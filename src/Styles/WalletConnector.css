@@ -22,7 +22,39 @@
     color: #0f0;
 }
 
+
+
+/* Enhanced styles for the Connect button */
 .btn-primary {
-    padding: 5px 15px;
-    font-size: 14px;
-}
+	background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%); /* Gradient effect */
+	border: none;
+	color: #fff;
+	font-size: 0.9rem;
+	font-weight: bold;
+	text-transform: uppercase;
+	padding: 10px 20px;
+	border-radius: 25px;
+	transition: all 0.3s ease;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-primary:hover {
+	background: linear-gradient(90deg, #2575fc 0%, #6a11cb 100%); /* Reverse gradient */
+	box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+	transform: translateY(-2px); /* Subtle hover lift */
+  }
+  
+  .btn-primary:active {
+	background: linear-gradient(90deg, #6a11cb 0%, #2575fc 100%);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	transform: translateY(0); /* Reset on click */
+  }
+  
+  /* Responsive design for smaller screens */
+  @media (max-width: 768px) {
+	.btn-primary {
+	  font-size: 0.8rem;
+	  padding: 8px 16px;
+	}
+  }
+  

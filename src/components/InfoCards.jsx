@@ -7,22 +7,27 @@ import { ethers } from "ethers";
 const InfoCards = () => {
   const {
     mintDAV,
-    loading,
     CalculationOfCost,
     TotalCost,
     StateReward,
     GetStateRewards,
+    GetCurrentStateReward,
+    CurrentSReward,
+    Supply,
+    davHolds,
+    davPercentage,
+    StateHolds,
   } = useDAVToken();
   const [amount, setAmount] = useState("");
   const [load, setLoad] = useState(false);
-
-  const handleMint = () => {
-    setLoad(true);
+  const handleMint = async () => {
+    setLoad(true); // Start loading
     try {
-      mintDAV(amount);
+      await mintDAV(amount); // Wait for minting to complete
     } catch (e) {
-      console.error("Error", e);
-      setLoad(false);
+      console.error("Error during minting:", e);
+    } finally {
+      setLoad(false); // Stop loading, regardless of success or failure
     }
   };
 
@@ -42,6 +47,7 @@ const InfoCards = () => {
   useEffect(() => {
     CalculationOfCost(amount);
     GetStateRewards(amount);
+    GetCurrentStateReward();
   }, [amount]);
 
   return (
@@ -57,6 +63,7 @@ const InfoCards = () => {
               <div className="carddetails">
                 <input
                   type="text"
+                  placeholder="Enter Value"
                   className="form-control text-center fw-bold"
                   value={amount} // Controlled input, using state value
                   onChange={handleInputChange} // Update state on change
@@ -81,12 +88,13 @@ const InfoCards = () => {
             <div className="carddetaildiv d-flex">
               <div className="carddetails">
                 <p className="mb-1 detailText">STATE TOKEN REWARD</p>
-                <h5 className="detailAmount">50 000 000</h5>
+                <h5 className="detailAmount">{formatNumber(CurrentSReward)}</h5>
               </div>
               <div className="carddetails text-center">
                 <button
                   onClick={handleMint}
                   className="btn btn-primary btn-sm w-100"
+                  disabled={load}
                 >
                   {load ? "Minting..." : "Mint"}
                 </button>
@@ -94,7 +102,7 @@ const InfoCards = () => {
                 <h5 className="detailAmount pt-3">1% SLIPPAGE</h5>
               </div>
             </div>
-            <p className="detailfooter m-0">500 000 DAV TOKEN RELEASED</p>
+            <p className="detailfooter m-0">{Supply} DAV TOKEN RELEASED</p>
           </div>
         </div>
         <div className="col-md-4 cards">
@@ -102,11 +110,11 @@ const InfoCards = () => {
             <div className="carddetaildiv uppercase">
               <div className="carddetails2">
                 <p className="mb-1 detailText">Dav holdings</p>
-                <h5 className="">25 Dav</h5>
+                <h5 className="">{davHolds}</h5>
               </div>
               <div className="carddetails2">
                 <p className="mb-1 detailText">Dav Rank</p>
-                <h5 className="">0.0025%</h5>
+                <h5 className="">{davPercentage}%</h5>
               </div>
             </div>
           </div>
@@ -116,7 +124,7 @@ const InfoCards = () => {
             <div className="carddetaildiv uppercase">
               <div className="carddetails2">
                 <p className="mb-1 detailText">State token holdings</p>
-                <h5 className="">250 000 000 / $56.90</h5>
+                <h5 className="">{StateHolds} / $56.90</h5>
               </div>
               <div className="carddetails2">
                 <p className="mb-1 detailText">State token price</p>

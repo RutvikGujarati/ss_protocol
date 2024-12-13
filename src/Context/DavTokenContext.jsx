@@ -1,26 +1,29 @@
 // DAVTokenContext.js
 import { createContext, useContext, useState, useEffect } from "react";
 import { ethers } from "ethers";
-import DAVTokenABI from "../ABI/DavTokenABI.json"; // Add ABI file path for the DAVToken contract
+import DAVTokenABI from "../ABI/DavTokenABI.json";
+import StateABI from "../ABI/StateTokenABI.json";
 
-// Define context for DAVToken contract
 const DAVTokenContext = createContext();
 
-// Replace this with your contract's deployed address
-const DAV_TOKEN_ADDRESS = "0x0f25532F2A2CEAB7427cF28CfEa116D467426f42";
+const DAV_TOKEN_ADDRESS = "0xD30C8EfD9F732b0045482504BbB2109B86c0b403";
+const STATE_TOKEN_ADDRESS = "0x5fD237F8a7c1E959401f8619D1F39CB9CfAB4380";
 
-export const useDAVToken = () => {
-  return useContext(DAVTokenContext);
-};
+export const useDAVToken = () => useContext(DAVTokenContext);
 
 export const DAVTokenProvider = ({ children }) => {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
-  const [contract, setContract] = useState(null);
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [davContract, setDavContract] = useState(null);
+  const [stateContract, setStateContract] = useState(null);
   const [TotalCost, setTotalCost] = useState(null);
-
+  const [CurrentSReward, setCurrentSReward] = useState(null);
+  const [davHolds, setDavHoldings] = useState(null);
+  const [StateHolds, setStateHoldings] = useState(null);
+  const [davPercentage, setDavPercentage] = useState(null);
+  const [Supply, setSupply] = useState(null);
   const [StateReward, setStateReward] = useState(null);
 
   useEffect(() => {
@@ -28,7 +31,6 @@ export const DAVTokenProvider = ({ children }) => {
       if (typeof window.ethereum !== "undefined") {
         try {
           await window.ethereum.request({ method: "eth_requestAccounts" });
-
           const newProvider = new ethers.BrowserProvider(
             window.ethereum,
             "any"
@@ -36,123 +38,152 @@ export const DAVTokenProvider = ({ children }) => {
           const accounts = await newProvider.send("eth_requestAccounts", []);
           const newSigner = await newProvider.getSigner();
 
-          const newContract = new ethers.Contract(
-            DAV_TOKEN_ADDRESS,
-            DAVTokenABI,
-            newSigner 
-          );
-
           setProvider(newProvider);
           setSigner(newSigner);
           setAccount(accounts[0]);
-          setContract(newContract);
-          setLoading(false); 
+          setDavContract(
+            new ethers.Contract(DAV_TOKEN_ADDRESS, DAVTokenABI, newSigner)
+          );
+          setStateContract(
+            new ethers.Contract(STATE_TOKEN_ADDRESS, StateABI, newSigner)
+          );
         } catch (error) {
           console.error("Error initializing contract:", error);
+        } finally {
           setLoading(false);
         }
       } else {
         console.error("Ethereum wallet is not installed");
-        setLoading(false); 
+        setLoading(false);
       }
     };
-
     initialize();
-
-    return () => {
-      setProvider(null);
-      setSigner(null);
-      setContract(null);
-      setAccount(null);
-      setLoading(true);
-    };
   }, []);
 
-  const mintDAV = async (amount) => {
+  const handleContractCall = async (
+    contract,
+    method,
+    args = [],
+    formatter = (v) => v
+  ) => {
     try {
-      if (loading) {
-        console.log("Waiting for contract initialization...");
-        return;
-      }
-      if (!contract) throw new Error("Contract is not loaded");
-
-      // Convert amount to wei
-      const value = ethers.parseEther(amount.toString());
-
-      const cost = ethers.parseEther((amount * 100000).toString());
-
-      console.log("cost", cost);
-
-	  const tx = await contract.mintDAV(value, { value: cost });
-      await tx.wait();
-      console.log("Minting successful", tx);
+      if (loading || !contract) return console.error("Contract not loaded");
+      const result = await contract[method](...args);
+      return formatter(result);
     } catch (error) {
-      console.error("Error minting DAV:", error);
+      console.error(`Error calling ${method}:", error`, error);
     }
   };
-  const GetStateRewards = async (amount) => {
-	try {
-	  if (loading) {
-		console.log("Waiting for contract initialization...");
-		return;
-	  }
-	  if (!contract) throw new Error("Contract is not loaded");
-  
-	  const value = ethers.parseEther(amount.toString()); 
-  
-	  const TotalStateReward = await contract.getStateReward(value);
-	  console.log("Total State Reward", TotalStateReward);
-  
-	  const formattedReward = ethers.formatUnits(TotalStateReward, 18);
-  
-	  setStateReward(formattedReward);
-	} catch (error) {
-	  console.error("Error fetching state reward:", error);
-	}
+
+  const mintDAV = async (amount) => {
+    const value = ethers.parseEther(amount.toString());
+    const cost = ethers.parseEther((amount * 100000).toString());
+    await handleContractCall(davContract, "mintDAV", [value, { value: cost }]);
   };
-  
+
+  const GetStateRewards = async (amount) => {
+    if (!amount || isNaN(amount) || amount <= 0) return setStateReward(0);
+    const reward = await handleContractCall(
+      davContract,
+      "getStateReward",
+      [ethers.parseEther(amount.toString())],
+      (r) => ethers.formatUnits(r, 18)
+    );
+    setStateReward(reward);
+  };
 
   const CalculationOfCost = async (amount) => {
-    try {
-      if (loading) {
-        console.log("Waiting for contract initialization...");
-        return;
-      }
-      if (!contract) throw new Error("Contract is not loaded");
+    setTotalCost(ethers.parseEther((amount * 100000).toString()));
+  };
 
-      const cost = ethers.parseEther((amount * 100000).toString());
+  const DavHoldings = async () => {
+    const holdings = await handleContractCall(
+      davContract,
+      "getDAVHoldings",
+      [account],
+      (h) => ethers.formatUnits(h, 18)
+    );
+    setDavHoldings(holdings);
+  };
 
-      setTotalCost(cost);
-    } catch (error) {
-      console.error("Error calculating cost:", error);
-    }
+  const StateHoldings = async () => {
+    const holdings = await handleContractCall(
+      stateContract,
+      "getDAVHoldings",
+      [account],
+      (h) => ethers.formatUnits(h, 18)
+    );
+    setStateHoldings(holdings);
+  };
+
+  const DavHoldingsPercentage = async () => {
+    const percentage = await handleContractCall(
+      davContract,
+      "getUserHoldingPercentage",
+      [account],
+      (p) => ethers.formatUnits(p, 18)
+    );
+    setDavPercentage(percentage);
+  };
+
+  const DavSupply = async () => {
+    const supply = await handleContractCall(
+      davContract,
+      "totalSupply",
+      [],
+      (s) => ethers.formatUnits(s, 18)
+    );
+    setSupply(supply);
+  };
+
+  const GetCurrentStateReward = async () => {
+    const reward = await handleContractCall(
+      davContract,
+      "getCurrentStateReward",
+      [],
+      (r) => ethers.formatUnits(r, 18)
+    );
+    setCurrentSReward(reward);
   };
 
   const releaseNextBatch = async () => {
-    try {
-      if (!contract) throw new Error("Contract is not loaded");
-      const tx = await contract.releaseNextBatch();
-      await tx.wait();
-      console.log("Next batch released", tx);
-    } catch (error) {
-      console.error("Error releasing next batch:", error);
-    }
+    await handleContractCall(davContract, "releaseNextBatch");
   };
+
+  useEffect(() => {
+    if (account && davContract) {
+      DavHoldings();
+      DavHoldingsPercentage();
+      StateHoldings();
+      DavSupply();
+    }
+    GetCurrentStateReward();
+  }, [account, davContract]);
 
   return (
     <DAVTokenContext.Provider
       value={{
         provider,
         signer,
-        contract,
+        davContract,
         loading,
         account,
         mintDAV,
         releaseNextBatch,
         CalculationOfCost,
         TotalCost,
-		GetStateRewards,
-		StateReward
+        GetStateRewards,
+        StateReward,
+        GetCurrentStateReward,
+        CurrentSReward,
+        DavHoldings,
+        davHolds,
+        DavHoldingsPercentage,
+        davPercentage,
+        StateHoldings,
+        StateHolds,
+        DavSupply,
+        Supply,
       }}
     >
       {children}
