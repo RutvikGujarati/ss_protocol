@@ -1,0 +1,83 @@
+/* Import the Satoshi font */
+
+/* Root styles for the dark theme */
+:root {
+  --primary-bg: #121212; /* Background */
+  --secondary-bg: #1e1e1e; /* Card or section backgrounds */
+  --primary-text: #ffffff; /* Main text */
+  --secondary-text: #b3b3b3; /* Secondary text */
+  --accent-color: #ff4081; /* Accent color */
+  --border-color: #333333; /* Border color */
+  --font-family: 'Satoshi', sans-serif; /* Satoshi font */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+
+/* a:hover {
+  text-decoration: underline;
+} */
+
+header, nav, footer {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.card {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+}
+
+button {
+  background-color: var(--accent-color);
+  color: var(--primary-text);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-family: var(--font-family);
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #ff79a7;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  text-align: left;
+}
+
+th {
+  background-color: var(--secondary-bg);
+  color: var(--primary-text);
+}
+
+td {
+  color: var(--secondary-text);
+}
+

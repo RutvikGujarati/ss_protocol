@@ -1,0 +1,40 @@
+.card{
+    min-height: 200px;
+}
+
+.carddetails{
+    padding: 15px;
+    width: 50%;
+    /* border-right: 1px solid green;  */
+}
+
+.carddetails:first-child{
+    border-right: 1px solid green; 
+}
+
+.detailText{
+    font-size: small;
+    text-transform: uppercase;
+    font-weight: 700;
+    opacity: 0.5;
+}
+
+.detailAmount{
+    font-weight: 700;
+	font-size: 10px;
+}
+
+.detailSmall{
+    font-size: 14px;
+    font-weight: 600;
+    color: green;
+}
+
+.detailfooter{
+    padding: 10px 10px 0px 10px;
+    font-size: small;
+}
+
+.greenText{
+    color: green;
+}
