@@ -28,7 +28,6 @@ const ConnectWalletProvider = ({ children }) => {
       const accounts = await browserProvider.send("eth_requestAccounts", []);
       const address = accounts[0]; // Fetch the first account address
 
-      // Get balance for the account
       const balance = await browserProvider.getBalance(address);
 
       // Update state
@@ -36,7 +35,7 @@ const ConnectWalletProvider = ({ children }) => {
       setAddress(address);
       localStorage.setItem("walletAddress", address);
 
-      setBalance(ethers.formatEther(balance)); // Use `ethers.formatEther` for formatting
+      setBalance(ethers.formatEther(balance));
     } catch (error) {
       console.error("Wallet connection failed:", error);
     }

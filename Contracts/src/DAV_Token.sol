@@ -65,10 +65,10 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
 
         // Mint STATE tokens to user
 
-        // require(
-        //     stateToken.balanceOf(address(this)) >= stateReward,
-        //     "Insufficient STATE in treasury"
-        // );
+        require(
+            stateToken.balanceOf(address(this)) >= stateReward,
+            "Insufficient STATE in treasury"
+        );
 
         stateToken.transfer(msg.sender, stateReward);
 

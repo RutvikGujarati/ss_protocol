@@ -1,7 +1,49 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/InfoCards.css";
+import { useDAVToken } from "../Context/DavTokenContext";
+import { useEffect, useState } from "react";
+import { ethers } from "ethers";
 
 const InfoCards = () => {
+  const {
+    mintDAV,
+    loading,
+    CalculationOfCost,
+    TotalCost,
+    StateReward,
+    GetStateRewards,
+  } = useDAVToken();
+  const [amount, setAmount] = useState("");
+  const [load, setLoad] = useState(false);
+
+  const handleMint = () => {
+    setLoad(true);
+    try {
+      mintDAV(amount);
+    } catch (e) {
+      console.error("Error", e);
+      setLoad(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setAmount(e.target.value);
+    GetStateRewards(e.target.value);
+    CalculationOfCost(e.target.value);
+  };
+
+  function formatNumber(number) {
+    if (!number) return "0";
+    return new Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 0,
+    }).format(number);
+  }
+
+  useEffect(() => {
+    CalculationOfCost(amount);
+    GetStateRewards(amount);
+  }, [amount]);
+
   return (
     <div className="container mt-4">
       <div className="row g-4">
@@ -16,12 +58,24 @@ const InfoCards = () => {
                 <input
                   type="text"
                   className="form-control"
-                  defaultValue="5"
+                  value={amount} // Controlled input, using state value
+                  onChange={handleInputChange} // Update state on change
                   style={{ textAlign: "center", height: "20px" }}
                 />
+
                 <div className="mx-4">
-                  <h5 className="detailAmount">500 000 PLS</h5>
-                  <h5 className="detailAmount">250 000 000 PLS</h5>
+                  <h5 className="detailAmount">
+                    {TotalCost
+                      ? formatNumber(ethers.formatUnits(TotalCost, 18))
+                      : "0"}{" "}
+                    PLS
+                  </h5>
+                  <h5 className="detailAmount">
+                    {StateReward
+                      ? formatNumber(StateReward) // format STATE
+                      : "0"}{" "}
+                    STATE
+                  </h5>
                 </div>
               </div>
             </div>
@@ -31,8 +85,11 @@ const InfoCards = () => {
                 <h5 className="detailAmount">50 000 000</h5>
               </div>
               <div className="carddetails">
-                <button className="btn btn-dark border border-light">
-                  Click
+                <button
+                  onClick={handleMint}
+                  className="btn btn-dark border border-light"
+                >
+                  {load ? "Minting..." : "Mint"}
                 </button>
 
                 <h5 className="detailAmount">1% SLIPPAGE</h5>
