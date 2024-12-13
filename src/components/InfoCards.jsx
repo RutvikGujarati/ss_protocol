@@ -46,10 +46,10 @@ const InfoCards = () => {
 
   return (
     <div className="container mt-4">
-      <div className="row g-4">
+      <div className="row g-4 d-flex align-items-stretch">
         <div className="col-md-4 cards">
-          <div className="card bg-dark text-light border-light p-3 d-flex">
-            <div className="carddetaildiv d-flex">
+          <div className="card bg-dark text-light border-light p-3 d-flex w-100 mh200">
+            <div className="carddetaildiv d-flex uppercase">
               <div className="carddetails">
                 <p className="mb-1 detailText">DAV MINT COST</p>
                 <h5 className="detailAmount">1 DAV MINT COST = 100 000 PLS</h5>
@@ -57,20 +57,19 @@ const InfoCards = () => {
               <div className="carddetails">
                 <input
                   type="text"
-                  className="form-control"
+                  className="form-control text-center fw-bold"
                   value={amount} // Controlled input, using state value
                   onChange={handleInputChange} // Update state on change
-                  style={{ textAlign: "center", height: "20px" }}
                 />
 
-                <div className="mx-4">
-                  <h5 className="detailAmount">
+                <div className="mx-4 text-center">
+                  <h5 className="detailAmount mt-3">
                     {TotalCost
                       ? formatNumber(ethers.formatUnits(TotalCost, 18))
                       : "0"}{" "}
                     PLS
                   </h5>
-                  <h5 className="detailAmount">
+                  <h5 className="detailAmount mt-3">
                     {StateReward
                       ? formatNumber(StateReward) // format STATE
                       : "0"}{" "}
@@ -84,78 +83,46 @@ const InfoCards = () => {
                 <p className="mb-1 detailText">STATE TOKEN REWARD</p>
                 <h5 className="detailAmount">50 000 000</h5>
               </div>
-              <div className="carddetails">
+              <div className="carddetails text-center">
                 <button
                   onClick={handleMint}
-                  className="btn btn-dark border border-light"
+                  className="btn btn-primary btn-sm w-100"
                 >
                   {load ? "Minting..." : "Mint"}
                 </button>
 
-                <h5 className="detailAmount">1% SLIPPAGE</h5>
+                <h5 className="detailAmount pt-3">1% SLIPPAGE</h5>
               </div>
             </div>
             <p className="detailfooter m-0">500 000 DAV TOKEN RELEASED</p>
           </div>
         </div>
         <div className="col-md-4 cards">
-          <div className="card bg-dark text-light border-light p-3 d-flex">
-            <div className="carddetaildiv d-flex">
-              <div className="carddetails">
-                <p className="mb-1 detailText">Eco System MCAP</p>
-                <h5 className="detailAmount">$151.48M</h5>
+          <div className="card bg-dark text-light border-light p-3 d-flex w-100 mh200">
+            <div className="carddetaildiv uppercase">
+              <div className="carddetails2">
+                <p className="mb-1 detailText">Dav holdings</p>
+                <h5 className="">25 Dav</h5>
               </div>
-              <div className="carddetails">
-                <p className="mb-1 detailText">ECO SYSTEM VOLUME</p>
-                <h5 className="detailAmount">$2.88M</h5>
-              </div>
-            </div>
-            <div className="carddetaildiv d-flex">
-              <div className="carddetails">
-                <p className="mb-1 detailText">TOTAL TITANX BURNED</p>
-                <h5 className="detailAmount">113.80T</h5>
-              </div>
-              <div className="carddetails">
-                <p className="mb-1 detailText">TITANX USERS</p>
-                <h5 className="detailAmount">
-                  19.53K <small className="detailSmall">+0.04%</small>
-                </h5>
+              <div className="carddetails2">
+                <p className="mb-1 detailText">Dav Rank</p>
+                <h5 className="">0.0025%</h5>
               </div>
             </div>
-            <p className="detailfooter m-0">
-              ETH Price: $3939.03 • <span className="greenText">+3.38%</span>{" "}
-              26.80 Gwei
-            </p>
           </div>
         </div>
         <div className="col-md-4 cards">
-          <div className="card bg-dark text-light border-light p-3 d-flex">
-            <div className="carddetaildiv d-flex">
-              <div className="carddetails">
-                <p className="mb-1 detailText">Eco System MCAP</p>
-                <h5 className="detailAmount">$151.48M</h5>
+          <div className="card bg-dark text-light border-light p-3 d-flex w-100 mh200">
+            <div className="carddetaildiv uppercase">
+              <div className="carddetails2">
+                <p className="mb-1 detailText">State token holdings</p>
+                <h5 className="">250 000 000 / $56.90</h5>
               </div>
-              <div className="carddetails">
-                <p className="mb-1 detailText">ECO SYSTEM VOLUME</p>
-                <h5 className="detailAmount">$2.88M</h5>
-              </div>
-            </div>
-            <div className="carddetaildiv d-flex">
-              <div className="carddetails">
-                <p className="mb-1 detailText">TOTAL TITANX BURNED</p>
-                <h5 className="detailAmount">113.80T</h5>
-              </div>
-              <div className="carddetails">
-                <p className="mb-1 detailText">TITANX USERS</p>
-                <h5 className="detailAmount">
-                  19.53K <small className="detailSmall">+0.04%</small>
-                </h5>
+              <div className="carddetails2">
+                <p className="mb-1 detailText">State token price</p>
+                <h5 className="">$0.000000356</h5>
               </div>
             </div>
-            <p className="detailfooter m-0">
-              ETH Price: $3939.03 • <span className="greenText">+3.38%</span>{" "}
-              26.80 Gwei
-            </p>
           </div>
         </div>
       </div>
