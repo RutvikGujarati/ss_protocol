@@ -1,0 +1,28 @@
+.wallet-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color: #fff;
+}
+
+.connected-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.wallet-address, .wallet-balance {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.wallet-balance {
+    font-weight: bold;
+    color: #0f0;
+}
+
+.btn-primary {
+    padding: 5px 15px;
+    font-size: 14px;
+}

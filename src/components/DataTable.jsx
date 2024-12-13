@@ -1,20 +1,8 @@
-import React from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 
 
 const DataTable = () => {
-  const tableData = [
-    {
-      id: 1, name: "FLUXIN", price: "$0.00000089", liquidity: "1.25M",
-      burnRatio: "250M : 1", currentRatio: "1 : 250M", ratioTarget: "1 : 1T",
-      ratioSwap: "50,000 Fluxin - 25,000,000 State"
-    },
-    {
-      id: 2, name: "XERION", price: "$0.00000067", liquidity: "2.67M",
-      burnRatio: "500K : 1", currentRatio: "1 : 250K", ratioTarget: "1 : 1T",
-      ratioSwap: "20,000 Xerion - 12,500,000 State"
-    },
-  ];
+  
 
   return (
     <div className="container mt-4">

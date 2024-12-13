@@ -11,43 +11,53 @@ const ConnectWalletProvider = ({ children }) => {
 
   const connectWallet = async () => {
     if (typeof window.ethereum === "undefined") {
-        alert("MetaMask is not installed. Please install it to use this feature.");
-        return;
+      alert(
+        "MetaMask is not installed. Please install it to use this feature."
+      );
+      return;
     }
 
     try {
-        // Initialize BrowserProvider
-        const browserProvider = new ethers.BrowserProvider(window.ethereum, "any");
+      // Initialize BrowserProvider
+      const browserProvider = new ethers.BrowserProvider(
+        window.ethereum,
+        "any"
+      );
 
-        // Request account access
-        const accounts = await browserProvider.send("eth_requestAccounts", []);
-        const address = accounts[0]; // Fetch the first account address
+      // Request account access
+      const accounts = await browserProvider.send("eth_requestAccounts", []);
+      const address = accounts[0]; // Fetch the first account address
 
-        // Get balance for the account
-        const balance = await browserProvider.getBalance(address);
+      // Get balance for the account
+      const balance = await browserProvider.getBalance(address);
 
-        // Update state
-        setProvider(browserProvider);
-        setAddress(address);
-        setBalance(ethers.formatEther(balance)); // Use `ethers.formatEther` for formatting
+      // Update state
+      setProvider(browserProvider);
+      setAddress(address);
+      localStorage.setItem("walletAddress", address);
+
+      setBalance(ethers.formatEther(balance)); // Use `ethers.formatEther` for formatting
     } catch (error) {
-        console.error("Wallet connection failed:", error);
+      console.error("Wallet connection failed:", error);
     }
-};
-
-
+  };
 
   const disconnectWallet = () => {
     setProvider(null);
     setSigner(null);
     setAddress("");
     setBalance("");
+    localStorage.removeItem("walletAddress");
   };
 
   useEffect(() => {
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", connectWallet);
       window.ethereum.on("chainChanged", () => window.location.reload());
+    }
+    const savedAddress = localStorage.getItem("walletAddress");
+    if (savedAddress) {
+      setAddress(savedAddress);
     }
     return () => {
       if (window.ethereum) {

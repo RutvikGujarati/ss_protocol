@@ -1,5 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./InfoCards.css";
+import "../Styles/InfoCards.css";
 
 const InfoCards = () => {
   return (
