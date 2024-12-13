@@ -1,5 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css"; // Add custom styles here
+import WalletConnector from "./Components/WalletConnect";
 
 function App() {
   return (
@@ -11,28 +12,28 @@ function App() {
       >
         <div className="d-flex justify-content-between align-items-center">
           <h1 className="text-light">TitanX Hub</h1>
-          <button className="btn btn-outline-light">Contact</button>
+          <WalletConnector />
         </div>
       </header>
 
       {/* Overview Section */}
       <div className="container mt-4">
-        <div className="row g-4">
-          <div className="col-md-3">
-            <div className="card bg-dark text-light border-light p-3">
-              <h5 className="mb-1">Eco System MCAP</h5>
+        <div className="row justify-content-center">
+          <div className="col-md-4">
+            <div className="card bg-dark text-light border-light text-center py-4">
+              <h5 className="mb-2">Eco System MCAP</h5>
               <h3>$151.48M</h3>
             </div>
           </div>
-          <div className="col-md-3">
-            <div className="card bg-dark text-light border-light p-3">
-              <h5 className="mb-1">Total TitanX Burned</h5>
+          <div className="col-md-4">
+            <div className="card bg-dark text-light border-light text-center py-4">
+              <h5 className="mb-2">Total TitanX Burned</h5>
               <h3>113.01T</h3>
             </div>
           </div>
-          <div className="col-md-3">
-            <div className="card bg-dark text-light border-light p-3">
-              <h5 className="mb-1">TitanX Users</h5>
+          <div className="col-md-4">
+            <div className="card bg-dark text-light border-light text-center py-4">
+              <h5 className="mb-2">TitanX Users</h5>
               <h3>
                 19.52K <span className="text-success">+0.15%</span>
               </h3>
