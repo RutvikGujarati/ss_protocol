@@ -1,0 +1,84 @@
+/* General table styling */
+.table {
+    /* border-radius: 15px; */
+    overflow: hidden;
+  }
+  
+  .table th,
+  .table td {
+    vertical-align: middle;
+    height: 60px;
+    text-align: center; /* Centers content */
+    border: none; /* Removes default borders */
+    background-color: #000;
+    color: #f8f9fa; /* Light text */
+  }
+
+  table.table-dark thead th:first-child {
+    border-top-left-radius: 10px;
+  }
+  
+  table.table-dark thead th:last-child {
+    border-top-right-radius: 10px;
+  }
+  
+  /* Rounded corners for the last row in the table body */
+  table.table-dark tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+  }
+  
+  table.table-dark tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+  }
+
+  
+  .table thead th {
+    background-color: #343a40; /* Darker header color */
+    font-size: small;
+    font-weight: 700;
+    opacity: 0.5;
+  }
+  
+  .table tbody tr {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Adds shadow effect */
+    border-radius: 8px;
+    border-top: 1px solid;
+    transition: all 0.2s ease;
+  }
+  
+  .table tbody tr:hover td{
+    background-color: #1c1e22;
+    /* transform: scale(1.01); */
+    /* transform-origin: center; */
+    transition: background-color 0.5s ease; /* Smooth effect */
+}
+
+  .table a {
+    font-size: 1.2rem; /* Enlarges icons */
+    text-decoration: none;
+  }
+  
+  .table a:hover {
+    color: #1db954; /* Adds green hover color */
+  }
+  
+  .uppercase{
+    text-transform: uppercase;
+}
+
+.nameSmall{
+    font-size: 12px;
+}
+
+.tableClaim{
+    background-color: #343a40;
+    padding: 5px 25px;
+    border-radius: 25px;
+}
+
+.detailText{
+    font-size: small;
+    text-transform: uppercase;
+    font-weight: 700;
+    opacity: 0.5;
+}

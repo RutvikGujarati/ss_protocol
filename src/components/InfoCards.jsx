@@ -52,8 +52,8 @@ const InfoCards = () => {
 
   return (
     <div className="container mt-4">
-      <div className="row g-4 d-flex align-items-stretch">
-        <div className="col-md-4 cards">
+      <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom">
+        <div className="col-md-4 p-0 m-2 cards">
           <div className="card bg-dark text-light border-light p-3 d-flex w-100 mh200">
             <div className="carddetaildiv d-flex uppercase">
               <div className="carddetails">
@@ -64,19 +64,19 @@ const InfoCards = () => {
                 <input
                   type="text"
                   placeholder="Enter Value"
-                  className="form-control text-center fw-bold"
+                  className="form-control text-center fw-bold cardInput"
                   value={amount} // Controlled input, using state value
                   onChange={handleInputChange} // Update state on change
                 />
 
                 <div className="mx-4 text-center">
-                  <h5 className="detailAmount mt-3">
+                  <h5 className="detailAmount mt-1">
                     {TotalCost
                       ? formatNumber(ethers.formatUnits(TotalCost, 18))
                       : "0"}{" "}
                     PLS
                   </h5>
-                  <h5 className="detailAmount mt-3">
+                  <h5 className="detailAmount mt-1">
                     {StateReward
                       ? formatNumber(StateReward) // format STATE
                       : "0"}{" "}
@@ -99,13 +99,13 @@ const InfoCards = () => {
                   {load ? "Minting..." : "Mint"}
                 </button>
 
-                <h5 className="detailAmount pt-3">1% SLIPPAGE</h5>
+                <h5 className="detailAmount pt-1">1% SLIPPAGE</h5>
               </div>
             </div>
-            <p className="detailfooter m-0">{Supply} DAV TOKEN RELEASED</p>
+            <p className="detailfooter p-0 m-0">{Supply} DAV TOKEN RELEASED</p>
           </div>
         </div>
-        <div className="col-md-4 cards">
+        <div className="col-md-4 p-0 m-2 cards">
           <div className="card bg-dark text-light border-light p-3 d-flex w-100 mh200">
             <div className="carddetaildiv uppercase">
               <div className="carddetails2">
@@ -119,7 +119,7 @@ const InfoCards = () => {
             </div>
           </div>
         </div>
-        <div className="col-md-4 cards">
+        <div className="col-md-4 p-0 m-2 cards">
           <div className="card bg-dark text-light border-light p-3 d-flex w-100 mh200">
             <div className="carddetaildiv uppercase">
               <div className="carddetails2">

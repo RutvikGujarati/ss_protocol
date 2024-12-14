@@ -39,6 +39,11 @@
     color: green;
 }
 
+.cardInput{
+    height: 24px;
+    font-size: 14px;
+}
+
 .detailfooter{
     padding: 10px 10px 0px 10px;
     font-size: small;
