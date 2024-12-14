@@ -41,12 +41,17 @@ const ConnectWalletProvider = ({ children }) => {
     }
   };
 
-  const disconnectWallet = () => {
-    setProvider(null);
-    setSigner(null);
-    setAddress("");
-    setBalance("");
-    localStorage.removeItem("walletAddress");
+  const disconnectWallet = async () => {
+    try {
+      // Clear application state
+      setProvider(null);
+      setSigner(null);
+      setAddress("");
+      setBalance("");
+      localStorage.removeItem("walletAddress");
+    } catch (error) {
+      console.error("Error during wallet disconnect:", error);
+    }
   };
 
   useEffect(() => {

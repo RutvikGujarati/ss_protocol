@@ -1,79 +1,81 @@
-  /* General Styles */
+/* General Styles */
 
-  @font-face {
-      font-family: 'Satoshi';
-      src: url('../fonts/Satoshi-Regular.woff2') format('woff2'),
-          url('../fonts/Satoshi-Regular.woff') format('woff');
-      font-weight: 400;
-      font-style: normal;
-    }
-    
-.navbar {
-    background-color: #1e1e1e; /* Dark background */
-    min-height: 80px;
-    border-bottom: 2px solid #333333; /* Subtle border */
-    font-family: 'Satoshi', sans-serif; /* Font style */
-    display: flex; /* Flexbox for alignment */
-    justify-content: center; /* Centers the content horizontally */
-    align-items: center; /* Centers the content vertically */
+@font-face {
+  font-family: "Satoshi";
+  src: url("../fonts/Satoshi-Regular.woff2") format("woff2"),
+    url("../fonts/Satoshi-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
 }
 
-    
-    .navbar-brand {
-      font-size: 1.8rem;
-      /* padding: 1rem 2rem; */
-      color: #ffffff !important; /* Light text color */
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-    }
-    
-    .navbar-nav .nav-link {
-      color: #ffffff; /* Light link color */
-      font-size: 1rem;
-      line-height: 1.5;
-      font-weight: 700;
-      padding: 1rem;
-      /* text-transform: uppercase; */
-      transition: color 0.3s ease;
-    }
-    
-    .navbar-nav .nav-link:hover {
-      border-bottom: 1px solid green;
-      color: #ff4081 !important; /* Pink accent color */
-    }
-    
-    .navbar-nav .btn-primary {
-      background-color: #ff4081; /* Primary button color */
-      border: none;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      font-weight: 600;
-      /* text-transform: uppercase; */
-      transition: background-color 0.3s ease;
-    }
-    
-    .navbar-nav .btn-primary:hover {
-      background-color: #ff79a7; /* Lighter pink on hover */
-    }
-    
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .navbar {
-        padding: 1rem;
-      }
-    
-      .navbar-nav {
-        text-align: center;
-      }
-    
-      .navbar-nav .nav-link {
-        margin-right: 0;
-        margin-bottom: 0.5rem;
-      }
-    
-      .navbar-nav .btn-primary {
-        width: 100%;
-      }
-    }
-    
+.navbar {
+  background-color: #1e1e1e; /* Dark background */
+  min-height: 80px;
+  border-bottom: 2px solid #333333; /* Subtle border */
+  font-family: "Satoshi", sans-serif; /* Font style */
+  display: flex; /* Flexbox for alignment */
+  justify-content: center; /* Centers the content horizontally */
+  align-items: center; /* Centers the content vertically */
+}
+
+.navbar-brand {
+  font-size: 1.8rem;
+  /* padding: 1rem 2rem; */
+  color: #ffffff !important; /* Light text color */
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.navbar-nav .nav-link {
+  color: #ffffff; /* Light link color */
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 700;
+  padding: 1rem;
+  /* text-transform: uppercase; */
+  transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+  border-bottom: 1px solid green;
+  color: #ff4081 !important; /* Pink accent color */
+}
+
+.navbar-nav .btn-primary {
+  background-color: #ff4081; /* Primary button color */
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  /* text-transform: uppercase; */
+  transition: background-color 0.3s ease;
+}
+
+.navbar-nav .btn-primary:hover {
+  background-color: #ff79a7; /* Lighter pink on hover */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 1rem;
+  }
+
+  .navbar-nav {
+    text-align: center;
+  }
+
+  .navbar-nav .nav-link {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  .navbar-nav .btn-primary {
+    width: 100%;
+  }
+}
+
+.small-text {
+  font-size: 0.9rem; /* Adjust size to your preference */
+}

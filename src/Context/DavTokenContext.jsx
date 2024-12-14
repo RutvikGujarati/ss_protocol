@@ -20,11 +20,11 @@ export const DAVTokenProvider = ({ children }) => {
   const [stateContract, setStateContract] = useState(null);
   const [TotalCost, setTotalCost] = useState(null);
   const [CurrentSReward, setCurrentSReward] = useState(null);
-  const [davHolds, setDavHoldings] = useState(null);
-  const [StateHolds, setStateHoldings] = useState(null);
-  const [davPercentage, setDavPercentage] = useState(null);
-  const [Supply, setSupply] = useState(null);
-  const [StateReward, setStateReward] = useState(null);
+  const [davHolds, setDavHoldings] = useState("0.0");
+  const [StateHolds, setStateHoldings] = useState("0.0");
+  const [davPercentage, setDavPercentage] = useState("0.0");
+  const [Supply, setSupply] = useState("0.0");
+  const [StateReward, setStateReward] = useState("0");
 
   useEffect(() => {
     const initialize = async () => {
@@ -151,7 +151,7 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    if (account && davContract) {
+    if (davContract) {
       DavHoldings();
       DavHoldingsPercentage();
       StateHoldings();
