@@ -46,6 +46,11 @@
   color: #ff4081 !important; /* Pink accent color */
 }
 
+.active-link{
+  border-bottom: 1px solid #fff;
+  color: #ff4081 !important;
+}
+
 .navbar-nav .btn-primary {
   background-color: #ff4081; /* Primary button color */
   border: none;

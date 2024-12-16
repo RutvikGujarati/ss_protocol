@@ -16,6 +16,10 @@
     cursor: default !important;
   }
 
+  .table td{
+    font-size: small;
+  }
+
   table.table-dark thead th:first-child {
     border-top-left-radius: 10px;
   }
@@ -78,6 +82,8 @@
 
 .tableClaim{
     background-color: #343a40;
+    width: max-content;
+    align-content: center;
     padding: 5px 15px;
     border-radius: 25px;
     font-size: 14px;

@@ -1,5 +1,6 @@
 .card{
     border: 1px solid #FFFFFF26 !important;
+    min-height: 200px;
 }
 
 .cards{
@@ -14,7 +15,7 @@
     /* border-right: 1px solid green;  */
 }
 .carddetails2{
-    padding: 15px;
+    padding: 5px 15px;
     width: 100%;
 }
 .carddetails:first-child{
