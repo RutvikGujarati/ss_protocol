@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./App.css"; // Custom global styles
-import "./Styles/styles.css"; // Additional component-specific styles
+import "./App.css";
+import "./Styles/styles.css"; 
 
 import Header from "./components/Header";
 import InfoCards from "./components/InfoCards";
