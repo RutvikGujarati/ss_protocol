@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import {STATEToken} from "./State_Token.sol";
+import {STATEToken} from "./StateToken.sol";
 
 contract DAVToken is ERC20, Ownable(msg.sender) {
     uint256 public constant MAX_SUPPLY = 5000000 ether; // 5 Million DAV Tokens
@@ -26,17 +26,18 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
         uint256 stateAmount
     );
     event BatchReleased(uint256 batchNumber);
+    mapping(address => bool) private davHolderExists;
+    address[] private davHolders;
 
     constructor(
         address _stateToken,
         address _liquidityWallet,
         address _developmentWallet,
-		string memory tokenName,
+        string memory tokenName,
         string memory TokenSymbol
     )
-       ERC20(tokenName, TokenSymbol)
-	// ERC20("DAV Token", "DAV") 
-	{
+        ERC20(tokenName, TokenSymbol) // ERC20("DAV Token", "DAV")
+    {
         stateToken = IERC20(_stateToken);
         liquidityWallet = _liquidityWallet;
         developmentWallet = _developmentWallet;
@@ -79,6 +80,85 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
     }
 
     /**
+     * @dev Internal function to track DAV holders.
+     * Removes holders with a zero balance and adds new holders.
+     */
+    function trackDAVHolder(address from, address to) internal {
+        // Remove `from` as a holder if their balance becomes zero
+        if (
+            from != address(0) && balanceOf(from) == 0 && davHolderExists[from]
+        ) {
+            davHolderExists[from] = false;
+            _removeHolder(from);
+        }
+
+        // Add `to` as a holder if they are not already tracked and their balance is positive
+        if (to != address(0) && !davHolderExists[to] && balanceOf(to) > 0) {
+            davHolderExists[to] = true;
+            davHolders.push(to);
+        }
+    }
+
+    /**
+     * @dev Internal function to remove a holder from the `davHolders` array.
+     * @param holder The address of the holder to remove.
+     */
+    function _removeHolder(address holder) internal {
+        for (uint256 i = 0; i < davHolders.length; i++) {
+            if (davHolders[i] == holder) {
+                davHolders[i] = davHolders[davHolders.length - 1];
+                davHolders.pop();
+                break;
+            }
+        }
+    }
+
+    /**
+     * @dev Override `_transfer` to track holders on every transfer.
+     */
+    function _transfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override {
+        super._transfer(from, to, amount);
+        trackDAVHolder(from, to);
+    }
+
+    /**
+     * @dev Fetch the list of all current DAV holders.
+     * @return The array of DAV holder addresses.
+     */
+    function getDAVHolders() public view returns (address[] memory) {
+        return davHolders;
+    }
+
+    /**
+     * @dev Get the user's DAV token holdings in numbers.
+     * @param user The address of the user.
+     * @return The DAV token balance of the user.
+     */
+    function getDAVHoldings(address user) public view returns (uint256) {
+        return balanceOf(user);
+    }
+
+    /**
+     * @dev Get the user's percentage of total DAV token holdings.
+     * @param user The address of the user.
+     * @return The percentage of the user's holdings relative to total DAV supply.
+     */
+    function getUserHoldingPercentage(
+        address user
+    ) public view returns (uint256) {
+        uint256 userBalance = balanceOf(user);
+        uint256 totalSupply = totalSupply();
+        if (totalSupply == 0) {
+            return 0;
+        }
+        return (userBalance * 1e18) / totalSupply; // Return percentage as a scaled value (1e18 = 100%).
+    }
+
+    /**
      * @dev Calculate the STATE reward based on the current batch.
      * @param amount The amount of DAV tokens minted.
      * @return The amount of STATE tokens to mint.
@@ -88,6 +168,19 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
             (currentBatch - 1) *
             STATE_REWARD_DECREMENT;
         return (amount / 1 ether) * baseReward;
+    }
+
+    /**
+     * @dev Show the current STATE token reward per DAV token minted.
+     * @return The current STATE token reward per DAV token.
+     */
+    function getCurrentStateReward() public view returns (uint256) {
+        uint256 currentBatched = (mintedSupply / BATCH_SIZE) + 1;
+        uint256 baseReward = INITIAL_STATE_REWARD -
+            (currentBatched - 1) *
+            STATE_REWARD_DECREMENT;
+        require(baseReward >= 0, "Reward cannot be negative");
+        return baseReward;
     }
 
     /**
