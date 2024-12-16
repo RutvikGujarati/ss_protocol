@@ -1,7 +1,6 @@
-/* .card{
-    min-height: 200px;
-    width: 100%;
-} */
+.card{
+    border: 1px solid #FFFFFF26 !important;
+}
 
 .cards{
     flex: 1;
@@ -11,6 +10,7 @@
 .carddetails{
     padding: 5px 15px;
     width: 50%;
+    
     /* border-right: 1px solid green;  */
 }
 .carddetails2{
@@ -18,7 +18,7 @@
     width: 100%;
 }
 .carddetails:first-child{
-    border-right: 1px solid green; 
+    border-right: 1px solid #fff; 
 }
 
 .detailText{
@@ -66,4 +66,8 @@
 
 .uppercase{
     text-transform: uppercase;
+}
+
+.border-bottom{
+    border-bottom: 1px solid #FFFFFF26 !important;
 }

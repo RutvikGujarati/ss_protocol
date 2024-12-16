@@ -93,7 +93,7 @@ const InfoCards = () => {
               <div className="carddetails text-center">
                 <button
                   onClick={handleMint}
-                  className="btn btn-primary btn-sm w-100"
+                  className="btn btn-primary btn-sm w-50 p-1"
                   disabled={load}
                 >
                   {load ? "Minting..." : "Mint"}

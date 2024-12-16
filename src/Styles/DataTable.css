@@ -8,10 +8,12 @@
   .table td {
     vertical-align: middle;
     height: 60px;
+    font-size: 14px;
     text-align: center; /* Centers content */
     border: none; /* Removes default borders */
     background-color: #000;
     color: #f8f9fa; /* Light text */
+    cursor: default !important;
   }
 
   table.table-dark thead th:first-child {
@@ -42,7 +44,7 @@
   .table tbody tr {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Adds shadow effect */
     border-radius: 8px;
-    border-top: 1px solid;
+    border-top: 1px solid #343a40; 
     transition: all 0.2s ease;
   }
   
@@ -50,7 +52,7 @@
     background-color: #1c1e22;
     /* transform: scale(1.01); */
     /* transform-origin: center; */
-    transition: background-color 0.5s ease; /* Smooth effect */
+    transition: background-color 0.5s ease;
 }
 
   .table a {
@@ -70,10 +72,15 @@
     font-size: 12px;
 }
 
+.nameBig{
+  font-size: 16px;
+}
+
 .tableClaim{
     background-color: #343a40;
-    padding: 5px 25px;
+    padding: 5px 15px;
     border-radius: 25px;
+    font-size: 14px;
 }
 
 .detailText{
@@ -81,4 +88,14 @@
     text-transform: uppercase;
     font-weight: 700;
     opacity: 0.5;
+}
+
+.tagTd{
+  padding: 0px;
+}
+
+.logoTD img{
+  width: 24px;
+  height: 24px;
+  cursor:pointer !important;
 }
