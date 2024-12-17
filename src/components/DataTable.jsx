@@ -188,8 +188,8 @@ const DataTable = () => {
                     </td>
                     <td>
                       <div className="d-flex align-items-center justify-content-center">
-                        <button className="btn btn-primary btn-sm swap-btn">
-                          Swap
+					    <button className="btn btn-primary btn-sm swap-btn">
+                          Burn
                         </button>
                       </div>
                     </td>
