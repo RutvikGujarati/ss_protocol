@@ -5,6 +5,17 @@
     color: #fff;
 }
 
+.wallet-connector button:hover {
+  transform: translateY(0) !important;
+  background-color: #fff;
+  color: #343a40;
+}
+
+.wallet-connector button:last-child{
+  background-color: #343a40;
+  color: #fff;
+}
+
 .connected-info {
     display: flex;
     flex-direction: column;
