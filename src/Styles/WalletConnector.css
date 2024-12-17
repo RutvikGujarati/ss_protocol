@@ -22,6 +22,24 @@
     color: #0f0;
 }
 
+/* Customize button with a specific class */
+.rainbow-button {
+	background-color: #f00;
+	border-radius: 12px;
+	padding: 12px 24px;
+	font-size: 16px;
+	font-weight: bold;
+	color: white;
+	border: none;
+	cursor: pointer;
+  }
+  
+  /* Add hover effect */
+  .rainbow-button:hover {
+	background-color: #b00;
+  }
+  
+
 
 
 /* Enhanced styles for the Connect button */
