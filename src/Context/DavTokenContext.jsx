@@ -18,6 +18,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [signer, setSigner] = useState(null);
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [claiming, setClaiming] = useState(false);
 
   const [davContract, setDavContract] = useState(null);
   const [stateContract, setStateContract] = useState(null);
@@ -30,7 +31,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [davPercentage, setDavPercentage] = useState("0.0");
   const [Supply, setSupply] = useState("0.0");
   const [StateReward, setStateReward] = useState("0");
-  const [Distributed, setViewDistributed] = useState("0");
+  const [Distributed, setViewDistributed] = useState("0.0");
 
   useEffect(() => {
     const initialize = async () => {
@@ -66,9 +67,7 @@ export const DAVTokenProvider = ({ children }) => {
         setLoading(false);
       }
     };
-
-    initialize();
-
+	initialize()
     // Listen for account changes
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts) => {
@@ -88,6 +87,7 @@ export const DAVTokenProvider = ({ children }) => {
         window.ethereum.removeAllListeners("accountsChanged");
       }
     };
+	
   }, []);
 
   const handleContractCall = async (
@@ -202,9 +202,16 @@ export const DAVTokenProvider = ({ children }) => {
     );
   };
   const ClaimTokens = async () => {
-    await handleContractCall(RatioContract, "claimTokens", [], (s) =>
-      ethers.formatUnits(s, 18)
-    );
+    try {
+      setClaiming(true);
+      await handleContractCall(RatioContract, "claimTokens", [], (s) =>
+        ethers.formatUnits(s, 18)
+      );
+      setClaiming(false);
+    } catch (e) {
+      console.error("Error claiming tokens:", e);
+      setClaiming(false);
+    }
   };
   const ViewDistributedTokens = async () => {
     const amount = await handleContractCall(
@@ -245,6 +252,7 @@ export const DAVTokenProvider = ({ children }) => {
         ClaimTokens,
         ViewDistributedTokens,
         Distributed,
+        claiming,
       }}
     >
       {children}

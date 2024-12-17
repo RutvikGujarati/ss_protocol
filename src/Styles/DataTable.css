@@ -1,112 +1,117 @@
 /* General table styling */
 .table {
-    /* border-radius: 15px; */
-    overflow: hidden;
-  }
-  
-  .table th,
-  .table td {
-    vertical-align: middle;
-    height: 60px;
-    font-size: 14px;
-    text-align: center; /* Centers content */
-    border: none; /* Removes default borders */
-    background-color: #000;
-    color: #f8f9fa; /* Light text */
-    cursor: default !important;
-  }
-
-  .table td{
-    font-size: small;
-  }
-
-  table.table-dark thead th:first-child {
-    border-top-left-radius: 10px;
-  }
-  
-  table.table-dark thead th:last-child {
-    border-top-right-radius: 10px;
-  }
-  
-  /* Rounded corners for the last row in the table body */
-  table.table-dark tbody tr:last-child td:first-child {
-    border-bottom-left-radius: 10px;
-  }
-  
-  table.table-dark tbody tr:last-child td:last-child {
-    border-bottom-right-radius: 10px;
-  }
-
-  
-  .table thead th {
-    background-color: #343a40; /* Darker header color */
-    font-size: small;
-    font-weight: 700;
-    opacity: 0.5;
-  }
-  
-  .table tbody tr {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Adds shadow effect */
-    border-radius: 8px;
-    border-top: 1px solid #343a40; 
-    transition: all 0.2s ease;
-  }
-  
-  .table tbody tr:hover td{
-    background-color: #1c1e22;
-    /* transform: scale(1.01); */
-    /* transform-origin: center; */
-    transition: background-color 0.5s ease;
+  /* border-radius: 15px; */
+  overflow: hidden;
 }
 
-  .table a {
-    font-size: 1.2rem; /* Enlarges icons */
-    text-decoration: none;
-  }
-  
-  .table a:hover {
-    color: #1db954; /* Adds green hover color */
-  }
-  
-  .uppercase{
-    text-transform: uppercase;
+.table th,
+.table td {
+  vertical-align: middle;
+  height: 60px;
+  font-size: 14px;
+  text-align: center; /* Centers content */
+  border: none; /* Removes default borders */
+  background-color: #000;
+  color: #f8f9fa; /* Light text */
+  cursor: default !important;
 }
 
-.nameSmall{
-    font-size: 12px;
+.table td {
+  font-size: small;
 }
 
-.nameBig{
+table.table-dark thead th:first-child {
+  border-top-left-radius: 10px;
+}
+
+table.table-dark thead th:last-child {
+  border-top-right-radius: 10px;
+}
+
+/* Rounded corners for the last row in the table body */
+table.table-dark tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 10px;
+}
+
+table.table-dark tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 10px;
+}
+
+.table thead th {
+  background-color: #343a40; /* Darker header color */
+  font-size: small;
+  font-weight: 700;
+  opacity: 0.5;
+}
+
+.table tbody tr {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Adds shadow effect */
+  border-radius: 8px;
+  border-top: 1px solid #343a40;
+  transition: all 0.2s ease;
+}
+
+.table tbody tr:hover td {
+  background-color: #1c1e22;
+  /* transform: scale(1.01); */
+  /* transform-origin: center; */
+  transition: background-color 0.5s ease;
+}
+
+.table a {
+  font-size: 1.2rem; /* Enlarges icons */
+  text-decoration: none;
+}
+
+.table a:hover {
+  color: #1db954; /* Adds green hover color */
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.nameSmall {
+  font-size: 12px;
+}
+
+.nameBig {
   font-size: 16px;
 }
 
-.tableClaim{
-    background-color: #343a40;
-    width: max-content;
-    align-content: center;
-    padding: 5px 15px;
-    border-radius: 25px;
-    font-size: 14px;
-	cursor: pointer;
+.tableClaim {
+  background-color: #343a40;
+  width: max-content;
+  align-content: center;
+  padding: 5px 15px;
+  border-radius: 25px;
+  font-size: 14px;
+  cursor: pointer;
 }
 
-.detailText{
-    font-size: small;
-    text-transform: uppercase;
-    font-weight: 700;
-    opacity: 0.5;
+.detailText {
+  font-size: small;
+  text-transform: uppercase;
+  font-weight: 700;
+  opacity: 0.5;
 }
 
-.tagTd{
+.tagTd {
   padding: 0px;
 }
 
-.logoTD img{
+.logoTD img {
   width: 24px;
   height: 24px;
-  cursor:pointer !important;
+  cursor: pointer !important;
 }
 
-.swap-btn{
-  padding: 5px 15px ; 
+.swap-btn {
+  padding: 5px 15px;
+}
+
+.hoverEffect:hover {
+  background-color: #7b3fe4; /* Change this to your preferred hover color */
+  color: white; /* Change text color on hover */
+  transform: scale(1.05); /* Slightly scale up the element */
 }

@@ -1,7 +1,7 @@
-import { StrictMode } from "react";
+import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import ConnectWalletProvider from "./Context/ConnectWalletContext.jsx";
+// import ConnectWalletProvider from "./Context/ConnectWalletContext.jsx";
 import App from "./App.jsx";
 import { DAVTokenProvider } from "./Context/DavTokenContext.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -15,18 +15,21 @@ createRoot(document.getElementById("root")).render(
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
+          coolMode
           theme={darkTheme({
             accentColor: "#7b3fe4",
             accentColorForeground: "white",
-            fontStack: "system",
+            fontStack: "Satoshi",
             overlayBlur: "small",
           })}
         >
-          <ConnectWalletProvider>
-            <DAVTokenProvider>
+          {/* <ConnectWalletProvider> */}
+          <DAVTokenProvider>
+          <Suspense fallback={<div>Loading...</div>}>
               <App />
-            </DAVTokenProvider>
-          </ConnectWalletProvider>
+            </Suspense>
+          </DAVTokenProvider>
+          {/* </ConnectWalletProvider> */}
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>

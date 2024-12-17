@@ -6,7 +6,7 @@ import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useDAVToken } from "../Context/DavTokenContext";
 const DataTable = () => {
-  const { StartMarketPlaceListing, Distributed ,ClaimTokens} =
+  const { StartMarketPlaceListing, claiming, Distributed, ClaimTokens } =
     useDAVToken();
   const location = useLocation();
   const isBurn = location.pathname === "/burn";
@@ -41,7 +41,12 @@ const DataTable = () => {
                       {/* <div className="d-flex justify-content-between align-items-center"> */}
                       <div className="tableName d-flex gap-2 align-items-center">
                         <div className="nameImage">
-                          <img src={PinkCircle} width={36} height={36} alt="Logo" />
+                          <img
+                            src={PinkCircle}
+                            width={36}
+                            height={36}
+                            alt="Logo"
+                          />
                         </div>
                         <div className="nameDetails">
                           <h5 className="nameBig">Fluxin</h5>
@@ -51,7 +56,17 @@ const DataTable = () => {
                     </td>
                     <td>V1</td>
                     <td>
-                      <div onClick={ClaimTokens} className="tableClaim">{Distributed} Claim</div>
+                      <div
+                        onClick={ClaimTokens}
+                        className={`tableClaim hoverEffect ${
+                          claiming ? "disabled" : ""
+                        }`}
+                        style={{ pointerEvents: claiming ? "none" : "auto" }}
+                      >
+                        {claiming
+                          ? "claiming.."
+                          : `${Distributed ?? "0.0"} Claim`}
+                      </div>
                     </td>
                     <td>$0.00000089</td>
                     <td className="text-success">1.25 M</td>
@@ -68,7 +83,12 @@ const DataTable = () => {
                         <button className="btn btn-primary btn-sm swap-btn">
                           Swap
                         </button>
-                        <img src={MetaMaskIcon} width={20} height={20} alt="Logo" />
+                        <img
+                          src={MetaMaskIcon}
+                          width={20}
+                          height={20}
+                          alt="Logo"
+                        />
                       </div>
                     </td>
                   </tr>
@@ -77,7 +97,12 @@ const DataTable = () => {
                     <td>
                       <div className="tableName d-flex gap-2 align-items-center">
                         <div className="nameImage">
-                          <img src={PinkCircle} width={36} height={36} alt="Logo" />
+                          <img
+                            src={PinkCircle}
+                            width={36}
+                            height={36}
+                            alt="Logo"
+                          />
                         </div>
                         <div className="nameDetails">
                           <h5 className="nameBig">Xerion</h5>
@@ -100,11 +125,16 @@ const DataTable = () => {
                       </div>
                     </td>
                     <td>
-                    <div className="d-flex align-items-center gap-2">
+                      <div className="d-flex align-items-center gap-2">
                         <button className="btn btn-primary btn-sm swap-btn">
                           Swap
                         </button>
-                        <img src={MetaMaskIcon} width={20} height={20} alt="Logo" />
+                        <img
+                          src={MetaMaskIcon}
+                          width={20}
+                          height={20}
+                          alt="Logo"
+                        />
                       </div>
                     </td>
                   </tr>
@@ -135,14 +165,19 @@ const DataTable = () => {
                     <td>1</td>
                     <td>
                       <div className="nameImage">
-                          <img src={PinkCircle} width={36} height={36} alt="Logo" />
-                        </div>
+                        <img
+                          src={PinkCircle}
+                          width={36}
+                          height={36}
+                          alt="Logo"
+                        />
+                      </div>
                     </td>
                     <td>
-                        <div className="nameDetails">
-                          <h5 className="nameBig">Fluxin</h5>
-                          <p className="nameSmall mb-1 uppercase">Fluxin</p>
-                        </div>
+                      <div className="nameDetails">
+                        <h5 className="nameBig">Fluxin</h5>
+                        <p className="nameSmall mb-1 uppercase">Fluxin</p>
+                      </div>
                     </td>
                     <td>1.2</td>
                     <td>500Fluxin</td>
@@ -153,7 +188,7 @@ const DataTable = () => {
                     </td>
                     <td>
                       <div className="d-flex align-items-center justify-content-center">
-                      <button className="btn btn-primary btn-sm swap-btn">
+                        <button className="btn btn-primary btn-sm swap-btn">
                           Swap
                         </button>
                       </div>
