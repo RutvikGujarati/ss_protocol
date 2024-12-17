@@ -11,9 +11,9 @@ const Header = () => {
       <nav className="navbar navbar-expand-lg bg-dark py-2 d-none d-lg-flex">
         <div className="container d-flex justify-content-between align-items-center w-100">
           {/* Navbar Brand */}
-          <NavLink className="navbar-brand text-light text-center pb-0" to="/">
+          <NavLink className="navbar-brand text-light pb-0" to="/">
             <h5 className="uppercase fs-2 fw-bolder">THE STATE</h5>
-            <p className="small-text fs-5 fw-normal mb-0">
+            <p className="small-text fs-6 fw-normal mb-0">
               by System State Protocol
             </p>
           </NavLink>

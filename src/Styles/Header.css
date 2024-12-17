@@ -90,6 +90,10 @@
  /* Adjust size to your preference */
 }
 
+.small-text-logo {
+  font-size: 18px;
+
+}
 .uppercase{
   text-transform: uppercase;
 }

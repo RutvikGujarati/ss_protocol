@@ -38,7 +38,7 @@ const DataTable = () => {
                       {/* <div className="d-flex justify-content-between align-items-center"> */}
                       <div className="tableName d-flex gap-2 align-items-center">
                         <div className="nameImage">
-                          <img src={PinkCircle} alt="Logo" />
+                          <img src={PinkCircle} width={36} height={36} alt="Logo" />
                         </div>
                         <div className="nameDetails">
                           <h5 className="nameBig">Fluxin</h5>
@@ -61,9 +61,11 @@ const DataTable = () => {
                       </div>
                     </td>
                     <td>
-                      <div className="d-flex align-items-center gap-2 logoTD">
-                        <img src={BlueCircle} alt="Logo" />
-                        <img src={MetaMaskIcon} alt="Logo" />
+                      <div className="d-flex align-items-center gap-2">
+                        <button className="btn btn-primary btn-sm swap-btn">
+                          Swap
+                        </button>
+                        <img src={MetaMaskIcon} width={20} height={20} alt="Logo" />
                       </div>
                     </td>
                   </tr>
@@ -72,7 +74,7 @@ const DataTable = () => {
                     <td>
                       <div className="tableName d-flex gap-2 align-items-center">
                         <div className="nameImage">
-                          <img src={PinkCircle} alt="Logo" />
+                          <img src={PinkCircle} width={36} height={36} alt="Logo" />
                         </div>
                         <div className="nameDetails">
                           <h5 className="nameBig">Xerion</h5>
@@ -95,9 +97,11 @@ const DataTable = () => {
                       </div>
                     </td>
                     <td>
-                      <div className="d-flex align-items-center gap-2 logoTD">
-                        <img src={BlueCircle} alt="Logo" />
-                        <img src={MetaMaskIcon} alt="Logo" />
+                    <div className="d-flex align-items-center gap-2">
+                        <button className="btn btn-primary btn-sm swap-btn">
+                          Swap
+                        </button>
+                        <img src={MetaMaskIcon} width={20} height={20} alt="Logo" />
                       </div>
                     </td>
                   </tr>
@@ -128,7 +132,7 @@ const DataTable = () => {
                     <td>1</td>
                     <td>
                       <div className="nameImage">
-                          <img src={PinkCircle} alt="Logo" />
+                          <img src={PinkCircle} width={36} height={36} alt="Logo" />
                         </div>
                     </td>
                     <td>
@@ -145,8 +149,10 @@ const DataTable = () => {
                       </div>
                     </td>
                     <td>
-                      <div className="d-flex align-items-center gap-2 logoTD">
-                        <img src={BlueCircle} alt="Logo" />
+                      <div className="d-flex align-items-center justify-content-center">
+                      <button className="btn btn-primary btn-sm swap-btn">
+                          Swap
+                        </button>
                       </div>
                     </td>
                   </tr>
