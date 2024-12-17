@@ -18,6 +18,9 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
     uint256 public auctionDuration = 24 hours;
     uint256 public lastAuctionTime;
     uint256 public totalBurned;
+    uint256 public ratioTarget; // Ratio target for swapping logic
+
+    mapping(address => uint256) public claimableTokens;
 
     // Percentages (basis points)
     uint256 public constant PERCENT_DAV_HOLDERS = 1500; // 15%
@@ -30,6 +33,9 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
     event TokensDistributedToHolders(uint256 amount, uint256 holderCount);
     event TokensBurned(uint256 amount, address indexed burnedBy);
     event ListedOnMarketplace();
+    event RatioSwappingTypeUpdated(string swapType);
+    event TokensMixed(uint256 timestamp);
+    event Claimed(address indexed claimant, uint256 amount);
 
     constructor(
         address _davTreasury,
@@ -81,7 +87,6 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
 
         // Fetch the total DAV holdings from the treasury
         uint256 totalDAVHoldings = davToken.totalSupply();
-
         require(totalDAVHoldings > 0, "No DAV token holders detected");
 
         // Iterate over holders and distribute proportionally
@@ -96,13 +101,58 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
             uint256 share = (holderBalance * distributionAmount) /
                 totalDAVHoldings;
 
-            // Transfer the calculated share
+            // Assign the calculated share to claimable tokens
             if (share > 0) {
-                _transfer(address(this), holder, share);
+                claimableTokens[holder] += share;
             }
         }
 
-        emit TokensDistributedToHolders(distributionAmount, holderCount);
+        emit TokensDistributedToHolders(distributionAmount, holders.length);
+    }
+
+    function performSwapping(
+        uint256 stateTokenAmount,
+        uint256 listedTokenAmount
+    ) external {
+        if (stateTokenAmount / listedTokenAmount >= ratioTarget) {
+            // Reverse Ratio Swapping
+            _reverseRatioSwap(msg.sender, stateTokenAmount);
+            emit RatioSwappingTypeUpdated("Reverse Ratio Swapping");
+        } else {
+            // Normal Ratio Swapping
+            _normalRatioSwap(msg.sender, listedTokenAmount);
+            emit RatioSwappingTypeUpdated("Normal Ratio Swapping");
+        }
+    }
+
+    function _normalRatioSwap(address participant, uint256 amount) internal {
+        _transfer(address(this), participant, amount);
+    }
+
+    function _reverseRatioSwap(address participant, uint256 amount) internal {
+        _burn(participant, amount);
+        totalBurned += amount;
+        emit TokensBurned(amount, participant);
+    }
+    // ================= Claim Function =================
+
+    function claimTokens() external {
+        uint256 amount = claimableTokens[msg.sender];
+        require(amount > 0, "No claimable tokens available");
+
+        // Transfer tokens to the claimant
+        claimableTokens[msg.sender] = 0;
+        _transfer(address(this), msg.sender, amount);
+
+        emit Claimed(msg.sender, amount);
+    }
+
+    // ================= View Functions =================
+
+    function viewClaimableTokens(
+        address holder
+    ) external view returns (uint256) {
+        return claimableTokens[holder];
     }
 
     // ================= Treasury and Burn Functions =================
@@ -131,5 +181,12 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
 
     function withdrawTokens(uint256 amount) external onlyOwner {
         _transfer(address(this), msg.sender, amount);
+    }
+    function getSwapRatioTarget() external view returns (uint256) {
+        return ratioTarget;
+    }
+
+    function getTotalBurnedTokens() external view returns (uint256) {
+        return totalBurned;
     }
 }

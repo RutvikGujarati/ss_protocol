@@ -4,7 +4,10 @@ import BlueCircle from "../assets/BlueCircle.png";
 import PinkCircle from "../assets/PinkCircle.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
+import { useDAVToken } from "../Context/DavTokenContext";
 const DataTable = () => {
+  const { StartMarketPlaceListing, Distributed ,ClaimTokens} =
+    useDAVToken();
   const location = useLocation();
   const isBurn = location.pathname === "/burn";
   const isAuction = location.pathname === "/auction";
@@ -50,7 +53,7 @@ const DataTable = () => {
                     </td>
                     <td>V1</td>
                     <td>
-                      <div className="tableClaim">789 Claim</div>
+                      <div onClick={ClaimTokens} className="tableClaim">{Distributed} Claim</div>
                     </td>
                     <td>$0.00000089</td>
                     <td className="text-success">1.25 M</td>

@@ -3,11 +3,13 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { ethers } from "ethers";
 import DAVTokenABI from "../ABI/DavTokenABI.json";
 import StateABI from "../ABI/StateTokenABI.json";
+import RatioABI from "../ABI/RatioABI.json";
 
 const DAVTokenContext = createContext();
 
-const DAV_TOKEN_ADDRESS = "0xD30C8EfD9F732b0045482504BbB2109B86c0b403";
+const DAV_TOKEN_ADDRESS = "0x7c0461f4B63f1C9746D767cF22EA4BD8B702Bb5c";
 const STATE_TOKEN_ADDRESS = "0x5fD237F8a7c1E959401f8619D1F39CB9CfAB4380";
+const Ratio_TOKEN_ADDRESS = "0x181a3a085740582e8009d4a0839323B9154ecE48";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -16,8 +18,11 @@ export const DAVTokenProvider = ({ children }) => {
   const [signer, setSigner] = useState(null);
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const [davContract, setDavContract] = useState(null);
   const [stateContract, setStateContract] = useState(null);
+  const [RatioContract, setRatioContract] = useState(null);
+
   const [TotalCost, setTotalCost] = useState(null);
   const [CurrentSReward, setCurrentSReward] = useState(null);
   const [davHolds, setDavHoldings] = useState("0.0");
@@ -25,12 +30,12 @@ export const DAVTokenProvider = ({ children }) => {
   const [davPercentage, setDavPercentage] = useState("0.0");
   const [Supply, setSupply] = useState("0.0");
   const [StateReward, setStateReward] = useState("0");
+  const [Distributed, setViewDistributed] = useState("0");
 
   useEffect(() => {
     const initialize = async () => {
       if (typeof window.ethereum !== "undefined") {
         try {
-          await window.ethereum.request({ method: "eth_requestAccounts" });
           const newProvider = new ethers.BrowserProvider(
             window.ethereum,
             "any"
@@ -41,11 +46,15 @@ export const DAVTokenProvider = ({ children }) => {
           setProvider(newProvider);
           setSigner(newSigner);
           setAccount(accounts[0]);
+
           setDavContract(
             new ethers.Contract(DAV_TOKEN_ADDRESS, DAVTokenABI, newSigner)
           );
           setStateContract(
             new ethers.Contract(STATE_TOKEN_ADDRESS, StateABI, newSigner)
+          );
+          setRatioContract(
+            new ethers.Contract(Ratio_TOKEN_ADDRESS, RatioABI, newSigner)
           );
         } catch (error) {
           console.error("Error initializing contract:", error);
@@ -57,7 +66,28 @@ export const DAVTokenProvider = ({ children }) => {
         setLoading(false);
       }
     };
+
     initialize();
+
+    // Listen for account changes
+    if (window.ethereum) {
+      window.ethereum.on("accountsChanged", (accounts) => {
+        if (accounts.length > 0) {
+          setAccount(accounts[0]);
+          initialize(); // Re-initialize contracts with the new account
+        } else {
+          setAccount(null);
+          setSigner(null);
+          setProvider(null);
+        }
+      });
+    }
+
+    return () => {
+      if (window.ethereum) {
+        window.ethereum.removeAllListeners("accountsChanged");
+      }
+    };
   }, []);
 
   const handleContractCall = async (
@@ -77,7 +107,7 @@ export const DAVTokenProvider = ({ children }) => {
 
   const mintDAV = async (amount) => {
     const value = ethers.parseEther(amount.toString());
-    const cost = ethers.parseEther((amount * 100000).toString());
+    const cost = ethers.parseEther((amount * 1).toString()); // org - 100000
     await handleContractCall(davContract, "mintDAV", [value, { value: cost }]);
   };
 
@@ -156,9 +186,35 @@ export const DAVTokenProvider = ({ children }) => {
       DavHoldingsPercentage();
       StateHoldings();
       DavSupply();
+      ViewDistributedTokens();
     }
     GetCurrentStateReward();
   }, [account, davContract]);
+
+  // Ratio Token Contracts
+
+  const StartMarketPlaceListing = async () => {
+    await handleContractCall(
+      RatioContract,
+      "notifyMarketplaceListing",
+      [],
+      (s) => ethers.formatUnits(s, 18)
+    );
+  };
+  const ClaimTokens = async () => {
+    await handleContractCall(RatioContract, "claimTokens", [], (s) =>
+      ethers.formatUnits(s, 18)
+    );
+  };
+  const ViewDistributedTokens = async () => {
+    const amount = await handleContractCall(
+      RatioContract,
+      "viewClaimableTokens",
+      [account],
+      (s) => ethers.formatUnits(s, 18)
+    );
+    setViewDistributed(amount);
+  };
 
   return (
     <DAVTokenContext.Provider
@@ -184,6 +240,11 @@ export const DAVTokenProvider = ({ children }) => {
         StateHolds,
         DavSupply,
         Supply,
+
+        StartMarketPlaceListing,
+        ClaimTokens,
+        ViewDistributedTokens,
+        Distributed,
       }}
     >
       {children}
