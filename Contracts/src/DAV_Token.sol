@@ -243,6 +243,7 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
         require(_developmentWallet != address(0), "Invalid address");
         developmentWallet = _developmentWallet;
     }
+	
 
     /**
      * @dev Fallback function to accept PLS.

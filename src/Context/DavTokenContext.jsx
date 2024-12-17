@@ -9,7 +9,7 @@ const DAVTokenContext = createContext();
 
 const DAV_TOKEN_ADDRESS = "0x7c0461f4B63f1C9746D767cF22EA4BD8B702Bb5c";
 const STATE_TOKEN_ADDRESS = "0x5fD237F8a7c1E959401f8619D1F39CB9CfAB4380";
-const Ratio_TOKEN_ADDRESS = "0x181a3a085740582e8009d4a0839323B9154ecE48";
+const Ratio_TOKEN_ADDRESS = "0xfcDF0f0607898d237D989CeA41a84991072d85Bc";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -25,6 +25,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [RatioContract, setRatioContract] = useState(null);
 
   const [TotalCost, setTotalCost] = useState(null);
+  const [ButtonText, setButtonText] = useState("");
   const [CurrentSReward, setCurrentSReward] = useState(null);
   const [davHolds, setDavHoldings] = useState("0.0");
   const [StateHolds, setStateHoldings] = useState("0.0");
@@ -67,7 +68,7 @@ export const DAVTokenProvider = ({ children }) => {
         setLoading(false);
       }
     };
-	initialize()
+    initialize();
     // Listen for account changes
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts) => {
@@ -87,7 +88,6 @@ export const DAVTokenProvider = ({ children }) => {
         window.ethereum.removeAllListeners("accountsChanged");
       }
     };
-	
   }, []);
 
   const handleContractCall = async (
@@ -213,6 +213,48 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
+  const SwapTokens = async (amount) => {
+    try {
+      // Step 0: Initial button state
+      setButtonText("Checking allowance...");
+
+      // Convert amount to wei
+      const amountInWei = ethers.parseUnits(amount.toString(), 18);
+
+      // Step 1: Check Allowance
+      const allowance = await stateContract.allowance(
+        account,
+        RatioContract.target
+      );
+
+      if (allowance < amountInWei) {
+        // Step 2: Approve Tokens
+        setButtonText("Approving tokens...");
+        const approveTx = await stateContract.approve(
+          RatioContract.target,
+          amountInWei
+        );
+        await approveTx.wait(); 
+        console.log("Approval successful!");
+      } else {
+        console.log("Sufficient allowance already granted.");
+      }
+
+      // Step 3: Call Swap Function
+      setButtonText("Executing swap...");
+      await handleContractCall(RatioContract, "swapSTATEForListedTokens", [
+        amountInWei,
+      ]);
+
+      // Step 4: Swap Success
+      setButtonText("Swap successful!");
+      console.log("Swap successful!");
+    } catch (e) {
+      console.error("Error during token swap:", e);
+      setButtonText("Error occurred. Try again.");
+    }
+  };
+
   const ViewDistributedTokens = async () => {
     const amount = await handleContractCall(
       RatioContract,
@@ -253,6 +295,9 @@ export const DAVTokenProvider = ({ children }) => {
         ViewDistributedTokens,
         Distributed,
         claiming,
+
+        SwapTokens,
+		ButtonText,
       }}
     >
       {children}

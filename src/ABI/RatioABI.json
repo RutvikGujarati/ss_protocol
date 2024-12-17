@@ -40,18 +40,11 @@
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "amount",
+				"name": "_amount",
 				"type": "uint256"
 			}
 		],
-		"name": "burnTokens",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "claimTokens",
+		"name": "burnSTATE",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -77,6 +70,16 @@
 				"internalType": "address",
 				"name": "_davTokenAddress",
 				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_StateTokenAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_ratioTarget",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "nonpayable",
@@ -232,6 +235,38 @@
 		"anonymous": false,
 		"inputs": [
 			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "startTime",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "duration",
+				"type": "uint256"
+			}
+		],
+		"name": "AuctionStarted",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "burnTokens",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
 				"indexed": true,
 				"internalType": "address",
 				"name": "claimant",
@@ -246,6 +281,13 @@
 		],
 		"name": "Claimed",
 		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "claimTokens",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
 	},
 	{
 		"anonymous": false,
@@ -293,24 +335,6 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "stateTokenAmount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "listedTokenAmount",
-				"type": "uint256"
-			}
-		],
-		"name": "performSwapping",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -341,6 +365,57 @@
 		"anonymous": false,
 		"inputs": [
 			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "stateAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "listedTokens",
+				"type": "uint256"
+			}
+		],
+		"name": "SwapExecuted",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_amount",
+				"type": "uint256"
+			}
+		],
+		"name": "swapListedTokensForSTATE",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_amount",
+				"type": "uint256"
+			}
+		],
+		"name": "swapSTATEForListedTokens",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
 				"indexed": false,
 				"internalType": "uint256",
 				"name": "amount",
@@ -354,6 +429,25 @@
 			}
 		],
 		"name": "TokensBurned",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "TokensClaimed",
 		"type": "event"
 	},
 	{
@@ -575,6 +669,32 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "BurnAddress",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "calculateCurrentRatio",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -647,12 +767,40 @@
 	},
 	{
 		"inputs": [],
-		"name": "getDavHolders",
+		"name": "distribution",
 		"outputs": [
 			{
-				"internalType": "address[]",
+				"internalType": "uint256",
+				"name": "toDAVHolders",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "toLiquidity",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "toDAVTreasury",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "toDevelopment",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getBurnedSTATE",
+		"outputs": [
+			{
+				"internalType": "uint256",
 				"name": "",
-				"type": "address[]"
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -803,6 +951,19 @@
 	},
 	{
 		"inputs": [],
+		"name": "StateToken",
+		"outputs": [
+			{
+				"internalType": "contract STATEToken",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "symbol",
 		"outputs": [
 			{
@@ -817,6 +978,19 @@
 	{
 		"inputs": [],
 		"name": "totalBurned",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalBurnedSTATE",
 		"outputs": [
 			{
 				"internalType": "uint256",

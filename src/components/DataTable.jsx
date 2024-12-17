@@ -6,12 +6,21 @@ import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useDAVToken } from "../Context/DavTokenContext";
 const DataTable = () => {
-  const { StartMarketPlaceListing, claiming, Distributed, ClaimTokens } =
-    useDAVToken();
+  const {
+    StartMarketPlaceListing,
+    SwapTokens,
+    ButtonText,
+    claiming,
+    Distributed,
+    ClaimTokens,
+  } = useDAVToken();
   const location = useLocation();
   const isBurn = location.pathname === "/burn";
   const isAuction = location.pathname === "/auction";
 
+  async function Swapping() {
+    await SwapTokens("100");
+  }
   return (
     <>
       {isAuction ? (
@@ -74,15 +83,21 @@ const DataTable = () => {
                     <td>1 : 1 T</td>
                     <td className="tagTd">
                       <div className="d-flex justify-content-center gap-3 w-100">
-                        <div className="tableClaim">50 000 Flixin</div>
-                        <div className="tableClaim">25 000 000 State</div>
+                        <div className="tableClaim">100 RT</div>
+                        <div className="tableClaim">200 State</div>
                       </div>
                     </td>
                     <td>
                       <div className="d-flex align-items-center gap-2">
-                        <button className="btn btn-primary btn-sm swap-btn">
-                          Swap
+                        <button
+                          onClick={Swapping}
+                          disabled={ButtonText.includes("...")}
+                          className="btn btn-primary btn-sm swap-btn"
+                          
+                        >
+                          {ButtonText.includes("...") ? ButtonText : "Swap"}
                         </button>
+
                         <img
                           src={MetaMaskIcon}
                           width={20}
@@ -188,7 +203,7 @@ const DataTable = () => {
                     </td>
                     <td>
                       <div className="d-flex align-items-center justify-content-center">
-					    <button className="btn btn-primary btn-sm swap-btn">
+                        <button className="btn btn-primary btn-sm swap-btn">
                           Burn
                         </button>
                       </div>
