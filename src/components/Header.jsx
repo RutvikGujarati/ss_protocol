@@ -2,7 +2,7 @@ import "../Styles/Header.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import WalletConnector from "../WalletComps/WalletConnect";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const Header = () => {
   return (
@@ -11,39 +11,38 @@ const Header = () => {
       <nav className="navbar navbar-expand-lg bg-dark py-2 d-none d-lg-flex">
         <div className="container d-flex justify-content-between align-items-center w-100">
           {/* Navbar Brand */}
-          <Link className="navbar-brand text-light text-center pb-0" to="/">
+          <NavLink className="navbar-brand text-light pb-0" to="/">
             <h5 className="uppercase fs-2 fw-bolder">THE STATE</h5>
-            <p className="small-text fs-5 fw-normal mb-0">
+            <p className="small-text fs-6 fw-normal mb-0">
               by System State Protocol
             </p>
-          </Link>
+          </NavLink>
 
           {/* Right-Side Container */}
           <div className="d-flex align-items-center">
             {/* Navigation Links */}
             <ul className="navbar-nav d-flex flex-row align-items-center me-4">
               <li className="nav-item mx-2">
-                <Link className="nav-link text-light" to="/auction">
+                <NavLink className={({ isActive }) => isActive ? "nav-link active-link text-light" : "nav-link text-light"} to="/auction">
                   Auction
-                </Link>
+                </NavLink>
               </li>
               <li className="nav-item mx-2">
-                <Link className="nav-link text-light" to="/burn">
+                <NavLink className={({ isActive }) => isActive ? "nav-link active-link text-light" : "nav-link text-light"} to="/burn">
                   Burn
-                </Link>
+                </NavLink>
               </li>
               <li className="nav-item mx-2">
-                <Link className="nav-link text-light" to="/info">
+                <NavLink className={({ isActive }) => isActive ? "nav-link active-link text-light" : "nav-link text-light"} to="/info">
                   Info
-                </Link>
+                </NavLink>
               </li>
               <li className="nav-item mx-2">
-                <Link className="nav-link text-light" to="/docs">
+                <NavLink className={({ isActive }) => isActive ? "nav-link active-link text-light" : "nav-link text-light"} to="/docs">
                   Docs
-                </Link>
+                </NavLink>
               </li>
             </ul>
-
             {/* Wallet Connector Button */}
             <div>
               <WalletConnector />
@@ -55,9 +54,9 @@ const Header = () => {
       {/* Top Navbar for Mobile */}
       <nav className="navbar bg-dark d-lg-none justify-content-between align-items-center py-2">
         {/* Navbar Brand */}
-        <Link className="navbar-brand text-light small-text" to="/">
+        <NavLink className="navbar-brand text-light small-text" to="/">
           SYSTEM STATE DEX
-        </Link>
+        </NavLink>
         {/* Wallet Connector */}
         <div className="me-3 small-text">
           <WalletConnector />
@@ -66,22 +65,22 @@ const Header = () => {
 
       {/* Mobile Bottom Navigation */}
       <div className="mobile-nav d-flex d-lg-none justify-content-around fixed-bottom bg-dark py-2">
-        <Link to="/auction" className="text-light text-center">
+        <NavLink to="/auction"     className={({ isActive }) => isActive ? "text-light active-link text-center" : "text-light text-center"}>
           <i className="bi bi-hammer"></i>
           <div>Auction</div>
-        </Link>
-        <Link to="/burn" className="text-light text-center">
+        </NavLink>
+        <NavLink to="/burn"     className={({ isActive }) => isActive ? "text-light active-link text-center" : "text-light text-center"}>
           <i className="bi bi-fire"></i>
           <div>Burn</div>
-        </Link>
-        <Link to="/info" className="text-light text-center">
+        </NavLink>
+        <NavLink to="/info"     className={({ isActive }) => isActive ? "text-light active-link text-center" : "text-light text-center"}>
           <i className="bi bi-info-circle"></i>
           <div>Info</div>
-        </Link>
-        <Link to="/docs" className="text-light text-center">
+        </NavLink>
+        <NavLink to="/docs"     className={({ isActive }) => isActive ? "text-light active-link text-center" : "text-light text-center"}>
           <i className="bi bi-file-earmark-text"></i>
           <div>Docs</div>
-        </Link>
+        </NavLink>
       </div>
     </>
   );

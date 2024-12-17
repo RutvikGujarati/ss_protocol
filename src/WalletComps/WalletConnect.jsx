@@ -15,8 +15,8 @@ const WalletConnector = () => {
   return (
     <div className="wallet-connector">
       {address ? (
-        <div className="d-flex align-items-center">
-          <span className="wallet-info me-3">{formatAddress(address)}</span>
+        <div className="d-flex align-items-center gap-3">
+          <span className="btn btn-address btn-sm">{formatAddress(address)}</span>
           {/* <span className="wallet-info me-3">{formatBalance(balance)} ETH</span> */}
           <button className="btn btn-primary btn-sm" onClick={disconnectWallet}>
             Disconnect
