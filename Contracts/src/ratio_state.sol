@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import {DAVToken} from "./DavToken.sol";
+import {DAVToken} from "./DAV_Token.sol";
 import {STATEToken} from "./StateToken.sol";
 
 contract RatioSwapToken is ERC20, Ownable(msg.sender) {
@@ -191,24 +191,35 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
 
     function calculateCurrentRatio() public view returns (uint256) {
         uint256 stateTokenSupply = StateToken.totalSupply();
-        uint256 listedTokenSupply = totalSupply(); // This contract's token supply
+        uint256 listedTokenSupply = totalSupply(); 
 
         require(listedTokenSupply > 0, "No listed tokens available");
 
-        return (stateTokenSupply * 1e18) / listedTokenSupply; // Ratio scaled by 1e18
+        return (stateTokenSupply * 1e18) / listedTokenSupply; 
     }
 
     // Burn STATE Tokens
     function burnSTATE(uint256 _amount) external {
+        require(_amount > 0, "Amount must be greater than 0");
         require(
-            StateToken.balanceOf(address(this)) >= _amount,
+            StateToken.balanceOf(msg.sender) >= _amount,
             "Not enough STATE tokens to burn"
         );
 
-        StateToken.transfer(BurnAddress, _amount);
-        totalBurnedSTATE += _amount;
+        // Calculate the bounty and the actual burn amount
+        uint256 bounty = (_amount * 1) / 100; // 1% bounty
+        uint256 amountToBurn = _amount - bounty; // 99% to burn
 
-        emit TokensBurned(_amount, msg.sender);
+        // Transfer the STATE tokens to the burn address
+        StateToken.transferFrom(msg.sender, BurnAddress, amountToBurn);
+
+        // Reward the user with 1% bounty in STATE tokens
+        StateToken.transferFrom(msg.sender, msg.sender, bounty);
+
+        // Update total burned STATE tokens
+        totalBurnedSTATE += amountToBurn;
+
+        emit TokensBurned(amountToBurn, msg.sender);
     }
 
     // ================= Claim Function =================

@@ -198,10 +198,10 @@ const DataTable = () => {
                       </div>
                     </td>
                     <td>1.2</td>
-                    <td>500Fluxin</td>
+                    <td>500 Fluxin</td>
                     <td>
                       <div className="d-flex align-items-center justify-content-center">
-                        <div className="tableClaim">5 000 000 Claim</div>
+                        <div className="tableClaim">5 000 000 Fluxin</div>
                       </div>
                     </td>
                     <td>
