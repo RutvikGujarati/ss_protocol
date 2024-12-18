@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import DAVTokenABI from "../ABI/DavTokenABI.json";
 import StateABI from "../ABI/StateTokenABI.json";
 import RatioABI from "../ABI/RatioABI.json";
+import MetaMaskIcon from "../assets/metamask-icon.png";
 
 const DAVTokenContext = createContext();
 
@@ -216,7 +217,7 @@ export const DAVTokenProvider = ({ children }) => {
   const SwapTokens = async (amount) => {
     try {
       // Step 0: Initial button state
-      setButtonText("Checking allowance...");
+      setButtonText("Check allowance...");
 
       // Convert amount to wei
       const amountInWei = ethers.parseUnits(amount.toString(), 18);
@@ -229,19 +230,19 @@ export const DAVTokenProvider = ({ children }) => {
 
       if (allowance < amountInWei) {
         // Step 2: Approve Tokens
-        setButtonText("Approving tokens...");
+        setButtonText("Approving...");
         const approveTx = await stateContract.approve(
           RatioContract.target,
           amountInWei
         );
-        await approveTx.wait(); 
+        await approveTx.wait();
         console.log("Approval successful!");
       } else {
         console.log("Sufficient allowance already granted.");
       }
 
       // Step 3: Call Swap Function
-      setButtonText("Executing swap...");
+      setButtonText("swapping...");
       await handleContractCall(RatioContract, "swapSTATEForListedTokens", [
         amountInWei,
       ]);
@@ -263,6 +264,40 @@ export const DAVTokenProvider = ({ children }) => {
       (s) => ethers.formatUnits(s, 18)
     );
     setViewDistributed(amount);
+  };
+
+  const handleAddToken = async () => {
+    if (!window.ethereum) {
+      alert(
+        "MetaMask is not installed. Please install it to use this feature."
+      );
+      return;
+    }
+
+    try {
+      const tokenDetails = {
+        type: "ERC20",
+        options: {
+          address: Ratio_TOKEN_ADDRESS,
+          decimals: 18,
+          image: MetaMaskIcon,
+        },
+      };
+
+      const wasAdded = await window.ethereum.request({
+        method: "wallet_watchAsset",
+        params: tokenDetails,
+      });
+
+      if (wasAdded) {
+        alert("Token successfully added to your wallet!");
+      } else {
+        alert("Token addition was canceled.");
+      }
+    } catch (error) {
+      console.error("Error adding token:", error);
+      alert("An error occurred while adding the token.");
+    }
   };
 
   return (
@@ -297,7 +332,9 @@ export const DAVTokenProvider = ({ children }) => {
         claiming,
 
         SwapTokens,
-		ButtonText,
+        ButtonText,
+
+        handleAddToken,
       }}
     >
       {children}

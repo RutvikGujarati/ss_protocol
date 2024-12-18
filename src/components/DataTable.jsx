@@ -8,6 +8,7 @@ import { useDAVToken } from "../Context/DavTokenContext";
 const DataTable = () => {
   const {
     StartMarketPlaceListing,
+	handleAddToken,
     SwapTokens,
     ButtonText,
     claiming,
@@ -103,6 +104,8 @@ const DataTable = () => {
                           width={20}
                           height={20}
                           alt="Logo"
+						  style={{cursor: "pointer"}}
+						  onClick={handleAddToken}
                         />
                       </div>
                     </td>
