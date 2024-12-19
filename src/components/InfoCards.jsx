@@ -10,6 +10,8 @@ const InfoCards = () => {
     mintDAV,
     CalculationOfCost,
     TotalCost,
+    StateBurned,
+	StateBurnedRatio,
     StateReward,
     GetStateRewards,
     GetCurrentStateReward,
@@ -154,7 +156,7 @@ const InfoCards = () => {
         <>
           <div className="container mt-4">
             <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom">
-            <div className="col-md-4 p-0 m-2 cards">
+              <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
@@ -170,7 +172,7 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State tokens burn</p>
-                      <h5 className="">9 Trillion</h5>
+                      <h5 className="">{StateBurned}</h5>
                     </div>
                   </div>
                 </div>
@@ -179,8 +181,10 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">State tokens % burn & burn ratio</p>
-                      <h5 className="">0.0025%</h5>
+                      <p className="mb-1 detailText">
+                        State tokens % burn & burn ratio
+                      </p>
+                      <h5 className="">{StateBurnedRatio}%</h5>
                     </div>
                   </div>
                 </div>

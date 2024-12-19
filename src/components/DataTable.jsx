@@ -9,6 +9,7 @@ const DataTable = () => {
   const {
     StartMarketPlaceListing,
 	handleAddToken,
+	ListedTokenBurned,
     SwapTokens,
     ButtonText,
     claiming,
@@ -197,7 +198,7 @@ const DataTable = () => {
                     <td>500 Fluxin</td>
                     <td>
                       <div className="d-flex align-items-center justify-content-center">
-                        <div className="tableClaim">5 000 000 Fluxin</div>
+                        <div className="tableClaim">{ListedTokenBurned} Fluxin</div>
                       </div>
                     </td>
                     <td>

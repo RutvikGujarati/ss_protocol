@@ -8,9 +8,10 @@ import MetaMaskIcon from "../assets/metamask-icon.png";
 
 const DAVTokenContext = createContext();
 
-const DAV_TOKEN_ADDRESS = "0x7c0461f4B63f1C9746D767cF22EA4BD8B702Bb5c";
-const STATE_TOKEN_ADDRESS = "0x5fD237F8a7c1E959401f8619D1F39CB9CfAB4380";
-const Ratio_TOKEN_ADDRESS = "0xfcDF0f0607898d237D989CeA41a84991072d85Bc";
+const DAV_TOKEN_ADDRESS = "0x5A6796D654FAbDB9fCb524Fe1cb8A589dF6F99bb";
+const STATE_TOKEN_ADDRESS = "0x9dA567451c3e43EDc5acF7263Ba83C25a852A437";
+// const Ratio_TOKEN_ADDRESS = "0xee44b627182fB92c3453e96bA29f7db5f53a0301";
+const Ratio_TOKEN_ADDRESS = "0x071D680C43990a89c6a7bF61E9Bf0D2A593173EF";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -34,6 +35,11 @@ export const DAVTokenProvider = ({ children }) => {
   const [Supply, setSupply] = useState("0.0");
   const [StateReward, setStateReward] = useState("0");
   const [Distributed, setViewDistributed] = useState("0.0");
+  const [StateBurned, setStateBurnAMount] = useState("0.0");
+
+  const [ListedTokenBurned, setListedTokenBurnAMount] = useState("0.0");
+
+  const [StateBurnedRatio, setStateBurnRatio] = useState("0.0");
 
   useEffect(() => {
     const initialize = async () => {
@@ -188,8 +194,12 @@ export const DAVTokenProvider = ({ children }) => {
       StateHoldings();
       DavSupply();
       ViewDistributedTokens();
+      getBurnedSTATE();
+	  calculateBurnAmount()
     }
     GetCurrentStateReward();
+	
+    StateTokenBurnRatio();
   }, [account, davContract]);
 
   // Ratio Token Contracts
@@ -265,6 +275,52 @@ export const DAVTokenProvider = ({ children }) => {
     );
     setViewDistributed(amount);
   };
+  const getBurnedSTATE = async () => {
+    const amount = await handleContractCall(
+      RatioContract,
+      "getBurnedSTATE",
+      [],
+      (s) => ethers.formatUnits(s, 18)
+    );
+    setStateBurnAMount(amount);
+  };
+  const calculateBurnAmount = async () => {
+    const amount = await handleContractCall(
+      RatioContract,
+      "calculateBurnAmount",
+      [],
+      (s) => ethers.formatUnits(s, 18)
+    );
+    setListedTokenBurnAMount(amount);
+  };
+
+  const StateTokenBurnRatio = async () => {
+    try {
+      const burnAmount = await handleContractCall(
+        RatioContract,
+        "getBurnedSTATE",
+        [],
+        (s) => parseFloat(ethers.formatUnits(s, 18)) 
+      );
+
+      const totalSupply = await handleContractCall(
+        RatioContract,
+        "totalSupply",
+        [],
+        (s) => parseFloat(ethers.formatUnits(s, 18)) 
+      );
+
+      if (totalSupply > 0) {
+        const ratio = burnAmount / totalSupply;
+        const percentageRatio = ratio * 100; 
+        setStateBurnRatio(percentageRatio.toFixed(7)); 
+      } else {
+        console.error("Total supply is zero. Cannot calculate ratio.");
+      }
+    } catch (error) {
+      console.error("Error calculating state burn ratio:", error);
+    }
+  };
 
   const handleAddToken = async () => {
     if (!window.ethereum) {
@@ -324,12 +380,16 @@ export const DAVTokenProvider = ({ children }) => {
         StateHolds,
         DavSupply,
         Supply,
-
+        getBurnedSTATE,
         StartMarketPlaceListing,
         ClaimTokens,
         ViewDistributedTokens,
         Distributed,
         claiming,
+
+        StateBurned,
+        StateBurnedRatio,
+		ListedTokenBurned,
 
         SwapTokens,
         ButtonText,

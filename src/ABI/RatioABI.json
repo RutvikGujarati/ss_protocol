@@ -37,14 +37,21 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "burnAndDistributeListedTokens",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "_amount",
+				"name": "amount",
 				"type": "uint256"
 			}
 		],
-		"name": "burnSTATE",
+		"name": "burnTokens",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -251,19 +258,6 @@
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "burnTokens",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -293,6 +287,31 @@
 		"anonymous": false,
 		"inputs": [],
 		"name": "ListedOnMarketplace",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "finalAMount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "userAMount",
+				"type": "uint256"
+			}
+		],
+		"name": "ListedTokensBurn",
 		"type": "event"
 	},
 	{
@@ -411,6 +430,25 @@
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "burner",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "TokensBurn",
+		"type": "event"
 	},
 	{
 		"anonymous": false,
@@ -683,6 +721,19 @@
 	},
 	{
 		"inputs": [],
+		"name": "calculateBurnAmount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "calculateCurrentRatio",
 		"outputs": [
 			{
@@ -796,6 +847,19 @@
 	{
 		"inputs": [],
 		"name": "getBurnedSTATE",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getStateBurnRatio",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -991,6 +1055,19 @@
 	{
 		"inputs": [],
 		"name": "totalBurnedSTATE",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalListedTokensDeposited",
 		"outputs": [
 			{
 				"internalType": "uint256",
