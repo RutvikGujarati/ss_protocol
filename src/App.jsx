@@ -5,6 +5,8 @@ import "./Styles/styles.css";
 import Header from "./components/Header";
 import InfoCards from "./components/InfoCards";
 import DataTable from "./components/DataTable";
+import SearchInfo from './components/SearchInfo';
+import DetailsInfo from './components/DetailsInfo';
 
 import {
   BrowserRouter as Router,
@@ -42,8 +44,16 @@ const App = () => {
           path="/info"
           element={
             <>
-              <InfoCards />
-              <DataTable />
+              <div className="container mt-3">
+                <div className="row  g-4 d-flex align-items-stretch">
+                  <div className="col-md-4">
+                    <SearchInfo />
+                  </div>
+                  <div className="col-md-8">
+                    <DetailsInfo />
+                  </div>
+                </div>
+              </div>
             </>
           }
         />

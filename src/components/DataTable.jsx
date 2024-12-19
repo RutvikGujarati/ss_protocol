@@ -1,7 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
-import BlueCircle from "../assets/BlueCircle.png";
-import PinkCircle from "../assets/PinkCircle.png";
+import XerionLogo from "../assets/XerionLogo.png";
+import FluxinLogo from "../assets/FluxinLogo.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useDAVToken } from "../Context/DavTokenContext";
@@ -39,12 +39,12 @@ const DataTable = () => {
                     <td>1</td>
                     <td>
                       {/* <div className="d-flex justify-content-between align-items-center"> */}
-                      <div className="tableName d-flex gap-2 align-items-center">
+                      <div className="tableName d-flex gap-4 align-items-center">
                         <div className="nameImage">
                           <img
-                            src={PinkCircle}
-                            width={36}
-                            height={36}
+                            src={FluxinLogo}
+                            width={40}
+                            height={40}
                             alt="Logo"
                           />
                         </div>
@@ -95,12 +95,10 @@ const DataTable = () => {
                   <tr>
                     <td>2</td>
                     <td>
-                      <div className="tableName d-flex gap-2 align-items-center">
+                      <div className="tableName d-flex gap-4 align-items-center">
                         <div className="nameImage">
                           <img
-                            src={PinkCircle}
-                            width={36}
-                            height={36}
+                            src={XerionLogo}
                             alt="Logo"
                           />
                         </div>
@@ -166,9 +164,7 @@ const DataTable = () => {
                     <td>
                       <div className="nameImage">
                         <img
-                          src={PinkCircle}
-                          width={36}
-                          height={36}
+                          src={FluxinLogo}
                           alt="Logo"
                         />
                       </div>

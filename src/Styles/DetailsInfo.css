@@ -1,0 +1,19 @@
+/* td{
+    width: max-content;
+} */
+
+.infoTable tr {
+    display: flex;
+    align-items: center;
+  }
+  
+  .infoTable td {
+    display: flex;
+    flex: 1; /* Ensures equal width for all columns */
+    text-align: center; /* Optional: Centers text */
+    align-items: center;
+  }
+
+  .info-icon{
+    margin-right: 50px;
+  }
