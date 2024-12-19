@@ -115,3 +115,15 @@ table.table-dark tbody tr:last-child td:last-child {
   color: white; /* Change text color on hover */
   transform: scale(1.05); /* Slightly scale up the element */
 }
+
+.nameImage img{
+  /* border-radius: 50%; */
+  width: 40px;
+  height: 40px;
+}
+
+.nameImage img:hover{
+  transform: scale(2);
+  transition: transform 0.5s ease;
+
+}
