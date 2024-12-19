@@ -1,7 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import "./Styles/styles.css"; 
-
+import React, { useState } from "react";
 import Header from "./components/Header";
 import InfoCards from "./components/InfoCards";
 import DataTable from "./components/DataTable";
@@ -16,6 +16,7 @@ import {
 } from "react-router-dom";
 
 const App = () => {
+  const [searchQuery, setSearchQuery] = useState("");
   return (
     <Router>
       <Header />
@@ -40,23 +41,25 @@ const App = () => {
             </>
           }
         />
-        <Route
-          path="/info"
-          element={
-            <>
-              <div className="container mt-3">
-                <div className="row  g-4 d-flex align-items-stretch">
-                  <div className="col-md-4">
-                    <SearchInfo />
-                  </div>
-                  <div className="col-md-8">
-                    <DetailsInfo />
-                  </div>
+      <Route
+        path="/info"
+        element={
+          <>
+            <div className="container mt-3">
+              <div className="row g-4">
+                <div className="col-md-4 d-flex align-items-stretch">
+                  {/* Pass setSearchQuery to update the search input */}
+                  <SearchInfo setSearchQuery={setSearchQuery} />
+                </div>
+                <div className="col-md-8">
+                  {/* Pass searchQuery to filter the details */}
+                  <DetailsInfo searchQuery={searchQuery} />
                 </div>
               </div>
-            </>
-          }
-        />
+            </div>
+          </>
+        }
+      />
       </Routes>
     </Router>
   );
