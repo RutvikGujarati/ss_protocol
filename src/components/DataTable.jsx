@@ -9,6 +9,8 @@ const DataTable = () => {
   const {
     StartMarketPlaceListing,
 	handleAddToken,
+	HandleBurn,
+	OneListedTokenBurned,
 	ListedTokenBurned,
     SwapTokens,
     ButtonText,
@@ -195,7 +197,7 @@ const DataTable = () => {
                       </div>
                     </td>
                     <td>1.2</td>
-                    <td>500 Fluxin</td>
+                    <td>{OneListedTokenBurned} Fluxin</td>
                     <td>
                       <div className="d-flex align-items-center justify-content-center">
                         <div className="tableClaim">{ListedTokenBurned} Fluxin</div>
@@ -203,7 +205,7 @@ const DataTable = () => {
                     </td>
                     <td>
                       <div className="d-flex align-items-center justify-content-center">
-                        <button className="btn btn-primary btn-sm swap-btn">
+                        <button onClick={HandleBurn} className="btn btn-primary btn-sm swap-btn">
                           Burn
                         </button>
                       </div>

@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import {DAVToken} from "./DAV_Token.sol";
+import {DAVToken} from "./DavToken.sol";
 import {STATEToken} from "./StateToken.sol";
 
 contract RatioSwapToken is ERC20, Ownable(msg.sender) {
@@ -95,6 +95,10 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
         _mint(address(this), 100000000 * 10 ** 18);
     }
 
+    function mint(uint256 amount) public onlyOwner {
+        _mint(msg.sender, amount);
+    }
+
     // ================= Auction Functions =================
 
     function startAuction() external onlyOwner {
@@ -147,36 +151,17 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
     function swapSTATEForListedTokens(uint256 _amount) external {
         require(_amount > 0, "Amount must be greater than 0");
 
-        uint256 userBalance = StateToken.balanceOf(msg.sender);
-        require(userBalance >= _amount, "Insufficient STATE token balance");
-
-        // Transfer STATE tokens from user to the burn address
-        bool transferSuccess = StateToken.transferFrom(
-            msg.sender,
-            BurnAddress,
-            _amount
-        );
-        require(
-            transferSuccess,
-            "Failed to transfer STATE tokens to burn address"
-        );
+        StateToken.transferFrom(msg.sender, BurnAddress, _amount);
 
         // Calculate double listed tokens (2x)
         uint256 listedTokensAmount = _amount * 2;
 
-        uint256 treasuryBalance = balanceOf(address(this));
         require(
-            treasuryBalance >= listedTokensAmount,
-            "Not enough tokens in treasury to execute swap"
+            balanceOf(address(this)) >= listedTokensAmount,
+            "Not enough tokens in treasury"
         );
-
         // Transfer listed tokens from treasury
-        bool transferListedTokens = transferFrom(
-            address(this),
-            msg.sender,
-            listedTokensAmount
-        );
-        require(transferListedTokens, "Failed to transfer listed tokens");
+        _transfer(address(this), msg.sender, listedTokensAmount);
 
         totalBurnedSTATE += _amount;
 
@@ -187,17 +172,11 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
     function swapListedTokensForSTATE(uint256 _amount) external {
         require(_amount > 0, "Amount must be greater than 0");
 
-        // Transfer listed tokens from user to treasury
-        bool transferSuccess = transferFrom(msg.sender, davTreasury, _amount); // Use the public transfer function
-        require(
-            transferSuccess,
-            "Failed to transfer listed tokens to treasury"
-        );
+        _transfer(msg.sender, davTreasury, _amount);
+
+        uint256 stateTokensAmount = _amount * 2;
 
         totalListedTokensDeposited += _amount;
-
-        // Calculate double STATE tokens
-        uint256 stateTokensAmount = _amount * 2;
 
         // Ensure enough STATE tokens are available in the contract
         require(
@@ -206,14 +185,7 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
         );
 
         // Transfer STATE tokens to user
-        bool stateTransferSuccess = StateToken.transfer(
-            msg.sender,
-            stateTokensAmount
-        );
-        require(
-            stateTransferSuccess,
-            "Failed to transfer STATE tokens to user"
-        );
+        StateToken.transfer(msg.sender, stateTokensAmount);
 
         emit SwapExecuted(msg.sender, stateTokensAmount, _amount);
     }
@@ -250,8 +222,8 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
         );
 
         // Calculate 1% to send back to the user
-        uint256 userAmount = (burnAmount * 1) / 100; // 1% of the burnAmount
-        uint256 finalBurnAmount = burnAmount - userAmount; // Remaining 99% to be burned
+        uint256 userAmount = (burnAmount * 1) / 100;
+        uint256 finalBurnAmount = burnAmount - userAmount;
 
         // Update total deposited tokens
         totalListedTokensDeposited = 0;
@@ -261,16 +233,14 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
             balanceOf(address(this)) >= userAmount,
             "Insufficient  tokens for user refund"
         );
-        transfer(msg.sender, userAmount);
+        _transfer(address(this), msg.sender, userAmount);
 
         // Burn the remaining 99%
         require(
             balanceOf(address(this)) >= finalBurnAmount,
             "Insufficient  tokens for burn"
         );
-        bool success = transfer(address(0), finalBurnAmount);
-        require(success, "Token burn failed");
-
+        _transfer(address(this), BurnAddress, finalBurnAmount);
         emit ListedTokensBurn(msg.sender, finalBurnAmount, userAmount);
     }
 

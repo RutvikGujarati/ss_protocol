@@ -46,34 +46,6 @@
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "burnTokens",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_davTreasury",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_lpTreasury",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_devTreasury",
-				"type": "address"
-			},
-			{
 				"internalType": "address",
 				"name": "_davTokenAddress",
 				"type": "address"
@@ -82,11 +54,6 @@
 				"internalType": "address",
 				"name": "_StateTokenAddress",
 				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_ratioTarget",
-				"type": "uint256"
 			}
 		],
 		"stateMutability": "nonpayable",
@@ -258,6 +225,19 @@
 		"type": "event"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "burnTokens",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -315,6 +295,19 @@
 		"type": "event"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "mint",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "notifyMarketplaceListing",
 		"outputs": [],
@@ -339,19 +332,6 @@
 		],
 		"name": "OwnershipTransferred",
 		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "participateInAuction",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
 	},
 	{
 		"anonymous": false,
@@ -607,6 +587,19 @@
 			}
 		],
 		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "transferTokens",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -872,19 +865,6 @@
 	},
 	{
 		"inputs": [],
-		"name": "getSwapRatioTarget",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
 		"name": "getTotalBurnedTokens",
 		"outputs": [
 			{
@@ -990,19 +970,6 @@
 	{
 		"inputs": [],
 		"name": "PERCENT_LP_TREASURY",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "ratioTarget",
 		"outputs": [
 			{
 				"internalType": "uint256",

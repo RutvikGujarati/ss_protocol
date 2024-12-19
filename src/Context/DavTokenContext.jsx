@@ -11,7 +11,7 @@ const DAVTokenContext = createContext();
 const DAV_TOKEN_ADDRESS = "0x5A6796D654FAbDB9fCb524Fe1cb8A589dF6F99bb";
 const STATE_TOKEN_ADDRESS = "0x9dA567451c3e43EDc5acF7263Ba83C25a852A437";
 // const Ratio_TOKEN_ADDRESS = "0xee44b627182fB92c3453e96bA29f7db5f53a0301";
-const Ratio_TOKEN_ADDRESS = "0x071D680C43990a89c6a7bF61E9Bf0D2A593173EF";
+const Ratio_TOKEN_ADDRESS = "0xB90DaE45D0129Bb12928870A25aE6Df6a1b3669F";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -38,6 +38,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [StateBurned, setStateBurnAMount] = useState("0.0");
 
   const [ListedTokenBurned, setListedTokenBurnAMount] = useState("0.0");
+  const [OneListedTokenBurned, setOneListedTokenBurnAMount] = useState("0.0");
 
   const [StateBurnedRatio, setStateBurnRatio] = useState("0.0");
 
@@ -195,10 +196,11 @@ export const DAVTokenProvider = ({ children }) => {
       DavSupply();
       ViewDistributedTokens();
       getBurnedSTATE();
-	  calculateBurnAmount()
+      calculateBurnAmount();
+      calculateOnePercentBurnAmount();
     }
     GetCurrentStateReward();
-	
+
     StateTokenBurnRatio();
   }, [account, davContract]);
 
@@ -233,19 +235,18 @@ export const DAVTokenProvider = ({ children }) => {
       const amountInWei = ethers.parseUnits(amount.toString(), 18);
 
       // Step 1: Check Allowance
-      const allowance = await stateContract.allowance(
-        account,
-        RatioContract.target
-      );
+      const allowance = await stateContract.allowance(account, RatioContract);
 
       if (allowance < amountInWei) {
         // Step 2: Approve Tokens
         setButtonText("Approving...");
         const approveTx = await stateContract.approve(
-          RatioContract.target,
+          RatioContract,
           amountInWei
         );
         await approveTx.wait();
+        const approveTx2 = await stateContract.approve(account, amountInWei);
+        await approveTx2.wait();
         console.log("Approval successful!");
       } else {
         console.log("Sufficient allowance already granted.");
@@ -253,7 +254,7 @@ export const DAVTokenProvider = ({ children }) => {
 
       // Step 3: Call Swap Function
       setButtonText("swapping...");
-      await handleContractCall(RatioContract, "swapSTATEForListedTokens", [
+      await handleContractCall(RatioContract, "swapListedTokensForSTATE", [
         amountInWei,
       ]);
 
@@ -285,13 +286,59 @@ export const DAVTokenProvider = ({ children }) => {
     setStateBurnAMount(amount);
   };
   const calculateBurnAmount = async () => {
-    const amount = await handleContractCall(
-      RatioContract,
-      "calculateBurnAmount",
-      [],
-      (s) => ethers.formatUnits(s, 18)
-    );
-    setListedTokenBurnAMount(amount);
+    try {
+      const amount = await handleContractCall(
+        RatioContract,
+        "totalListedTokensDeposited",
+        [],
+        (s) => parseFloat(ethers.formatUnits(s, 18)) // Ensure amount is a number
+      );
+      console.log("totalListedTokensDeposited:", amount);
+
+      const burnRatio = await StateTokenBurnRatio(); // Await the burn ratio calculation
+      console.log(`Burned Ratio: ${burnRatio}`);
+
+      if (isNaN(burnRatio) || burnRatio <= 0) {
+        throw new Error("Burn ratio is invalid or not set.");
+      }
+
+      const totalAmount = amount * burnRatio; // Calculate burned amount
+      setListedTokenBurnAMount(totalAmount.toFixed(7)); // Update state with formatted value
+      console.log("Calculated Burn Amount:", totalAmount);
+      return totalAmount.toFixed(18); // Return the calculated total burn amount
+    } catch (error) {
+      console.error("Error calculating burn amount:", error);
+    }
+  };
+
+  const calculateOnePercentBurnAmount = async () => {
+    try {
+      const totalBurnAmount = await calculateBurnAmount(); // Ensure calculateBurnAmount returns the total value
+      if (!totalBurnAmount || isNaN(totalBurnAmount)) {
+        throw new Error("Total burn amount is invalid or not calculated.");
+      }
+
+      const onePercentBurnAmount = totalBurnAmount * 0.01; // Calculate 1% of the total burn amount
+      console.log("1% of Burn Amount:", onePercentBurnAmount);
+      setOneListedTokenBurnAMount(onePercentBurnAmount.toFixed(6));
+      return onePercentBurnAmount.toFixed(18);
+    } catch (error) {
+      console.error("Error calculating 1% burn amount:", error);
+      return "0.0";
+    }
+  };
+
+  const HandleBurn = async () => {
+    try {
+      await handleContractCall(
+        RatioContract,
+        "burnAndDistributeListedTokens",
+        [],
+      );
+    } catch (error) {
+      console.error("Error :", error);
+      return "0.0";
+    }
   };
 
   const StateTokenBurnRatio = async () => {
@@ -300,20 +347,23 @@ export const DAVTokenProvider = ({ children }) => {
         RatioContract,
         "getBurnedSTATE",
         [],
-        (s) => parseFloat(ethers.formatUnits(s, 18)) 
+        (s) => parseFloat(ethers.formatUnits(s, 18))
       );
+      console.log("Burn Amount:", burnAmount);
 
       const totalSupply = await handleContractCall(
         RatioContract,
         "totalSupply",
         [],
-        (s) => parseFloat(ethers.formatUnits(s, 18)) 
+        (s) => parseFloat(ethers.formatUnits(s, 18))
       );
+      console.log("Total Supply:", totalSupply);
 
       if (totalSupply > 0) {
         const ratio = burnAmount / totalSupply;
-        const percentageRatio = ratio * 100; 
-        setStateBurnRatio(percentageRatio.toFixed(7)); 
+        setStateBurnRatio(ratio.toFixed(10)); // Store ratio as a string for precision
+        console.log("State Burn Ratio:", ratio);
+        return ratio;
       } else {
         console.error("Total supply is zero. Cannot calculate ratio.");
       }
@@ -386,11 +436,11 @@ export const DAVTokenProvider = ({ children }) => {
         ViewDistributedTokens,
         Distributed,
         claiming,
-
+		HandleBurn,
         StateBurned,
         StateBurnedRatio,
-		ListedTokenBurned,
-
+        ListedTokenBurned,
+        OneListedTokenBurned,
         SwapTokens,
         ButtonText,
 
