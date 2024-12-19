@@ -5,7 +5,7 @@ import PinkCircle from "../assets/PinkCircle.png";
 
 const VerticalTableComponent = () => {
   return (
-    <div className="container mt-4">
+    <div className="container mt-3">
       <table className="table table-dark infoTable">
         <thead>
             <th className="fw-bold d-flex align-items-center uppercase">Information</th>
@@ -47,14 +47,9 @@ const VerticalTableComponent = () => {
             <div className="tableClaim w-100">1 : 1 Trillion</div>
             </td>
             <td className="d-flex justify-content-end">
-              <div className="nameImage info-icon">
-                                        <img
-                                          src={PinkCircle}
-                                          width={36}
-                                          height={36}
-                                          alt="Logo"
-                                        />
-                                      </div>
+            <button className="btn btn-primary btn-sm swap-btn info-icon">
+              Set
+            </button>
             </td>
           </tr>
           <tr>
@@ -63,14 +58,9 @@ const VerticalTableComponent = () => {
             <div className="tableClaim w-100">1 : 1 Trillion</div>
             </td>
             <td className="d-flex justify-content-end">
-              <div className="nameImage info-icon">
-                          <img
-                            src={PinkCircle}
-                            width={36}
-                            height={36}
-                            alt="Logo"
-                          />
-                        </div>
+            <button className="btn btn-primary btn-sm swap-btn info-icon">
+              Set
+            </button>
             </td>
           </tr>
           <tr>
@@ -79,28 +69,18 @@ const VerticalTableComponent = () => {
             <div className="tableClaim w-100">1 : 1 Trillion</div>
             </td>
             <td className="d-flex justify-content-end">
-              <div className="nameImage info-icon">
-                          <img
-                            src={PinkCircle}
-                            width={36}
-                            height={36}
-                            alt="Logo"
-                          />
-                        </div>
+            <button className="btn btn-primary btn-sm swap-btn info-icon">
+              Set
+            </button>
             </td>
           </tr>
           <tr>
             <td className="d-flex align-items-center">Renounce Smart Contract</td>
             <td></td>
             <td className="d-flex justify-content-end">
-              <div className="nameImage info-icon">
-                          <img
-                            src={PinkCircle}
-                            width={36}
-                            height={36}
-                            alt="Logo"
-                          />
-                        </div>
+            <button className="btn btn-primary btn-sm swap-btn info-icon">
+              Set
+            </button>
             </td>
           </tr>
 
