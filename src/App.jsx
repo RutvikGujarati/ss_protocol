@@ -45,8 +45,8 @@ const App = () => {
           element={
             <>
               <div className="container mt-3">
-                <div className="row  g-4 d-flex align-items-stretch">
-                  <div className="col-md-4">
+                <div className="row  g-4">
+                  <div className="col-md-4 d-flex align-items-stretch">
                     <SearchInfo />
                   </div>
                   <div className="col-md-8">
