@@ -3,7 +3,6 @@ import "../Styles/DetailsInfo.css";
 import { useDAVToken } from "../Context/DavTokenContext";
 import PropTypes from "prop-types";
 import { useState } from "react";
-// import React, { useState } from "react";
 
 const DetailsInfo = ({ searchQuery }) => {
   const {
@@ -22,13 +21,15 @@ const DetailsInfo = ({ searchQuery }) => {
   const [Denominator, setDenominator] = useState("");
   const auctionStatus = AuctionRunning ? "True" : "False";
   const FluxinAddress = "0xAE79930e57BB2EA8dde7381AC6d338A706386bAe";
+
   const shortenAddress = (address) => {
     if (!address) return "";
     return `${address.slice(0, 6)}...${address.slice(-6)}`;
   };
   const shortened = shortenAddress(FluxinAddress);
 
-  const details = [
+  // List of tokens with their respective actions
+  const tokens = [
     {
       tokenName: "Fluxin",
       key: shortened,
@@ -42,7 +43,15 @@ const DetailsInfo = ({ searchQuery }) => {
       claimFiveDAVToken: DAVTokensFiveWithdraw,
       startAuction: `Auction Status - ${auctionStatus}`,
       renounceSmartContract: "Yes",
+      actions: {
+        claimLPToken: ClaimLPTokens,
+        claimDAVToken: withdraw_95,
+        claimFiveDAVToken: withdraw_5,
+        startAuction: StartMarketPlaceListing,
+        setRatioTarget: () => setRatioTarget(numerator, Denominator), // Using dynamic parameters
+      },
     },
+    //left of implementation
     {
       tokenName: "Xerion",
       key: "XRN",
@@ -54,6 +63,13 @@ const DetailsInfo = ({ searchQuery }) => {
       claimLPToken: "1M",
       claimDAVToken: "1M",
       renounceSmartContract: "No",
+      actions: {
+        claimLPToken: ClaimLPTokens,
+        claimDAVToken: withdraw_95,
+        claimFiveDAVToken: withdraw_5,
+        startAuction: StartMarketPlaceListing,
+        setRatioTarget: () => setRatioTarget(numerator, Denominator), // Using dynamic parameters
+      },
     },
     {
       tokenName: "Polaris",
@@ -66,6 +82,13 @@ const DetailsInfo = ({ searchQuery }) => {
       claimLPToken: "1.2M",
       claimDAVToken: "1.2M",
       renounceSmartContract: "Yes",
+	  actions: {
+        claimLPToken: ClaimLPTokens,
+        claimDAVToken: withdraw_95,
+        claimFiveDAVToken: withdraw_5,
+        startAuction: StartMarketPlaceListing,
+        setRatioTarget: () => setRatioTarget(numerator, Denominator), // Using dynamic parameters
+      },
     },
     {
       tokenName: "Nova",
@@ -78,6 +101,13 @@ const DetailsInfo = ({ searchQuery }) => {
       claimLPToken: "200K",
       claimDAVToken: "100K",
       renounceSmartContract: "No",
+	  actions: {
+        claimLPToken: ClaimLPTokens,
+        claimDAVToken: withdraw_95,
+        claimFiveDAVToken: withdraw_5,
+        startAuction: StartMarketPlaceListing,
+        setRatioTarget: () => setRatioTarget(numerator, Denominator), // Using dynamic parameters
+      },
     },
     {
       tokenName: "Eterna",
@@ -90,6 +120,13 @@ const DetailsInfo = ({ searchQuery }) => {
       claimLPToken: "4M",
       claimDAVToken: "2M",
       renounceSmartContract: "Yes",
+	  actions: {
+        claimLPToken: ClaimLPTokens,
+        claimDAVToken: withdraw_95,
+        claimFiveDAVToken: withdraw_5,
+        startAuction: StartMarketPlaceListing,
+        setRatioTarget: () => setRatioTarget(numerator, Denominator), // Using dynamic parameters
+      },
     },
     {
       tokenName: "Celest",
@@ -163,13 +200,12 @@ const DetailsInfo = ({ searchQuery }) => {
   };
 
   // Filter details based on the search query
-  const filteredDetails = details.filter((item) =>
+  const filteredTokens = tokens.filter((item) =>
     item.tokenName.toLowerCase().includes((searchQuery ?? "").toLowerCase())
   );
 
   // Show the first value by default or the searched value
-  const dataToShow =
-    filteredDetails.length > 0 ? filteredDetails[0] : details[0];
+  const dataToShow = filteredTokens.length > 0 ? filteredTokens[0] : tokens[0];
 
   return (
     <div className="container mt-3">
@@ -189,7 +225,7 @@ const DetailsInfo = ({ searchQuery }) => {
           </tr>
           <tr>
             <td className="d-flex align-items-center">
-              contract/token address
+              Contract/Token Address
             </td>
             <td className="d-flex align-items-center justify-content-center">
               <a
@@ -198,7 +234,7 @@ const DetailsInfo = ({ searchQuery }) => {
                 rel="noopener noreferrer"
                 style={{ fontSize: "12px" }}
               >
-                {dataToShow.key || ""}{" "}
+                {dataToShow.key || ""}
               </a>
             </td>
             <td></td>
@@ -238,7 +274,7 @@ const DetailsInfo = ({ searchQuery }) => {
                 <input
                   type="text"
                   className="form-control input-sm"
-                  placeholder="numerator"
+                  placeholder="Numerator"
                   value={numerator}
                   onChange={(e) => handleInputChange(e, "numerator")}
                 />
@@ -249,7 +285,7 @@ const DetailsInfo = ({ searchQuery }) => {
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="denominator"
+                  placeholder="Denominator"
                   value={Denominator}
                   onChange={(e) => handleInputChange(e, "denominator")}
                 />
@@ -257,14 +293,14 @@ const DetailsInfo = ({ searchQuery }) => {
             </td>
             <td className="d-flex justify-content-end">
               <button
-                onClick={setRatioTarget(numerator, Denominator)}
+                onClick={dataToShow.actions.setRatioTarget} // Trigger setRatioTarget dynamically
                 className="btn btn-primary btn-sm swap-btn info-icon"
               >
                 Set
               </button>
             </td>
           </tr>
-
+          {/* Dynamically render token actions */}
           <tr>
             <td className="d-flex align-items-center">
               Claim 25% LP Token (Listed)
@@ -276,7 +312,7 @@ const DetailsInfo = ({ searchQuery }) => {
             </td>
             <td className="d-flex justify-content-end">
               <button
-                onClick={ClaimLPTokens}
+                onClick={dataToShow.actions.claimLPToken}
                 className="btn btn-primary btn-sm swap-btn info-icon"
               >
                 Claim
@@ -284,7 +320,7 @@ const DetailsInfo = ({ searchQuery }) => {
             </td>
           </tr>
           <tr>
-            <td className="d-flex align-items-center">Claim 95% DAV Token</td>
+            <td className="d-flex align-items-center">Claim 95% Liquidity share(PLS)</td>
             <td>
               <div className="tableClaim w-100">
                 {dataToShow.claimDAVToken || ""}
@@ -292,7 +328,7 @@ const DetailsInfo = ({ searchQuery }) => {
             </td>
             <td className="d-flex justify-content-end">
               <button
-                onClick={withdraw_95}
+                onClick={dataToShow.actions.claimDAVToken}
                 className="btn btn-primary btn-sm swap-btn info-icon"
               >
                 Claim
@@ -300,9 +336,12 @@ const DetailsInfo = ({ searchQuery }) => {
             </td>
           </tr>
           <tr>
-            <td className="d-flex align-items-center">Claim 5% DAV Token</td>
+            <td className="d-flex align-items-center">Claim 5% Development share(PLS)</td>
             <td>
-              <div onClick={withdraw_5} className="tableClaim w-100">
+              <div
+                onClick={dataToShow.actions.claimFiveDAVToken}
+                className="tableClaim w-100"
+              >
                 {dataToShow.claimFiveDAVToken || ""}
               </div>
             </td>
@@ -321,7 +360,7 @@ const DetailsInfo = ({ searchQuery }) => {
             </td>
             <td className="d-flex justify-content-end">
               <button
-                onClick={StartMarketPlaceListing}
+                onClick={dataToShow.actions.startAuction}
                 className="btn btn-primary btn-sm swap-btn info-icon"
               >
                 SET
@@ -346,6 +385,7 @@ const DetailsInfo = ({ searchQuery }) => {
     </div>
   );
 };
+
 DetailsInfo.propTypes = {
   searchQuery: PropTypes.string.isRequired,
 };

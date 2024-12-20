@@ -341,8 +341,8 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const withdraw_95 = () => handleWithdraw("withdrawLiquidityShare");
   const withdraw_5 = () => handleWithdraw("withdrawDevelopmentShare");
+  const withdraw_95 = () => handleWithdraw("withdrawLiquidityShare");
 
   const DAVTokenAmount = () => calculateShare(95, setDAvTokens);
   const DAVTokenfive_Amount = () => calculateShare(5, setFiveAvTokens);

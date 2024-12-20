@@ -7,7 +7,7 @@ import { useLocation } from "react-router-dom";
 import { useDAVToken } from "../Context/DavTokenContext";
 const DataTable = () => {
   const {
-    StartMarketPlaceListing,
+    // StartMarketPlaceListing,
     BurnTokenRatio,
 	RatioTargetAmount,
     handleAddToken,

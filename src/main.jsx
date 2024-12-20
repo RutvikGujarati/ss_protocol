@@ -25,7 +25,7 @@ createRoot(document.getElementById("root")).render(
         >
           {/* <ConnectWalletProvider> */}
           <DAVTokenProvider>
-          <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<div>Loading...</div>}>
               <App />
             </Suspense>
           </DAVTokenProvider>

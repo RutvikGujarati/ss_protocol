@@ -186,7 +186,7 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token supply</p>
-                      <h5 className="mb-0">990 trillion</h5>
+                      <h5 className="mb-0">999 trillion</h5>
                       <p className="detailAmount">999 trillion</p>
                     </div>
                   </div>
