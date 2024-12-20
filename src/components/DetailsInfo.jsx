@@ -268,38 +268,38 @@ const DetailsInfo = ({ searchQuery }) => {
             <td></td>
           </tr>
           <tr>
-            <td className="d-flex align-items-center">Ratio Target - Amend</td>
-            <td>
-              <div className="tableClaim w-100">
-                <input
-                  type="text"
-                  className="form-control input-sm"
-                  placeholder="Numerator"
-                  value={numerator}
-                  onChange={(e) => handleInputChange(e, "numerator")}
-                />
-              </div>
-            </td>
-            <td>
-              <div className="tableClaim w-100">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Denominator"
-                  value={Denominator}
-                  onChange={(e) => handleInputChange(e, "denominator")}
-                />
-              </div>
-            </td>
-            <td className="d-flex justify-content-end">
-              <button
-                onClick={dataToShow.actions.setRatioTarget} // Trigger setRatioTarget dynamically
-                className="btn btn-primary btn-sm swap-btn info-icon"
-              >
-                Set
-              </button>
-            </td>
-          </tr>
+              <td className="d-flex align-items-center">Ratio Target - Amend</td>
+              <td>
+                <div className="w-100">
+                  <input
+                    type="text"
+                    className="form-control text-center mh-30"
+                    placeholder="Numerator"
+                    value={numerator}
+                    onChange={(e) => handleInputChange(e, "numerator")}
+                  />
+                </div>
+              </td>
+              <td>
+                <div className="w-100">
+                  <input
+                    type="text"
+                    className="form-control text-center mh-30"
+                    placeholder="Denominator"
+                    value={Denominator}
+                    onChange={(e) => handleInputChange(e, "denominator")}
+                  />
+                </div>
+              </td>
+              <td className="d-flex justify-content-end">
+                <button
+                  onClick={setRatioTarget(numerator, Denominator)}
+                  className="btn btn-primary btn-sm swap-btn info-icon"
+                >
+                  Set
+                </button>
+              </td>
+            </tr>
           {/* Dynamically render token actions */}
           <tr>
             <td className="d-flex align-items-center">

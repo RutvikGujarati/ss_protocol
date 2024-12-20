@@ -10,7 +10,7 @@ const InfoCards = () => {
   const {
     mintDAV,
     // handleAddTokenRatio,
-    // handleAddTokenState,
+    handleAddTokenState,
     handleAddTokenDAV,
     CalculationOfCost,
     TotalCost,
@@ -172,7 +172,7 @@ const InfoCards = () => {
                         height={20}
                         alt="Logo"
                         style={{ cursor: "pointer" }}
-                        onClick={handleAddTokenDAV}
+                        onClick={handleAddTokenState}
                       />
                     </div>
                   </div>

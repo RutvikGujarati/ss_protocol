@@ -5,10 +5,15 @@ import WalletConnector from "../WalletComps/WalletConnect";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { NavLink } from "react-router-dom";
 import { Tooltip } from "bootstrap";
+import { useDAVToken } from "../Context/DavTokenContext";
 
 const Header = () => {
+  const { AuctionRunning } = useDAVToken();
+
   useEffect(() => {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipTriggerList = document.querySelectorAll(
+      '[data-bs-toggle="tooltip"]'
+    );
     tooltipTriggerList.forEach((tooltipTriggerEl) => {
       new bootstrap.Tooltip(tooltipTriggerEl, {
         trigger: "hover",
@@ -24,7 +29,9 @@ const Header = () => {
           {/* Navbar Brand */}
           <NavLink className="navbar-brand text-light pb-0" to="/">
             <h5 className="uppercase fs-2 fw-bolder">THE STATE</h5>
-            <p className="small-text fs-6 fw-normal mb-0">by System State Protocol</p>
+            <p className="small-text fs-6 fw-normal mb-0">
+              by System State Protocol
+            </p>
           </NavLink>
 
           {/* Right-Side Container */}
@@ -33,9 +40,9 @@ const Header = () => {
             <ul className="navbar-nav d-flex flex-row align-items-center me-4">
               <li
                 className="nav-item mx-2"
-                data-bs-toggle="tooltip"
+                data-bs-toggle={AuctionRunning ? "tooltip" : ""}
                 data-bs-placement="left"
-                title="Auction is running"
+                title={AuctionRunning ? "Auction is running" : ""}
               >
                 <NavLink
                   className={({ isActive }) =>
@@ -46,7 +53,12 @@ const Header = () => {
                   to="/auction"
                 >
                   Auction
-                  <span class="active-dot"></span>
+                  {AuctionRunning && (
+                    <span
+                      className="active-dot"
+                      style={{ backgroundColor: "green" }}
+                    ></span>
+                  )}
                 </NavLink>
               </li>
               <li className="nav-item mx-2">
