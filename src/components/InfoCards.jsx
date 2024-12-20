@@ -10,7 +10,7 @@ const InfoCards = () => {
   const {
     mintDAV,
     // handleAddTokenRatio,
-    handleAddTokenState,
+    // handleAddTokenState,
     handleAddTokenDAV,
     CalculationOfCost,
     TotalCost,
