@@ -11,7 +11,7 @@ const DAVTokenContext = createContext();
 const DAV_TOKEN_ADDRESS = "0x5A6796D654FAbDB9fCb524Fe1cb8A589dF6F99bb";
 const STATE_TOKEN_ADDRESS = "0x9dA567451c3e43EDc5acF7263Ba83C25a852A437";
 // const Ratio_TOKEN_ADDRESS = "0xee44b627182fB92c3453e96bA29f7db5f53a0301";
-const Ratio_TOKEN_ADDRESS = "0xB90DaE45D0129Bb12928870A25aE6Df6a1b3669F";
+const Ratio_TOKEN_ADDRESS = "0xAE79930e57BB2EA8dde7381AC6d338A706386bAe";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -21,6 +21,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
+  const [LpTokens, setLpTokens] = useState(false);
 
   const [davContract, setDavContract] = useState(null);
   const [stateContract, setStateContract] = useState(null);
@@ -29,18 +30,22 @@ export const DAVTokenProvider = ({ children }) => {
   const [TotalCost, setTotalCost] = useState(null);
   const [ButtonText, setButtonText] = useState("");
   const [CurrentSReward, setCurrentSReward] = useState(null);
+  const [AuctionRunning, setIsAuctionRunning] = useState(false);
   const [davHolds, setDavHoldings] = useState("0.0");
   const [StateHolds, setStateHoldings] = useState("0.0");
   const [davPercentage, setDavPercentage] = useState("0.0");
   const [Supply, setSupply] = useState("0.0");
+  const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
   const [StateReward, setStateReward] = useState("0");
   const [Distributed, setViewDistributed] = useState("0.0");
   const [StateBurned, setStateBurnAMount] = useState("0.0");
 
   const [ListedTokenBurned, setListedTokenBurnAMount] = useState("0.0");
   const [OneListedTokenBurned, setOneListedTokenBurnAMount] = useState("0.0");
+  const [BurnTokenRatio, setBurnAMountRatio] = useState("0.0");
 
   const [StateBurnedRatio, setStateBurnRatio] = useState("0.0");
+  const [RatioTargetAmount, setRatioTargetAmount] = useState("0.0");
 
   useEffect(() => {
     const initialize = async () => {
@@ -77,12 +82,11 @@ export const DAVTokenProvider = ({ children }) => {
       }
     };
     initialize();
-    // Listen for account changes
     if (window.ethereum) {
       window.ethereum.on("accountsChanged", (accounts) => {
         if (accounts.length > 0) {
           setAccount(accounts[0]);
-          initialize(); // Re-initialize contracts with the new account
+          initialize();
         } else {
           setAccount(null);
           setSigner(null);
@@ -189,31 +193,64 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    if (davContract) {
-      DavHoldings();
-      DavHoldingsPercentage();
-      StateHoldings();
-      DavSupply();
-      ViewDistributedTokens();
-      getBurnedSTATE();
-      calculateBurnAmount();
-      calculateOnePercentBurnAmount();
-    }
-    GetCurrentStateReward();
+    let interval;
 
-    StateTokenBurnRatio();
-  }, [account, davContract]);
+    const fetchLiveData = async () => {
+      if (davContract && stateContract && RatioContract) {
+        try {
+          await DavHoldings();
+          await DavHoldingsPercentage();
+          await StateHoldings();
+          await DavSupply();
+          await ViewDistributedTokens();
+          await getBurnedSTATE();
+          await calculateBurnAmount();
+          await ratioOfBurn();
+          await calculateOnePercentBurnAmount();
+          await GetCurrentStateReward();
+          await StateTokenBurnRatio();
+          await getRatioTarget();
+          await isAuctionRunning();
+          await LpTokenAmount();
+          await DAVTokenAmount();
+        } catch (error) {
+          console.error("Error fetching live data:", error);
+        }
+      }
+    };
+
+    fetchLiveData(); // Fetch initially
+
+    // Set up polling every 10 seconds
+    interval = setInterval(() => {
+      fetchLiveData();
+    }, 10000);
+
+    return () => clearInterval(interval); // Clean up interval on component unmount
+  }, [davContract, stateContract, RatioContract, account]);
 
   // Ratio Token Contracts
 
   const StartMarketPlaceListing = async () => {
-    await handleContractCall(
-      RatioContract,
-      "notifyMarketplaceListing",
-      [],
-      (s) => ethers.formatUnits(s, 18)
+    await handleContractCall(RatioContract, "startAuction", [], (s) =>
+      ethers.formatUnits(s, 18)
     );
   };
+  const isAuctionRunning = async () => {
+    try {
+      const isRunning = await handleContractCall(
+        RatioContract,
+        "isAuctionRunning",
+        [],
+        (response) => response // Assuming the contract returns a boolean value
+      );
+      console.log(isRunning);
+      setIsAuctionRunning(isRunning); // Update the state with the boolean value
+    } catch (error) {
+      console.error("Error fetching auction status:", error);
+    }
+  };
+
   const ClaimTokens = async () => {
     try {
       setClaiming(true);
@@ -226,6 +263,53 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
+  const ClaimLPTokens = async () => {
+    try {
+      setClaiming(true);
+      await handleContractCall(RatioContract, "WithdrawLPTokens", [], (s) =>
+        ethers.formatUnits(s, 18)
+      );
+      setClaiming(false);
+    } catch (e) {
+      console.error("Error claiming tokens:", e);
+      setClaiming(false);
+    }
+  };
+  const LpTokenAmount = async () => {
+    try {
+      const balance = await handleContractCall(
+        RatioContract,
+        "balanceOf",
+        ["0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483"],
+        (s) => ethers.formatUnits(s, 18)
+      );
+
+      // Calculate 60% of the balance
+      const sixtyPercent = (parseFloat(balance) * 25) / 100;
+      setLpTokens(sixtyPercent);
+    } catch (e) {
+      console.error("Error fetching LP tokens:", e);
+      setLpTokens(null); // Handle error state
+    }
+  };
+  const DAVTokenAmount = async () => {
+    try {
+      const balance = await handleContractCall(
+        RatioContract,
+        "balanceOf",
+        ["0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483"],
+        (s) => ethers.formatUnits(s, 18)
+      );
+
+      // Calculate 60% of the balance
+      const sixtyPercent = (parseFloat(balance) * 60) / 100;
+      setDAvTokens(sixtyPercent);
+    } catch (e) {
+      console.error("Error fetching LP tokens:", e);
+      setLpTokens(null); // Handle error state
+    }
+  };
+
   const SwapTokens = async (amount) => {
     try {
       // Step 0: Initial button state
@@ -254,7 +338,7 @@ export const DAVTokenProvider = ({ children }) => {
 
       // Step 3: Call Swap Function
       setButtonText("swapping...");
-      await handleContractCall(RatioContract, "swapListedTokensForSTATE", [
+      await handleContractCall(RatioContract, "swapSTATEForListedTokens", [
         amountInWei,
       ]);
 
@@ -291,21 +375,21 @@ export const DAVTokenProvider = ({ children }) => {
         RatioContract,
         "totalListedTokensDeposited",
         [],
-        (s) => parseFloat(ethers.formatUnits(s, 18)) // Ensure amount is a number
+        (s) => parseFloat(ethers.formatUnits(s, 18))
       );
       console.log("totalListedTokensDeposited:", amount);
 
-      const burnRatio = await StateTokenBurnRatio(); // Await the burn ratio calculation
+      const burnRatio = await StateTokenBurnRatio();
       console.log(`Burned Ratio: ${burnRatio}`);
 
       if (isNaN(burnRatio) || burnRatio <= 0) {
         throw new Error("Burn ratio is invalid or not set.");
       }
 
-      const totalAmount = amount * burnRatio; // Calculate burned amount
-      setListedTokenBurnAMount(totalAmount.toFixed(7)); // Update state with formatted value
+      const totalAmount = amount * burnRatio;
+      setListedTokenBurnAMount(totalAmount.toFixed(7));
       console.log("Calculated Burn Amount:", totalAmount);
-      return totalAmount.toFixed(18); // Return the calculated total burn amount
+      return totalAmount.toFixed(18);
     } catch (error) {
       console.error("Error calculating burn amount:", error);
     }
@@ -328,16 +412,104 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
+  const ratioOfBurn = async () => {
+    try {
+      const totalBurnAmount = await calculateBurnAmount(); // Await the value
+      const OnePercent = await calculateOnePercentBurnAmount(); // Await the async function
+
+      // Debugging logs for clarity
+      console.log("Total Burn Amount:", totalBurnAmount);
+      console.log("1% Burn Amount:", OnePercent);
+
+      // Validate totalBurnAmount and OnePercent
+      if (!totalBurnAmount || isNaN(totalBurnAmount) || totalBurnAmount <= 0) {
+        console.warn(
+          "Invalid or zero total burn amount. Returning ratio as 1:0."
+        );
+        setBurnAMountRatio("1:0");
+        return "1:0";
+      }
+
+      if (!OnePercent || isNaN(Number(OnePercent))) {
+        console.warn("Invalid 1% burn amount. Returning ratio as 1:0.");
+        setBurnAMountRatio("1:0");
+        return "1:0";
+      }
+
+      const onePercentValue = Number(OnePercent);
+
+      const ratio = onePercentValue / totalBurnAmount;
+
+      if (isNaN(ratio)) {
+        console.warn("Calculated ratio is NaN. Returning 1:0.");
+        setBurnAMountRatio("1:0");
+        return "1:0";
+      }
+
+      const ratioInFormat = `1:${(1 / ratio).toFixed(0)}`;
+      console.log("Formatted Ratio:", ratioInFormat);
+
+      setBurnAMountRatio(ratioInFormat);
+      return ratioInFormat;
+    } catch (error) {
+      console.error("Error in ratioOfBurn calculation:", error);
+      setBurnAMountRatio("1:0");
+      return "1:0";
+    }
+  };
+
   const HandleBurn = async () => {
+    setButtonText("Burning...");
     try {
       await handleContractCall(
         RatioContract,
         "burnAndDistributeListedTokens",
-        [],
+        []
       );
+      setButtonText("Burn Complete");
     } catch (error) {
       console.error("Error :", error);
-      return "0.0";
+      setButtonText("Burn Failed");
+    } finally {
+      setTimeout(() => {
+        setButtonText("Burn");
+      }, 3000);
+    }
+  };
+
+  const setRatioTarget = async (numerator, denominator) => {
+    try {
+      // Call the contract to set both numerator and denominator
+      await handleContractCall(RatioContract, "setRatioTarget", [
+        numerator,
+        denominator,
+      ]);
+      console.log(`Ratio target set to ${numerator}:${denominator}`);
+    } catch (error) {
+      console.error("Error setting ratio target:", error);
+    }
+  };
+  const getRatioTarget = async () => {
+    try {
+      // Fetch both numerator and denominator from the contract
+      const [numerator, denominator] = await handleContractCall(
+        RatioContract,
+        "getRatioTarget",
+        [],
+        (result) => result.map((s) => parseFloat(ethers.formatUnits(s, 18))) // Format each value separately
+      );
+
+      // Check if denominator is valid (non-zero)
+      if (denominator > 0) {
+        const ratio = `${numerator}:${denominator.toFixed(0)}`;
+        setRatioTargetAmount(ratio); // Update the state with the ratio
+      } else {
+        console.warn("Invalid denominator.");
+        setRatioTargetAmount(`${numerator}:0`); // Default to "numerator:0" in case of error
+      }
+    } catch (error) {
+      console.error("Error fetching ratio target:", error);
+      setRatioTargetAmount(null); // Handle error state properly
     }
   };
 
@@ -387,6 +559,7 @@ export const DAVTokenProvider = ({ children }) => {
           address: Ratio_TOKEN_ADDRESS,
           decimals: 18,
           image: MetaMaskIcon,
+		  Symbol:"Fluxin"
         },
       };
 
@@ -436,15 +609,22 @@ export const DAVTokenProvider = ({ children }) => {
         ViewDistributedTokens,
         Distributed,
         claiming,
-		HandleBurn,
+        HandleBurn,
         StateBurned,
         StateBurnedRatio,
         ListedTokenBurned,
         OneListedTokenBurned,
         SwapTokens,
         ButtonText,
-
+        BurnTokenRatio,
         handleAddToken,
+        setRatioTarget,
+        RatioTargetAmount,
+        AuctionRunning,
+        ClaimLPTokens,
+        LpTokenAmount,
+        LpTokens,
+		DAVTokensWithdraw,
       }}
     >
       {children}

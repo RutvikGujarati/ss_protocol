@@ -8,10 +8,12 @@ import { useDAVToken } from "../Context/DavTokenContext";
 const DataTable = () => {
   const {
     StartMarketPlaceListing,
-	handleAddToken,
-	HandleBurn,
-	OneListedTokenBurned,
-	ListedTokenBurned,
+    BurnTokenRatio,
+	RatioTargetAmount,
+    handleAddToken,
+    HandleBurn,
+    OneListedTokenBurned,
+    ListedTokenBurned,
     SwapTokens,
     ButtonText,
     claiming,
@@ -84,7 +86,7 @@ const DataTable = () => {
                     <td>$0.00000089</td>
                     <td className="text-success">1.25 M</td>
                     <td>1 : 250 M</td>
-                    <td>1 : 1 T</td>
+                    <td>{RatioTargetAmount} T</td>
                     <td className="tagTd">
                       <div className="d-flex justify-content-center gap-3 w-100">
                         <div className="tableClaim">100 RT</div>
@@ -97,7 +99,6 @@ const DataTable = () => {
                           onClick={Swapping}
                           disabled={ButtonText.includes("...")}
                           className="btn btn-primary btn-sm swap-btn"
-                          
                         >
                           {ButtonText.includes("...") ? ButtonText : "Swap"}
                         </button>
@@ -107,8 +108,8 @@ const DataTable = () => {
                           width={20}
                           height={20}
                           alt="Logo"
-						  style={{cursor: "pointer"}}
-						  onClick={handleAddToken}
+                          style={{ cursor: "pointer" }}
+                          onClick={handleAddToken}
                         />
                       </div>
                     </td>
@@ -118,10 +119,7 @@ const DataTable = () => {
                     <td>
                       <div className="tableName d-flex gap-4 align-items-center">
                         <div className="nameImage">
-                          <img
-                            src={XerionLogo}
-                            alt="Logo"
-                          />
+                          <img src={XerionLogo} alt="Logo" />
                         </div>
                         <div className="nameDetails">
                           <h5 className="nameBig">Xerion</h5>
@@ -184,10 +182,7 @@ const DataTable = () => {
                     <td>1</td>
                     <td>
                       <div className="nameImage">
-                        <img
-                          src={FluxinLogo}
-                          alt="Logo"
-                        />
+                        <img src={FluxinLogo} alt="Logo" />
                       </div>
                     </td>
                     <td>
@@ -196,17 +191,23 @@ const DataTable = () => {
                         <p className="nameSmall mb-1 uppercase">Fluxin</p>
                       </div>
                     </td>
-                    <td>1.2</td>
+                    <td>{BurnTokenRatio}</td>
                     <td>{OneListedTokenBurned} Fluxin</td>
                     <td>
                       <div className="d-flex align-items-center justify-content-center">
-                        <div className="tableClaim">{ListedTokenBurned} Fluxin</div>
+                        <div className="tableClaim">
+                          {ListedTokenBurned} Fluxin
+                        </div>
                       </div>
                     </td>
                     <td>
                       <div className="d-flex align-items-center justify-content-center">
-                        <button onClick={HandleBurn} className="btn btn-primary btn-sm swap-btn">
-                          Burn
+                        <button
+                          disabled={ButtonText.includes("...")}
+                          onClick={HandleBurn}
+                          className="btn btn-primary btn-sm swap-btn"
+                        >
+                          {ButtonText.includes("...") ? ButtonText : "Burn"}
                         </button>
                       </div>
                     </td>

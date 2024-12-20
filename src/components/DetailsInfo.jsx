@@ -1,9 +1,13 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DetailsInfo.css";
+import { useDAVToken } from "../Context/DavTokenContext";
 // import React, { useState } from "react";
 
 const DetailsInfo = ({ searchQuery }) => {
+  const { StartMarketPlaceListing, AuctionRunning, ClaimLPTokens,LpTokens,DAVTokensWithdraw } =
+    useDAVToken();
+  const auctionStatus = AuctionRunning ? "True" : "False";
   const details = [
     {
       tokenName: "Fluxin",
@@ -13,8 +17,9 @@ const DetailsInfo = ({ searchQuery }) => {
       auctionAllocation: "50%",
       davTreasurySupply: "500K",
       ratioTargetAmend: "1:1 Trillion",
-      claimLPToken: "500K",
-      claimDAVToken: "500K",
+      claimLPToken: LpTokens,
+      claimDAVToken: DAVTokensWithdraw,
+      startAuction: `Auction Status - ${auctionStatus}`,
       renounceSmartContract: "Yes",
     },
     {
@@ -126,7 +131,6 @@ const DetailsInfo = ({ searchQuery }) => {
       renounceSmartContract: "Yes",
     },
   ];
-  
 
   // Filter details based on the search query
   const filteredDetails = details.filter((item) =>
@@ -134,13 +138,16 @@ const DetailsInfo = ({ searchQuery }) => {
   );
 
   // Show the first value by default or the searched value
-  const dataToShow = filteredDetails.length > 0 ? filteredDetails[0] : details[0];
+  const dataToShow =
+    filteredDetails.length > 0 ? filteredDetails[0] : details[0];
 
   return (
     <div className="container mt-3">
       <table className="table table-dark infoTable">
         <thead>
-          <th className="fw-bold d-flex align-items-center uppercase">Information</th>
+          <th className="fw-bold d-flex align-items-center uppercase">
+            Information
+          </th>
         </thead>
         <tbody>
           <tr>
@@ -189,42 +196,68 @@ const DetailsInfo = ({ searchQuery }) => {
             <td className="d-flex align-items-center">Ratio Target - Amend</td>
             <td>
               <div className="tableClaim w-100">
-              {dataToShow.ratioTargetAmend || ""}
+                {dataToShow.ratioTargetAmend || ""}
               </div>
             </td>
             <td className="d-flex justify-content-end">
-              <button className="btn btn-primary btn-sm swap-btn info-icon">Set</button>
+              <button className="btn btn-primary btn-sm swap-btn info-icon">
+                Set
+              </button>
             </td>
           </tr>
           <tr>
             <td className="d-flex align-items-center">Claim LP Token</td>
             <td>
-              <div className="tableClaim w-100">
-              {dataToShow.claimLPToken || ""}
+              <div onClick={ClaimLPTokens} className="tableClaim w-100">
+                {dataToShow.claimLPToken || ""}
               </div>
             </td>
             <td className="d-flex justify-content-end">
-              <button className="btn btn-primary btn-sm swap-btn info-icon">Set</button>
+              <button className="btn btn-primary btn-sm swap-btn info-icon">
+                Claim
+              </button>
             </td>
           </tr>
           <tr>
             <td className="d-flex align-items-center">Claim DAV Token</td>
             <td>
               <div className="tableClaim w-100">
-              {dataToShow.claimDAVToken || ""}
+                {dataToShow.claimDAVToken || ""}
               </div>
             </td>
             <td className="d-flex justify-content-end">
-              <button className="btn btn-primary btn-sm swap-btn info-icon">Set</button>
+              <button className="btn btn-primary btn-sm swap-btn info-icon">
+                Claim
+              </button>
             </td>
           </tr>
           <tr>
-            <td className="d-flex align-items-center">Renounce Smart Contract</td>
+            <td className="d-flex align-items-center">Start Auction</td>
+            <td>
+              <div className="tableClaim w-100">
+                {dataToShow.startAuction || ""}
+              </div>
+            </td>
+            <td className="d-flex justify-content-end">
+              <button
+                onClick={StartMarketPlaceListing}
+                className="btn btn-primary btn-sm swap-btn info-icon"
+              >
+                SET
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td className="d-flex align-items-center">
+              Renounce Smart Contract
+            </td>
             <td className="d-flex align-items-center justify-content-center">
               {dataToShow.renounceSmartContract || ""}
             </td>
             <td className="d-flex justify-content-end">
-              <button className="btn btn-primary btn-sm swap-btn info-icon">Set</button>
+              <button className="btn btn-primary btn-sm swap-btn info-icon">
+                Set
+              </button>
             </td>
           </tr>
         </tbody>
