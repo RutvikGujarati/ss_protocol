@@ -12,8 +12,14 @@
     flex: 1; /* Ensures equal width for all columns */
     text-align: center; /* Optional: Centers text */
     align-items: center;
+    width: max-content;
+    padding: 0 10px;
   }
 
   .info-icon{
     margin-right: 50px;
+  }
+
+  .mh-30{
+    max-height: 30px;
   }
