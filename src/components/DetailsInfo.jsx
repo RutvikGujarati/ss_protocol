@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DetailsInfo.css";
 import { useDAVToken } from "../Context/DavTokenContext";
 import PropTypes from "prop-types";
+import { useState } from "react";
 // import React, { useState } from "react";
 
 const DetailsInfo = ({ searchQuery }) => {
@@ -11,10 +12,14 @@ const DetailsInfo = ({ searchQuery }) => {
     AuctionRunning,
     withdraw_5,
     ClaimLPTokens,
+    setRatioTarget,
     LpTokens,
     DAVTokensWithdraw,
     DAVTokensFiveWithdraw,
   } = useDAVToken();
+
+  const [numerator, setNumerator] = useState("");
+  const [Denominator, setDenominator] = useState("");
   const auctionStatus = AuctionRunning ? "True" : "False";
   const FluxinAddress = "0xAE79930e57BB2EA8dde7381AC6d338A706386bAe";
   const shortenAddress = (address) => {
@@ -148,6 +153,15 @@ const DetailsInfo = ({ searchQuery }) => {
     },
   ];
 
+  const handleInputChange = (e, field) => {
+    const value = e.target.value;
+    if (field === "numerator") {
+      setNumerator(value);
+    } else if (field === "denominator") {
+      setDenominator(value);
+    }
+  };
+
   // Filter details based on the search query
   const filteredDetails = details.filter((item) =>
     item.tokenName.toLowerCase().includes((searchQuery ?? "").toLowerCase())
@@ -221,15 +235,36 @@ const DetailsInfo = ({ searchQuery }) => {
             <td className="d-flex align-items-center">Ratio Target - Amend</td>
             <td>
               <div className="tableClaim w-100">
-                {dataToShow.ratioTargetAmend || ""}
+                <input
+                  type="text"
+                  className="form-control input-sm"
+                  placeholder="numerator"
+                  value={numerator}
+                  onChange={(e) => handleInputChange(e, "numerator")}
+                />
+              </div>
+            </td>
+            <td>
+              <div className="tableClaim w-100">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="denominator"
+                  value={Denominator}
+                  onChange={(e) => handleInputChange(e, "denominator")}
+                />
               </div>
             </td>
             <td className="d-flex justify-content-end">
-              <button className="btn btn-primary btn-sm swap-btn info-icon">
+              <button
+                onClick={setRatioTarget(numerator, Denominator)}
+                className="btn btn-primary btn-sm swap-btn info-icon"
+              >
                 Set
               </button>
             </td>
           </tr>
+
           <tr>
             <td className="d-flex align-items-center">
               Claim 25% LP Token (Listed)
