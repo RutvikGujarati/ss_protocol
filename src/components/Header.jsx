@@ -9,7 +9,6 @@ import { useDAVToken } from "../Context/DavTokenContext";
 
 const Header = () => {
   const { AuctionRunning } = useDAVToken();
-
   useEffect(() => {
     const tooltipTriggerList = document.querySelectorAll(
       '[data-bs-toggle="tooltip"]'
@@ -40,9 +39,9 @@ const Header = () => {
             <ul className="navbar-nav d-flex flex-row align-items-center me-4">
               <li
                 className="nav-item mx-2"
-                data-bs-toggle={AuctionRunning ? "tooltip" : ""}
+                data-bs-toggle="tooltip"
                 data-bs-placement="left"
-                title={AuctionRunning ? "Auction is running" : ""}
+                title="Auction is running"
               >
                 <NavLink
                   className={({ isActive }) =>
@@ -58,7 +57,7 @@ const Header = () => {
                       className="active-dot"
                       style={{ backgroundColor: "green" }}
                     ></span>
-                  )}
+                  )}{" "}
                 </NavLink>
               </li>
               <li className="nav-item mx-2">
@@ -129,7 +128,15 @@ const Header = () => {
           }
         >
           <i className="bi bi-hammer"></i>
-          <div>Auction</div>
+          <div>
+            Auction
+            {AuctionRunning && (
+              <span
+                className="active-dot"
+                style={{ backgroundColor: "green" }}
+              ></span>
+            )}
+          </div>
         </NavLink>
         <NavLink
           to="/burn"
