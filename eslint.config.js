@@ -17,7 +17,7 @@ export default [
         sourceType: 'module',
       },
     },
-    settings: { react: { version: '18.3' } },
+    settings: { react: { version: '18' } },  // Correct React version
     plugins: {
       react,
       'react-hooks': reactHooks,
@@ -31,7 +31,7 @@ export default [
       'react/jsx-no-target-blank': 'off',
       'react-refresh/only-export-components': [
         'warn',
-        { allowConstantExport: true },
+        { allowConstantExport: true },  // Still allow constants
       ],
     },
   },

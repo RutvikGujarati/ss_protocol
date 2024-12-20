@@ -1,7 +1,7 @@
-import React from "react";
 import "../Styles/SearchInfo.css";
 import XerionLogo from "../assets/XerionLogo.png";
 import FluxinLogo from "../assets/FluxinLogo.png";
+import PropTypes from "prop-types";
 
 const SearchInfo = ({ setSearchQuery }) => {
   const handleSearch = (e) => {
@@ -58,6 +58,9 @@ const SearchInfo = ({ setSearchQuery }) => {
       </table>
     </div>
   );
+};
+SearchInfo.propTypes = {
+  setSearchQuery: PropTypes.string.isRequired,
 };
 
 export default SearchInfo;

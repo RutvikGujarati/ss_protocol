@@ -4,38 +4,41 @@ import { ethers } from "ethers";
 import DAVTokenABI from "../ABI/DavTokenABI.json";
 import StateABI from "../ABI/StateTokenABI.json";
 import RatioABI from "../ABI/RatioABI.json";
-import MetaMaskIcon from "../assets/metamask-icon.png";
+import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 
-const DAV_TOKEN_ADDRESS = "0x5A6796D654FAbDB9fCb524Fe1cb8A589dF6F99bb";
-const STATE_TOKEN_ADDRESS = "0x9dA567451c3e43EDc5acF7263Ba83C25a852A437";
-// const Ratio_TOKEN_ADDRESS = "0xee44b627182fB92c3453e96bA29f7db5f53a0301";
+const DAV_TOKEN_ADDRESS = "0xDCFc4E135714D4e7bdbF269be45A7dE92B770217";
+const STATE_TOKEN_ADDRESS = "0x6E3013580cc189f489c6728dB8417F5EFe829622";
 const Ratio_TOKEN_ADDRESS = "0xAE79930e57BB2EA8dde7381AC6d338A706386bAe";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
 export const DAVTokenProvider = ({ children }) => {
+  //contract initialization states
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [account, setAccount] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
   const [LpTokens, setLpTokens] = useState(false);
 
+  //contract state
   const [davContract, setDavContract] = useState(null);
   const [stateContract, setStateContract] = useState(null);
   const [RatioContract, setRatioContract] = useState(null);
 
   const [TotalCost, setTotalCost] = useState(null);
-  const [ButtonText, setButtonText] = useState("");
   const [CurrentSReward, setCurrentSReward] = useState(null);
   const [AuctionRunning, setIsAuctionRunning] = useState(false);
+  const [ButtonText, setButtonText] = useState("");
   const [davHolds, setDavHoldings] = useState("0.0");
   const [StateHolds, setStateHoldings] = useState("0.0");
   const [davPercentage, setDavPercentage] = useState("0.0");
   const [Supply, setSupply] = useState("0.0");
   const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
+  const [DAVTokensFiveWithdraw, setFiveAvTokens] = useState("0.0");
   const [StateReward, setStateReward] = useState("0");
   const [Distributed, setViewDistributed] = useState("0.0");
   const [StateBurned, setStateBurnAMount] = useState("0.0");
@@ -119,7 +122,7 @@ export const DAVTokenProvider = ({ children }) => {
 
   const mintDAV = async (amount) => {
     const value = ethers.parseEther(amount.toString());
-    const cost = ethers.parseEther((amount * 1).toString()); // org - 100000
+    const cost = ethers.parseEther((amount * 10).toString()); // org - 100000
     await handleContractCall(davContract, "mintDAV", [value, { value: cost }]);
   };
 
@@ -137,7 +140,7 @@ export const DAVTokenProvider = ({ children }) => {
   const CalculationOfCost = async (amount) => {
     setTotalCost(ethers.parseEther((amount * 100000).toString()));
   };
-
+  //DAV and STate token functions
   const DavHoldings = async () => {
     const holdings = await handleContractCall(
       davContract,
@@ -147,27 +150,45 @@ export const DAVTokenProvider = ({ children }) => {
     );
     setDavHoldings(holdings);
   };
-
   const StateHoldings = async () => {
-    const holdings = await handleContractCall(
-      stateContract,
-      "getDAVHoldings",
-      [account],
-      (h) => ethers.formatUnits(h, 18)
-    );
-    setStateHoldings(holdings);
-  };
+    try {
+      const holdings = await handleContractCall(
+        stateContract,
+        "getDAVHoldings",
+        [account],
+        (h) => ethers.formatUnits(h, 18)
+      );
 
+      if (holdings) {
+        const formattedHoldings = new Intl.NumberFormat("en-US").format(
+          holdings
+        );
+        setStateHoldings(formattedHoldings);
+      } else {
+        console.error("Failed to fetch state holdings.");
+      }
+    } catch (error) {
+      console.error("Error fetching state holdings:", error);
+    }
+  };
   const DavHoldingsPercentage = async () => {
-    const percentage = await handleContractCall(
-      davContract,
-      "getUserHoldingPercentage",
-      [account],
-      (p) => ethers.formatUnits(p, 18)
-    );
-    setDavPercentage(percentage);
-  };
+    try {
+      const percentage = await handleContractCall(
+        davContract,
+        "getUserHoldingPercentage",
+        [account],
+        (p) => ethers.formatUnits(p, 18)
+      );
 
+      if (percentage) {
+        setDavPercentage(parseFloat(percentage).toFixed(4));
+      } else {
+        console.error("Failed to fetch holding percentage.");
+      }
+    } catch (error) {
+      console.error("Error fetching DAV holdings percentage:", error);
+    }
+  };
   const DavSupply = async () => {
     const supply = await handleContractCall(
       davContract,
@@ -191,7 +212,7 @@ export const DAVTokenProvider = ({ children }) => {
   const releaseNextBatch = async () => {
     await handleContractCall(davContract, "releaseNextBatch");
   };
-
+  //main useEffect
   useEffect(() => {
     let interval;
 
@@ -213,15 +234,15 @@ export const DAVTokenProvider = ({ children }) => {
           await isAuctionRunning();
           await LpTokenAmount();
           await DAVTokenAmount();
+          await DAVTokenfive_Amount();
         } catch (error) {
           console.error("Error fetching live data:", error);
         }
       }
     };
 
-    fetchLiveData(); // Fetch initially
+    fetchLiveData();
 
-    // Set up polling every 10 seconds
     interval = setInterval(() => {
       fetchLiveData();
     }, 10000);
@@ -230,7 +251,7 @@ export const DAVTokenProvider = ({ children }) => {
   }, [davContract, stateContract, RatioContract, account]);
 
   // Ratio Token Contracts
-
+  // -- auction
   const StartMarketPlaceListing = async () => {
     await handleContractCall(RatioContract, "startAuction", [], (s) =>
       ethers.formatUnits(s, 18)
@@ -250,7 +271,7 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching auction status:", error);
     }
   };
-
+  //claiming functions
   const ClaimTokens = async () => {
     try {
       setClaiming(true);
@@ -292,23 +313,39 @@ export const DAVTokenProvider = ({ children }) => {
       setLpTokens(null); // Handle error state
     }
   };
-  const DAVTokenAmount = async () => {
-    try {
-      const balance = await handleContractCall(
-        RatioContract,
-        "balanceOf",
-        ["0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483"],
-        (s) => ethers.formatUnits(s, 18)
-      );
 
-      // Calculate 60% of the balance
-      const sixtyPercent = (parseFloat(balance) * 60) / 100;
-      setDAvTokens(sixtyPercent);
+  const handleWithdraw = async (methodName) => {
+    try {
+      setClaiming(true);
+      await handleContractCall(davContract, methodName, []);
     } catch (e) {
-      console.error("Error fetching LP tokens:", e);
-      setLpTokens(null); // Handle error state
+      console.error(`Error withdrawing with method ${methodName}:`, e);
+    } finally {
+      setClaiming(false);
     }
   };
+
+  const calculateShare = async (percentage, setAmount) => {
+    try {
+      const balance = await handleContractCall(
+        davContract,
+        "balacneETH",
+        [],
+        (s) => ethers.formatUnits(s, 18)
+      );
+      const share = (parseFloat(balance) * percentage) / 100;
+      setAmount(share);
+    } catch (e) {
+      console.error(`Error fetching ${percentage}% share:`, e);
+      setAmount(null); // Handle error state
+    }
+  };
+
+  const withdraw_95 = () => handleWithdraw("withdrawLiquidityShare");
+  const withdraw_5 = () => handleWithdraw("withdrawDevelopmentShare");
+
+  const DAVTokenAmount = () => calculateShare(95, setDAvTokens);
+  const DAVTokenfive_Amount = () => calculateShare(5, setFiveAvTokens);
 
   const SwapTokens = async (amount) => {
     try {
@@ -544,7 +581,11 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const handleAddToken = async () => {
+  const handleAddToken = async (
+    tokenAddress,
+    tokenSymbol,
+    tokenDecimals = 18
+  ) => {
     if (!window.ethereum) {
       alert(
         "MetaMask is not installed. Please install it to use this feature."
@@ -556,10 +597,9 @@ export const DAVTokenProvider = ({ children }) => {
       const tokenDetails = {
         type: "ERC20",
         options: {
-          address: Ratio_TOKEN_ADDRESS,
-          decimals: 18,
-          image: MetaMaskIcon,
-		  Symbol:"Fluxin"
+          address: tokenAddress,
+          symbol: tokenSymbol,
+          decimals: tokenDecimals,
         },
       };
 
@@ -569,15 +609,21 @@ export const DAVTokenProvider = ({ children }) => {
       });
 
       if (wasAdded) {
-        alert("Token successfully added to your wallet!");
+        alert(`${tokenSymbol} token successfully added to your wallet!`);
       } else {
-        alert("Token addition was canceled.");
+        alert(`${tokenSymbol} token addition was canceled.`);
       }
     } catch (error) {
-      console.error("Error adding token:", error);
-      alert("An error occurred while adding the token.");
+      console.error(`Error adding ${tokenSymbol} token:`, error);
+      alert(`An error occurred while adding the ${tokenSymbol} token.`);
     }
   };
+
+  // Example usage for different tokens
+  const handleAddTokenRatio = () =>
+    handleAddToken(Ratio_TOKEN_ADDRESS, "Fluxin");
+  const handleAddTokenDAV = () => handleAddToken(DAV_TOKEN_ADDRESS, "DT");
+  const handleAddTokenState = () => handleAddToken(STATE_TOKEN_ADDRESS, "ST");
 
   return (
     <DAVTokenContext.Provider
@@ -624,10 +670,20 @@ export const DAVTokenProvider = ({ children }) => {
         ClaimLPTokens,
         LpTokenAmount,
         LpTokens,
-		DAVTokensWithdraw,
+        DAVTokensWithdraw,
+        withdraw_95,
+        handleAddTokenRatio,
+        handleAddTokenState,
+        handleAddTokenDAV,
+        withdraw_5,
+        // WithdrawLPTokens,
+        DAVTokensFiveWithdraw,
       }}
     >
       {children}
     </DAVTokenContext.Provider>
   );
+};
+DAVTokenProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };

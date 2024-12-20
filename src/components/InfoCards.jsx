@@ -4,14 +4,18 @@ import { useDAVToken } from "../Context/DavTokenContext";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
+import MetaMaskIcon from "../assets/metamask-icon.png";
 
 const InfoCards = () => {
   const {
     mintDAV,
+    // handleAddTokenRatio,
+    handleAddTokenState,
+    handleAddTokenDAV,
     CalculationOfCost,
     TotalCost,
     StateBurned,
-	StateBurnedRatio,
+    StateBurnedRatio,
     StateReward,
     GetStateRewards,
     GetCurrentStateReward,
@@ -117,7 +121,7 @@ const InfoCards = () => {
                     </div>
                   </div>
                   <p className="detailfooter p-0 m-0">
-                    {Supply} DAV TOKEN RELEASED
+                    {Supply} DAV TOKEN MINTED
                   </p>
                 </div>
               </div>
@@ -125,7 +129,18 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">Dav holdings</p>
+                      <p className="mb-1 detailText">
+                        Dav holdings
+                        <img
+                          src={MetaMaskIcon}
+                          width={20}
+                          height={20}
+                          alt="Logo"
+                          style={{ cursor: "pointer" }}
+                          onClick={handleAddTokenDAV}
+                        />
+                      </p>
+
                       <h5 className="">{davHolds}</h5>
                     </div>
                     <div className="carddetails2">
@@ -139,12 +154,22 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">State token holdings</p>
-                      <h5 className="">{StateHolds} / $56.90</h5>
+                      <p className="mb-1 detailText">
+                        State token holdings
+                        <img
+                          src={MetaMaskIcon}
+                          width={20}
+                          height={20}
+                          alt="Logo"
+                          style={{ cursor: "pointer" }}
+                          onClick={handleAddTokenState}
+                        />
+                      </p>
+                      <h5 className="">{StateHolds} / $0.00</h5>
                     </div>
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token price</p>
-                      <h5 className="">$0.000000356</h5>
+                      <h5 className="">$0</h5>
                     </div>
                   </div>
                 </div>

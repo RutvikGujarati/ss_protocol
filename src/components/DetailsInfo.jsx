@@ -1,17 +1,32 @@
-import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DetailsInfo.css";
 import { useDAVToken } from "../Context/DavTokenContext";
+import PropTypes from "prop-types";
 // import React, { useState } from "react";
 
 const DetailsInfo = ({ searchQuery }) => {
-  const { StartMarketPlaceListing, AuctionRunning, ClaimLPTokens,LpTokens,DAVTokensWithdraw } =
-    useDAVToken();
+  const {
+    StartMarketPlaceListing,
+    withdraw_95,
+    AuctionRunning,
+    withdraw_5,
+    ClaimLPTokens,
+    LpTokens,
+    DAVTokensWithdraw,
+    DAVTokensFiveWithdraw,
+  } = useDAVToken();
   const auctionStatus = AuctionRunning ? "True" : "False";
+  const FluxinAddress = "0xAE79930e57BB2EA8dde7381AC6d338A706386bAe";
+  const shortenAddress = (address) => {
+    if (!address) return "";
+    return `${address.slice(0, 6)}...${address.slice(-6)}`;
+  };
+  const shortened = shortenAddress(FluxinAddress);
+
   const details = [
     {
       tokenName: "Fluxin",
-      key: "FLX",
+      key: shortened,
       supply: "1M",
       ratioTarget: "1:1",
       auctionAllocation: "50%",
@@ -19,6 +34,7 @@ const DetailsInfo = ({ searchQuery }) => {
       ratioTargetAmend: "1:1 Trillion",
       claimLPToken: LpTokens,
       claimDAVToken: DAVTokensWithdraw,
+      claimFiveDAVToken: DAVTokensFiveWithdraw,
       startAuction: `Auction Status - ${auctionStatus}`,
       renounceSmartContract: "Yes",
     },
@@ -134,7 +150,7 @@ const DetailsInfo = ({ searchQuery }) => {
 
   // Filter details based on the search query
   const filteredDetails = details.filter((item) =>
-    item.tokenName.toLowerCase().includes(searchQuery.toLowerCase())
+    item.tokenName.toLowerCase().includes((searchQuery ?? "").toLowerCase())
   );
 
   // Show the first value by default or the searched value
@@ -158,9 +174,18 @@ const DetailsInfo = ({ searchQuery }) => {
             <td></td>
           </tr>
           <tr>
-            <td className="d-flex align-items-center">#</td>
+            <td className="d-flex align-items-center">
+              contract/token address
+            </td>
             <td className="d-flex align-items-center justify-content-center">
-              {dataToShow.key || ""}
+              <a
+                href={`https://scan.v4.testnet.pulsechain.com/#/address/${FluxinAddress}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontSize: "12px" }}
+              >
+                {dataToShow.key || ""}{" "}
+              </a>
             </td>
             <td></td>
           </tr>
@@ -206,23 +231,44 @@ const DetailsInfo = ({ searchQuery }) => {
             </td>
           </tr>
           <tr>
-            <td className="d-flex align-items-center">Claim LP Token</td>
+            <td className="d-flex align-items-center">
+              Claim 25% LP Token (Listed)
+            </td>
             <td>
-              <div onClick={ClaimLPTokens} className="tableClaim w-100">
+              <div className="tableClaim w-100">
                 {dataToShow.claimLPToken || ""}
               </div>
             </td>
             <td className="d-flex justify-content-end">
-              <button className="btn btn-primary btn-sm swap-btn info-icon">
+              <button
+                onClick={ClaimLPTokens}
+                className="btn btn-primary btn-sm swap-btn info-icon"
+              >
                 Claim
               </button>
             </td>
           </tr>
           <tr>
-            <td className="d-flex align-items-center">Claim DAV Token</td>
+            <td className="d-flex align-items-center">Claim 95% DAV Token</td>
             <td>
               <div className="tableClaim w-100">
                 {dataToShow.claimDAVToken || ""}
+              </div>
+            </td>
+            <td className="d-flex justify-content-end">
+              <button
+                onClick={withdraw_95}
+                className="btn btn-primary btn-sm swap-btn info-icon"
+              >
+                Claim
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td className="d-flex align-items-center">Claim 5% DAV Token</td>
+            <td>
+              <div onClick={withdraw_5} className="tableClaim w-100">
+                {dataToShow.claimFiveDAVToken || ""}
               </div>
             </td>
             <td className="d-flex justify-content-end">
@@ -264,6 +310,9 @@ const DetailsInfo = ({ searchQuery }) => {
       </table>
     </div>
   );
+};
+DetailsInfo.propTypes = {
+  searchQuery: PropTypes.string.isRequired,
 };
 
 export default DetailsInfo;
