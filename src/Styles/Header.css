@@ -108,3 +108,47 @@
 	border-radius: 50%;
   }
   
+.tooltip {
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  padding: 4px !important;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.tooltip-inner {
+  background-color: #ff4081 !important;
+  color: #fff !important;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.tooltip .tooltip-arrow::before {
+  border-left-color: #ff4081 !important;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(71, 226, 9, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 10px 10px rgba(255, 64, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 64, 129, 0);
+  }
+}
+
+.active-dot {
+  width: 10px;
+  height: 10px;
+  background-color: #28a745;
+  border-radius: 50%;
+  position: relative;
+  display: inline-block;
+  animation: pulse 1.5s infinite ease-in-out;
+  margin-left: 10px;
+}
+

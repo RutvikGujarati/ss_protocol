@@ -120,7 +120,7 @@ const InfoCards = () => {
                       <h5 className="detailAmount pt-1">1% SLIPPAGE</h5>
                     </div>
                   </div>
-                  <p className="detailfooter p-0 m-0">
+                  <p className="detailfooter m-0">
                     {Supply} DAV TOKEN MINTED
                   </p>
                 </div>
@@ -131,14 +131,6 @@ const InfoCards = () => {
                     <div className="carddetails2">
                       <p className="mb-1 detailText">
                         Dav holdings
-                        <img
-                          src={MetaMaskIcon}
-                          width={20}
-                          height={20}
-                          alt="Logo"
-                          style={{ cursor: "pointer" }}
-                          onClick={handleAddTokenDAV}
-                        />
                       </p>
 
                       <h5 className="">{davHolds}</h5>
@@ -146,6 +138,16 @@ const InfoCards = () => {
                     <div className="carddetails2">
                       <p className="mb-1 detailText">Dav Rank</p>
                       <h5 className="">{davPercentage}%</h5>
+                    </div>
+                    <div className="carddetails2">
+                      <img
+                        src={MetaMaskIcon}
+                        width={20}
+                        height={20}
+                        alt="Logo"
+                        style={{ cursor: "pointer" }}
+                        onClick={handleAddTokenDAV}
+                      />
                     </div>
                   </div>
                 </div>
@@ -156,20 +158,22 @@ const InfoCards = () => {
                     <div className="carddetails2">
                       <p className="mb-1 detailText">
                         State token holdings
-                        <img
-                          src={MetaMaskIcon}
-                          width={20}
-                          height={20}
-                          alt="Logo"
-                          style={{ cursor: "pointer" }}
-                          onClick={handleAddTokenState}
-                        />
                       </p>
                       <h5 className="">{StateHolds} / $0.00</h5>
                     </div>
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token price</p>
                       <h5 className="">$0</h5>
+                    </div>
+                    <div className="carddetails2">
+                      <img
+                        src={MetaMaskIcon}
+                        width={20}
+                        height={20}
+                        alt="Logo"
+                        style={{ cursor: "pointer" }}
+                        onClick={handleAddTokenDAV}
+                      />
                     </div>
                   </div>
                 </div>

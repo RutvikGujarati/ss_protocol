@@ -31,7 +31,7 @@ const DataTable = () => {
     <>
       {isAuction ? (
         <>
-          <div className="container mt-4">
+          <div className="container mt-4 datatablemarginbottom">
             <div className="table-responsive">
               <table className="table table-dark">
                 <thead>
@@ -162,7 +162,7 @@ const DataTable = () => {
         </>
       ) : isBurn ? (
         <>
-          <div className="container mt-4">
+          <div className="container mt-4 datatablemarginbottom">
             <div className="table-responsive">
               <table className="table table-dark">
                 <thead>

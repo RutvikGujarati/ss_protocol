@@ -125,5 +125,8 @@ table.table-dark tbody tr:last-child td:last-child {
 .nameImage img:hover{
   transform: scale(2);
   transition: transform 0.5s ease;
+}
 
+.datatablemarginbottom{
+  margin-bottom: 70px;
 }

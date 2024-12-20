@@ -1,9 +1,21 @@
+import React, { useEffect } from "react";
 import "../Styles/Header.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import WalletConnector from "../WalletComps/WalletConnect";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { NavLink } from "react-router-dom";
+import { Tooltip } from "bootstrap";
+
 const Header = () => {
+  useEffect(() => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach((tooltipTriggerEl) => {
+      new bootstrap.Tooltip(tooltipTriggerEl, {
+        trigger: "hover",
+      });
+    });
+  }, []);
+
   return (
     <>
       {/* Top Navbar for Desktop */}
@@ -12,16 +24,19 @@ const Header = () => {
           {/* Navbar Brand */}
           <NavLink className="navbar-brand text-light pb-0" to="/">
             <h5 className="uppercase fs-2 fw-bolder">THE STATE</h5>
-            <p className="small-text fs-6 fw-normal mb-0">
-              by System State Protocol
-            </p>
+            <p className="small-text fs-6 fw-normal mb-0">by System State Protocol</p>
           </NavLink>
 
           {/* Right-Side Container */}
           <div className="d-flex align-items-center">
             {/* Navigation Links */}
             <ul className="navbar-nav d-flex flex-row align-items-center me-4">
-              <li className="nav-item mx-2">
+              <li
+                className="nav-item mx-2"
+                data-bs-toggle="tooltip"
+                data-bs-placement="left"
+                title="Auction is running"
+              >
                 <NavLink
                   className={({ isActive }) =>
                     isActive
@@ -31,6 +46,7 @@ const Header = () => {
                   to="/auction"
                 >
                   Auction
+                  <span class="active-dot"></span>
                 </NavLink>
               </li>
               <li className="nav-item mx-2">
