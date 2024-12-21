@@ -45,7 +45,7 @@ const DetailsInfo = ({ searchQuery }) => {
       BatchRelease: "1M",
       claimDAVToken: DAVTokensWithdraw,
       claimFiveDAVToken: DAVTokensFiveWithdraw,
-
+      address: DAV_TOKEN_ADDRESS,
       renounceSmartContract: "No",
       actions: {
         claimDAVToken: withdraw_95,
@@ -62,6 +62,7 @@ const DetailsInfo = ({ searchQuery }) => {
       davTreasurySupply: "500K",
       ratioTargetAmend: "1:1 Trillion",
       claimDAVToken: DAVTokensWithdraw,
+      address: Ratio_TOKEN_ADDRESS,
       claimFiveDAVToken: DAVTokensFiveWithdraw,
       startAuction: `Auction Status - ${auctionStatus}`,
       renounceSmartContract: "Yes",
@@ -99,6 +100,7 @@ const DetailsInfo = ({ searchQuery }) => {
       key: stateShortened,
       supply: "999T",
       Treasury: "999T",
+      address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
       renounceSmartContract: "No",
       actions: {
@@ -185,7 +187,7 @@ const DetailsInfo = ({ searchQuery }) => {
             </td>
             <td className="d-flex align-items-center justify-content-center">
               <a
-                href={`https://scan.v4.testnet.pulsechain.com/#/address/${FluxinAddress}`}
+                href={`https://scan.v4.testnet.pulsechain.com/#/address/${dataToShow.address}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ fontSize: "12px" }}

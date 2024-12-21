@@ -382,7 +382,7 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
- 
+
   const ClaimLPTokens = async () => {
     try {
       setClaiming(true);
