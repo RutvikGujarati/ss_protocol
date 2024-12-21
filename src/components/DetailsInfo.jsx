@@ -110,7 +110,7 @@ const DetailsInfo = ({ searchQuery }) => {
   const dataToShow = filteredTokens.length > 0 ? filteredTokens[0] : tokens[0];
 
   return (
-    <div className="container mt-3">
+    <div className="container mt-3 p-0">
       <table className="table table-dark infoTable">
         <thead>
           <th className="fw-bold d-flex align-items-center uppercase">

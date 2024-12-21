@@ -51,7 +51,7 @@ const App = () => {
                   {/* Pass setSearchQuery to update the search input */}
                   <SearchInfo setSearchQuery={setSearchQuery} />
                 </div>
-                <div className="col-md-8">
+                <div className="col-md-8 d-flex align-items-stretch">
                   {/* Pass searchQuery to filter the details */}
                   <DetailsInfo searchQuery={searchQuery} />
                 </div>
