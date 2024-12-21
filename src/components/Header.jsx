@@ -1,14 +1,14 @@
-import React, { useEffect } from "react";
+import  { useEffect } from "react";
 import "../Styles/Header.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import WalletConnector from "../WalletComps/WalletConnect";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import WalletConnector from "../WalletComps/WalletConnect";
 import { NavLink } from "react-router-dom";
-import { Tooltip } from "bootstrap";
-import { useDAVToken } from "../Context/DavTokenContext";
+// import { Tooltip } from "bootstrap";
+// import { useDAVToken } from "../Context/DavTokenContext";
 
 const Header = () => {
-  const { AuctionRunning } = useDAVToken();
+//   const { AuctionRunning } = useDAVToken();
   useEffect(() => {
     const tooltipTriggerList = document.querySelectorAll(
       '[data-bs-toggle="tooltip"]'
@@ -52,12 +52,7 @@ const Header = () => {
                   to="/auction"
                 >
                   Auction
-                  {AuctionRunning && (
-                    <span
-                      className="active-dot"
-                      style={{ backgroundColor: "green" }}
-                    ></span>
-                  )}{" "}
+                  <span className="active-dot"></span>
                 </NavLink>
               </li>
               <li className="nav-item mx-2">
@@ -128,15 +123,7 @@ const Header = () => {
           }
         >
           <i className="bi bi-hammer"></i>
-          <div>
-            Auction
-            {AuctionRunning && (
-              <span
-                className="active-dot"
-                style={{ backgroundColor: "green" }}
-              ></span>
-            )}
-          </div>
+          <div>Auction</div>
         </NavLink>
         <NavLink
           to="/burn"

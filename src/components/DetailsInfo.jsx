@@ -164,7 +164,7 @@ const DetailsInfo = ({ searchQuery }) => {
       claimDAVToken: "3M",
       renounceSmartContract: "Yes",
     },
-    {
+	{
       tokenName: "Lunaris",
       key: "LNR",
       supply: "750K",

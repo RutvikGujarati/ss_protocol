@@ -1,11 +1,30 @@
+import React, { useState } from "react";
 import "../Styles/SearchInfo.css";
 import XerionLogo from "../assets/XerionLogo.png";
 import FluxinLogo from "../assets/FluxinLogo.png";
 import PropTypes from "prop-types";
 
 const SearchInfo = ({ setSearchQuery }) => {
+  const [filteredData, setFilteredData] = useState([
+    { id: 1, name: "Fluxin", logo: FluxinLogo },
+    { id: 2, name: "Xerion", logo: XerionLogo },
+    { id: 3, name: "Rutvik", logo: FluxinLogo },
+    { id: 4, name: "Polaris", logo: FluxinLogo },
+  ]);
+
   const handleSearch = (e) => {
-    setSearchQuery(e.target.value); // Update search query on input change
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query); // Update the parent state
+    const originalData = [
+      { id: 1, name: "Fluxin", logo: FluxinLogo },
+      { id: 2, name: "Xerion", logo: XerionLogo },
+      { id: 3, name: "Rutvik", logo: FluxinLogo },
+      { id: 4, name: "Polaris", logo: FluxinLogo },
+    ];
+    const filtered = originalData.filter((item) =>
+      item.name.toLowerCase().includes(query)
+    );
+    setFilteredData(filtered);
   };
 
   return (
@@ -27,40 +46,25 @@ const SearchInfo = ({ setSearchQuery }) => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>
-              <div className="nameImage">
-                <img src={FluxinLogo} width={40} height={40} alt="Logo" />
-              </div>
-            </td>
-            <td>Fluxin</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>
-              <div className="nameImage">
-                <img src={XerionLogo} width={40} height={40} alt="Logo" />
-              </div>
-            </td>
-            <td>Xerion</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>
-              <div className="nameImage">
-                <img src={FluxinLogo} width={40} height={40} alt="Logo" />
-              </div>
-            </td>
-            <td>Rutvik</td>
-          </tr>
+          {filteredData.map((item) => (
+            <tr key={item.id}>
+              <td>{item.id}</td>
+              <td>
+                <div className="nameImage">
+                  <img src={item.logo} width={40} height={40} alt="Logo" />
+                </div>
+              </td>
+              <td>{item.name}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
   );
 };
+
 SearchInfo.propTypes = {
-  setSearchQuery: PropTypes.string.isRequired,
+  setSearchQuery: PropTypes.func.isRequired,
 };
 
 export default SearchInfo;
