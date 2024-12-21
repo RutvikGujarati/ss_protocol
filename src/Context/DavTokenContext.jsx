@@ -8,9 +8,9 @@ import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 
-const DAV_TOKEN_ADDRESS = "0xDCFc4E135714D4e7bdbF269be45A7dE92B770217";
-const STATE_TOKEN_ADDRESS = "0x6E3013580cc189f489c6728dB8417F5EFe829622";
-const Ratio_TOKEN_ADDRESS = "0xAE79930e57BB2EA8dde7381AC6d338A706386bAe";
+export const DAV_TOKEN_ADDRESS = "0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3";
+export const STATE_TOKEN_ADDRESS = "0xFed740728a32d4f0519732095B4f6c5B752EAaF7";
+export const Ratio_TOKEN_ADDRESS = "0xAE79930e57BB2EA8dde7381AC6d338A706386bAe";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -46,6 +46,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [ListedTokenBurned, setListedTokenBurnAMount] = useState("0.0");
   const [OneListedTokenBurned, setOneListedTokenBurnAMount] = useState("0.0");
   const [BurnTokenRatio, setBurnAMountRatio] = useState("0.0");
+  const [LPStateTransferred, setLPStateTransferred] = useState("0.0");
 
   const [StateBurnedRatio, setStateBurnRatio] = useState("0.0");
   const [RatioTargetAmount, setRatioTargetAmount] = useState("0.0");
@@ -130,7 +131,7 @@ export const DAVTokenProvider = ({ children }) => {
     if (!amount || isNaN(amount) || amount <= 0) return setStateReward(0);
     const reward = await handleContractCall(
       davContract,
-      "getStateReward",
+      "getAdjustedReward",
       [ethers.parseEther(amount.toString())],
       (r) => ethers.formatUnits(r, 18)
     );
@@ -199,42 +200,139 @@ export const DAVTokenProvider = ({ children }) => {
     setSupply(supply);
   };
 
-  const GetCurrentStateReward = async () => {
-    const reward = await handleContractCall(
-      davContract,
-      "getCurrentStateReward",
-      [],
-      (r) => ethers.formatUnits(r, 18)
-    );
-    setCurrentSReward(reward);
-  };
+  //   const GetCurrentStateReward = async () => {
+  //     const reward = await handleContractCall(
+  //       davContract,
+  //       "getAdjustedReward",
+  //       [],
+  //       (r) => ethers.formatUnits(r, 18)
+  //     );
+  //     setCurrentSReward(reward);
+  //   };
+    const LiquidityTransferred = async () => {
+      const reward = await handleContractCall(
+        davContract,
+        "totalLiquidityTransferred",
+        [],
+        (r) => ethers.formatUnits(r, 18)
+      );
+      setLPStateTransferred(reward);
+    };
 
   const releaseNextBatch = async () => {
     await handleContractCall(davContract, "releaseNextBatch");
   };
-  //main useEffect
   useEffect(() => {
     let interval;
 
     const fetchLiveData = async () => {
       if (davContract && stateContract && RatioContract) {
         try {
-          await DavHoldings();
-          await DavHoldingsPercentage();
-          await StateHoldings();
-          await DavSupply();
-          await ViewDistributedTokens();
-          await getBurnedSTATE();
-          await calculateBurnAmount();
-          await ratioOfBurn();
-          await calculateOnePercentBurnAmount();
-          await GetCurrentStateReward();
-          await StateTokenBurnRatio();
-          await getRatioTarget();
-          await isAuctionRunning();
-          await LpTokenAmount();
-          await DAVTokenAmount();
-          await DAVTokenfive_Amount();
+          // Individual function calls with error handling
+          try {
+            await DavHoldings();
+          } catch (error) {
+            console.error("Error fetching DavHoldings:", error);
+          }
+
+          try {
+            await DavHoldingsPercentage();
+          } catch (error) {
+            console.error("Error fetching DavHoldingsPercentage:", error);
+          }
+
+          try {
+            await StateHoldings();
+          } catch (error) {
+            console.error("Error fetching StateHoldings:", error);
+          }
+
+          try {
+            await DavSupply();
+          } catch (error) {
+            console.error("Error fetching DavSupply:", error);
+          }
+          try {
+            await LiquidityTransferred();
+          } catch (error) {
+            console.error("Error fetching DavSupply:", error);
+          }
+
+          try {
+            await ViewDistributedTokens();
+          } catch (error) {
+            console.error("Error fetching ViewDistributedTokens:", error);
+          }
+
+          try {
+            await getBurnedSTATE();
+          } catch (error) {
+            console.error("Error fetching getBurnedSTATE:", error);
+          }
+
+          try {
+            await calculateBurnAmount();
+          } catch (error) {
+            console.error("Error fetching calculateBurnAmount:", error);
+          }
+
+          try {
+            await ratioOfBurn();
+          } catch (error) {
+            console.error("Error fetching ratioOfBurn:", error);
+          }
+
+          try {
+            await calculateOnePercentBurnAmount();
+          } catch (error) {
+            console.error(
+              "Error fetching calculateOnePercentBurnAmount:",
+              error
+            );
+          }
+
+          // Uncomment if needed
+          // try {
+          //   await GetCurrentStateReward();
+          // } catch (error) {
+          //   console.error("Error fetching GetCurrentStateReward:", error);
+          // }
+
+          try {
+            await StateTokenBurnRatio();
+          } catch (error) {
+            console.error("Error fetching StateTokenBurnRatio:", error);
+          }
+
+          try {
+            await getRatioTarget();
+          } catch (error) {
+            console.error("Error fetching getRatioTarget:", error);
+          }
+
+          try {
+            await isAuctionRunning();
+          } catch (error) {
+            console.error("Error fetching isAuctionRunning:", error);
+          }
+
+          try {
+            await LpTokenAmount();
+          } catch (error) {
+            console.error("Error fetching LpTokenAmount:", error);
+          }
+
+          try {
+            await DAVTokenAmount();
+          } catch (error) {
+            console.error("Error fetching DAVTokenAmount:", error);
+          }
+
+          try {
+            await DAVTokenfive_Amount();
+          } catch (error) {
+            console.error("Error fetching DAVTokenfive_Amount:", error);
+          }
         } catch (error) {
           console.error("Error fetching live data:", error);
         }
@@ -623,7 +721,8 @@ export const DAVTokenProvider = ({ children }) => {
   const handleAddTokenRatio = () =>
     handleAddToken(Ratio_TOKEN_ADDRESS, "Fluxin");
   const handleAddTokenDAV = () => handleAddToken(DAV_TOKEN_ADDRESS, "tDAV");
-  const handleAddTokenState = () => handleAddToken(STATE_TOKEN_ADDRESS, "tState");
+  const handleAddTokenState = () =>
+    handleAddToken(STATE_TOKEN_ADDRESS, "tState");
 
   return (
     <DAVTokenContext.Provider
@@ -639,7 +738,7 @@ export const DAVTokenProvider = ({ children }) => {
         TotalCost,
         GetStateRewards,
         StateReward,
-        GetCurrentStateReward,
+        // GetCurrentStateReward,
         CurrentSReward,
         DavHoldings,
         davHolds,
@@ -649,6 +748,7 @@ export const DAVTokenProvider = ({ children }) => {
         StateHolds,
         DavSupply,
         Supply,
+		LPStateTransferred,
         getBurnedSTATE,
         StartMarketPlaceListing,
         ClaimTokens,
