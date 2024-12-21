@@ -33,6 +33,7 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
         address _stateToken,
         address _liquidityWallet,
         address _developmentWallet,
+        address Governance,
         string memory tokenName,
         string memory TokenSymbol
     )
@@ -41,7 +42,20 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
         stateToken = IERC20(_stateToken);
         liquidityWallet = _liquidityWallet;
         developmentWallet = _developmentWallet;
+        governanceAddress = Governance;
     }
+
+    address public governanceAddress;
+
+    // Modifier to check if the sender is the governance address
+    modifier onlyGovernance() {
+        require(
+            msg.sender == governanceAddress,
+            "You are not authorized to perform this action"
+        );
+        _;
+    }
+    uint256 public totalLiquidityTransferred; // Tracks the total amount sent to the liquidity wallet
 
     /**
      * @dev Mint DAV tokens by paying PLS.
@@ -58,25 +72,62 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
         uint256 cost = (amount / 1 ether) * TOKEN_COST;
         require(msg.value == cost, "Incorrect PLS amount sent");
 
-        uint256 stateReward = getStateReward(amount);
+        // Get adjusted state reward and liquidity reward
+        uint256 adjustedReward = getAdjustedReward(amount);
+        uint256 liquidityReward = getLiquidityReward(amount);
+
+        // Ensure the contract has enough STATE tokens for rewards
+        require(
+            stateToken.balanceOf(address(this)) >=
+                adjustedReward + liquidityReward,
+            "Insufficient STATE in treasury"
+        );
 
         // Mint DAV tokens to user
         _mint(msg.sender, amount);
         mintedSupply += amount;
 
-        // Mint STATE tokens to user
+        // Track the user as a DAV holder
+        trackDAVHolder(address(0), msg.sender);
 
-        require(
-            stateToken.balanceOf(address(this)) >= stateReward,
-            "Insufficient STATE in treasury"
-        );
+        // Mint adjusted STATE tokens to user
+        stateToken.transfer(msg.sender, adjustedReward);
 
-        stateToken.transfer(msg.sender, stateReward);
+        stateToken.transfer(liquidityWallet, liquidityReward);
+        totalLiquidityTransferred += liquidityReward;
 
-        // Distribute PLS
-        distributeFunds();
+        emit TokensMinted(msg.sender, amount, adjustedReward);
+    }
 
-        emit TokensMinted(msg.sender, amount, stateReward);
+    /**
+     * @dev Calculate the STATE reward based on the current batch.
+     * @param amount The amount of DAV tokens minted.
+     * @return The amount of STATE tokens to mint.
+     */
+    function getAdjustedReward(uint256 amount) public view returns (uint256) {
+        uint256 baseReward = INITIAL_STATE_REWARD -
+            (currentBatch - 1) *
+            STATE_REWARD_DECREMENT;
+        uint256 totalReward = (amount / 1 ether) * baseReward;
+        return totalReward;
+    }
+
+    function getLiquidityReward(uint256 amount) public view returns (uint256) {
+        uint256 baseReward = INITIAL_STATE_REWARD -
+            (currentBatch - 1) *
+            STATE_REWARD_DECREMENT;
+        uint256 totalReward = (amount / 1 ether) * baseReward;
+        uint256 liquidityReward = (totalReward * 35) / 1000; // 3.5% of the reward
+        return liquidityReward;
+    }
+
+    function getCurrentStateReward() public view returns (uint256) {
+        uint256 currentBatched = (mintedSupply / BATCH_SIZE) + 1;
+        uint256 baseReward = INITIAL_STATE_REWARD -
+            (currentBatched - 1) *
+            STATE_REWARD_DECREMENT;
+        require(baseReward >= 0, "Reward cannot be negative");
+        return baseReward;
     }
 
     /**
@@ -147,9 +198,11 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
      * @param user The address of the user.
      * @return The percentage of the user's holdings relative to total DAV supply.
      */
-    function getUserHoldingPercentage(
-        address user
-    ) public view returns (uint256) {
+    function getUserHoldingPercentage(address user)
+        public
+        view
+        returns (uint256)
+    {
         uint256 userBalance = balanceOf(user);
         uint256 totalSupply = totalSupply();
         if (totalSupply == 0) {
@@ -159,52 +212,63 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
     }
 
     /**
-     * @dev Calculate the STATE reward based on the current batch.
-     * @param amount The amount of DAV tokens minted.
-     * @return The amount of STATE tokens to mint.
-     */
-    function getStateReward(uint256 amount) public view returns (uint256) {
-        uint256 baseReward = INITIAL_STATE_REWARD -
-            (currentBatch - 1) *
-            STATE_REWARD_DECREMENT;
-        return (amount / 1 ether) * baseReward;
-    }
-
-    /**
-     * @dev Show the current STATE token reward per DAV token minted.
-     * @return The current STATE token reward per DAV token.
-     */
-    function getCurrentStateReward() public view returns (uint256) {
-        uint256 currentBatched = (mintedSupply / BATCH_SIZE) + 1;
-        uint256 baseReward = INITIAL_STATE_REWARD -
-            (currentBatched - 1) *
-            STATE_REWARD_DECREMENT;
-        require(baseReward >= 0, "Reward cannot be negative");
-        return baseReward;
-    }
-
-    /**
      * @dev Distribute incoming PLS funds.
      */
-    function distributeFunds() internal {
-        uint256 liquidityShare = (msg.value * 95) / 100;
-        uint256 developmentShare = msg.value - liquidityShare;
+
+    function calculateShare(uint256 totalAmount, uint256 percentage)
+        public
+        pure
+        returns (uint256)
+    {
+        require(percentage <= 100, "Invalid percentage");
+        return (totalAmount * percentage) / 100;
+    }
+
+    function withdrawLiquidityShare() external onlyGovernance {
+        uint256 liquidityShare = calculateShare(address(this).balance, 95);
+        require(
+            address(this).balance >= liquidityShare,
+            "Insufficient balance"
+        );
 
         (bool successLiquidity, ) = liquidityWallet.call{value: liquidityShare}(
             ""
         );
         require(successLiquidity, "Liquidity transfer failed");
 
+        emit FundsWithdrawn(msg.sender, liquidityWallet, liquidityShare);
+    }
+
+    function withdrawDevelopmentShare() external onlyGovernance {
+        uint256 developmentShare = calculateShare(address(this).balance, 5);
+        require(
+            address(this).balance >= developmentShare,
+            "Insufficient balance"
+        );
+
         (bool successDevelopment, ) = developmentWallet.call{
             value: developmentShare
         }("");
         require(successDevelopment, "Development transfer failed");
+
+        emit FundsWithdrawn(msg.sender, developmentWallet, developmentShare);
     }
+
+    function balacneETH() public view returns (uint256) {
+        return address(this).balance;
+    }
+
+    // Event for logging withdrawals
+    event FundsWithdrawn(
+        address indexed executor,
+        address indexed recipient,
+        uint256 amount
+    );
 
     /**
      * @dev Release the next batch of DAV tokens for minting.
      */
-    function releaseNextBatch() external onlyOwner {
+    function releaseNextBatch() external onlyGovernance {
         require(
             currentBatch * BATCH_SIZE < MAX_SUPPLY,
             "No more batches available"
@@ -217,7 +281,7 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
      * @dev Update the STATE token contract address.
      * @param _stateToken The address of the new STATE token contract.
      */
-    function updateStateToken(address _stateToken) external onlyOwner {
+    function updateStateToken(address _stateToken) external onlyGovernance {
         require(_stateToken != address(0), "Invalid address");
         stateToken = IERC20(_stateToken);
     }
@@ -226,9 +290,10 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
      * @dev Update the liquidity wallet address.
      * @param _liquidityWallet The new liquidity wallet address.
      */
-    function updateLiquidityWallet(
-        address _liquidityWallet
-    ) external onlyOwner {
+    function updateLiquidityWallet(address _liquidityWallet)
+        external
+        onlyGovernance
+    {
         require(_liquidityWallet != address(0), "Invalid address");
         liquidityWallet = _liquidityWallet;
     }
@@ -237,13 +302,13 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
      * @dev Update the development wallet address.
      * @param _developmentWallet The new development wallet address.
      */
-    function updateDevelopmentWallet(
-        address _developmentWallet
-    ) external onlyOwner {
+    function updateDevelopmentWallet(address _developmentWallet)
+        external
+        onlyGovernance
+    {
         require(_developmentWallet != address(0), "Invalid address");
         developmentWallet = _developmentWallet;
     }
-	
 
     /**
      * @dev Fallback function to accept PLS.

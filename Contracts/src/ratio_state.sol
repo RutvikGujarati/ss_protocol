@@ -27,11 +27,12 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
     // Percentages (basis points)
     uint256 public constant PERCENT_DAV_HOLDERS = 1500; // 15%
     uint256 public constant PERCENT_LP_TREASURY = 2500; // 25%
-    uint256 public constant PERCENT_DAV_TREASURY = 6000; // 60%
+    uint256 public constant PERCENT_DAV_TREASURY = 5500; // 55%
     uint256 public constant PERCENT_DEV_TREASURY = 500; // 5%
 
     // Events
     event AuctionStarted(uint256 indexed auctionStartTime);
+    event AuctionEnded(uint256 indexed auctionEndTime);
     event TokensDistributedToHolders(uint256 amount, uint256 holderCount);
     event TokensBurned(uint256 amount, address indexed burnedBy);
     event TokensBurn(address indexed burner, uint256 amount);
@@ -70,6 +71,17 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
             )
         );
 
+    address public governanceAddress =
+        0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483;
+
+    // Modifier to check if the sender is the governance address
+    modifier onlyGovernance() {
+        require(
+            msg.sender == governanceAddress,
+            "You are not authorized to perform this action"
+        );
+        _;
+    }
     struct Distribution {
         uint256 toDAVHolders;
         uint256 toLiquidity;
@@ -87,36 +99,46 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
 
     constructor(
         address _davTokenAddress,
+        string memory name,
+        string memory symbol,
         address _StateTokenAddress
-    ) ERC20("Fluxin", "Fluxin") {
+    ) ERC20(name, symbol) {
         davToken = DAVToken(payable(_davTokenAddress));
         StateToken = STATEToken(_StateTokenAddress);
-        lastAuctionTime = block.timestamp;
-        _mint(address(this), 100000000 * 10 ** 18);
-    }
-
-    function mint(uint256 amount) public onlyOwner {
-        _mint(msg.sender, amount);
+        // lastAuctionTime = block.timestamp;
+        _mint(address(this), 100000000 * 10**18);
     }
 
     // ================= Auction Functions =================
 
-    function startAuction() external onlyOwner {
+    function startAuction() external onlyGovernance {
         require(
-            block.timestamp >= lastAuctionTime + auctionInterval,
+            block.timestamp >= lastAuctionTime + auctionDuration,
             "Auction interval not reached"
         );
         lastAuctionTime = block.timestamp;
+        distributeToHolders();
         emit AuctionStarted(block.timestamp);
     }
 
-    // ================= Listing Detection and Distribution =================
-
-    function notifyMarketplaceListing() external onlyOwner {
-        // Start the distribution
-        emit ListedOnMarketplace();
-        distributeToHolders();
+    function checkAndEndAuction() external {
+        uint256 auctionEndTime = lastAuctionTime + auctionDuration;
+        if (block.timestamp >= auctionEndTime) {
+            emit AuctionEnded(block.timestamp);
+            lastAuctionTime = 0;
+        }
     }
+
+    function isAuctionRunning() external view returns (bool) {
+        if (lastAuctionTime == 0) {
+            return false; // Auction hasn't started
+        }
+
+        uint256 auctionEndTime = lastAuctionTime + auctionDuration;
+        return block.timestamp < auctionEndTime; // Returns true if the auction is still running
+    }
+
+    // ================= Listing Detection and Distribution =================
 
     function distributeToHolders() internal {
         uint256 distributionAmount = (totalSupply() * PERCENT_DAV_HOLDERS) /
@@ -150,6 +172,10 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
     // Swap STATE tokens for Listed Tokens
     function swapSTATEForListedTokens(uint256 _amount) external {
         require(_amount > 0, "Amount must be greater than 0");
+
+        // Ensure auction is active before swapping
+        uint256 auctionEndTime = lastAuctionTime + auctionDuration;
+        require(block.timestamp < auctionEndTime, "Auction has ended");
 
         StateToken.transferFrom(msg.sender, BurnAddress, _amount);
 
@@ -190,26 +216,10 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
         emit SwapExecuted(msg.sender, stateTokensAmount, _amount);
     }
 
-    function transferTokens(uint256 amount) public {
-        // Ensure the contract has enough balance to transfer
-        uint256 contractBalance = balanceOf(address(this));
-        require(contractBalance >= amount, "Insufficient balance in contract");
-
-        // Transfer tokens from the contract to the sender (msg.sender)
-        bool success = transfer(msg.sender, amount);
-        require(success, "Transfer failed");
-    }
-
-    function calculateCurrentRatio() public view returns (uint256) {
-        uint256 stateTokenSupply = StateToken.totalSupply();
-        uint256 listedTokenSupply = totalSupply(); // This contract's token supply
-
-        require(listedTokenSupply > 0, "No listed tokens available");
-
-        return (stateTokenSupply * 1e18) / listedTokenSupply; // Ratio scaled by 1e18
-    }
-
     function burnAndDistributeListedTokens() external {
+        uint256 auctionEndTime = lastAuctionTime + auctionDuration;
+        require(block.timestamp >= auctionEndTime, "Auction not ended yet");
+
         uint256 burnRatio = getStateBurnRatio(); // Retrieve the burn ratio (scaled by 1e18)
 
         // Calculate the total burnable amount based on the ratio
@@ -245,51 +255,99 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
     }
 
     // ================= Claim Function =================
-
     function claimTokens() external {
         uint256 amount = claimableTokens[msg.sender];
         require(amount > 0, "No claimable tokens available");
 
         // Transfer tokens to the claimant
         claimableTokens[msg.sender] = 0;
-        transfer(msg.sender, amount);
+        _transfer(address(this), msg.sender, amount);
 
         emit Claimed(msg.sender, amount);
     }
 
     // ================= View Functions =================
 
-    function viewClaimableTokens(
-        address holder
-    ) external view returns (uint256) {
+    function viewClaimableTokens(address holder)
+        external
+        view
+        returns (uint256)
+    {
         return claimableTokens[holder];
     }
 
     // ================= Treasury and Burn Functions =================
 
-    function allocateTokens(uint256 amount) external onlyOwner {
+    function allocateTokens() external onlyGovernance {
+        uint256 amount = balanceOf(address(this));
+        require(amount > 0, "No tokens available for allocation");
+        require(
+            PERCENT_LP_TREASURY + PERCENT_DAV_TREASURY + PERCENT_DEV_TREASURY ==
+                9000,
+            "Percentage allocation mismatch"
+        );
+
         uint256 toLPTreasury = (amount * PERCENT_LP_TREASURY) / 10000;
         uint256 toDAVTreasury = (amount * PERCENT_DAV_TREASURY) / 10000;
         uint256 toDevTreasury = (amount * PERCENT_DEV_TREASURY) / 10000;
 
-        transfer(lpTreasury, toLPTreasury);
-        transfer(davTreasury, toDAVTreasury);
-        transfer(devTreasury, toDevTreasury);
+        require(
+            toLPTreasury + toDAVTreasury + toDevTreasury <= amount,
+            "Allocation exceeds total balance"
+        );
+
+        _transfer(address(this), lpTreasury, toLPTreasury);
+        _transfer(address(this), davTreasury, toDAVTreasury);
+        _transfer(address(this), devTreasury, toDevTreasury);
     }
 
-    function burnTokens(uint256 amount) external onlyOwner {
-        _burn(msg.sender, amount);
-        totalBurned += amount;
-        emit TokensBurned(amount, msg.sender);
+    function WithdrawLPTokens() external onlyGovernance {
+        uint256 amount = balanceOf(address(this));
+        require(amount > 0, "No tokens available for withdrawal");
+        require(PERCENT_LP_TREASURY > 0, "LP treasury percentage is not set");
+
+        uint256 toLPTreasury = (amount * PERCENT_LP_TREASURY) / 10000;
+        require(toLPTreasury <= amount, "Withdrawal exceeds total balance");
+
+        _transfer(address(this), msg.sender, toLPTreasury);
+    }
+
+    function WithdrawDAVTreasuryTokens() external onlyGovernance {
+        uint256 amount = balanceOf(address(this));
+        require(amount > 0, "No tokens available for withdrawal");
+        require(PERCENT_DAV_TREASURY > 0, "DAV treasury percentage is not set");
+
+        uint256 toDAVTreasury = (amount * PERCENT_DAV_TREASURY) / 10000;
+        require(toDAVTreasury <= amount, "Withdrawal exceeds total balance");
+
+        _transfer(address(this), msg.sender, toDAVTreasury);
     }
 
     // ================= Admin Functions =================
 
-    function updateAuctionInterval(uint256 interval) external onlyOwner {
+    function updateAuctionInterval(uint256 interval) external onlyGovernance {
         auctionInterval = interval;
     }
 
-    function withdrawTokens(uint256 amount) external onlyOwner {
+    uint256 public numerator;
+    uint256 public denominator;
+
+    // Function to set the ratio
+    function setRatioTarget(uint256 _numerator, uint256 _denominator)
+        external
+        onlyGovernance
+    {
+        require(_denominator > 0, "Denominator cannot be zero");
+        numerator = _numerator;
+        denominator = _denominator;
+    }
+
+    // Function to get the ratio as two values
+    function getRatioTarget() external view returns (uint256, uint256) {
+        return (numerator, denominator);
+    }
+
+    function withdrawTokens(uint256 amount) external onlyGovernance {
         transfer(msg.sender, amount);
     }
 

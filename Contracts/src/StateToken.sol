@@ -9,13 +9,21 @@ contract STATEToken is ERC20, Ownable(msg.sender) {
     uint256 public constant MINT_THRESHOLD = 1000000000000 ether; // 1 Trillion Tokens
     uint256 public constant MINT_AMOUNT = 1000000000000 ether; // 1 Trillion Tokens
     address public constant burnAddress =
-	0x0000000000000000000000000000000000000369; // Burn Address
+        0x0000000000000000000000000000000000000369; // Burn Address
     uint256 public burnedTokens;
 
-    constructor(
-        string memory tokenName,
-        string memory TokenSymbol
-    )
+    address public governanceAddress;
+
+    // Modifier to check if the sender is the governance address
+    modifier onlyGovernance() {
+        require(
+            msg.sender == governanceAddress,
+            "You are not authorized to perform this action"
+        );
+        _;
+    }
+
+    constructor(string memory tokenName, string memory TokenSymbol)
         // ERC20("pSTATE", "STATE")
         ERC20(tokenName, TokenSymbol)
     {
@@ -38,6 +46,33 @@ contract STATEToken is ERC20, Ownable(msg.sender) {
             "Insufficient tokens in treasury"
         );
         _transfer(address(this), to, amount);
+    }
+
+    /**
+     * @dev Get the user's DAV token holdings in numbers.
+     * @param user The address of the user.
+     * @return The DAV token balance of the user.
+     */
+    function getDAVHoldings(address user) public view returns (uint256) {
+        return balanceOf(user);
+    }
+
+    /**
+     * @dev Get the user's percentage of total DAV token holdings.
+     * @param user The address of the user.
+     * @return The percentage of the user's holdings relative to total DAV supply.
+     */
+    function getUserHoldingPercentage(address user)
+        public
+        view
+        returns (uint256)
+    {
+        uint256 userBalance = balanceOf(user);
+        uint256 totalSupply = totalSupply();
+        if (totalSupply == 0) {
+            return 0;
+        }
+        return (userBalance * 1e18) / totalSupply; // Return percentage as a scaled value (1e18 = 100%).
     }
 
     // Burn tokens and track the burn amount
