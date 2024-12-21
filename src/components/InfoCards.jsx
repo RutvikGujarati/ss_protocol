@@ -105,7 +105,7 @@ const InfoCards = () => {
                     <div className="carddetails">
                       <p className="mb-1 detailText">STATE TOKEN REWARD</p>
                       <h5 className="detailAmount">
-                        {formatNumber("50000000")}
+                        {formatNumber(CurrentSReward)}
                       </h5>
                     </div>
                     <div className="carddetails text-center">

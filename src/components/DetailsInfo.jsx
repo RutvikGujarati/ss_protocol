@@ -19,6 +19,7 @@ const DetailsInfo = ({ searchQuery }) => {
     setRatioTarget,
     LPStateTransferred,
     DAVTokensWithdraw,
+    releaseNextBatch,
     DAVTokensFiveWithdraw,
   } = useDAVToken();
 
@@ -44,9 +45,11 @@ const DetailsInfo = ({ searchQuery }) => {
       BatchRelease: "1M",
       claimDAVToken: DAVTokensWithdraw,
       claimFiveDAVToken: DAVTokensFiveWithdraw,
+
       renounceSmartContract: "No",
       actions: {
         claimDAVToken: withdraw_95,
+        releaseToken: releaseNextBatch,
         claimFiveDAVToken: withdraw_5,
       },
     },
@@ -327,15 +330,15 @@ const DetailsInfo = ({ searchQuery }) => {
                   Release Next batch DAV Token
                 </td>
                 <td>
-                  <div
-                    onClick={dataToShow.actions.claimFiveDAVToken}
-                    className="tableClaim w-100"
-                  >
+                  <div className="tableClaim w-100">
                     {dataToShow.BatchRelease || ""}
                   </div>
                 </td>
                 <td className="d-flex justify-content-end">
-                  <button className="btn btn-primary btn-sm swap-btn info-icon">
+                  <button
+                    onClick={dataToShow.actions.releaseToken}
+                    className="btn btn-primary btn-sm swap-btn info-icon"
+                  >
                     Release
                   </button>
                 </td>

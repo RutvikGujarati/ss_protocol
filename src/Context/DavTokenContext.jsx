@@ -7,8 +7,8 @@ import RatioABI from "../ABI/RatioABI.json";
 import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
-
-export const DAV_TOKEN_ADDRESS = "0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3";
+//0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
+export const DAV_TOKEN_ADDRESS = "0x2665a03c2515dc13A2D441Aa7dE1A5A344a8fD43";
 export const STATE_TOKEN_ADDRESS = "0xFed740728a32d4f0519732095B4f6c5B752EAaF7";
 export const Ratio_TOKEN_ADDRESS = "0xAE79930e57BB2EA8dde7381AC6d338A706386bAe";
 
@@ -200,24 +200,24 @@ export const DAVTokenProvider = ({ children }) => {
     setSupply(supply);
   };
 
-  //   const GetCurrentStateReward = async () => {
-  //     const reward = await handleContractCall(
-  //       davContract,
-  //       "getAdjustedReward",
-  //       [],
-  //       (r) => ethers.formatUnits(r, 18)
-  //     );
-  //     setCurrentSReward(reward);
-  //   };
-    const LiquidityTransferred = async () => {
-      const reward = await handleContractCall(
-        davContract,
-        "totalLiquidityTransferred",
-        [],
-        (r) => ethers.formatUnits(r, 18)
-      );
-      setLPStateTransferred(reward);
-    };
+  const GetCurrentStateReward = async () => {
+    const reward = await handleContractCall(
+      davContract,
+      "getCurrentStateReward",
+      [],
+      (r) => ethers.formatUnits(r, 18)
+    );
+    setCurrentSReward(reward);
+  };
+  const LiquidityTransferred = async () => {
+    const reward = await handleContractCall(
+      davContract,
+      "totalLiquidityTransferred",
+      [],
+      (r) => ethers.formatUnits(r, 18)
+    );
+    setLPStateTransferred(reward);
+  };
 
   const releaseNextBatch = async () => {
     await handleContractCall(davContract, "releaseNextBatch");
@@ -292,11 +292,11 @@ export const DAVTokenProvider = ({ children }) => {
           }
 
           // Uncomment if needed
-          // try {
-          //   await GetCurrentStateReward();
-          // } catch (error) {
-          //   console.error("Error fetching GetCurrentStateReward:", error);
-          // }
+          try {
+            await GetCurrentStateReward();
+          } catch (error) {
+            console.error("Error fetching GetCurrentStateReward:", error);
+          }
 
           try {
             await StateTokenBurnRatio();
@@ -382,6 +382,7 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
+ 
   const ClaimLPTokens = async () => {
     try {
       setClaiming(true);
@@ -748,7 +749,7 @@ export const DAVTokenProvider = ({ children }) => {
         StateHolds,
         DavSupply,
         Supply,
-		LPStateTransferred,
+        LPStateTransferred,
         getBurnedSTATE,
         StartMarketPlaceListing,
         ClaimTokens,
