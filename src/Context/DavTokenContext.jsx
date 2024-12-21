@@ -8,9 +8,9 @@ import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
-export const DAV_TOKEN_ADDRESS = "0x2665a03c2515dc13A2D441Aa7dE1A5A344a8fD43";
-export const STATE_TOKEN_ADDRESS = "0xFed740728a32d4f0519732095B4f6c5B752EAaF7";
-export const Ratio_TOKEN_ADDRESS = "0xAE79930e57BB2EA8dde7381AC6d338A706386bAe";
+export const DAV_TOKEN_ADDRESS = "0x62f137FA7D7f7FC42c38dEd023C16D383634a4bD";
+export const STATE_TOKEN_ADDRESS = "0xd3be2DAF0c9DE0bAd53b74040d9745A373381f64";
+export const Ratio_TOKEN_ADDRESS = "0x0Bd9BA2FF4F82011eeC33dd84fc09DC89ac5B5EA";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -123,7 +123,7 @@ export const DAVTokenProvider = ({ children }) => {
 
   const mintDAV = async (amount) => {
     const value = ethers.parseEther(amount.toString());
-    const cost = ethers.parseEther((amount * 10).toString()); // org - 100000
+    const cost = ethers.parseEther((amount * 100000).toString()); // org - 100000
     await handleContractCall(davContract, "mintDAV", [value, { value: cost }]);
   };
 

@@ -43,31 +43,25 @@ const App = () => {
             </>
           }
         />
-        <Route
-          path="/info"
-          element={
-            <>
-              <div className="container mt-3">
-                <div className="row g-4">
-                  <div className="col-md-4 d-flex align-items-stretch">
-                    {/* Pass setSearchQuery to update the search input */}
-                    <SearchInfo
-                      setSearchQuery={setSearchQuery}
-                      onTokenSelect={setSelectedToken}
-                    />
-                  </div>
-                  <div className="col-md-8">
-                    {/* Pass searchQuery to filter the details */}
-                    <DetailsInfo
-                      searchQuery={searchQuery}
-                      selectedToken={selectedToken}
-                    />
-                  </div>
+      <Route
+        path="/info"
+        element={
+          <>
+            <div className="container mt-3">
+              <div className="row g-4">
+                <div className="col-md-4 d-flex align-items-stretch">
+                  {/* Pass setSearchQuery to update the search input */}
+                  <SearchInfo setSearchQuery={setSearchQuery} />
+                </div>
+                <div className="col-md-8">
+                  {/* Pass searchQuery to filter the details */}
+                  <DetailsInfo searchQuery={searchQuery} />
                 </div>
               </div>
-            </>
-          }
-        />
+            </div>
+          </>
+        }
+      />
       </Routes>
     </Router>
   );
