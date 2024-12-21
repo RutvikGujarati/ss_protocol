@@ -121,6 +121,9 @@ table.table-dark tbody tr:last-child td:last-child {
   width: 40px;
   height: 40px;
 }
+.nameImage{
+	cursor: pointer;
+}
 
 .nameImage img:hover{
   transform: scale(2);
