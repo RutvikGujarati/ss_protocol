@@ -26,7 +26,6 @@ const DetailsInfo = ({ searchQuery }) => {
   const [numerator, setNumerator] = useState("");
   const [Denominator, setDenominator] = useState("");
   const auctionStatus = AuctionRunning ? "True" : "False";
-  const FluxinAddress = "0xAE79930e57BB2EA8dde7381AC6d338A706386bAe";
 
   const shortenAddress = (address) => {
     if (!address) return "";
@@ -75,25 +74,7 @@ const DetailsInfo = ({ searchQuery }) => {
       },
     },
     //left of implementation
-    {
-      tokenName: "Xerion",
-      key: "XRN",
-      supply: "2M",
-      ratioTarget: "1:2",
-      auctionAllocation: "30%",
-      davTreasurySupply: "1M",
-      ratioTargetAmend: "1:2 Trillion",
-      claimLPToken: "1M",
-      claimDAVToken: "1M",
-      renounceSmartContract: "No",
-      actions: {
-        claimLPToken: ClaimLPTokens,
-        claimDAVToken: withdraw_95,
-        claimFiveDAVToken: withdraw_5,
-        startAuction: StartMarketPlaceListing,
-        setRatioTarget: () => setRatioTarget(numerator, Denominator), // Using dynamic parameters
-      },
-    },
+
     //state token
     {
       tokenName: "State",
@@ -108,44 +89,7 @@ const DetailsInfo = ({ searchQuery }) => {
         claimFiveDAVToken: withdraw_5,
       },
     },
-    {
-      tokenName: "Rutvik",
-      key: "RT",
-      supply: "5M",
-      ratioTarget: "1:5",
-      auctionAllocation: "70%",
-      davTreasurySupply: "1M",
-      ratioTargetAmend: "1:2 Trillion",
-      claimLPToken: "1M",
-      claimDAVToken: "1M",
-      renounceSmartContract: "No",
-      actions: {
-        claimLPToken: ClaimLPTokens,
-        claimDAVToken: withdraw_95,
-        claimFiveDAVToken: withdraw_5,
-        startAuction: StartMarketPlaceListing,
-        setRatioTarget: () => setRatioTarget(numerator, Denominator), // Using dynamic parameters
-      },
-    },
-    {
-      tokenName: "Polaris",
-      key: "PLR",
-      supply: "3M",
-      ratioTarget: "1:3",
-      auctionAllocation: "40%",
-      davTreasurySupply: "1.2M",
-      ratioTargetAmend: "1:3 Quadrillion",
-      claimLPToken: "1.2M",
-      claimDAVToken: "1.2M",
-      renounceSmartContract: "Yes",
-      actions: {
-        claimLPToken: ClaimLPTokens,
-        claimDAVToken: withdraw_95,
-        claimFiveDAVToken: withdraw_5,
-        startAuction: StartMarketPlaceListing,
-        setRatioTarget: () => setRatioTarget(numerator, Denominator), // Using dynamic parameters
-      },
-    },
+
   ];
 
   const handleInputChange = (e, field) => {
