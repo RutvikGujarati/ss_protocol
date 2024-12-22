@@ -8,8 +8,8 @@ import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
-export const DAV_TOKEN_ADDRESS = "0x62f137FA7D7f7FC42c38dEd023C16D383634a4bD";
-export const STATE_TOKEN_ADDRESS = "0xd3be2DAF0c9DE0bAd53b74040d9745A373381f64";
+export const DAV_TOKEN_ADDRESS = "0xfE4f05eB83aFd46D1bBd8fF9Bbcc53E7886B2830";
+export const STATE_TOKEN_ADDRESS = "0xD895C3A76bd18669A4506B461b8Da7fB8F41f2e6";
 export const Ratio_TOKEN_ADDRESS = "0x0Bd9BA2FF4F82011eeC33dd84fc09DC89ac5B5EA";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
@@ -39,6 +39,11 @@ export const DAVTokenProvider = ({ children }) => {
   const [Supply, setSupply] = useState("0.0");
   const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
   const [DAVTokensFiveWithdraw, setFiveAvTokens] = useState("0.0");
+  const [LastLiquidity, setLastLiquidityTransaction] = useState("0.0");
+  const [LastDevShare, setLastDevShare] = useState("0.0");
+  const [Batch, setBatch] = useState("0.0");
+  const [BatchAmount, setBatchAmount] = useState("0.0");
+  const [StateBalance, setStateBalance] = useState("0.0");
   const [StateReward, setStateReward] = useState("0");
   const [Distributed, setViewDistributed] = useState("0.0");
   const [StateBurned, setStateBurnAMount] = useState("0.0");
@@ -122,9 +127,35 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   const mintDAV = async (amount) => {
-    const value = ethers.parseEther(amount.toString());
-    const cost = ethers.parseEther((amount * 100000).toString()); // org - 100000
-    await handleContractCall(davContract, "mintDAV", [value, { value: cost }]);
+    try {
+      const value = ethers.parseEther(amount.toString());
+      const cost = ethers.parseEther((amount * 100000).toString());
+
+      await handleContractCall(davContract, "mintDAV", [
+        value,
+        { value: cost },
+      ]);
+      console.log("Minting successful!");
+    } catch (error) {
+      console.error("Error during minting:", error);
+    }
+  };
+
+  const MoveTokens = async (amount) => {
+    try {
+      if (!amount || isNaN(amount)) {
+        throw new Error("Invalid amount");
+      }
+
+      const value = ethers.parseEther(amount.toString());
+
+      await handleContractCall(stateContract, "moveTokens", [
+        DAV_TOKEN_ADDRESS,
+        value,
+      ]);
+    } catch (error) {
+      console.error("Error in MoveTokens:", error);
+    }
   };
 
   const GetStateRewards = async (amount) => {
@@ -141,7 +172,7 @@ export const DAVTokenProvider = ({ children }) => {
   const CalculationOfCost = async (amount) => {
     setTotalCost(ethers.parseEther((amount * 100000).toString()));
   };
-  //DAV and STate token functions
+
   const DavHoldings = async () => {
     const holdings = await handleContractCall(
       davContract,
@@ -155,7 +186,7 @@ export const DAVTokenProvider = ({ children }) => {
     try {
       const holdings = await handleContractCall(
         stateContract,
-        "getDAVHoldings",
+        "balanceOf",
         [account],
         (h) => ethers.formatUnits(h, 18)
       );
@@ -219,9 +250,53 @@ export const DAVTokenProvider = ({ children }) => {
     setLPStateTransferred(reward);
   };
 
-  const releaseNextBatch = async () => {
-    await handleContractCall(davContract, "releaseNextBatch");
+  const releases = [
+    { dav: 1000000, releaseState: 50000000000000 },
+    { dav: 1000000, releaseState: 40000000000000 },
+    { dav: 1000000, releaseState: 30000000000000 },
+    { dav: 1000000, releaseState: 20000000000000 },
+    { dav: 1000000, releaseState: 10000000000000 },
+  ];
+
+  const releaseNextBatch = async (batchIndex) => {
+    try {
+      console.log("Batch Index:", batchIndex);
+
+      // Validate batchIndex and releases array
+      if (batchIndex < 0 || batchIndex >= releases.length) {
+        throw new Error("Invalid batch index");
+      }
+
+      const releaseData = releases[batchIndex];
+
+      // Ensure releaseData is not undefined
+      if (!releaseData) {
+        throw new Error(`No release data found for batch index ${batchIndex}`);
+      }
+
+      const { releaseState } = releaseData;
+
+      console.log(
+        `Releasing batch ${
+          batchIndex + 1
+        } with releaseState: ${releaseState}...`
+      );
+
+      // Call `releaseNextBatch` on DAV contract
+      await handleContractCall(davContract, "releaseNextBatch");
+
+      // Move tokens on the state contract
+      await handleContractCall(stateContract, "moveTokens", [
+        DAV_TOKEN_ADDRESS,
+        releaseState,
+      ]);
+
+      console.log(`Batch ${batchIndex + 1} released successfully.`);
+    } catch (error) {
+      console.error("Error releasing next batch:", error);
+    }
   };
+
   useEffect(() => {
     let interval;
 
@@ -321,6 +396,15 @@ export const DAVTokenProvider = ({ children }) => {
           } catch (error) {
             console.error("Error fetching LpTokenAmount:", error);
           }
+          try {
+            await LastLiquidityTransactionAMount();
+            await LastDevShareTransactionAMount();
+            await CurrentBatchAmount();
+            await TotalBatchReleased();
+            await DavContractStateBalance();
+          } catch (error) {
+            console.error("Error fetching LpTokenAmount:", error);
+          }
 
           try {
             await DAVTokenAmount();
@@ -382,6 +466,20 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
+  const ReanounceContract = async () => {
+    try {
+      await handleContractCall(davContract, "renounceOwnership", []);
+    } catch (e) {
+      console.error("Error claiming tokens:", e);
+    }
+  };
+  const RenounceState = async () => {
+    try {
+      await handleContractCall(stateContract, "renounceOwnership", []);
+    } catch (e) {
+      console.error("Error claiming tokens:", e);
+    }
+  };
 
   const ClaimLPTokens = async () => {
     try {
@@ -424,28 +522,116 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const calculateShare = async (percentage, setAmount) => {
-    try {
-      const balance = await handleContractCall(
-        davContract,
-        "balacneETH",
-        [],
-        (s) => ethers.formatUnits(s, 18)
-      );
-      const share = (parseFloat(balance) * percentage) / 100;
-      setAmount(share);
-    } catch (e) {
-      console.error(`Error fetching ${percentage}% share:`, e);
-      setAmount(null); // Handle error state
-    }
-  };
-
   const withdraw_5 = () => handleWithdraw("withdrawDevelopmentShare");
   const withdraw_95 = () => handleWithdraw("withdrawLiquidityShare");
 
-  const DAVTokenAmount = () => calculateShare(95, setDAvTokens);
-  const DAVTokenfive_Amount = () => calculateShare(5, setFiveAvTokens);
+  const DAVTokenAmount = async () => {
+    try {
+      const balance = await handleContractCall(
+        davContract,
+        "totalLiquidityAllocated",
+        [],
+        (s) => ethers.formatUnits(s, 18)
+      );
+      setDAvTokens(balance);
+    } catch (e) {
+      console.error("Error fetching LP tokens:", e);
+    }
+  };
+  const DAVTokenfive_Amount = async () => {
+    try {
+      const balance = await handleContractCall(
+        davContract,
+        "totalDevelopmentAllocated",
+        [],
+        (s) => ethers.formatUnits(s, 18)
+      );
+      setFiveAvTokens(balance);
+    } catch (e) {
+      console.error("Error fetching LP tokens:", e);
+    }
+  };
+  const LastLiquidityTransactionAMount = async () => {
+    try {
+      const transaction = await handleContractCall(
+        davContract,
+        "lastLiquidityTransaction",
+        []
+      );
 
+      const amount = ethers.formatUnits(transaction.amount, 18);
+
+      setLastLiquidityTransaction(amount);
+    } catch (e) {
+      console.error("Error fetching LP tokens:", e);
+    }
+  };
+  const LastDevShareTransactionAMount = async () => {
+    try {
+      const transaction = await handleContractCall(
+        davContract,
+        "lastDevelopmentTransaction",
+        []
+      );
+
+      const amount = ethers.formatUnits(transaction.amount, 18);
+
+      setLastDevShare(amount);
+    } catch (e) {
+      console.error("Error fetching LP tokens:", e);
+    }
+  };
+  const TotalBatchReleased = async () => {
+    try {
+      const transaction = await handleContractCall(
+        davContract,
+        "totalBatchesReleased",
+        []
+      );
+
+      const transactionInWei = ethers.parseUnits(transaction.toString(), 18);
+
+      const transactionInEther = ethers.formatUnits(transactionInWei, 18);
+
+      console.log("Transaction in Wei:", transactionInWei.toString());
+      console.log("Transaction in Ether:", transactionInEther);
+
+      setBatch(transactionInEther);
+    } catch (e) {
+      console.error("Error fetching LP tokens:", e);
+    }
+  };
+
+  const CurrentBatchAmount = async () => {
+    try {
+      const transaction = await handleContractCall(
+        davContract,
+        "totalTokensReleased",
+        [],
+        (s) => ethers.formatUnits(s, 18)
+      );
+
+      console.log("batch amount", transaction);
+      setBatchAmount(transaction);
+    } catch (e) {
+      console.error("Error fetching LP tokens:", e);
+    }
+  };
+  const DavContractStateBalance = async () => {
+    try {
+      const transaction = await handleContractCall(
+        stateContract,
+        "balanceOf",
+        [DAV_TOKEN_ADDRESS],
+        (s) => ethers.formatUnits(s, 18)
+      );
+
+      console.log("balance", transaction);
+      setStateBalance(transaction);
+    } catch (e) {
+      console.error("Error fetching LP tokens:", e);
+    }
+  };
   const SwapTokens = async (amount) => {
     try {
       // Step 0: Initial button state
@@ -763,6 +949,14 @@ export const DAVTokenProvider = ({ children }) => {
         OneListedTokenBurned,
         SwapTokens,
         ButtonText,
+		ReanounceContract,
+		RenounceState,
+        MoveTokens,
+        LastLiquidity,
+        LastDevShare,
+        Batch,
+        BatchAmount,
+        StateBalance,
         BurnTokenRatio,
         handleAddToken,
         setRatioTarget,

@@ -19,8 +19,16 @@ const DetailsInfo = ({ searchQuery }) => {
     setRatioTarget,
     LPStateTransferred,
     DAVTokensWithdraw,
+    StateBalance,
     releaseNextBatch,
+    RenounceState,
+    // MoveTokens,
+    ReanounceContract,
     DAVTokensFiveWithdraw,
+    LastLiquidity,
+    Batch,
+    BatchAmount,
+    LastDevShare,
   } = useDAVToken();
 
   const [numerator, setNumerator] = useState("");
@@ -42,14 +50,20 @@ const DetailsInfo = ({ searchQuery }) => {
       key: davShortened,
       supply: "5M",
       BatchRelease: "1M",
+
       claimDAVToken: DAVTokensWithdraw,
       claimFiveDAVToken: DAVTokensFiveWithdraw,
       address: DAV_TOKEN_ADDRESS,
       renounceSmartContract: "No",
+      BatchAmount: BatchAmount,
+      Batch: Batch,
+      LastDevShare: LastDevShare,
+      LastLiquidity: LastLiquidity,
       actions: {
         claimDAVToken: withdraw_95,
-        releaseToken: releaseNextBatch,
         claimFiveDAVToken: withdraw_5,
+        ReanounceContract: ReanounceContract,
+        // MoveTokens: () => MoveTokens(Amount),
       },
     },
     {
@@ -64,7 +78,7 @@ const DetailsInfo = ({ searchQuery }) => {
       address: Ratio_TOKEN_ADDRESS,
       claimFiveDAVToken: DAVTokensFiveWithdraw,
       startAuction: `Auction Status - ${auctionStatus}`,
-      renounceSmartContract: "Yes",
+      renounceSmartContract: "no",
       actions: {
         claimLPToken: ClaimLPTokens,
         claimDAVToken: withdraw_95,
@@ -87,9 +101,9 @@ const DetailsInfo = ({ searchQuery }) => {
       actions: {
         claimDAVToken: withdraw_95,
         claimFiveDAVToken: withdraw_5,
+        ReanounceContract: RenounceState,
       },
     },
-
   ];
 
   const handleInputChange = (e, field) => {
@@ -237,39 +251,53 @@ const DetailsInfo = ({ searchQuery }) => {
             <>
               <tr>
                 <td className="d-flex align-items-center">
-                  Claim 95% Liquidity share(PLS)
+                  total 95% Liquidity share(PLS) Transferred
                 </td>
                 <td>
                   <div className="tableClaim w-100">
                     {dataToShow.claimDAVToken || ""}
                   </div>
                 </td>
-                <td className="d-flex justify-content-end">
-                  <button
-                    onClick={dataToShow.actions.claimDAVToken}
-                    className="btn btn-primary btn-sm swap-btn info-icon"
-                  >
-                    Claim
-                  </button>
-                </td>
+                <td className="d-flex justify-content-end"></td>
               </tr>
               <tr>
                 <td className="d-flex align-items-center">
-                  Claim 5% Development share(PLS)
+                  Last 95% Send Transaction Amount
+                </td>
+                <td className="d-flex align-items-center justify-content-center">
+                  {dataToShow.LastLiquidity || ""}
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td className="d-flex align-items-center">
+                  total 5% Development share(PLS) Transferred
                 </td>
                 <td>
-                  <div
-                    onClick={dataToShow.actions.claimFiveDAVToken}
-                    className="tableClaim w-100"
-                  >
+                  <div className="tableClaim w-100">
                     {dataToShow.claimFiveDAVToken || ""}
                   </div>
                 </td>
-                <td className="d-flex justify-content-end">
-                  <button className="btn btn-primary btn-sm swap-btn info-icon">
-                    Claim
-                  </button>
+                <td className="d-flex justify-content-end"></td>
+              </tr>
+              <tr>
+                <td className="d-flex align-items-center">
+                  Last 5% Send Transaction Amount
                 </td>
+                <td className="d-flex align-items-center justify-content-center">
+                  {dataToShow.LastDevShare || ""}
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td className="d-flex align-items-center">
+                  Dav Contract Balance (for state Token){" "}
+                </td>
+                <td className="d-flex align-items-center justify-content-center">
+                  {StateBalance}
+                </td>
+                <td></td>
               </tr>
               <tr>
                 <td className="d-flex align-items-center">
@@ -277,17 +305,26 @@ const DetailsInfo = ({ searchQuery }) => {
                 </td>
                 <td>
                   <div className="tableClaim w-100">
-                    {dataToShow.BatchRelease || ""}
+                    {dataToShow.Batch || ""}
                   </div>
                 </td>
                 <td className="d-flex justify-content-end">
                   <button
-                    onClick={dataToShow.actions.releaseToken}
+                    onClick={() => releaseNextBatch(Batch - 1)}
                     className="btn btn-primary btn-sm swap-btn info-icon"
                   >
                     Release
                   </button>
                 </td>
+              </tr>
+              <tr>
+                <td className="d-flex align-items-center">
+                  Total Dav Token released
+                </td>
+                <td className="d-flex align-items-center justify-content-center">
+                  {dataToShow.BatchAmount || ""}
+                </td>
+                <td></td>
               </tr>
             </>
           )}
@@ -319,11 +356,15 @@ const DetailsInfo = ({ searchQuery }) => {
             <td className="d-flex align-items-center">
               Renounce Smart Contract
             </td>
+
             <td className="d-flex align-items-center justify-content-center">
               {dataToShow.renounceSmartContract || ""}
             </td>
             <td className="d-flex justify-content-end">
-              <button className="btn btn-primary btn-sm swap-btn info-icon">
+              <button
+                onClick={() => dataToShow.actions.ReanounceContract()} // Add parentheses to invoke the function
+                className="btn btn-primary btn-sm swap-btn info-icon"
+              >
                 Set
               </button>
             </td>
