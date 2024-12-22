@@ -117,7 +117,7 @@ const InfoCards = () => {
                         {load ? "Minting..." : "Mint"}
                       </button>
 
-                      <h5 className="detailAmount pt-1">1% SLIPPAGE</h5>
+                      {/* <h5 className="detailAmount pt-1">1% SLIPPAGE</h5> */}
                     </div>
                   </div>
                   <p className="detailfooter m-0">
