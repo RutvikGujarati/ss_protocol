@@ -62,7 +62,7 @@ const InfoCards = () => {
           <div className="container mt-4">
             <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom">
               <div className="col-md-4 p-0 m-2 cards">
-                <div className="card bg-dark text-light border-light p-3 d-flex justify-content-center align-items-center text-center w-100">
+                <div className="card bg-dark text-light border-light p-0 d-flex justify-content-center align-items-center text-center w-100">
                   <div>
                     <p className="mb-1 detailText">DAV MINT COST</p>
                     <h5 className="detailAmount mb-4">
