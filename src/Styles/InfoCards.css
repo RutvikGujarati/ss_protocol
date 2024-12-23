@@ -18,9 +18,9 @@
     padding: 5px 15px;
     width: 100%;
 }
-.carddetails:first-child{
+/* .carddetails:first-child{
     border-right: 1px solid #fff; 
-}
+} */
 
 .detailText{
     font-size: small;
