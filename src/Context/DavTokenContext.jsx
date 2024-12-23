@@ -8,7 +8,7 @@ import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
-export const DAV_TOKEN_ADDRESS = "0xfE4f05eB83aFd46D1bBd8fF9Bbcc53E7886B2830";
+export const DAV_TOKEN_ADDRESS = "0x2a163e3c97ca039a3Ea0D1cEFd4fb27e9Ee93b52";
 export const STATE_TOKEN_ADDRESS = "0xD895C3A76bd18669A4506B461b8Da7fB8F41f2e6";
 export const Ratio_TOKEN_ADDRESS = "0x0Bd9BA2FF4F82011eeC33dd84fc09DC89ac5B5EA";
 
@@ -129,7 +129,7 @@ export const DAVTokenProvider = ({ children }) => {
   const mintDAV = async (amount) => {
     try {
       const value = ethers.parseEther(amount.toString());
-      const cost = ethers.parseEther((amount * 100000).toString());
+      const cost = ethers.parseEther((amount * 150000).toString());
 
       await handleContractCall(davContract, "mintDAV", [
         value,
@@ -158,19 +158,10 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const GetStateRewards = async (amount) => {
-    if (!amount || isNaN(amount) || amount <= 0) return setStateReward(0);
-    const reward = await handleContractCall(
-      davContract,
-      "getAdjustedReward",
-      [ethers.parseEther(amount.toString())],
-      (r) => ethers.formatUnits(r, 18)
-    );
-    setStateReward(reward);
-  };
+
 
   const CalculationOfCost = async (amount) => {
-    setTotalCost(ethers.parseEther((amount * 100000).toString()));
+    setTotalCost(ethers.parseEther((amount * 150000).toString()));
   };
 
   const DavHoldings = async () => {
@@ -205,15 +196,19 @@ export const DAVTokenProvider = ({ children }) => {
   };
   const DavHoldingsPercentage = async () => {
     try {
-      const percentage = await handleContractCall(
+      const balance = await handleContractCall(
         davContract,
-        "getUserHoldingPercentage",
+        "balanceOf",
         [account],
-        (p) => ethers.formatUnits(p, 18)
+        (b) => ethers.formatUnits(b, 18)
       );
 
-      if (percentage) {
-        setDavPercentage(parseFloat(percentage).toFixed(4));
+      const totalSupply = 5000000;
+
+      if (balance) {
+        const rank = balance / totalSupply;
+
+        setDavPercentage(parseFloat(rank).toFixed(8));
       } else {
         console.error("Failed to fetch holding percentage.");
       }
@@ -221,6 +216,7 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching DAV holdings percentage:", error);
     }
   };
+
   const DavSupply = async () => {
     const supply = await handleContractCall(
       davContract,
@@ -229,25 +225,6 @@ export const DAVTokenProvider = ({ children }) => {
       (s) => ethers.formatUnits(s, 18)
     );
     setSupply(supply);
-  };
-
-  const GetCurrentStateReward = async () => {
-    const reward = await handleContractCall(
-      davContract,
-      "getCurrentStateReward",
-      [],
-      (r) => ethers.formatUnits(r, 18)
-    );
-    setCurrentSReward(reward);
-  };
-  const LiquidityTransferred = async () => {
-    const reward = await handleContractCall(
-      davContract,
-      "totalLiquidityTransferred",
-      [],
-      (r) => ethers.formatUnits(r, 18)
-    );
-    setLPStateTransferred(reward);
   };
 
   const releases = [
@@ -327,11 +304,6 @@ export const DAVTokenProvider = ({ children }) => {
           } catch (error) {
             console.error("Error fetching DavSupply:", error);
           }
-          try {
-            await LiquidityTransferred();
-          } catch (error) {
-            console.error("Error fetching DavSupply:", error);
-          }
 
           try {
             await ViewDistributedTokens();
@@ -366,13 +338,6 @@ export const DAVTokenProvider = ({ children }) => {
             );
           }
 
-          // Uncomment if needed
-          try {
-            await GetCurrentStateReward();
-          } catch (error) {
-            console.error("Error fetching GetCurrentStateReward:", error);
-          }
-
           try {
             await StateTokenBurnRatio();
           } catch (error) {
@@ -397,10 +362,9 @@ export const DAVTokenProvider = ({ children }) => {
             console.error("Error fetching LpTokenAmount:", error);
           }
           try {
-            await LastLiquidityTransactionAMount();
-            await LastDevShareTransactionAMount();
-            await CurrentBatchAmount();
-            await TotalBatchReleased();
+            // await LastLiquidityTransactionAMount();
+            // await LastDevShareTransactionAMount();
+
             await DavContractStateBalance();
           } catch (error) {
             console.error("Error fetching LpTokenAmount:", error);
@@ -551,72 +515,8 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching LP tokens:", e);
     }
   };
-  const LastLiquidityTransactionAMount = async () => {
-    try {
-      const transaction = await handleContractCall(
-        davContract,
-        "lastLiquidityTransaction",
-        []
-      );
 
-      const amount = ethers.formatUnits(transaction.amount, 18);
-
-      setLastLiquidityTransaction(amount);
-    } catch (e) {
-      console.error("Error fetching LP tokens:", e);
-    }
-  };
-  const LastDevShareTransactionAMount = async () => {
-    try {
-      const transaction = await handleContractCall(
-        davContract,
-        "lastDevelopmentTransaction",
-        []
-      );
-
-      const amount = ethers.formatUnits(transaction.amount, 18);
-
-      setLastDevShare(amount);
-    } catch (e) {
-      console.error("Error fetching LP tokens:", e);
-    }
-  };
-  const TotalBatchReleased = async () => {
-    try {
-      const transaction = await handleContractCall(
-        davContract,
-        "totalBatchesReleased",
-        []
-      );
-
-      const transactionInWei = ethers.parseUnits(transaction.toString(), 18);
-
-      const transactionInEther = ethers.formatUnits(transactionInWei, 18);
-
-      console.log("Transaction in Wei:", transactionInWei.toString());
-      console.log("Transaction in Ether:", transactionInEther);
-
-      setBatch(transactionInEther);
-    } catch (e) {
-      console.error("Error fetching LP tokens:", e);
-    }
-  };
-
-  const CurrentBatchAmount = async () => {
-    try {
-      const transaction = await handleContractCall(
-        davContract,
-        "totalTokensReleased",
-        [],
-        (s) => ethers.formatUnits(s, 18)
-      );
-
-      console.log("batch amount", transaction);
-      setBatchAmount(transaction);
-    } catch (e) {
-      console.error("Error fetching LP tokens:", e);
-    }
-  };
+  
   const DavContractStateBalance = async () => {
     try {
       const transaction = await handleContractCall(
@@ -923,7 +823,7 @@ export const DAVTokenProvider = ({ children }) => {
         releaseNextBatch,
         CalculationOfCost,
         TotalCost,
-        GetStateRewards,
+        // GetStateRewards,
         StateReward,
         // GetCurrentStateReward,
         CurrentSReward,
@@ -949,8 +849,8 @@ export const DAVTokenProvider = ({ children }) => {
         OneListedTokenBurned,
         SwapTokens,
         ButtonText,
-		ReanounceContract,
-		RenounceState,
+        ReanounceContract,
+        RenounceState,
         MoveTokens,
         LastLiquidity,
         LastDevShare,

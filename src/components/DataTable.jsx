@@ -80,7 +80,7 @@ const DataTable = () => {
                       >
                         {claiming
                           ? "claiming.."
-                          : `${Distributed ?? "0.0"} Claim`}
+                          : `${Distributed ?? "0.0"} Mint`}
                       </div>
                     </td>
                     <td>$0.00000089</td>
@@ -129,7 +129,7 @@ const DataTable = () => {
                     </td>
                     <td>V2</td>
                     <td>
-                      <div className="tableClaim">789 Claim</div>
+                      <div className="tableClaim">789 Mint</div>
                     </td>
                     <td>$0.0000067</td>
                     <td className="text-success">2.67 M</td>

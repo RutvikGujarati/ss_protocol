@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "../Styles/SearchInfo.css";
 import XerionLogo from "../assets/XerionLogo.png";
 import FluxinLogo from "../assets/FluxinLogo.png";
@@ -15,6 +15,24 @@ const SearchInfo = ({ setSearchQuery, onTokenSelect }) => {
     { id: 3, name: "Rutvik", logo: FluxinLogo },
     { id: 4, name: "Polaris", logo: FluxinLogo },
   ]);
+  const searchInputRef = useRef(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Shortcut: Ctrl + V or /
+      if ((e.ctrlKey && e.key.toLowerCase() === "v") || e.key === "/") {
+        e.preventDefault(); // Prevent the default behavior
+        if (searchInputRef.current) {
+          searchInputRef.current.focus(); // Focus on the search input
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
@@ -32,9 +50,11 @@ const SearchInfo = ({ setSearchQuery, onTokenSelect }) => {
     );
     setFilteredData(filtered);
   };
+
   const handleRowClick = (token) => {
     onTokenSelect(token); // Pass selected token data to the parent
   };
+
   return (
     <div className="card w-100">
       <div className="mb-3">
@@ -43,6 +63,7 @@ const SearchInfo = ({ setSearchQuery, onTokenSelect }) => {
           className="form-control text-center"
           placeholder="SEARCH"
           onChange={handleSearch}
+          ref={searchInputRef} // Attach the ref to the search input
         />
       </div>
       <table className="table table-dark cursor">

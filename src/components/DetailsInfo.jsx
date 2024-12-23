@@ -24,6 +24,7 @@ const DetailsInfo = ({ searchQuery }) => {
     RenounceState,
     // MoveTokens,
     ReanounceContract,
+	Supply,
     DAVTokensFiveWithdraw,
     LastLiquidity,
     Batch,
@@ -48,7 +49,7 @@ const DetailsInfo = ({ searchQuery }) => {
     {
       tokenName: "DAV",
       key: davShortened,
-      supply: "5M",
+      supply: "5,000,000.00",
       BatchRelease: "1M",
 
       claimDAVToken: DAVTokensWithdraw,
@@ -57,6 +58,7 @@ const DetailsInfo = ({ searchQuery }) => {
       renounceSmartContract: "No",
       BatchAmount: BatchAmount,
       Batch: Batch,
+	  Supply:Supply,
       LastDevShare: LastDevShare,
       LastLiquidity: LastLiquidity,
       actions: {
@@ -251,78 +253,10 @@ const DetailsInfo = ({ searchQuery }) => {
             <>
               <tr>
                 <td className="d-flex align-items-center">
-                  total 95% Liquidity share(PLS) Transferred
-                </td>
-                <td>
-                  <div className="tableClaim w-100">
-                    {dataToShow.claimDAVToken || ""}
-                  </div>
-                </td>
-                <td className="d-flex justify-content-end"></td>
-              </tr>
-              <tr>
-                <td className="d-flex align-items-center">
-                  Last 95% Send Transaction Amount
+                  Total Dav Token Minted
                 </td>
                 <td className="d-flex align-items-center justify-content-center">
-                  {dataToShow.LastLiquidity || ""}
-                </td>
-                <td></td>
-              </tr>
-
-              <tr>
-                <td className="d-flex align-items-center">
-                  total 5% Development share(PLS) Transferred
-                </td>
-                <td>
-                  <div className="tableClaim w-100">
-                    {dataToShow.claimFiveDAVToken || ""}
-                  </div>
-                </td>
-                <td className="d-flex justify-content-end"></td>
-              </tr>
-              <tr>
-                <td className="d-flex align-items-center">
-                  Last 5% Send Transaction Amount
-                </td>
-                <td className="d-flex align-items-center justify-content-center">
-                  {dataToShow.LastDevShare || ""}
-                </td>
-                <td></td>
-              </tr>
-              <tr>
-                <td className="d-flex align-items-center">
-                  Dav Contract Balance (for state Token){" "}
-                </td>
-                <td className="d-flex align-items-center justify-content-center">
-                  {StateBalance}
-                </td>
-                <td></td>
-              </tr>
-              <tr>
-                <td className="d-flex align-items-center">
-                  Release Next batch DAV Token
-                </td>
-                <td>
-                  <div className="tableClaim w-100">
-                    {dataToShow.Batch || ""}
-                  </div>
-                </td>
-                <td className="d-flex justify-content-end">
-                  <button
-                    onClick={() => releaseNextBatch(Batch - 1)}
-                    className="btn btn-primary btn-sm swap-btn info-icon"
-                  >
-                    Release
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td className="d-flex align-items-center">
-                  Total Dav Token released
-                </td>
-                <td className="d-flex align-items-center justify-content-center">
-                  {dataToShow.BatchAmount || ""}
+                  {dataToShow.Supply || ""}
                 </td>
                 <td></td>
               </tr>

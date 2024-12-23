@@ -17,8 +17,6 @@ const InfoCards = () => {
     StateBurned,
     StateBurnedRatio,
     StateReward,
-    GetStateRewards,
-    // GetCurrentStateReward,
     CurrentSReward,
     Supply,
     davHolds,
@@ -40,10 +38,10 @@ const InfoCards = () => {
 
   const handleInputChange = (e) => {
     setAmount(e.target.value);
-    GetStateRewards(e.target.value);
     CalculationOfCost(e.target.value);
   };
 
+ 
   function formatNumber(number) {
     if (!number) return "0";
     return new Intl.NumberFormat("en-US", {
@@ -53,7 +51,6 @@ const InfoCards = () => {
 
   useEffect(() => {
     CalculationOfCost(amount);
-    GetStateRewards(amount);
     // GetCurrentStateReward();
   }, [amount]);
 
@@ -129,9 +126,7 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">
-                        Dav holdings
-                      </p>
+                      <p className="mb-1 detailText">Dav holdings</p>
 
                       <h5 className="">{davHolds}</h5>
                     </div>
@@ -156,9 +151,7 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">
-                        State token holdings
-                      </p>
+                      <p className="mb-1 detailText">State token holdings</p>
                       <h5 className="">{StateHolds} / $0.00</h5>
                     </div>
                     <div className="carddetails2">
