@@ -92,21 +92,21 @@ const InfoCards = () => {
                             : "0"}{" "}
                           PLS
                         </h5>
-                        <h5 className="detailAmount mt-1">
+                        {/* <h5 className="detailAmount mt-1">
                           {StateReward
                             ? formatNumber(StateReward) // format STATE
                             : "0"}{" "}
                           STATE
-                        </h5>
+                        </h5> */}
                       </div>
                     </div>
                   </div>
                   <div className="carddetaildiv d-flex">
                     <div className="carddetails">
-                      <p className="mb-1 detailText">STATE TOKEN REWARD</p>
+                      {/* <p className="mb-1 detailText">STATE TOKEN REWARD</p>
                       <h5 className="detailAmount">
                         {formatNumber(CurrentSReward)}
-                      </h5>
+                      </h5> */}
                     </div>
                     <div className="carddetails text-center">
                       <button
@@ -120,9 +120,9 @@ const InfoCards = () => {
                       {/* <h5 className="detailAmount pt-1">1% SLIPPAGE</h5> */}
                     </div>
                   </div>
-                  <p className="detailfooter m-0">
+                  {/* <p className="detailfooter m-0">
                     {Supply} DAV TOKEN MINTED
-                  </p>
+                  </p> */}
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">

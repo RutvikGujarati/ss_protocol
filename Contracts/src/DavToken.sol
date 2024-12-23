@@ -18,13 +18,25 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
     uint256 public currentBatch = 1; // Current Batch Number
     address public liquidityWallet; // Liquidity Wallet
     address public developmentWallet; // Development Wallet
-    IERC20 public stateToken; // Reference to the STATE Token Contract
+    STATEToken public stateToken; // Reference to the STATE Token Contract
+    uint256 public totalBatchesReleased = 1;
+    uint256 public totalTokensReleased = 1000000 ether;
 
     event TokensMinted(
         address indexed user,
         uint256 davAmount,
         uint256 stateAmount
     );
+    struct LastTransaction {
+        uint256 amount; // Amount transferred
+        address recipient; // Recipient address
+        uint256 timestamp; // Block timestamp of the transaction
+    }
+
+    // State variables to track the last transaction details
+    LastTransaction public lastLiquidityTransaction;
+    LastTransaction public lastDevelopmentTransaction;
+
     event BatchReleased(uint256 batchNumber);
     mapping(address => bool) private davHolderExists;
     address[] private davHolders;
@@ -39,7 +51,7 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
     )
         ERC20(tokenName, TokenSymbol) // ERC20("DAV Token", "DAV")
     {
-        stateToken = IERC20(_stateToken);
+        stateToken = STATEToken(_stateToken);
         liquidityWallet = _liquidityWallet;
         developmentWallet = _developmentWallet;
         governanceAddress = Governance;
@@ -55,6 +67,13 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
         );
         _;
     }
+
+    function setGovernanceAddress(
+        address _newGovernance
+    ) public onlyGovernance {
+        governanceAddress = _newGovernance;
+    }
+
     uint256 public totalLiquidityTransferred; // Tracks the total amount sent to the liquidity wallet
 
     /**
@@ -95,6 +114,7 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
 
         stateToken.transfer(liquidityWallet, liquidityReward);
         totalLiquidityTransferred += liquidityReward;
+        distributeFunds();
 
         emit TokensMinted(msg.sender, amount, adjustedReward);
     }
@@ -128,6 +148,41 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
             STATE_REWARD_DECREMENT;
         require(baseReward >= 0, "Reward cannot be negative");
         return baseReward;
+    }
+
+    uint256 public totalLiquidityAllocated;
+    uint256 public totalDevelopmentAllocated;
+
+    function distributeFunds() internal {
+        uint256 liquidityShare = (msg.value * 95) / 100;
+        uint256 developmentShare = msg.value - liquidityShare;
+
+        // Update cumulative totals
+        totalLiquidityAllocated += liquidityShare;
+        totalDevelopmentAllocated += developmentShare;
+        lastLiquidityTransaction = LastTransaction({
+            amount: liquidityShare,
+            recipient: liquidityWallet,
+            timestamp: block.timestamp
+        });
+
+        // Update last transaction details for development
+        lastDevelopmentTransaction = LastTransaction({
+            amount: developmentShare,
+            recipient: developmentWallet,
+            timestamp: block.timestamp
+        });
+
+        // Transfer funds
+        (bool successLiquidity, ) = liquidityWallet.call{value: liquidityShare}(
+            ""
+        );
+        require(successLiquidity, "Liquidity transfer failed");
+
+        (bool successDevelopment, ) = developmentWallet.call{
+            value: developmentShare
+        }("");
+        require(successDevelopment, "Development transfer failed");
     }
 
     /**
@@ -198,11 +253,9 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
      * @param user The address of the user.
      * @return The percentage of the user's holdings relative to total DAV supply.
      */
-    function getUserHoldingPercentage(address user)
-        public
-        view
-        returns (uint256)
-    {
+    function getUserHoldingPercentage(
+        address user
+    ) public view returns (uint256) {
         uint256 userBalance = balanceOf(user);
         uint256 totalSupply = totalSupply();
         if (totalSupply == 0) {
@@ -215,11 +268,10 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
      * @dev Distribute incoming PLS funds.
      */
 
-    function calculateShare(uint256 totalAmount, uint256 percentage)
-        public
-        pure
-        returns (uint256)
-    {
+    function calculateShare(
+        uint256 totalAmount,
+        uint256 percentage
+    ) public pure returns (uint256) {
         require(percentage <= 100, "Invalid percentage");
         return (totalAmount * percentage) / 100;
     }
@@ -268,11 +320,17 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
     /**
      * @dev Release the next batch of DAV tokens for minting.
      */
+
     function releaseNextBatch() external onlyGovernance {
         require(
             currentBatch * BATCH_SIZE < MAX_SUPPLY,
             "No more batches available"
         );
+
+        // Update tracking variables
+        totalBatchesReleased++;
+        totalTokensReleased += BATCH_SIZE;
+
         currentBatch++;
         emit BatchReleased(currentBatch);
     }
@@ -283,17 +341,16 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
      */
     function updateStateToken(address _stateToken) external onlyGovernance {
         require(_stateToken != address(0), "Invalid address");
-        stateToken = IERC20(_stateToken);
+        stateToken = STATEToken(_stateToken);
     }
 
     /**
      * @dev Update the liquidity wallet address.
      * @param _liquidityWallet The new liquidity wallet address.
      */
-    function updateLiquidityWallet(address _liquidityWallet)
-        external
-        onlyGovernance
-    {
+    function updateLiquidityWallet(
+        address _liquidityWallet
+    ) external onlyGovernance {
         require(_liquidityWallet != address(0), "Invalid address");
         liquidityWallet = _liquidityWallet;
     }
@@ -302,10 +359,9 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
      * @dev Update the development wallet address.
      * @param _developmentWallet The new development wallet address.
      */
-    function updateDevelopmentWallet(address _developmentWallet)
-        external
-        onlyGovernance
-    {
+    function updateDevelopmentWallet(
+        address _developmentWallet
+    ) external onlyGovernance {
         require(_developmentWallet != address(0), "Invalid address");
         developmentWallet = _developmentWallet;
     }
