@@ -8,8 +8,8 @@ import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
-export const DAV_TOKEN_ADDRESS = "0x2a163e3c97ca039a3Ea0D1cEFd4fb27e9Ee93b52";
-export const STATE_TOKEN_ADDRESS = "0xAB98DD486f69959e8b89dEDE0f91CC92f02A03bB";
+export const DAV_TOKEN_ADDRESS = "0x241732380d05e99665F023c4CcC816CAb2Ab4e3F";
+export const STATE_TOKEN_ADDRESS = "0xce1ddF557E7064B5a2E3794763CC8337Ffd1A361";
 export const Ratio_TOKEN_ADDRESS = "0x0Bd9BA2FF4F82011eeC33dd84fc09DC89ac5B5EA";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
@@ -122,7 +122,11 @@ export const DAVTokenProvider = ({ children }) => {
       const result = await contract[method](...args);
       return formatter(result);
     } catch (error) {
-      console.error(`Error calling ${method}:", error`, error);
+      if (error.reason || error.data) {
+        throw error;
+      }
+	  console.log(error)
+      throw new Error("Unknown contract call error");
     }
   };
 
@@ -441,18 +445,17 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const ClaimLPTokens = async () => {
+  const CheckMintBalance = async () => {
     try {
-      setClaiming(true);
-      await handleContractCall(RatioContract, "WithdrawLPTokens", [], (s) =>
+      await handleContractCall(stateContract, "seeMintableAmount", [], (s) =>
         ethers.formatUnits(s, 18)
       );
-      setClaiming(false);
     } catch (e) {
       console.error("Error claiming tokens:", e);
-      setClaiming(false);
+      throw e; // Rethrow the error for the caller to handle it.
     }
   };
+
   const LpTokenAmount = async () => {
     try {
       const balance = await handleContractCall(
@@ -571,8 +574,8 @@ export const DAVTokenProvider = ({ children }) => {
   const ViewDistributedTokens = async () => {
     const amount = await handleContractCall(
       stateContract,
-      "getCalculationOfReward",
-      [],
+      "userRewardAmount",
+      [account],
       (s) => ethers.formatUnits(s, 18)
     );
     setViewDistributed(amount);
@@ -857,7 +860,7 @@ export const DAVTokenProvider = ({ children }) => {
         setRatioTarget,
         RatioTargetAmount,
         AuctionRunning,
-        ClaimLPTokens,
+        CheckMintBalance,
         LpTokenAmount,
         LpTokens,
         DAVTokensWithdraw,

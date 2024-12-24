@@ -5,13 +5,15 @@ import FluxinLogo from "../assets/FluxinLogo.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useDAVToken } from "../Context/DavTokenContext";
+import { useState } from "react";
 const DataTable = () => {
   const {
     // StartMarketPlaceListing,
     BurnTokenRatio,
-	RatioTargetAmount,
+    RatioTargetAmount,
     handleAddToken,
     HandleBurn,
+    CheckMintBalance,
     OneListedTokenBurned,
     ListedTokenBurned,
     SwapTokens,
@@ -24,6 +26,28 @@ const DataTable = () => {
   const isBurn = location.pathname === "/burn";
   const isAuction = location.pathname === "/auction";
 
+  const [errorPopup, setErrorPopup] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
+
+  const Checking = async () => {
+    setIsChecking(true); // Set checking to true when button is clicked
+    try {
+      await CheckMintBalance();
+    } catch (e) {
+      if (
+        e.reason === "No additional DAV tokens added" ||
+        (e.revert &&
+          e.revert.args &&
+          e.revert.args[0] === "No additional DAV tokens added")
+      ) {
+        console.error("No additional DAV tokens added:", e);
+        setErrorPopup(true); // Show error popup if specific error occurs
+      } else {
+        console.error("Error calling seeMintableAmount:", e);
+      }
+    }
+    setIsChecking(false); // Reset checking state after function execution
+  };
   async function Swapping() {
     await SwapTokens("100");
   }
@@ -72,24 +96,58 @@ const DataTable = () => {
                     <td>
                       <div className="d-flex align-items-center justify-content-center">
                         <div
-                          onClick={ClaimTokens}
+                          onClick={
+                            Distributed !== "0.0" && !claiming
+                              ? ClaimTokens
+                              : null
+                          }
                           className={`tableClaim hoverEffect ${
-                            claiming ? "disabled" : ""
+                            claiming || Distributed === "0.0" ? "disabled" : ""
                           }`}
-                          style={{ pointerEvents: claiming ? "none" : "auto" }}
+                          style={{
+                            pointerEvents:
+                              claiming || Distributed === "0.0"
+                                ? "none"
+                                : "auto",
+                          }}
                         >
                           {claiming
-                            ? "claiming.."
+                            ? "minting.."
                             : `${Distributed ?? "0.0"} Mint`}
                         </div>
                       </div>
                     </td>
                     <td>
-                      <div className="d-flex align-items-center gap-2">
-                        <button className="btn btn-primary btn-sm swap-btn">
-                        Mint Balance
+                      <div
+                        className={`d-flex align-items-center gap-2 ${
+                          isChecking ? "disabled" : ""
+                        }`}
+                      >
+                        <button
+                          onClick={Checking}
+						  disabled={isChecking}
+                          className="btn btn-primary btn-sm swap-btn"
+                        >
+                          {isChecking ? "Checking..." : "Mint Balance"}
                         </button>
                       </div>
+                      {errorPopup && (
+                        <div className="popup-overlay">
+                          <div className="popup-content">
+                            <h4>Mint Additional DAV Tokens</h4>
+                            <p>
+                              You need to mint additional DAV tokens to claim
+                              your reward.
+                            </p>
+                            <button
+                              onClick={() => setErrorPopup(false)}
+                              className="btn btn-secondary"
+                            >
+                              Close
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </td>
                     <td>$0.00000089</td>
                     <td className="text-success">1.25 M</td>
@@ -143,7 +201,7 @@ const DataTable = () => {
                     <td>
                       <div className="d-flex align-items-center gap-2">
                         <button className="btn btn-primary btn-sm swap-btn">
-                        Mint Balance
+                          Mint Balance
                         </button>
                       </div>
                     </td>
