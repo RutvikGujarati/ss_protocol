@@ -39,6 +39,7 @@ const DataTable = () => {
                     <th>#</th>
                     <th className="">Name</th>
                     <th>Mint</th>
+                    <th></th>
                     <th>Price</th>
                     <th>Liquidity</th>
                     <th>Current Ratio</th>
@@ -81,6 +82,13 @@ const DataTable = () => {
                             ? "claiming.."
                             : `${Distributed ?? "0.0"} Mint`}
                         </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center gap-2">
+                        <button className="btn btn-primary btn-sm swap-btn">
+                        Mint Balance
+                        </button>
                       </div>
                     </td>
                     <td>$0.00000089</td>
@@ -130,6 +138,13 @@ const DataTable = () => {
                     <td>
                       <div className="d-flex align-items-center justify-content-center">
                         <div className="tableClaim ">789 Mint</div>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center gap-2">
+                        <button className="btn btn-primary btn-sm swap-btn">
+                        Mint Balance
+                        </button>
                       </div>
                     </td>
                     <td>$0.0000067</td>
