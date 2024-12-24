@@ -120,17 +120,18 @@ const DataTable = () => {
                     <td>
                       <div
                         className={`d-flex align-items-center gap-2 ${
-                          isChecking ? "disabled" : ""
+                          isChecking || Distributed > 0 ? "disabled" : ""
                         }`}
                       >
                         <button
                           onClick={Checking}
-						  disabled={isChecking}
+                          disabled={isChecking || Distributed > 0} // Disable if isChecking or Distributed > 0
                           className="btn btn-primary btn-sm swap-btn"
                         >
                           {isChecking ? "Checking..." : "Mint Balance"}
                         </button>
                       </div>
+
                       {errorPopup && (
                         <div className="popup-overlay">
                           <div className="popup-content">
