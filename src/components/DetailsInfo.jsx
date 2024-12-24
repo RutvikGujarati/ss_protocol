@@ -9,7 +9,7 @@ import {
   Ratio_TOKEN_ADDRESS,
 } from "../Context/DavTokenContext";
 
-const DetailsInfo = ({ searchQuery }) => {
+const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const {
     StartMarketPlaceListing,
     withdraw_95,
@@ -92,7 +92,7 @@ const DetailsInfo = ({ searchQuery }) => {
         claimDAVToken: withdraw_95,
         claimFiveDAVToken: withdraw_5,
         startAuction: StartMarketPlaceListing,
-        setRatioTarget: () => setRatioTarget(numerator, Denominator), // Using dynamic parameters
+        // setRatioTarget: setRatioTarget(numerator, Denominator), // Using dynamic parameters
       },
     },
 
@@ -127,75 +127,197 @@ const DetailsInfo = ({ searchQuery }) => {
     item.tokenName.toLowerCase().includes((searchQuery ?? "").toLowerCase())
   );
 
-  const dataToShow = filteredTokens.length > 0 ? filteredTokens[0] : tokens[0];
-
+  const dataToShow = selectedToken
+    ? tokens.find((token) => token.tokenName === selectedToken.name)
+    : filteredTokens[0] || tokens[0];
   return (
     <div className="container mt-3 p-0">
-      <table className="table table-dark infoTable">
-        <thead>
-          <th className="fw-bold d-flex align-items-center uppercase">
-            Information
-          </th>
-        </thead>
-        <tbody>
-          <tr>
-            <td className="d-flex align-items-center">Token Name</td>
-            <td className="d-flex align-items-center justify-content-center">
-              {dataToShow.tokenName || ""}
-            </td>
-            <td></td>
-          </tr>
-          <tr>
-            <td className="d-flex align-items-center">
-              Contract/Token Address
-            </td>
-            <td className="d-flex align-items-center justify-content-center">
-              <a
-                href={`https://scan.v4.testnet.pulsechain.com/#/address/${dataToShow.address}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ fontSize: "12px" }}
-              >
-                {dataToShow.key || ""}
-              </a>
-            </td>
-            <td></td>
-          </tr>
+      {dataToShow ? (
+        <table className="table table-dark infoTable">
+          <thead>
+            <th className="fw-bold d-flex align-items-center uppercase">
+              Information
+            </th>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="d-flex align-items-center">Token Name</td>
+              <td className="d-flex align-items-center justify-content-center">
+                {dataToShow.tokenName || ""}
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td className="d-flex align-items-center">
+                Contract/Token Address
+              </td>
+              <td className="d-flex align-items-center justify-content-center">
+                <a
+                  href={`https://scan.v4.testnet.pulsechain.com/#/address/${dataToShow.address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize: "12px" }}
+                >
+                  {dataToShow.key || ""}
+                </a>
+              </td>
+              <td></td>
+            </tr>
 
-          {dataToShow.tokenName !== "DAV" &&
-            dataToShow.tokenName !== "STATE" && (
+            {dataToShow.tokenName !== "DAV" &&
+              dataToShow.tokenName !== "STATE" && (
+                <>
+                  <tr>
+                    <td className="d-flex align-items-center">Ratio Target</td>
+                    <td className="d-flex align-items-center justify-content-center">
+                      {dataToShow.ratioTarget || ""}
+                    </td>
+                    <td></td>
+                  </tr>
+
+                  <tr>
+                    <td className="d-flex align-items-center">
+                      Auction Allocation
+                    </td>
+                    <td className="d-flex align-items-center justify-content-center">
+                      {dataToShow.auctionAllocation || ""}
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td className="d-flex align-items-center">
+                      DAV Treasury Supply
+                    </td>
+                    <td className="d-flex align-items-center justify-content-center">
+                      {dataToShow.davTreasurySupply || ""}
+                    </td>
+                    <td></td>
+                  </tr>
+
+                  <tr>
+                    <td className="d-flex align-items-center">
+                      Ratio Target - Amend
+                    </td>
+                    <td>
+                      <div className="w-100">
+                        <input
+                          type="text"
+                          className="form-control text-center mh-30"
+                          placeholder="Numerator"
+                          value={numerator}
+                          onChange={(e) => handleInputChange(e, "numerator")}
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <div className="w-100">
+                        <input
+                          type="text"
+                          className="form-control text-center mh-30"
+                          placeholder="Denominator"
+                          value={Denominator}
+                          onChange={(e) => handleInputChange(e, "denominator")}
+                        />
+                      </div>
+                    </td>
+                    <td className="d-flex justify-content-end">
+                      <button
+                        // onClick={() => setRatioTarget(numerator, Denominator)} 
+                        className="btn btn-primary btn-sm swap-btn info-icon"
+                      >
+                        Set
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="d-flex align-items-center">Start Auction</td>
+                    <td>
+                      <div className="tableClaim w-100">
+                        {dataToShow.startAuction || ""}
+                      </div>
+                    </td>
+                    <td className="d-flex justify-content-end">
+                      <button
+                        onClick={dataToShow.actions.startAuction}
+                        className="btn btn-primary btn-sm swap-btn info-icon"
+                      >
+                        SET
+                      </button>
+                    </td>
+                  </tr>
+                </>
+              )}
+            {dataToShow.tokenName == "DAV" && (
               <>
                 <tr>
+                  <td className="d-flex align-items-center">Supply</td>
+                  <td className="d-flex align-items-center justify-content-center">
+                    {"5,000,000.00"}
+                  </td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td className="d-flex align-items-center">
+                    Total Dav Tokens Minted
+                  </td>
+                  <td className="d-flex align-items-center justify-content-center">
+                    {dataToShow.Supply || ""}
+                  </td>
+                  <td></td>
+                </tr>
+              </>
+            )}
+
+            {dataToShow.tokenName == "STATE" && (
+              <>
+                <tr>
+                  <td className="d-flex align-items-center">Minted Supply</td>
+                  <td className="d-flex align-items-center justify-content-center">
+                    {formatWithCommas(dataToShow.StateSupply)}
+                  </td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td className="d-flex align-items-center">Treasury Supply</td>
+                  <td className="d-flex align-items-center justify-content-center">
+                    {dataToShow.supply || ""}
+                  </td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td className="d-flex align-items-center">
+                    Auction Rate (in days)
+                  </td>
+                  <td>
+                    <div className="w-100">
+                      <input
+                        type="text"
+                        className="form-control text-center mh-30"
+                        placeholder="Enter Days"
+                        value={numerator}
+                        onChange={(e) => handleInputChange(e, "numerator")}
+                      />
+                    </div>
+                  </td>
+                  <td className="d-flex justify-content-end">
+                    <button
+                    //   onClick={()=>setRatioTarget(numerator, Denominator)}
+                      className="btn btn-primary btn-sm swap-btn info-icon"
+                    >
+                      Set
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="d-flex align-items-center">Current Ratio</td>
+                  <td className="d-flex align-items-center justify-content-center">
+                    {"0:0"}
+                  </td>
+                  <td></td>
+                </tr>
+                <tr>
                   <td className="d-flex align-items-center">Ratio Target</td>
-                  <td className="d-flex align-items-center justify-content-center">
-                    {dataToShow.ratioTarget || ""}
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td className="d-flex align-items-center">
-                    Auction Allocation
-                  </td>
-                  <td className="d-flex align-items-center justify-content-center">
-                    {dataToShow.auctionAllocation || ""}
-                  </td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td className="d-flex align-items-center">
-                    DAV Treasury Supply
-                  </td>
-                  <td className="d-flex align-items-center justify-content-center">
-                    {dataToShow.davTreasurySupply || ""}
-                  </td>
-                  <td></td>
-                </tr>
-
-                <tr>
-                  <td className="d-flex align-items-center">
-                    Ratio Target - Amend
-                  </td>
                   <td>
                     <div className="w-100">
                       <input
@@ -220,7 +342,7 @@ const DetailsInfo = ({ searchQuery }) => {
                   </td>
                   <td className="d-flex justify-content-end">
                     <button
-                      onClick={setRatioTarget(numerator, Denominator)}
+                    //   onClick={()=>setRatioTarget(numerator, Denominator)}
                       className="btn btn-primary btn-sm swap-btn info-icon"
                     >
                       Set
@@ -228,186 +350,72 @@ const DetailsInfo = ({ searchQuery }) => {
                   </td>
                 </tr>
                 <tr>
-                  <td className="d-flex align-items-center">Start Auction</td>
+                  <td className="d-flex align-items-center">Burn Ratio</td>
                   <td>
-                    <div className="tableClaim w-100">
-                      {dataToShow.startAuction || ""}
+                    <div className="w-100">
+                      <input
+                        type="text"
+                        className="form-control text-center mh-30"
+                        placeholder="Numerator"
+                        value={numerator}
+                        onChange={(e) => handleInputChange(e, "numerator")}
+                      />
+                    </div>
+                  </td>
+                  <td>
+                    <div className="w-100">
+                      <input
+                        type="text"
+                        className="form-control text-center mh-30"
+                        placeholder="Denominator"
+                        value={Denominator}
+                        onChange={(e) => handleInputChange(e, "denominator")}
+                      />
                     </div>
                   </td>
                   <td className="d-flex justify-content-end">
                     <button
-                      onClick={dataToShow.actions.startAuction}
+                      onClick={()=>setRatioTarget(numerator, Denominator)}
                       className="btn btn-primary btn-sm swap-btn info-icon"
                     >
-                      SET
+                      Set
                     </button>
                   </td>
                 </tr>
               </>
             )}
-          {dataToShow.tokenName == "DAV" && (
-            <>
-              <tr>
-                <td className="d-flex align-items-center">Supply</td>
-                <td className="d-flex align-items-center justify-content-center">
-                  {"5,000,000.00"}
-                </td>
-                <td></td>
-              </tr>
-              <tr>
-                <td className="d-flex align-items-center">
-                  Total Dav Tokens Minted
-                </td>
-                <td className="d-flex align-items-center justify-content-center">
-                  {dataToShow.Supply || ""}
-                </td>
-                <td></td>
-              </tr>
-            </>
-          )}
 
-          {dataToShow.tokenName == "STATE" && (
-            <>
-              <tr>
-                <td className="d-flex align-items-center">Minted Supply</td>
-                <td className="d-flex align-items-center justify-content-center">
-                  {formatWithCommas(dataToShow.StateSupply)}
-                </td>
-                <td></td>
-              </tr>
+            <tr>
+              <td className="d-flex align-items-center">
+                Renounce Smart Contract
+              </td>
 
-              <tr>
-                <td className="d-flex align-items-center">Treasury Supply</td>
-                <td className="d-flex align-items-center justify-content-center">
-                  {dataToShow.supply || ""}
-                </td>
-                <td></td>
-              </tr>
-              <tr>
-                <td className="d-flex align-items-center">
-                  Auction Rate (in days)
-                </td>
-                <td>
-                  <div className="w-100">
-                    <input
-                      type="text"
-                      className="form-control text-center mh-30"
-                      placeholder="Enter Days"
-                      value={numerator}
-                      onChange={(e) => handleInputChange(e, "numerator")}
-                    />
-                  </div>
-                </td>
-                <td className="d-flex justify-content-end">
-                  <button
-                    onClick={setRatioTarget(numerator, Denominator)}
-                    className="btn btn-primary btn-sm swap-btn info-icon"
-                  >
-                    Set
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td className="d-flex align-items-center">Current Ratio</td>
-                <td className="d-flex align-items-center justify-content-center">
-                  {"0:0"}
-                </td>
-                <td></td>
-              </tr>
-              <tr>
-                <td className="d-flex align-items-center">Ratio Target</td>
-                <td>
-                  <div className="w-100">
-                    <input
-                      type="text"
-                      className="form-control text-center mh-30"
-                      placeholder="Numerator"
-                      value={numerator}
-                      onChange={(e) => handleInputChange(e, "numerator")}
-                    />
-                  </div>
-                </td>
-                <td>
-                  <div className="w-100">
-                    <input
-                      type="text"
-                      className="form-control text-center mh-30"
-                      placeholder="Denominator"
-                      value={Denominator}
-                      onChange={(e) => handleInputChange(e, "denominator")}
-                    />
-                  </div>
-                </td>
-                <td className="d-flex justify-content-end">
-                  <button
-                    onClick={setRatioTarget(numerator, Denominator)}
-                    className="btn btn-primary btn-sm swap-btn info-icon"
-                  >
-                    Set
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td className="d-flex align-items-center">Burn Ratio</td>
-                <td>
-                  <div className="w-100">
-                    <input
-                      type="text"
-                      className="form-control text-center mh-30"
-                      placeholder="Numerator"
-                      value={numerator}
-                      onChange={(e) => handleInputChange(e, "numerator")}
-                    />
-                  </div>
-                </td>
-                <td>
-                  <div className="w-100">
-                    <input
-                      type="text"
-                      className="form-control text-center mh-30"
-                      placeholder="Denominator"
-                      value={Denominator}
-                      onChange={(e) => handleInputChange(e, "denominator")}
-                    />
-                  </div>
-                </td>
-                <td className="d-flex justify-content-end">
-                  <button
-                    onClick={setRatioTarget(numerator, Denominator)}
-                    className="btn btn-primary btn-sm swap-btn info-icon"
-                  >
-                    Set
-                  </button>
-                </td>
-              </tr>
-            </>
-          )}
-
-          <tr>
-            <td className="d-flex align-items-center">
-              Renounce Smart Contract
-            </td>
-
-            <td className="d-flex align-items-center justify-content-center">
-              {dataToShow.renounceSmartContract || ""}
-            </td>
-            <td className="d-flex justify-content-end">
-              <button
-                onClick={() => dataToShow.actions.ReanounceContract()} // Add parentheses to invoke the function
-                className="btn btn-primary btn-sm swap-btn info-icon"
-              >
-                Set
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              <td className="d-flex align-items-center justify-content-center">
+                {dataToShow.renounceSmartContract || ""}
+              </td>
+              <td className="d-flex justify-content-end">
+                <button
+                  onClick={() => dataToShow.actions.ReanounceContract()} // Add parentheses to invoke the function
+                  className="btn btn-primary btn-sm swap-btn info-icon"
+                >
+                  Set
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      ) : (
+        <div className="alert alert-warning text-center" role="alert">
+          Currently No detailed information is available for the selected token.
+        </div>
+      )}
     </div>
   );
 };
 
 DetailsInfo.propTypes = {
   searchQuery: PropTypes.string.isRequired,
+  selectedToken: PropTypes.object,
 };
 
 export default DetailsInfo;

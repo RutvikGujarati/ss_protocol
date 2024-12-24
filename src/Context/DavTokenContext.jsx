@@ -331,26 +331,26 @@ export const DAVTokenProvider = ({ children }) => {
             console.error("Error fetching getBurnedSTATE:", error);
           }
 
-          try {
-            await calculateBurnAmount();
-          } catch (error) {
-            console.error("Error fetching calculateBurnAmount:", error);
-          }
+        //   try {
+        //     await calculateBurnAmount();
+        //   } catch (error) {
+        //     console.error("Error fetching calculateBurnAmount:", error);
+        //   }
 
-          try {
-            await ratioOfBurn();
-          } catch (error) {
-            console.error("Error fetching ratioOfBurn:", error);
-          }
+        //   try {
+        //     await ratioOfBurn();
+        //   } catch (error) {
+        //     console.error("Error fetching ratioOfBurn:", error);
+        //   }
 
-          try {
-            await calculateOnePercentBurnAmount();
-          } catch (error) {
-            console.error(
-              "Error fetching calculateOnePercentBurnAmount:",
-              error
-            );
-          }
+        //   try {
+        //     await calculateOnePercentBurnAmount();
+        //   } catch (error) {
+        //     console.error(
+        //       "Error fetching calculateOnePercentBurnAmount:",
+        //       error
+        //     );
+        //   }
 
           try {
             await StateTokenBurnRatio();
@@ -712,7 +712,7 @@ export const DAVTokenProvider = ({ children }) => {
   const setRatioTarget = async (numerator, denominator) => {
     try {
       // Call the contract to set both numerator and denominator
-      await handleContractCall(RatioContract, "setRatioTarget", [
+      await handleContractCall(stateContract, "setRatioTarget", [
         numerator,
         denominator,
       ]);

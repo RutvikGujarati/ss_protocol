@@ -19,11 +19,10 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Shortcut: Ctrl + V or /
       if ((e.ctrlKey && e.key.toLowerCase() === "v") || e.key === "/") {
-        e.preventDefault(); // Prevent the default behavior
+        e.preventDefault();
         if (searchInputRef.current) {
-          searchInputRef.current.focus(); // Focus on the search input
+          searchInputRef.current.focus();
         }
       }
     };
@@ -34,9 +33,17 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     };
   }, []);
 
+  useEffect(() => {
+    // Add cursor pointer dynamically to specific td
+    const nameCells = document.querySelectorAll(".name-cell");
+    nameCells.forEach((cell) => {
+      cell.style.cursor = "pointer";
+    });
+  }, [filteredData]);
+
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
-    setSearchQuery(query); // Update the parent state
+    setSearchQuery(query); 
     const originalData = [
       { id: "∈", name: "DAV", logo: DAVLogo },
       { id: "±", name: "STATE", logo: stateLogo },
@@ -52,7 +59,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
   };
 
   const handleRowClick = (token) => {
-    setSelectedToken(token); // Pass selected token data to the parent
+    setSelectedToken(token); 
   };
 
   return (
@@ -63,10 +70,10 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
           className="form-control text-center"
           placeholder="SEARCH"
           onChange={handleSearch}
-          ref={searchInputRef} // Attach the ref to the search input
+          ref={searchInputRef} 
         />
       </div>
-      <table className="table table-dark cursor">
+      <table className="table table-dark clickable-row-table">
         <thead>
           <tr className="align-item-center">
             <th>#</th>
@@ -94,7 +101,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
 
 SearchInfo.propTypes = {
   setSearchQuery: PropTypes.func.isRequired,
-  setSelectedToken: PropTypes.func.isRequired,
+  setSelectedToken: PropTypes.func.isRequired, 
 };
 
 export default SearchInfo;

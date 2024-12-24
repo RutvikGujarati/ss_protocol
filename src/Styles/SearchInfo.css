@@ -1,4 +1,14 @@
 .cursor {
-	cursor: pointer;
-  }
-  
+  cursor: pointer;
+}
+/* Apply to tables with the 'clickable-row-table' class */
+.clickable-row-table tbody tr {
+  cursor: pointer; /* Make the entire row a pointer */
+}
+
+.clickable-row-table tbody tr:hover {
+  background-color: #343a40; /* Add hover effect for better UX */
+}
+.clickable-name {
+  cursor: pointer;
+}
