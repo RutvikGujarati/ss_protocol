@@ -79,7 +79,7 @@ const DataTable = () => {
                         style={{ pointerEvents: claiming ? "none" : "auto" }}
                       >
                         {claiming
-                          ? "claiming.."
+                          ? "Minting.."
                           : `${Distributed ?? "0.0"} Mint`}
                       </div>
                     </td>

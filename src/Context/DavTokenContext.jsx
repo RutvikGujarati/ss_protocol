@@ -9,7 +9,7 @@ import PropTypes from "prop-types";
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
 export const DAV_TOKEN_ADDRESS = "0x2a163e3c97ca039a3Ea0D1cEFd4fb27e9Ee93b52";
-export const STATE_TOKEN_ADDRESS = "0xD895C3A76bd18669A4506B461b8Da7fB8F41f2e6";
+export const STATE_TOKEN_ADDRESS = "0xAB98DD486f69959e8b89dEDE0f91CC92f02A03bB";
 export const Ratio_TOKEN_ADDRESS = "0x0Bd9BA2FF4F82011eeC33dd84fc09DC89ac5B5EA";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
@@ -157,8 +157,6 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error in MoveTokens:", error);
     }
   };
-
-
 
   const CalculationOfCost = async (amount) => {
     setTotalCost(ethers.parseEther((amount * 150000).toString()));
@@ -421,9 +419,7 @@ export const DAVTokenProvider = ({ children }) => {
   const ClaimTokens = async () => {
     try {
       setClaiming(true);
-      await handleContractCall(RatioContract, "claimTokens", [], (s) =>
-        ethers.formatUnits(s, 18)
-      );
+      await handleContractCall(stateContract, "mintReward", []);
       setClaiming(false);
     } catch (e) {
       console.error("Error claiming tokens:", e);
@@ -516,7 +512,6 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  
   const DavContractStateBalance = async () => {
     try {
       const transaction = await handleContractCall(
@@ -575,9 +570,9 @@ export const DAVTokenProvider = ({ children }) => {
 
   const ViewDistributedTokens = async () => {
     const amount = await handleContractCall(
-      RatioContract,
-      "viewClaimableTokens",
-      [account],
+      stateContract,
+      "getCalculationOfReward",
+      [],
       (s) => ethers.formatUnits(s, 18)
     );
     setViewDistributed(amount);
