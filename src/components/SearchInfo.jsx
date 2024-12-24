@@ -6,10 +6,10 @@ import DAVLogo from "../assets/d_logo.png";
 import stateLogo from "../assets/state_logo.png";
 import PropTypes from "prop-types";
 
-const SearchInfo = ({ setSearchQuery, onTokenSelect }) => {
+const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
   const [filteredData, setFilteredData] = useState([
     { id: "∈", name: "DAV", logo: DAVLogo },
-    { id: 0.1, name: "STATE", logo: stateLogo },
+    { id: "±", name: "STATE", logo: stateLogo },
     { id: 1, name: "Fluxin", logo: FluxinLogo },
     { id: 2, name: "Xerion", logo: XerionLogo },
     { id: 3, name: "Rutvik", logo: FluxinLogo },
@@ -38,8 +38,8 @@ const SearchInfo = ({ setSearchQuery, onTokenSelect }) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query); // Update the parent state
     const originalData = [
-      { id: 0, name: "DAV", logo: DAVLogo },
-      { id: 0.1, name: "STATE", logo: stateLogo },
+      { id: "∈", name: "DAV", logo: DAVLogo },
+      { id: "±", name: "STATE", logo: stateLogo },
       { id: 1, name: "Fluxin", logo: FluxinLogo },
       { id: 2, name: "Xerion", logo: XerionLogo },
       { id: 3, name: "Rutvik", logo: FluxinLogo },
@@ -52,7 +52,7 @@ const SearchInfo = ({ setSearchQuery, onTokenSelect }) => {
   };
 
   const handleRowClick = (token) => {
-    onTokenSelect(token); // Pass selected token data to the parent
+    setSelectedToken(token); // Pass selected token data to the parent
   };
 
   return (
@@ -94,7 +94,7 @@ const SearchInfo = ({ setSearchQuery, onTokenSelect }) => {
 
 SearchInfo.propTypes = {
   setSearchQuery: PropTypes.func.isRequired,
-  onTokenSelect: PropTypes.func.isRequired,
+  setSelectedToken: PropTypes.func.isRequired,
 };
 
 export default SearchInfo;

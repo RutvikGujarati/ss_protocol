@@ -19,12 +19,10 @@ const DetailsInfo = ({ searchQuery }) => {
     setRatioTarget,
     LPStateTransferred,
     DAVTokensWithdraw,
-    StateBalance,
-    releaseNextBatch,
+    StateSupply,
     RenounceState,
-    // MoveTokens,
     ReanounceContract,
-	Supply,
+    Supply,
     DAVTokensFiveWithdraw,
     LastLiquidity,
     Batch,
@@ -35,6 +33,15 @@ const DetailsInfo = ({ searchQuery }) => {
   const [numerator, setNumerator] = useState("");
   const [Denominator, setDenominator] = useState("");
   const auctionStatus = AuctionRunning ? "True" : "False";
+  const formatWithCommas = (value) => {
+    if (value === null || value === undefined) return "";
+    const valueString = value.toString();
+    const [integerPart, decimalPart] = valueString.split(".");
+    const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return decimalPart
+      ? `${formattedInteger}.${decimalPart}`
+      : formattedInteger;
+  };
 
   const shortenAddress = (address) => {
     if (!address) return "";
@@ -44,7 +51,6 @@ const DetailsInfo = ({ searchQuery }) => {
   const davShortened = shortenAddress(DAV_TOKEN_ADDRESS);
   const stateShortened = shortenAddress(STATE_TOKEN_ADDRESS);
 
-  // List of tokens with their respective actions
   const tokens = [
     {
       tokenName: "DAV",
@@ -58,7 +64,7 @@ const DetailsInfo = ({ searchQuery }) => {
       renounceSmartContract: "No",
       BatchAmount: BatchAmount,
       Batch: Batch,
-	  Supply:Supply,
+      Supply: Supply,
       LastDevShare: LastDevShare,
       LastLiquidity: LastLiquidity,
       actions: {
@@ -89,14 +95,14 @@ const DetailsInfo = ({ searchQuery }) => {
         setRatioTarget: () => setRatioTarget(numerator, Denominator), // Using dynamic parameters
       },
     },
-    //left of implementation
 
     //state token
     {
-      tokenName: "State",
+      tokenName: "STATE",
       key: stateShortened,
       supply: "999T",
       Treasury: "999T",
+      StateSupply: StateSupply,
       address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
       renounceSmartContract: "No",
@@ -117,12 +123,10 @@ const DetailsInfo = ({ searchQuery }) => {
     }
   };
 
-  // Filter details based on the search query
   const filteredTokens = tokens.filter((item) =>
     item.tokenName.toLowerCase().includes((searchQuery ?? "").toLowerCase())
   );
 
-  // Show the first value by default or the searched value
   const dataToShow = filteredTokens.length > 0 ? filteredTokens[0] : tokens[0];
 
   return (
@@ -157,15 +161,9 @@ const DetailsInfo = ({ searchQuery }) => {
             </td>
             <td></td>
           </tr>
-          <tr>
-            <td className="d-flex align-items-center">Supply</td>
-            <td className="d-flex align-items-center justify-content-center">
-              {dataToShow.supply || ""}
-            </td>
-            <td></td>
-          </tr>
+
           {dataToShow.tokenName !== "DAV" &&
-            dataToShow.tokenName !== "State" && (
+            dataToShow.tokenName !== "STATE" && (
               <>
                 <tr>
                   <td className="d-flex align-items-center">Ratio Target</td>
@@ -245,12 +243,17 @@ const DetailsInfo = ({ searchQuery }) => {
                     </button>
                   </td>
                 </tr>
-
-                {/* Dynamically render token actions */}
               </>
             )}
           {dataToShow.tokenName == "DAV" && (
             <>
+              <tr>
+                <td className="d-flex align-items-center">Supply</td>
+                <td className="d-flex align-items-center justify-content-center">
+                  {"5,000,000.00"}
+                </td>
+                <td></td>
+              </tr>
               <tr>
                 <td className="d-flex align-items-center">
                   Total Dav Token Minted
@@ -263,25 +266,119 @@ const DetailsInfo = ({ searchQuery }) => {
             </>
           )}
 
-          {dataToShow.tokenName == "State" && (
+          {dataToShow.tokenName == "STATE" && (
             <>
               <tr>
-                <td className="d-flex align-items-center">State Treasury</td>
+                <td className="d-flex align-items-center">Minted Supply</td>
                 <td className="d-flex align-items-center justify-content-center">
-                  {dataToShow.Treasury || ""}
+                  {formatWithCommas(dataToShow.StateSupply)}
+                </td>
+                <td></td>
+              </tr>
+
+              <tr>
+                <td className="d-flex align-items-center">Treasury Supply</td>
+                <td className="d-flex align-items-center justify-content-center">
+                  {dataToShow.supply || ""}
                 </td>
                 <td></td>
               </tr>
               <tr>
                 <td className="d-flex align-items-center">
-                  3.5% LP Token Transferred
+                  Auction Rate (in days)
                 </td>
                 <td>
-                  <div className="tableClaim w-100">
-                    {dataToShow.claimLPToken || ""}
+                  <div className="w-100">
+                    <input
+                      type="text"
+                      className="form-control text-center mh-30"
+                      placeholder="Enter Days"
+                      value={numerator}
+                      onChange={(e) => handleInputChange(e, "numerator")}
+                    />
                   </div>
                 </td>
-                <td className="d-flex justify-content-end"></td>
+                <td className="d-flex justify-content-end">
+                  <button
+                    onClick={setRatioTarget(numerator, Denominator)}
+                    className="btn btn-primary btn-sm swap-btn info-icon"
+                  >
+                    Set
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td className="d-flex align-items-center">Current Ratio</td>
+                <td className="d-flex align-items-center justify-content-center">
+                  {"0:0"}
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td className="d-flex align-items-center">Ratio Target</td>
+                <td>
+                  <div className="w-100">
+                    <input
+                      type="text"
+                      className="form-control text-center mh-30"
+                      placeholder="Numerator"
+                      value={numerator}
+                      onChange={(e) => handleInputChange(e, "numerator")}
+                    />
+                  </div>
+                </td>
+                <td>
+                  <div className="w-100">
+                    <input
+                      type="text"
+                      className="form-control text-center mh-30"
+                      placeholder="Denominator"
+                      value={Denominator}
+                      onChange={(e) => handleInputChange(e, "denominator")}
+                    />
+                  </div>
+                </td>
+                <td className="d-flex justify-content-end">
+                  <button
+                    onClick={setRatioTarget(numerator, Denominator)}
+                    className="btn btn-primary btn-sm swap-btn info-icon"
+                  >
+                    Set
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td className="d-flex align-items-center">Burn Ratio</td>
+                <td>
+                  <div className="w-100">
+                    <input
+                      type="text"
+                      className="form-control text-center mh-30"
+                      placeholder="Numerator"
+                      value={numerator}
+                      onChange={(e) => handleInputChange(e, "numerator")}
+                    />
+                  </div>
+                </td>
+                <td>
+                  <div className="w-100">
+                    <input
+                      type="text"
+                      className="form-control text-center mh-30"
+                      placeholder="Denominator"
+                      value={Denominator}
+                      onChange={(e) => handleInputChange(e, "denominator")}
+                    />
+                  </div>
+                </td>
+                <td className="d-flex justify-content-end">
+                  <button
+                    onClick={setRatioTarget(numerator, Denominator)}
+                    className="btn btn-primary btn-sm swap-btn info-icon"
+                  >
+                    Set
+                  </button>
+                </td>
               </tr>
             </>
           )}

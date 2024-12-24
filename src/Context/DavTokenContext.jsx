@@ -37,6 +37,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [StateHolds, setStateHoldings] = useState("0.0");
   const [davPercentage, setDavPercentage] = useState("0.0");
   const [Supply, setSupply] = useState("0.0");
+  const [StateSupply, setStateSupply] = useState("0.0");
   const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
   const [DAVTokensFiveWithdraw, setFiveAvTokens] = useState("0.0");
   const [LastLiquidity, setLastLiquidityTransaction] = useState("0.0");
@@ -229,6 +230,16 @@ export const DAVTokenProvider = ({ children }) => {
     setSupply(supply);
   };
 
+  const StateTotalMintedSupply = async () => {
+    const supply = await handleContractCall(
+      stateContract,
+      "totalSupply",
+      [],
+      (s) => ethers.formatUnits(s, 18)
+    );
+    setStateSupply(supply);
+  };
+
   const releases = [
     { dav: 1000000, releaseState: 50000000000000 },
     { dav: 1000000, releaseState: 40000000000000 },
@@ -309,6 +320,7 @@ export const DAVTokenProvider = ({ children }) => {
 
           try {
             await ViewDistributedTokens();
+            await StateTotalMintedSupply();
           } catch (error) {
             console.error("Error fetching ViewDistributedTokens:", error);
           }
@@ -832,6 +844,7 @@ export const DAVTokenProvider = ({ children }) => {
         StateHoldings,
         StateHolds,
         DavSupply,
+		StateSupply,
         Supply,
         LPStateTransferred,
         getBurnedSTATE,

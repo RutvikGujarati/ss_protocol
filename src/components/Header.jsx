@@ -9,16 +9,16 @@ import { NavLink } from "react-router-dom";
 
 const Header = () => {
 //   const { AuctionRunning } = useDAVToken();
-  useEffect(() => {
-    const tooltipTriggerList = document.querySelectorAll(
-      '[data-bs-toggle="tooltip"]'
-    );
-    tooltipTriggerList.forEach((tooltipTriggerEl) => {
-      new bootstrap.Tooltip(tooltipTriggerEl, {
-        trigger: "hover",
-      });
-    });
-  }, []);
+//   useEffect(() => {
+//     const tooltipTriggerList = document.querySelectorAll(
+//       '[data-bs-toggle="tooltip"]'
+//     );
+//     tooltipTriggerList.forEach((tooltipTriggerEl) => {
+//       new bootstrap.Tooltip(tooltipTriggerEl, {
+//         trigger: "hover",
+//       });
+//     });
+//   }, []);
 
   return (
     <>
@@ -39,9 +39,9 @@ const Header = () => {
             <ul className="navbar-nav d-flex flex-row align-items-center me-4">
               <li
                 className="nav-item mx-2"
-                data-bs-toggle="tooltip"
-                data-bs-placement="left"
-                title="Auction is running"
+                // data-bs-toggle="tooltip"
+                // data-bs-placement="left"
+                // title="Auction is running"
               >
                 <NavLink
                   className={({ isActive }) =>
@@ -52,7 +52,7 @@ const Header = () => {
                   to="/auction"
                 >
                   Auction
-                  <span className="active-dot"></span>
+                  {/* <span className="active-dot"></span> */}
                 </NavLink>
               </li>
               <li className="nav-item mx-2">

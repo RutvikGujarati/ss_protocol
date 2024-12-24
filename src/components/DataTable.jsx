@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import XerionLogo from "../assets/XerionLogo.png";
 import FluxinLogo from "../assets/FluxinLogo.png";
+import stateLogo from "../assets/state_logo.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useDAVToken } from "../Context/DavTokenContext";
@@ -81,15 +82,15 @@ const DataTable = () => {
                       <div className="tableName d-flex gap-4 align-items-center">
                         <div className="nameImage">
                           <img
-                            src={FluxinLogo}
+                            src={stateLogo}
                             width={40}
                             height={40}
                             alt="Logo"
                           />
                         </div>
                         <div className="nameDetails">
-                          <h5 className="nameBig">Fluxin</h5>
-                          <p className="nameSmall mb-1 uppercase">Fluxin</p>
+                          <h5 className="nameBig">STATE</h5>
+                          <p className="nameSmall mb-1 uppercase">pState</p>
                         </div>
                       </div>
                     </td>
@@ -150,21 +151,22 @@ const DataTable = () => {
                         </div>
                       )}
                     </td>
-                    <td>$0.00000089</td>
-                    <td className="text-success">1.25 M</td>
-                    <td>1 : 250 M</td>
+                    <td>$0.0</td>
+                    <td className="text-success">0.0 M</td>
+                    <td>0 : 0 M</td>
                     <td>{RatioTargetAmount} T</td>
                     <td className="tagTd">
                       <div className="d-flex justify-content-center gap-3 w-100">
-                        <div className="tableClaim">100 RT</div>
-                        <div className="tableClaim">200 State</div>
+                        <div className="tableClaim">0.0 </div>
+                        <div className="tableClaim">0.0</div>
                       </div>
                     </td>
                     <td>
                       <div className="d-flex align-items-center gap-2">
                         <button
                           onClick={Swapping}
-                          disabled={ButtonText.includes("...")}
+                        //   disabled={ButtonText.includes("...")}
+						  disabled={true}
                           className="btn btn-primary btn-sm swap-btn"
                         >
                           {ButtonText.includes("...") ? ButtonText : "Swap"}
@@ -181,7 +183,7 @@ const DataTable = () => {
                       </div>
                     </td>
                   </tr>
-                  <tr>
+                  {/* <tr>
                     <td>2</td>
                     <td>
                       <div className="tableName d-flex gap-4 align-items-center">
@@ -229,7 +231,7 @@ const DataTable = () => {
                         />
                       </div>
                     </td>
-                  </tr>
+                  </tr> */}
                 </tbody>
               </table>
             </div>
