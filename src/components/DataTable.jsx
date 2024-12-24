@@ -76,7 +76,7 @@ const DataTable = () => {
                 <tbody>
                   {/* Example Rows */}
                   <tr>
-                    <td>1</td>
+                    <td>±</td>
                     <td>
                       {/* <div className="d-flex justify-content-between align-items-center"> */}
                       <div className="tableName d-flex gap-4 align-items-center">
@@ -165,8 +165,8 @@ const DataTable = () => {
                       <div className="d-flex align-items-center gap-2">
                         <button
                           onClick={Swapping}
-                        //   disabled={ButtonText.includes("...")}
-						  disabled={true}
+                          //   disabled={ButtonText.includes("...")}
+                          disabled={true}
                           className="btn btn-primary btn-sm swap-btn"
                         >
                           {ButtonText.includes("...") ? ButtonText : "Swap"}
