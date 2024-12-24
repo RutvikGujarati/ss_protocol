@@ -100,8 +100,8 @@ const DetailsInfo = ({ searchQuery }) => {
     {
       tokenName: "STATE",
       key: stateShortened,
-      supply: "999T",
-      Treasury: "999T",
+      supply: "999,000,000,000,000.00",
+      Treasury: "999,000,000,000,000.00",
       StateSupply: StateSupply,
       address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
@@ -256,7 +256,7 @@ const DetailsInfo = ({ searchQuery }) => {
               </tr>
               <tr>
                 <td className="d-flex align-items-center">
-                  Total Dav Token Minted
+                  Total Dav Tokens Minted
                 </td>
                 <td className="d-flex align-items-center justify-content-center">
                   {dataToShow.Supply || ""}

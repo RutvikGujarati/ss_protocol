@@ -63,8 +63,8 @@ const DataTable = () => {
                   <tr className="align-item-center">
                     <th>#</th>
                     <th className="">Name</th>
+                    <th>Check</th>
                     <th>Mint</th>
-                    <th></th>
                     <th>Price</th>
                     <th>Liquidity</th>
                     <th>Current Ratio</th>
@@ -95,38 +95,14 @@ const DataTable = () => {
                       </div>
                     </td>
                     <td>
-                      <div className="d-flex align-items-center justify-content-center">
-                        <div
-                          onClick={
-                            Distributed !== "0.0" && !claiming
-                              ? ClaimTokens
-                              : null
-                          }
-                          className={`tableClaim hoverEffect ${
-                            claiming || Distributed === "0.0" ? "disabled" : ""
-                          }`}
-                          style={{
-                            pointerEvents:
-                              claiming || Distributed === "0.0"
-                                ? "none"
-                                : "auto",
-                          }}
-                        >
-                          {claiming
-                            ? "minting.."
-                            : `${Distributed ?? "0.0"} Mint`}
-                        </div>
-                      </div>
-                    </td>
-                    <td>
                       <div
-                        className={`d-flex align-items-center gap-2 ${
+                        className={`d-flex align-items-center justify-content-center ${
                           isChecking || Distributed > 0 ? "disabled" : ""
                         }`}
                       >
                         <button
                           onClick={Checking}
-                          disabled={isChecking || Distributed > 0} // Disable if isChecking or Distributed > 0
+                          disabled={isChecking || Distributed > 0}
                           className="btn btn-primary btn-sm swap-btn"
                         >
                           {isChecking ? "Checking..." : "Mint Balance"}
@@ -151,6 +127,31 @@ const DataTable = () => {
                         </div>
                       )}
                     </td>
+                    <td>
+                      <div className="d-flex align-items-center justify-content-center">
+                        <div
+                          onClick={
+                            Distributed !== "0.0" && !claiming
+                              ? ClaimTokens
+                              : null
+                          }
+                          className={`tableClaim hoverEffect ${
+                            claiming || Distributed === "0.0" ? "disabled" : ""
+                          }`}
+                          style={{
+                            pointerEvents:
+                              claiming || Distributed === "0.0"
+                                ? "none"
+                                : "auto",
+                          }}
+                        >
+                          {claiming
+                            ? "minting.."
+                            : `${Distributed ?? "0.0"} Mint`}
+                        </div>
+                      </div>
+                    </td>
+
                     <td>$0.0</td>
                     <td className="text-success">0.0 M</td>
                     <td>0 : 0 M</td>
@@ -239,7 +240,7 @@ const DataTable = () => {
         </>
       ) : isBurn ? (
         <>
-          <div className="container mt-4 datatablemarginbottom">
+          {/* <div className="container mt-4 datatablemarginbottom">
             <div className="table-responsive">
               <table className="table table-dark">
                 <thead>
@@ -254,7 +255,6 @@ const DataTable = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {/* Example Rows */}
                   <tr>
                     <td>1</td>
                     <td>
@@ -292,7 +292,7 @@ const DataTable = () => {
                 </tbody>
               </table>
             </div>
-          </div>
+          </div> */}
         </>
       ) : (
         <></>
