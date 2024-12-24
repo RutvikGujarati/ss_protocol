@@ -38,8 +38,7 @@ const DataTable = () => {
                   <tr className="align-item-center">
                     <th>#</th>
                     <th className="">Name</th>
-                    <th>Version</th>
-                    <th></th>
+                    <th>Mint</th>
                     <th>Price</th>
                     <th>Liquidity</th>
                     <th>Current Ratio</th>
@@ -69,18 +68,19 @@ const DataTable = () => {
                         </div>
                       </div>
                     </td>
-                    <td>V1</td>
                     <td>
-                      <div
-                        onClick={ClaimTokens}
-                        className={`tableClaim hoverEffect ${
-                          claiming ? "disabled" : ""
-                        }`}
-                        style={{ pointerEvents: claiming ? "none" : "auto" }}
-                      >
-                        {claiming
-                          ? "Minting.."
-                          : `${Distributed ?? "0.0"} Mint`}
+                      <div className="d-flex align-items-center justify-content-center">
+                        <div
+                          onClick={ClaimTokens}
+                          className={`tableClaim hoverEffect ${
+                            claiming ? "disabled" : ""
+                          }`}
+                          style={{ pointerEvents: claiming ? "none" : "auto" }}
+                        >
+                          {claiming
+                            ? "claiming.."
+                            : `${Distributed ?? "0.0"} Mint`}
+                        </div>
                       </div>
                     </td>
                     <td>$0.00000089</td>
@@ -127,9 +127,10 @@ const DataTable = () => {
                         </div>
                       </div>
                     </td>
-                    <td>V2</td>
                     <td>
-                      <div className="tableClaim">789 Mint</div>
+                      <div className="d-flex align-items-center justify-content-center">
+                        <div className="tableClaim ">789 Mint</div>
+                      </div>
                     </td>
                     <td>$0.0000067</td>
                     <td className="text-success">2.67 M</td>

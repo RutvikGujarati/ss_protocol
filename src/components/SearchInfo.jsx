@@ -8,7 +8,7 @@ import PropTypes from "prop-types";
 
 const SearchInfo = ({ setSearchQuery, onTokenSelect }) => {
   const [filteredData, setFilteredData] = useState([
-    { id: 0, name: "DAV", logo: DAVLogo },
+    { id: "∈", name: "DAV", logo: DAVLogo },
     { id: 0.1, name: "STATE", logo: stateLogo },
     { id: 1, name: "Fluxin", logo: FluxinLogo },
     { id: 2, name: "Xerion", logo: XerionLogo },

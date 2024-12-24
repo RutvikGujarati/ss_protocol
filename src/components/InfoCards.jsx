@@ -64,10 +64,7 @@ const InfoCards = () => {
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-center align-items-center text-center w-100">
                   <div>
-                    <p className="mb-1 detailText">DAV MINT COST</p>
-                    <h5 className="detailAmount mb-4">
-                      1 DAV MINT COST = 100 000 PLS
-                    </h5>
+                    <p className="mb-2 detailText">DAV MINT COST</p>
                     <input
                       type="text"
                       placeholder="Enter Value"
@@ -75,7 +72,7 @@ const InfoCards = () => {
                       value={amount}
                       onChange={handleInputChange}
                     />
-                    <h5 className="detailAmount mb-3">
+                    <h5 className="detailAmount mb-4">
                       {TotalCost
                         ? formatNumber(ethers.formatUnits(TotalCost, 18))
                         : "0"}{" "}
@@ -83,7 +80,7 @@ const InfoCards = () => {
                     </h5>
                     <button
                       onClick={handleMint}
-                      className="btn btn-primary btn-sm w-100"
+                      className="btn btn-primary btn-sm d-flex justify-content-center align-items-center w-100"
                       disabled={load}
                     >
                       {load ? "Minting..." : "Mint"}
