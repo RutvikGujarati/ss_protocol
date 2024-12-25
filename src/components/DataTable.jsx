@@ -49,6 +49,8 @@ const DataTable = () => {
     }
     setIsChecking(false); // Reset checking state after function execution
   };
+
+  
   async function Swapping() {
     await SwapTokens("100");
   }
@@ -102,7 +104,7 @@ const DataTable = () => {
                       >
                         <button
                           onClick={Checking}
-                          disabled={isChecking || Distributed > 0}
+                        //   disabled={isChecking || Distributed > 0}
                           className="btn btn-primary btn-sm swap-btn"
                         >
                           {isChecking ? "Checking..." : "Mint Balance"}

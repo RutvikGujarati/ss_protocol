@@ -7,7 +7,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DAVToken is ERC20, Ownable(msg.sender) {
     uint256 public constant MAX_SUPPLY = 5000000 ether; // 5 Million DAV Tokens
-    uint256 public constant TOKEN_COST = 100000 ether; // 100,000 PLS per DAV
+    uint256 public constant TOKEN_COST = 1 ether; // 100,000 PLS per DAV
 
     uint256 public mintedSupply; // Total Minted DAV Tokens
     address public liquidityWallet; // Liquidity Wallet
@@ -20,6 +20,7 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
     );
 
     mapping(address => bool) private davHolderExists;
+    mapping(address => uint256) public lastMintTimestamp; // Track the last mint timestamp for each user
     address[] private davHolders;
 
     constructor(
@@ -53,6 +54,17 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
         governanceAddress = _newGovernance;
     }
 
+    function viewLastMintTimeStamp(address user) public view returns (uint256) {
+        return lastMintTimestamp[user];
+    }
+
+    function setLastRewardMintTimestamp(
+        address user,
+        uint256 timestamp
+    ) external onlyOwner {
+        lastMintTimestamp[user] = timestamp;
+    }
+
     /**
      * @dev Mint DAV tokens by paying PLS.
      * @param amount The amount of DAV tokens to mint (in wei).
@@ -71,6 +83,9 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
 
         // Track the user as a DAV holder
         trackDAVHolder(address(0), msg.sender);
+
+        // Update the last mint timestamp for the user
+        lastMintTimestamp[msg.sender] = block.timestamp;
 
         distributeFunds();
 

@@ -9,28 +9,13 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
     DAVToken public davToken;
     uint256 public constant MAX_SUPPLY = 999000000000000 ether;
 
-    uint256 public totalBurned;
-    uint256 public constant REWARD_DECAY_START = 1735070950; // Timestamp for 01/01/2025
+    uint256 public constant REWARD_DECAY_START = 1735112059; // Timestamp for 01/01/2025
     uint256 public constant DAILY_DECAY_PERCENT = 1; // 1% per day
+    uint256 public constant MAX_DECAY_PERIOD = 100 minutes;
 
-    mapping(address => uint256) public claimableTokens;
     mapping(address => uint256) public userRewardAmount;
     mapping(address => uint256) public mintedAmount;
     mapping(address => uint256) public lastDavHolding;
-    mapping(address => uint256) public lastMintTimestamp;
-
-    event Claimed(address indexed claimant, uint256 amount);
-
-    address public governanceAddress =
-        0x5B38Da6a701c568545dCfcB03FcB875f56beddC4;
-
-    modifier onlyGovernance() {
-        require(
-            msg.sender == governanceAddress,
-            "You are not authorized to perform this action"
-        );
-        _;
-    }
 
     constructor(
         address _davTokenAddress,
@@ -40,113 +25,99 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
         davToken = DAVToken(payable(_davTokenAddress));
     }
 
-    function getDavRankScaled(address user) public view returns (uint256) {
-        uint256 currentDavHolding = davToken.balanceOf(user);
-        require(currentDavHolding > 0, "You must hold some DAV tokens");
-        return currentDavHolding / 5000000;
-    }
-
-    function getCalculationOfReward(
-        address user
-    ) public view returns (uint256) {
-        uint256 holdingRank = getDavRankScaled(user);
-        require(holdingRank > 0, "Insufficient rank for reward");
-
-        uint256 totalAmountToDistribute = (MAX_SUPPLY * 200) / 1000;
-        uint256 userReward = (holdingRank * totalAmountToDistribute) / 1e20;
-
-        require(
-            userReward <= totalAmountToDistribute,
-            "User reward exceeds limit"
-        );
-
-        return userReward;
-    }
-
     function distributeRewardForUser(address user) public {
         uint256 currentDavHolding = davToken.balanceOf(user);
-        require(
-            currentDavHolding > lastDavHolding[user],
-            "No additional DAV tokens added"
-        );
+        require(currentDavHolding > lastDavHolding[user], "No new DAV minted");
 
-        uint256 userReward = getCalculationOfReward(user);
-        require(userReward > 0, "No reward available");
+        uint256 newDavMinted = currentDavHolding - lastDavHolding[user];
+        uint256 lastMintTime = davToken.viewLastMintTimeStamp(user); // Fetch DAV mint timestamp
+        uint256 newReward = calculateReward(newDavMinted);
 
-        // Apply decay if the user has received rewards before
-        uint256 lastMintTime = lastMintTimestamp[user];
-        if (lastMintTime > 0) {
-            uint256 adjustedUserReward = getCurrentReward(
-                userReward,
-                lastMintTime
-            );
-            userRewardAmount[user] = adjustedUserReward; // Update the reward mapping with the decremented value
-        } else {
-            userRewardAmount[user] = userReward; // Set the reward without decay for the first time
+        if (block.timestamp >= REWARD_DECAY_START) {
+            uint256 timeElapsed = block.timestamp - lastMintTime;
+
+            // Apply decay only if within the decay period
+            if (timeElapsed <= MAX_DECAY_PERIOD) {
+                newReward = getCurrentReward(newReward, timeElapsed);
+            }
         }
 
-        // Update lastDavHolding and lastMintTimestamp for the user
+        userRewardAmount[user] += newReward;
         lastDavHolding[user] = currentDavHolding;
-        lastMintTimestamp[user] = block.timestamp; // Reset mint timestamp after distribution
+    }
+    function seetimestampslogs(address user) public view returns (uint256) {
+        uint256 reward;
+        if (block.timestamp >= REWARD_DECAY_START) {
+            uint256 lastMintTime = davToken.viewLastMintTimeStamp(user);
+            uint256 currentDavHolding = davToken.balanceOf(user);
+
+            uint256 newDavMinted = currentDavHolding - lastDavHolding[user];
+
+            uint256 timeElapsed = block.timestamp - lastMintTime;
+            uint256 newReward = calculateReward(newDavMinted);
+
+            // Apply decay only if within the decay period
+            if (timeElapsed <= MAX_DECAY_PERIOD) {
+                newReward = getCurrentReward(newReward, timeElapsed);
+                reward += newReward;
+            }
+        }
+        return reward;
+    }
+    function mintReward() public {
+        uint256 reward = userRewardAmount[msg.sender];
+        require(reward > 0, "No reward to mint");
+
+        uint256 currentDavHoldings = davToken.balanceOf(msg.sender);
+        uint256 lastHolding = lastDavHolding[msg.sender];
+
+        // Ensure the user has additional DAV holdings since the last record
+        require(
+            currentDavHoldings >= lastHolding,
+            "No new DAV holdings to mint extra"
+        );
+
+        uint256 extraHoldings = currentDavHoldings - lastHolding;
+        uint256 contractReward = extraHoldings * 1000000000;
+
+        // Mint rewards to the user
+        _mint(msg.sender, reward);
+
+        // Mint additional rewards to the contract based on extra holdings
+        _mint(address(this), contractReward);
+
+        // Reset reward and update last holding information
+        userRewardAmount[msg.sender] = 0;
+        lastDavHolding[msg.sender] = currentDavHoldings; // Update last holdings
     }
 
     function getCurrentReward(
         uint256 baseReward,
-        uint256 davMintTimestamp
-    ) public view returns (uint256) {
-        if (davMintTimestamp == 0 || block.timestamp < REWARD_DECAY_START) {
-            return baseReward; // No decay if no DAV tokens were minted or before reward decay start
-        }
-
-        // Calculate the number of days since the user's last DAV mint
-        uint256 daysSinceDavMint = (block.timestamp - davMintTimestamp) /
-            1 days;
-
-        // Apply decay for each day since the last mint
-        uint256 adjustedReward = baseReward;
-        for (uint256 i = 0; i < daysSinceDavMint; i++) {
-            adjustedReward =
-                (adjustedReward * (100 - DAILY_DECAY_PERCENT)) /
-                100;
-        }
-
-        return adjustedReward;
+        uint256 timeElapsed
+    ) public pure returns (uint256) {
+        uint256 decayPeriods = timeElapsed / 1 minutes;
+        uint256 decayFactor = (100 - DAILY_DECAY_PERCENT) ** decayPeriods;
+        return (baseReward * decayFactor) / (100 ** decayPeriods);
     }
 
-    function mintReward() public {
-        uint256 userReward = userRewardAmount[msg.sender];
-        require(userReward > 0, "No reward to mint");
-
-        uint256 userDavHoldings = davToken.balanceOf(msg.sender);
-        require(userDavHoldings > 0, "User has no DAV holdings");
-
-        uint256 davMintTimestamp = davToken.viewLastMintTimeStamp(msg.sender);
-
-        // Get the adjusted reward after decay (if applicable)
-        uint256 adjustedUserReward = getCurrentReward(
-            userReward,
-            davMintTimestamp
-        );
-        uint256 baseContractMint = userDavHoldings * 1e9;
-
-        // Mint rewards
-        mintedAmount[msg.sender] = adjustedUserReward;
-        _mint(msg.sender, adjustedUserReward);
-        _mint(address(this), baseContractMint);
-
-        // Reset rewards and update timestamps
-        userRewardAmount[msg.sender] = 0;
-        lastMintTimestamp[msg.sender] = block.timestamp;
+    function calculateReward(uint256 davAmount) public pure returns (uint256) {
+        uint256 scaled = davAmount / 5000000;
+        return ((scaled * (MAX_SUPPLY * 200)) / 1000) / 1e18;
     }
 
-    // View function to check claimable tokens for a user
-    function viewClaimableTokens(
-        address holder
-    ) external view returns (uint256) {
-        return userRewardAmount[holder];
+    function viewUserTimestamps(
+        address user
+    ) public view returns (uint256 davMintTimestamp, uint256 lastHolding) {
+        davMintTimestamp = davToken.viewLastMintTimeStamp(user);
+        lastHolding = lastDavHolding[user];
     }
 
-    // View function to show both non-decremented and decremented rewards
+    function getCurrentDecayPercentage() public view returns (uint256) {
+        if (block.timestamp < REWARD_DECAY_START) return 0;
+        uint256 elapsed = block.timestamp - REWARD_DECAY_START;
+        return (elapsed / 1 minutes) * DAILY_DECAY_PERCENT;
+    }
+
     function viewMintableAmountWithDetails(
         address user
     )
@@ -154,14 +125,12 @@ contract RatioSwapToken is ERC20, Ownable(msg.sender) {
         view
         returns (uint256 nonDecrementedReward, uint256 decrementedReward)
     {
-        uint256 userReward = userRewardAmount[user];
-        require(userReward > 0, "No reward to view");
+        uint256 reward = userRewardAmount[user];
+        require(reward > 0, "No reward to view");
 
         uint256 davMintTimestamp = davToken.viewLastMintTimeStamp(user);
-
-        // Calculate Rewards
-        nonDecrementedReward = userReward;
-        decrementedReward = getCurrentReward(userReward, davMintTimestamp);
-        return (nonDecrementedReward, decrementedReward);
+        uint256 elapsed = block.timestamp - davMintTimestamp;
+        nonDecrementedReward = reward;
+        decrementedReward = getCurrentReward(reward, elapsed);
     }
 }

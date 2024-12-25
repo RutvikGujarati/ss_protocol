@@ -8,8 +8,8 @@ import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
-export const DAV_TOKEN_ADDRESS = "0x241732380d05e99665F023c4CcC816CAb2Ab4e3F";
-export const STATE_TOKEN_ADDRESS = "0xce1ddF557E7064B5a2E3794763CC8337Ffd1A361";
+export const DAV_TOKEN_ADDRESS = "0xA84485d323063a435F66d59F55d29a91242Dcd3B";
+export const STATE_TOKEN_ADDRESS = "0x8b6BBb0Bf8D51218016BE6Fb143Cfa37E09AE9a7";
 export const Ratio_TOKEN_ADDRESS = "0x0Bd9BA2FF4F82011eeC33dd84fc09DC89ac5B5EA";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
@@ -134,7 +134,7 @@ export const DAVTokenProvider = ({ children }) => {
   const mintDAV = async (amount) => {
     try {
       const value = ethers.parseEther(amount.toString());
-      const cost = ethers.parseEther((amount * 150000).toString());
+      const cost = ethers.parseEther((amount * 1).toString());//150000
 
       await handleContractCall(davContract, "mintDAV", [
         value,
@@ -459,8 +459,7 @@ export const DAVTokenProvider = ({ children }) => {
 
   const CheckMintBalance = async () => {
     try {
-      await handleContractCall(stateContract, "seeMintableAmount", [], (s) =>
-        ethers.formatUnits(s, 18)
+      await handleContractCall(stateContract, "distributeReward", [account]
       );
     } catch (e) {
       console.error("Error claiming tokens:", e);
@@ -837,6 +836,7 @@ export const DAVTokenProvider = ({ children }) => {
         StateReward,
         // GetCurrentStateReward,
         CurrentSReward,
+		setClaiming,
         DavHoldings,
         davHolds,
         DavHoldingsPercentage,
