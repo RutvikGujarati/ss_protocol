@@ -9,7 +9,7 @@ import PropTypes from "prop-types";
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
 export const DAV_TOKEN_ADDRESS = "0xCDB77C474A0670F8051f723D68068260B14B6D9f";
-export const STATE_TOKEN_ADDRESS = "0x4350C4102fb217A49299518BBdD3C8Fca18f5f7B";
+export const STATE_TOKEN_ADDRESS = "0xa97Ad954E1a0465B169FBE0aA9748609A40E529A";
 export const Ratio_TOKEN_ADDRESS = "0x0Bd9BA2FF4F82011eeC33dd84fc09DC89ac5B5EA";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
