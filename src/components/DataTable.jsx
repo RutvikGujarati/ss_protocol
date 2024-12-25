@@ -20,6 +20,7 @@ const DataTable = () => {
     SwapTokens,
     ButtonText,
     claiming,
+	DavBalance,
     Distributed,
     ClaimTokens,
   } = useDAVToken();
@@ -36,12 +37,12 @@ const DataTable = () => {
       await CheckMintBalance();
     } catch (e) {
       if (
-        e.reason === "No additional DAV tokens added" ||
+        e.reason === "No new DAV minted" ||
         (e.revert &&
           e.revert.args &&
-          e.revert.args[0] === "No additional DAV tokens added")
+          e.revert.args[0] === "No new DAV minted")
       ) {
-        console.error("No additional DAV tokens added:", e);
+        console.error("No new DAV minted:", e);
         setErrorPopup(true); // Show error popup if specific error occurs
       } else {
         console.error("Error calling seeMintableAmount:", e);
@@ -104,7 +105,7 @@ const DataTable = () => {
                       >
                         <button
                           onClick={Checking}
-                        //   disabled={isChecking || Distributed > 0}
+                          disabled={isChecking || Distributed > 0 || DavBalance == 0}
                           className="btn btn-primary btn-sm swap-btn"
                         >
                           {isChecking ? "Checking..." : "Mint Balance"}

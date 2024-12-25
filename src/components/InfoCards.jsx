@@ -27,6 +27,7 @@ const InfoCards = () => {
     setLoad(true); // Start loading
     try {
       await mintDAV(amount); // Wait for minting to complete
+	  
     } catch (e) {
       console.error("Error during minting:", e);
     } finally {

@@ -28,10 +28,11 @@ contract StateToken is ERC20, Ownable(msg.sender) {
         davToken = DAVToken(payable(_davTokenAddress));
     }
 
-    function calculateDecayedReward(
-        uint256 baseReward,
-        uint256 decayPercent
-    ) public pure returns (uint256) {
+    function calculateDecayedReward(uint256 baseReward, uint256 decayPercent)
+        public
+        pure
+        returns (uint256)
+    {
         if (decayPercent >= 100) {
             return 0;
         }
@@ -67,16 +68,21 @@ contract StateToken is ERC20, Ownable(msg.sender) {
         userRewardAmount[msg.sender] = 0;
     }
 
-    function calculateBaseReward(
-        uint256 davAmount
-    ) public view returns (uint256) {
+    function calculateBaseReward(uint256 davAmount)
+        public
+        view
+        returns (uint256)
+    {
         uint256 scaled = davAmount / 5000000;
         return ((scaled * (MAX_SUPPLY * 200)) / 1000) / 1e18;
     }
 
-    function getDecayPercentageAtTime(
-        uint256 timestamp
-    ) public pure returns (uint256) {
+
+    function getDecayPercentageAtTime(uint256 timestamp)
+        public
+        pure
+        returns (uint256)
+    {
         if (timestamp < REWARD_DECAY_START) return 0;
 
         uint256 elapsed = timestamp - REWARD_DECAY_START;
@@ -90,9 +96,7 @@ contract StateToken is ERC20, Ownable(msg.sender) {
         return getDecayPercentageAtTime(block.timestamp);
     }
 
-    function viewRewardDetails(
-        address user
-    )
+    function viewRewardDetails(address user)
         public
         view
         returns (

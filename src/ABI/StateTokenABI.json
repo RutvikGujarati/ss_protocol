@@ -144,13 +144,6 @@
 		"type": "error"
 	},
 	{
-		"inputs": [],
-		"name": "mintReward",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -196,6 +189,13 @@
 		],
 		"name": "Approval",
 		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "mintReward",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
 	},
 	{
 		"anonymous": false,
@@ -384,9 +384,9 @@
 				"type": "uint256"
 			},
 			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "decayPercent",
+				"type": "uint256"
 			}
 		],
 		"name": "calculateDecayedReward",
@@ -397,12 +397,25 @@
 				"type": "uint256"
 			}
 		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "davToken",
+		"outputs": [
+			{
+				"internalType": "contract DAVToken",
+				"name": "",
+				"type": "address"
+			}
+		],
 		"stateMutability": "view",
 		"type": "function"
 	},
 	{
 		"inputs": [],
-		"name": "DAILY_DECAY_PERCENT",
+		"name": "DECAY_INTERVAL",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -415,12 +428,12 @@
 	},
 	{
 		"inputs": [],
-		"name": "davToken",
+		"name": "DECAY_STEP",
 		"outputs": [
 			{
-				"internalType": "contract DAVToken",
+				"internalType": "uint256",
 				"name": "",
-				"type": "address"
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -450,6 +463,25 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			}
+		],
+		"name": "getDecayPercentageAtTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "pure",
 		"type": "function"
 	},
 	{
@@ -491,14 +523,8 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "lastDecayPercentage",
+		"inputs": [],
+		"name": "MAX_SUPPLY",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -510,8 +536,14 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "MAX_SUPPLY",
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "mintDecayPercentage",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -595,6 +627,25 @@
 				"type": "address"
 			}
 		],
+		"name": "userBaseReward",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
 		"name": "userRewardAmount",
 		"outputs": [
 			{
@@ -618,17 +669,22 @@
 		"outputs": [
 			{
 				"internalType": "uint256",
+				"name": "baseReward",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
 				"name": "currentReward",
 				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
-				"name": "decayedReward",
+				"name": "lastMintTimestamp",
 				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
-				"name": "lastMintTimestamp",
+				"name": "decayAtMint",
 				"type": "uint256"
 			}
 		],

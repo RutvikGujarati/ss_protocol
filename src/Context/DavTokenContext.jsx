@@ -8,8 +8,8 @@ import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
-export const DAV_TOKEN_ADDRESS = "0xA84485d323063a435F66d59F55d29a91242Dcd3B";
-export const STATE_TOKEN_ADDRESS = "0x8b6BBb0Bf8D51218016BE6Fb143Cfa37E09AE9a7";
+export const DAV_TOKEN_ADDRESS = "0xCDB77C474A0670F8051f723D68068260B14B6D9f";
+export const STATE_TOKEN_ADDRESS = "0x4350C4102fb217A49299518BBdD3C8Fca18f5f7B";
 export const Ratio_TOKEN_ADDRESS = "0x0Bd9BA2FF4F82011eeC33dd84fc09DC89ac5B5EA";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
@@ -19,6 +19,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [account, setAccount] = useState(null);
+  const [DavBalance, setDavBalance] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
@@ -126,7 +127,7 @@ export const DAVTokenProvider = ({ children }) => {
       if (error.reason || error.data) {
         throw error;
       }
-	  console.log(error)
+      console.log(error);
       throw new Error("Unknown contract call error");
     }
   };
@@ -134,12 +135,13 @@ export const DAVTokenProvider = ({ children }) => {
   const mintDAV = async (amount) => {
     try {
       const value = ethers.parseEther(amount.toString());
-      const cost = ethers.parseEther((amount * 1).toString());//150000
+      const cost = ethers.parseEther((amount * 150000).toString()); //150000
 
-      await handleContractCall(davContract, "mintDAV", [
+      const transaction = await handleContractCall(davContract, "mintDAV", [
         value,
         { value: cost },
       ]);
+      await transaction.wait();
       console.log("Minting successful!");
     } catch (error) {
       console.error("Error during minting:", error);
@@ -205,6 +207,7 @@ export const DAVTokenProvider = ({ children }) => {
         [account],
         (b) => ethers.formatUnits(b, 18)
       );
+      setDavBalance(balance);
 
       const totalSupply = 5000000;
 
@@ -331,26 +334,26 @@ export const DAVTokenProvider = ({ children }) => {
             console.error("Error fetching getBurnedSTATE:", error);
           }
 
-        //   try {
-        //     await calculateBurnAmount();
-        //   } catch (error) {
-        //     console.error("Error fetching calculateBurnAmount:", error);
-        //   }
+          //   try {
+          //     await calculateBurnAmount();
+          //   } catch (error) {
+          //     console.error("Error fetching calculateBurnAmount:", error);
+          //   }
 
-        //   try {
-        //     await ratioOfBurn();
-        //   } catch (error) {
-        //     console.error("Error fetching ratioOfBurn:", error);
-        //   }
+          //   try {
+          //     await ratioOfBurn();
+          //   } catch (error) {
+          //     console.error("Error fetching ratioOfBurn:", error);
+          //   }
 
-        //   try {
-        //     await calculateOnePercentBurnAmount();
-        //   } catch (error) {
-        //     console.error(
-        //       "Error fetching calculateOnePercentBurnAmount:",
-        //       error
-        //     );
-        //   }
+          //   try {
+          //     await calculateOnePercentBurnAmount();
+          //   } catch (error) {
+          //     console.error(
+          //       "Error fetching calculateOnePercentBurnAmount:",
+          //       error
+          //     );
+          //   }
 
           try {
             await StateTokenBurnRatio();
@@ -435,7 +438,8 @@ export const DAVTokenProvider = ({ children }) => {
   const ClaimTokens = async () => {
     try {
       setClaiming(true);
-      await handleContractCall(stateContract, "mintReward", []);
+      const tx = await handleContractCall(stateContract, "mintReward", []);
+      await tx.wait();
       setClaiming(false);
     } catch (e) {
       console.error("Error claiming tokens:", e);
@@ -459,8 +463,10 @@ export const DAVTokenProvider = ({ children }) => {
 
   const CheckMintBalance = async () => {
     try {
-      await handleContractCall(stateContract, "distributeReward", [account]
-      );
+      const tx = await handleContractCall(stateContract, "distributeReward", [
+        account,
+      ]);
+      await tx.wait();
     } catch (e) {
       console.error("Error claiming tokens:", e);
       throw e; // Rethrow the error for the caller to handle it.
@@ -836,7 +842,7 @@ export const DAVTokenProvider = ({ children }) => {
         StateReward,
         // GetCurrentStateReward,
         CurrentSReward,
-		setClaiming,
+        setClaiming,
         DavHoldings,
         davHolds,
         DavHoldingsPercentage,
@@ -844,7 +850,7 @@ export const DAVTokenProvider = ({ children }) => {
         StateHoldings,
         StateHolds,
         DavSupply,
-		StateSupply,
+        StateSupply,
         Supply,
         LPStateTransferred,
         getBurnedSTATE,
@@ -855,6 +861,7 @@ export const DAVTokenProvider = ({ children }) => {
         claiming,
         HandleBurn,
         StateBurned,
+        DavBalance,
         StateBurnedRatio,
         ListedTokenBurned,
         OneListedTokenBurned,
