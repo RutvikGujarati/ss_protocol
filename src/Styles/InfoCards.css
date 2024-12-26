@@ -72,3 +72,27 @@
 .border-bottom{
     border-bottom: 1px solid #FFFFFF26 !important;
 }
+
+.announcement {
+    background-color: #212529;
+    color: #fff;
+    border: 1px solid #FFFFFF26;
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease;
+  }
+
+  .announcement span{
+    color: #ff4081;
+  }
+
+  .announcement span:first-child{
+    margin-right: 50px;
+  }
+
+  .announcement:hover{
+    background-color: #1C1E22;
+  }
