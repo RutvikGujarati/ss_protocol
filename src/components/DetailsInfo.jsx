@@ -8,7 +8,13 @@ import {
   STATE_TOKEN_ADDRESS,
   Ratio_TOKEN_ADDRESS,
 } from "../Context/DavTokenContext";
-
+export const formatWithCommas = (value) => {
+  if (value === null || value === undefined) return "";
+  const valueString = value.toString();
+  const [integerPart, decimalPart] = valueString.split(".");
+  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger;
+};
 const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const {
     StartMarketPlaceListing,
@@ -33,15 +39,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const [numerator, setNumerator] = useState("");
   const [Denominator, setDenominator] = useState("");
   const auctionStatus = AuctionRunning ? "True" : "False";
-  const formatWithCommas = (value) => {
-    if (value === null || value === undefined) return "";
-    const valueString = value.toString();
-    const [integerPart, decimalPart] = valueString.split(".");
-    const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return decimalPart
-      ? `${formattedInteger}.${decimalPart}`
-      : formattedInteger;
-  };
 
   const shortenAddress = (address) => {
     if (!address) return "";
@@ -222,7 +219,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     </td>
                     <td className="d-flex justify-content-end">
                       <button
-                        // onClick={() => setRatioTarget(numerator, Denominator)} 
+                        // onClick={() => setRatioTarget(numerator, Denominator)}
                         className="btn btn-primary btn-sm swap-btn info-icon"
                       >
                         Set
@@ -271,6 +268,13 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             {dataToShow.tokenName == "STATE" && (
               <>
                 <tr>
+                  <td className="d-flex align-items-center">Supply</td>
+                  <td className="d-flex align-items-center justify-content-center">
+                    {dataToShow.supply || ""}
+                  </td>
+                  <td></td>
+                </tr>
+                <tr>
                   <td className="d-flex align-items-center">Minted Supply</td>
                   <td className="d-flex align-items-center justify-content-center">
                     {formatWithCommas(dataToShow.StateSupply)}
@@ -278,13 +282,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   <td></td>
                 </tr>
 
-                <tr>
-                  <td className="d-flex align-items-center">Treasury Supply</td>
-                  <td className="d-flex align-items-center justify-content-center">
-                    {dataToShow.supply || ""}
-                  </td>
-                  <td></td>
-                </tr>
                 <tr>
                   <td className="d-flex align-items-center">
                     Auction Rate (in days)
@@ -302,7 +299,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   </td>
                   <td className="d-flex justify-content-end">
                     <button
-                    //   onClick={()=>setRatioTarget(numerator, Denominator)}
+                      //   onClick={()=>setRatioTarget(numerator, Denominator)}
                       className="btn btn-primary btn-sm swap-btn info-icon"
                     >
                       Set
@@ -342,7 +339,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   </td>
                   <td className="d-flex justify-content-end">
                     <button
-                    //   onClick={()=>setRatioTarget(numerator, Denominator)}
+                      //   onClick={()=>setRatioTarget(numerator, Denominator)}
                       className="btn btn-primary btn-sm swap-btn info-icon"
                     >
                       Set
@@ -375,7 +372,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   </td>
                   <td className="d-flex justify-content-end">
                     <button
-                      onClick={()=>setRatioTarget(numerator, Denominator)}
+                      onClick={() => setRatioTarget(numerator, Denominator)}
                       className="btn btn-primary btn-sm swap-btn info-icon"
                     >
                       Set

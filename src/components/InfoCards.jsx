@@ -5,8 +5,9 @@ import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import MetaMaskIcon from "../assets/metamask-icon.png";
-
+import { formatWithCommas } from "./DetailsInfo";
 const InfoCards = () => {
+
   const {
     mintDAV,
     // handleAddTokenRatio,
@@ -16,7 +17,7 @@ const InfoCards = () => {
     TotalCost,
     StateBurned,
     StateBurnedRatio,
-
+	StateSupply,
     davHolds,
     davPercentage,
     StateHolds,
@@ -150,8 +151,8 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token supply</p>
-                      <h5 className="mb-0">999 trillion</h5>
-                      <p className="detailAmount">999 trillion</p>
+                      <h5 className="mb-0">0 trillion</h5>
+                      <p className="detailAmount">{formatWithCommas(StateSupply)}</p>
                     </div>
                   </div>
                 </div>

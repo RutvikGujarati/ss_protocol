@@ -10,10 +10,10 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
   const [filteredData, setFilteredData] = useState([
     { id: "∈", name: "DAV", logo: DAVLogo },
     { id: "±", name: "STATE", logo: stateLogo },
-    { id: 1, name: "Fluxin", logo: FluxinLogo },
-    { id: 2, name: "Xerion", logo: XerionLogo },
-    { id: 3, name: "Rutvik", logo: FluxinLogo },
-    { id: 4, name: "Polaris", logo: FluxinLogo },
+    // { id: 1, name: "Fluxin", logo: FluxinLogo },
+    // { id: 2, name: "Xerion", logo: XerionLogo },
+    // { id: 3, name: "Rutvik", logo: FluxinLogo },
+    // { id: 4, name: "Polaris", logo: FluxinLogo },
   ]);
   const searchInputRef = useRef(null);
 
@@ -43,14 +43,14 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
 
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
-    setSearchQuery(query); 
+    setSearchQuery(query);
     const originalData = [
       { id: "∈", name: "DAV", logo: DAVLogo },
       { id: "±", name: "STATE", logo: stateLogo },
-      { id: 1, name: "Fluxin", logo: FluxinLogo },
-      { id: 2, name: "Xerion", logo: XerionLogo },
-      { id: 3, name: "Rutvik", logo: FluxinLogo },
-      { id: 4, name: "Polaris", logo: FluxinLogo },
+      //   { id: 1, name: "Fluxin", logo: FluxinLogo },
+      //   { id: 2, name: "Xerion", logo: XerionLogo },
+      //   { id: 3, name: "Rutvik", logo: FluxinLogo },
+      //   { id: 4, name: "Polaris", logo: FluxinLogo },
     ];
     const filtered = originalData.filter((item) =>
       item.name.toLowerCase().includes(query)
@@ -59,7 +59,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
   };
 
   const handleRowClick = (token) => {
-    setSelectedToken(token); 
+    setSelectedToken(token);
   };
 
   return (
@@ -70,7 +70,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
           className="form-control text-center"
           placeholder="SEARCH"
           onChange={handleSearch}
-          ref={searchInputRef} 
+          ref={searchInputRef}
         />
       </div>
       <table className="table table-dark clickable-row-table">
@@ -101,7 +101,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
 
 SearchInfo.propTypes = {
   setSearchQuery: PropTypes.func.isRequired,
-  setSelectedToken: PropTypes.func.isRequired, 
+  setSelectedToken: PropTypes.func.isRequired,
 };
 
 export default SearchInfo;

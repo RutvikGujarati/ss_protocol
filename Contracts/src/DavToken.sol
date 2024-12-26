@@ -3,11 +3,10 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract DAVToken is ERC20, Ownable(msg.sender) {
     uint256 public constant MAX_SUPPLY = 5000000 ether; // 5 Million DAV Tokens
-    uint256 public constant TOKEN_COST = 1 ether; // 100,000 PLS per DAV
+    uint256 public constant TOKEN_COST = 150000 ether; // 100,000 PLS per DAV
 
     uint256 public mintedSupply; // Total Minted DAV Tokens
     address public liquidityWallet; // Liquidity Wallet
@@ -37,7 +36,7 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
         governanceAddress = Governance;
     }
 
-    address public governanceAddress;
+    address private governanceAddress;
 
     // Modifier to check if the sender is the governance address
     modifier onlyGovernance() {
@@ -56,13 +55,6 @@ contract DAVToken is ERC20, Ownable(msg.sender) {
 
     function viewLastMintTimeStamp(address user) public view returns (uint256) {
         return lastMintTimestamp[user];
-    }
-
-    function setLastRewardMintTimestamp(
-        address user,
-        uint256 timestamp
-    ) external onlyOwner {
-        lastMintTimestamp[user] = timestamp;
     }
 
     /**
