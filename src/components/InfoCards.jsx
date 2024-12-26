@@ -69,7 +69,7 @@ const InfoCards = () => {
       {isAuction ? (
         <>
           <div className="container mt-4">
-            <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom">
+            <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-center align-items-center text-center w-100">
                   <div>
@@ -147,6 +147,9 @@ const InfoCards = () => {
                   </div>
                 </div>
               </div>
+            </div>
+            <div className="announcement text-center">
+              <div className="">STATE token mints will be live on <span>01/01/2025.</span> Ratio Swapping auctions will start on <span>09/01/2025.</span></div>
             </div>
           </div>
         </>
