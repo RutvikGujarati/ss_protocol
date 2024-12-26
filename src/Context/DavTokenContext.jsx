@@ -8,8 +8,8 @@ import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
-export const DAV_TOKEN_ADDRESS = "0xC48A47AB5A594d78104a9410202e8f0b1bbde3D4";
-export const STATE_TOKEN_ADDRESS = "0x6419476f5eDc0cb68374bA9b8A96f700C7746Ae0";
+export const DAV_TOKEN_ADDRESS = "0xd1E29198f7476bF7995f0ceece4e0f801c9c1376";
+export const STATE_TOKEN_ADDRESS = "0x2e49Df4A11F22500F4d1B7841027271b6DDD561A";
 export const Ratio_TOKEN_ADDRESS = "0x0Bd9BA2FF4F82011eeC33dd84fc09DC89ac5B5EA";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
@@ -48,6 +48,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [StateBalance, setStateBalance] = useState("0.0");
   const [StateReward, setStateReward] = useState("0");
   const [Distributed, setViewDistributed] = useState("0.0");
+  const [tokenNames, setTokenNames] = useState({});
   const [StateBurned, setStateBurnAMount] = useState("0.0");
 
   const [ListedTokenBurned, setListedTokenBurnAMount] = useState("0.0");
@@ -453,6 +454,8 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error claiming tokens:", e);
     }
   };
+
+//   console.log(account)
   const RenounceState = async () => {
     try {
       await handleContractCall(stateContract, "renounceOwnership", []);
@@ -597,6 +600,7 @@ export const DAVTokenProvider = ({ children }) => {
     );
     setViewDistributed(amount);
   };
+ 
   const getBurnedSTATE = async () => {
     const amount = await handleContractCall(
       RatioContract,

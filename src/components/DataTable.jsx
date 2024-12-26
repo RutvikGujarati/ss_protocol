@@ -37,12 +37,12 @@ const DataTable = () => {
       await CheckMintBalance();
     } catch (e) {
       if (
-        e.reason === "No new DAV minted" ||
+        e.reason === "StateToken: No new DAV minted" ||
         (e.revert &&
           e.revert.args &&
-          e.revert.args[0] === "No new DAV minted")
+          e.revert.args[0] === "StateToken: No new DAV minted")
       ) {
-        console.error("No new DAV minted:", e);
+        console.error("StateToken: No new DAV minted:", e);
         setErrorPopup(true); // Show error popup if specific error occurs
       } else {
         console.error("Error calling seeMintableAmount:", e);

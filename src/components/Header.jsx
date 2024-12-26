@@ -1,4 +1,3 @@
-import  { useEffect } from "react";
 import "../Styles/Header.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -86,7 +85,7 @@ const Header = () => {
                       ? "nav-link active-link text-light"
                       : "nav-link text-light"
                   }
-                  to="/docs"
+                  to="https://system-state-documentation.gitbook.io/system-state"
                 >
                   Docs
                 </NavLink>

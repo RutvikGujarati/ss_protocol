@@ -7,7 +7,6 @@ import { useLocation } from "react-router-dom";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { formatWithCommas } from "./DetailsInfo";
 const InfoCards = () => {
-
   const {
     mintDAV,
     // handleAddTokenRatio,
@@ -17,22 +16,30 @@ const InfoCards = () => {
     TotalCost,
     StateBurned,
     StateBurnedRatio,
-	StateSupply,
+    StateSupply,
     davHolds,
     davPercentage,
     StateHolds,
   } = useDAVToken();
   const [amount, setAmount] = useState("");
   const [load, setLoad] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(""); // Tracks success message
+
   const handleMint = async () => {
-    setLoad(true); // Start loading
+    setLoad(true);
+    setSuccessMessage("");
     try {
-      await mintDAV(amount); // Wait for minting to complete
-	  
-    } catch (e) {
-      console.error("Error during minting:", e);
+      await mintDAV(amount); // Call the mint function with the entered amount
+      setSuccessMessage("Successful Mint!");
+      setAmount(""); // Reset the input box
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 2000); // Clear success message after 2 seconds
+    } catch (error) {
+      console.error("Error minting:", error);
+      alert("Minting failed! Please try again.");
     } finally {
-      setLoad(false); // Stop loading, regardless of success or failure
+      setLoad(false);
     }
   };
 
@@ -80,6 +87,7 @@ const InfoCards = () => {
                         : "0"}{" "}
                       PLS
                     </h5>
+
                     <button
                       onClick={handleMint}
                       className="btn btn-primary btn-sm d-flex justify-content-center align-items-center w-100"
@@ -151,8 +159,10 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token supply</p>
-                      <h5 className="mb-0">0 trillion</h5>
-                      <p className="detailAmount">{formatWithCommas(StateSupply)}</p>
+                      <h5 className="mb-0"> {formatWithCommas(StateSupply)}</h5>
+                      {/* <p className="detailAmount">
+                        {formatWithCommas(StateSupply)}
+                      </p> */}
                     </div>
                   </div>
                 </div>

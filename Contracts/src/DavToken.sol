@@ -26,22 +26,6 @@ contract DAVToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
     mapping(address => uint256) public lastMintTimestamp; // Track the last mint timestamp for each user
     address[] private davHolders;
 
-    constructor(
-        address _liquidityWallet,
-        address _developmentWallet,
-        address Governance,
-        string memory tokenName,
-        string memory TokenSymbol
-    ) ERC20(tokenName, TokenSymbol) {
-        require(
-            _liquidityWallet != address(0) && _developmentWallet != address(0),
-            "Wallet addresses cannot be zero"
-        );
-        liquidityWallet = _liquidityWallet;
-        developmentWallet = _developmentWallet;
-        governanceAddress = Governance;
-    }
-
     address private governanceAddress;
 
     modifier onlyGovernance() {
@@ -52,10 +36,25 @@ contract DAVToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
         _;
     }
 
-    function setGovernanceAddress(address _newGovernance)
-        external
-        onlyGovernance
-    {
+    constructor(
+        address _liquidityWallet,
+        address _developmentWallet,
+        address Governance,
+        string memory tokenName,
+        string memory tokenSymbol
+    ) ERC20(tokenName, tokenSymbol) {
+        require(
+            _liquidityWallet != address(0) && _developmentWallet != address(0),
+            "Wallet addresses cannot be zero"
+        );
+        liquidityWallet = _liquidityWallet;
+        developmentWallet = _developmentWallet;
+        governanceAddress = Governance;
+    }
+
+    function setGovernanceAddress(
+        address _newGovernance
+    ) external onlyGovernance {
         require(
             _newGovernance != address(0),
             "New governance address cannot be zero"
@@ -78,10 +77,11 @@ contract DAVToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
 
         uint256 cost = (amount / 1 ether) * TOKEN_COST;
         require(msg.value == cost, "Incorrect PLS amount sent");
+        require(msg.sender != address(0), "Invalid sender address");
 
         // **Effects**
         mintedSupply += amount;
-        lastMintTimestamp[msg.sender] = block.timestamp; // Update the last mint timestamp for the user
+        lastMintTimestamp[msg.sender] = block.timestamp;
 
         _mint(msg.sender, amount);
 
@@ -91,30 +91,29 @@ contract DAVToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
         emit TokensMinted(msg.sender, amount, amount);
 
         // **Interactions**
-        distributeFunds();
+        distributeFunds(msg.value);
     }
 
-    function distributeFunds() internal {
+    function distributeFunds(uint256 value) internal {
         // **Checks**
-        require(msg.value > 0, "No funds sent for distribution");
+        require(value > 0, "No funds sent for distribution");
 
         // **Effects**
-        uint256 liquidityShare = (msg.value * 95) / 100;
-        uint256 developmentShare = msg.value - liquidityShare;
+        uint256 liquidityShare = (value * 95) / 100;
+        uint256 developmentShare = value - liquidityShare;
 
         totalLiquidityAllocated += liquidityShare;
         totalDevelopmentAllocated += developmentShare;
 
         // **Interactions**
-        (bool successLiquidity, ) = liquidityWallet.call{value: liquidityShare}(
-            ""
-        );
-        require(successLiquidity, "Liquidity transfer failed");
+        _safeTransfer(liquidityWallet, liquidityShare);
+        _safeTransfer(developmentWallet, developmentShare);
+    }
 
-        (bool successDevelopment, ) = developmentWallet.call{
-            value: developmentShare
-        }("");
-        require(successDevelopment, "Development transfer failed");
+    function _safeTransfer(address to, uint256 amount) internal {
+        require(to != address(0), "Cannot transfer to zero address");
+        (bool success, ) = to.call{value: amount}("");
+        require(success, "Transfer failed");
     }
 
     function trackDAVHolder(address from, address to) internal {
@@ -160,11 +159,9 @@ contract DAVToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
         return balanceOf(user);
     }
 
-    function getUserHoldingPercentage(address user)
-        public
-        view
-        returns (uint256)
-    {
+    function getUserHoldingPercentage(
+        address user
+    ) public view returns (uint256) {
         uint256 userBalance = balanceOf(user);
         uint256 totalSupply = totalSupply();
         if (totalSupply == 0) {
@@ -173,22 +170,20 @@ contract DAVToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
         return (userBalance * 1e18) / totalSupply; // Return percentage as a scaled value (1e18 = 100%).
     }
 
-    function balacneETH() public view returns (uint256) {
+    function balanceETH() public view returns (uint256) {
         return address(this).balance;
     }
 
-    function updateLiquidityWallet(address _liquidityWallet)
-        external
-        onlyGovernance
-    {
+    function updateLiquidityWallet(
+        address _liquidityWallet
+    ) external onlyGovernance {
         require(_liquidityWallet != address(0), "Invalid address");
         liquidityWallet = _liquidityWallet;
     }
 
-    function updateDevelopmentWallet(address _developmentWallet)
-        external
-        onlyGovernance
-    {
+    function updateDevelopmentWallet(
+        address _developmentWallet
+    ) external onlyGovernance {
         require(_developmentWallet != address(0), "Invalid address");
         developmentWallet = _developmentWallet;
     }

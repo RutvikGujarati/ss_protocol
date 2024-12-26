@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DetailsInfo.css";
 import { useDAVToken } from "../Context/DavTokenContext";
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DAV_TOKEN_ADDRESS,
   STATE_TOKEN_ADDRESS,
@@ -23,6 +23,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     withdraw_5,
     ClaimLPTokens,
     setRatioTarget,
+    account,
     LPStateTransferred,
     DAVTokensWithdraw,
     StateSupply,
@@ -33,12 +34,27 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     LastLiquidity,
     Batch,
     BatchAmount,
+    saveTokenName,
     LastDevShare,
   } = useDAVToken();
 
   const [numerator, setNumerator] = useState("");
   const [Denominator, setDenominator] = useState("");
+  const [authorized, setAuthorized] = useState(false);
   const auctionStatus = AuctionRunning ? "True" : "False";
+
+  const AuthAddress = "0xB1bD9F3B5F64dE482485A41c84ea4a90DAc5F98e".toLowerCase();
+
+  const handleSetAddress = () => {
+    setAuthorized(AuthAddress === account);
+	console.log(account)
+  };
+
+  // Update authorization whenever 'account' or 'AuthAddress' changes
+  useEffect(() => {
+    handleSetAddress();
+  }, [account, AuthAddress]);
+
 
   const shortenAddress = (address) => {
     if (!address) return "";
@@ -52,6 +68,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     {
       tokenName: "DAV",
       key: davShortened,
+      name: "tDAV",
       supply: "5,000,000.00",
       BatchRelease: "1M",
 
@@ -97,6 +114,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     {
       tokenName: "STATE",
       key: stateShortened,
+      name: "tSTATE",
       supply: "999,000,000,000,000.00",
       Treasury: "999,000,000,000,000.00",
       StateSupply: StateSupply,
@@ -140,7 +158,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             <tr>
               <td className="d-flex align-items-center">Token Name</td>
               <td className="d-flex align-items-center justify-content-center">
-                {dataToShow.tokenName || ""}
+                {dataToShow.name || ""}
               </td>
               <td></td>
             </tr>
@@ -268,117 +286,123 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             {dataToShow.tokenName == "STATE" && (
               <>
                 <tr>
-                  <td className="d-flex align-items-center">Supply</td>
-                  <td className="d-flex align-items-center justify-content-center">
-                    {dataToShow.supply || ""}
-                  </td>
-                  <td></td>
-                </tr>
-                <tr>
                   <td className="d-flex align-items-center">Minted Supply</td>
                   <td className="d-flex align-items-center justify-content-center">
                     {formatWithCommas(dataToShow.StateSupply)}
                   </td>
                   <td></td>
                 </tr>
-
-                <tr>
-                  <td className="d-flex align-items-center">
-                    Auction Rate (in days)
-                  </td>
-                  <td>
-                    <div className="w-100">
-                      <input
-                        type="text"
-                        className="form-control text-center mh-30"
-                        placeholder="Enter Days"
-                        value={numerator}
-                        onChange={(e) => handleInputChange(e, "numerator")}
-                      />
-                    </div>
-                  </td>
-                  <td className="d-flex justify-content-end">
-                    <button
-                      //   onClick={()=>setRatioTarget(numerator, Denominator)}
-                      className="btn btn-primary btn-sm swap-btn info-icon"
-                    >
-                      Set
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="d-flex align-items-center">Current Ratio</td>
-                  <td className="d-flex align-items-center justify-content-center">
-                    {"0:0"}
-                  </td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td className="d-flex align-items-center">Ratio Target</td>
-                  <td>
-                    <div className="w-100">
-                      <input
-                        type="text"
-                        className="form-control text-center mh-30"
-                        placeholder="Numerator"
-                        value={numerator}
-                        onChange={(e) => handleInputChange(e, "numerator")}
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <div className="w-100">
-                      <input
-                        type="text"
-                        className="form-control text-center mh-30"
-                        placeholder="Denominator"
-                        value={Denominator}
-                        onChange={(e) => handleInputChange(e, "denominator")}
-                      />
-                    </div>
-                  </td>
-                  <td className="d-flex justify-content-end">
-                    <button
-                      //   onClick={()=>setRatioTarget(numerator, Denominator)}
-                      className="btn btn-primary btn-sm swap-btn info-icon"
-                    >
-                      Set
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="d-flex align-items-center">Burn Ratio</td>
-                  <td>
-                    <div className="w-100">
-                      <input
-                        type="text"
-                        className="form-control text-center mh-30"
-                        placeholder="Numerator"
-                        value={numerator}
-                        onChange={(e) => handleInputChange(e, "numerator")}
-                      />
-                    </div>
-                  </td>
-                  <td>
-                    <div className="w-100">
-                      <input
-                        type="text"
-                        className="form-control text-center mh-30"
-                        placeholder="Denominator"
-                        value={Denominator}
-                        onChange={(e) => handleInputChange(e, "denominator")}
-                      />
-                    </div>
-                  </td>
-                  <td className="d-flex justify-content-end">
-                    <button
-                      onClick={() => setRatioTarget(numerator, Denominator)}
-                      className="btn btn-primary btn-sm swap-btn info-icon"
-                    >
-                      Set
-                    </button>
-                  </td>
-                </tr>
+                {authorized ? (
+                  <>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        Auction Rate (in days)
+                      </td>
+                      <td>
+                        <div className="w-100">
+                          <input
+                            type="text"
+                            className="form-control text-center mh-30"
+                            placeholder="Enter Days"
+                            value={numerator}
+                            onChange={(e) => handleInputChange(e, "numerator")}
+                          />
+                        </div>
+                      </td>
+                      <td className="d-flex justify-content-end">
+                        <button
+                          //   onClick={()=>setRatioTarget(numerator, Denominator)}
+                          className="btn btn-primary btn-sm swap-btn info-icon"
+                        >
+                          Set
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        Current Ratio
+                      </td>
+                      <td className="d-flex align-items-center justify-content-center">
+                        {"0:0"}
+                      </td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        Ratio Target
+                      </td>
+                      <td>
+                        <div className="w-100">
+                          <input
+                            type="text"
+                            className="form-control text-center mh-30"
+                            placeholder="Numerator"
+                            value={numerator}
+                            onChange={(e) => handleInputChange(e, "numerator")}
+                          />
+                        </div>
+                      </td>
+                      <td>
+                        <div className="w-100">
+                          <input
+                            type="text"
+                            className="form-control text-center mh-30"
+                            placeholder="Denominator"
+                            value={Denominator}
+                            onChange={(e) =>
+                              handleInputChange(e, "denominator")
+                            }
+                          />
+                        </div>
+                      </td>
+                      <td className="d-flex justify-content-end">
+                        <button
+                          //   onClick={()=>setRatioTarget(numerator, Denominator)}
+                          className="btn btn-primary btn-sm swap-btn info-icon"
+                        >
+                          Set
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="d-flex align-items-center">Burn Ratio</td>
+                      <td>
+                        <div className="w-100">
+                          <input
+                            type="text"
+                            className="form-control text-center mh-30"
+                            placeholder="Numerator"
+                            value={numerator}
+                            onChange={(e) => handleInputChange(e, "numerator")}
+                          />
+                        </div>
+                      </td>
+                      <td>
+                        <div className="w-100">
+                          <input
+                            type="text"
+                            className="form-control text-center mh-30"
+                            placeholder="Denominator"
+                            value={Denominator}
+                            onChange={(e) =>
+                              handleInputChange(e, "denominator")
+                            }
+                          />
+                        </div>
+                      </td>
+                      <td className="d-flex justify-content-end">
+                        <button
+                          onClick={() => setRatioTarget(numerator, Denominator)}
+                          className="btn btn-primary btn-sm swap-btn info-icon"
+                        >
+                          Set
+                        </button>
+                      </td>
+                    </tr>
+                  </>
+                ) : (
+                  <></>
+                )}
               </>
             )}
 
