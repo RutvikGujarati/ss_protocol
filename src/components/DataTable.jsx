@@ -150,15 +150,15 @@ const DataTable = () => {
                         >
                           {claiming
                             ? "minting.."
-                            : `${Distributed ?? "0.0"} Mint`}
+                            : `${Distributed ?? "0.0"}`}
                         </div>
                       </div>
                     </td>
 
                     <td>$0.0</td>
-                    <td className="text-success">0.0 M</td>
-                    <td>0 : 0 M</td>
-                    <td>{RatioTargetAmount} T</td>
+                    <td className="text-success">0.0 </td>
+                    <td>0 : 0 </td>
+                    <td>{RatioTargetAmount} </td>
                     <td className="tagTd">
                       <div className="d-flex justify-content-center gap-3 w-100">
                         <div className="tableClaim">0.0 </div>

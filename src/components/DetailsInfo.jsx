@@ -25,6 +25,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     setRatioTarget,
     account,
     LPStateTransferred,
+	PercentageOfState,
     DAVTokensWithdraw,
     StateSupply,
     RenounceState,
@@ -118,6 +119,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       supply: "999,000,000,000,000.00",
       Treasury: "999,000,000,000,000.00",
       StateSupply: StateSupply,
+	  percentage:PercentageOfState,
       address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
       renounceSmartContract: "No",
@@ -289,6 +291,13 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   <td className="d-flex align-items-center">Minted Supply</td>
                   <td className="d-flex align-items-center justify-content-center">
                     {formatWithCommas(dataToShow.StateSupply)}
+                  </td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td className="d-flex align-items-center">Current Distribution Rate</td>
+                  <td className="d-flex align-items-center justify-content-center">
+                    {dataToShow.percentage} %
                   </td>
                   <td></td>
                 </tr>

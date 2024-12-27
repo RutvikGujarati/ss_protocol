@@ -46,6 +46,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [Batch, setBatch] = useState("0.0");
   const [BatchAmount, setBatchAmount] = useState("0.0");
   const [StateBalance, setStateBalance] = useState("0.0");
+  const [PercentageOfState, setPercentage] = useState("0.0");
   const [StateReward, setStateReward] = useState("0");
   const [Distributed, setViewDistributed] = useState("0.0");
   const [tokenNames, setTokenNames] = useState({});
@@ -325,6 +326,7 @@ export const DAVTokenProvider = ({ children }) => {
           try {
             await ViewDistributedTokens();
             await StateTotalMintedSupply();
+            await Percentage();
           } catch (error) {
             console.error("Error fetching ViewDistributedTokens:", error);
           }
@@ -546,6 +548,22 @@ export const DAVTokenProvider = ({ children }) => {
 
       console.log("balance", transaction);
       setStateBalance(transaction);
+    } catch (e) {
+      console.error("Error fetching LP tokens:", e);
+    }
+  };
+
+  const Percentage = async () => {
+    try {
+      const transaction = await handleContractCall(
+        stateContract,
+        "getDecayPercentageAtTime",
+        [],
+        (s) => ethers.formatUnits(s, 18)
+      );
+
+      console.log("balance", transaction);
+      setPercentage(transaction);
     } catch (e) {
       console.error("Error fetching LP tokens:", e);
     }
@@ -892,6 +910,7 @@ export const DAVTokenProvider = ({ children }) => {
         handleAddTokenRatio,
         handleAddTokenState,
         handleAddTokenDAV,
+		PercentageOfState,
         withdraw_5,
         // WithdrawLPTokens,
         DAVTokensFiveWithdraw,
