@@ -8,8 +8,8 @@ import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
-export const DAV_TOKEN_ADDRESS = "0xd1E29198f7476bF7995f0ceece4e0f801c9c1376";
-export const STATE_TOKEN_ADDRESS = "0x2e49Df4A11F22500F4d1B7841027271b6DDD561A";
+export const DAV_TOKEN_ADDRESS = "0x2D5f678c5647EFf5Ef8Bf84b9f6395C61623Da10";
+export const STATE_TOKEN_ADDRESS = "0xAbc8cFD369736d452Eac7A88ba6475D30e7BBE61";
 export const Ratio_TOKEN_ADDRESS = "0x0Bd9BA2FF4F82011eeC33dd84fc09DC89ac5B5EA";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
@@ -324,9 +324,9 @@ export const DAVTokenProvider = ({ children }) => {
           }
 
           try {
+			  await Percentage();
             await ViewDistributedTokens();
             await StateTotalMintedSupply();
-            await Percentage();
           } catch (error) {
             console.error("Error fetching ViewDistributedTokens:", error);
           }
@@ -554,20 +554,23 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   const Percentage = async () => {
-    try {
-      const transaction = await handleContractCall(
-        stateContract,
-        "getDecayPercentageAtTime",
-        [],
-        (s) => ethers.formatUnits(s, 18)
-      );
+	try {
+	  const currentTimestamp = Math.floor(Date.now() / 1000); 
+	  const transaction = await handleContractCall(
+		stateContract,
+		"getDecayPercentageAtTime",
+		[currentTimestamp], 
+        (s) => parseFloat(ethers.formatUnits(s, 0))
+	  );
+  
 
-      console.log("balance", transaction);
-      setPercentage(transaction);
-    } catch (e) {
-      console.error("Error fetching LP tokens:", e);
-    }
+	  console.log("Decay percentage:", transaction);
+	  setPercentage(transaction);
+	} catch (e) {
+	  console.error("Error fetching decay percentage:", e);
+	}
   };
+  
   const SwapTokens = async (amount) => {
     try {
       // Step 0: Initial button state

@@ -108,7 +108,7 @@ const InfoCards = () => {
                     </div>
                     <div className="carddetails2">
                       <p className="mb-1 detailText">Dav Rank</p>
-                      <h5 className="">{davPercentage}%</h5>
+                      <h5 className="">{davPercentage}</h5>
                     </div>
                     <div className="carddetails2">
                       <img

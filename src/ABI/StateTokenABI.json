@@ -27,19 +27,6 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			}
-		],
-		"name": "distributeReward",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
 				"name": "_davTokenAddress",
 				"type": "address"
 			},
@@ -149,6 +136,13 @@
 		"type": "error"
 	},
 	{
+		"inputs": [],
+		"name": "mintReward",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -198,6 +192,32 @@
 	{
 		"inputs": [
 			{
+				"internalType": "address",
+				"name": "newDav",
+				"type": "address"
+			}
+		],
+		"name": "changeDavToken",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "newInterval",
+				"type": "uint256"
+			}
+		],
+		"name": "changeInterval",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "uint256",
 				"name": "newMaxSupply",
 				"type": "uint256"
@@ -209,8 +229,27 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "mintReward",
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "newTimeStamp",
+				"type": "uint256"
+			}
+		],
+		"name": "changeTimeStamp",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			}
+		],
+		"name": "distributeReward",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -544,7 +583,7 @@
 				"type": "uint256"
 			}
 		],
-		"stateMutability": "pure",
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
