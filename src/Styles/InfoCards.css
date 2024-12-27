@@ -96,3 +96,14 @@
   .announcement:hover{
     background-color: #1C1E22;
   }
+
+  @media (max-width: 768px) {
+    .cards {
+      flex: 0 0 100%; /* Force full width for each card */
+      max-width: 95%;
+    }
+
+    .announcement span:first-child{
+        margin-right: 0px;
+    }
+  }
