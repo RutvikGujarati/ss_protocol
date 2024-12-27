@@ -72,7 +72,7 @@ const InfoCards = () => {
             <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-center align-items-center text-center w-100">
-                  <div>
+                  <div className="p-2">
                     <p className="mb-2 detailText">MINT DAV TOKENS</p>
                     <input
                       type="text"
