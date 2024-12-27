@@ -157,7 +157,7 @@ const DataTable = () => {
 
                     <td>$0.0</td>
                     <td className="text-success">0.0 </td>
-                    <td>0 : 0 </td>
+                    <td>0:0 </td>
                     <td>{RatioTargetAmount} </td>
                     <td className="tagTd">
                       <div className="d-flex justify-content-center gap-3 w-100">

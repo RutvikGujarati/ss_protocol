@@ -7,17 +7,17 @@ import { NavLink } from "react-router-dom";
 // import { useDAVToken } from "../Context/DavTokenContext";
 
 const Header = () => {
-//   const { AuctionRunning } = useDAVToken();
-//   useEffect(() => {
-//     const tooltipTriggerList = document.querySelectorAll(
-//       '[data-bs-toggle="tooltip"]'
-//     );
-//     tooltipTriggerList.forEach((tooltipTriggerEl) => {
-//       new bootstrap.Tooltip(tooltipTriggerEl, {
-//         trigger: "hover",
-//       });
-//     });
-//   }, []);
+  //   const { AuctionRunning } = useDAVToken();
+  //   useEffect(() => {
+  //     const tooltipTriggerList = document.querySelectorAll(
+  //       '[data-bs-toggle="tooltip"]'
+  //     );
+  //     tooltipTriggerList.forEach((tooltipTriggerEl) => {
+  //       new bootstrap.Tooltip(tooltipTriggerEl, {
+  //         trigger: "hover",
+  //       });
+  //     });
+  //   }, []);
 
   return (
     <>
@@ -86,6 +86,8 @@ const Header = () => {
                       : "nav-link text-light"
                   }
                   to="https://system-state-documentation.gitbook.io/system-state"
+				  target="_blank"
+
                 >
                   Docs
                 </NavLink>
@@ -147,7 +149,8 @@ const Header = () => {
           <div>Info</div>
         </NavLink>
         <NavLink
-          to="/docs"
+          target="_blank"
+          to="https://system-state-documentation.gitbook.io/system-state"
           className={({ isActive }) =>
             isActive
               ? "text-light active-link text-center"

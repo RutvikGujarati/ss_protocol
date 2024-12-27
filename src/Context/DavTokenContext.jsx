@@ -324,7 +324,7 @@ export const DAVTokenProvider = ({ children }) => {
           }
 
           try {
-			  await Percentage();
+            await Percentage();
             await ViewDistributedTokens();
             await StateTotalMintedSupply();
           } catch (error) {
@@ -457,7 +457,7 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-//   console.log(account)
+  //   console.log(account)
   const RenounceState = async () => {
     try {
       await handleContractCall(stateContract, "renounceOwnership", []);
@@ -554,23 +554,23 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   const Percentage = async () => {
-	try {
-	  const currentTimestamp = Math.floor(Date.now() / 1000); 
-	  const transaction = await handleContractCall(
-		stateContract,
-		"getDecayPercentageAtTime",
-		[currentTimestamp], 
+    try {
+      const currentTimestamp = Math.floor(Date.now() / 1000);
+      const transaction = await handleContractCall(
+        stateContract,
+        "getDecayPercentageAtTime",
+        [currentTimestamp],
         (s) => parseFloat(ethers.formatUnits(s, 0))
-	  );
-  
+      );
 
-	  console.log("Decay percentage:", transaction);
-	  setPercentage(transaction);
-	} catch (e) {
-	  console.error("Error fetching decay percentage:", e);
-	}
+      const reversedPercentage = 100 - transaction; // Reverse the percentage
+      console.log("Decay percentage (reversed):", reversedPercentage);
+      setPercentage(reversedPercentage);
+    } catch (e) {
+      console.error("Error fetching decay percentage:", e);
+    }
   };
-  
+
   const SwapTokens = async (amount) => {
     try {
       // Step 0: Initial button state
@@ -621,7 +621,7 @@ export const DAVTokenProvider = ({ children }) => {
     );
     setViewDistributed(amount);
   };
- 
+
   const getBurnedSTATE = async () => {
     const amount = await handleContractCall(
       RatioContract,
@@ -913,7 +913,7 @@ export const DAVTokenProvider = ({ children }) => {
         handleAddTokenRatio,
         handleAddTokenState,
         handleAddTokenDAV,
-		PercentageOfState,
+        PercentageOfState,
         withdraw_5,
         // WithdrawLPTokens,
         DAVTokensFiveWithdraw,
