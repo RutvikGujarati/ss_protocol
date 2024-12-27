@@ -99,7 +99,7 @@
 
   @media (max-width: 768px) {
     .cards {
-      flex: 0 0 100%; /* Force full width for each card */
+      flex: 0 0 100%;
       max-width: 95%;
     }
 

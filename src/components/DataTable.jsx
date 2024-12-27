@@ -117,14 +117,14 @@ const DataTable = () => {
                       {errorPopup && (
                         <div className="popup-overlay">
                           <div className="popup-content">
-                            <h4>Mint Additional DAV Tokens</h4>
-                            <p>
+                            <h4 className="popup-header">Mint Additional DAV Tokens</h4>
+                            <p className="popup-para">
                               You need to mint additional DAV tokens to claim
                               your reward.
                             </p>
                             <button
                               onClick={() => setErrorPopup(false)}
-                              className="btn btn-secondary"
+                              className="btn btn-secondary popup-button"
                             >
                               Close
                             </button>
