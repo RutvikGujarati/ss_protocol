@@ -7,6 +7,7 @@ import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useDAVToken } from "../Context/DavTokenContext";
 import { useState } from "react";
+import { formatWithCommas } from "./DetailsInfo";
 const DataTable = () => {
   const {
     // StartMarketPlaceListing,
@@ -20,7 +21,7 @@ const DataTable = () => {
     SwapTokens,
     ButtonText,
     claiming,
-	DavBalance,
+    DavBalance,
     Distributed,
     ClaimTokens,
   } = useDAVToken();
@@ -51,7 +52,6 @@ const DataTable = () => {
     setIsChecking(false); // Reset checking state after function execution
   };
 
-  
   async function Swapping() {
     await SwapTokens("100");
   }
@@ -105,7 +105,9 @@ const DataTable = () => {
                       >
                         <button
                           onClick={Checking}
-                          disabled={isChecking || Distributed > 0 || DavBalance == 0}
+                          disabled={
+                            isChecking || Distributed > 0 || DavBalance == 0
+                          }
                           className="btn btn-primary btn-sm swap-btn"
                         >
                           {isChecking ? "Checking..." : "Mint Balance"}
@@ -150,7 +152,7 @@ const DataTable = () => {
                         >
                           {claiming
                             ? "minting.."
-                            : `${Distributed ?? "0.0"}`}
+                            : `${formatWithCommas(Distributed) ?? "0.0"}`}
                         </div>
                       </div>
                     </td>
