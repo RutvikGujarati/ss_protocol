@@ -7,11 +7,11 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {DAVToken} from "./DavToken.sol";
 
 contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
-    DAVToken public immutable davToken;
+    DAVToken public davToken;
 
     uint256 public MAX_SUPPLY = 999000000000000 ether;
-    uint256 public constant REWARD_DECAY_START = 1735669800; // Timestamp for 01/01/2025
-    uint256 public constant DECAY_INTERVAL = 1 days;
+    uint256 public REWARD_DECAY_START = 1735284528 ; // Timestamp for 01/01/2025
+    uint256 public DECAY_INTERVAL = 1 minutes;
     uint256 public constant DECAY_STEP = 1; // 1% per interval
     uint256 private constant PRECISION = 1e18;
 
@@ -56,10 +56,43 @@ contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
      */
     function changeMAXSupply(uint256 newMaxSupply) external onlyGovernance {
         require(
-            newMaxSupply > totalSupply(),
-            "StateToken: New max supply must exceed total supply"
+            newMaxSupply <= MAX_SUPPLY,
+            "StateToken: Max supply exceeds limit"
         );
         MAX_SUPPLY = newMaxSupply;
+    }
+
+    function changeTimeStamp(uint256 newTimeStamp) external onlyGovernance {
+        require(
+            newTimeStamp > block.timestamp,
+            "StateToken: New timestamp must be in the future"
+        );
+        require(
+            newTimeStamp != REWARD_DECAY_START,
+            "StateToken: New timestamp must be different from the current"
+        );
+        REWARD_DECAY_START = newTimeStamp;
+    }
+
+    function changeInterval(uint256 newInterval) external onlyGovernance {
+        require(
+            newInterval > 0,
+            "StateToken: Interval must be greater than zero"
+        );
+        require(
+            newInterval != DECAY_INTERVAL,
+            "StateToken: New interval must be different from the current"
+        );
+        DECAY_INTERVAL = newInterval;
+    }
+
+    function changeDavToken(address newDav) external onlyGovernance {
+        require(newDav != address(0), "StateToken: Invalid DAV token address");
+        require(
+            newDav != address(davToken),
+            "StateToken: New DAV token must be different from the current"
+        );
+        davToken = DAVToken(payable(newDav));
     }
 
     /**
@@ -146,7 +179,7 @@ contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
         returns (uint256)
     {
         uint256 scaled = davAmount / 5000000;
-        return ((scaled * (MAX_SUPPLY * 200)) / 1000) / 1e18;
+        return ((scaled * (MAX_SUPPLY * 10)) / 1000) / 1e18;
     }
 
     /**
@@ -154,7 +187,7 @@ contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
      */
     function getDecayPercentageAtTime(uint256 timestamp)
         public
-        pure
+        view
         returns (uint256)
     {
         if (timestamp < REWARD_DECAY_START) return 0;
@@ -171,6 +204,32 @@ contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
      */
     function getCurrentDecayPercentage() public view returns (uint256) {
         return getDecayPercentageAtTime(block.timestamp);
+    }
+
+    function transferToken(uint256 amount)
+        external
+        onlyGovernance
+        nonReentrant
+    {
+        require(amount > 0, "Transfer amount must be greater than zero");
+        require(
+            balanceOf(address(this)) >= amount,
+            "Insufficient contract balance"
+        );
+        require(governanceAddress != address(0), "Invalid governance address");
+
+        _transfer(address(this), governanceAddress, amount);
+    }
+
+    function setGovernanceAddress(address _newGovernance)
+        external
+        onlyGovernance
+    {
+        require(
+            _newGovernance != address(0),
+            "New governance address cannot be zero"
+        );
+        governanceAddress = _newGovernance;
     }
 
     /**
