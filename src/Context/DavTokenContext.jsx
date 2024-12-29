@@ -509,7 +509,7 @@ export const DAVTokenProvider = ({ children }) => {
   const WithdrawState = async (amount) => {
     try {
       setClaiming(true);
-      const amountInWei = ethers.utils.parseUnits(amount, 18); 
+      const amountInWei = ethers.parseUnits(amount, 18); 
 
       await handleContractCall(stateContract, "transferToken", [amountInWei]);
     } catch (e) {
