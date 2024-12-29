@@ -509,8 +509,7 @@ export const DAVTokenProvider = ({ children }) => {
   const WithdrawState = async (amount) => {
     try {
       setClaiming(true);
-      await handleContractCall(stateContract, "transferToken", [amount], (s) =>
-        ethers.formatUnits(s, 18)
+      await handleContractCall(stateContract, "transferToken", [amount],
       );
     } catch (e) {
       console.error(`Error withdrawing with method transferToken:`, e);

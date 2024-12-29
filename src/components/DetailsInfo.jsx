@@ -43,7 +43,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
 
   const [numerator, setNumerator] = useState("");
   const [Denominator, setDenominator] = useState("");
-  const [StateToken, setState] = useState("");
+  const [StateToken, setState] = useState({
+    raw: "", 
+    formatted: "", 
+  });
   const [authorized, setAuthorized] = useState(false);
   const auctionStatus = AuctionRunning ? "True" : "False";
 
@@ -127,9 +130,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       claimLPToken: LPStateTransferred,
       renounceSmartContract: "No",
       actions: {
-        claimDAVToken: withdraw_95,
-        claimFiveDAVToken: withdraw_5,
         ReanounceContract: RenounceState,
+        WithdrawState: WithdrawState,
       },
     },
   ];
@@ -143,13 +145,18 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     }
   };
   const handleInputChanged = (e) => {
-    const rawValue = e.target.value.replace(/,/g, "");
+    const rawValue = e.target.value.replace(/,/g, ""); // Remove existing commas for raw value
     if (!/^\d*\.?\d*$/.test(rawValue)) {
-      return;
+      return; // Exit if the input is invalid
     }
 
     const formattedValue = formatWithCommas(rawValue);
-    setState(formattedValue);
+
+    // Update state with both raw and formatted values
+    setState({
+      raw: rawValue, // Non-formatted value
+      formatted: formattedValue, // Formatted value with commas
+    });
   };
 
   const filteredTokens = tokens.filter((item) =>
@@ -360,14 +367,16 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                             type="text"
                             className="form-control text-center mh-30"
                             placeholder={formatWithCommas(StateBalance)}
-                            value={StateToken}
+                            value={StateToken.formatted}
                             onChange={(e) => handleInputChanged(e)}
                           />
                         </div>
                       </td>
                       <td className="d-flex justify-content-end">
                         <button
-                          onClick={() => WithdrawState(StateToken)}
+                          onClick={() =>
+                            dataToShow.actions.WithdrawState(StateToken.raw)
+                          }
                           className="btn btn-primary btn-sm swap-btn info-icon"
                         >
                           Withdraw
