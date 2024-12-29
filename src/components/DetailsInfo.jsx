@@ -143,9 +143,13 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     }
   };
   const handleInputChanged = (e) => {
-    const value = e.target.value;
+    const rawValue = e.target.value.replace(/,/g, "");
+    if (!/^\d*\.?\d*$/.test(rawValue)) {
+      return;
+    }
 
-    setState(value);
+    const formattedValue = formatWithCommas(rawValue);
+    setState(formattedValue);
   };
 
   const filteredTokens = tokens.filter((item) =>
