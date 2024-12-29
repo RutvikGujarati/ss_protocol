@@ -13,7 +13,7 @@ const DataTable = () => {
     // StartMarketPlaceListing,
     BurnTokenRatio,
     RatioTargetAmount,
-    handleAddToken,
+    handleAddTokenState,
     HandleBurn,
     CheckMintBalance,
     OneListedTokenBurned,
@@ -184,7 +184,7 @@ const DataTable = () => {
                           height={20}
                           alt="Logo"
                           style={{ cursor: "pointer" }}
-                          onClick={handleAddToken}
+                          onClick={handleAddTokenState}
                         />
                       </div>
                     </td>

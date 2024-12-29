@@ -23,9 +23,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     withdraw_5,
     ClaimLPTokens,
     setRatioTarget,
+    WithdrawState,
     account,
     LPStateTransferred,
-	PercentageOfState,
+    PercentageOfState,
     DAVTokensWithdraw,
     StateSupply,
     RenounceState,
@@ -34,6 +35,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     DAVTokensFiveWithdraw,
     LastLiquidity,
     Batch,
+    StateBalance,
     BatchAmount,
     saveTokenName,
     LastDevShare,
@@ -41,21 +43,22 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
 
   const [numerator, setNumerator] = useState("");
   const [Denominator, setDenominator] = useState("");
+  const [StateToken, setState] = useState("");
   const [authorized, setAuthorized] = useState(false);
   const auctionStatus = AuctionRunning ? "True" : "False";
 
-  const AuthAddress = "0xB1bD9F3B5F64dE482485A41c84ea4a90DAc5F98e".toLowerCase();
+  const AuthAddress =
+    "0xB1bD9F3B5F64dE482485A41c84ea4a90DAc5F98e".toLowerCase();
 
   const handleSetAddress = () => {
     setAuthorized(AuthAddress === account);
-	console.log(account)
+    console.log(account);
   };
 
   // Update authorization whenever 'account' or 'AuthAddress' changes
   useEffect(() => {
     handleSetAddress();
   }, [account, AuthAddress]);
-
 
   const shortenAddress = (address) => {
     if (!address) return "";
@@ -119,7 +122,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       supply: "999,000,000,000,000.00",
       Treasury: "999,000,000,000,000.00",
       StateSupply: StateSupply,
-	  percentage:PercentageOfState,
+      percentage: PercentageOfState,
       address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
       renounceSmartContract: "No",
@@ -138,6 +141,11 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     } else if (field === "denominator") {
       setDenominator(value);
     }
+  };
+  const handleInputChanged = (e) => {
+    const value = e.target.value;
+
+    setState(value);
   };
 
   const filteredTokens = tokens.filter((item) =>
@@ -295,7 +303,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   <td></td>
                 </tr>
                 <tr>
-                  <td className="d-flex align-items-center">Current Distribution Rate</td>
+                  <td className="d-flex align-items-center">
+                    Current Distribution Rate
+                  </td>
                   <td className="d-flex align-items-center justify-content-center">
                     {dataToShow.percentage} %
                   </td>
@@ -335,6 +345,30 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                         {"0:0"}
                       </td>
                       <td></td>
+                    </tr>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        State Balance(inside Contract)
+                      </td>
+                      <td>
+                        <div className="w-100">
+                          <input
+                            type="text"
+                            className="form-control text-center mh-30"
+                            placeholder={formatWithCommas(StateBalance)}
+                            value={StateToken}
+                            onChange={(e) => handleInputChanged(e)}
+                          />
+                        </div>
+                      </td>
+                      <td className="d-flex justify-content-end">
+                        <button
+                          onClick={() => WithdrawState(StateToken)}
+                          className="btn btn-primary btn-sm swap-btn info-icon"
+                        >
+                          Withdraw
+                        </button>
+                      </td>
                     </tr>
                     <tr>
                       <td className="d-flex align-items-center">

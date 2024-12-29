@@ -385,7 +385,7 @@ export const DAVTokenProvider = ({ children }) => {
             // await LastLiquidityTransactionAMount();
             // await LastDevShareTransactionAMount();
 
-            await DavContractStateBalance();
+            await ContractStateBalance();
           } catch (error) {
             console.error("Error fetching LpTokenAmount:", error);
           }
@@ -506,6 +506,18 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
+  const WithdrawState = async (amount) => {
+    try {
+      setClaiming(true);
+      await handleContractCall(stateContract, "transferToken", [amount], (s) =>
+        ethers.formatUnits(s, 18)
+      );
+    } catch (e) {
+      console.error(`Error withdrawing with method transferToken:`, e);
+    } finally {
+      setClaiming(false);
+    }
+  };
 
   const withdraw_5 = () => handleWithdraw("withdrawDevelopmentShare");
   const withdraw_95 = () => handleWithdraw("withdrawLiquidityShare");
@@ -537,12 +549,12 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const DavContractStateBalance = async () => {
+  const ContractStateBalance = async () => {
     try {
       const transaction = await handleContractCall(
         stateContract,
         "balanceOf",
-        [DAV_TOKEN_ADDRESS],
+        [STATE_TOKEN_ADDRESS],
         (s) => ethers.formatUnits(s, 18)
       );
 
@@ -905,6 +917,7 @@ export const DAVTokenProvider = ({ children }) => {
         setRatioTarget,
         RatioTargetAmount,
         AuctionRunning,
+		WithdrawState,
         CheckMintBalance,
         LpTokenAmount,
         LpTokens,
