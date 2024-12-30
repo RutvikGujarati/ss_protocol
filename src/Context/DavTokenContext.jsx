@@ -8,8 +8,8 @@ import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
-export const DAV_TOKEN_ADDRESS = "0x2D5f678c5647EFf5Ef8Bf84b9f6395C61623Da10";
-export const STATE_TOKEN_ADDRESS = "0xAbc8cFD369736d452Eac7A88ba6475D30e7BBE61";
+export const DAV_TOKEN_ADDRESS = "0xDc55641E50bA61Da7ad6B8ce23ca2A10188b7d3A";
+export const STATE_TOKEN_ADDRESS = "0x4B2aCe41aC823DFC25AB413C36b817d9fa9f5E8A";
 export const Ratio_TOKEN_ADDRESS = "0x0Bd9BA2FF4F82011eeC33dd84fc09DC89ac5B5EA";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
@@ -519,14 +519,14 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const withdraw_5 = () => handleWithdraw("withdrawDevelopmentShare");
-  const withdraw_95 = () => handleWithdraw("withdrawLiquidityShare");
+  const withdraw_5 = () => handleWithdraw("withdrawDevelopmentFunds");
+  const withdraw_95 = () => handleWithdraw("withdrawLiquidityFunds");
 
   const DAVTokenAmount = async () => {
     try {
       const balance = await handleContractCall(
         davContract,
-        "totalLiquidityAllocated",
+        "liquidityFunds",
         [],
         (s) => ethers.formatUnits(s, 18)
       );
@@ -539,7 +539,7 @@ export const DAVTokenProvider = ({ children }) => {
     try {
       const balance = await handleContractCall(
         davContract,
-        "totalDevelopmentAllocated",
+        "developmentFunds",
         [],
         (s) => ethers.formatUnits(s, 18)
       );

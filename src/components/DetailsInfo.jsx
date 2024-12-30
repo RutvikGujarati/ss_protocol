@@ -25,6 +25,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     setRatioTarget,
     WithdrawState,
     account,
+
     LPStateTransferred,
     PercentageOfState,
     DAVTokensWithdraw,
@@ -44,8 +45,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const [numerator, setNumerator] = useState("");
   const [Denominator, setDenominator] = useState("");
   const [StateToken, setState] = useState({
-    raw: "", 
-    formatted: "", 
+    raw: "",
+    formatted: "",
   });
   const [authorized, setAuthorized] = useState(false);
   const auctionStatus = AuctionRunning ? "True" : "False";
@@ -89,7 +90,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       LastDevShare: LastDevShare,
       LastLiquidity: LastLiquidity,
       actions: {
-        claimDAVToken: withdraw_95,
+        claimLiquidityDAVToken: withdraw_95,
         claimFiveDAVToken: withdraw_5,
         ReanounceContract: ReanounceContract,
         // MoveTokens: () => MoveTokens(Amount),
@@ -301,6 +302,46 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   </td>
                   <td></td>
                 </tr>
+                {authorized && (
+                  <>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        Withdraw 95%
+                      </td>
+                      <td>
+                        <td className="d-flex align-items-center justify-content-center">
+                          {dataToShow.claimDAVToken || ""}
+                        </td>
+                      </td>
+                      <td className="d-flex justify-content-end">
+                        <button
+                          onClick={() =>
+                            dataToShow.actions.claimLiquidityDAVToken()
+                          }
+                          className="btn btn-primary btn-sm swap-btn info-icon"
+                        >
+                          Withdraw
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="d-flex align-items-center">Withdraw 5%</td>
+                      <td>
+                        <td className="d-flex align-items-center justify-content-center">
+                          {dataToShow.claimFiveDAVToken || ""}
+                        </td>
+                      </td>
+                      <td className="d-flex justify-content-end">
+                        <button
+                          onClick={() => dataToShow.actions.claimFiveDAVToken()}
+                          className="btn btn-primary btn-sm swap-btn info-icon"
+                        >
+                          Withdraw
+                        </button>
+                      </td>
+                    </tr>
+                  </>
+                )}
               </>
             )}
 
