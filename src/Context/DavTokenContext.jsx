@@ -8,8 +8,8 @@ import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
-export const DAV_TOKEN_ADDRESS = "0x55B69991f8456B16746f9edf6B3dEB0Cdd62D0EF";
-export const STATE_TOKEN_ADDRESS = "0xdCa42fd635B682c90494B5A21BAC4983F9488242";
+export const DAV_TOKEN_ADDRESS = "0xB25202f5748116bC5A5e9eB3fCaBC7d5b5777996";
+export const STATE_TOKEN_ADDRESS = "0x5C219A513A4198a84dAcf088c229E41257838A8d";
 export const Ratio_TOKEN_ADDRESS = "0x0Bd9BA2FF4F82011eeC33dd84fc09DC89ac5B5EA";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
