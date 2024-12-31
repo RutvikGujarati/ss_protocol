@@ -25,7 +25,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     setRatioTarget,
     WithdrawState,
     account,
-
+    mintAdditionalTOkens,
     LPStateTransferred,
     PercentageOfState,
     DAVTokensWithdraw,
@@ -133,6 +133,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       actions: {
         ReanounceContract: RenounceState,
         WithdrawState: WithdrawState,
+        mintAdditionalTOkens: mintAdditionalTOkens,
       },
     },
   ];
@@ -421,6 +422,26 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           className="btn btn-primary btn-sm swap-btn info-icon"
                         >
                           Withdraw
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        Mint Additional state tokens
+                      </td>
+                      <td className="d-flex align-items-center justify-content-center">
+                        {"1,000,000,000,000"}
+                      </td>
+                      <td className="d-flex justify-content-end">
+                        <button
+                          onClick={() =>
+                            dataToShow.actions.mintAdditionalTOkens(
+                              1000000000000
+                            )
+                          }
+                          className="btn btn-primary btn-sm swap-btn info-icon"
+                        >
+                          Mint
                         </button>
                       </td>
                     </tr>

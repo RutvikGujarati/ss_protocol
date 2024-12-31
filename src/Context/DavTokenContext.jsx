@@ -518,6 +518,18 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
+  const mintAdditionalTOkens = async (amount) => {
+    try {
+      setClaiming(true);
+      const amountInWei = ethers.parseUnits(amount.toString(), 18); 
+
+      await handleContractCall(stateContract, "mintAdditionalTOkens", [amountInWei]);
+    } catch (e) {
+      console.error(`Error minting with method mintAdditionalTOkens:`, e);
+    } finally {
+      setClaiming(false);
+    }
+  };
 
   const withdraw_5 = () => handleWithdraw("withdrawDevelopmentFunds");
   const withdraw_95 = () => handleWithdraw("withdrawLiquidityFunds");
@@ -929,6 +941,7 @@ export const DAVTokenProvider = ({ children }) => {
         PercentageOfState,
         withdraw_5,
         // WithdrawLPTokens,
+		mintAdditionalTOkens,
         DAVTokensFiveWithdraw,
       }}
     >

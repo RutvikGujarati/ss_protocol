@@ -86,8 +86,7 @@ const Header = () => {
                       : "nav-link text-light"
                   }
                   to="https://system-state-documentation.gitbook.io/system-state"
-				  target="_blank"
-
+                  target="_blank"
                 >
                   Docs
                 </NavLink>
@@ -105,7 +104,7 @@ const Header = () => {
       <nav className="navbar bg-dark d-lg-none justify-content-between align-items-center py-2">
         {/* Navbar Brand */}
         <NavLink className="navbar-brand text-light small-text" to="/">
-          SYSTEM STATE DEX
+          <h5 className="uppercase fs-2 fw-bolder">THE STATE</h5>
         </NavLink>
         {/* Wallet Connector */}
         <div className="me-3 small-text">
