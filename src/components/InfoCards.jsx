@@ -110,15 +110,24 @@ const InfoCards = () => {
                       <p className="mb-1 detailText">Dav Rank</p>
                       <h5 className="">{davPercentage}</h5>
                     </div>
-                    <div className="carddetails2">
+                    <div className="carddetails2 d-flex align-items-center">
                       <img
                         src={MetaMaskIcon}
                         width={20}
                         height={20}
                         alt="Logo"
-                        style={{ cursor: "pointer" }}
+                        style={{ cursor: "pointer", marginRight: "5px" }}
                         onClick={handleAddTokenDAV}
                       />
+                      <h6
+                        className="detailText mx-3 mt-2 "
+                        style={{
+                          fontSize: "14px",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        Transferring DAV tokens are not allowed
+                      </h6>
                     </div>
                   </div>
                 </div>
@@ -149,7 +158,10 @@ const InfoCards = () => {
               </div>
             </div>
             <div className="announcement text-center">
-              <div className="">STATE token mints will be live on <span>01/01/2025.</span> Ratio Swapping auctions will start on <span>13/01/2025.</span></div>
+              <div className="">
+                STATE token mints will be live on <span>01/01/2025.</span> Ratio
+                Swapping auctions will start on <span>13/01/2025.</span>
+              </div>
             </div>
           </div>
         </>
