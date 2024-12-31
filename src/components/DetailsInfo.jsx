@@ -77,7 +77,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     {
       tokenName: "DAV",
       key: davShortened,
-      name: "tDAV",
+      name: "pDAV",
       supply: "5,000,000.00",
       BatchRelease: "1M",
 
@@ -123,7 +123,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     {
       tokenName: "STATE",
       key: stateShortened,
-      name: "tSTATE",
+      name: "pSTATE",
       supply: "999,000,000,000,000.00",
       Treasury: "999,000,000,000,000.00",
       StateSupply: StateSupply,
