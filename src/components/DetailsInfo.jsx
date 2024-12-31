@@ -192,7 +192,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               </td>
               <td className="d-flex align-items-center justify-content-center">
                 <a
-                  href={`https://scan.v4.testnet.pulsechain.com/#/address/${dataToShow.address}`}
+                  href={`https://otter.pulsechain.com/address/${dataToShow.address}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ fontSize: "12px" }}

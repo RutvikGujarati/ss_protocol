@@ -871,9 +871,9 @@ export const DAVTokenProvider = ({ children }) => {
   // Example usage for different tokens
   const handleAddTokenRatio = () =>
     handleAddToken(Ratio_TOKEN_ADDRESS, "Fluxin");
-  const handleAddTokenDAV = () => handleAddToken(DAV_TOKEN_ADDRESS, "tDAV");
+  const handleAddTokenDAV = () => handleAddToken(DAV_TOKEN_ADDRESS, "pDAV");
   const handleAddTokenState = () =>
-    handleAddToken(STATE_TOKEN_ADDRESS, "tState");
+    handleAddToken(STATE_TOKEN_ADDRESS, "pState");
 
   return (
     <DAVTokenContext.Provider
