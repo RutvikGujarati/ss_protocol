@@ -20,7 +20,7 @@
     "react-router-dom": "^7.0.2",
     "s-s-protocol": "file:",
     "viem": "^2.21.55",
-    "wagmi": "^2.14.3"
+    "wagmi": "^2.14.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

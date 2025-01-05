@@ -10,7 +10,7 @@ const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
 export const DAV_TOKEN_ADDRESS = "0x8037E06539b2Dc1b87BD56BE622663022f4b5aC1";
 export const STATE_TOKEN_ADDRESS = "0x9Cd5fe7149CA9220844dB106cEffEa3Ef4e2B6f9";
-export const Ratio_TOKEN_ADDRESS = "0x0Bd9BA2FF4F82011eeC33dd84fc09DC89ac5B5EA";
+export const Ratio_TOKEN_ADDRESS = "0x6b720b8630A1713b96a0c125CF7931ab1A427089";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -164,6 +164,20 @@ export const DAVTokenProvider = ({ children }) => {
       ]);
     } catch (error) {
       console.error("Error in MoveTokens:", error);
+    }
+  };
+  const AddTokens = async (address) => {
+    try {
+      if (!address || isNaN(address)) {
+        throw new Error("Invalid amount");
+      }
+
+      await handleContractCall(stateContract, "addSupportedToken", [
+        DAV_TOKEN_ADDRESS,
+        address,
+      ]);
+    } catch (error) {
+      console.error("Error in addSupportedToken:", error);
     }
   };
 
@@ -509,7 +523,7 @@ export const DAVTokenProvider = ({ children }) => {
   const WithdrawState = async (amount) => {
     try {
       setClaiming(true);
-      const amountInWei = ethers.parseUnits(amount, 18); 
+      const amountInWei = ethers.parseUnits(amount, 18);
 
       await handleContractCall(stateContract, "transferToken", [amountInWei]);
     } catch (e) {
@@ -521,9 +535,11 @@ export const DAVTokenProvider = ({ children }) => {
   const mintAdditionalTOkens = async (amount) => {
     try {
       setClaiming(true);
-      const amountInWei = ethers.parseUnits(amount.toString(), 18); 
+      const amountInWei = ethers.parseUnits(amount.toString(), 18);
 
-      await handleContractCall(stateContract, "mintAdditionalTOkens", [amountInWei]);
+      await handleContractCall(stateContract, "mintAdditionalTOkens", [
+        amountInWei,
+      ]);
     } catch (e) {
       console.error(`Error minting with method mintAdditionalTOkens:`, e);
     } finally {
@@ -623,7 +639,9 @@ export const DAVTokenProvider = ({ children }) => {
 
       // Step 3: Call Swap Function
       setButtonText("swapping...");
-      await handleContractCall(RatioContract, "swapSTATEForListedTokens", [
+      await handleContractCall(RatioContract, "swapTokens", [
+        "0xc91e76657fD5aC3864E82Cc4EbCCd635f302d581",
+        "0x90fF90b356017c4FC0a20cD2e3cDF718Ee01d15a",
         amountInWei,
       ]);
 
@@ -941,7 +959,8 @@ export const DAVTokenProvider = ({ children }) => {
         PercentageOfState,
         withdraw_5,
         // WithdrawLPTokens,
-		mintAdditionalTOkens,
+		AddTokens,
+        mintAdditionalTOkens,
         DAVTokensFiveWithdraw,
       }}
     >

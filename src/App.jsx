@@ -40,6 +40,7 @@ const App = () => {
             <>
               <InfoCards />
               <DataTable />
+			  {/* <NetworkSwitcher /> */}
             </>
           }
         />

@@ -6,6 +6,7 @@ import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { formatWithCommas } from "./DetailsInfo";
+
 const InfoCards = () => {
   const {
     mintDAV,
