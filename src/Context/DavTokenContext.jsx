@@ -14,6 +14,7 @@ export const Ratio_TOKEN_ADDRESS = "0x67CDEB53A9229EE26c230B7aD4A9BadA6503Ba58";
 
 export const Xerion = "0xc91e76657fD5aC3864E82Cc4EbCCd635f302d581";
 export const Xerion2 = "0xC43BFbdbc49101B1c2A9c2Ad96eE198429F2Ca66";
+export const Xerion3 = "0xbaDF8624Bcd75be85f1081EfC4F646F1ca7c18BE";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -936,6 +937,9 @@ export const DAVTokenProvider = ({ children }) => {
   const handleAddTokenDAV = () => handleAddToken(DAV_TOKEN_ADDRESS, "pDAV");
   const handleAddTokenState = () =>
     handleAddToken(STATE_TOKEN_ADDRESS, "pState");
+  const handleAddXerion1 = () => handleAddToken(Xerion, "Xerion");
+  const handleAddXerion2 = () => handleAddToken(Xerion2, "Xerion2");
+  const handleAddXerion3 = () => handleAddToken(Xerion3, "Xerion3");
 
   return (
     <DAVTokenContext.Provider
@@ -1000,6 +1004,9 @@ export const DAVTokenProvider = ({ children }) => {
         handleAddTokenRatio,
         handleAddTokenState,
         handleAddTokenDAV,
+        handleAddXerion1,
+        handleAddXerion2,
+        handleAddXerion3,
         PercentageOfState,
         withdraw_5,
         // WithdrawLPTokens,
