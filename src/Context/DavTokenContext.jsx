@@ -10,7 +10,9 @@ const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
 export const DAV_TOKEN_ADDRESS = "0x8037E06539b2Dc1b87BD56BE622663022f4b5aC1";
 export const STATE_TOKEN_ADDRESS = "0x9Cd5fe7149CA9220844dB106cEffEa3Ef4e2B6f9";
-export const Ratio_TOKEN_ADDRESS = "0x6b720b8630A1713b96a0c125CF7931ab1A427089";
+export const Ratio_TOKEN_ADDRESS = "0x67CDEB53A9229EE26c230B7aD4A9BadA6503Ba58";
+
+export const Xerion = "0xc91e76657fD5aC3864E82Cc4EbCCd635f302d581";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -28,6 +30,7 @@ export const DAVTokenProvider = ({ children }) => {
   //contract state
   const [davContract, setDavContract] = useState(null);
   const [stateContract, setStateContract] = useState(null);
+  const [XerionContract, setXerionContract] = useState(null);
   const [RatioContract, setRatioContract] = useState(null);
 
   const [TotalCost, setTotalCost] = useState(null);
@@ -79,6 +82,9 @@ export const DAVTokenProvider = ({ children }) => {
             new ethers.Contract(DAV_TOKEN_ADDRESS, DAVTokenABI, newSigner)
           );
           setStateContract(
+            new ethers.Contract(STATE_TOKEN_ADDRESS, StateABI, newSigner)
+          );
+          setXerionContract(
             new ethers.Contract(STATE_TOKEN_ADDRESS, StateABI, newSigner)
           );
           setRatioContract(
@@ -610,19 +616,41 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching decay percentage:", e);
     }
   };
+  const ERC20_ABI = [
+    "function allowance(address owner, address spender) view returns (uint256)",
+    "function approve(address spender, uint256 amount) returns (bool)",
+  ];
 
   const SwapTokens = async (amount) => {
     try {
       // Step 0: Initial button state
-      setButtonText("Check allowance...");
+      setButtonText("Checking allowance...");
 
       // Convert amount to wei
       const amountInWei = ethers.parseUnits(amount.toString(), 18);
 
+      // Get contract instance for `tokenIn`
+      const tokenInContract = new ethers.Contract(Xerion, ERC20_ABI, signer);
+
       // Step 1: Check Allowance
-      const allowance = await stateContract.allowance(account, RatioContract);
+      const allowance = await tokenInContract.allowance(account, RatioContract);
 
       if (allowance < amountInWei) {
+        // Step 2: Approve Tokens
+        setButtonText("Approving...");
+        const approveTx = await tokenInContract.approve(
+          RatioContract,
+          amountInWei
+        );
+        await approveTx.wait();
+        console.log("Approval successful!");
+      } else {
+        console.log("Sufficient allowance already granted.");
+      }
+
+      const allowance2 = await stateContract.allowance(account, RatioContract);
+
+      if (allowance2 < amountInWei) {
         // Step 2: Approve Tokens
         setButtonText("Approving...");
         const approveTx = await stateContract.approve(
@@ -630,21 +658,19 @@ export const DAVTokenProvider = ({ children }) => {
           amountInWei
         );
         await approveTx.wait();
-        const approveTx2 = await stateContract.approve(account, amountInWei);
-        await approveTx2.wait();
         console.log("Approval successful!");
       } else {
         console.log("Sufficient allowance already granted.");
       }
 
       // Step 3: Call Swap Function
-      setButtonText("swapping...");
-      await handleContractCall(RatioContract, "swapTokens", [
-        "0xc91e76657fD5aC3864E82Cc4EbCCd635f302d581",
-        "0x90fF90b356017c4FC0a20cD2e3cDF718Ee01d15a",
+      setButtonText("Swapping...");
+      const tx = await handleContractCall(RatioContract, "swapTokens", [
+        Xerion,
+        STATE_TOKEN_ADDRESS,
         amountInWei,
       ]);
-
+      tx.wait();
       // Step 4: Swap Success
       setButtonText("Swap successful!");
       console.log("Swap successful!");
@@ -959,7 +985,7 @@ export const DAVTokenProvider = ({ children }) => {
         PercentageOfState,
         withdraw_5,
         // WithdrawLPTokens,
-		AddTokens,
+        AddTokens,
         mintAdditionalTOkens,
         DAVTokensFiveWithdraw,
       }}
