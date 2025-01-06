@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "../Styles/SearchInfo.css";
-import XerionLogo from "../assets/XerionLogo.png";
-import FluxinLogo from "../assets/FluxinLogo.png";
+// import XerionLogo from "../assets/XerionLogo.png";
+// import FluxinLogo from "../assets/FluxinLogo.png";
 import DAVLogo from "../assets/d_logo.png";
 import stateLogo from "../assets/state_logo.png";
 import PropTypes from "prop-types";

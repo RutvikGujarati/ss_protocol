@@ -13,6 +13,7 @@ export const STATE_TOKEN_ADDRESS = "0x9Cd5fe7149CA9220844dB106cEffEa3Ef4e2B6f9";
 export const Ratio_TOKEN_ADDRESS = "0x67CDEB53A9229EE26c230B7aD4A9BadA6503Ba58";
 
 export const Xerion = "0xc91e76657fD5aC3864E82Cc4EbCCd635f302d581";
+export const Xerion2 = "0xC43BFbdbc49101B1c2A9c2Ad96eE198429F2Ca66";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -621,7 +622,7 @@ export const DAVTokenProvider = ({ children }) => {
     "function approve(address spender, uint256 amount) returns (bool)",
   ];
 
-  const SwapTokens = async (amount) => {
+  const SwapTokens = async (amount, InContract) => {
     try {
       // Step 0: Initial button state
       setButtonText("Checking allowance...");
@@ -629,48 +630,65 @@ export const DAVTokenProvider = ({ children }) => {
       // Convert amount to wei
       const amountInWei = ethers.parseUnits(amount.toString(), 18);
 
-      // Get contract instance for `tokenIn`
-      const tokenInContract = new ethers.Contract(Xerion, ERC20_ABI, signer);
+      // Get contract instance for `InContract`
+      const tokenInContract = new ethers.Contract(
+        InContract,
+        ERC20_ABI,
+        signer
+      );
 
-      // Step 1: Check Allowance
-      const allowance = await tokenInContract.allowance(account, RatioContract);
+      // Step 1: Check Allowance for `InContract`
+      const allowanceIn = await tokenInContract.allowance(
+        account,
+        RatioContract
+      );
 
-      if (allowance < amountInWei) {
-        // Step 2: Approve Tokens
-        setButtonText("Approving...");
+      if (allowanceIn < amountInWei) {
+        // Step 2: Approve Tokens for `InContract`
+        setButtonText("Approving input token...");
         const approveTx = await tokenInContract.approve(
           RatioContract,
           amountInWei
         );
         await approveTx.wait();
-        console.log("Approval successful!");
+        console.log("Approval for input token successful!");
       } else {
-        console.log("Sufficient allowance already granted.");
+        console.log("Sufficient allowance already granted for input token.");
       }
 
-      const allowance2 = await stateContract.allowance(account, RatioContract);
+      // Step 1: Check Allowance for `OutContract` (if necessary)
+      const allowanceOut = await stateContract.allowance(
+        account,
+        RatioContract
+      );
 
-      if (allowance2 < amountInWei) {
-        // Step 2: Approve Tokens
-        setButtonText("Approving...");
+      if (allowanceOut < amountInWei) {
+        // Step 2: Approve Tokens for `OutContract`
+        setButtonText("Approving output token...");
         const approveTx = await stateContract.approve(
           RatioContract,
           amountInWei
         );
         await approveTx.wait();
-        console.log("Approval successful!");
+        console.log("Approval for output token successful!");
       } else {
-        console.log("Sufficient allowance already granted.");
+        console.log("Sufficient allowance already granted for output token.");
       }
 
       // Step 3: Call Swap Function
       setButtonText("Swapping...");
-      const tx = await handleContractCall(RatioContract, "swapTokens", [
-        Xerion,
+      const ratioContract = new ethers.Contract(
+        RatioContract,
+        RatioABI,
+        signer
+      );
+      const tx = await ratioContract.swapTokens(
+        InContract,
         STATE_TOKEN_ADDRESS,
-        amountInWei,
-      ]);
-      tx.wait();
+        amountInWei
+      );
+      await tx.wait();
+
       // Step 4: Swap Success
       setButtonText("Swap successful!");
       console.log("Swap successful!");

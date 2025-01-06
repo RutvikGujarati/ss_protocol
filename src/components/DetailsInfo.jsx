@@ -23,7 +23,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     AuctionRunning,
     withdraw_5,
     ClaimLPTokens,
-	AddTokens,
+	// AddTokens,
     setRatioTarget,
     WithdrawState,
     account,
@@ -40,7 +40,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     Batch,
     StateBalance,
     BatchAmount,
-    saveTokenName,
+    // saveTokenName,
     LastDevShare,
   } = useDAVToken();
 

@@ -1,25 +1,27 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import XerionLogo from "../assets/XerionLogo.png";
-import FluxinLogo from "../assets/FluxinLogo.png";
+// import FluxinLogo from "../assets/FluxinLogo.png";
 import stateLogo from "../assets/state_logo.png";
 
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
-import { useDAVToken } from "../Context/DavTokenContext";
+import { STATE_TOKEN_ADDRESS, useDAVToken } from "../Context/DavTokenContext";
 import { useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
+
+import { Xerion, Xerion2 } from "../Context/DavTokenContext";
 const DataTable = () => {
   const {
     // StartMarketPlaceListing,
-    BurnTokenRatio,
-    RatioTargetAmount,
-    handleAddTokenState,
-    HandleBurn,
-    CheckMintBalance,
-    OneListedTokenBurned,
-    ListedTokenBurned,
+    // BurnTokenRatio,
+    // RatioTargetAmount,
+    // HandleBurn,
+    // OneListedTokenBurned,
+    // ListedTokenBurned,
     SwapTokens,
+    handleAddTokenState,
+    CheckMintBalance,
     ButtonText,
     claiming,
     DavBalance,
@@ -54,7 +56,10 @@ const DataTable = () => {
   };
 
   async function Swapping() {
-    await SwapTokens("1");
+    await SwapTokens("1",Xerion);
+  }
+  async function SwappingXerion2() {
+    await SwapTokens("1",Xerion2);
   }
   return (
     <>
@@ -180,7 +185,7 @@ const DataTable = () => {
                           className="btn btn-primary btn-sm swap-btn"
                         >
                           {/* {ButtonText.includes("...") ? ButtonText : "Swap"} */}
-						  Swap
+                          Swap
                         </button>
 
                         <img
@@ -272,6 +277,102 @@ const DataTable = () => {
                       <div className="d-flex align-items-center gap-2">
                         <button
                           onClick={Swapping}
+                          disabled={ButtonText.includes("...")}
+                          //   disabled={true}
+                          className="btn btn-primary btn-sm swap-btn"
+                        >
+                          {ButtonText.includes("...") ? ButtonText : "Swap"}
+                        </button>
+
+                        <img
+                          src={MetaMaskIcon}
+                          width={20}
+                          height={20}
+                          alt="Logo"
+                          style={{ cursor: "pointer" }}
+                          onClick={handleAddTokenState}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>2</td>
+                    <td>
+                      {/* <div className="d-flex justify-content-between align-items-center"> */}
+                      <div className="tableName d-flex gap-4 align-items-center">
+                        <div className="nameImage">
+                          <img
+                            src={XerionLogo}
+                            width={40}
+                            height={40}
+                            alt="Logo"
+                          />
+                        </div>
+                        <div className="nameDetails">
+                          <h5 className="nameBig">Xerion2</h5>
+                          <p className="nameSmall mb-1 uppercase">Xerion2</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div
+                        className={`d-flex align-items-center justify-content-center ${
+                          isChecking || Distributed > 0 ? "disabled" : ""
+                        }`}
+                      >
+                        <button
+                          onClick={Checking}
+                          //   disabled={
+                          //     isChecking || Distributed > 0 || DavBalance == 0
+                          //   }
+                          disabled={true}
+                          className="btn btn-primary btn-sm swap-btn"
+                        >
+                          {isChecking ? "Checking..." : "Mint Balance"}
+                        </button>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center justify-content-center">
+                        <div
+                          onClick={
+                            Distributed !== "0.0" && !claiming
+                              ? ClaimTokens
+                              : null
+                          }
+                          disabled={true}
+                          className={`tableClaim hoverEffect ${
+                            claiming || Distributed === "0.0" ? "disabled" : ""
+                          }`}
+                          style={{
+                            pointerEvents:
+                              claiming || Distributed === "0.0"
+                                ? "none"
+                                : "auto",
+                          }}
+                        >
+                          {claiming
+                            ? "minting.."
+                            : `${formatWithCommas(Distributed) ?? "0.0"}`}
+                        </div>
+                      </div>
+                    </td>
+
+                    <td>$0.0</td>
+                    <td className="text-success">0.0 </td>
+                    <td>0:0 </td>
+                    {/* <td>{RatioTargetAmount} </td> */}
+                    <td>1:1 </td>
+                    <td className="tagTd">
+                      <div className="d-flex justify-content-center gap-3 w-100">
+                        <div className="tableClaim">1 Xerion</div>
+                        <div className="tableClaim">1 State </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center gap-2">
+                        <button
+                          onClick={SwappingXerion2}
                           disabled={ButtonText.includes("...")}
                           //   disabled={true}
                           className="btn btn-primary btn-sm swap-btn"
