@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "../Styles/SearchInfo.css";
-// import XerionLogo from "../assets/XerionLogo.png";
-// import FluxinLogo from "../assets/FluxinLogo.png";
+import XerionLogo from "../assets/XerionLogo.png";
+import FluxinLogo from "../assets/FluxinLogo.png";
 import DAVLogo from "../assets/d_logo.png";
 import stateLogo from "../assets/state_logo.png";
 import PropTypes from "prop-types";
@@ -11,7 +11,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     { id: "∈", name: "DAV", logo: DAVLogo },
     { id: "±", name: "STATE", logo: stateLogo },
     // { id: 1, name: "Fluxin", logo: FluxinLogo },
-    // { id: 2, name: "Xerion", logo: XerionLogo },
+    { id: 2, name: "Xerion", logo: XerionLogo },
     // { id: 3, name: "Rutvik", logo: FluxinLogo },
     // { id: 4, name: "Polaris", logo: FluxinLogo },
   ]);
@@ -48,7 +48,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
       { id: "∈", name: "DAV", logo: DAVLogo },
       { id: "±", name: "STATE", logo: stateLogo },
       //   { id: 1, name: "Fluxin", logo: FluxinLogo },
-      //   { id: 2, name: "Xerion", logo: XerionLogo },
+        { id: 2, name: "Xerion", logo: XerionLogo },
       //   { id: 3, name: "Rutvik", logo: FluxinLogo },
       //   { id: 4, name: "Polaris", logo: FluxinLogo },
     ];

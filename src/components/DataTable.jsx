@@ -103,7 +103,7 @@ const DataTable = () => {
                 token: Xerion,
                 handleAddXerion: handleAddXerion1,
                 inputTokenAmount: 1,
-                outputToken: 2,
+                outputToken: 1,
               },
               {
                 id: "xerion2",
