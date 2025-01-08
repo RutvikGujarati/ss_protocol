@@ -3,15 +3,21 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import {DAVToken} from "./DavToken.sol";
+import {DavToken} from "./DavToken.sol";
 
-contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
-    DAVToken public davToken;
+contract STATE_Token_V1_0_Ratio_Swapping is
+    ERC20,
+    Ownable(msg.sender),
+    ReentrancyGuard
+{
+    using SafeERC20 for ERC20;
 
+    DavToken public davToken;
     uint256 public MAX_SUPPLY = 999000000000000 ether;
-    uint256 public REWARD_DECAY_START = 1735284528 ; // Timestamp for 01/01/2025
-    uint256 public DECAY_INTERVAL = 1 minutes;
+    uint256 public REWARD_DECAY_START = 1735545600; //timestamp
+    uint256 public DECAY_INTERVAL = 30 minutes;
     uint256 public constant DECAY_STEP = 1; // 1% per interval
     uint256 private constant PRECISION = 1e18;
 
@@ -22,7 +28,32 @@ contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
     mapping(address => uint256) public mintDecayPercentage;
     mapping(address => uint256) public cumulativeMintableHoldings;
 
+    bool private paused;
+
+    modifier whenNotPaused() {
+        require(!paused, "Contract is paused");
+        _;
+    }
+
+    modifier whenPaused() {
+        require(paused, "Contract is not paused");
+        _;
+    }
+
+    function pause() external onlyGovernance whenNotPaused {
+        paused = true;
+    }
+
+    function unpause() external onlyGovernance whenPaused {
+        paused = false;
+    }
+
     address private governanceAddress;
+    event GovernanceChanged(
+        address indexed oldGovernance,
+        address indexed newGovernance
+    );
+    event RewardDistributed(address indexed user, uint256 amount);
 
     modifier onlyGovernance() {
         require(
@@ -47,7 +78,7 @@ contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
             "StateToken: Governance address cannot be zero"
         );
 
-        davToken = DAVToken(payable(_davTokenAddress));
+        davToken = DavToken(payable(_davTokenAddress));
         governanceAddress = Governance;
     }
 
@@ -92,7 +123,7 @@ contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
             newDav != address(davToken),
             "StateToken: New DAV token must be different from the current"
         );
-        davToken = DAVToken(payable(newDav));
+        davToken = DavToken(payable(newDav));
     }
 
     /**
@@ -110,21 +141,34 @@ contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
         return (baseReward * decayFactor) / (100 * PRECISION);
     }
 
+    function mintAdditionalTOkens(uint256 amount)
+        public
+        onlyGovernance
+        nonReentrant
+    {
+        require(amount > 0, "mint amount must be greater than zero");
+        require(governanceAddress != address(0), "address should not be zero");
+        _mint(governanceAddress, amount);
+    }
+
     /**
      * @dev Distribute reward for a user's DAV holdings.
      */
-    function distributeReward(address user) external nonReentrant {
+    function distributeReward(address user)
+        external
+        nonReentrant
+        whenNotPaused
+    {
         // **Checks**
         require(user != address(0), "StateToken: Invalid user address");
 
         uint256 currentDavHolding = davToken.balanceOf(user);
         uint256 lastHolding = lastDavHolding[user];
-        require(
-            currentDavHolding > lastHolding,
-            "StateToken: No new DAV minted"
-        );
+        uint256 newDavMinted = currentDavHolding > lastHolding
+            ? currentDavHolding - lastHolding
+            : 0;
+        require(newDavMinted > 0, "StateToken: No new DAV minted");
 
-        uint256 newDavMinted = currentDavHolding - lastHolding;
         uint256 mintTimestamp = davToken.viewLastMintTimeStamp(user);
 
         // **Effects**
@@ -140,10 +184,11 @@ contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
         lastDavMintTime[user] = mintTimestamp;
         mintDecayPercentage[user] = decayAtMint;
 
+        emit RewardDistributed(user, decayedReward);
         // **No Interactions**
     }
 
-    function mintReward() external nonReentrant {
+    function mintReward() external nonReentrant whenNotPaused {
         // **Checks**
         uint256 reward = userRewardAmount[msg.sender];
         require(reward > 0, "StateToken: No reward to mint");
@@ -178,8 +223,8 @@ contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
         view
         returns (uint256)
     {
-        uint256 scaled = davAmount / 5000000;
-        return ((scaled * (MAX_SUPPLY * 10)) / 1000) / 1e18;
+        // Multiply first to retain precision, then divide
+        return (davAmount * (MAX_SUPPLY * 10)) / (5000000 * 1000 * 1e18);
     }
 
     /**
@@ -190,6 +235,13 @@ contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
         view
         returns (uint256)
     {
+        // Ensure the timestamp is not significantly in the future or past
+        require(
+            timestamp >= block.timestamp - 15 seconds &&
+                timestamp <= block.timestamp + 15 seconds,
+            "StateToken: Timestamp out of bounds"
+        );
+
         if (timestamp < REWARD_DECAY_START) return 0;
 
         uint256 elapsed = timestamp - REWARD_DECAY_START;
@@ -218,7 +270,7 @@ contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
         );
         require(governanceAddress != address(0), "Invalid governance address");
 
-        _transfer(address(this), governanceAddress, amount);
+        ERC20(address(this)).safeTransfer(governanceAddress, amount);
     }
 
     function setGovernanceAddress(address _newGovernance)
@@ -230,6 +282,7 @@ contract StateToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
             "New governance address cannot be zero"
         );
         governanceAddress = _newGovernance;
+        emit GovernanceChanged(governanceAddress, _newGovernance);
     }
 
     /**
