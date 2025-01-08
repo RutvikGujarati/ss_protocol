@@ -30,8 +30,10 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
     event FundsWithdrawn(string fundType, uint256 amount, uint256 timestamp);
 
     mapping(address => uint256) public lastMintTimestamp; // Track the last mint timestamp for each user
+    mapping(address => bool) private isDAVHolder; // Replacing davHolders array with mapping
 
-    address[] private davHolders;
+    address private governanceAddress;
+    address private pendingGovernance; // For two-step governance transfer
 
     constructor(
         address _liquidityWallet,
@@ -49,8 +51,6 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         governanceAddress = Governance;
     }
 
-    address private governanceAddress;
-
     modifier onlyGovernance() {
         require(
             msg.sender == governanceAddress,
@@ -59,27 +59,12 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         _;
     }
 
-    function setGovernanceAddress(address _newGovernance)
-        external
-        onlyGovernance
-    {
-        require(
-            _newGovernance != address(0),
-            "New governance address cannot be zero"
-        );
-        governanceAddress = _newGovernance;
-    }
-
-    function viewLastMintTimeStamp(address user) public view returns (uint256) {
-        return lastMintTimestamp[user];
-    }
-
-    bool public transfersPaused = true;
-
     modifier whenTransfersAllowed() {
         require(!transfersPaused, "Transfers are currently paused");
         _;
     }
+
+    bool public transfersPaused = true;
 
     function pauseTransfers() external onlyGovernance {
         transfersPaused = true;
@@ -89,17 +74,13 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         transfersPaused = false;
     }
 
-    // Override transfer to apply restrictions
-    function transfer(address recipient, uint256 amount)
-        public
-        override
-        whenTransfersAllowed
-        returns (bool)
-    {
+    function transfer(
+        address recipient,
+        uint256 amount
+    ) public override whenTransfersAllowed returns (bool) {
         return super.transfer(recipient, amount);
     }
 
-    // Override transferFrom to apply restrictions
     function transferFrom(
         address sender,
         address recipient,
@@ -108,24 +89,36 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         return super.transferFrom(sender, recipient, amount);
     }
 
-    /**
-     * @dev Mint DAV tokens by paying PLS.
-     * @param amount The amount of DAV tokens to mint (in wei).
-     */
+    function setGovernanceAddress(
+        address _newGovernance
+    ) external onlyGovernance {
+        require(
+            _newGovernance != address(0),
+            "New governance address cannot be zero"
+        );
+        pendingGovernance = _newGovernance;
+    }
+
+    function acceptGovernance() external {
+        require(msg.sender == pendingGovernance, "Not pending governance");
+        governanceAddress = msg.sender;
+        pendingGovernance = address(0);
+    }
+
+    function viewLastMintTimeStamp(address user) public view returns (uint256) {
+        return lastMintTimestamp[user];
+    }
 
     function mintDAV(uint256 amount) external payable nonReentrant {
-        // **Checks**
         require(amount > 0, "Amount must be greater than zero");
         require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
 
         uint256 cost = (amount / 1 ether) * TOKEN_COST;
         require(msg.value == cost, "Incorrect PLS amount sent");
 
-        // **Effects**
         mintedSupply += amount;
-        lastMintTimestamp[msg.sender] = block.timestamp; // Update the last mint timestamp for the user
+        lastMintTimestamp[msg.sender] = block.timestamp;
 
-        // Split funds immediately into liquidity and development allocations
         uint256 liquidityShare = (msg.value * 95) / 100;
         uint256 developmentShare = msg.value - liquidityShare;
 
@@ -134,34 +127,21 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
 
         _mint(msg.sender, amount);
 
-        // Add the user to the DAV holders list if not already present
-        bool isHolder = false;
-        for (uint256 i = 0; i < davHolders.length; i++) {
-            if (davHolders[i] == msg.sender) {
-                isHolder = true;
-                break;
-            }
-        }
-        if (!isHolder) {
-            davHolders.push(msg.sender);
+        if (!isDAVHolder[msg.sender]) {
+            isDAVHolder[msg.sender] = true;
         }
 
-        emit TokensMinted(msg.sender, amount, amount);
+        emit TokensMinted(msg.sender, amount, msg.value);
     }
 
     function withdrawLiquidityFunds() external onlyGovernance nonReentrant {
         require(liquidityFunds > 0, "No liquidity funds available");
 
         uint256 amount = liquidityFunds;
-        liquidityFunds = 0; // Reset allocation to zero before transfer
+        liquidityFunds = 0;
 
-        (bool successLiquidity, ) = liquidityWallet.call{
-            value: amount,
-            gas: 30000
-        }("");
-        if (!successLiquidity) {
-            revert("Liquidity transfer failed");
-        }
+        (bool successLiquidity, ) = liquidityWallet.call{value: amount}("");
+        require(successLiquidity, "Liquidity transfer failed");
 
         totalLiquidityAllocated += amount;
         emit FundsWithdrawn("Liquidity", amount, block.timestamp);
@@ -171,15 +151,10 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         require(developmentFunds > 0, "No development funds available");
 
         uint256 amount = developmentFunds;
-        developmentFunds = 0; // Reset allocation to zero before transfer
+        developmentFunds = 0;
 
-        (bool successDevelopment, ) = developmentWallet.call{
-            value: amount,
-            gas: 30000
-        }("");
-        if (!successDevelopment) {
-            revert("Development transfer failed");
-        }
+        (bool successDevelopment, ) = developmentWallet.call{value: amount}("");
+        require(successDevelopment, "Development transfer failed");
 
         totalDevelopmentAllocated += amount;
         emit FundsWithdrawn("Development", amount, block.timestamp);
@@ -189,11 +164,9 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         return balanceOf(user);
     }
 
-    function getUserHoldingPercentage(address user)
-        public
-        view
-        returns (uint256)
-    {
+    function getUserHoldingPercentage(
+        address user
+    ) public view returns (uint256) {
         uint256 userBalance = balanceOf(user);
         uint256 totalSupply = totalSupply();
         if (totalSupply == 0) {
@@ -206,24 +179,18 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         return address(this).balance;
     }
 
-    function updateLiquidityWallet(address _liquidityWallet)
-        external
-        onlyGovernance
-    {
+    function updateLiquidityWallet(
+        address _liquidityWallet
+    ) external onlyGovernance {
         require(_liquidityWallet != address(0), "Invalid address");
         liquidityWallet = _liquidityWallet;
     }
 
-    function updateDevelopmentWallet(address _developmentWallet)
-        external
-        onlyGovernance
-    {
+    function updateDevelopmentWallet(
+        address _developmentWallet
+    ) external onlyGovernance {
         require(_developmentWallet != address(0), "Invalid address");
         developmentWallet = _developmentWallet;
-    }
-
-    function getDAVHolders() public view returns (address[] memory) {
-        return davHolders;
     }
 
     receive() external payable nonReentrant {}
