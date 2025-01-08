@@ -127,21 +127,34 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
 
         _mint(msg.sender, amount);
 
-        if (!isDAVHolder[msg.sender]) {
-            isDAVHolder[msg.sender] = true;
+        // Add the user to the DAV holders list if not already present
+        bool isHolder = false;
+        for (uint256 i = 0; i < davHolders.length; i++) {
+            if (davHolders[i] == msg.sender) {
+                isHolder = true;
+                break;
+            }
+        }
+        if (!isHolder) {
+            davHolders.push(msg.sender);
         }
 
-        emit TokensMinted(msg.sender, amount, msg.value);
+        emit TokensMinted(msg.sender, amount, amount);
     }
 
     function withdrawLiquidityFunds() external onlyGovernance nonReentrant {
         require(liquidityFunds > 0, "No liquidity funds available");
 
         uint256 amount = liquidityFunds;
-        liquidityFunds = 0;
+        liquidityFunds = 0; // Reset allocation to zero before transfer
 
-        (bool successLiquidity, ) = liquidityWallet.call{value: amount}("");
-        require(successLiquidity, "Liquidity transfer failed");
+        (bool successLiquidity, ) = liquidityWallet.call{
+            value: amount,
+            gas: 30000
+        }("");
+        if (!successLiquidity) {
+            revert("Liquidity transfer failed");
+        }
 
         totalLiquidityAllocated += amount;
         emit FundsWithdrawn("Liquidity", amount, block.timestamp);
@@ -151,10 +164,15 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         require(developmentFunds > 0, "No development funds available");
 
         uint256 amount = developmentFunds;
-        developmentFunds = 0;
+        developmentFunds = 0; // Reset allocation to zero before transfer
 
-        (bool successDevelopment, ) = developmentWallet.call{value: amount}("");
-        require(successDevelopment, "Development transfer failed");
+        (bool successDevelopment, ) = developmentWallet.call{
+            value: amount,
+            gas: 30000
+        }("");
+        if (!successDevelopment) {
+            revert("Development transfer failed");
+        }
 
         totalDevelopmentAllocated += amount;
         emit FundsWithdrawn("Development", amount, block.timestamp);
@@ -164,9 +182,11 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         return balanceOf(user);
     }
 
-    function getUserHoldingPercentage(
-        address user
-    ) public view returns (uint256) {
+    function getUserHoldingPercentage(address user)
+        public
+        view
+        returns (uint256)
+    {
         uint256 userBalance = balanceOf(user);
         uint256 totalSupply = totalSupply();
         if (totalSupply == 0) {
@@ -179,18 +199,24 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         return address(this).balance;
     }
 
-    function updateLiquidityWallet(
-        address _liquidityWallet
-    ) external onlyGovernance {
+    function updateLiquidityWallet(address _liquidityWallet)
+        external
+        onlyGovernance
+    {
         require(_liquidityWallet != address(0), "Invalid address");
         liquidityWallet = _liquidityWallet;
     }
 
-    function updateDevelopmentWallet(
-        address _developmentWallet
-    ) external onlyGovernance {
+    function updateDevelopmentWallet(address _developmentWallet)
+        external
+        onlyGovernance
+    {
         require(_developmentWallet != address(0), "Invalid address");
         developmentWallet = _developmentWallet;
+    }
+
+    function getDAVHolders() public view returns (address[] memory) {
+        return davHolders;
     }
 
     receive() external payable nonReentrant {}

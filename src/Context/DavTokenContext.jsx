@@ -8,13 +8,13 @@ import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
-export const DAV_TOKEN_ADDRESS = "0x8037E06539b2Dc1b87BD56BE622663022f4b5aC1";
-export const STATE_TOKEN_ADDRESS = "0x9Cd5fe7149CA9220844dB106cEffEa3Ef4e2B6f9";
-export const Ratio_TOKEN_ADDRESS = "0x67CDEB53A9229EE26c230B7aD4A9BadA6503Ba58";
+export const DAV_TOKEN_ADDRESS = "0x7536b87C86A2c6D61620038D262A9D4Fd61959D2";
+export const STATE_TOKEN_ADDRESS = "0x8443eC9FbEa0C10195faef0E62544B299E3f0A1b";
+export const Ratio_TOKEN_ADDRESS = "0xb8810E0715B60687b0391379e15ce1EAdcE08aaB";
 
-export const Xerion = "0xc91e76657fD5aC3864E82Cc4EbCCd635f302d581";
-export const Xerion2 = "0xC43BFbdbc49101B1c2A9c2Ad96eE198429F2Ca66";
-export const Xerion3 = "0xbaDF8624Bcd75be85f1081EfC4F646F1ca7c18BE";
+export const Xerion = "0xae48FcF102062B4E57C6efB02e878B485786F74d";
+export const Xerion2 = "0x3391c40E62499Aa498503902b8712195db2624DD";
+export const Xerion3 = "0x4a169d0e0dEF9C1a6a6ab3BBf6870371C830626D";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -33,6 +33,8 @@ export const DAVTokenProvider = ({ children }) => {
   const [davContract, setDavContract] = useState(null);
   const [stateContract, setStateContract] = useState(null);
   const [XerionContract, setXerionContract] = useState(null);
+  const [Xerion2Contract, setXerion2Contract] = useState(null);
+  const [Xerion3Contract, setXerion3Contract] = useState(null);
   const [RatioContract, setRatioContract] = useState(null);
 
   const [TotalCost, setTotalCost] = useState(null);
@@ -53,8 +55,13 @@ export const DAVTokenProvider = ({ children }) => {
   const [StateBalance, setStateBalance] = useState("0.0");
   const [PercentageOfState, setPercentage] = useState("0.0");
   const [StateReward, setStateReward] = useState("0");
-  const [Distributed, setViewDistributed] = useState("0.0");
-  const [tokenNames, setTokenNames] = useState({});
+  const [Distributed, setViewDistributed] = useState({
+	state: "0.0",
+	xerion: "0.0",
+	xerion2: "0.0",
+	xerion3: "0.0",
+  });
+	const [tokenNames, setTokenNames] = useState({});
   const [StateBurned, setStateBurnAMount] = useState("0.0");
 
   const [ListedTokenBurned, setListedTokenBurnAMount] = useState("0.0");
@@ -86,9 +93,9 @@ export const DAVTokenProvider = ({ children }) => {
           setStateContract(
             new ethers.Contract(STATE_TOKEN_ADDRESS, StateABI, newSigner)
           );
-          setXerionContract(
-            new ethers.Contract(STATE_TOKEN_ADDRESS, StateABI, newSigner)
-          );
+          setXerionContract(new ethers.Contract(Xerion, StateABI, newSigner));
+          setXerion2Contract(new ethers.Contract(Xerion2, StateABI, newSigner));
+          setXerion3Contract(new ethers.Contract(Xerion3, StateABI, newSigner));
           setRatioContract(
             new ethers.Contract(Ratio_TOKEN_ADDRESS, RatioABI, newSigner)
           );
@@ -460,10 +467,10 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
   //claiming functions
-  const ClaimTokens = async () => {
+  const ClaimTokens = async (contract) => {
     try {
       setClaiming(true);
-      const tx = await handleContractCall(stateContract, "mintReward", []);
+      const tx = await handleContractCall(contract, "mintReward", []);
       await tx.wait();
       setClaiming(false);
     } catch (e) {
@@ -478,6 +485,13 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error claiming tokens:", e);
     }
   };
+  const AddTokensToContract = async (TokenAddress) => {
+    try {
+      await handleContractCall(RatioContract, "addSupportedToken", [TokenAddress]);
+    } catch (e) {
+      console.error("Error claiming tokens:", e);
+    }
+  };
 
   //   console.log(account)
   const RenounceState = async () => {
@@ -488,9 +502,15 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const CheckMintBalance = async () => {
+  const contracts = {
+    state: stateContract,
+    xerion: XerionContract,
+    xerion2: Xerion2Contract,
+    xerion3: Xerion3Contract,
+  };
+  const CheckMintBalance = async (contract) => {
     try {
-      const tx = await handleContractCall(stateContract, "distributeReward", [
+      const tx = await handleContractCall(contract, "distributeReward", [
         account,
       ]);
       await tx.wait();
@@ -700,13 +720,24 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   const ViewDistributedTokens = async () => {
-    const amount = await handleContractCall(
-      stateContract,
-      "userRewardAmount",
-      [account],
-      (s) => ethers.formatUnits(s, 18)
-    );
-    setViewDistributed(amount);
+    try {
+      const amounts = {};
+
+      // Loop through each contract and get the userRewardAmount
+      for (const [key, contract] of Object.entries(contracts)) {
+        const amount = await handleContractCall(
+          contract, 
+          "userRewardAmount",
+          [account],
+          (s) => ethers.formatUnits(s, 18)
+        );
+        amounts[key] = amount; // Store the result in an object
+      }
+
+      setViewDistributed(amounts); // Set all amounts for each contract
+    } catch (e) {
+      console.error("Error viewing distributed tokens:", e);
+    }
   };
 
   const getBurnedSTATE = async () => {
@@ -966,6 +997,7 @@ export const DAVTokenProvider = ({ children }) => {
         StateHolds,
         DavSupply,
         StateSupply,
+        contracts,
         Supply,
         LPStateTransferred,
         getBurnedSTATE,
@@ -1011,6 +1043,7 @@ export const DAVTokenProvider = ({ children }) => {
         withdraw_5,
         // WithdrawLPTokens,
         AddTokens,
+		AddTokensToContract,
         mintAdditionalTOkens,
         DAVTokensFiveWithdraw,
       }}

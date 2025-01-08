@@ -24,6 +24,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     withdraw_5,
     ClaimLPTokens,
 	// AddTokens,
+	AddTokensToContract,
     setRatioTarget,
     WithdrawState,
     account,
@@ -118,6 +119,13 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         claimFiveDAVToken: withdraw_5,
         startAuction: StartMarketPlaceListing,
         // setRatioTarget: setRatioTarget(numerator, Denominator), // Using dynamic parameters
+      },
+    },
+    {
+      tokenName: "AuctionRatioSwapping",
+	  
+      actions: {
+      
       },
     },
 

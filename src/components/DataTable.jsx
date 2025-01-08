@@ -15,6 +15,7 @@ const DataTable = () => {
     handleAddTokenState,
     CheckMintBalance,
     // claiming,
+    contracts,
     Distributed,
     // DavBalance,
     ClaimTokens,
@@ -29,10 +30,11 @@ const DataTable = () => {
   const [swappingStates, setSwappingStates] = useState({}); // State for swapping buttons
   const [claimingStates, setClaimingStates] = useState({}); // Separate claiming state for each token
 
-  const Checking = async (id) => {
+  const Checking = async (id, ContractName) => {
     setCheckingStates((prev) => ({ ...prev, [id]: true })); // Set checking state for specific button
     try {
-      await CheckMintBalance();
+      const contract = contracts[ContractName]; // Get the dynamic contract based on the ContractName
+      await CheckMintBalance(contract);
     } catch (e) {
       if (
         e.reason === "StateToken: No new DAV minted" ||
@@ -43,7 +45,7 @@ const DataTable = () => {
         console.error("StateToken: No new DAV minted:", e);
         setErrorPopup((prev) => ({ ...prev, [id]: true })); // Show error popup for the specific token
       } else {
-        console.error("Error calling seeMintableAmount:", e);
+        console.error("Error calling CheckMintBalance:", e);
       }
     }
     setCheckingStates((prev) => ({ ...prev, [id]: false })); // Reset checking state
@@ -55,9 +57,10 @@ const DataTable = () => {
     setSwappingStates((prev) => ({ ...prev, [id]: false })); // Reset swapping state
   };
 
-  const handleClaimTokens = async (id) => {
+  const handleClaimTokens = async (id,ContractName) => {
     setClaimingStates((prev) => ({ ...prev, [id]: true }));
-    await ClaimTokens();
+	const contract = contracts[ContractName]
+    await ClaimTokens(contract);
     setClaimingStates((prev) => ({ ...prev, [id]: false })); // Reset claiming state
   };
 
@@ -85,21 +88,23 @@ const DataTable = () => {
                 id: "state",
                 name: "STATE",
                 Pname: "pSTATE",
+                ContractName: "state",
                 image: stateLogo,
                 handleAddXerion: handleAddTokenState,
                 ratio: "1:1",
                 token: null,
                 inputTokenAmount: 1,
-                distributedAmount: Distributed,
+                distributedAmount: Distributed["state"],
                 outputToken: 1,
               },
               {
                 id: "xerion",
                 name: "Xerion",
                 Pname: "Xerion",
+                ContractName: "xerion",
                 image: XerionLogo,
                 ratio: "1:2",
-                distributedAmount: "0.0",
+                distributedAmount: Distributed["xerion"],
                 token: Xerion,
                 handleAddXerion: handleAddXerion1,
                 inputTokenAmount: 1,
@@ -109,7 +114,8 @@ const DataTable = () => {
                 id: "xerion2",
                 name: "Xerion2",
                 Pname: "Xerion2",
-                distributedAmount: "0.0",
+                ContractName: "xerion2",
+                distributedAmount: Distributed["xerion2"],
                 handleAddXerion: handleAddXerion2,
                 image: XerionLogo,
                 ratio: "1:1",
@@ -121,7 +127,8 @@ const DataTable = () => {
                 id: "xerion3",
                 name: "Xerion3",
                 Pname: "Xerion3",
-                distributedAmount: "0.0",
+                ContractName: "xerion3",
+                distributedAmount: Distributed["xerion3"],
                 handleAddXerion: handleAddXerion3,
                 image: XerionLogo,
                 ratio: "1:1",
@@ -137,6 +144,7 @@ const DataTable = () => {
                   Pname,
                   image,
                   ratio,
+                  ContractName,
                   distributedAmount,
                   token,
                   inputTokenAmount,
@@ -160,8 +168,7 @@ const DataTable = () => {
                   </td>
                   <td>
                     <button
-                      onClick={() => Checking(id)}
-                      disabled={id !== "state" || checkingStates[id]} // Disable for tokens other than STATE
+                      onClick={() => Checking(id, ContractName)}
                       className="btn btn-primary btn-sm swap-btn"
                     >
                       {checkingStates[id] ? "Checking..." : "Mint Balance"}
@@ -171,7 +178,7 @@ const DataTable = () => {
                     <div
                       onClick={
                         Distributed !== "0.0" && !claimingStates[id]
-                          ? () => handleClaimTokens(id)
+                          ? () => handleClaimTokens(id,ContractName)
                           : null
                       }
                       className={` btn btn-primary btn-sm swap-btn ${
