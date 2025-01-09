@@ -56,12 +56,12 @@ export const DAVTokenProvider = ({ children }) => {
   const [PercentageOfState, setPercentage] = useState("0.0");
   const [StateReward, setStateReward] = useState("0");
   const [Distributed, setViewDistributed] = useState({
-	state: "0.0",
-	xerion: "0.0",
-	xerion2: "0.0",
-	xerion3: "0.0",
+    state: "0.0",
+    xerion: "0.0",
+    xerion2: "0.0",
+    xerion3: "0.0",
   });
-	const [tokenNames, setTokenNames] = useState({});
+  const [tokenNames, setTokenNames] = useState({});
   const [StateBurned, setStateBurnAMount] = useState("0.0");
 
   const [ListedTokenBurned, setListedTokenBurnAMount] = useState("0.0");
@@ -487,7 +487,9 @@ export const DAVTokenProvider = ({ children }) => {
   };
   const AddTokensToContract = async (TokenAddress) => {
     try {
-      await handleContractCall(RatioContract, "addSupportedToken", [TokenAddress]);
+      await handleContractCall(RatioContract, "addSupportedToken", [
+        TokenAddress,
+      ]);
     } catch (e) {
       console.error("Error claiming tokens:", e);
     }
@@ -723,18 +725,44 @@ export const DAVTokenProvider = ({ children }) => {
     try {
       const amounts = {};
 
-      // Loop through each contract and get the userRewardAmount
+      // Loop through each contract and fetch the userRewardAmount
       for (const [key, contract] of Object.entries(contracts)) {
-        const amount = await handleContractCall(
-          contract, 
-          "userRewardAmount",
-          [account],
-          (s) => ethers.formatUnits(s, 18)
-        );
-        amounts[key] = amount; // Store the result in an object
+        try {
+          // Check if the contract object is valid
+          if (!contract) {
+            console.warn(`Contract for key "${key}" is undefined or null.`);
+            continue;
+          }
+
+          // Log the contract details for debugging
+          console.log(`Fetching userRewardAmount for contract key: ${key}`);
+          console.log("Contract instance:", contract);
+
+          // Make the contract call
+          const rawAmount = await handleContractCall(
+            contract,
+            "userRewardAmount",
+            [account],
+            (s) => ethers.formatUnits(s, 18)
+          );
+
+          // Log the raw and formatted amounts
+          console.log(`Raw amount for key "${key}":`, rawAmount);
+          amounts[key] = rawAmount;
+        } catch (contractError) {
+          console.error(
+            `Error fetching userRewardAmount for key "${key}":`,
+            contractError
+          );
+          amounts[key] = "0.0"; // Default to 0.0 if an error occurs
+        }
       }
 
-      setViewDistributed(amounts); // Set all amounts for each contract
+      // Update the state with the fetched amounts
+      setViewDistributed(amounts);
+
+      // Debugging output
+      console.log("Final Distributed amounts object:", amounts);
     } catch (e) {
       console.error("Error viewing distributed tokens:", e);
     }
@@ -1043,7 +1071,7 @@ export const DAVTokenProvider = ({ children }) => {
         withdraw_5,
         // WithdrawLPTokens,
         AddTokens,
-		AddTokensToContract,
+        AddTokensToContract,
         mintAdditionalTOkens,
         DAVTokensFiveWithdraw,
       }}
