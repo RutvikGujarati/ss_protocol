@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import {DavToken} from "./DavToken.sol";
+import {Decentralized_Autonomous_Vaults_DAV_V1_0} from "./DavToken.sol";
 
 contract STATE_Token_V1_0_Ratio_Swapping is
     ERC20,
@@ -14,10 +14,10 @@ contract STATE_Token_V1_0_Ratio_Swapping is
 {
     using SafeERC20 for ERC20;
 
-    DavToken public davToken;
+    Decentralized_Autonomous_Vaults_DAV_V1_0 public davToken;
     uint256 public MAX_SUPPLY = 999000000000000 ether;
-    uint256 public REWARD_DECAY_START = 1735545600; //timestamp
-    uint256 public DECAY_INTERVAL = 30 minutes;
+    uint256 public REWARD_DECAY_START = 1735707600; //timestamp
+    uint256 public DECAY_INTERVAL = 10 days;
     uint256 public constant DECAY_STEP = 1; // 1% per interval
     uint256 private constant PRECISION = 1e18;
 
@@ -54,13 +54,22 @@ contract STATE_Token_V1_0_Ratio_Swapping is
         address indexed newGovernance
     );
     event RewardDistributed(address indexed user, uint256 amount);
+    mapping(address => bool) private isAuthorized;
 
     modifier onlyGovernance() {
         require(
-            msg.sender == governanceAddress,
+            isAuthorized[msg.sender],
             "StateToken: You are not authorized to perform this action"
         );
         _;
+    }
+
+    function addAuthorized(address _authorized) external onlyGovernance {
+        isAuthorized[_authorized] = true;
+    }
+
+    function removeAuthorized(address _authorized) external onlyGovernance {
+        isAuthorized[_authorized] = false;
     }
 
     constructor(
@@ -78,18 +87,18 @@ contract STATE_Token_V1_0_Ratio_Swapping is
             "StateToken: Governance address cannot be zero"
         );
 
-        davToken = DavToken(payable(_davTokenAddress));
+        davToken = Decentralized_Autonomous_Vaults_DAV_V1_0(
+            payable(_davTokenAddress)
+        );
         governanceAddress = Governance;
+        isAuthorized[Governance] = true;
     }
 
     /**
      * @dev Change MAX_SUPPLY, restricted to governance.
      */
     function changeMAXSupply(uint256 newMaxSupply) external onlyGovernance {
-        require(
-            newMaxSupply <= MAX_SUPPLY,
-            "StateToken: Max supply exceeds limit"
-        );
+        require(newMaxSupply > 0, "StateToken: Max supply exceeds limit");
         MAX_SUPPLY = newMaxSupply;
     }
 
@@ -123,17 +132,16 @@ contract STATE_Token_V1_0_Ratio_Swapping is
             newDav != address(davToken),
             "StateToken: New DAV token must be different from the current"
         );
-        davToken = DavToken(payable(newDav));
+        davToken = Decentralized_Autonomous_Vaults_DAV_V1_0(payable(newDav));
     }
 
     /**
      * @dev Calculate decayed reward based on decay percentage.
      */
-    function calculateDecayedReward(uint256 baseReward, uint256 decayPercent)
-        public
-        pure
-        returns (uint256)
-    {
+    function calculateDecayedReward(
+        uint256 baseReward,
+        uint256 decayPercent
+    ) public pure returns (uint256) {
         if (decayPercent >= 100) {
             return 0;
         }
@@ -141,11 +149,9 @@ contract STATE_Token_V1_0_Ratio_Swapping is
         return (baseReward * decayFactor) / (100 * PRECISION);
     }
 
-    function mintAdditionalTOkens(uint256 amount)
-        public
-        onlyGovernance
-        nonReentrant
-    {
+    function mintAdditionalTOkens(
+        uint256 amount
+    ) public onlyGovernance nonReentrant {
         require(amount > 0, "mint amount must be greater than zero");
         require(governanceAddress != address(0), "address should not be zero");
         _mint(governanceAddress, amount);
@@ -154,11 +160,9 @@ contract STATE_Token_V1_0_Ratio_Swapping is
     /**
      * @dev Distribute reward for a user's DAV holdings.
      */
-    function distributeReward(address user)
-        external
-        nonReentrant
-        whenNotPaused
-    {
+    function distributeReward(
+        address user
+    ) external nonReentrant whenNotPaused {
         // **Checks**
         require(user != address(0), "StateToken: Invalid user address");
 
@@ -200,7 +204,7 @@ contract STATE_Token_V1_0_Ratio_Swapping is
         );
 
         uint256 amountToMint = ((1000000000 * 1e18) * mintableHoldings) /
-            (10**decimals());
+            (10 ** decimals());
         require(
             totalSupply() + reward + amountToMint <= MAX_SUPPLY,
             "StateToken: Max supply exceeded"
@@ -218,11 +222,9 @@ contract STATE_Token_V1_0_Ratio_Swapping is
     /**
      * @dev Calculate the base reward for a given DAV amount.
      */
-    function calculateBaseReward(uint256 davAmount)
-        public
-        view
-        returns (uint256)
-    {
+    function calculateBaseReward(
+        uint256 davAmount
+    ) public view returns (uint256) {
         // Multiply first to retain precision, then divide
         return (davAmount * (MAX_SUPPLY * 10)) / (5000000 * 1000 * 1e18);
     }
@@ -230,18 +232,9 @@ contract STATE_Token_V1_0_Ratio_Swapping is
     /**
      * @dev Get the decay percentage at a specific timestamp.
      */
-    function getDecayPercentageAtTime(uint256 timestamp)
-        public
-        view
-        returns (uint256)
-    {
-        // Ensure the timestamp is not significantly in the future or past
-        require(
-            timestamp >= block.timestamp - 15 seconds &&
-                timestamp <= block.timestamp + 15 seconds,
-            "StateToken: Timestamp out of bounds"
-        );
-
+    function getDecayPercentageAtTime(
+        uint256 timestamp
+    ) public view returns (uint256) {
         if (timestamp < REWARD_DECAY_START) return 0;
 
         uint256 elapsed = timestamp - REWARD_DECAY_START;
@@ -258,11 +251,9 @@ contract STATE_Token_V1_0_Ratio_Swapping is
         return getDecayPercentageAtTime(block.timestamp);
     }
 
-    function transferToken(uint256 amount)
-        external
-        onlyGovernance
-        nonReentrant
-    {
+    function transferToken(
+        uint256 amount
+    ) external onlyGovernance nonReentrant {
         require(amount > 0, "Transfer amount must be greater than zero");
         require(
             balanceOf(address(this)) >= amount,
@@ -273,10 +264,9 @@ contract STATE_Token_V1_0_Ratio_Swapping is
         ERC20(address(this)).safeTransfer(governanceAddress, amount);
     }
 
-    function setGovernanceAddress(address _newGovernance)
-        external
-        onlyGovernance
-    {
+    function setGovernanceAddress(
+        address _newGovernance
+    ) external onlyGovernance {
         require(
             _newGovernance != address(0),
             "New governance address cannot be zero"
@@ -288,7 +278,9 @@ contract STATE_Token_V1_0_Ratio_Swapping is
     /**
      * @dev View reward details for a user.
      */
-    function viewRewardDetails(address user)
+    function viewRewardDetails(
+        address user
+    )
         external
         view
         returns (

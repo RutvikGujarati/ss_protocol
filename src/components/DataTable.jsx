@@ -17,7 +17,7 @@ const DataTable = () => {
     // claiming,
     contracts,
     Distributed,
-    // DavBalance,
+    DavBalance,
     ClaimTokens,
     handleAddXerion1,
     handleAddXerion2,
@@ -170,6 +170,9 @@ const DataTable = () => {
                     <button
                       onClick={() => Checking(id, ContractName)}
                       className="btn btn-primary btn-sm swap-btn"
+					  disabled={
+						checkingStates[id]  || Distributed > 0 || DavBalance == 0
+					  }
                     >
                       {checkingStates[id] ? "Checking..." : "Mint Balance"}
                     </button>
