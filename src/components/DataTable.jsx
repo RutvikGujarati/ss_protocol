@@ -1,41 +1,40 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import XerionLogo from "../assets/XerionLogo.png";
-import FluxinLogo from "../assets/FluxinLogo.png";
 import stateLogo from "../assets/state_logo.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useDAVToken } from "../Context/DavTokenContext";
 import { useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
+import { Xerion, Xerion2, Xerion3 } from "../Context/DavTokenContext";
+
 const DataTable = () => {
   const {
-    // StartMarketPlaceListing,
-    BurnTokenRatio,
-    RatioTargetAmount,
-    handleAddTokenState,
-    HandleBurn,
-    CheckMintBalance,
-    OneListedTokenBurned,
-    ListedTokenBurned,
     SwapTokens,
-    ButtonText,
-    claiming,
-    DavBalance,
+    handleAddTokenState,
+    CheckMintBalance,
+    // claiming,
+    contracts,
     Distributed,
+    DavBalance,
     ClaimTokens,
+    handleAddXerion1,
+    handleAddXerion2,
+    handleAddXerion3,
   } = useDAVToken();
   const location = useLocation();
-  const isBurn = location.pathname === "/burn";
   const isAuction = location.pathname === "/auction";
+  const [errorPopup, setErrorPopup] = useState({});
+  const [checkingStates, setCheckingStates] = useState({}); // State for checking buttons
+  const [swappingStates, setSwappingStates] = useState({}); // State for swapping buttons
+  const [claimingStates, setClaimingStates] = useState({}); // Separate claiming state for each token
 
-  const [errorPopup, setErrorPopup] = useState(false);
-  const [isChecking, setIsChecking] = useState(false);
-
-  const Checking = async () => {
-    setIsChecking(true); // Set checking to true when button is clicked
+  const Checking = async (id, ContractName) => {
+    setCheckingStates((prev) => ({ ...prev, [id]: true })); // Set checking state for specific button
     try {
-      await CheckMintBalance();
+      const contract = contracts[ContractName]; // Get the dynamic contract based on the ContractName
+      await CheckMintBalance(contract);
     } catch (e) {
       if (
         e.reason === "StateToken: No new DAV minted" ||
@@ -44,266 +43,225 @@ const DataTable = () => {
           e.revert.args[0] === "StateToken: No new DAV minted")
       ) {
         console.error("StateToken: No new DAV minted:", e);
-        setErrorPopup(true); // Show error popup if specific error occurs
+        setErrorPopup((prev) => ({ ...prev, [id]: true })); // Show error popup for the specific token
       } else {
-        console.error("Error calling seeMintableAmount:", e);
+        console.error("Error calling CheckMintBalance:", e);
       }
     }
-    setIsChecking(false); // Reset checking state after function execution
+    setCheckingStates((prev) => ({ ...prev, [id]: false })); // Reset checking state
   };
 
-  async function Swapping() {
-    await SwapTokens("100");
-  }
-  return (
-    <>
-      {isAuction ? (
-        <>
-          <div className="container mt-4 datatablemarginbottom">
-            <div className="table-responsive">
-              <table className="table table-dark">
-                <thead>
-                  <tr className="align-item-center">
-                    <th>#</th>
-                    <th className="">Name</th>
-                    <th>Check</th>
-                    <th>Mint</th>
-                    <th>Price</th>
-                    <th>Liquidity</th>
-                    <th>Current Ratio</th>
-                    <th>Ratio Target</th>
-                    <th>Ratio Swap</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Example Rows */}
-                  <tr>
-                    <td>±</td>
-                    <td>
-                      {/* <div className="d-flex justify-content-between align-items-center"> */}
-                      <div className="tableName d-flex gap-4 align-items-center">
-                        <div className="nameImage">
-                          <img
-                            src={stateLogo}
-                            width={40}
-                            height={40}
-                            alt="Logo"
-                          />
-                        </div>
-                        <div className="nameDetails">
-                          <h5 className="nameBig">STATE</h5>
-                          <p className="nameSmall mb-1 uppercase">pState</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div
-                        className={`d-flex align-items-center justify-content-center ${
-                          isChecking || Distributed > 0 ? "disabled" : ""
-                        }`}
-                      >
-                        <button
-                          onClick={Checking}
-                          disabled={
-                            isChecking || Distributed > 0 || DavBalance == 0
-                          }
-                          className="btn btn-primary btn-sm swap-btn"
-                        >
-                          {isChecking ? "Checking..." : "Mint Balance"}
-                        </button>
-                      </div>
+  const Swapping = async (id, token) => {
+    setSwappingStates((prev) => ({ ...prev, [id]: true })); // Set swapping state for specific button
+    await SwapTokens("1", token);
+    setSwappingStates((prev) => ({ ...prev, [id]: false })); // Reset swapping state
+  };
 
-                      {errorPopup && (
-                        <div className="popup-overlay">
-                          <div className="popup-content">
-                            <h4 className="popup-header">Mint Additional DAV Tokens</h4>
-                            <p className="popup-para">
-                              You need to mint additional DAV tokens to claim
-                              your reward.
-                            </p>
-                            <button
-                              onClick={() => setErrorPopup(false)}
-                              className="btn btn-secondary popup-button"
-                            >
-                              Close
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </td>
-                    <td>
-                      <div className="d-flex align-items-center justify-content-center">
-                        <div
-                          onClick={
-                            Distributed !== "0.0" && !claiming
-                              ? ClaimTokens
-                              : null
-                          }
-                          className={`tableClaim hoverEffect ${
-                            claiming || Distributed === "0.0" ? "disabled" : ""
-                          }`}
-                          style={{
-                            pointerEvents:
-                              claiming || Distributed === "0.0"
-                                ? "none"
-                                : "auto",
-                          }}
-                        >
-                          {claiming
-                            ? "minting.."
-                            : `${formatWithCommas(Distributed) ?? "0.0"}`}
-                        </div>
-                      </div>
-                    </td>
+  const handleClaimTokens = async (id,ContractName) => {
+    setClaimingStates((prev) => ({ ...prev, [id]: true }));
+	const contract = contracts[ContractName]
+    await ClaimTokens(contract);
+    setClaimingStates((prev) => ({ ...prev, [id]: false })); // Reset claiming state
+  };
 
-                    <td>$0.0</td>
-                    <td className="text-success">0.0 </td>
-                    <td>0:0 </td>
-                    <td>{RatioTargetAmount} </td>
-                    <td className="tagTd">
-                      <div className="d-flex justify-content-center gap-3 w-100">
-                        <div className="tableClaim">0.0 </div>
-                        <div className="tableClaim">0.0</div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="d-flex align-items-center gap-2">
-                        <button
-                          onClick={Swapping}
-                          //   disabled={ButtonText.includes("...")}
-                          disabled={true}
-                          className="btn btn-primary btn-sm swap-btn"
-                        >
-                          {ButtonText.includes("...") ? ButtonText : "Swap"}
-                        </button>
-
-                        <img
-                          src={MetaMaskIcon}
-                          width={20}
-                          height={20}
-                          alt="Logo"
-                          style={{ cursor: "pointer" }}
-                          onClick={handleAddTokenState}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                  {/* <tr>
-                    <td>2</td>
-                    <td>
-                      <div className="tableName d-flex gap-4 align-items-center">
-                        <div className="nameImage">
-                          <img src={XerionLogo} alt="Logo" />
-                        </div>
-                        <div className="nameDetails">
-                          <h5 className="nameBig">Xerion</h5>
-                          <p className="nameSmall mb-1 uppercase">Xerion</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="d-flex align-items-center justify-content-center">
-                        <div className="tableClaim ">789 Mint</div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="d-flex align-items-center gap-2">
-                        <button className="btn btn-primary btn-sm swap-btn">
-                          Mint Balance
-                        </button>
-                      </div>
-                    </td>
-                    <td>$0.0000067</td>
-                    <td className="text-success">2.67 M</td>
-                    <td>1 : 250 K</td>
-                    <td>1 : 1 T</td>
-                    <td>
-                      <div className="d-flex justify-content-center gap-3 w-100">
-                        <div className="tableClaim">50 000 Flixin</div>
-                        <div className="tableClaim">25 000 000 State</div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="d-flex align-items-center gap-2">
-                        <button className="btn btn-primary btn-sm swap-btn">
-                          Swap
-                        </button>
-                        <img
-                          src={MetaMaskIcon}
-                          width={20}
-                          height={20}
-                          alt="Logo"
-                        />
-                      </div>
-                    </td>
-                  </tr> */}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </>
-      ) : isBurn ? (
-        <>
-          {/* <div className="container mt-4 datatablemarginbottom">
-            <div className="table-responsive">
-              <table className="table table-dark">
-                <thead>
-                  <tr className="align-item-center">
-                    <th>#</th>
-                    <th></th>
-                    <th className="">Name</th>
-                    <th>Burn Ratio</th>
-                    <th>Bounty</th>
-                    <th>Burn Amount</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td>
+  return isAuction ? (
+    <div className="container mt-4 datatablemarginbottom">
+      <div className="table-responsive">
+        <table className="table table-dark">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Check</th>
+              <th>Mint</th>
+              <th>Price</th>
+              <th>Liquidity</th>
+              <th>Current Ratio</th>
+              <th>Ratio Target</th>
+              <th>Ratio Swap</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              {
+                id: "state",
+                name: "STATE",
+                Pname: "pSTATE",
+                ContractName: "state",
+                image: stateLogo,
+                handleAddXerion: handleAddTokenState,
+                ratio: "1:1",
+                token: null,
+                inputTokenAmount: 0,
+                distributedAmount: Distributed["state"],
+                outputToken: 0,
+              },
+            //   {
+            //     id: "xerion",
+            //     name: "Xerion",
+            //     Pname: "Xerion",
+            //     ContractName: "xerion",
+            //     image: XerionLogo,
+            //     ratio: "1:2",
+            //     distributedAmount: Distributed["xerion"],
+            //     token: Xerion,
+            //     handleAddXerion: handleAddXerion1,
+            //     inputTokenAmount: 1,
+            //     outputToken: 1,
+            //   },
+            //   {
+            //     id: "xerion2",
+            //     name: "Xerion2",
+            //     Pname: "Xerion2",
+            //     ContractName: "xerion2",
+            //     distributedAmount: Distributed["xerion2"],
+            //     handleAddXerion: handleAddXerion2,
+            //     image: XerionLogo,
+            //     ratio: "1:1",
+            //     token: Xerion2,
+            //     inputTokenAmount: 1,
+            //     outputToken: 1,
+            //   },
+            //   {
+            //     id: "xerion3",
+            //     name: "Xerion3",
+            //     Pname: "Xerion3",
+            //     ContractName: "xerion3",
+            //     distributedAmount: Distributed["xerion3"],
+            //     handleAddXerion: handleAddXerion3,
+            //     image: XerionLogo,
+            //     ratio: "1:1",
+            //     token: Xerion3,
+            //     inputTokenAmount: 1,
+            //     outputToken: 1,
+            //   },
+            ].map(
+              (
+                {
+                  id,
+                  name,
+                  Pname,
+                  image,
+                  ratio,
+                  ContractName,
+                  distributedAmount,
+                  token,
+                  inputTokenAmount,
+                  handleAddXerion,
+                  outputToken,
+                },
+                index
+              ) => (
+                <tr key={index}>
+                  <td>{index === 0 ? "±" : index}</td>
+                  <td>
+                    <div className="tableName d-flex gap-4 align-items-center">
                       <div className="nameImage">
-                        <img src={FluxinLogo} alt="Logo" />
+                        <img src={image} width={40} height={40} alt="Logo" />
                       </div>
-                    </td>
-                    <td>
                       <div className="nameDetails">
-                        <h5 className="nameBig">Fluxin</h5>
-                        <p className="nameSmall mb-1 uppercase">Fluxin</p>
+                        <h5 className="nameBig">{name}</h5>
+                        <p className="nameSmall mb-1 uppercase">{Pname}</p>
                       </div>
-                    </td>
-                    <td>{BurnTokenRatio}</td>
-                    <td>{OneListedTokenBurned} Fluxin</td>
-                    <td>
-                      <div className="d-flex align-items-center justify-content-center">
-                        <div className="tableClaim">
-                          {ListedTokenBurned} Fluxin
-                        </div>
+                    </div>
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => Checking(id, ContractName)}
+                      className="btn btn-primary btn-sm swap-btn"
+					  disabled={
+						checkingStates[id]  || Distributed > 0 || DavBalance == 0
+					  }
+                    >
+                      {checkingStates[id] ? "Checking..." : "Mint Balance"}
+                    </button>
+                  </td>
+                  <td>
+                    <div
+                      onClick={
+                        Distributed !== "0.0" && !claimingStates[id]
+                          ? () => handleClaimTokens(id,ContractName)
+                          : null
+                      }
+                      className={` btn btn-primary btn-sm swap-btn ${
+                        claimingStates[id] || distributedAmount === "0.0"
+                          ? "disabled"
+                          : ""
+                      }`}
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      {claimingStates[id]
+                        ? "minting..."
+                        : `${formatWithCommas(distributedAmount) ?? "0.0"}`}
+                    </div>
+                  </td>
+
+                  <td>$0.0</td>
+                  <td className="text-success">0.0</td>
+                  <td>0:0</td>
+                  <td>{ratio}</td>
+                  <td>
+                    <div className="d-flex justify-content-center gap-3 w-100">
+                      <div className="tableClaim">
+                        {inputTokenAmount} Xerion
                       </div>
-                    </td>
-                    <td>
-                      <div className="d-flex align-items-center justify-content-center">
+                      <div className="tableClaim">{outputToken} State</div>
+                    </div>
+                  </td>
+                  {errorPopup[id] && (
+                    <div className="popup-overlay">
+                      <div className="popup-content">
+                        <h4 className="popup-header">
+                          Mint Additional DAV Tokens
+                        </h4>
+                        <p className="popup-para">
+                          You need to mint additional DAV tokens to claim your
+                          reward.
+                        </p>
                         <button
-                          disabled={ButtonText.includes("...")}
-                          onClick={HandleBurn}
-                          className="btn btn-primary btn-sm swap-btn"
+                          onClick={() =>
+                            setErrorPopup((prev) => ({ ...prev, [id]: false }))
+                          }
+                          className="btn btn-secondary popup-button"
                         >
-                          {ButtonText.includes("...") ? ButtonText : "Burn"}
+                          Close
                         </button>
                       </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div> */}
-        </>
-      ) : (
-        <></>
-      )}
-    </>
-  );
+                    </div>
+                  )}
+                  <td>
+                    <div className="d-flex align-items-center gap-2">
+                      <button
+                        onClick={() => Swapping(id, token)}
+                        disabled={id === "state" || swappingStates[id]} // Disable for STATE
+                        className="btn btn-primary btn-sm swap-btn"
+                      >
+                        {swappingStates[id] ? "Swapping..." : "Swap"}
+                      </button>
+
+                      <img
+                        src={MetaMaskIcon}
+                        width={20}
+                        height={20}
+                        alt="Logo"
+                        style={{ cursor: "pointer" }}
+                        onClick={handleAddXerion}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              )
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  ) : null;
 };
 
 export default DataTable;

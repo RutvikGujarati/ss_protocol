@@ -8,6 +8,7 @@ import {
   STATE_TOKEN_ADDRESS,
   Ratio_TOKEN_ADDRESS,
 } from "../Context/DavTokenContext";
+
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
   const valueString = value.toString();
@@ -22,6 +23,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     AuctionRunning,
     withdraw_5,
     ClaimLPTokens,
+	// AddTokens,
+	AddTokensToContract,
     setRatioTarget,
     WithdrawState,
     account,
@@ -38,7 +41,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     Batch,
     StateBalance,
     BatchAmount,
-    saveTokenName,
+    // saveTokenName,
     LastDevShare,
   } = useDAVToken();
 
@@ -98,7 +101,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       },
     },
     {
-      tokenName: "Fluxin",
+      tokenName: "Xerion",
       key: shortened,
       supply: "1M",
       ratioTarget: "1:1",
@@ -116,6 +119,13 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         claimFiveDAVToken: withdraw_5,
         startAuction: StartMarketPlaceListing,
         // setRatioTarget: setRatioTarget(numerator, Denominator), // Using dynamic parameters
+      },
+    },
+    {
+      tokenName: "AuctionRatioSwapping",
+	  
+      actions: {
+      
       },
     },
 
@@ -148,17 +158,16 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     }
   };
   const handleInputChanged = (e) => {
-    const rawValue = e.target.value.replace(/,/g, ""); // Remove existing commas for raw value
+    const rawValue = e.target.value.replace(/,/g, "");
     if (!/^\d*\.?\d*$/.test(rawValue)) {
-      return; // Exit if the input is invalid
+      return; 
     }
 
     const formattedValue = formatWithCommas(rawValue);
 
-    // Update state with both raw and formatted values
     setState({
-      raw: rawValue, // Non-formatted value
-      formatted: formattedValue, // Formatted value with commas
+      raw: rawValue,
+      formatted: formattedValue, 
     });
   };
 
@@ -377,6 +386,30 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                             type="text"
                             className="form-control text-center mh-30"
                             placeholder="Enter Days"
+                            value={numerator}
+                            onChange={(e) => handleInputChange(e, "numerator")}
+                          />
+                        </div>
+                      </td>
+                      <td className="d-flex justify-content-end">
+                        <button
+                          //   onClick={()=>setRatioTarget(numerator, Denominator)}
+                          className="btn btn-primary btn-sm swap-btn info-icon"
+                        >
+                          Set
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                       Add Tokens
+                      </td>
+                      <td>
+                        <div className="w-100">
+                          <input
+                            type="text"
+                            className="form-control text-center mh-30"
+                            placeholder="Enter Token Address"
                             value={numerator}
                             onChange={(e) => handleInputChange(e, "numerator")}
                           />

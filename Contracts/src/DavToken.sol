@@ -5,26 +5,36 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract DAVToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
+contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
+    ERC20,
+    Ownable(msg.sender),
+    ReentrancyGuard
+{
     uint256 public constant MAX_SUPPLY = 5000000 ether; // 5 Million DAV Tokens
     uint256 public constant TOKEN_COST = 150000 ether; // 150,000 PLS per DAV
 
     uint256 public mintedSupply; // Total Minted DAV Tokens
     address public liquidityWallet; // Liquidity Wallet
     address public developmentWallet; // Development Wallet
+    uint256 public liquidityFunds;
+    uint256 public developmentFunds;
 
     uint256 public totalLiquidityAllocated;
     uint256 public totalDevelopmentAllocated;
+    address[] public davHolders; // Array to store all DAV holders
 
     event TokensMinted(
         address indexed user,
         uint256 davAmount,
         uint256 stateAmount
     );
+    event FundsWithdrawn(string fundType, uint256 amount, uint256 timestamp);
 
-    mapping(address => bool) private davHolderExists;
     mapping(address => uint256) public lastMintTimestamp; // Track the last mint timestamp for each user
-    address[] private davHolders;
+    mapping(address => bool) private isDAVHolder; // Replacing davHolders array with mapping
+
+    address private governanceAddress;
+    address private pendingGovernance; // For two-step governance transfer
 
     constructor(
         address _liquidityWallet,
@@ -42,8 +52,6 @@ contract DAVToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
         governanceAddress = Governance;
     }
 
-    address private governanceAddress;
-
     modifier onlyGovernance() {
         require(
             msg.sender == governanceAddress,
@@ -52,119 +60,126 @@ contract DAVToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
         _;
     }
 
-    function setGovernanceAddress(address _newGovernance)
-        external
-        onlyGovernance
-    {
+    modifier whenTransfersAllowed() {
+        require(!transfersPaused, "Transfers are currently paused");
+        _;
+    }
+
+    bool public transfersPaused = true;
+
+    function pauseTransfers() external onlyGovernance {
+        transfersPaused = true;
+    }
+
+    function resumeTransfers() external onlyGovernance {
+        transfersPaused = false;
+    }
+
+    function transfer(
+        address recipient,
+        uint256 amount
+    ) public override whenTransfersAllowed returns (bool) {
+        return super.transfer(recipient, amount);
+    }
+
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) public override whenTransfersAllowed returns (bool) {
+        return super.transferFrom(sender, recipient, amount);
+    }
+
+    function setGovernanceAddress(
+        address _newGovernance
+    ) external onlyGovernance {
         require(
             _newGovernance != address(0),
             "New governance address cannot be zero"
         );
-        governanceAddress = _newGovernance;
+        pendingGovernance = _newGovernance;
+    }
+
+    function acceptGovernance() external {
+        require(msg.sender == pendingGovernance, "Not pending governance");
+        governanceAddress = msg.sender;
+        pendingGovernance = address(0);
     }
 
     function viewLastMintTimeStamp(address user) public view returns (uint256) {
         return lastMintTimestamp[user];
     }
 
-    /**
-     * @dev Mint DAV tokens by paying PLS.
-     * @param amount The amount of DAV tokens to mint (in wei).
-     */
+    uint256 public davHoldersCount;
+
     function mintDAV(uint256 amount) external payable nonReentrant {
-        // **Checks**
         require(amount > 0, "Amount must be greater than zero");
         require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
 
         uint256 cost = (amount / 1 ether) * TOKEN_COST;
         require(msg.value == cost, "Incorrect PLS amount sent");
 
-        // **Effects**
         mintedSupply += amount;
-        lastMintTimestamp[msg.sender] = block.timestamp; // Update the last mint timestamp for the user
 
-        _mint(msg.sender, amount);
-
-        // Track the user as a DAV holder
-        trackDAVHolder(address(0), msg.sender);
-
-        emit TokensMinted(msg.sender, amount, amount);
-
-        // **Interactions**
-        distributeFunds();
-    }
-
-    function distributeFunds() internal {
-        // **Checks**
-        require(msg.value > 0, "No funds sent for distribution");
-
-        // **Effects**
         uint256 liquidityShare = (msg.value * 95) / 100;
         uint256 developmentShare = msg.value - liquidityShare;
 
-        totalLiquidityAllocated += liquidityShare;
-        totalDevelopmentAllocated += developmentShare;
+        liquidityFunds += liquidityShare;
+        developmentFunds += developmentShare;
 
-        // **Interactions**
-        (bool successLiquidity, ) = liquidityWallet.call{value: liquidityShare}(
-            ""
-        );
+        _mint(msg.sender, amount);
+
+        // Add the user to the davHolders list if they are not already a holder
+        if (!isDAVHolder[msg.sender]) {
+            isDAVHolder[msg.sender] = true;
+            davHolders.push(msg.sender);
+        }
+
+        emit TokensMinted(msg.sender, amount, msg.value);
+    }
+
+    function getDAVHolderAt(uint256 index) external view returns (address) {
+        require(index < davHolders.length, "Index out of bounds");
+        return davHolders[index];
+    }
+
+    function getDAVHoldersCount() external view returns (uint256) {
+        return davHolders.length;
+    }
+
+    function withdrawLiquidityFunds() external onlyGovernance nonReentrant {
+        require(liquidityFunds > 0, "No liquidity funds available");
+
+        uint256 amount = liquidityFunds;
+        liquidityFunds = 0;
+
+        (bool successLiquidity, ) = liquidityWallet.call{value: amount}("");
         require(successLiquidity, "Liquidity transfer failed");
 
-        (bool successDevelopment, ) = developmentWallet.call{
-            value: developmentShare
-        }("");
+        totalLiquidityAllocated += amount;
+        emit FundsWithdrawn("Liquidity", amount, block.timestamp);
+    }
+
+    function withdrawDevelopmentFunds() external onlyGovernance nonReentrant {
+        require(developmentFunds > 0, "No development funds available");
+
+        uint256 amount = developmentFunds;
+        developmentFunds = 0;
+
+        (bool successDevelopment, ) = developmentWallet.call{value: amount}("");
         require(successDevelopment, "Development transfer failed");
-    }
 
-    function trackDAVHolder(address from, address to) internal {
-        // Remove `from` as a holder if their balance becomes zero
-        if (
-            from != address(0) && balanceOf(from) == 0 && davHolderExists[from]
-        ) {
-            davHolderExists[from] = false;
-            _removeHolder(from);
-        }
-
-        // Add `to` as a holder if they are not already tracked and their balance is positive
-        if (to != address(0) && !davHolderExists[to] && balanceOf(to) > 0) {
-            davHolderExists[to] = true;
-            davHolders.push(to);
-        }
-    }
-
-    function _removeHolder(address holder) internal {
-        for (uint256 i = 0; i < davHolders.length; i++) {
-            if (davHolders[i] == holder) {
-                davHolders[i] = davHolders[davHolders.length - 1];
-                davHolders.pop();
-                break;
-            }
-        }
-    }
-
-    function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal override {
-        super._transfer(from, to, amount);
-        trackDAVHolder(from, to);
-    }
-
-    function getDAVHolders() public view returns (address[] memory) {
-        return davHolders;
+        totalDevelopmentAllocated += amount;
+        emit FundsWithdrawn("Development", amount, block.timestamp);
     }
 
     function getDAVHoldings(address user) public view returns (uint256) {
         return balanceOf(user);
     }
 
-    function getUserHoldingPercentage(address user)
-        public
-        view
-        returns (uint256)
-    {
+    function getUserHoldingPercentage(
+        address user
+    ) public view returns (uint256) {
         uint256 userBalance = balanceOf(user);
         uint256 totalSupply = totalSupply();
         if (totalSupply == 0) {
@@ -177,18 +192,16 @@ contract DAVToken is ERC20, Ownable(msg.sender), ReentrancyGuard {
         return address(this).balance;
     }
 
-    function updateLiquidityWallet(address _liquidityWallet)
-        external
-        onlyGovernance
-    {
+    function updateLiquidityWallet(
+        address _liquidityWallet
+    ) external onlyGovernance {
         require(_liquidityWallet != address(0), "Invalid address");
         liquidityWallet = _liquidityWallet;
     }
 
-    function updateDevelopmentWallet(address _developmentWallet)
-        external
-        onlyGovernance
-    {
+    function updateDevelopmentWallet(
+        address _developmentWallet
+    ) external onlyGovernance {
         require(_developmentWallet != address(0), "Invalid address");
         developmentWallet = _developmentWallet;
     }

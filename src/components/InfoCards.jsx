@@ -6,6 +6,7 @@ import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { formatWithCommas } from "./DetailsInfo";
+
 const InfoCards = () => {
   const {
     mintDAV,
@@ -81,7 +82,8 @@ const InfoCards = () => {
                       value={amount}
                       onChange={handleInputChange}
                     />
-					<h5 className="detailAmount">
+                    <h5 className="detailAmount">
+
 					1 DAV TOKEN = 150,000 PLS
                     </h5>
                     <h5 className="detailAmount mb-4">
