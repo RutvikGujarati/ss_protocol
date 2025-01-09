@@ -93,9 +93,9 @@ const DataTable = () => {
                 handleAddXerion: handleAddTokenState,
                 ratio: "1:1",
                 token: null,
-                inputTokenAmount: 0,
+                inputTokenAmount: "0.0",
                 distributedAmount: Distributed["state"],
-                outputToken: 0,
+                outputToken: "0.0",
               },
             //   {
             //     id: "xerion",
@@ -208,9 +208,9 @@ const DataTable = () => {
                   <td>
                     <div className="d-flex justify-content-center gap-3 w-100">
                       <div className="tableClaim">
-                        {inputTokenAmount} Xerion
+                        {inputTokenAmount} 
                       </div>
-                      <div className="tableClaim">{outputToken} State</div>
+                      <div className="tableClaim">{outputToken} </div>
                     </div>
                   </td>
                   {errorPopup[id] && (
