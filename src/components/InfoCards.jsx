@@ -164,8 +164,8 @@ const InfoCards = () => {
             </div>
             <div className="announcement text-center">
               <div className="">
-                STATE token mints will be live on <span>01/01/2025.</span> Ratio
-                Swapping auctions will start on <span>13/01/2025.</span>
+                Ratio
+                Swapping auctions will start on <span>01/02/2025.</span>
               </div>
             </div>
           </div>
