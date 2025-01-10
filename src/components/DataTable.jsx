@@ -248,33 +248,23 @@ const DataTable = () => {
                       {id !== "state" && ( // Only show the button for non-state tokens
                         <button
                           onClick={() => Swapping(id, token)}
-                          disabled={swappingStates[id]}
+                        //   disabled={swappingStates[id]}
+						  disabled={true}
                           className="btn btn-primary btn-sm swap-btn"
                         >
                           {swappingStates[id] ? "Swapping..." : "Swap"}
                         </button>
                       )}
 
-                      {id !== "state" ? (
+                      {id !== "state" && (
                         <img
                           src={MetaMaskIcon}
                           width={20}
                           height={20}
+						  onClick={handleAddXerion}
                           alt="Logo"
                           style={{ cursor: "pointer" }}
-                          onClick={handleAddXerion}
                         />
-                      ) : (
-                        <div className="img-inline">
-                          <img
-                            src={MetaMaskIcon}
-                            className="mx-4"
-                            width={20}
-                            height={20}
-                            alt="Logo"
-                            style={{ cursor: "pointer", margin: "10px" }}
-                          />
-                        </div>
                       )}
                     </div>
                   </td>
