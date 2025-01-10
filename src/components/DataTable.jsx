@@ -1,13 +1,14 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import XerionLogo from "../assets/XerionLogo.png";
+import FluxinLogo from "../assets/FluxinLogo.png";
 import stateLogo from "../assets/state_logo.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useDAVToken } from "../Context/DavTokenContext";
 import { useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
-import { Xerion, Xerion2, Xerion3 } from "../Context/DavTokenContext";
+import { Fluxin, Xerion2, Xerion3 } from "../Context/DavTokenContext";
 
 const DataTable = () => {
   const {
@@ -19,7 +20,7 @@ const DataTable = () => {
     Distributed,
     DavBalance,
     ClaimTokens,
-    handleAddXerion1,
+    handleAddFluxin,
     handleAddXerion2,
     handleAddXerion3,
   } = useDAVToken();
@@ -97,19 +98,19 @@ const DataTable = () => {
                 distributedAmount: Distributed["state"],
                 outputToken: "0.0",
               },
-            //   {
-            //     id: "xerion",
-            //     name: "Xerion",
-            //     Pname: "Xerion",
-            //     ContractName: "xerion",
-            //     image: XerionLogo,
-            //     ratio: "1:2",
-            //     distributedAmount: Distributed["xerion"],
-            //     token: Xerion,
-            //     handleAddXerion: handleAddXerion1,
-            //     inputTokenAmount: 1,
-            //     outputToken: 1,
-            //   },
+              {
+                id: "Fluxin",
+                name: "Fluxin",
+                Pname: "Fluxin",
+                ContractName: "Fluxin",
+                image: FluxinLogo,
+                ratio: "1:1",
+                distributedAmount: Distributed["Fluxin"],
+                token: Fluxin,
+                handleAddXerion: handleAddFluxin,
+                inputTokenAmount: "1 Fluxin",
+                outputToken: "1 State",
+              },
             //   {
             //     id: "xerion2",
             //     name: "Xerion2",
