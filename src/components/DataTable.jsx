@@ -239,7 +239,8 @@ const DataTable = () => {
                     <div className="d-flex align-items-center gap-2">
                       <button
                         onClick={() => Swapping(id, token)}
-                        disabled={id === "state" || swappingStates[id]} // Disable for STATE
+                        // disabled={id === "state" || swappingStates[id]} 
+						disabled={true}
                         className="btn btn-primary btn-sm swap-btn"
                       >
                         {swappingStates[id] ? "Swapping..." : "Swap"}

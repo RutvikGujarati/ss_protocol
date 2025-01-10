@@ -12,7 +12,7 @@ export const DAV_TOKEN_ADDRESS = "0xd75fA7c2380f539320F9ABD29D09f48DbEB0E13E";
 export const STATE_TOKEN_ADDRESS = "0xd918a6EC7Ae556D38fE6F76C27f17f99a1CD3d2F";
 export const Ratio_TOKEN_ADDRESS = "0xb8810E0715B60687b0391379e15ce1EAdcE08aaB";
 
-export const Fluxin = "0x472712a5eBF2e8341A3091Cd9C05A6fd42814d14";
+export const Fluxin = "0x8D4C0c584A0db3a9aD39Bc623b58EB75D9d4466e";
 export const Xerion2 = "0x3391c40E62499Aa498503902b8712195db2624DD";
 export const Xerion3 = "0x4a169d0e0dEF9C1a6a6ab3BBf6870371C830626D";
 
@@ -1010,7 +1010,8 @@ export const DAVTokenProvider = ({ children }) => {
         params: tokenDetails,
       });
 
-      if (wasAdded) {
+      // Adjust the success condition to be less strict for non-MetaMask wallets
+      if (wasAdded === true || wasAdded === undefined || wasAdded) {
         alert(`${tokenSymbol} token successfully added to your wallet!`);
       } else {
         alert(`${tokenSymbol} token addition was canceled.`);
@@ -1084,7 +1085,7 @@ export const DAVTokenProvider = ({ children }) => {
         BurnTokenRatio,
         handleAddToken,
         setRatioTarget,
-		PercentageFluxin,
+        PercentageFluxin,
         FluxinSupply,
         RatioTargetAmount,
         AuctionRunning,
