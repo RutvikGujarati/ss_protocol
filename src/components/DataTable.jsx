@@ -58,9 +58,9 @@ const DataTable = () => {
     setSwappingStates((prev) => ({ ...prev, [id]: false })); // Reset swapping state
   };
 
-  const handleClaimTokens = async (id,ContractName) => {
+  const handleClaimTokens = async (id, ContractName) => {
     setClaimingStates((prev) => ({ ...prev, [id]: true }));
-	const contract = contracts[ContractName]
+    const contract = contracts[ContractName];
     await ClaimTokens(contract);
     setClaimingStates((prev) => ({ ...prev, [id]: false })); // Reset claiming state
   };
@@ -92,11 +92,11 @@ const DataTable = () => {
                 ContractName: "state",
                 image: stateLogo,
                 handleAddXerion: handleAddTokenState,
-                ratio: "1:1",
-                token: null,
-                inputTokenAmount: "0.0",
                 distributedAmount: Distributed["state"],
-                outputToken: "0.0",
+                // ratio: "1:1",
+                // token: null,
+                // inputTokenAmount: "0.0",
+                // outputToken: "0.0",
               },
               {
                 id: "Fluxin",
@@ -105,38 +105,41 @@ const DataTable = () => {
                 ContractName: "Fluxin",
                 image: FluxinLogo,
                 ratio: "1:1",
+                currentRatio: "0:0",
+                Price: "$0.0",
+                Liquidity: "0.0",
                 distributedAmount: Distributed["Fluxin"],
                 token: Fluxin,
                 handleAddXerion: handleAddFluxin,
                 inputTokenAmount: "0.0 Fluxin",
                 outputToken: "0.0 State",
               },
-            //   {
-            //     id: "xerion2",
-            //     name: "Xerion2",
-            //     Pname: "Xerion2",
-            //     ContractName: "xerion2",
-            //     distributedAmount: Distributed["xerion2"],
-            //     handleAddXerion: handleAddXerion2,
-            //     image: XerionLogo,
-            //     ratio: "1:1",
-            //     token: Xerion2,
-            //     inputTokenAmount: 1,
-            //     outputToken: 1,
-            //   },
-            //   {
-            //     id: "xerion3",
-            //     name: "Xerion3",
-            //     Pname: "Xerion3",
-            //     ContractName: "xerion3",
-            //     distributedAmount: Distributed["xerion3"],
-            //     handleAddXerion: handleAddXerion3,
-            //     image: XerionLogo,
-            //     ratio: "1:1",
-            //     token: Xerion3,
-            //     inputTokenAmount: 1,
-            //     outputToken: 1,
-            //   },
+              //   {
+              //     id: "xerion2",
+              //     name: "Xerion2",
+              //     Pname: "Xerion2",
+              //     ContractName: "xerion2",
+              //     distributedAmount: Distributed["xerion2"],
+              //     handleAddXerion: handleAddXerion2,
+              //     image: XerionLogo,
+              //     ratio: "1:1",
+              //     token: Xerion2,
+              //     inputTokenAmount: 1,
+              //     outputToken: 1,
+              //   },
+              //   {
+              //     id: "xerion3",
+              //     name: "Xerion3",
+              //     Pname: "Xerion3",
+              //     ContractName: "xerion3",
+              //     distributedAmount: Distributed["xerion3"],
+              //     handleAddXerion: handleAddXerion3,
+              //     image: XerionLogo,
+              //     ratio: "1:1",
+              //     token: Xerion3,
+              //     inputTokenAmount: 1,
+              //     outputToken: 1,
+              //   },
             ].map(
               (
                 {
@@ -145,7 +148,10 @@ const DataTable = () => {
                   Pname,
                   image,
                   ratio,
+                  currentRatio,
                   ContractName,
+                  Liquidity,
+                  Price,
                   distributedAmount,
                   token,
                   inputTokenAmount,
@@ -171,9 +177,9 @@ const DataTable = () => {
                     <button
                       onClick={() => Checking(id, ContractName)}
                       className="btn btn-primary btn-sm swap-btn"
-					  disabled={
-						checkingStates[id]  || Distributed > 0 || DavBalance == 0
-					  }
+                      disabled={
+                        checkingStates[id] || Distributed > 0 || DavBalance == 0
+                      }
                     >
                       {checkingStates[id] ? "Checking..." : "Mint Balance"}
                     </button>
@@ -182,7 +188,7 @@ const DataTable = () => {
                     <div
                       onClick={
                         Distributed !== "0.0" && !claimingStates[id]
-                          ? () => handleClaimTokens(id,ContractName)
+                          ? () => handleClaimTokens(id, ContractName)
                           : null
                       }
                       className={` btn btn-primary btn-sm swap-btn ${
@@ -202,16 +208,18 @@ const DataTable = () => {
                     </div>
                   </td>
 
-                  <td>$0.0</td>
-                  <td className="text-success">0.0</td>
-                  <td>0:0</td>
+                  <td>{Price}</td>
+                  <td className="text-success">{Liquidity}</td>
+                  <td>{currentRatio}</td>
                   <td>{ratio}</td>
                   <td>
                     <div className="d-flex justify-content-center gap-3 w-100">
-                      <div className="tableClaim">
-                        {inputTokenAmount} 
-                      </div>
-                      <div className="tableClaim">{outputToken} </div>
+                      {id !== "state" && (
+                        <>
+                          <div className="tableClaim">{inputTokenAmount}</div>
+                          <div className="tableClaim">{outputToken} </div>
+                        </>
+                      )}
                     </div>
                   </td>
                   {errorPopup[id] && (
@@ -237,23 +245,37 @@ const DataTable = () => {
                   )}
                   <td>
                     <div className="d-flex align-items-center gap-2">
-                      <button
-                        onClick={() => Swapping(id, token)}
-                        // disabled={id === "state" || swappingStates[id]} 
-						disabled={true}
-                        className="btn btn-primary btn-sm swap-btn"
-                      >
-                        {swappingStates[id] ? "Swapping..." : "Swap"}
-                      </button>
+                      {id !== "state" && ( // Only show the button for non-state tokens
+                        <button
+                          onClick={() => Swapping(id, token)}
+                          disabled={swappingStates[id]}
+                          className="btn btn-primary btn-sm swap-btn"
+                        >
+                          {swappingStates[id] ? "Swapping..." : "Swap"}
+                        </button>
+                      )}
 
-                      <img
-                        src={MetaMaskIcon}
-                        width={20}
-                        height={20}
-                        alt="Logo"
-                        style={{ cursor: "pointer" }}
-                        onClick={handleAddXerion}
-                      />
+                      {id !== "state" ? (
+                        <img
+                          src={MetaMaskIcon}
+                          width={20}
+                          height={20}
+                          alt="Logo"
+                          style={{ cursor: "pointer" }}
+                          onClick={handleAddXerion}
+                        />
+                      ) : (
+                        <div className="img-inline">
+                          <img
+                            src={MetaMaskIcon}
+                            className="mx-4"
+                            width={20}
+                            height={20}
+                            alt="Logo"
+                            style={{ cursor: "pointer", margin: "10px" }}
+                          />
+                        </div>
+                      )}
                     </div>
                   </td>
                 </tr>
