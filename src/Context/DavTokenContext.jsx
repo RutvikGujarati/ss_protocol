@@ -54,6 +54,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [Batch, setBatch] = useState("0.0");
   const [BatchAmount, setBatchAmount] = useState("0.0");
   const [StateBalance, setStateBalance] = useState("0.0");
+  const [FluxinBalance, setFluxinBalance] = useState("0.0");
   const [PercentageOfState, setPercentage] = useState("0.0");
   const [PercentageFluxin, setFluxinPercentage] = useState("0.0");
   const [StateReward, setStateReward] = useState("0");
@@ -429,6 +430,7 @@ export const DAVTokenProvider = ({ children }) => {
             // await LastDevShareTransactionAMount();
 
             await ContractStateBalance();
+            await ContractFluxinBalance();
           } catch (error) {
             console.error("Error fetching LpTokenAmount:", error);
           }
@@ -576,14 +578,25 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
-  const mintAdditionalTOkens = async (amount) => {
+  const mintAdditionalTOkens = async (contractType, amount) => {
     try {
       setClaiming(true);
-      const amountInWei = ethers.parseUnits(amount.toString(), 18);
 
-      await handleContractCall(stateContract, "mintAdditionalTOkens", [
-        amountInWei,
-      ]);
+      const amountInWei = ethers.parseUnits(amount.toString(), 18);
+      let contract;
+
+      // Select the correct contract based on contractType
+      if (contractType === "fluxin") {
+        contract = FluxinContract;
+      } else if (contractType === "state") {
+        contract = stateContract;
+      }
+
+      if (!contract) {
+        throw new Error("Invalid contract type");
+      }
+
+      await handleContractCall(contract, "mintAdditionalTOkens", [amountInWei]);
     } catch (e) {
       console.error(`Error minting with method mintAdditionalTOkens:`, e);
     } finally {
@@ -620,21 +633,32 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching LP tokens:", e);
     }
   };
-
-  const ContractStateBalance = async () => {
+  const fetchContractBalance = async (contract, tokenAddress, setState) => {
     try {
       const transaction = await handleContractCall(
-        stateContract,
+        contract,
         "balanceOf",
-        [STATE_TOKEN_ADDRESS],
+        [tokenAddress],
         (s) => ethers.formatUnits(s, 18)
       );
 
       console.log("balance", transaction);
-      setStateBalance(transaction);
+      setState(transaction);
     } catch (e) {
-      console.error("Error fetching LP tokens:", e);
+      console.error("Error fetching token balance:", e);
     }
+  };
+
+  const ContractStateBalance = async () => {
+    await fetchContractBalance(
+      stateContract,
+      STATE_TOKEN_ADDRESS,
+      setStateBalance
+    );
+  };
+
+  const ContractFluxinBalance = async () => {
+    await fetchContractBalance(FluxinContract, Fluxin, setFluxinBalance);
   };
 
   const getDecayPercentage = async (contractName) => {
@@ -851,51 +875,51 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const ratioOfBurn = async () => {
-    try {
-      const totalBurnAmount = await calculateBurnAmount(); // Await the value
-      const OnePercent = await calculateOnePercentBurnAmount(); // Await the async function
+  //   const ratioOfBurn = async () => {
+  //     try {
+  //       const totalBurnAmount = await calculateBurnAmount(); // Await the value
+  //       const OnePercent = await calculateOnePercentBurnAmount(); // Await the async function
 
-      // Debugging logs for clarity
-      console.log("Total Burn Amount:", totalBurnAmount);
-      console.log("1% Burn Amount:", OnePercent);
+  //       // Debugging logs for clarity
+  //       console.log("Total Burn Amount:", totalBurnAmount);
+  //       console.log("1% Burn Amount:", OnePercent);
 
-      // Validate totalBurnAmount and OnePercent
-      if (!totalBurnAmount || isNaN(totalBurnAmount) || totalBurnAmount <= 0) {
-        console.warn(
-          "Invalid or zero total burn amount. Returning ratio as 1:0."
-        );
-        setBurnAMountRatio("1:0");
-        return "1:0";
-      }
+  //       // Validate totalBurnAmount and OnePercent
+  //       if (!totalBurnAmount || isNaN(totalBurnAmount) || totalBurnAmount <= 0) {
+  //         console.warn(
+  //           "Invalid or zero total burn amount. Returning ratio as 1:0."
+  //         );
+  //         setBurnAMountRatio("1:0");
+  //         return "1:0";
+  //       }
 
-      if (!OnePercent || isNaN(Number(OnePercent))) {
-        console.warn("Invalid 1% burn amount. Returning ratio as 1:0.");
-        setBurnAMountRatio("1:0");
-        return "1:0";
-      }
+  //       if (!OnePercent || isNaN(Number(OnePercent))) {
+  //         console.warn("Invalid 1% burn amount. Returning ratio as 1:0.");
+  //         setBurnAMountRatio("1:0");
+  //         return "1:0";
+  //       }
 
-      const onePercentValue = Number(OnePercent);
+  //       const onePercentValue = Number(OnePercent);
 
-      const ratio = onePercentValue / totalBurnAmount;
+  //       const ratio = onePercentValue / totalBurnAmount;
 
-      if (isNaN(ratio)) {
-        console.warn("Calculated ratio is NaN. Returning 1:0.");
-        setBurnAMountRatio("1:0");
-        return "1:0";
-      }
+  //       if (isNaN(ratio)) {
+  //         console.warn("Calculated ratio is NaN. Returning 1:0.");
+  //         setBurnAMountRatio("1:0");
+  //         return "1:0";
+  //       }
 
-      const ratioInFormat = `1:${(1 / ratio).toFixed(0)}`;
-      console.log("Formatted Ratio:", ratioInFormat);
+  //       const ratioInFormat = `1:${(1 / ratio).toFixed(0)}`;
+  //       console.log("Formatted Ratio:", ratioInFormat);
 
-      setBurnAMountRatio(ratioInFormat);
-      return ratioInFormat;
-    } catch (error) {
-      console.error("Error in ratioOfBurn calculation:", error);
-      setBurnAMountRatio("1:0");
-      return "1:0";
-    }
-  };
+  //       setBurnAMountRatio(ratioInFormat);
+  //       return ratioInFormat;
+  //     } catch (error) {
+  //       console.error("Error in ratioOfBurn calculation:", error);
+  //       setBurnAMountRatio("1:0");
+  //       return "1:0";
+  //     }
+  //   };
 
   const HandleBurn = async () => {
     setButtonText("Burning...");
@@ -928,60 +952,60 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error setting ratio target:", error);
     }
   };
-  const getRatioTarget = async () => {
-    try {
-      // Fetch both numerator and denominator from the contract
-      const [numerator, denominator] = await handleContractCall(
-        RatioContract,
-        "getRatioTarget",
-        [],
-        (result) => result.map((s) => parseFloat(ethers.formatUnits(s, 18))) // Format each value separately
-      );
+  //   const getRatioTarget = async () => {
+  //     try {
+  //       // Fetch both numerator and denominator from the contract
+  //       const [numerator, denominator] = await handleContractCall(
+  //         RatioContract,
+  //         "getRatioTarget",
+  //         [],
+  //         (result) => result.map((s) => parseFloat(ethers.formatUnits(s, 18))) // Format each value separately
+  //       );
 
-      // Check if denominator is valid (non-zero)
-      if (denominator > 0) {
-        const ratio = `${numerator}:${denominator.toFixed(0)}`;
-        setRatioTargetAmount(ratio); // Update the state with the ratio
-      } else {
-        console.warn("Invalid denominator.");
-        setRatioTargetAmount(`${numerator}:0`); // Default to "numerator:0" in case of error
-      }
-    } catch (error) {
-      console.error("Error fetching ratio target:", error);
-      setRatioTargetAmount(null); // Handle error state properly
-    }
-  };
+  //       // Check if denominator is valid (non-zero)
+  //       if (denominator > 0) {
+  //         const ratio = `${numerator}:${denominator.toFixed(0)}`;
+  //         setRatioTargetAmount(ratio); // Update the state with the ratio
+  //       } else {
+  //         console.warn("Invalid denominator.");
+  //         setRatioTargetAmount(`${numerator}:0`); // Default to "numerator:0" in case of error
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching ratio target:", error);
+  //       setRatioTargetAmount(null); // Handle error state properly
+  //     }
+  //   };
 
-  const StateTokenBurnRatio = async () => {
-    try {
-      const burnAmount = await handleContractCall(
-        RatioContract,
-        "getBurnedSTATE",
-        [],
-        (s) => parseFloat(ethers.formatUnits(s, 18))
-      );
-      console.log("Burn Amount:", burnAmount);
+  //   const StateTokenBurnRatio = async () => {
+  //     try {
+  //       const burnAmount = await handleContractCall(
+  //         RatioContract,
+  //         "getBurnedSTATE",
+  //         [],
+  //         (s) => parseFloat(ethers.formatUnits(s, 18))
+  //       );
+  //       console.log("Burn Amount:", burnAmount);
 
-      const totalSupply = await handleContractCall(
-        RatioContract,
-        "totalSupply",
-        [],
-        (s) => parseFloat(ethers.formatUnits(s, 18))
-      );
-      console.log("Total Supply:", totalSupply);
+  //       const totalSupply = await handleContractCall(
+  //         RatioContract,
+  //         "totalSupply",
+  //         [],
+  //         (s) => parseFloat(ethers.formatUnits(s, 18))
+  //       );
+  //       console.log("Total Supply:", totalSupply);
 
-      if (totalSupply > 0) {
-        const ratio = burnAmount / totalSupply;
-        setStateBurnRatio(ratio.toFixed(10)); // Store ratio as a string for precision
-        console.log("State Burn Ratio:", ratio);
-        return ratio;
-      } else {
-        console.error("Total supply is zero. Cannot calculate ratio.");
-      }
-    } catch (error) {
-      console.error("Error calculating state burn ratio:", error);
-    }
-  };
+  //       if (totalSupply > 0) {
+  //         const ratio = burnAmount / totalSupply;
+  //         setStateBurnRatio(ratio.toFixed(10)); // Store ratio as a string for precision
+  //         console.log("State Burn Ratio:", ratio);
+  //         return ratio;
+  //       } else {
+  //         console.error("Total supply is zero. Cannot calculate ratio.");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error calculating state burn ratio:", error);
+  //     }
+  //   };
 
   const handleAddToken = async (
     tokenAddress,
@@ -1053,6 +1077,7 @@ export const DAVTokenProvider = ({ children }) => {
         davHolds,
         DavHoldingsPercentage,
         davPercentage,
+        FluxinBalance,
         StateHoldings,
         StateHolds,
         DavSupply,
