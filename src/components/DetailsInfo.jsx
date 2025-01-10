@@ -42,6 +42,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     DAVTokensFiveWithdraw,
     LastLiquidity,
     Batch,
+	ReanounceFluxinContract,
     StateBalance,
     FluxinBalance,
     mintAdditionalTOkens,
@@ -120,7 +121,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
 	  mintAddTOkens: "250,000,000,000",
       renounceSmartContract: "No",
       actions: {
-        ReanounceContract: RenounceState,
+        ReanounceContract: ReanounceFluxinContract,
         WithdrawState: WithdrawState,
         mintAdditionalTOkens: mintAdditionalTOkens,
       },
@@ -574,7 +575,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               </td>
               <td className="d-flex justify-content-end">
                 <button
-                  onClick={() => dataToShow.actions.ReanounceContract()} // Add parentheses to invoke the function
+                  onClick={() => dataToShow.actions.ReanounceContract()}
                   className="btn btn-primary btn-sm swap-btn info-icon"
                 >
                   Set

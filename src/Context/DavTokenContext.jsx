@@ -501,6 +501,13 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error claiming tokens:", e);
     }
   };
+  const ReanounceFluxinContract = async () => {
+    try {
+      await handleContractCall(FluxinContract, "renounceOwnership", []);
+    } catch (e) {
+      console.error("Error claiming tokens:", e);
+    }
+  };
   const AddTokensToContract = async (TokenAddress) => {
     try {
       await handleContractCall(RatioContract, "addSupportedToken", [
@@ -1100,6 +1107,7 @@ export const DAVTokenProvider = ({ children }) => {
         SwapTokens,
         ButtonText,
         ReanounceContract,
+		ReanounceFluxinContract,
         RenounceState,
         MoveTokens,
         LastLiquidity,
