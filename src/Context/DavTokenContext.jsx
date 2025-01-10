@@ -8,11 +8,11 @@ import PropTypes from "prop-types";
 
 const DAVTokenContext = createContext();
 //0x40Ae7404e9E915552414C4F9Fa521214f8E5CBc3
-export const DAV_TOKEN_ADDRESS = "0xf75E9a9AD4022bADee7878f4E65c8db398fbC5f4";
+export const DAV_TOKEN_ADDRESS = "0xd75fA7c2380f539320F9ABD29D09f48DbEB0E13E";
 export const STATE_TOKEN_ADDRESS = "0xd918a6EC7Ae556D38fE6F76C27f17f99a1CD3d2F";
 export const Ratio_TOKEN_ADDRESS = "0xb8810E0715B60687b0391379e15ce1EAdcE08aaB";
 
-export const Fluxin = "0xEc0629035F1AA6A71f3B2eBc6145EF26d74f8E3B";
+export const Fluxin = "0x8D4C0c584A0db3a9aD39Bc623b58EB75D9d4466e";
 export const Xerion2 = "0x3391c40E62499Aa498503902b8712195db2624DD";
 export const Xerion3 = "0x4a169d0e0dEF9C1a6a6ab3BBf6870371C830626D";
 
@@ -46,6 +46,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [davPercentage, setDavPercentage] = useState("0.0");
   const [Supply, setSupply] = useState("0.0");
   const [StateSupply, setStateSupply] = useState("0.0");
+  const [FluxinSupply, setFluxinSupply] = useState("0.0");
   const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
   const [DAVTokensFiveWithdraw, setFiveAvTokens] = useState("0.0");
   const [LastLiquidity, setLastLiquidityTransaction] = useState("0.0");
@@ -54,6 +55,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [BatchAmount, setBatchAmount] = useState("0.0");
   const [StateBalance, setStateBalance] = useState("0.0");
   const [PercentageOfState, setPercentage] = useState("0.0");
+  const [PercentageFluxin, setFluxinPercentage] = useState("0.0");
   const [StateReward, setStateReward] = useState("0");
   const [Distributed, setViewDistributed] = useState({
     state: "0.0",
@@ -274,6 +276,16 @@ export const DAVTokenProvider = ({ children }) => {
     setStateSupply(supply);
   };
 
+  const FluxinTotalMintedSupply = async () => {
+    const supply = await handleContractCall(
+      FluxinContract,
+      "totalSupply",
+      [],
+      (s) => ethers.formatUnits(s, 18)
+    );
+    setFluxinSupply(supply);
+  };
+
   const releases = [
     { dav: 1000000, releaseState: 50000000000000 },
     { dav: 1000000, releaseState: 40000000000000 },
@@ -353,9 +365,11 @@ export const DAVTokenProvider = ({ children }) => {
           }
 
           try {
-            await Percentage();
+            await getDecayPercentage("state");
+            await getDecayPercentage("Fluxin");
             await ViewDistributedTokens();
             await StateTotalMintedSupply();
+            await FluxinTotalMintedSupply();
           } catch (error) {
             console.error("Error fetching ViewDistributedTokens:", error);
           }
@@ -623,21 +637,38 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const Percentage = async () => {
+  const getDecayPercentage = async (contractName) => {
     try {
+      if (!contracts[contractName]) {
+        console.error(`Contract "${contractName}" not found.`);
+        return;
+      }
+
       const currentTimestamp = Math.floor(Date.now() / 1000);
       const transaction = await handleContractCall(
-        stateContract,
+        contracts[contractName], // Dynamically select the contract
         "getDecayPercentageAtTime",
         [currentTimestamp],
         (s) => parseFloat(ethers.formatUnits(s, 0))
       );
 
       const reversedPercentage = 100 - transaction; // Reverse the percentage
-      console.log("Decay percentage (reversed):", reversedPercentage);
-      setPercentage(reversedPercentage);
+      console.log(
+        `${contractName} decay percentage (reversed):`,
+        reversedPercentage
+      );
+
+      // Set the percentage based on the contract
+      if (contractName === "state") {
+        setPercentage(reversedPercentage);
+      } else if (contractName === "Fluxin") {
+        setFluxinPercentage(reversedPercentage);
+      }
     } catch (e) {
-      console.error("Error fetching decay percentage:", e);
+      console.error(
+        `Error fetching decay percentage for "${contractName}":`,
+        e
+      );
     }
   };
   const ERC20_ABI = [
@@ -1053,6 +1084,8 @@ export const DAVTokenProvider = ({ children }) => {
         BurnTokenRatio,
         handleAddToken,
         setRatioTarget,
+		PercentageFluxin,
+        FluxinSupply,
         RatioTargetAmount,
         AuctionRunning,
         WithdrawState,

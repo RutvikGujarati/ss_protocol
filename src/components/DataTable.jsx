@@ -108,8 +108,8 @@ const DataTable = () => {
                 distributedAmount: Distributed["Fluxin"],
                 token: Fluxin,
                 handleAddXerion: handleAddFluxin,
-                inputTokenAmount: "1 Fluxin",
-                outputToken: "1 State",
+                inputTokenAmount: "0.0 Fluxin",
+                outputToken: "0.0 State",
               },
             //   {
             //     id: "xerion2",
