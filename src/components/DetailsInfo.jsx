@@ -22,15 +22,17 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     withdraw_95,
     AuctionRunning,
     withdraw_5,
-    ClaimLPTokens,
-	// AddTokens,
-	AddTokensToContract,
+    // ClaimLPTokens,
+    // AddTokens,
+	FluxinSupply,
+    // AddTokensToContract,
     setRatioTarget,
     WithdrawState,
     account,
     mintAdditionalTOkens,
     LPStateTransferred,
     PercentageOfState,
+	PercentageFluxin,
     DAVTokensWithdraw,
     StateSupply,
     RenounceState,
@@ -57,7 +59,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const AuthAddress =
     "0xB511110f312a4C6C4a240b2fE94de55D600Df7a9".toLowerCase();
 
-	// Fetch and update token data when the selectedToken changes
+  // Fetch and update token data when the selectedToken changes
   const handleSetAddress = () => {
     setAuthorized(AuthAddress === account);
     console.log(account);
@@ -101,32 +103,26 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       },
     },
     {
-      tokenName: "Xerion",
-      key: shortened,
-      supply: "1M",
-      ratioTarget: "1:1",
-      auctionAllocation: "50%",
-      davTreasurySupply: "500K",
-      ratioTargetAmend: "1:1 Trillion",
-      claimDAVToken: DAVTokensWithdraw,
-      address: Ratio_TOKEN_ADDRESS,
-      claimFiveDAVToken: DAVTokensFiveWithdraw,
-      startAuction: `Auction Status - ${auctionStatus}`,
-      renounceSmartContract: "no",
+      tokenName: "Fluxin",
+      key: stateShortened,
+      name: "Fluxin",
+      supply: "1,000,000,000,000.00",
+      Treasury: "1,000,000,000,000.00",
+      Supply: FluxinSupply,
+      percentage: PercentageFluxin,
+      address: STATE_TOKEN_ADDRESS,
+      claimLPToken: LPStateTransferred,
+      renounceSmartContract: "No",
       actions: {
-        claimLPToken: ClaimLPTokens,
-        claimDAVToken: withdraw_95,
-        claimFiveDAVToken: withdraw_5,
-        startAuction: StartMarketPlaceListing,
-        // setRatioTarget: setRatioTarget(numerator, Denominator), // Using dynamic parameters
+        ReanounceContract: RenounceState,
+        WithdrawState: WithdrawState,
+        mintAdditionalTOkens: mintAdditionalTOkens,
       },
     },
     {
       tokenName: "AuctionRatioSwapping",
-	  
-      actions: {
-      
-      },
+
+      actions: {},
     },
 
     //state token
@@ -136,7 +132,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       name: "pSTATE",
       supply: "999,000,000,000,000.00",
       Treasury: "999,000,000,000,000.00",
-      StateSupply: StateSupply,
+      Supply: StateSupply,
       percentage: PercentageOfState,
       address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
@@ -160,14 +156,14 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const handleInputChanged = (e) => {
     const rawValue = e.target.value.replace(/,/g, "");
     if (!/^\d*\.?\d*$/.test(rawValue)) {
-      return; 
+      return;
     }
 
     const formattedValue = formatWithCommas(rawValue);
 
     setState({
       raw: rawValue,
-      formatted: formattedValue, 
+      formatted: formattedValue,
     });
   };
 
@@ -213,7 +209,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             </tr>
 
             {dataToShow.tokenName !== "DAV" &&
-              dataToShow.tokenName !== "STATE" && (
+              dataToShow.tokenName !== "STATE" && dataToShow.tokenName !== "Fluxin" && (
                 <>
                   <tr>
                     <td className="d-flex align-items-center">Ratio Target</td>
@@ -356,12 +352,13 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               </>
             )}
 
-            {dataToShow.tokenName == "STATE" && (
+            {(dataToShow.tokenName == "STATE" ||
+              dataToShow.tokenName == "Fluxin") && (
               <>
                 <tr>
                   <td className="d-flex align-items-center">Minted Supply</td>
                   <td className="d-flex align-items-center justify-content-center">
-                    {formatWithCommas(dataToShow.StateSupply)}
+                    {formatWithCommas(dataToShow.Supply)}
                   </td>
                   <td></td>
                 </tr>
@@ -401,9 +398,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                       </td>
                     </tr>
                     <tr>
-                      <td className="d-flex align-items-center">
-                       Add Tokens
-                      </td>
+                      <td className="d-flex align-items-center">Add Tokens</td>
                       <td>
                         <div className="w-100">
                           <input
