@@ -12,7 +12,7 @@ export const DAV_TOKEN_ADDRESS = "0xf75E9a9AD4022bADee7878f4E65c8db398fbC5f4";
 export const STATE_TOKEN_ADDRESS = "0xd918a6EC7Ae556D38fE6F76C27f17f99a1CD3d2F";
 export const Ratio_TOKEN_ADDRESS = "0xb8810E0715B60687b0391379e15ce1EAdcE08aaB";
 
-export const Xerion = "0xae48FcF102062B4E57C6efB02e878B485786F74d";
+export const Fluxin = "0xEc0629035F1AA6A71f3B2eBc6145EF26d74f8E3B";
 export const Xerion2 = "0x3391c40E62499Aa498503902b8712195db2624DD";
 export const Xerion3 = "0x4a169d0e0dEF9C1a6a6ab3BBf6870371C830626D";
 
@@ -32,7 +32,7 @@ export const DAVTokenProvider = ({ children }) => {
   //contract state
   const [davContract, setDavContract] = useState(null);
   const [stateContract, setStateContract] = useState(null);
-  const [XerionContract, setXerionContract] = useState(null);
+  const [FluxinContract, setFluxinContract] = useState(null);
   const [Xerion2Contract, setXerion2Contract] = useState(null);
   const [Xerion3Contract, setXerion3Contract] = useState(null);
   const [RatioContract, setRatioContract] = useState(null);
@@ -57,7 +57,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [StateReward, setStateReward] = useState("0");
   const [Distributed, setViewDistributed] = useState({
     state: "0.0",
-    xerion: "0.0",
+    Fluxin: "0.0",
     xerion2: "0.0",
     xerion3: "0.0",
   });
@@ -93,7 +93,7 @@ export const DAVTokenProvider = ({ children }) => {
           setStateContract(
             new ethers.Contract(STATE_TOKEN_ADDRESS, StateABI, newSigner)
           );
-          setXerionContract(new ethers.Contract(Xerion, StateABI, newSigner));
+          setFluxinContract(new ethers.Contract(Fluxin, StateABI, newSigner));
           setXerion2Contract(new ethers.Contract(Xerion2, StateABI, newSigner));
           setXerion3Contract(new ethers.Contract(Xerion3, StateABI, newSigner));
           setRatioContract(
@@ -506,7 +506,7 @@ export const DAVTokenProvider = ({ children }) => {
 
   const contracts = {
     state: stateContract,
-    xerion: XerionContract,
+    Fluxin: FluxinContract,
     xerion2: Xerion2Contract,
     xerion3: Xerion3Contract,
   };
@@ -996,7 +996,7 @@ export const DAVTokenProvider = ({ children }) => {
   const handleAddTokenDAV = () => handleAddToken(DAV_TOKEN_ADDRESS, "pDAV");
   const handleAddTokenState = () =>
     handleAddToken(STATE_TOKEN_ADDRESS, "pState");
-  const handleAddXerion1 = () => handleAddToken(Xerion, "Xerion");
+  const handleAddFluxin = () => handleAddToken(Fluxin, "Fluxin");
   const handleAddXerion2 = () => handleAddToken(Xerion2, "Xerion2");
   const handleAddXerion3 = () => handleAddToken(Xerion3, "Xerion3");
 
@@ -1064,7 +1064,7 @@ export const DAVTokenProvider = ({ children }) => {
         handleAddTokenRatio,
         handleAddTokenState,
         handleAddTokenDAV,
-        handleAddXerion1,
+        handleAddFluxin,
         handleAddXerion2,
         handleAddXerion3,
         PercentageOfState,
