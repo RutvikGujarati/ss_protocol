@@ -191,3 +191,9 @@ table.table-dark tbody tr:last-child td:last-child {
       margin: 0 15px;
       }
   }
+
+  .img-inline {
+	color: red;
+	margin-left: 53px;
+  }
+  

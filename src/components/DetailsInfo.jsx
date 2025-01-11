@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DetailsInfo.css";
-import { useDAVToken } from "../Context/DavTokenContext";
+import { Fluxin, useDAVToken } from "../Context/DavTokenContext";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import {
@@ -24,15 +24,17 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     withdraw_5,
     // ClaimLPTokens,
     // AddTokens,
-	FluxinSupply,
+    FluxinSupply,
     // AddTokensToContract,
     setRatioTarget,
     WithdrawState,
+    WithdrawFluxin,
     account,
-    mintAdditionalTOkens,
+    mintStateTokens,
+    mintFluxinTokens,
     LPStateTransferred,
     PercentageOfState,
-	PercentageFluxin,
+    PercentageFluxin,
     DAVTokensWithdraw,
     StateSupply,
     RenounceState,
@@ -41,7 +43,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     DAVTokensFiveWithdraw,
     LastLiquidity,
     Batch,
+    ReanounceFluxinContract,
     StateBalance,
+    FluxinBalance,
+    mintAdditionalTOkens,
     BatchAmount,
     // saveTokenName,
     LastDevShare,
@@ -77,6 +82,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const shortened = shortenAddress(Ratio_TOKEN_ADDRESS);
   const davShortened = shortenAddress(DAV_TOKEN_ADDRESS);
   const stateShortened = shortenAddress(STATE_TOKEN_ADDRESS);
+  const FluxinShortened = shortenAddress(Fluxin);
 
   const tokens = [
     {
@@ -104,18 +110,21 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     },
     {
       tokenName: "Fluxin",
-      key: stateShortened,
+      key: FluxinShortened,
       name: "Fluxin",
       supply: "1,000,000,000,000.00",
       Treasury: "1,000,000,000,000.00",
       Supply: FluxinSupply,
       percentage: PercentageFluxin,
       address: STATE_TOKEN_ADDRESS,
+
+      Balance: FluxinBalance,
       claimLPToken: LPStateTransferred,
+      mintAddTOkens: "250,000,000,000",
       renounceSmartContract: "No",
       actions: {
-        ReanounceContract: RenounceState,
-        WithdrawState: WithdrawState,
+        ReanounceContract: ReanounceFluxinContract,
+        WithdrawState: WithdrawFluxin,
         mintAdditionalTOkens: mintAdditionalTOkens,
       },
     },
@@ -134,8 +143,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       Treasury: "999,000,000,000,000.00",
       Supply: StateSupply,
       percentage: PercentageOfState,
+      Balance: StateBalance,
       address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
+      mintAddTOkens: "1,000,000,000,000",
       renounceSmartContract: "No",
       actions: {
         ReanounceContract: RenounceState,
@@ -209,7 +220,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             </tr>
 
             {dataToShow.tokenName !== "DAV" &&
-              dataToShow.tokenName !== "STATE" && dataToShow.tokenName !== "Fluxin" && (
+              dataToShow.tokenName !== "STATE" &&
+              dataToShow.tokenName !== "Fluxin" && (
                 <>
                   <tr>
                     <td className="d-flex align-items-center">Ratio Target</td>
@@ -430,14 +442,17 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     </tr>
                     <tr>
                       <td className="d-flex align-items-center">
-                        State Balance(inside Contract)
+                        {dataToShow.tokenName.toLowerCase() === "state"
+                          ? "State Balance (inside Contract)"
+                          : "Fluxin Balance (inside Contract)"}
                       </td>
+
                       <td>
                         <div className="w-100">
                           <input
                             type="text"
                             className="form-control text-center mh-30"
-                            placeholder={formatWithCommas(StateBalance)}
+                            placeholder={formatWithCommas(dataToShow.Balance)}
                             value={StateToken.formatted}
                             onChange={(e) => handleInputChanged(e)}
                           />
@@ -459,15 +474,17 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                         Mint Additional state tokens
                       </td>
                       <td className="d-flex align-items-center justify-content-center">
-                        {"1,000,000,000,000"}
+                        {dataToShow.mintAddTOkens}
                       </td>
                       <td className="d-flex justify-content-end">
                         <button
-                          onClick={() =>
-                            dataToShow.actions.mintAdditionalTOkens(
-                              1000000000000
-                            )
-                          }
+                          onClick={() => {
+                            if (dataToShow.tokenName === "Fluxin") {
+                              mintAdditionalTOkens("fluxin", 250000000000); // Amount for Fluxin
+                            } else if (dataToShow.tokenName === "STATE") {
+                              mintAdditionalTOkens("state", 1000000000000); // Amount for State
+                            }
+                          }}
                           className="btn btn-primary btn-sm swap-btn info-icon"
                         >
                           Mint
@@ -563,7 +580,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               </td>
               <td className="d-flex justify-content-end">
                 <button
-                  onClick={() => dataToShow.actions.ReanounceContract()} // Add parentheses to invoke the function
+                  onClick={() => dataToShow.actions.ReanounceContract()}
                   className="btn btn-primary btn-sm swap-btn info-icon"
                 >
                   Set
