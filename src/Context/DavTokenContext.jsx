@@ -585,6 +585,18 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
+  const WithdrawFluxin = async (amount) => {
+    try {
+      setClaiming(true);
+      const amountInWei = ethers.parseUnits(amount, 18);
+
+      await handleContractCall(FluxinContract, "transferToken", [amountInWei]);
+    } catch (e) {
+      console.error(`Error withdrawing with method transferToken:`, e);
+    } finally {
+      setClaiming(false);
+    }
+  };
   const mintAdditionalTOkens = async (contractType, amount) => {
     try {
       setClaiming(true);
@@ -1123,6 +1135,7 @@ export const DAVTokenProvider = ({ children }) => {
         RatioTargetAmount,
         AuctionRunning,
         WithdrawState,
+		WithdrawFluxin,
         CheckMintBalance,
         LpTokenAmount,
         LpTokens,

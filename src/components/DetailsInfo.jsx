@@ -28,6 +28,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     // AddTokensToContract,
     setRatioTarget,
     WithdrawState,
+    WithdrawFluxin,
     account,
     mintStateTokens,
     mintFluxinTokens,
@@ -42,7 +43,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     DAVTokensFiveWithdraw,
     LastLiquidity,
     Batch,
-	ReanounceFluxinContract,
+    ReanounceFluxinContract,
     StateBalance,
     FluxinBalance,
     mintAdditionalTOkens,
@@ -61,7 +62,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const auctionStatus = AuctionRunning ? "True" : "False";
 
   const AuthAddress =
-    "0xB511110f312a4C6C4a240b2fE94de55D600Df7a9".toLowerCase();
+    "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483".toLowerCase();
 
   // Fetch and update token data when the selectedToken changes
   const handleSetAddress = () => {
@@ -118,11 +119,11 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       address: STATE_TOKEN_ADDRESS,
       Balance: FluxinBalance,
       claimLPToken: LPStateTransferred,
-	  mintAddTOkens: "250,000,000,000",
+      mintAddTOkens: "250,000,000,000",
       renounceSmartContract: "No",
       actions: {
         ReanounceContract: ReanounceFluxinContract,
-        WithdrawState: WithdrawState,
+        WithdrawState: WithdrawFluxin,
         mintAdditionalTOkens: mintAdditionalTOkens,
       },
     },
@@ -144,7 +145,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       Balance: StateBalance,
       address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
-	  mintAddTOkens: "1,000,000,000,000",
+      mintAddTOkens: "1,000,000,000,000",
       renounceSmartContract: "No",
       actions: {
         ReanounceContract: RenounceState,
@@ -440,8 +441,11 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     </tr>
                     <tr>
                       <td className="d-flex align-items-center">
-                        State Balance(inside Contract)
+                        {dataToShow.tokenName.toLowerCase() === "state"
+                          ? "State Balance (inside Contract)"
+                          : "Fluxin Balance (inside Contract)"}
                       </td>
+
                       <td>
                         <div className="w-100">
                           <input
