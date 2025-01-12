@@ -200,7 +200,7 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   const CalculationOfCost = async (amount) => {
-    setTotalCost(ethers.parseEther((amount * 150000).toString()));
+    setTotalCost(ethers.parseEther((amount * 200000).toString()));
   };
 
   const DavHoldings = async () => {
