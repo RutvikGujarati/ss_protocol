@@ -16,7 +16,7 @@ contract STATE_Token_V1_0_Ratio_Swapping is
 
     Decentralized_Autonomous_Vaults_DAV_V1_0 public davToken;
     uint256 public MAX_SUPPLY = 999000000000000 ether;
-    uint256 public REWARD_DECAY_START = 1735707600; //timestamp
+    uint256 public REWARD_DECAY_START;
     uint256 public DECAY_INTERVAL = 10 days;
     uint256 public constant DECAY_STEP = 1; // 1% per interval
     uint256 private constant PRECISION = 1e18;
@@ -48,13 +48,13 @@ contract STATE_Token_V1_0_Ratio_Swapping is
         paused = false;
     }
 
-    address private governanceAddress;
+    address public governanceAddress;
     event GovernanceChanged(
         address indexed oldGovernance,
         address indexed newGovernance
     );
     event RewardDistributed(address indexed user, uint256 amount);
-    mapping(address => bool) private isAuthorized;
+    mapping(address => bool) public isAuthorized;
 
     modifier onlyGovernance() {
         require(
@@ -62,14 +62,6 @@ contract STATE_Token_V1_0_Ratio_Swapping is
             "StateToken: You are not authorized to perform this action"
         );
         _;
-    }
-
-    function addAuthorized(address _authorized) external onlyGovernance {
-        isAuthorized[_authorized] = true;
-    }
-
-    function removeAuthorized(address _authorized) external onlyGovernance {
-        isAuthorized[_authorized] = false;
     }
 
     constructor(
@@ -91,6 +83,7 @@ contract STATE_Token_V1_0_Ratio_Swapping is
             payable(_davTokenAddress)
         );
         governanceAddress = Governance;
+        REWARD_DECAY_START = block.timestamp;
         isAuthorized[Governance] = true;
     }
 

@@ -11,7 +11,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
     ReentrancyGuard
 {
     uint256 public constant MAX_SUPPLY = 5000000 ether; // 5 Million DAV Tokens
-    uint256 public constant TOKEN_COST = 150000 ether; // 150,000 PLS per DAV
+    uint256 public constant TOKEN_COST = 200000 ether; // 200,000 PLS per DAV
 
     uint256 public mintedSupply; // Total Minted DAV Tokens
     address public liquidityWallet; // Liquidity Wallet
@@ -75,10 +75,12 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         transfersPaused = false;
     }
 
-    function transfer(
-        address recipient,
-        uint256 amount
-    ) public override whenTransfersAllowed returns (bool) {
+    function transfer(address recipient, uint256 amount)
+        public
+        override
+        whenTransfersAllowed
+        returns (bool)
+    {
         return super.transfer(recipient, amount);
     }
 
@@ -90,9 +92,10 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         return super.transferFrom(sender, recipient, amount);
     }
 
-    function setGovernanceAddress(
-        address _newGovernance
-    ) external onlyGovernance {
+    function setGovernanceAddress(address _newGovernance)
+        external
+        onlyGovernance
+    {
         require(
             _newGovernance != address(0),
             "New governance address cannot be zero"
@@ -120,6 +123,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         require(msg.value == cost, "Incorrect PLS amount sent");
 
         mintedSupply += amount;
+        lastMintTimestamp[msg.sender] = block.timestamp;
 
         uint256 liquidityShare = (msg.value * 95) / 100;
         uint256 developmentShare = msg.value - liquidityShare;
@@ -177,9 +181,11 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         return balanceOf(user);
     }
 
-    function getUserHoldingPercentage(
-        address user
-    ) public view returns (uint256) {
+    function getUserHoldingPercentage(address user)
+        public
+        view
+        returns (uint256)
+    {
         uint256 userBalance = balanceOf(user);
         uint256 totalSupply = totalSupply();
         if (totalSupply == 0) {
@@ -192,16 +198,18 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         return address(this).balance;
     }
 
-    function updateLiquidityWallet(
-        address _liquidityWallet
-    ) external onlyGovernance {
+    function updateLiquidityWallet(address _liquidityWallet)
+        external
+        onlyGovernance
+    {
         require(_liquidityWallet != address(0), "Invalid address");
         liquidityWallet = _liquidityWallet;
     }
 
-    function updateDevelopmentWallet(
-        address _developmentWallet
-    ) external onlyGovernance {
+    function updateDevelopmentWallet(address _developmentWallet)
+        external
+        onlyGovernance
+    {
         require(_developmentWallet != address(0), "Invalid address");
         developmentWallet = _developmentWallet;
     }
