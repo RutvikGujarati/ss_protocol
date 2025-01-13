@@ -34,7 +34,6 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
     mapping(address => bool) private isDAVHolder; // Replacing davHolders array with mapping
 
     address private governanceAddress;
-    address private pendingGovernance; // For two-step governance transfer
 
     constructor(
         address _liquidityWallet,
@@ -88,22 +87,6 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         uint256 amount
     ) public override whenTransfersAllowed returns (bool) {
         return super.transferFrom(sender, recipient, amount);
-    }
-
-    function setGovernanceAddress(
-        address _newGovernance
-    ) external onlyGovernance {
-        require(
-            _newGovernance != address(0),
-            "New governance address cannot be zero"
-        );
-        pendingGovernance = _newGovernance;
-    }
-
-    function acceptGovernance() external {
-        require(msg.sender == pendingGovernance, "Not pending governance");
-        governanceAddress = msg.sender;
-        pendingGovernance = address(0);
     }
 
     function viewLastMintTimeStamp(address user) public view returns (uint256) {
