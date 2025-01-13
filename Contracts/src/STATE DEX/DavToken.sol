@@ -75,12 +75,10 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         transfersPaused = false;
     }
 
-    function transfer(address recipient, uint256 amount)
-        public
-        override
-        whenTransfersAllowed
-        returns (bool)
-    {
+    function transfer(
+        address recipient,
+        uint256 amount
+    ) public override whenTransfersAllowed returns (bool) {
         return super.transfer(recipient, amount);
     }
 
@@ -92,10 +90,9 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         return super.transferFrom(sender, recipient, amount);
     }
 
-    function setGovernanceAddress(address _newGovernance)
-        external
-        onlyGovernance
-    {
+    function setGovernanceAddress(
+        address _newGovernance
+    ) external onlyGovernance {
         require(
             _newGovernance != address(0),
             "New governance address cannot be zero"
@@ -181,11 +178,9 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
         return balanceOf(user);
     }
 
-    function getUserHoldingPercentage(address user)
-        public
-        view
-        returns (uint256)
-    {
+    function getUserHoldingPercentage(
+        address user
+    ) public view returns (uint256) {
         uint256 userBalance = balanceOf(user);
         uint256 totalSupply = totalSupply();
         if (totalSupply == 0) {
@@ -196,22 +191,6 @@ contract Decentralized_Autonomous_Vaults_DAV_V1_0 is
 
     function balacneETH() public view returns (uint256) {
         return address(this).balance;
-    }
-
-    function updateLiquidityWallet(address _liquidityWallet)
-        external
-        onlyGovernance
-    {
-        require(_liquidityWallet != address(0), "Invalid address");
-        liquidityWallet = _liquidityWallet;
-    }
-
-    function updateDevelopmentWallet(address _developmentWallet)
-        external
-        onlyGovernance
-    {
-        require(_developmentWallet != address(0), "Invalid address");
-        developmentWallet = _developmentWallet;
     }
 
     receive() external payable nonReentrant {}

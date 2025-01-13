@@ -23,32 +23,8 @@ contract Fluxin is ERC20, Ownable(msg.sender), ReentrancyGuard {
     mapping(address => uint256) public lastDavHolding;
     mapping(address => uint256) public mintDecayPercentage;
     mapping(address => uint256) public cumulativeMintableHoldings;
-
-    bool private paused;
-
-    modifier whenNotPaused() {
-        require(!paused, "Contract is paused");
-        _;
-    }
-
-    modifier whenPaused() {
-        require(paused, "Contract is not paused");
-        _;
-    }
-
-    function pause() external onlyGovernance whenNotPaused {
-        paused = true;
-    }
-
-    function unpause() external onlyGovernance whenPaused {
-        paused = false;
-    }
-
     address public governanceAddress;
-    event GovernanceChanged(
-        address indexed oldGovernance,
-        address indexed newGovernance
-    );
+
     event RewardDistributed(address indexed user, uint256 amount);
     mapping(address => bool) public isAuthorized;
 
@@ -126,11 +102,10 @@ contract Fluxin is ERC20, Ownable(msg.sender), ReentrancyGuard {
     /**
      * @dev Calculate decayed reward based on decay percentage.
      */
-    function calculateDecayedReward(uint256 baseReward, uint256 decayPercent)
-        public
-        pure
-        returns (uint256)
-    {
+    function calculateDecayedReward(
+        uint256 baseReward,
+        uint256 decayPercent
+    ) public pure returns (uint256) {
         if (decayPercent >= 100) {
             return 0;
         }
@@ -138,11 +113,9 @@ contract Fluxin is ERC20, Ownable(msg.sender), ReentrancyGuard {
         return (baseReward * decayFactor) / (100 * PRECISION);
     }
 
-    function mintAdditionalTOkens(uint256 amount)
-        public
-        onlyGovernance
-        nonReentrant
-    {
+    function mintAdditionalTOkens(
+        uint256 amount
+    ) public onlyGovernance nonReentrant {
         require(amount > 0, "mint amount must be greater than zero");
         require(governanceAddress != address(0), "address should not be zero");
         _mint(governanceAddress, amount);
@@ -151,11 +124,7 @@ contract Fluxin is ERC20, Ownable(msg.sender), ReentrancyGuard {
     /**
      * @dev Distribute reward for a user's DAV holdings.
      */
-    function distributeReward(address user)
-        external
-        nonReentrant
-        whenNotPaused
-    {
+    function distributeReward(address user) external nonReentrant {
         // **Checks**
         require(user != address(0), "Fluxin: Invalid user address");
 
@@ -185,7 +154,7 @@ contract Fluxin is ERC20, Ownable(msg.sender), ReentrancyGuard {
         // **No Interactions**
     }
 
-    function mintReward() external nonReentrant whenNotPaused {
+    function mintReward() external nonReentrant {
         // **Checks**
         uint256 reward = userRewardAmount[msg.sender];
         require(reward > 0, "Fluxin: No reward to mint");
@@ -197,7 +166,7 @@ contract Fluxin is ERC20, Ownable(msg.sender), ReentrancyGuard {
         );
 
         uint256 amountToMint = ((150000000 * 1e18) * mintableHoldings) /
-            (10**decimals());
+            (10 ** decimals());
         require(
             totalSupply() + reward + amountToMint <= MAX_SUPPLY,
             "Fluxin: Max supply exceeded"
@@ -215,11 +184,9 @@ contract Fluxin is ERC20, Ownable(msg.sender), ReentrancyGuard {
     /**
      * @dev Calculate the base reward for a given DAV amount.
      */
-    function calculateBaseReward(uint256 davAmount)
-        public
-        view
-        returns (uint256)
-    {
+    function calculateBaseReward(
+        uint256 davAmount
+    ) public view returns (uint256) {
         // Multiply first to retain precision, then divide
         return (davAmount * (MAX_SUPPLY * 10)) / (5000000 * 1000 * 1e17);
     }
@@ -227,11 +194,9 @@ contract Fluxin is ERC20, Ownable(msg.sender), ReentrancyGuard {
     /**
      * @dev Get the decay percentage at a specific timestamp.
      */
-    function getDecayPercentageAtTime(uint256 timestamp)
-        public
-        view
-        returns (uint256)
-    {
+    function getDecayPercentageAtTime(
+        uint256 timestamp
+    ) public view returns (uint256) {
         if (timestamp < REWARD_DECAY_START) return 0;
 
         uint256 elapsed = timestamp - REWARD_DECAY_START;
@@ -248,11 +213,9 @@ contract Fluxin is ERC20, Ownable(msg.sender), ReentrancyGuard {
         return getDecayPercentageAtTime(block.timestamp);
     }
 
-    function transferToken(uint256 amount)
-        external
-        onlyGovernance
-        nonReentrant
-    {
+    function transferToken(
+        uint256 amount
+    ) external onlyGovernance nonReentrant {
         require(amount > 0, "Transfer amount must be greater than zero");
         require(
             balanceOf(address(this)) >= amount,
@@ -263,22 +226,12 @@ contract Fluxin is ERC20, Ownable(msg.sender), ReentrancyGuard {
         ERC20(address(this)).safeTransfer(governanceAddress, amount);
     }
 
-    function setGovernanceAddress(address _newGovernance)
-        external
-        onlyGovernance
-    {
-        require(
-            _newGovernance != address(0),
-            "New governance address cannot be zero"
-        );
-        governanceAddress = _newGovernance;
-        emit GovernanceChanged(governanceAddress, _newGovernance);
-    }
-
     /**
      * @dev View reward details for a user.
      */
-    function viewRewardDetails(address user)
+    function viewRewardDetails(
+        address user
+    )
         external
         view
         returns (

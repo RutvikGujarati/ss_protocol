@@ -28,31 +28,8 @@ contract STATE_Token_V1_0_Ratio_Swapping is
     mapping(address => uint256) public mintDecayPercentage;
     mapping(address => uint256) public cumulativeMintableHoldings;
 
-    bool private paused;
-
-    modifier whenNotPaused() {
-        require(!paused, "Contract is paused");
-        _;
-    }
-
-    modifier whenPaused() {
-        require(paused, "Contract is not paused");
-        _;
-    }
-
-    function pause() external onlyGovernance whenNotPaused {
-        paused = true;
-    }
-
-    function unpause() external onlyGovernance whenPaused {
-        paused = false;
-    }
-
     address public governanceAddress;
-    event GovernanceChanged(
-        address indexed oldGovernance,
-        address indexed newGovernance
-    );
+
     event RewardDistributed(address indexed user, uint256 amount);
     mapping(address => bool) public isAuthorized;
 
@@ -153,9 +130,7 @@ contract STATE_Token_V1_0_Ratio_Swapping is
     /**
      * @dev Distribute reward for a user's DAV holdings.
      */
-    function distributeReward(
-        address user
-    ) external nonReentrant whenNotPaused {
+    function distributeReward(address user) external nonReentrant {
         // **Checks**
         require(user != address(0), "StateToken: Invalid user address");
 
@@ -185,7 +160,7 @@ contract STATE_Token_V1_0_Ratio_Swapping is
         // **No Interactions**
     }
 
-    function mintReward() external nonReentrant whenNotPaused {
+    function mintReward() external nonReentrant {
         // **Checks**
         uint256 reward = userRewardAmount[msg.sender];
         require(reward > 0, "StateToken: No reward to mint");
@@ -255,17 +230,6 @@ contract STATE_Token_V1_0_Ratio_Swapping is
         require(governanceAddress != address(0), "Invalid governance address");
 
         ERC20(address(this)).safeTransfer(governanceAddress, amount);
-    }
-
-    function setGovernanceAddress(
-        address _newGovernance
-    ) external onlyGovernance {
-        require(
-            _newGovernance != address(0),
-            "New governance address cannot be zero"
-        );
-        governanceAddress = _newGovernance;
-        emit GovernanceChanged(governanceAddress, _newGovernance);
     }
 
     /**
