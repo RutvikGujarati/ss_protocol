@@ -62,7 +62,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const auctionStatus = AuctionRunning ? "True" : "False";
 
   const AuthAddress =
-    "0xB511110f312a4C6C4a240b2fE94de55D600Df7a9".toLowerCase();
+    "0xB1bD9F3B5F64dE482485A41c84ea4a90DAc5F98e".toLowerCase();
 
   // Fetch and update token data when the selectedToken changes
   const handleSetAddress = () => {
