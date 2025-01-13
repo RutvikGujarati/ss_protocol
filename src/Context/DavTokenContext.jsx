@@ -155,7 +155,7 @@ export const DAVTokenProvider = ({ children }) => {
   const mintDAV = async (amount) => {
     try {
       const value = ethers.parseEther(amount.toString());
-      const cost = ethers.parseEther((amount * 150000).toString()); //150000
+      const cost = ethers.parseEther((amount * 200000).toString()); //200000
 
       const transaction = await handleContractCall(davContract, "mintDAV", [
         value,
