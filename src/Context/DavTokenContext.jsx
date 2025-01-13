@@ -1070,9 +1070,9 @@ export const DAVTokenProvider = ({ children }) => {
   // Example usage for different tokens
   const handleAddTokenRatio = () =>
     handleAddToken(Ratio_TOKEN_ADDRESS, "Fluxin");
-  const handleAddTokenDAV = () => handleAddToken(DAV_TOKEN_ADDRESS, "pDAV");
+  const handleAddTokenDAV = () => handleAddToken(DAV_TOKEN_ADDRESS, "tDAV");
   const handleAddTokenState = () =>
-    handleAddToken(STATE_TOKEN_ADDRESS, "pState");
+    handleAddToken(STATE_TOKEN_ADDRESS, "tState");
   const handleAddFluxin = () => handleAddToken(Fluxin, "Fluxin");
   const handleAddXerion2 = () => handleAddToken(Xerion2, "Xerion2");
   const handleAddXerion3 = () => handleAddToken(Xerion3, "Xerion3");
