@@ -7,17 +7,13 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {Decentralized_Autonomous_Vaults_DAV_V1_0} from "./DavToken.sol";
 
-contract STATE_Token_V1_0_Ratio_Swapping is
-    ERC20,
-    Ownable(msg.sender),
-    ReentrancyGuard
-{
+contract Fluxin is ERC20, Ownable(msg.sender), ReentrancyGuard {
     using SafeERC20 for ERC20;
 
     Decentralized_Autonomous_Vaults_DAV_V1_0 public davToken;
-    uint256 public MAX_SUPPLY = 999000000000000 ether;
-    uint256 public REWARD_DECAY_START = 1735707600; //timestamp
-    uint256 public DECAY_INTERVAL = 10 days;
+    uint256 public MAX_SUPPLY = 1000000000000 ether;
+    uint256 public REWARD_DECAY_START;
+    uint256 public DECAY_INTERVAL = 5 days;
     uint256 public constant DECAY_STEP = 1; // 1% per interval
     uint256 private constant PRECISION = 1e18;
 
@@ -27,49 +23,17 @@ contract STATE_Token_V1_0_Ratio_Swapping is
     mapping(address => uint256) public lastDavHolding;
     mapping(address => uint256) public mintDecayPercentage;
     mapping(address => uint256) public cumulativeMintableHoldings;
+    address public governanceAddress;
 
-    bool private paused;
-
-    modifier whenNotPaused() {
-        require(!paused, "Contract is paused");
-        _;
-    }
-
-    modifier whenPaused() {
-        require(paused, "Contract is not paused");
-        _;
-    }
-
-    function pause() external onlyGovernance whenNotPaused {
-        paused = true;
-    }
-
-    function unpause() external onlyGovernance whenPaused {
-        paused = false;
-    }
-
-    address private governanceAddress;
-    event GovernanceChanged(
-        address indexed oldGovernance,
-        address indexed newGovernance
-    );
     event RewardDistributed(address indexed user, uint256 amount);
-    mapping(address => bool) private isAuthorized;
+    mapping(address => bool) public isAuthorized;
 
     modifier onlyGovernance() {
         require(
             isAuthorized[msg.sender],
-            "StateToken: You are not authorized to perform this action"
+            "Fluxin: You are not authorized to perform this action"
         );
         _;
-    }
-
-    function addAuthorized(address _authorized) external onlyGovernance {
-        isAuthorized[_authorized] = true;
-    }
-
-    function removeAuthorized(address _authorized) external onlyGovernance {
-        isAuthorized[_authorized] = false;
     }
 
     constructor(
@@ -80,17 +44,18 @@ contract STATE_Token_V1_0_Ratio_Swapping is
     ) ERC20(name, symbol) {
         require(
             _davTokenAddress != address(0),
-            "StateToken: Invalid DAV token address"
+            "Fluxin: Invalid DAV token address"
         );
         require(
             Governance != address(0),
-            "StateToken: Governance address cannot be zero"
+            "Fluxin: Governance address cannot be zero"
         );
 
         davToken = Decentralized_Autonomous_Vaults_DAV_V1_0(
             payable(_davTokenAddress)
         );
         governanceAddress = Governance;
+        REWARD_DECAY_START = block.timestamp;
         isAuthorized[Governance] = true;
     }
 
@@ -98,40 +63,39 @@ contract STATE_Token_V1_0_Ratio_Swapping is
      * @dev Change MAX_SUPPLY, restricted to governance.
      */
     function changeMAXSupply(uint256 newMaxSupply) external onlyGovernance {
-        require(newMaxSupply > 0, "StateToken: Max supply exceeds limit");
+        require(newMaxSupply > 0, "Fluxin: Max supply exceeds limit");
         MAX_SUPPLY = newMaxSupply;
     }
 
     function changeTimeStamp(uint256 newTimeStamp) external onlyGovernance {
         require(
             newTimeStamp > block.timestamp,
-            "StateToken: New timestamp must be in the future"
+            "Fluxin: New timestamp must be in the future"
         );
         require(
             newTimeStamp != REWARD_DECAY_START,
-            "StateToken: New timestamp must be different from the current"
+            "Fluxin: New timestamp must be different from the current"
         );
         REWARD_DECAY_START = newTimeStamp;
     }
 
     function changeInterval(uint256 newInterval) external onlyGovernance {
-        require(
-            newInterval > 0,
-            "StateToken: Interval must be greater than zero"
-        );
+        require(newInterval > 0, "Fluxin: Interval must be greater than zero");
         require(
             newInterval != DECAY_INTERVAL,
-            "StateToken: New interval must be different from the current"
+            "Fluxin: New interval must be different from the current"
         );
         DECAY_INTERVAL = newInterval;
     }
 
     function changeDavToken(address newDav) external onlyGovernance {
-        require(newDav != address(0), "StateToken: Invalid DAV token address");
+        require(newDav != address(0), "Fluxin: Invalid DAV token address");
         require(
             newDav != address(davToken),
-            "StateToken: New DAV token must be different from the current"
+            "Fluxin: New DAV token must be different from the current"
         );
+
+        // Update the DAV token reference
         davToken = Decentralized_Autonomous_Vaults_DAV_V1_0(payable(newDav));
     }
 
@@ -160,18 +124,16 @@ contract STATE_Token_V1_0_Ratio_Swapping is
     /**
      * @dev Distribute reward for a user's DAV holdings.
      */
-    function distributeReward(
-        address user
-    ) external nonReentrant whenNotPaused {
+    function distributeReward(address user) external nonReentrant {
         // **Checks**
-        require(user != address(0), "StateToken: Invalid user address");
+        require(user != address(0), "Fluxin: Invalid user address");
 
         uint256 currentDavHolding = davToken.balanceOf(user);
         uint256 lastHolding = lastDavHolding[user];
         uint256 newDavMinted = currentDavHolding > lastHolding
             ? currentDavHolding - lastHolding
             : 0;
-        require(newDavMinted > 0, "StateToken: No new DAV minted");
+        require(newDavMinted > 0, "Fluxin: No new DAV minted");
 
         uint256 mintTimestamp = davToken.viewLastMintTimeStamp(user);
 
@@ -192,22 +154,22 @@ contract STATE_Token_V1_0_Ratio_Swapping is
         // **No Interactions**
     }
 
-    function mintReward() external nonReentrant whenNotPaused {
+    function mintReward() external nonReentrant {
         // **Checks**
         uint256 reward = userRewardAmount[msg.sender];
-        require(reward > 0, "StateToken: No reward to mint");
+        require(reward > 0, "Fluxin: No reward to mint");
 
         uint256 mintableHoldings = cumulativeMintableHoldings[msg.sender];
         require(
             mintableHoldings > 0,
-            "StateToken: No new holdings to calculate minting"
+            "Fluxin: No new holdings to calculate minting"
         );
 
-        uint256 amountToMint = ((1000000000 * 1e18) * mintableHoldings) /
+        uint256 amountToMint = ((150000000 * 1e18) * mintableHoldings) /
             (10 ** decimals());
         require(
             totalSupply() + reward + amountToMint <= MAX_SUPPLY,
-            "StateToken: Max supply exceeded"
+            "Fluxin: Max supply exceeded"
         );
 
         // **Effects**
@@ -226,7 +188,7 @@ contract STATE_Token_V1_0_Ratio_Swapping is
         uint256 davAmount
     ) public view returns (uint256) {
         // Multiply first to retain precision, then divide
-        return (davAmount * (MAX_SUPPLY * 10)) / (5000000 * 1000 * 1e18);
+        return (davAmount * (MAX_SUPPLY * 10)) / (5000000 * 1000 * 1e17);
     }
 
     /**
@@ -262,17 +224,6 @@ contract STATE_Token_V1_0_Ratio_Swapping is
         require(governanceAddress != address(0), "Invalid governance address");
 
         ERC20(address(this)).safeTransfer(governanceAddress, amount);
-    }
-
-    function setGovernanceAddress(
-        address _newGovernance
-    ) external onlyGovernance {
-        require(
-            _newGovernance != address(0),
-            "New governance address cannot be zero"
-        );
-        governanceAddress = _newGovernance;
-        emit GovernanceChanged(governanceAddress, _newGovernance);
     }
 
     /**

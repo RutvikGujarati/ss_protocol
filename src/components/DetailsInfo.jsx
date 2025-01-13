@@ -116,8 +116,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       Treasury: "1,000,000,000,000.00",
       Supply: FluxinSupply,
       percentage: PercentageFluxin,
-      address: STATE_TOKEN_ADDRESS,
-
+      address: Fluxin,
       Balance: FluxinBalance,
       claimLPToken: LPStateTransferred,
       mintAddTOkens: "250,000,000,000",
