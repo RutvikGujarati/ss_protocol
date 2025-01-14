@@ -491,17 +491,36 @@ export const DAVTokenProvider = ({ children }) => {
       setRenounceStatus(name, null); // Set to null if an error occurs
     }
   };
+  const [transactionHashes, setTransactionHashes] = useState({
+    dav: null,
+    fluxin: null,
+    state: null,
+  });
 
   const ReanounceContract = async () => {
     try {
-      await handleContractCall(davContract, "renounceOwnership", []);
+      const tx = await handleContractCall(davContract, "renounceOwnership", []);
+      console.log("Transaction Hash:", tx.transactionHash);
+      setTransactionHashes((prev) => ({
+        ...prev,
+        dav: tx.transactionHash,
+      }));
     } catch (e) {
       console.error("Error claiming tokens:", e);
     }
   };
   const ReanounceFluxinContract = async () => {
     try {
-      await handleContractCall(FluxinContract, "renounceOwnership", []);
+      const tx = await handleContractCall(
+        FluxinContract,
+        "renounceOwnership",
+        []
+      );
+      console.log("Transaction Hash:", tx.transactionHash);
+      setTransactionHashes((prev) => ({
+        ...prev,
+        fluxin: tx.transactionHash,
+      }));
     } catch (e) {
       console.error("Error claiming tokens:", e);
     }
@@ -1154,6 +1173,7 @@ export const DAVTokenProvider = ({ children }) => {
         mintAdditionalTOkens,
         isRenounced,
         checkOwnershipStatus,
+		transactionHashes,
         DAVTokensFiveWithdraw,
       }}
     >

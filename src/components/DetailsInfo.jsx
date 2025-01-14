@@ -39,6 +39,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     StateSupply,
     RenounceState,
     ReanounceContract,
+    transactionHashes,
     Supply,
     isRenounced,
     DAVTokensFiveWithdraw,
@@ -92,7 +93,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       name: "pDAV",
       supply: "5,000,000.00",
       BatchRelease: "1M",
-
+      transactionHash: transactionHashes?.dav,
       claimDAVToken: DAVTokensWithdraw,
       claimFiveDAVToken: DAVTokensFiveWithdraw,
       address: DAV_TOKEN_ADDRESS,
@@ -121,6 +122,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       Balance: FluxinBalance,
       claimLPToken: LPStateTransferred,
       mintAddTOkens: "250,000,000,000",
+	  transactionHash: transactionHashes?.fluxin,
       renounceSmartContract: isRenounced?.Fluxin ?? "Unknown",
       actions: {
         ReanounceContract: ReanounceFluxinContract,
@@ -147,6 +149,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
       mintAddTOkens: "1,000,000,000,000",
+	  transactionHash: transactionHashes?.state,
       renounceSmartContract: isRenounced?.state ?? "Unknown",
       actions: {
         ReanounceContract: RenounceState,
@@ -583,12 +586,27 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   : "No"}{" "}
               </td>
               <td className="d-flex justify-content-end">
-                <button
-                  onClick={() => dataToShow.actions.ReanounceContract()}
-                  className="btn btn-primary btn-sm swap-btn info-icon"
-                >
-                  Set
-                </button>
+                {dataToShow.renounceSmartContract ? (
+                  <button
+                    onClick={() =>
+                      window.open(
+                        `https://scan.v4.testnet.pulsechain.com/#/tx/${dataToShow.transactionHash}`,
+                        "_blank",
+                        "noopener,noreferrer"
+                      )
+                    }
+                    className="btn btn-primary btn-sm swap-btn info-icon"
+                  >
+                    View
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => dataToShow.actions.ReanounceContract()}
+                    className="btn btn-primary btn-sm swap-btn info-icon"
+                  >
+                    Set
+                  </button>
+                )}
               </td>
             </tr>
           </tbody>
