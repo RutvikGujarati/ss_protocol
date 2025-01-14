@@ -341,112 +341,76 @@ export const DAVTokenProvider = ({ children }) => {
     const fetchLiveData = async () => {
       if (davContract && stateContract && RatioContract) {
         try {
-          // Individual function calls with error handling
-          try {
-            await DavHoldings();
-          } catch (error) {
-            console.error("Error fetching DavHoldings:", error);
-          }
+          // Concurrent fetching with Promise.all
+          await Promise.all([
+            DavHoldings().catch((error) =>
+              console.error("Error fetching DavHoldings:", error)
+            ),
+            DavHoldingsPercentage().catch((error) =>
+              console.error("Error fetching DavHoldingsPercentage:", error)
+            ),
+            StateHoldings().catch((error) =>
+              console.error("Error fetching StateHoldings:", error)
+            ),
 
-          try {
-            await DavHoldingsPercentage();
-          } catch (error) {
-            console.error("Error fetching DavHoldingsPercentage:", error);
-          }
-
-          try {
-            await StateHoldings();
-          } catch (error) {
-            console.error("Error fetching StateHoldings:", error);
-          }
-
-          try {
-            await DavSupply();
-          } catch (error) {
-            console.error("Error fetching DavSupply:", error);
-          }
-
-          try {
-            await getDecayPercentage("state");
-            await getDecayPercentage("Fluxin");
-            await ViewDistributedTokens();
-            await StateTotalMintedSupply();
-            await FluxinTotalMintedSupply();
-          } catch (error) {
-            console.error("Error fetching ViewDistributedTokens:", error);
-          }
-
-          try {
-            await getBurnedSTATE();
-          } catch (error) {
-            console.error("Error fetching getBurnedSTATE:", error);
-          }
-
-          //   try {
-          //     await calculateBurnAmount();
-          //   } catch (error) {
-          //     console.error("Error fetching calculateBurnAmount:", error);
-          //   }
-
-          //   try {
-          //     await ratioOfBurn();
-          //   } catch (error) {
-          //     console.error("Error fetching ratioOfBurn:", error);
-          //   }
-
-          //   try {
-          //     await calculateOnePercentBurnAmount();
-          //   } catch (error) {
-          //     console.error(
-          //       "Error fetching calculateOnePercentBurnAmount:",
-          //       error
-          //     );
-          //   }
-
-          try {
-            await StateTokenBurnRatio();
-          } catch (error) {
-            console.error("Error fetching StateTokenBurnRatio:", error);
-          }
-
-          try {
-            await getRatioTarget();
-          } catch (error) {
-            console.error("Error fetching getRatioTarget:", error);
-          }
-
-          try {
-            await isAuctionRunning();
-          } catch (error) {
-            console.error("Error fetching isAuctionRunning:", error);
-          }
-
-          try {
-            await LpTokenAmount();
-          } catch (error) {
-            console.error("Error fetching LpTokenAmount:", error);
-          }
-          try {
-            // await LastLiquidityTransactionAMount();
-            // await LastDevShareTransactionAMount();
-
-            await ContractStateBalance();
-            await ContractFluxinBalance();
-          } catch (error) {
-            console.error("Error fetching LpTokenAmount:", error);
-          }
-
-          try {
-            await DAVTokenAmount();
-          } catch (error) {
-            console.error("Error fetching DAVTokenAmount:", error);
-          }
-
-          try {
-            await DAVTokenfive_Amount();
-          } catch (error) {
-            console.error("Error fetching DAVTokenfive_Amount:", error);
-          }
+            DavSupply().catch((error) =>
+              console.error("Error fetching DavSupply:", error)
+            ),
+            getDecayPercentage("state").catch((error) =>
+              console.error("Error fetching getDecayPercentage (state):", error)
+            ),
+            checkOwnershipStatus("state").catch((error) =>
+              console.error("Error fetching getDecayPercentage (state):", error)
+            ),
+            checkOwnershipStatus("dav").catch((error) =>
+              console.error("Error fetching getDecayPercentage (state):", error)
+            ),
+            checkOwnershipStatus("Fluxin").catch((error) =>
+              console.error("Error fetching getDecayPercentage (state):", error)
+            ),
+            getDecayPercentage("Fluxin").catch((error) =>
+              console.error(
+                "Error fetching getDecayPercentage (Fluxin):",
+                error
+              )
+            ),
+            ViewDistributedTokens().catch((error) =>
+              console.error("Error fetching ViewDistributedTokens:", error)
+            ),
+            StateTotalMintedSupply().catch((error) =>
+              console.error("Error fetching StateTotalMintedSupply:", error)
+            ),
+            FluxinTotalMintedSupply().catch((error) =>
+              console.error("Error fetching FluxinTotalMintedSupply:", error)
+            ),
+            getBurnedSTATE().catch((error) =>
+              console.error("Error fetching getBurnedSTATE:", error)
+            ),
+            // StateTokenBurnRatio().catch((error) =>
+            //   console.error("Error fetching StateTokenBurnRatio:", error)
+            // ),
+            // getRatioTarget().catch((error) =>
+            //   console.error("Error fetching getRatioTarget:", error)
+            // ),
+            isAuctionRunning().catch((error) =>
+              console.error("Error fetching isAuctionRunning:", error)
+            ),
+            LpTokenAmount().catch((error) =>
+              console.error("Error fetching LpTokenAmount:", error)
+            ),
+            ContractStateBalance().catch((error) =>
+              console.error("Error fetching ContractStateBalance:", error)
+            ),
+            ContractFluxinBalance().catch((error) =>
+              console.error("Error fetching ContractFluxinBalance:", error)
+            ),
+            DAVTokenAmount().catch((error) =>
+              console.error("Error fetching DAVTokenAmount:", error)
+            ),
+            DAVTokenfive_Amount().catch((error) =>
+              console.error("Error fetching DAVTokenfive_Amount:", error)
+            ),
+          ]);
         } catch (error) {
           console.error("Error fetching live data:", error);
         }
@@ -455,9 +419,7 @@ export const DAVTokenProvider = ({ children }) => {
 
     fetchLiveData();
 
-    interval = setInterval(() => {
-      fetchLiveData();
-    }, 10000);
+    interval = setInterval(fetchLiveData, 10000);
 
     return () => clearInterval(interval); // Clean up interval on component unmount
   }, [davContract, stateContract, RatioContract, account]);
@@ -495,6 +457,41 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
+  const [isRenounced, setIsRenounced] = useState({
+    state: null,
+    dav: null,
+    Fluxin: null,
+  });
+  const setRenounceStatus = (name, status) => {
+    setIsRenounced((prevState) => ({
+      ...prevState,
+      [name]: status,
+    }));
+  };
+  const checkOwnershipStatus = async (name) => {
+    try {
+      const contract = contracts[name];
+      if (!contract) {
+        console.error(`Contract ${name} not found`);
+        return;
+      }
+      const owner = await contract.owner(); // Assumes the contract has an `owner` method
+      console.log(
+        "Contract owner:",
+        owner,
+        "Contract address:",
+        contract.address
+      );
+      setRenounceStatus(
+        name,
+        owner === "0x0000000000000000000000000000000000000000"
+      );
+    } catch (e) {
+      console.error(`Error checking ownership status for ${name}:`, e);
+      setRenounceStatus(name, null); // Set to null if an error occurs
+    }
+  };
+
   const ReanounceContract = async () => {
     try {
       await handleContractCall(davContract, "renounceOwnership", []);
@@ -530,6 +527,7 @@ export const DAVTokenProvider = ({ children }) => {
 
   const contracts = {
     state: stateContract,
+    dav: davContract,
     Fluxin: FluxinContract,
     xerion2: Xerion2Contract,
     xerion3: Xerion3Contract,
@@ -668,7 +666,6 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching token balance:", e);
     }
   };
-
 
   const ContractStateBalance = async () => {
     await fetchContractBalance(
@@ -863,7 +860,7 @@ export const DAVTokenProvider = ({ children }) => {
       );
       console.log("totalListedTokensDeposited:", amount);
 
-      const burnRatio = await StateTokenBurnRatio();
+      const burnRatio = await StateBurnedRatio();
       console.log(`Burned Ratio: ${burnRatio}`);
 
       if (isNaN(burnRatio) || burnRatio <= 0) {
@@ -1121,7 +1118,7 @@ export const DAVTokenProvider = ({ children }) => {
         SwapTokens,
         ButtonText,
         ReanounceContract,
-		ReanounceFluxinContract,
+        ReanounceFluxinContract,
         RenounceState,
         MoveTokens,
         LastLiquidity,
@@ -1137,7 +1134,7 @@ export const DAVTokenProvider = ({ children }) => {
         RatioTargetAmount,
         AuctionRunning,
         WithdrawState,
-		WithdrawFluxin,
+        WithdrawFluxin,
         CheckMintBalance,
         LpTokenAmount,
         LpTokens,
@@ -1155,6 +1152,8 @@ export const DAVTokenProvider = ({ children }) => {
         AddTokens,
         AddTokensToContract,
         mintAdditionalTOkens,
+        isRenounced,
+        checkOwnershipStatus,
         DAVTokensFiveWithdraw,
       }}
     >

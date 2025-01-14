@@ -40,6 +40,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     RenounceState,
     ReanounceContract,
     Supply,
+    isRenounced,
     DAVTokensFiveWithdraw,
     LastLiquidity,
     Batch,
@@ -95,7 +96,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       claimDAVToken: DAVTokensWithdraw,
       claimFiveDAVToken: DAVTokensFiveWithdraw,
       address: DAV_TOKEN_ADDRESS,
-      renounceSmartContract: "No",
+      renounceSmartContract: isRenounced?.dav ?? "Unknown",
       BatchAmount: BatchAmount,
       Batch: Batch,
       Supply: Supply,
@@ -120,7 +121,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       Balance: FluxinBalance,
       claimLPToken: LPStateTransferred,
       mintAddTOkens: "250,000,000,000",
-      renounceSmartContract: "No",
+      renounceSmartContract: isRenounced?.Fluxin ?? "Unknown",
       actions: {
         ReanounceContract: ReanounceFluxinContract,
         WithdrawState: WithdrawFluxin,
@@ -146,7 +147,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
       mintAddTOkens: "1,000,000,000,000",
-      renounceSmartContract: "No",
+      renounceSmartContract: isRenounced?.state ?? "Unknown",
       actions: {
         ReanounceContract: RenounceState,
         WithdrawState: WithdrawState,
@@ -575,7 +576,11 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               </td>
 
               <td className="d-flex align-items-center justify-content-center">
-                {dataToShow.renounceSmartContract || ""}
+                {dataToShow.renounceSmartContract === null
+                  ? "Loading..."
+                  : dataToShow.renounceSmartContract
+                  ? "Yes"
+                  : "No"}{" "}
               </td>
               <td className="d-flex justify-content-end">
                 <button
