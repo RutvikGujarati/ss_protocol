@@ -39,7 +39,11 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     StateSupply,
     RenounceState,
     ReanounceContract,
+	davTransactionHash,
+	stateTransactionHash,
+	fluxinTransactionHash,
     Supply,
+    isRenounced,
     DAVTokensFiveWithdraw,
     LastLiquidity,
     Batch,
@@ -62,7 +66,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const auctionStatus = AuctionRunning ? "True" : "False";
 
   const AuthAddress =
-    "0xB511110f312a4C6C4a240b2fE94de55D600Df7a9".toLowerCase();
+    "0xB1bD9F3B5F64dE482485A41c84ea4a90DAc5F98e".toLowerCase();
 
   // Fetch and update token data when the selectedToken changes
   const handleSetAddress = () => {
@@ -91,11 +95,11 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       name: "pDAV",
       supply: "5,000,000.00",
       BatchRelease: "1M",
-
+      transactionHash: davTransactionHash,
       claimDAVToken: DAVTokensWithdraw,
       claimFiveDAVToken: DAVTokensFiveWithdraw,
       address: DAV_TOKEN_ADDRESS,
-      renounceSmartContract: "No",
+      renounceSmartContract: isRenounced?.dav ?? "Unknown",
       BatchAmount: BatchAmount,
       Batch: Batch,
       Supply: Supply,
@@ -120,7 +124,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       Balance: FluxinBalance,
       claimLPToken: LPStateTransferred,
       mintAddTOkens: "250,000,000,000",
-      renounceSmartContract: "No",
+	  transactionHash: fluxinTransactionHash,
+      renounceSmartContract: isRenounced?.Fluxin ?? "Unknown",
       actions: {
         ReanounceContract: ReanounceFluxinContract,
         WithdrawState: WithdrawFluxin,
@@ -146,7 +151,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
       mintAddTOkens: "1,000,000,000,000",
-      renounceSmartContract: "No",
+	  transactionHash: stateTransactionHash,
+      renounceSmartContract: isRenounced?.state ?? "Unknown",
       actions: {
         ReanounceContract: RenounceState,
         WithdrawState: WithdrawState,
@@ -575,15 +581,34 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               </td>
 
               <td className="d-flex align-items-center justify-content-center">
-                {dataToShow.renounceSmartContract || ""}
+                {dataToShow.renounceSmartContract === null
+                  ? "Loading..."
+                  : dataToShow.renounceSmartContract
+                  ? "Yes"
+                  : "No"}{" "}
               </td>
               <td className="d-flex justify-content-end">
-                <button
-                  onClick={() => dataToShow.actions.ReanounceContract()}
-                  className="btn btn-primary btn-sm swap-btn info-icon"
-                >
-                  Set
-                </button>
+                {dataToShow.renounceSmartContract ? (
+                  <button
+                    onClick={() =>
+                      window.open(
+                        `https://scan.v4.testnet.pulsechain.com/#/tx/${dataToShow.transactionHash}`,
+                        "_blank",
+                        "noopener,noreferrer"
+                      )
+                    }
+                    className="btn btn-primary btn-sm swap-btn info-icon"
+                  >
+                    View
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => dataToShow.actions.ReanounceContract()}
+                    className="btn btn-primary btn-sm swap-btn info-icon"
+                  >
+                    Set
+                  </button>
+                )}
               </td>
             </tr>
           </tbody>

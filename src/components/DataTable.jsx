@@ -92,6 +92,7 @@ const DataTable = () => {
                 ContractName: "state",
                 image: stateLogo,
                 handleAddXerion: handleAddTokenState,
+
                 distributedAmount: Distributed["state"],
                 // ratio: "1:1",
                 // token: null,
@@ -214,6 +215,7 @@ const DataTable = () => {
                   <td>{ratio}</td>
                   <td>
                     <div className="d-flex justify-content-center gap-3 w-100">
+
                       {id !== "state" && (
                         <>
                           <div className="tableClaim">{inputTokenAmount}</div>
@@ -245,6 +247,7 @@ const DataTable = () => {
                   )}
                   <td>
                     <div className="d-flex align-items-center gap-2">
+
                       {id !== "state" && ( // Only show the button for non-state tokens
                         <button
                           onClick={() => Swapping(id, token)}
