@@ -491,22 +491,26 @@ export const DAVTokenProvider = ({ children }) => {
       setRenounceStatus(name, null); // Set to null if an error occurs
     }
   };
-  const [transactionHashes, setTransactionHashes] = useState({
-    dav: null,
-    fluxin: null,
-    state: null,
-  });
+  const [davTransactionHash, setDavTransactionHash] = useState(null);
+  const [fluxinTransactionHash, setFluxinTransactionHash] = useState(null);
+  const [stateTransactionHash, setStateTransactionHash] = useState(null);
 
   const ReanounceContract = async () => {
     try {
       const tx = await handleContractCall(davContract, "renounceOwnership", []);
-      console.log("Transaction Hash:", tx.transactionHash);
-      setTransactionHashes((prev) => ({
-        ...prev,
-        dav: tx.transactionHash,
-      }));
+      console.log("DAV Transaction:", tx);
+
+      if (tx && tx.hash) {
+        console.log("DAV Transaction Hash:", tx.hash);
+        setDavTransactionHash(tx.hash); // Set DAV transaction hash
+      } else {
+        console.error(
+          "Transaction object doesn't contain transactionHash:",
+          tx
+        );
+      }
     } catch (e) {
-      console.error("Error claiming tokens:", e);
+      console.error("Error renouncing ownership for DAV:", e);
     }
   };
   const ReanounceFluxinContract = async () => {
@@ -516,13 +520,19 @@ export const DAVTokenProvider = ({ children }) => {
         "renounceOwnership",
         []
       );
-      console.log("Transaction Hash:", tx.transactionHash);
-      setTransactionHashes((prev) => ({
-        ...prev,
-        fluxin: tx.transactionHash,
-      }));
+      console.log("Fluxin Transaction:", tx);
+
+      if (tx && tx.hash) {
+        console.log("Fluxin Transaction Hash:", tx.hash);
+        setFluxinTransactionHash(tx.hash); // Set Fluxin transaction hash
+      } else {
+        console.error(
+          "Transaction object doesn't contain transactionHash:",
+          tx
+        );
+      }
     } catch (e) {
-      console.error("Error claiming tokens:", e);
+      console.error("Error renouncing ownership for Fluxin:", e);
     }
   };
   const AddTokensToContract = async (TokenAddress) => {
@@ -538,9 +548,24 @@ export const DAVTokenProvider = ({ children }) => {
   //   console.log(account)
   const RenounceState = async () => {
     try {
-      await handleContractCall(stateContract, "renounceOwnership", []);
+      const tx = await handleContractCall(
+        stateContract,
+        "renounceOwnership",
+        []
+      );
+      console.log("State Transaction:", tx);
+
+      if (tx && tx.hash) {
+        console.log("State Transaction Hash:", tx.hash);
+        setStateTransactionHash(tx.hash); // Set State transaction hash
+      } else {
+        console.error(
+          "Transaction object doesn't contain transactionHash:",
+          tx
+        );
+      }
     } catch (e) {
-      console.error("Error claiming tokens:", e);
+      console.error("Error renouncing ownership for State:", e);
     }
   };
 
@@ -1173,7 +1198,10 @@ export const DAVTokenProvider = ({ children }) => {
         mintAdditionalTOkens,
         isRenounced,
         checkOwnershipStatus,
-		transactionHashes,
+        davTransactionHash,
+        stateTransactionHash,
+        fluxinTransactionHash,
+
         DAVTokensFiveWithdraw,
       }}
     >
