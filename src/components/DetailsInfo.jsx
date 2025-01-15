@@ -160,7 +160,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       },
     },
   ];
-
+console.log("renounced ", isRenounced?.state)
   const handleInputChange = (e, field) => {
     const value = e.target.value;
     if (field === "numerator") {
@@ -581,7 +581,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               </td>
 
               <td className="d-flex align-items-center justify-content-center">
-                {dataToShow.renounceSmartContract === null
+                {dataToShow.renounceSmartContract == null
                   ? "Loading..."
                   : dataToShow.renounceSmartContract
                   ? "Yes"
