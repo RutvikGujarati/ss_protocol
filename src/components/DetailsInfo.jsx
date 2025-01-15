@@ -592,7 +592,7 @@ console.log("renounced ", isRenounced?.state)
                   <button
                     onClick={() =>
                       window.open(
-                        `https://scan.v4.testnet.pulsechain.com/#/tx/${dataToShow.transactionHash}`,
+                        `https://otter.pulsechain.com/tx/${dataToShow.transactionHash}`,
                         "_blank",
                         "noopener,noreferrer"
                       )
