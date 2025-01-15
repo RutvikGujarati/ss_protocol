@@ -95,7 +95,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       name: "pDAV",
       supply: "5,000,000.00",
       BatchRelease: "1M",
-      transactionHash: davTransactionHash,
+      transactionHash: "0xa7edbeaf4dabb78ef6385220bc75f7266c144a4c9da19393245ab62999195d90",
       claimDAVToken: DAVTokensWithdraw,
       claimFiveDAVToken: DAVTokensFiveWithdraw,
       address: DAV_TOKEN_ADDRESS,
@@ -124,7 +124,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       Balance: FluxinBalance,
       claimLPToken: LPStateTransferred,
       mintAddTOkens: "250,000,000,000",
-	  transactionHash: fluxinTransactionHash,
+	  transactionHash: "0xcc7e04c885a56607fbc2417a9f894bda0fbdd68418ce189168adcb1c10406208",
       renounceSmartContract: isRenounced?.Fluxin ?? "Unknown",
       actions: {
         ReanounceContract: ReanounceFluxinContract,
@@ -151,7 +151,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
       mintAddTOkens: "1,000,000,000,000",
-	  transactionHash: stateTransactionHash,
+	  transactionHash: "0xf562341d1f0f5469809553f07cd9f19da479a9af3b074d0982594899a6595b10",
       renounceSmartContract: isRenounced?.state ?? "Unknown",
       actions: {
         ReanounceContract: RenounceState,
@@ -160,7 +160,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       },
     },
   ];
-console.log("renounced ", isRenounced?.state)
+console.log("renounced ", stateTransactionHash)
   const handleInputChange = (e, field) => {
     const value = e.target.value;
     if (field === "numerator") {
