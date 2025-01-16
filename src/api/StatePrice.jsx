@@ -6,23 +6,32 @@ const PriceContext = createContext();
 const PriceProvider = ({ children }) => {
   const [price, setPrice] = useState(null);
   const [error, setError] = useState(null);
-  const contractAddress = "0x63CC0B2CA22b260c7FD68EBBaDEc2275689A3969";
+  const pairId = "0x894Fd7d05FE360a1D713c10b0E356af223fDE88c";
+  const chainId = "pulsechain";
 
   useEffect(() => {
     const fetchPrice = async () => {
       try {
         const response = await axios.get(
-          `https://api.dexscreener.io/latest/dex/tokens/${contractAddress}`
+          `https://api.dexscreener.com/latest/dex/pairs/${chainId}/${pairId}`
         );
 
+        // Find the pair data for pulsechain
         const pairData = response.data.pairs.find(
           (pair) => pair.chainId === "pulsechain"
         );
 
-        if (pairData && pairData.priceUsd) {
-          setPrice(pairData.priceUsd);
+        if (pairData) {
+          // Check if priceUsd exists, if not, use priceNative
+          if (pairData.priceUsd) {
+            setPrice(pairData.priceUsd);
+          } else if (pairData.priceNative) {
+            setPrice(pairData.priceNative); // Fallback to priceNative
+          } else {
+            setError("No price data available for this pair.");
+          }
         } else {
-          setError("Price data not found for the specified token.");
+          setError("Pair data not found for the specified contract.");
         }
       } catch (err) {
         setError("Failed to fetch token price. Please try again later.");
@@ -31,7 +40,7 @@ const PriceProvider = ({ children }) => {
     };
 
     fetchPrice();
-  }, [contractAddress]);
+  }, [pairId]);
 
   return (
     <PriceContext.Provider value={{ price, error }}>

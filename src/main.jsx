@@ -25,13 +25,13 @@ createRoot(document.getElementById("root")).render(
           })}
         >
           {/* <ConnectWalletProvider> */}
-          <DAVTokenProvider>
-            <PriceProvider>
+          <PriceProvider>
+            <DAVTokenProvider>
               <Suspense fallback={<div>Loading...</div>}>
                 <App />
               </Suspense>
-            </PriceProvider>
-          </DAVTokenProvider>
+            </DAVTokenProvider>
+          </PriceProvider>
           {/* </ConnectWalletProvider> */}
         </RainbowKitProvider>
       </QueryClientProvider>

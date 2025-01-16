@@ -6,14 +6,16 @@ import stateLogo from "../assets/state_logo.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useDAVToken, Xerion } from "../Context/DavTokenContext";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
 import { Fluxin, Xerion2, Xerion3 } from "../Context/DavTokenContext";
 import { PriceContext } from "../api/StatePrice";
+import axios from "axios";
 
 const DataTable = () => {
-	const { price, error } = useContext(PriceContext);
+  const { price, error } = useContext(PriceContext);
 
+ 
   const {
     SwapTokens,
     handleAddTokenState,
@@ -33,7 +35,7 @@ const DataTable = () => {
   const [errorPopup, setErrorPopup] = useState({});
   const [checkingStates, setCheckingStates] = useState({}); // State for checking buttons
   const [swappingStates, setSwappingStates] = useState({}); // State for swapping buttons
-  const [claimingStates, setClaimingStates] = useState({}); // Separate claiming state for each token
+  const [claimingStates, setClaimingStates] = useState({}); // Separate claiming state for each
 
   const Checking = async (id, ContractName) => {
     setCheckingStates((prev) => ({ ...prev, [id]: true })); // Set checking state for specific button
@@ -80,7 +82,8 @@ const DataTable = () => {
               <th>Check</th>
               <th>Mint</th>
               <th>Price</th>
-              <th>Liquidity</th>
+              {/* <th>Liquidity</th> */}
+			  <th></th>
               <th>Current Ratio</th>
               <th>Ratio Target</th>
               <th>Ratio Swap</th>
@@ -95,7 +98,7 @@ const DataTable = () => {
                 Pname: "pSTATE",
                 ContractName: "state",
                 image: stateLogo,
-				Price:price,
+                Price: price,
                 handleAddXerion: handleAddTokenState,
                 distributedAmount: Distributed["state"],
                 // ratio: "1:1",
@@ -112,7 +115,7 @@ const DataTable = () => {
                 ratio: "1:1",
                 currentRatio: "0:0",
                 Price: "0.0",
-                Liquidity: "0.0",
+                // Liquidity: "0.0",
                 distributedAmount: Distributed["Fluxin"],
                 token: Fluxin,
                 handleAddXerion: handleAddFluxin,
@@ -128,11 +131,11 @@ const DataTable = () => {
                 ratio: "1:1",
                 currentRatio: "0:0",
                 Price: "0.0",
-                Liquidity: "0.0",
+                // Liquidity: "0.0",
                 distributedAmount: Distributed["Xerion"],
                 token: Xerion,
                 handleAddXerion: handleAddXerion,
-                inputTokenAmount: "0.0 Fluxin",
+                inputTokenAmount: "0.0 Xerion",
                 outputToken: "0.0 State",
               },
               //   {
@@ -235,7 +238,6 @@ const DataTable = () => {
                   <td>{ratio}</td>
                   <td>
                     <div className="d-flex justify-content-center gap-3 w-100">
-
                       {id !== "state" && (
                         <>
                           <div className="tableClaim">{inputTokenAmount}</div>
@@ -267,12 +269,11 @@ const DataTable = () => {
                   )}
                   <td>
                     <div className="d-flex align-items-center gap-2">
-
                       {id !== "state" && ( // Only show the button for non-state tokens
                         <button
                           onClick={() => Swapping(id, token)}
-                        //   disabled={swappingStates[id]}
-						  disabled={true}
+                          //   disabled={swappingStates[id]}
+                          disabled={true}
                           className="btn btn-primary btn-sm swap-btn"
                         >
                           {swappingStates[id] ? "Swapping..." : "Swap"}
@@ -284,7 +285,7 @@ const DataTable = () => {
                           src={MetaMaskIcon}
                           width={20}
                           height={20}
-						  onClick={handleAddXerion}
+                          onClick={handleAddXerion}
                           alt="Logo"
                           style={{ cursor: "pointer" }}
                         />

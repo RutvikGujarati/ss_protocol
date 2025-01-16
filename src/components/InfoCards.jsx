@@ -1,13 +1,16 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/InfoCards.css";
 import { useDAVToken } from "../Context/DavTokenContext";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { formatWithCommas } from "./DetailsInfo";
+import { PriceContext } from "../api/StatePrice";
 
 const InfoCards = () => {
+	const { price, error } = useContext(PriceContext);
+
   const {
     mintDAV,
     // handleAddTokenRatio,
@@ -18,6 +21,7 @@ const InfoCards = () => {
     StateBurned,
     StateBurnedRatio,
     StateSupply,
+	TotalStateHoldsInUS,
     davHolds,
     davPercentage,
     StateHolds,
@@ -25,6 +29,7 @@ const InfoCards = () => {
   const [amount, setAmount] = useState("");
   const [load, setLoad] = useState(false);
   const [successMessage, setSuccessMessage] = useState(""); // Tracks success message
+
 
   const handleMint = async () => {
     setLoad(true);
@@ -142,11 +147,11 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token holdings</p>
-                      <h5 className="">{StateHolds} / $0.00</h5>
+                      <h5 className="">{StateHolds} / $ {TotalStateHoldsInUS}</h5>
                     </div>
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token price</p>
-                      <h5 className="">$0</h5>
+                      <h5 className="">$ {price}</h5>
                     </div>
                     <div className="carddetails2">
                       <img
