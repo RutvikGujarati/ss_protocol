@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider } from "wagmi";
 import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { config } from "../WalletConfig.js";
+import { PriceProvider } from "./api/StatePrice.jsx";
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")).render(
@@ -25,9 +26,11 @@ createRoot(document.getElementById("root")).render(
         >
           {/* <ConnectWalletProvider> */}
           <DAVTokenProvider>
-            <Suspense fallback={<div>Loading...</div>}>
-              <App />
-            </Suspense>
+            <PriceProvider>
+              <Suspense fallback={<div>Loading...</div>}>
+                <App />
+              </Suspense>
+            </PriceProvider>
           </DAVTokenProvider>
           {/* </ConnectWalletProvider> */}
         </RainbowKitProvider>

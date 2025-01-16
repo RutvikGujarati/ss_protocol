@@ -6,11 +6,14 @@ import stateLogo from "../assets/state_logo.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useDAVToken, Xerion } from "../Context/DavTokenContext";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
 import { Fluxin, Xerion2, Xerion3 } from "../Context/DavTokenContext";
+import { PriceContext } from "../api/StatePrice";
 
 const DataTable = () => {
+	const { price, error } = useContext(PriceContext);
+
   const {
     SwapTokens,
     handleAddTokenState,
@@ -92,8 +95,8 @@ const DataTable = () => {
                 Pname: "pSTATE",
                 ContractName: "state",
                 image: stateLogo,
+				Price:price,
                 handleAddXerion: handleAddTokenState,
-
                 distributedAmount: Distributed["state"],
                 // ratio: "1:1",
                 // token: null,
@@ -108,7 +111,7 @@ const DataTable = () => {
                 image: FluxinLogo,
                 ratio: "1:1",
                 currentRatio: "0:0",
-                Price: "$0.0",
+                Price: "0.0",
                 Liquidity: "0.0",
                 distributedAmount: Distributed["Fluxin"],
                 token: Fluxin,
@@ -124,7 +127,7 @@ const DataTable = () => {
                 image: XerionLogo,
                 ratio: "1:1",
                 currentRatio: "0:0",
-                Price: "$0.0",
+                Price: "0.0",
                 Liquidity: "0.0",
                 distributedAmount: Distributed["Xerion"],
                 token: Xerion,
@@ -226,7 +229,7 @@ const DataTable = () => {
                     </div>
                   </td>
 
-                  <td>{Price}</td>
+                  <td>$ {Price}</td>
                   <td className="text-success">{Liquidity}</td>
                   <td>{currentRatio}</td>
                   <td>{ratio}</td>
