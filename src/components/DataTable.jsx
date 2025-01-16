@@ -5,7 +5,7 @@ import FluxinLogo from "../assets/FluxinLogo.png";
 import stateLogo from "../assets/state_logo.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
-import { useDAVToken } from "../Context/DavTokenContext";
+import { useDAVToken, Xerion } from "../Context/DavTokenContext";
 import { useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
 import { Fluxin, Xerion2, Xerion3 } from "../Context/DavTokenContext";
@@ -21,6 +21,7 @@ const DataTable = () => {
     DavBalance,
     ClaimTokens,
     handleAddFluxin,
+    handleAddXerion,
     handleAddXerion2,
     handleAddXerion3,
   } = useDAVToken();
@@ -112,6 +113,22 @@ const DataTable = () => {
                 distributedAmount: Distributed["Fluxin"],
                 token: Fluxin,
                 handleAddXerion: handleAddFluxin,
+                inputTokenAmount: "0.0 Fluxin",
+                outputToken: "0.0 State",
+              },
+              {
+                id: "Xerion",
+                name: "Xerion",
+                Pname: "Xerion",
+                ContractName: "Xerion",
+                image: XerionLogo,
+                ratio: "1:1",
+                currentRatio: "0:0",
+                Price: "$0.0",
+                Liquidity: "0.0",
+                distributedAmount: Distributed["Xerion"],
+                token: Xerion,
+                handleAddXerion: handleAddXerion,
                 inputTokenAmount: "0.0 Fluxin",
                 outputToken: "0.0 State",
               },
