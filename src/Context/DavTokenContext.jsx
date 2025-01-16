@@ -13,6 +13,7 @@ export const STATE_TOKEN_ADDRESS = "0x63CC0B2CA22b260c7FD68EBBaDEc2275689A3969";
 export const Ratio_TOKEN_ADDRESS = "0xb8810E0715B60687b0391379e15ce1EAdcE08aaB";
 
 export const Fluxin = "0x6F01eEc1111748B66f735944b18b0EB2835aE201";
+export const Xerion = "0xb9664dE2E15b24f5e934e66c72ad9329469E3642";
 
 export const Xerion2 = "0x3391c40E62499Aa498503902b8712195db2624DD";
 export const Xerion3 = "0x4a169d0e0dEF9C1a6a6ab3BBf6870371C830626D";
@@ -34,6 +35,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [davContract, setDavContract] = useState(null);
   const [stateContract, setStateContract] = useState(null);
   const [FluxinContract, setFluxinContract] = useState(null);
+  const [XerionContract, setXerionContract] = useState(null);
   const [Xerion2Contract, setXerion2Contract] = useState(null);
   const [Xerion3Contract, setXerion3Contract] = useState(null);
   const [RatioContract, setRatioContract] = useState(null);
@@ -48,6 +50,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [Supply, setSupply] = useState("0.0");
   const [StateSupply, setStateSupply] = useState("0.0");
   const [FluxinSupply, setFluxinSupply] = useState("0.0");
+  const [XerionSupply, setXerionSupply] = useState("0.0");
   const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
   const [DAVTokensFiveWithdraw, setFiveAvTokens] = useState("0.0");
   const [LastLiquidity, setLastLiquidityTransaction] = useState("0.0");
@@ -56,12 +59,15 @@ export const DAVTokenProvider = ({ children }) => {
   const [BatchAmount, setBatchAmount] = useState("0.0");
   const [StateBalance, setStateBalance] = useState("0.0");
   const [FluxinBalance, setFluxinBalance] = useState("0.0");
+  const [XerionBalance, setXerionBalance] = useState("0.0");
   const [PercentageOfState, setPercentage] = useState("0.0");
   const [PercentageFluxin, setFluxinPercentage] = useState("0.0");
+  const [PercentageXerion, setXerionPercentage] = useState("0.0");
   const [StateReward, setStateReward] = useState("0");
   const [Distributed, setViewDistributed] = useState({
     state: "0.0",
     Fluxin: "0.0",
+    Xerion: "0.0",
     xerion2: "0.0",
     xerion3: "0.0",
   });
@@ -98,6 +104,7 @@ export const DAVTokenProvider = ({ children }) => {
             new ethers.Contract(STATE_TOKEN_ADDRESS, StateABI, newSigner)
           );
           setFluxinContract(new ethers.Contract(Fluxin, StateABI, newSigner));
+          setXerionContract(new ethers.Contract(Xerion, StateABI, newSigner));
           setXerion2Contract(new ethers.Contract(Xerion2, StateABI, newSigner));
           setXerion3Contract(new ethers.Contract(Xerion3, StateABI, newSigner));
           setRatioContract(
@@ -287,6 +294,15 @@ export const DAVTokenProvider = ({ children }) => {
     );
     setFluxinSupply(supply);
   };
+  const XerionTotalMintedSupply = async () => {
+    const supply = await handleContractCall(
+      XerionContract,
+      "totalSupply",
+      [],
+      (s) => ethers.formatUnits(s, 18)
+    );
+    setXerionSupply(supply);
+  };
 
   const releases = [
     { dav: 1000000, releaseState: 50000000000000 },
@@ -359,6 +375,9 @@ export const DAVTokenProvider = ({ children }) => {
             getDecayPercentage("state").catch((error) =>
               console.error("Error fetching getDecayPercentage (state):", error)
             ),
+            getDecayPercentage("Xerion").catch((error) =>
+              console.error("Error fetching getDecayPercentage (state):", error)
+            ),
             checkOwnershipStatus("state").catch((error) =>
               console.error("Error fetching getDecayPercentage (state):", error)
             ),
@@ -366,6 +385,9 @@ export const DAVTokenProvider = ({ children }) => {
               console.error("Error fetching getDecayPercentage (state):", error)
             ),
             checkOwnershipStatus("Fluxin").catch((error) =>
+              console.error("Error fetching getDecayPercentage (state):", error)
+            ),
+            checkOwnershipStatus("Xerion").catch((error) =>
               console.error("Error fetching getDecayPercentage (state):", error)
             ),
             getDecayPercentage("Fluxin").catch((error) =>
@@ -382,6 +404,9 @@ export const DAVTokenProvider = ({ children }) => {
             ),
             FluxinTotalMintedSupply().catch((error) =>
               console.error("Error fetching FluxinTotalMintedSupply:", error)
+            ),
+            XerionTotalMintedSupply().catch((error) =>
+              console.error("Error fetching XerionTotalMintedSupply:", error)
             ),
             getBurnedSTATE().catch((error) =>
               console.error("Error fetching getBurnedSTATE:", error)
@@ -403,6 +428,9 @@ export const DAVTokenProvider = ({ children }) => {
             ),
             ContractFluxinBalance().catch((error) =>
               console.error("Error fetching ContractFluxinBalance:", error)
+            ),
+            ContractXerionBalance().catch((error) =>
+              console.error("Error fetching ContractXerionBalance:", error)
             ),
             DAVTokenAmount().catch((error) =>
               console.error("Error fetching DAVTokenAmount:", error)
@@ -461,6 +489,7 @@ export const DAVTokenProvider = ({ children }) => {
     state: null,
     dav: null,
     Fluxin: null,
+    Xerion: null,
   });
   const setRenounceStatus = (name, status) => {
     setIsRenounced((prevState) => ({
@@ -493,6 +522,7 @@ export const DAVTokenProvider = ({ children }) => {
   };
   const [davTransactionHash, setDavTransactionHash] = useState(null);
   const [fluxinTransactionHash, setFluxinTransactionHash] = useState(null);
+  const [XerionTransactionHash, setXerionTransactionHash] = useState(null);
   const [stateTransactionHash, setStateTransactionHash] = useState(null);
 
   const ReanounceContract = async () => {
@@ -535,6 +565,27 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error renouncing ownership for Fluxin:", e);
     }
   };
+  const ReanounceXerionContract = async () => {
+    try {
+      const tx = await handleContractCall(
+        XerionContract,
+        "renounceOwnership",
+        []
+      );
+      console.log("Xerion Transaction:", tx);
+	  if (tx && tx.hash) {
+        console.log("Xerion Transaction Hash:", tx.hash);
+        setXerionTransactionHash(tx.hash); // Set Fluxin transaction hash
+      } else {
+        console.error(
+          "Transaction object doesn't contain transactionHash:",
+          tx
+        );
+      }
+    } catch (e) {
+      console.error("Error renouncing ownership for Xerion:", e);
+    }
+  };
   const AddTokensToContract = async (TokenAddress) => {
     try {
       await handleContractCall(RatioContract, "addSupportedToken", [
@@ -573,6 +624,7 @@ export const DAVTokenProvider = ({ children }) => {
     state: stateContract,
     dav: davContract,
     Fluxin: FluxinContract,
+    Xerion: XerionContract,
     xerion2: Xerion2Contract,
     xerion3: Xerion3Contract,
   };
@@ -640,6 +692,18 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
+  const WithdrawXerion = async (amount) => {
+    try {
+      setClaiming(true);
+      const amountInWei = ethers.parseUnits(amount, 18);
+
+      await handleContractCall(XerionContract, "transferToken", [amountInWei]);
+    } catch (e) {
+      console.error(`Error withdrawing with method transferToken:`, e);
+    } finally {
+      setClaiming(false);
+    }
+  };
   const mintAdditionalTOkens = async (contractType, amount) => {
     try {
       setClaiming(true);
@@ -652,6 +716,8 @@ export const DAVTokenProvider = ({ children }) => {
         contract = FluxinContract;
       } else if (contractType === "state") {
         contract = stateContract;
+      } else if (contractType === "Xerion") {
+        contract = XerionContract;
       }
 
       if (!contract) {
@@ -722,6 +788,9 @@ export const DAVTokenProvider = ({ children }) => {
   const ContractFluxinBalance = async () => {
     await fetchContractBalance(FluxinContract, Fluxin, setFluxinBalance);
   };
+  const ContractXerionBalance = async () => {
+    await fetchContractBalance(XerionContract, Xerion, setXerionBalance);
+  };
 
   const getDecayPercentage = async (contractName) => {
     try {
@@ -749,6 +818,8 @@ export const DAVTokenProvider = ({ children }) => {
         setPercentage(reversedPercentage);
       } else if (contractName === "Fluxin") {
         setFluxinPercentage(reversedPercentage);
+      } else if (contractName === "Xerion") {
+        setXerionPercentage(reversedPercentage);
       }
     } catch (e) {
       console.error(
@@ -1115,6 +1186,7 @@ export const DAVTokenProvider = ({ children }) => {
   const handleAddTokenState = () =>
     handleAddToken(STATE_TOKEN_ADDRESS, "tState");
   const handleAddFluxin = () => handleAddToken(Fluxin, "Fluxin");
+  const handleAddXerion = () => handleAddToken(Xerion, "Xerion");
   const handleAddXerion2 = () => handleAddToken(Xerion2, "Xerion2");
   const handleAddXerion3 = () => handleAddToken(Xerion3, "Xerion3");
 
@@ -1140,6 +1212,7 @@ export const DAVTokenProvider = ({ children }) => {
         DavHoldingsPercentage,
         davPercentage,
         FluxinBalance,
+        XerionBalance,
         StateHoldings,
         StateHolds,
         DavSupply,
@@ -1163,6 +1236,7 @@ export const DAVTokenProvider = ({ children }) => {
         ButtonText,
         ReanounceContract,
         ReanounceFluxinContract,
+		ReanounceXerionContract,
         RenounceState,
         MoveTokens,
         LastLiquidity,
@@ -1174,11 +1248,14 @@ export const DAVTokenProvider = ({ children }) => {
         handleAddToken,
         setRatioTarget,
         PercentageFluxin,
+		PercentageXerion,
         FluxinSupply,
+		XerionSupply,
         RatioTargetAmount,
         AuctionRunning,
         WithdrawState,
         WithdrawFluxin,
+		WithdrawXerion,
         CheckMintBalance,
         LpTokenAmount,
         LpTokens,
@@ -1188,6 +1265,7 @@ export const DAVTokenProvider = ({ children }) => {
         handleAddTokenState,
         handleAddTokenDAV,
         handleAddFluxin,
+		handleAddXerion,
         handleAddXerion2,
         handleAddXerion3,
         PercentageOfState,
@@ -1201,6 +1279,7 @@ export const DAVTokenProvider = ({ children }) => {
         davTransactionHash,
         stateTransactionHash,
         fluxinTransactionHash,
+		XerionTransactionHash,
 
         DAVTokensFiveWithdraw,
       }}
