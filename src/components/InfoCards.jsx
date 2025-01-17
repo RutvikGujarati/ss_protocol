@@ -9,7 +9,7 @@ import { formatWithCommas } from "./DetailsInfo";
 import { PriceContext } from "../api/StatePrice";
 
 const InfoCards = () => {
-	const { price, error } = useContext(PriceContext);
+	const { stateUsdPrice, error } = useContext(PriceContext);
 
   const {
     mintDAV,
@@ -151,7 +151,7 @@ const InfoCards = () => {
                     </div>
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token price</p>
-                      <h5 className="">$ {price}</h5>
+                      <h5 className="">$ {stateUsdPrice}</h5>
                     </div>
                     <div className="carddetails2">
                       <img

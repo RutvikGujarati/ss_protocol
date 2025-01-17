@@ -22,7 +22,7 @@ export const Xerion3 = "0x4a169d0e0dEF9C1a6a6ab3BBf6870371C830626D";
 export const useDAVToken = () => useContext(DAVTokenContext);
 
 export const DAVTokenProvider = ({ children }) => {
-  const { price, error } = useContext(PriceContext);
+  const { stateUsdPrice, error } = useContext(PriceContext);
 
   //contract initialization states
   const [provider, setProvider] = useState(null);
@@ -247,7 +247,7 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   const stateHoldingsInUsd = async () => {
-    const priceOfToken = await price;
+    const priceOfToken = await stateUsdPrice;
     const holdings = priceOfToken * StateHolds;
 
     if (holdings == 0) {

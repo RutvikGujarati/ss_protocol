@@ -13,9 +13,9 @@ import { PriceContext } from "../api/StatePrice";
 import axios from "axios";
 
 const DataTable = () => {
-  const { price, error } = useContext(PriceContext);
+  const { stateUsdPrice, error, XerionUsdPrice, FluxinUsdPrice } =
+    useContext(PriceContext);
 
- 
   const {
     SwapTokens,
     handleAddTokenState,
@@ -83,7 +83,7 @@ const DataTable = () => {
               <th>Mint</th>
               <th>Price</th>
               {/* <th>Liquidity</th> */}
-			  <th></th>
+              <th></th>
               <th>Current Ratio</th>
               <th>Ratio Target</th>
               <th>Ratio Swap</th>
@@ -98,7 +98,8 @@ const DataTable = () => {
                 Pname: "pSTATE",
                 ContractName: "state",
                 image: stateLogo,
-                Price: price,
+                Price: stateUsdPrice,
+				onChart:"https://www.geckoterminal.com/pulsechain/pools/0x894fd7d05fe360a1d713c10b0e356af223fde88c",
                 handleAddXerion: handleAddTokenState,
                 distributedAmount: Distributed["state"],
                 // ratio: "1:1",
@@ -114,7 +115,8 @@ const DataTable = () => {
                 image: FluxinLogo,
                 ratio: "1:1",
                 currentRatio: "0:0",
-                Price: "0.0",
+                Price: FluxinUsdPrice,
+				onChart:"https://www.geckoterminal.com/pulsechain/pools/0x361afa3f5ef839bed6071c9f0c225b078eb8089a",
                 // Liquidity: "0.0",
                 distributedAmount: Distributed["Fluxin"],
                 token: Fluxin,
@@ -130,7 +132,9 @@ const DataTable = () => {
                 image: XerionLogo,
                 ratio: "1:1",
                 currentRatio: "0:0",
-                Price: "0.0",
+                Price: XerionUsdPrice,
+                onChart:
+                  "https://www.geckoterminal.com/pulsechain/pools/0xc6359cd2c70f643888d556d377a4e8e25caadf77",
                 // Liquidity: "0.0",
                 distributedAmount: Distributed["Xerion"],
                 token: Xerion,
@@ -176,6 +180,7 @@ const DataTable = () => {
                   ContractName,
                   Liquidity,
                   Price,
+                  onChart,
                   distributedAmount,
                   token,
                   inputTokenAmount,
@@ -232,7 +237,15 @@ const DataTable = () => {
                     </div>
                   </td>
 
-                  <td>$ {Price}</td>
+                  <td>
+                    <a
+                      href={onChart}
+                      target="_blank"
+                      style={{fontSize:"13px"}}
+                    >
+                      $ {Price}
+                    </a>
+                  </td>
                   <td className="text-success">{Liquidity}</td>
                   <td>{currentRatio}</td>
                   <td>{ratio}</td>
