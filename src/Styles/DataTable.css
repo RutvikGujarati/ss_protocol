@@ -15,7 +15,14 @@
   color: #f8f9fa; /* Light text */
   cursor: default !important;
 }
-
+.price-up {
+	color: green;
+  }
+  
+  .price-down {
+	color: red;
+  }
+  
 .table td {
   font-size: small;
 }

@@ -13,7 +13,7 @@ import { PriceContext } from "../api/StatePrice";
 import axios from "axios";
 
 const DataTable = () => {
-  const { stateUsdPrice, error, XerionUsdPrice, FluxinUsdPrice } =
+  const { stateUsdPrice, error, XerionUsdPrice,XerionRatioPrice,FluxinRatioPrice, FluxinUsdPrice } =
     useContext(PriceContext);
 
   const {
@@ -57,6 +57,41 @@ const DataTable = () => {
     }
     setCheckingStates((prev) => ({ ...prev, [id]: false })); // Reset checking state
   };
+  const formatPrice = (price) => {
+    if (!price || isNaN(price)) {
+      return "$0.0000"; // Default display for invalid or null prices
+    }
+
+    const formattedPrice = parseFloat(price).toFixed(10); // Format to 9 decimals for processing
+    const [integerPart, decimalPart] = formattedPrice.split(".");
+
+    // Check for leading zeros in the decimal part
+    const leadingZerosMatch = decimalPart.match(/^0+(.)/); // Match leading zeros and capture the first non-zero digit
+    if (leadingZerosMatch) {
+      const leadingZeros = leadingZerosMatch[0].slice(0, -1); // Extract all leading zeros except the last digit
+      const firstSignificantDigit = leadingZerosMatch[1]; // Capture the first significant digit
+      const zeroCount = leadingZeros.length;
+      if (zeroCount < 4) {
+        return `${integerPart}.${"0".repeat(
+          zeroCount
+        )}${firstSignificantDigit}${decimalPart
+          .slice(zeroCount + 1)
+          .slice(0, 3)}`;
+      } else {
+        return (
+          <>
+            {integerPart}.<span>0</span>
+            <sub>{zeroCount}</sub>
+            {firstSignificantDigit}
+            {decimalPart.slice(zeroCount + 1).slice(0, 3)}
+          </>
+        );
+      }
+    }
+
+    // General case: No significant leading zeros
+    return `$${parseFloat(price).toFixed(7)}`;
+  };
 
   const Swapping = async (id, token) => {
     setSwappingStates((prev) => ({ ...prev, [id]: true })); // Set swapping state for specific button
@@ -99,7 +134,8 @@ const DataTable = () => {
                 ContractName: "state",
                 image: stateLogo,
                 Price: stateUsdPrice,
-				onChart:"https://www.geckoterminal.com/pulsechain/pools/0x894fd7d05fe360a1d713c10b0e356af223fde88c",
+                onChart:
+                  "https://www.geckoterminal.com/pulsechain/pools/0x894fd7d05fe360a1d713c10b0e356af223fde88c",
                 handleAddXerion: handleAddTokenState,
                 distributedAmount: Distributed["state"],
                 // ratio: "1:1",
@@ -114,9 +150,10 @@ const DataTable = () => {
                 ContractName: "Fluxin",
                 image: FluxinLogo,
                 ratio: "1:1",
-                currentRatio: "0:0",
+                currentRatio: `1:${FluxinRatioPrice}`,
                 Price: FluxinUsdPrice,
-				onChart:"https://www.geckoterminal.com/pulsechain/pools/0x361afa3f5ef839bed6071c9f0c225b078eb8089a",
+                onChart:
+                  "https://www.geckoterminal.com/pulsechain/pools/0x361afa3f5ef839bed6071c9f0c225b078eb8089a",
                 // Liquidity: "0.0",
                 distributedAmount: Distributed["Fluxin"],
                 token: Fluxin,
@@ -131,7 +168,7 @@ const DataTable = () => {
                 ContractName: "Xerion",
                 image: XerionLogo,
                 ratio: "1:1",
-                currentRatio: "0:0",
+                currentRatio: `1:${XerionRatioPrice}`,
                 Price: XerionUsdPrice,
                 onChart:
                   "https://www.geckoterminal.com/pulsechain/pools/0xc6359cd2c70f643888d556d377a4e8e25caadf77",
@@ -241,9 +278,9 @@ const DataTable = () => {
                     <a
                       href={onChart}
                       target="_blank"
-                      style={{fontSize:"13px"}}
+                      style={{ fontSize: "13px" }}
                     >
-                      $ {Price}
+                      $ {formatPrice(Price)}
                     </a>
                   </td>
                   <td className="text-success">{Liquidity}</td>
