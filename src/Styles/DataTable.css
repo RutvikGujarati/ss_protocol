@@ -15,14 +15,9 @@
   color: #f8f9fa; /* Light text */
   cursor: default !important;
 }
-.price-up {
-	color: green;
-  }
-  
-  .price-down {
-	color: red;
-  }
-  
+.font-color {
+  color: white;
+}
 .table td {
   font-size: small;
 }
@@ -123,84 +118,83 @@ table.table-dark tbody tr:last-child td:last-child {
   transform: scale(1.05); /* Slightly scale up the element */
 }
 
-.nameImage img{
+.nameImage img {
   /* border-radius: 50%; */
   width: 40px;
   height: 40px;
 }
-.nameImage{
-	cursor: pointer;
+.nameImage {
+  cursor: pointer;
 }
 
-.nameImage img:hover{
+.nameImage img:hover {
   transform: scale(2);
   transition: transform 0.5s ease;
 }
 
-.datatablemarginbottom{
+.datatablemarginbottom {
   margin-bottom: 70px;
 }
 .popup-overlay {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0, 0, 0, 0.5);
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	z-index: 1000;
-  }
-  
-  .popup-content {
-	background: black;
-	padding: 20px;
-  border: 1px solid #FFFFFF26;
-	border-radius: 8px;
-	text-align: center;
-	width: 500px;
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
-  .popup-button {
-	margin-top: 10px;
+.popup-content {
+  background: black;
+  padding: 20px;
+  border: 1px solid #ffffff26;
+  border-radius: 8px;
+  text-align: center;
+  width: 500px;
+}
+
+.popup-button {
+  margin-top: 10px;
   border-radius: 20px;
   width: 50%;
   border: none;
   background: #333;
   font-size: 16px;
   font-weight: 600;
-  }
+}
 
-  .popup-button:hover{
-    background: #2c2e33;
-  }
+.popup-button:hover {
+  background: #2c2e33;
+}
 
-  .popup-header{
-	  margin-bottom: 10px;
-    font-size: 30px;
-    font-weight: bold;
-  }
+.popup-header {
+  margin-bottom: 10px;
+  font-size: 30px;
+  font-weight: bold;
+}
 
-  .popup-para{
-    font-size: 16px;
-    padding: 10px 0px;
-  }
-  
-  .tableClaim.disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-  }
+.popup-para {
+  font-size: 16px;
+  padding: 10px 0px;
+}
 
-  @media (max-width: 768px) {
-    .popup-content {
-      width: 300px;
-      margin: 0 15px;
-      }
-  }
+.tableClaim.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-  .img-inline {
-	color: red;
-	margin-left: 53px;
+@media (max-width: 768px) {
+  .popup-content {
+    width: 300px;
+    margin: 0 15px;
   }
-  
+}
+
+.img-inline {
+  color: red;
+  margin-left: 53px;
+}

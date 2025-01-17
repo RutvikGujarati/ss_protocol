@@ -279,6 +279,7 @@ const DataTable = () => {
                       href={onChart}
                       target="_blank"
                       style={{ fontSize: "13px" }}
+					  className="font-color"
                     >
                       $ {formatPrice(Price)}
                     </a>
