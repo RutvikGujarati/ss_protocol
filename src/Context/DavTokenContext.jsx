@@ -870,23 +870,23 @@ export const DAVTokenProvider = ({ children }) => {
         // (s) => ethers.formatUnits(s, 18)
       );
 
-      const rawXerionBalance = await handleContractCall(
-        RatioContract,
-        "calculateAmountOut",
-        [onePercentValue, Xerion, STATE_TOKEN_ADDRESS]
-        // (s) => ethers.formatUnits(s, 18)
-      );
+    //   const rawXerionBalance = await handleContractCall(
+    //     RatioContract,
+    //     "calculateAmountOut",
+    //     [onePercentValue, Xerion, STATE_TOKEN_ADDRESS]
+    //     // (s) => ethers.formatUnits(s, 18)
+    //   );
 
       const balance = parseFloat(rawFluxinBalance || "0");
-      const XerionBalance = parseFloat(rawXerionBalance || "0");
+    //   const XerionBalance = parseFloat(rawXerionBalance || "0");
 
-      console.log("AmountOut -> Raw Xerion Balance:", rawXerionBalance);
+    //   console.log("AmountOut -> Raw Xerion Balance:", rawXerionBalance);
 
       console.log("AmountOut -> Raw Fluxin Balance:", onePercentFluxinValue);
       // Update the state
       setOutBalance({
         Fluxin: balance,
-        Xerion: XerionBalance,
+        // Xerion: XerionBalance,
       });
     } catch (e) {
       console.error("Error fetching AmountOut balances:", e);
@@ -929,15 +929,15 @@ export const DAVTokenProvider = ({ children }) => {
         "RatioTarget",
         [Fluxin, STATE_TOKEN_ADDRESS]
       );
-      const RatioTargetXerion = await handleContractCall(
-        RatioContract,
-        "RatioTarget",
-        [Xerion, STATE_TOKEN_ADDRESS]
-      );
+    //   const RatioTargetXerion = await handleContractCall(
+    //     RatioContract,
+    //     "RatioTarget",
+    //     [Xerion, STATE_TOKEN_ADDRESS]
+    //   );
 
       SetRatioTarget({
         Fluxin: RatioTargetFluxin,
-        Xerion: RatioTargetXerion,
+        // Xerion: RatioTargetXerion,
       }); // Update state with the formatted time
     } catch (e) {
       console.error("Error fetching ratio targets:", e);
