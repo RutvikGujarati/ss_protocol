@@ -9,12 +9,12 @@ import { PriceContext } from "../api/StatePrice";
 
 const DAVTokenContext = createContext();
 //0xd75fA7c2380f539320F9ABD29D09f48DbEB0E13E
-export const DAV_TOKEN_ADDRESS = "0x03b7Ce78A68E2f98C072C736b451D51F00C833c6";
-export const STATE_TOKEN_ADDRESS = "0x63CC0B2CA22b260c7FD68EBBaDEc2275689A3969";
-export const Ratio_TOKEN_ADDRESS = "0xb8810E0715B60687b0391379e15ce1EAdcE08aaB";
+export const DAV_TOKEN_ADDRESS = "0xDBfb087D16eF29Fd6c0872C4C0525B38fBAEB319";
+export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
+export const Ratio_TOKEN_ADDRESS = "0xcFF440eB3591b0901E0eF54b43a2358f2387Cb96";
 
-export const Fluxin = "0x6F01eEc1111748B66f735944b18b0EB2835aE201";
-export const Xerion = "0xb9664dE2E15b24f5e934e66c72ad9329469E3642";
+export const Fluxin = "0xdE45C7EEED1E776dC266B58Cf863b9B9518cb7aa";
+export const Xerion = "0xaB4Adc70B8EB38867Db8bA9d718eC31D67913d86";
 
 export const Xerion2 = "0x3391c40E62499Aa498503902b8712195db2624DD";
 export const Xerion3 = "0x4a169d0e0dEF9C1a6a6ab3BBf6870371C830626D";
@@ -22,7 +22,7 @@ export const Xerion3 = "0x4a169d0e0dEF9C1a6a6ab3BBf6870371C830626D";
 export const useDAVToken = () => useContext(DAVTokenContext);
 
 export const DAVTokenProvider = ({ children }) => {
-  const { stateUsdPrice, error } = useContext(PriceContext);
+  const { stateUsdPrice, FluxinRatioPrice } = useContext(PriceContext);
 
   //contract initialization states
   const [provider, setProvider] = useState(null);
@@ -44,12 +44,13 @@ export const DAVTokenProvider = ({ children }) => {
   const [RatioContract, setRatioContract] = useState(null);
 
   const [TotalCost, setTotalCost] = useState(null);
-  const [CurrentSReward, setCurrentSReward] = useState(null);
   const [AuctionRunning, setIsAuctionRunning] = useState(false);
   const [ButtonText, setButtonText] = useState("");
   const [davHolds, setDavHoldings] = useState("0.0");
   const [StateHolds, setStateHoldings] = useState("0.0");
+
   const [TotalStateHoldsInUS, setTotalStateHoldsInUS] = useState("0.00");
+
   const [davPercentage, setDavPercentage] = useState("0.0");
   const [Supply, setSupply] = useState("0.0");
   const [StateSupply, setStateSupply] = useState("0.0");
@@ -57,17 +58,12 @@ export const DAVTokenProvider = ({ children }) => {
   const [XerionSupply, setXerionSupply] = useState("0.0");
   const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
   const [DAVTokensFiveWithdraw, setFiveAvTokens] = useState("0.0");
-  const [LastLiquidity, setLastLiquidityTransaction] = useState("0.0");
-  const [LastDevShare, setLastDevShare] = useState("0.0");
-  const [Batch, setBatch] = useState("0.0");
-  const [BatchAmount, setBatchAmount] = useState("0.0");
   const [StateBalance, setStateBalance] = useState("0.0");
   const [FluxinBalance, setFluxinBalance] = useState("0.0");
   const [XerionBalance, setXerionBalance] = useState("0.0");
   const [PercentageOfState, setPercentage] = useState("0.0");
   const [PercentageFluxin, setFluxinPercentage] = useState("0.0");
   const [PercentageXerion, setXerionPercentage] = useState("0.0");
-  const [StateReward, setStateReward] = useState("0");
   const [Distributed, setViewDistributed] = useState({
     state: "0.0",
     Fluxin: "0.0",
@@ -75,16 +71,13 @@ export const DAVTokenProvider = ({ children }) => {
     xerion2: "0.0",
     xerion3: "0.0",
   });
-  const [tokenNames, setTokenNames] = useState({});
   const [StateBurned, setStateBurnAMount] = useState("0.0");
 
-  const [ListedTokenBurned, setListedTokenBurnAMount] = useState("0.0");
-  const [OneListedTokenBurned, setOneListedTokenBurnAMount] = useState("0.0");
-  const [BurnTokenRatio, setBurnAMountRatio] = useState("0.0");
-  const [LPStateTransferred, setLPStateTransferred] = useState("0.0");
-
-  const [StateBurnedRatio, setStateBurnRatio] = useState("0.0");
-  const [RatioTargetAmount, setRatioTargetAmount] = useState("0.0");
+  const [AuctionTime, SetAuctionTime] = useState("0");
+  const [RatioValues, SetRatioTarget] = useState({
+    Fluxin: "0",
+    Xerion: "0",
+  });
 
   useEffect(() => {
     const initialize = async () => {
@@ -224,36 +217,54 @@ export const DAVTokenProvider = ({ children }) => {
     );
     setDavHoldings(holdings);
   };
-  const StateHoldings = async () => {
+  const fetchStateHoldingsAndCalculateUSD = async () => {
     try {
       const holdings = await handleContractCall(
         stateContract,
         "balanceOf",
         [account],
-        (h) => ethers.formatUnits(h, 18)
+        (h) => ethers.formatUnits(h, 18) // This formats from Wei to Ether
       );
 
       if (holdings) {
+        // First convert the formatted string to a number
+        const rawHoldings = parseFloat(holdings); // Using parseFloat since formatUnits returns a string
+        const priceNum = Number(stateUsdPrice);
+
+        // Set the raw holdings and formatted holdings
         const formattedHoldings = new Intl.NumberFormat("en-US").format(
-          holdings
+          rawHoldings
         );
+        // setRawStateHolds(rawHoldings);
         setStateHoldings(formattedHoldings);
+
+        console.log("Raw holdings (in Ether):", rawHoldings);
+        console.log("Price of token:", priceNum);
+
+        // Calculate USD value
+        if (!isNaN(rawHoldings) && !isNaN(priceNum)) {
+          console.log("second time raw", Number(rawHoldings));
+          const holdingsInUSD = Number(rawHoldings * priceNum);
+          console.log("Holdings in USD:", holdingsInUSD);
+          setTotalStateHoldsInUS(
+            holdingsInUSD === 0 ? "0.0" : holdingsInUSD.toFixed(2)
+          );
+        } else {
+          console.error("Invalid values for calculation:", {
+            rawHoldings,
+            priceNum,
+          });
+          setTotalStateHoldsInUS("0.0");
+        }
       } else {
+        setStateHoldings("0");
+        setTotalStateHoldsInUS("0.0");
         console.error("Failed to fetch state holdings.");
       }
     } catch (error) {
-      console.error("Error fetching state holdings:", error);
-    }
-  };
-
-  const stateHoldingsInUsd = async () => {
-    const priceOfToken = await stateUsdPrice;
-    const holdings = priceOfToken * StateHolds;
-
-    if (holdings == 0) {
+      setStateHoldings("0");
       setTotalStateHoldsInUS("0.0");
-    } else {
-      setTotalStateHoldsInUS(holdings);
+      console.error("Error fetching state holdings:", error);
     }
   };
   const DavHoldingsPercentage = async () => {
@@ -380,16 +391,14 @@ export const DAVTokenProvider = ({ children }) => {
             DavHoldingsPercentage().catch((error) =>
               console.error("Error fetching DavHoldingsPercentage:", error)
             ),
-            StateHoldings().catch((error) =>
+            fetchStateHoldingsAndCalculateUSD().catch((error) =>
               console.error("Error fetching StateHoldings:", error)
             ),
 
             DavSupply().catch((error) =>
               console.error("Error fetching DavSupply:", error)
             ),
-            stateHoldingsInUsd().catch((error) =>
-              console.error("Error in multiplying:", error)
-            ),
+
             getDecayPercentage("state").catch((error) =>
               console.error("Error fetching getDecayPercentage (state):", error)
             ),
@@ -454,6 +463,15 @@ export const DAVTokenProvider = ({ children }) => {
               console.error("Error fetching DAVTokenAmount:", error)
             ),
             DAVTokenfive_Amount().catch((error) =>
+              console.error("Error fetching DAVTokenfive_Amount:", error)
+            ),
+            AuctioTimeInterval().catch((error) =>
+              console.error("Error fetching DAVTokenfive_Amount:", error)
+            ),
+            RatioTargetValues(Fluxin, STATE_TOKEN_ADDRESS).catch((error) =>
+              console.error("Error fetching DAVTokenfive_Amount:", error)
+            ),
+            RatioTargetValues(Xerion, STATE_TOKEN_ADDRESS).catch((error) =>
               console.error("Error fetching DAVTokenfive_Amount:", error)
             ),
           ]);
@@ -604,13 +622,15 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error renouncing ownership for Xerion:", e);
     }
   };
-  const AddTokensToContract = async (TokenAddress) => {
+  const AddTokensToContract = async (TokenAddress, State, CurrenRatio) => {
     try {
-      await handleContractCall(RatioContract, "addSupportedToken", [
+      await handleContractCall(RatioContract, "addAuctionPair", [
         TokenAddress,
+        State,
+        CurrenRatio,
       ]);
     } catch (e) {
-      console.error("Error claiming tokens:", e);
+      console.error("Error Adding pairs of tokens:", e);
     }
   };
 
@@ -643,8 +663,6 @@ export const DAVTokenProvider = ({ children }) => {
     dav: davContract,
     Fluxin: FluxinContract,
     Xerion: XerionContract,
-    xerion2: Xerion2Contract,
-    xerion3: Xerion3Contract,
   };
   const CheckMintBalance = async (contract) => {
     try {
@@ -779,6 +797,44 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching LP tokens:", e);
     }
   };
+  const AuctioTimeInterval = async () => {
+    try {
+      const Time = await handleContractCall(
+        RatioContract,
+        "auctionInterval",
+        []
+      );
+
+      const timeInDays = Number(Time) / 86400;
+
+      SetAuctionTime(timeInDays); // Update state with the formatted time
+      console.log("Auction Time Interval in Days:", timeInDays);
+    } catch (e) {
+      console.error("Error fetching auction interval:", e);
+    }
+  };
+  const RatioTargetValues = async () => {
+    try {
+      const RatioTargetFluxin = await handleContractCall(
+        RatioContract,
+        "RatioTarget",
+        [Fluxin, STATE_TOKEN_ADDRESS]
+      );
+      const RatioTargetXerion = await handleContractCall(
+        RatioContract,
+        "RatioTarget",
+        [Xerion, STATE_TOKEN_ADDRESS]
+      );
+
+      SetRatioTarget({
+        Fluxin:RatioTargetFluxin,
+		Xerion:RatioTargetXerion,
+      }); // Update state with the formatted time
+    } catch (e) {
+      console.error("Error fetching ratio targets:", e);
+    }
+  };
+
   const fetchContractBalance = async (contract, tokenAddress, setState) => {
     try {
       const transaction = await handleContractCall(
@@ -846,26 +902,21 @@ export const DAVTokenProvider = ({ children }) => {
       );
     }
   };
-  const ERC20_ABI = [
-    "function allowance(address owner, address spender) view returns (uint256)",
-    "function approve(address spender, uint256 amount) returns (bool)",
-  ];
+  console.log("Contract functions:", RatioContract);
 
-  const SwapTokens = async (amount, InContract) => {
+  const SwapTokens = async (TokenAddress, amountIn, amountOut) => {
     try {
       // Step 0: Initial button state
       setButtonText("Checking allowance...");
 
       // Convert amount to wei
-      const amountInWei = ethers.parseUnits(amount.toString(), 18);
+      const amountInWei = ethers.parseUnits(amountIn.toString(), 18);
+      const amountInWeiOut = ethers.parseUnits(amountOut.toString(), 18);
+      let tokenInContract = contracts[TokenAddress];
 
-      // Get contract instance for `InContract`
-      const tokenInContract = new ethers.Contract(
-        InContract,
-        ERC20_ABI,
-        signer
-      );
-
+      if (!tokenInContract) {
+        throw new Error("Token contract not found for the given address");
+      }
       // Step 1: Check Allowance for `InContract`
       const allowanceIn = await tokenInContract.allowance(
         account,
@@ -873,7 +924,7 @@ export const DAVTokenProvider = ({ children }) => {
       );
 
       if (allowanceIn < amountInWei) {
-        // Step 2: Approve Tokens for `InContract`
+        // Step 2: Approve Tokens for input token
         setButtonText("Approving input token...");
         const approveTx = await tokenInContract.approve(
           RatioContract,
@@ -884,7 +935,6 @@ export const DAVTokenProvider = ({ children }) => {
       } else {
         console.log("Sufficient allowance already granted for input token.");
       }
-
       // Step 1: Check Allowance for `OutContract` (if necessary)
       const allowanceOut = await stateContract.allowance(
         account,
@@ -906,15 +956,11 @@ export const DAVTokenProvider = ({ children }) => {
 
       // Step 3: Call Swap Function
       setButtonText("Swapping...");
-      const ratioContract = new ethers.Contract(
-        RatioContract,
-        RatioABI,
-        signer
-      );
-      const tx = await ratioContract.swapTokens(
-        InContract,
-        STATE_TOKEN_ADDRESS,
-        amountInWei
+
+      const tx = await RatioContract.swapTokens(
+        tokenInContract,
+        amountInWei,
+        amountInWeiOut
       );
       await tx.wait();
 
@@ -983,48 +1029,6 @@ export const DAVTokenProvider = ({ children }) => {
     );
     setStateBurnAMount(amount);
   };
-  const calculateBurnAmount = async () => {
-    try {
-      const amount = await handleContractCall(
-        RatioContract,
-        "totalListedTokensDeposited",
-        [],
-        (s) => parseFloat(ethers.formatUnits(s, 18))
-      );
-      console.log("totalListedTokensDeposited:", amount);
-
-      const burnRatio = await StateBurnedRatio();
-      console.log(`Burned Ratio: ${burnRatio}`);
-
-      if (isNaN(burnRatio) || burnRatio <= 0) {
-        throw new Error("Burn ratio is invalid or not set.");
-      }
-
-      const totalAmount = amount * burnRatio;
-      setListedTokenBurnAMount(totalAmount.toFixed(7));
-      console.log("Calculated Burn Amount:", totalAmount);
-      return totalAmount.toFixed(18);
-    } catch (error) {
-      console.error("Error calculating burn amount:", error);
-    }
-  };
-
-  const calculateOnePercentBurnAmount = async () => {
-    try {
-      const totalBurnAmount = await calculateBurnAmount(); // Ensure calculateBurnAmount returns the total value
-      if (!totalBurnAmount || isNaN(totalBurnAmount)) {
-        throw new Error("Total burn amount is invalid or not calculated.");
-      }
-
-      const onePercentBurnAmount = totalBurnAmount * 0.01; // Calculate 1% of the total burn amount
-      console.log("1% of Burn Amount:", onePercentBurnAmount);
-      setOneListedTokenBurnAMount(onePercentBurnAmount.toFixed(6));
-      return onePercentBurnAmount.toFixed(18);
-    } catch (error) {
-      console.error("Error calculating 1% burn amount:", error);
-      return "0.0";
-    }
-  };
 
   //   const ratioOfBurn = async () => {
   //     try {
@@ -1091,16 +1095,46 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const setRatioTarget = async (numerator, denominator) => {
+  const setRatioTarget = async (TokenAddress, Target) => {
     try {
       // Call the contract to set both numerator and denominator
-      await handleContractCall(stateContract, "setRatioTarget", [
-        numerator,
-        denominator,
+      await handleContractCall(RatioContract, "setRatioTarget", [
+        TokenAddress,
+        STATE_TOKEN_ADDRESS,
+        Target,
       ]);
-      console.log(`Ratio target set to ${numerator}:${denominator}`);
+      console.log(`Ratio target set to ${TokenAddress}`);
     } catch (error) {
       console.error("Error setting ratio target:", error);
+    }
+  };
+  const DepositToken = async (TokenAddress, amount) => {
+    try {
+      const amountInWei = ethers.parseUnits(amount, 18);
+
+      await handleContractCall(
+        RatioContract,
+        "depositTokens",
+        [TokenAddress, amountInWei],
+        (s) => ethers.formatUnits(s, 18)
+      );
+      console.log(`Ratio target set to ${TokenAddress}`);
+    } catch (error) {
+      console.error("Error setting ratio target:", error);
+    }
+  };
+  const Approve = async (contractName) => {
+    try {
+      // Call the contract to set both numerator and denominator
+      await handleContractCall(
+        contracts[contractName],
+        "approve",
+        [RatioContract, "10000000000000000000000000000"],
+        (s) => ethers.formatUnits(s, 18)
+      );
+      console.log(`approved by ${RatioContract}`);
+    } catch (error) {
+      console.error("Error Approving :", error);
     }
   };
   //   const getRatioTarget = async () => {
@@ -1220,10 +1254,7 @@ export const DAVTokenProvider = ({ children }) => {
         releaseNextBatch,
         CalculationOfCost,
         TotalCost,
-        // GetStateRewards,
-        StateReward,
-        // GetCurrentStateReward,
-        CurrentSReward,
+
         setClaiming,
         DavHoldings,
         davHolds,
@@ -1231,13 +1262,12 @@ export const DAVTokenProvider = ({ children }) => {
         davPercentage,
         FluxinBalance,
         XerionBalance,
-        StateHoldings,
+        // StateHoldings,
         StateHolds,
         DavSupply,
         StateSupply,
         contracts,
         Supply,
-        LPStateTransferred,
         getBurnedSTATE,
         StartMarketPlaceListing,
         ClaimTokens,
@@ -1247,9 +1277,6 @@ export const DAVTokenProvider = ({ children }) => {
         HandleBurn,
         StateBurned,
         DavBalance,
-        StateBurnedRatio,
-        ListedTokenBurned,
-        OneListedTokenBurned,
         SwapTokens,
         ButtonText,
         ReanounceContract,
@@ -1257,19 +1284,16 @@ export const DAVTokenProvider = ({ children }) => {
         ReanounceXerionContract,
         RenounceState,
         MoveTokens,
-        LastLiquidity,
-        LastDevShare,
-        Batch,
-        BatchAmount,
+
         StateBalance,
-        BurnTokenRatio,
+
         handleAddToken,
         setRatioTarget,
         PercentageFluxin,
         PercentageXerion,
         FluxinSupply,
         XerionSupply,
-        RatioTargetAmount,
+
         AuctionRunning,
         WithdrawState,
         WithdrawFluxin,
@@ -1300,6 +1324,11 @@ export const DAVTokenProvider = ({ children }) => {
         XerionTransactionHash,
         TotalStateHoldsInUS,
         DAVTokensFiveWithdraw,
+
+        AuctionTime,
+        Approve,
+        DepositToken,
+        RatioValues,
       }}
     >
       {children}

@@ -2,12 +2,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DetailsInfo.css";
 import { Fluxin, useDAVToken, Xerion } from "../Context/DavTokenContext";
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   DAV_TOKEN_ADDRESS,
   STATE_TOKEN_ADDRESS,
   Ratio_TOKEN_ADDRESS,
 } from "../Context/DavTokenContext";
+import { PriceContext } from "../api/StatePrice";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -17,6 +18,9 @@ export const formatWithCommas = (value) => {
   return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger;
 };
 const DetailsInfo = ({ searchQuery, selectedToken }) => {
+  const { stateUsdPrice, FluxinRatioPrice, XerionRatioPrice } =
+    useContext(PriceContext);
+
   const {
     StartMarketPlaceListing,
     withdraw_95,
@@ -44,7 +48,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     ReanounceContract,
     davTransactionHash,
     stateTransactionHash,
-    fluxinTransactionHash,
+    DepositToken,
     XerionTransactionHash,
     Supply,
     isRenounced,
@@ -56,10 +60,14 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     StateBalance,
     FluxinBalance,
     XerionBalance,
+    AuctionTime,
     mintAdditionalTOkens,
     BatchAmount,
     // saveTokenName,
     LastDevShare,
+
+    AddTokensToContract,
+    Approve,
   } = useDAVToken();
 
   const [numerator, setNumerator] = useState("");
@@ -72,7 +80,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const auctionStatus = AuctionRunning ? "True" : "False";
 
   const AuthAddress =
-    "0xB511110f312a4C6C4a240b2fE94de55D600Df7a9".toLowerCase();
+    "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483".toLowerCase();
 
   // Fetch and update token data when the selectedToken changes
   const handleSetAddress = () => {
@@ -130,8 +138,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       percentage: PercentageFluxin,
       address: Fluxin,
       Balance: FluxinBalance,
+      pair: "Fluxin/pSTATE",
       claimLPToken: LPStateTransferred,
       mintAddTOkens: "250,000,000,000",
+      ApproveAmount: "10,000,000,000",
       transactionHash:
         "0xcc7e04c885a56607fbc2417a9f894bda0fbdd68418ce189168adcb1c10406208",
       renounceSmartContract: isRenounced?.Fluxin ?? "Unknown",
@@ -139,6 +149,11 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         ReanounceContract: ReanounceFluxinContract,
         WithdrawState: WithdrawFluxin,
         mintAdditionalTOkens: mintAdditionalTOkens,
+        AddTokenToContract: () =>
+          AddTokensToContract(Fluxin, STATE_TOKEN_ADDRESS, FluxinRatioPrice),
+        setRatio: (value) => setRatioTarget(Fluxin, value), // Fluxin token is pre-set here
+        Approval: (value) => Approve("Fluxin", value),
+        DepositTokens: (value) => DepositToken(Fluxin, value),
       },
     },
     {
@@ -150,13 +165,20 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       percentage: PercentageXerion,
       address: Xerion,
       Balance: XerionBalance,
+      pair: "Xerion/pSTATE",
       mintAddTOkens: "125,000,000,000",
+      ApproveAmount: "10,000,000,000",
       transactionHash: XerionTransactionHash,
       renounceSmartContract: isRenounced?.Xerion ?? "Unknown",
       actions: {
         ReanounceContract: ReanounceXerionContract,
         WithdrawState: WithdrawXerion,
         mintAdditionalTOkens: mintAdditionalTOkens,
+        AddTokenToContract: () =>
+          AddTokensToContract(Xerion, STATE_TOKEN_ADDRESS, XerionRatioPrice),
+        setRatio: (value) => setRatioTarget(Xerion, value),
+        Approval: (value) => Approve("Xerion", value),
+        DepositTokens: (value) => DepositToken(Xerion, value),
       },
     },
     {
@@ -178,6 +200,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
       mintAddTOkens: "1,000,000,000,000",
+      ApproveAmount: "10,000,000,000",
       transactionHash:
         "0xf562341d1f0f5469809553f07cd9f19da479a9af3b074d0982594899a6595b10",
 
@@ -186,17 +209,19 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         ReanounceContract: RenounceState,
         WithdrawState: WithdrawState,
         mintAdditionalTOkens: mintAdditionalTOkens,
+        Approval: (value) => Approve("state", value),
+        DepositTokens: (value) => DepositToken(STATE_TOKEN_ADDRESS, value),
       },
     },
   ];
   console.log("renounced ", stateTransactionHash);
-  const handleInputChange = (e, field) => {
+  const handleInputChange = (e) => {
     const value = e.target.value;
-    if (field === "numerator") {
-      setNumerator(value);
-    } else if (field === "denominator") {
-      setDenominator(value);
-    }
+    setNumerator(value);
+  };
+  const handleInputChangeofToken = (e) => {
+    const value = e.target.value;
+    setDenominator(value);
   };
   const handleInputChanged = (e) => {
     const rawValue = e.target.value.replace(/,/g, "");
@@ -285,41 +310,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     <td></td>
                   </tr>
 
-                  <tr>
-                    <td className="d-flex align-items-center">
-                      Ratio Target - Amend
-                    </td>
-                    <td>
-                      <div className="w-100">
-                        <input
-                          type="text"
-                          className="form-control text-center mh-30"
-                          placeholder="Numerator"
-                          value={numerator}
-                          onChange={(e) => handleInputChange(e, "numerator")}
-                        />
-                      </div>
-                    </td>
-                    <td>
-                      <div className="w-100">
-                        <input
-                          type="text"
-                          className="form-control text-center mh-30"
-                          placeholder="Denominator"
-                          value={Denominator}
-                          onChange={(e) => handleInputChange(e, "denominator")}
-                        />
-                      </div>
-                    </td>
-                    <td className="d-flex justify-content-end">
-                      <button
-                        // onClick={() => setRatioTarget(numerator, Denominator)}
-                        className="btn btn-primary btn-sm swap-btn info-icon"
-                      >
-                        Set
-                      </button>
-                    </td>
-                  </tr>
                   <tr>
                     <td className="d-flex align-items-center">Start Auction</td>
                     <td>
@@ -430,7 +420,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           <input
                             type="text"
                             className="form-control text-center mh-30"
-                            placeholder="Enter Days"
+                            placeholder={AuctionTime}
                             value={numerator}
                             onChange={(e) => handleInputChange(e, "numerator")}
                           />
@@ -445,22 +435,64 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                         </button>
                       </td>
                     </tr>
+                    {dataToShow.tokenName != "STATE" && (
+                      <>
+                        <tr>
+                          <td className="d-flex align-items-center">
+                            Add Pair into Main Contract
+                          </td>
+                          <td className="d-flex align-items-center justify-content-center">
+                            {dataToShow.pair}
+                          </td>
+                          <td className="d-flex justify-content-end">
+                            <button
+                              onClick={dataToShow.actions.AddTokenToContract}
+                              className="btn btn-primary btn-sm swap-btn info-icon"
+                            >
+                              Set
+                            </button>
+                          </td>
+                        </tr>
+                      </>
+                    )}
                     <tr>
-                      <td className="d-flex align-items-center">Add Tokens</td>
+                      <td className="d-flex align-items-center">
+                        Approve Main Contract
+                      </td>
+                      <td className="d-flex align-items-center justify-content-center">
+                        {dataToShow.ApproveAmount}
+                      </td>
+                      <td className="d-flex justify-content-end">
+                        <button
+                          onClick={() => dataToShow.actions.Approval()}
+                          className="btn btn-primary btn-sm swap-btn info-icon"
+                        >
+                          Set
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        Deposit into Main Contract
+                      </td>
                       <td>
                         <div className="w-100">
                           <input
                             type="text"
                             className="form-control text-center mh-30"
-                            placeholder="Enter Token Address"
-                            value={numerator}
-                            onChange={(e) => handleInputChange(e, "numerator")}
+                            placeholder="Enter amount"
+                            value={Denominator}
+                            onChange={(e) =>
+                              handleInputChangeofToken(e, "Denominator")
+                            }
                           />
                         </div>
                       </td>
                       <td className="d-flex justify-content-end">
                         <button
-                          //   onClick={()=>setRatioTarget(numerator, Denominator)}
+                          onClick={() =>
+                            dataToShow.actions.DepositTokens(Denominator)
+                          }
                           className="btn btn-primary btn-sm swap-btn info-icon"
                         >
                           Set
@@ -540,63 +572,16 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           <input
                             type="text"
                             className="form-control text-center mh-30"
-                            placeholder="Numerator"
+                            placeholder="Enter Target"
                             value={numerator}
                             onChange={(e) => handleInputChange(e, "numerator")}
                           />
                         </div>
                       </td>
-                      <td>
-                        <div className="w-100">
-                          <input
-                            type="text"
-                            className="form-control text-center mh-30"
-                            placeholder="Denominator"
-                            value={Denominator}
-                            onChange={(e) =>
-                              handleInputChange(e, "denominator")
-                            }
-                          />
-                        </div>
-                      </td>
+
                       <td className="d-flex justify-content-end">
                         <button
-                          //   onClick={()=>setRatioTarget(numerator, Denominator)}
-                          className="btn btn-primary btn-sm swap-btn info-icon"
-                        >
-                          Set
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="d-flex align-items-center">Burn Ratio</td>
-                      <td>
-                        <div className="w-100">
-                          <input
-                            type="text"
-                            className="form-control text-center mh-30"
-                            placeholder="Numerator"
-                            value={numerator}
-                            onChange={(e) => handleInputChange(e, "numerator")}
-                          />
-                        </div>
-                      </td>
-                      <td>
-                        <div className="w-100">
-                          <input
-                            type="text"
-                            className="form-control text-center mh-30"
-                            placeholder="Denominator"
-                            value={Denominator}
-                            onChange={(e) =>
-                              handleInputChange(e, "denominator")
-                            }
-                          />
-                        </div>
-                      </td>
-                      <td className="d-flex justify-content-end">
-                        <button
-                          onClick={() => setRatioTarget(numerator, Denominator)}
+                          onClick={() => dataToShow.actions.setRatio(numerator)}
                           className="btn btn-primary btn-sm swap-btn info-icon"
                         >
                           Set

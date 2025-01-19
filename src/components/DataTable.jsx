@@ -5,7 +5,11 @@ import FluxinLogo from "../assets/FluxinLogo.png";
 import stateLogo from "../assets/state_logo.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
-import { useDAVToken, Xerion } from "../Context/DavTokenContext";
+import {
+  STATE_TOKEN_ADDRESS,
+  useDAVToken,
+  Xerion,
+} from "../Context/DavTokenContext";
 import { useContext, useEffect, useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
 import { Fluxin, Xerion2, Xerion3 } from "../Context/DavTokenContext";
@@ -13,8 +17,14 @@ import { PriceContext } from "../api/StatePrice";
 import axios from "axios";
 
 const DataTable = () => {
-  const { stateUsdPrice, error, XerionUsdPrice,XerionRatioPrice,FluxinRatioPrice, FluxinUsdPrice } =
-    useContext(PriceContext);
+  const {
+    stateUsdPrice,
+    error,
+    XerionUsdPrice,
+    XerionRatioPrice,
+    FluxinRatioPrice,
+    FluxinUsdPrice,
+  } = useContext(PriceContext);
 
   const {
     SwapTokens,
@@ -22,6 +32,7 @@ const DataTable = () => {
     CheckMintBalance,
     // claiming,
     contracts,
+	RatioValues,
     Distributed,
     DavBalance,
     ClaimTokens,
@@ -93,9 +104,11 @@ const DataTable = () => {
     return `$${parseFloat(price).toFixed(7)}`;
   };
 
-  const Swapping = async (id, token) => {
-    setSwappingStates((prev) => ({ ...prev, [id]: true })); // Set swapping state for specific button
-    await SwapTokens("1", token);
+  const Swapping = async (id, ratioPrice) => {
+    setSwappingStates((prev) => ({ ...prev, [id]: true }));
+    console.log("token id", id);
+	const ratio = ratioPrice *2
+    await SwapTokens(id,ratio,"1");
     setSwappingStates((prev) => ({ ...prev, [id]: false })); // Reset swapping state
   };
 
@@ -138,10 +151,6 @@ const DataTable = () => {
                   "https://www.geckoterminal.com/pulsechain/pools/0x894fd7d05fe360a1d713c10b0e356af223fde88c",
                 handleAddXerion: handleAddTokenState,
                 distributedAmount: Distributed["state"],
-                // ratio: "1:1",
-                // token: null,
-                // inputTokenAmount: "0.0",
-                // outputToken: "0.0",
               },
               {
                 id: "Fluxin",
@@ -149,17 +158,17 @@ const DataTable = () => {
                 Pname: "Fluxin",
                 ContractName: "Fluxin",
                 image: FluxinLogo,
-                ratio: "1:1",
+                ratio: `1:${RatioValues.Fluxin}`,
                 currentRatio: `1:${FluxinRatioPrice}`,
                 Price: FluxinUsdPrice,
                 onChart:
                   "https://www.geckoterminal.com/pulsechain/pools/0x361afa3f5ef839bed6071c9f0c225b078eb8089a",
-                // Liquidity: "0.0",
                 distributedAmount: Distributed["Fluxin"],
                 token: Fluxin,
                 handleAddXerion: handleAddFluxin,
-                inputTokenAmount: "0.0 Fluxin",
-                outputToken: "0.0 State",
+                inputTokenAmount: "1 Fluxin",
+				ratioPrice: FluxinRatioPrice,
+                outputToken: `${FluxinRatioPrice*2} State`,
               },
               {
                 id: "Xerion",
@@ -167,7 +176,7 @@ const DataTable = () => {
                 Pname: "Xerion",
                 ContractName: "Xerion",
                 image: XerionLogo,
-                ratio: "1:1",
+                ratio: `1:${RatioValues.Xerion}`,
                 currentRatio: `1:${XerionRatioPrice}`,
                 Price: XerionUsdPrice,
                 onChart:
@@ -175,36 +184,11 @@ const DataTable = () => {
                 // Liquidity: "0.0",
                 distributedAmount: Distributed["Xerion"],
                 token: Xerion,
+				ratioPrice: XerionRatioPrice,
                 handleAddXerion: handleAddXerion,
-                inputTokenAmount: "0.0 Xerion",
-                outputToken: "0.0 State",
+                inputTokenAmount: "1 Xerion",
+                outputToken: `${XerionRatioPrice * 2} State`,
               },
-              //   {
-              //     id: "xerion2",
-              //     name: "Xerion2",
-              //     Pname: "Xerion2",
-              //     ContractName: "xerion2",
-              //     distributedAmount: Distributed["xerion2"],
-              //     handleAddXerion: handleAddXerion2,
-              //     image: XerionLogo,
-              //     ratio: "1:1",
-              //     token: Xerion2,
-              //     inputTokenAmount: 1,
-              //     outputToken: 1,
-              //   },
-              //   {
-              //     id: "xerion3",
-              //     name: "Xerion3",
-              //     Pname: "Xerion3",
-              //     ContractName: "xerion3",
-              //     distributedAmount: Distributed["xerion3"],
-              //     handleAddXerion: handleAddXerion3,
-              //     image: XerionLogo,
-              //     ratio: "1:1",
-              //     token: Xerion3,
-              //     inputTokenAmount: 1,
-              //     outputToken: 1,
-              //   },
             ].map(
               (
                 {
@@ -218,8 +202,8 @@ const DataTable = () => {
                   Liquidity,
                   Price,
                   onChart,
+				  ratioPrice,
                   distributedAmount,
-                  token,
                   inputTokenAmount,
                   handleAddXerion,
                   outputToken,
@@ -279,7 +263,7 @@ const DataTable = () => {
                       href={onChart}
                       target="_blank"
                       style={{ fontSize: "13px" }}
-					  className="font-color"
+                      className="font-color"
                     >
                       $ {formatPrice(Price)}
                     </a>
@@ -320,11 +304,10 @@ const DataTable = () => {
                   )}
                   <td>
                     <div className="d-flex align-items-center gap-2">
-                      {id !== "state" && ( // Only show the button for non-state tokens
+                      {id !== "state" && (
                         <button
-                          onClick={() => Swapping(id, token)}
-                          //   disabled={swappingStates[id]}
-                          disabled={true}
+                          onClick={() => Swapping(name,ratioPrice)} // Just pass the id, no need for token
+                          disabled={swappingStates[id]}
                           className="btn btn-primary btn-sm swap-btn"
                         >
                           {swappingStates[id] ? "Swapping..." : "Swap"}
