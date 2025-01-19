@@ -67,6 +67,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     LastDevShare,
 
     AddTokensToContract,
+    StartAuction,
     Approve,
   } = useDAVToken();
 
@@ -80,7 +81,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const auctionStatus = AuctionRunning ? "True" : "False";
 
   const AuthAddress =
-    "0xB1bD9F3B5F64dE482485A41c84ea4a90DAc5F98e".toLowerCase();
+    "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483".toLowerCase();
 
   // Fetch and update token data when the selectedToken changes
   const handleSetAddress = () => {
@@ -139,6 +140,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       address: Fluxin,
       Balance: FluxinBalance,
       pair: "Fluxin/pSTATE",
+      Ratio: FluxinRatioPrice,
       claimLPToken: LPStateTransferred,
       mintAddTOkens: "250,000,000,000",
       ApproveAmount: "10,000,000,000",
@@ -164,6 +166,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       Supply: XerionSupply,
       percentage: PercentageXerion,
       address: Xerion,
+      Ratio: XerionRatioPrice,
+
       Balance: XerionBalance,
       pair: "Xerion/pSTATE",
       mintAddTOkens: "125,000,000,000",
@@ -211,6 +215,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         mintAdditionalTOkens: mintAdditionalTOkens,
         Approval: (value) => Approve("state", value),
         DepositTokens: (value) => DepositToken(STATE_TOKEN_ADDRESS, value),
+        StartingAuction: StartAuction,
       },
     },
   ];
@@ -449,9 +454,18 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               onClick={dataToShow.actions.AddTokenToContract}
                               className="btn btn-primary btn-sm swap-btn info-icon"
                             >
-                              Set
+                              Add
                             </button>
                           </td>
+                        </tr>
+                        <tr>
+                          <td className="d-flex align-items-center">
+                            Current Ratio
+                          </td>
+                          <td className="d-flex align-items-center justify-content-center">
+                            {`1:${dataToShow.Ratio}`}
+                          </td>
+                          <td></td>
                         </tr>
                       </>
                     )}
@@ -467,10 +481,29 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           onClick={() => dataToShow.actions.Approval()}
                           className="btn btn-primary btn-sm swap-btn info-icon"
                         >
-                          Set
+                          Approve
                         </button>
                       </td>
                     </tr>
+                    {dataToShow.tokenName == "STATE" && (
+                      <tr>
+                        <td className="d-flex align-items-center">
+                          Start Auction For all pairs{" "}
+                        </td>
+                        <td className="d-flex align-items-center justify-content-center">
+                          Start After Adding token pairs
+                        </td>
+                        <td className="d-flex justify-content-end">
+                          <button
+                            onClick={() => dataToShow.actions.StartingAuction()}
+                            className="btn btn-primary btn-sm swap-btn info-icon"
+                          >
+                            Start
+                          </button>
+                        </td>
+                      </tr>
+                    )}
+
                     <tr>
                       <td className="d-flex align-items-center">
                         Deposit into Main Contract
@@ -495,19 +528,11 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           }
                           className="btn btn-primary btn-sm swap-btn info-icon"
                         >
-                          Set
+                          Deposit
                         </button>
                       </td>
                     </tr>
-                    <tr>
-                      <td className="d-flex align-items-center">
-                        Current Ratio
-                      </td>
-                      <td className="d-flex align-items-center justify-content-center">
-                        {"0:0"}
-                      </td>
-                      <td></td>
-                    </tr>
+
                     <tr>
                       <td className="d-flex align-items-center">
                         {dataToShow.tokenName.toLowerCase() === "state"

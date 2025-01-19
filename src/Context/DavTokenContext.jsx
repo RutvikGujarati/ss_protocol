@@ -11,10 +11,10 @@ const DAVTokenContext = createContext();
 //0xd75fA7c2380f539320F9ABD29D09f48DbEB0E13E
 export const DAV_TOKEN_ADDRESS = "0xDBfb087D16eF29Fd6c0872C4C0525B38fBAEB319";
 export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
-export const Ratio_TOKEN_ADDRESS = "0xcFF440eB3591b0901E0eF54b43a2358f2387Cb96";
+export const Ratio_TOKEN_ADDRESS = "0x53b6b52F9dB6bA7Ae0153547Db6B951d1904C589";
 
 export const Fluxin = "0xdE45C7EEED1E776dC266B58Cf863b9B9518cb7aa";
-export const Xerion = "0xaB4Adc70B8EB38867Db8bA9d718eC31D67913d86";
+export const Xerion = "0xda5eF27FE698970526dFA7E47E824A843907AC71";
 
 export const Xerion2 = "0x3391c40E62499Aa498503902b8712195db2624DD";
 export const Xerion3 = "0x4a169d0e0dEF9C1a6a6ab3BBf6870371C830626D";
@@ -57,6 +57,17 @@ export const DAVTokenProvider = ({ children }) => {
   const [FluxinSupply, setFluxinSupply] = useState("0.0");
   const [XerionSupply, setXerionSupply] = useState("0.0");
   const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
+  const [FluxinBalanceN, setnoramalFluxin] = useState("0.0");
+  const [OnePBalance, setOnePBalance] = useState({
+    Fluxin: "0",
+    Xerion: "0",
+    formattedFluxin: "0",
+    formattedXerion: "0",
+  });
+  const [OutBalance, setOutBalance] = useState({
+    Fluxin: "0",
+    Xerion: "0",
+  });
   const [DAVTokensFiveWithdraw, setFiveAvTokens] = useState("0.0");
   const [StateBalance, setStateBalance] = useState("0.0");
   const [FluxinBalance, setFluxinBalance] = useState("0.0");
@@ -462,6 +473,12 @@ export const DAVTokenProvider = ({ children }) => {
             DAVTokenAmount().catch((error) =>
               console.error("Error fetching DAVTokenAmount:", error)
             ),
+            SetOnePercentageOfBalance().catch((error) =>
+              console.error("Error fetching DAVTokenAmount:", error)
+            ),
+            AmountOut().catch((error) =>
+              console.error("Error fetching DAVTokenAmount:", error)
+            ),
             DAVTokenfive_Amount().catch((error) =>
               console.error("Error fetching DAVTokenfive_Amount:", error)
             ),
@@ -784,6 +801,98 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching LP tokens:", e);
     }
   };
+
+  const SetOnePercentageOfBalance = async () => {
+    try {
+      // Fetch balances from the contract
+      const rawFluxinBalance = await handleContractCall(
+        RatioContract,
+        "getOnepercentOfUserBalance",
+        [Fluxin, account],
+        (s) => ethers.formatUnits(s, 18)
+      );
+
+      const rawXerionBalance = await handleContractCall(
+        RatioContract,
+        "getOnepercentOfUserBalance",
+        [Xerion, account],
+        (s) => ethers.formatUnits(s, 18)
+      );
+
+      const balance = Math.floor(parseFloat(rawFluxinBalance || "0") * 100);
+      const XerionBalance = Math.floor(
+        parseFloat(rawXerionBalance || "0") * 100
+      );
+
+      console.log("SetOnePercentageOfBalance -> Fluxin:", balance);
+      console.log("SetOnePercentageOfBalance -> Xerion:", XerionBalance);
+
+      // Update the state
+      setOnePBalance({
+        Fluxin: balance,
+        Xerion: XerionBalance.toString(),
+        formattedFluxin: rawFluxinBalance || "0",
+        formattedXerion: rawXerionBalance || "0",
+      });
+    } catch (e) {
+      console.error("Error fetching One Percentage balance of tokens:", e);
+    }
+  };
+
+  const AmountOut = async () => {
+    try {
+      const balanceOFuser = await handleContractCall(
+        XerionContract,
+        "balanceOf",
+        [account],
+        (s) => ethers.formatUnits(s, 18)
+      );
+      const balanceOFuserFluxin = await handleContractCall(
+        FluxinContract,
+        "balanceOf",
+        [account],
+        (s) => ethers.formatUnits(s, 18)
+      );
+
+      const balanceOfXerion = Math.floor(
+        parseFloat(balanceOFuser || "0") * 100
+      ).toString();
+      const FluxinBalance = Math.floor(
+        parseFloat(balanceOFuserFluxin || "0") * 100
+      ).toString();
+      const onePercentFluxinValue = (FluxinBalance * 1) / 100;
+      const onePercentValue = (balanceOfXerion * 1) / 100;
+
+      const rawFluxinBalance = await handleContractCall(
+        RatioContract,
+        "calculateAmountOut",
+        [onePercentFluxinValue, Fluxin, STATE_TOKEN_ADDRESS]
+        // (s) => ethers.formatUnits(s, 18)
+      );
+
+      const rawXerionBalance = await handleContractCall(
+        RatioContract,
+        "calculateAmountOut",
+        [onePercentValue, Xerion, STATE_TOKEN_ADDRESS]
+        // (s) => ethers.formatUnits(s, 18)
+      );
+
+      const balance = parseFloat(rawFluxinBalance || "0");
+      const XerionBalance = parseFloat(rawXerionBalance || "0");
+
+      console.log("AmountOut -> Raw Xerion Balance:", rawXerionBalance);
+
+      console.log("AmountOut -> Raw Fluxin Balance:", onePercentFluxinValue);
+      // Update the state
+      setOutBalance({
+        Fluxin: balance,
+        Xerion: XerionBalance,
+      });
+    } catch (e) {
+      console.error("Error fetching AmountOut balances:", e);
+    }
+  };
+
   const DAVTokenfive_Amount = async () => {
     try {
       const balance = await handleContractCall(
@@ -827,8 +936,8 @@ export const DAVTokenProvider = ({ children }) => {
       );
 
       SetRatioTarget({
-        Fluxin:RatioTargetFluxin,
-		Xerion:RatioTargetXerion,
+        Fluxin: RatioTargetFluxin,
+        Xerion: RatioTargetXerion,
       }); // Update state with the formatted time
     } catch (e) {
       console.error("Error fetching ratio targets:", e);
@@ -904,14 +1013,13 @@ export const DAVTokenProvider = ({ children }) => {
   };
   console.log("Contract functions:", RatioContract);
 
-  const SwapTokens = async (TokenAddress, amountIn, amountOut) => {
+  const SwapTokens = async (TokenAddress) => {
     try {
       // Step 0: Initial button state
       setButtonText("Checking allowance...");
 
       // Convert amount to wei
-      const amountInWei = ethers.parseUnits(amountIn.toString(), 18);
-      const amountInWeiOut = ethers.parseUnits(amountOut.toString(), 18);
+      const amountInWei = ethers.parseUnits(OutBalance.Fluxin.toString(), 18);
       let tokenInContract = contracts[TokenAddress];
 
       if (!tokenInContract) {
@@ -959,8 +1067,8 @@ export const DAVTokenProvider = ({ children }) => {
 
       const tx = await RatioContract.swapTokens(
         tokenInContract,
-        amountInWei,
-        amountInWeiOut
+        // amountInWei,
+        account
       );
       await tx.wait();
 
@@ -1119,6 +1227,15 @@ export const DAVTokenProvider = ({ children }) => {
         (s) => ethers.formatUnits(s, 18)
       );
       console.log(`Ratio target set to ${TokenAddress}`);
+    } catch (error) {
+      console.error("Error setting ratio target:", error);
+    }
+  };
+  const StartAuction = async () => {
+    try {
+      await handleContractCall(RatioContract, "startAuction", [], (s) =>
+        ethers.formatUnits(s, 18)
+      );
     } catch (error) {
       console.error("Error setting ratio target:", error);
     }
@@ -1329,6 +1446,9 @@ export const DAVTokenProvider = ({ children }) => {
         Approve,
         DepositToken,
         RatioValues,
+        OnePBalance,
+        OutBalance,
+		StartAuction,
       }}
     >
       {children}

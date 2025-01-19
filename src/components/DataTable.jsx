@@ -38,6 +38,8 @@ const DataTable = () => {
     ClaimTokens,
     handleAddFluxin,
     handleAddXerion,
+	OnePBalance,
+	OutBalance,
     handleAddXerion2,
     handleAddXerion3,
   } = useDAVToken();
@@ -104,11 +106,10 @@ const DataTable = () => {
     return `$${parseFloat(price).toFixed(7)}`;
   };
 
-  const Swapping = async (id, ratioPrice) => {
+  const Swapping = async (id,) => {
     setSwappingStates((prev) => ({ ...prev, [id]: true }));
     console.log("token id", id);
-	const ratio = ratioPrice *2
-    await SwapTokens(id,ratio,"1");
+    await SwapTokens(id);
     setSwappingStates((prev) => ({ ...prev, [id]: false })); // Reset swapping state
   };
 
@@ -166,9 +167,9 @@ const DataTable = () => {
                 distributedAmount: Distributed["Fluxin"],
                 token: Fluxin,
                 handleAddXerion: handleAddFluxin,
-                inputTokenAmount: "1 Fluxin",
+                inputTokenAmount: `${OnePBalance.Fluxin} Fluxin`,
 				ratioPrice: FluxinRatioPrice,
-                outputToken: `${FluxinRatioPrice*2} State`,
+                outputToken: `${OutBalance.Fluxin} State`,
               },
               {
                 id: "Xerion",
@@ -186,8 +187,8 @@ const DataTable = () => {
                 token: Xerion,
 				ratioPrice: XerionRatioPrice,
                 handleAddXerion: handleAddXerion,
-                inputTokenAmount: "1 Xerion",
-                outputToken: `${XerionRatioPrice * 2} State`,
+                inputTokenAmount: `${OnePBalance.Xerion} Xerion`,
+                outputToken: `${OutBalance.Xerion} State`,
               },
             ].map(
               (
@@ -306,7 +307,7 @@ const DataTable = () => {
                     <div className="d-flex align-items-center gap-2">
                       {id !== "state" && (
                         <button
-                          onClick={() => Swapping(name,ratioPrice)} // Just pass the id, no need for token
+                          onClick={() => Swapping(name)} // Just pass the id, no need for token
                           disabled={swappingStates[id]}
                           className="btn btn-primary btn-sm swap-btn"
                         >
