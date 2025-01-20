@@ -27,7 +27,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     AuctionRunning,
     withdraw_5,
     // ClaimLPTokens,
-    // AddTokens,
+    AddTokens,
     FluxinSupply,
     XerionSupply,
     // AddTokensToContract,
@@ -35,12 +35,15 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     WithdrawState,
     WithdrawFluxin,
     WithdrawXerion,
+	OutBalance,
+	OutBalanceXerion,
     account,
     mintStateTokens,
     mintFluxinTokens,
     LPStateTransferred,
     PercentageOfState,
     PercentageFluxin,
+    SetAUctionDuration,
     PercentageXerion,
     DAVTokensWithdraw,
     StateSupply,
@@ -60,6 +63,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     StateBalance,
     FluxinBalance,
     XerionBalance,
+
     AuctionTime,
     mintAdditionalTOkens,
     BatchAmount,
@@ -72,6 +76,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   } = useDAVToken();
 
   const [numerator, setNumerator] = useState("");
+  const [numeratorOfAUction, setNumeratorOfAuction] = useState("");
   const [Denominator, setDenominator] = useState("");
   const [StateToken, setState] = useState({
     raw: "",
@@ -139,9 +144,12 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       percentage: PercentageFluxin,
       address: Fluxin,
       Balance: FluxinBalance,
+      AuctionRunning: AuctionRunning.Fluxin,
       pair: "Fluxin/pSTATE",
       Ratio: FluxinRatioPrice,
       claimLPToken: LPStateTransferred,
+      SetDuration: () => SetAUctionDuration(),
+
       mintAddTOkens: "250,000,000,000",
       ApproveAmount: "10,000,000,000",
       transactionHash:
@@ -155,7 +163,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
           AddTokensToContract(Fluxin, STATE_TOKEN_ADDRESS, FluxinRatioPrice),
         setRatio: (value) => setRatioTarget(Fluxin, value), // Fluxin token is pre-set here
         Approval: (value) => Approve("Fluxin", value),
-        DepositTokens: (value) => DepositToken(Fluxin, value),
+        DepositTokens: (value) => DepositToken("Fluxin", Fluxin, value),
+        StartingAuction: StartAuction,
       },
     },
     {
@@ -167,6 +176,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       percentage: PercentageXerion,
       address: Xerion,
       Ratio: XerionRatioPrice,
+      AuctionRunning: AuctionRunning.Xerion,
 
       Balance: XerionBalance,
       pair: "Xerion/pSTATE",
@@ -177,12 +187,15 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       actions: {
         ReanounceContract: ReanounceXerionContract,
         WithdrawState: WithdrawXerion,
+        SetDuration: () => SetAUctionDuration(),
+
         mintAdditionalTOkens: mintAdditionalTOkens,
         AddTokenToContract: () =>
           AddTokensToContract(Xerion, STATE_TOKEN_ADDRESS, XerionRatioPrice),
         setRatio: (value) => setRatioTarget(Xerion, value),
         Approval: (value) => Approve("Xerion", value),
-        DepositTokens: (value) => DepositToken(Xerion, value),
+        DepositTokens: (value) => DepositToken("Xerion", Xerion, value),
+        StartingAuction: StartAuction,
       },
     },
     {
@@ -213,8 +226,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         ReanounceContract: RenounceState,
         WithdrawState: WithdrawState,
         mintAdditionalTOkens: mintAdditionalTOkens,
+        AddTokenToContract: () => AddTokens(),
         Approval: (value) => Approve("state", value),
-        DepositTokens: (value) => DepositToken(STATE_TOKEN_ADDRESS, value),
+        DepositTokens: (value) =>
+          DepositToken("state", STATE_TOKEN_ADDRESS, value),
         StartingAuction: StartAuction,
       },
     },
@@ -223,6 +238,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const handleInputChange = (e) => {
     const value = e.target.value;
     setNumerator(value);
+  };
+  const handleInputChangeAuction = (e) => {
+    const value = e.target.value;
+    setNumeratorOfAuction(value);
   };
   const handleInputChangeofToken = (e) => {
     const value = e.target.value;
@@ -283,56 +302,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               <td></td>
             </tr>
 
-            {dataToShow.tokenName !== "DAV" &&
-              dataToShow.tokenName !== "STATE" &&
-              dataToShow.tokenName !== "Fluxin" &&
-              dataToShow.tokenName !== "Xerion" && (
-                <>
-                  <tr>
-                    <td className="d-flex align-items-center">Ratio Target</td>
-                    <td className="d-flex align-items-center justify-content-center">
-                      {dataToShow.ratioTarget || ""}
-                    </td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td className="d-flex align-items-center">
-                      Auction Allocation
-                    </td>
-                    <td className="d-flex align-items-center justify-content-center">
-                      {dataToShow.auctionAllocation || ""}
-                    </td>
-                    <td></td>
-                  </tr>
-                  <tr>
-                    <td className="d-flex align-items-center">
-                      DAV Treasury Supply
-                    </td>
-                    <td className="d-flex align-items-center justify-content-center">
-                      {dataToShow.davTreasurySupply || ""}
-                    </td>
-                    <td></td>
-                  </tr>
-
-                  <tr>
-                    <td className="d-flex align-items-center">Start Auction</td>
-                    <td>
-                      <div className="tableClaim w-100">
-                        {dataToShow.startAuction || ""}
-                      </div>
-                    </td>
-                    <td className="d-flex justify-content-end">
-                      <button
-                        onClick={dataToShow.actions.startAuction}
-                        className="btn btn-primary btn-sm swap-btn info-icon"
-                      >
-                        SET
-                      </button>
-                    </td>
-                  </tr>
-                </>
-              )}
             {dataToShow.tokenName == "DAV" && (
               <>
                 <tr>
@@ -350,6 +319,42 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     {dataToShow.Supply || ""}
                   </td>
                   <td></td>
+                </tr>
+                <tr>
+                  <td className="d-flex align-items-center">
+                    Renounce Smart Contract
+                  </td>
+
+                  <td className="d-flex align-items-center justify-content-center">
+                    {dataToShow.renounceSmartContract == null
+                      ? "Loading..."
+                      : dataToShow.renounceSmartContract
+                      ? "Yes"
+                      : "No"}{" "}
+                  </td>
+                  <td className="d-flex justify-content-end">
+                    {dataToShow.renounceSmartContract ? (
+                      <button
+                        onClick={() =>
+                          window.open(
+                            `https://otter.pulsechain.com/tx/${dataToShow.transactionHash}`,
+                            "_blank",
+                            "noopener,noreferrer"
+                          )
+                        }
+                        className="btn btn-primary btn-sm swap-btn info-icon"
+                      >
+                        View
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => dataToShow.actions.ReanounceContract()}
+                        className="btn btn-primary btn-sm swap-btn info-icon"
+                      >
+                        Set
+                      </button>
+                    )}
+                  </td>
                 </tr>
                 {authorized && (
                   <>
@@ -414,125 +419,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   </td>
                   <td></td>
                 </tr>
-                {authorized ? (
+                {authorized && (
                   <>
-                    <tr>
-                      <td className="d-flex align-items-center">
-                        Auction Rate (in days)
-                      </td>
-                      <td>
-                        <div className="w-100">
-                          <input
-                            type="text"
-                            className="form-control text-center mh-30"
-                            placeholder={AuctionTime}
-                            value={numerator}
-                            onChange={(e) => handleInputChange(e, "numerator")}
-                          />
-                        </div>
-                      </td>
-                      <td className="d-flex justify-content-end">
-                        <button
-                          //   onClick={()=>setRatioTarget(numerator, Denominator)}
-                          className="btn btn-primary btn-sm swap-btn info-icon"
-                        >
-                          Set
-                        </button>
-                      </td>
-                    </tr>
-                    {dataToShow.tokenName != "STATE" && (
-                      <>
-                        <tr>
-                          <td className="d-flex align-items-center">
-                            Add Pair into Main Contract
-                          </td>
-                          <td className="d-flex align-items-center justify-content-center">
-                            {dataToShow.pair}
-                          </td>
-                          <td className="d-flex justify-content-end">
-                            <button
-                              onClick={dataToShow.actions.AddTokenToContract}
-                              className="btn btn-primary btn-sm swap-btn info-icon"
-                            >
-                              Add
-                            </button>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="d-flex align-items-center">
-                            Current Ratio
-                          </td>
-                          <td className="d-flex align-items-center justify-content-center">
-                            {`1:${dataToShow.Ratio}`}
-                          </td>
-                          <td></td>
-                        </tr>
-                      </>
-                    )}
-                    <tr>
-                      <td className="d-flex align-items-center">
-                        Approve Main Contract
-                      </td>
-                      <td className="d-flex align-items-center justify-content-center">
-                        {dataToShow.ApproveAmount}
-                      </td>
-                      <td className="d-flex justify-content-end">
-                        <button
-                          onClick={() => dataToShow.actions.Approval()}
-                          className="btn btn-primary btn-sm swap-btn info-icon"
-                        >
-                          Approve
-                        </button>
-                      </td>
-                    </tr>
-                    {dataToShow.tokenName == "STATE" && (
-                      <tr>
-                        <td className="d-flex align-items-center">
-                          Start Auction For all pairs{" "}
-                        </td>
-                        <td className="d-flex align-items-center justify-content-center">
-                          Start After Adding token pairs
-                        </td>
-                        <td className="d-flex justify-content-end">
-                          <button
-                            onClick={() => dataToShow.actions.StartingAuction()}
-                            className="btn btn-primary btn-sm swap-btn info-icon"
-                          >
-                            Start
-                          </button>
-                        </td>
-                      </tr>
-                    )}
-
-                    <tr>
-                      <td className="d-flex align-items-center">
-                        Deposit into Main Contract
-                      </td>
-                      <td>
-                        <div className="w-100">
-                          <input
-                            type="text"
-                            className="form-control text-center mh-30"
-                            placeholder="Enter amount"
-                            value={Denominator}
-                            onChange={(e) =>
-                              handleInputChangeofToken(e, "Denominator")
-                            }
-                          />
-                        </div>
-                      </td>
-                      <td className="d-flex justify-content-end">
-                        <button
-                          onClick={() =>
-                            dataToShow.actions.DepositTokens(Denominator)
-                          }
-                          className="btn btn-primary btn-sm swap-btn info-icon"
-                        >
-                          Deposit
-                        </button>
-                      </td>
-                    </tr>
-
                     <tr>
                       <td className="d-flex align-items-center">
                         {dataToShow.tokenName.toLowerCase() === "state"
@@ -588,74 +476,212 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                         </button>
                       </td>
                     </tr>
+                  </>
+                )}
+
+                <tr>
+                  <td className="d-flex align-items-center">
+                    Renounce Smart Contract
+                  </td>
+
+                  <td className="d-flex align-items-center justify-content-center">
+                    {dataToShow.renounceSmartContract == null
+                      ? "Loading..."
+                      : dataToShow.renounceSmartContract
+                      ? "Yes"
+                      : "No"}{" "}
+                  </td>
+                  <td className="d-flex justify-content-end">
+                    {dataToShow.renounceSmartContract ? (
+                      <button
+                        onClick={() =>
+                          window.open(
+                            `https://otter.pulsechain.com/tx/${dataToShow.transactionHash}`,
+                            "_blank",
+                            "noopener,noreferrer"
+                          )
+                        }
+                        className="btn btn-primary btn-sm swap-btn info-icon"
+                      >
+                        View
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => dataToShow.actions.ReanounceContract()}
+                        className="btn btn-primary btn-sm swap-btn info-icon"
+                      >
+                        Set
+                      </button>
+                    )}
+                  </td>
+                </tr>
+                {dataToShow.tokenName !== "STATE" && (
+                  <>
                     <tr>
                       <td className="d-flex align-items-center">
-                        Ratio Target
+                        Current Ratio
                       </td>
-                      <td>
-                        <div className="w-100">
-                          <input
-                            type="text"
-                            className="form-control text-center mh-30"
-                            placeholder="Enter Target"
-                            value={numerator}
-                            onChange={(e) => handleInputChange(e, "numerator")}
-                          />
-                        </div>
+                      <td className="d-flex align-items-center justify-content-center">
+                        {`1:${dataToShow.Ratio}`}
                       </td>
-
-                      <td className="d-flex justify-content-end">
-                        <button
-                          onClick={() => dataToShow.actions.setRatio(numerator)}
-                          className="btn btn-primary btn-sm swap-btn info-icon"
-                        >
-                          Set
-                        </button>
-                      </td>
+                      <td></td>
                     </tr>
+                  </>
+                )}
+                {authorized ? (
+                  <>
+                    <table className="table table-dark infoTable">
+                      <thead>
+                        <th className="fw-bold d-flex align-items-center uppercase">
+                          Auction Settings
+                        </th>
+                      </thead>
+
+                      {/* <tr>
+                        <td className="d-flex align-items-center">
+                          Approve Main Contract
+                        </td>
+                        <td className="d-flex align-items-center justify-content-center">
+                          {dataToShow.ApproveAmount}
+                        </td>
+                        <td className="d-flex justify-content-end">
+                          <button
+                            onClick={() => dataToShow.actions.Approval()}
+                            className="btn btn-primary btn-sm swap-btn info-icon"
+                          >
+                            Approve
+                          </button>
+                        </td>
+                      </tr> */}
+                      <tr>
+                        <td className="d-flex align-items-center">
+                          Add Token Into Contract
+                        </td>
+                        <td className="d-flex align-items-center justify-content-center">
+                          {dataToShow.name}
+                        </td>
+                        <td className="d-flex justify-content-end">
+                          <button
+                            onClick={dataToShow.actions.AddTokenToContract}
+                            className="btn btn-primary btn-sm swap-btn info-icon"
+                          >
+                            Add
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="d-flex align-items-center">
+                          Deposit into Main Contract
+                        </td>
+                        <td>
+                          <div className="w-100">
+                            <input
+                              type="text"
+                              className="form-control text-center mh-30"
+                              placeholder="Enter amount"
+                              value={Denominator}
+                              onChange={(e) =>
+                                handleInputChangeofToken(e, "Denominator")
+                              }
+                            />
+                          </div>
+                        </td>
+                        <td className="d-flex justify-content-end">
+                          <button
+                            onClick={() =>
+                              dataToShow.actions.DepositTokens(Denominator)
+                            }
+                            className="btn btn-primary btn-sm swap-btn info-icon"
+                          >
+                            Deposit
+                          </button>
+                        </td>
+                      </tr>
+
+                      {dataToShow.tokenName != "STATE" && (
+                        <>
+                          <tr>
+                            <td className="d-flex align-items-center">
+                              Auction Rate (in seconds)
+                            </td>
+                            <td>
+                              <div className="w-100">
+                                <input
+                                  type="text"
+                                  className="form-control text-center mh-30"
+                                  placeholder={AuctionTime}
+                                  value={numeratorOfAUction}
+                                  onChange={(e) =>
+                                    handleInputChangeAuction(e)
+                                  }
+                                />
+                              </div>
+                            </td>
+                            <td className="d-flex justify-content-end">
+                              <button
+                                  onClick={()=>SetAUctionDuration(numeratorOfAUction)}
+                                className="btn btn-primary btn-sm swap-btn info-icon"
+                              >
+                                Set
+                              </button>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="d-flex align-items-center">
+                              Ratio Target
+                            </td>
+                            <td>
+                              <div className="w-100">
+                                <input
+                                  type="text"
+                                  className="form-control text-center mh-30"
+                                  placeholder="Enter Target"
+                                  value={numerator}
+                                  onChange={(e) =>
+                                    handleInputChange(e, "numerator")
+                                  }
+                                />
+                              </div>
+                            </td>
+
+                            <td className="d-flex justify-content-end">
+                              <button
+                                onClick={() =>
+                                  dataToShow.actions.setRatio(numerator)
+                                }
+                                className="btn btn-primary btn-sm swap-btn info-icon"
+                              >
+                                Set
+                              </button>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="d-flex align-items-center">
+                              Start Auction For all pairs{" "}
+                            </td>
+                            <td className="d-flex align-items-center justify-content-center">
+                              {dataToShow.AuctionRunning}
+                            </td>
+                            <td className="d-flex justify-content-end">
+                              <button
+                                onClick={() =>
+                                  dataToShow.actions.StartingAuction()
+                                }
+                                className="btn btn-primary btn-sm swap-btn info-icon"
+                              >
+                                Start
+                              </button>
+                            </td>
+                          </tr>
+                        </>
+                      )}
+                    </table>
                   </>
                 ) : (
                   <></>
                 )}
               </>
             )}
-
-            <tr>
-              <td className="d-flex align-items-center">
-                Renounce Smart Contract
-              </td>
-
-              <td className="d-flex align-items-center justify-content-center">
-                {dataToShow.renounceSmartContract == null
-                  ? "Loading..."
-                  : dataToShow.renounceSmartContract
-                  ? "Yes"
-                  : "No"}{" "}
-              </td>
-              <td className="d-flex justify-content-end">
-                {dataToShow.renounceSmartContract ? (
-                  <button
-                    onClick={() =>
-                      window.open(
-                        `https://otter.pulsechain.com/tx/${dataToShow.transactionHash}`,
-                        "_blank",
-                        "noopener,noreferrer"
-                      )
-                    }
-                    className="btn btn-primary btn-sm swap-btn info-icon"
-                  >
-                    View
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => dataToShow.actions.ReanounceContract()}
-                    className="btn btn-primary btn-sm swap-btn info-icon"
-                  >
-                    Set
-                  </button>
-                )}
-              </td>
-            </tr>
           </tbody>
         </table>
       ) : (

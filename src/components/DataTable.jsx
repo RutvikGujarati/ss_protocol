@@ -40,6 +40,7 @@ const DataTable = () => {
     handleAddXerion,
 	OnePBalance,
 	OutBalance,
+	OutBalanceXerion,
     handleAddXerion2,
     handleAddXerion3,
   } = useDAVToken();
@@ -188,7 +189,7 @@ const DataTable = () => {
 				ratioPrice: XerionRatioPrice,
                 handleAddXerion: handleAddXerion,
                 inputTokenAmount: `${OnePBalance.Xerion} Xerion`,
-                outputToken: `${OutBalance.Xerion} State`,
+                outputToken: `${OutBalanceXerion.Xerion} State`,
               },
             ].map(
               (
