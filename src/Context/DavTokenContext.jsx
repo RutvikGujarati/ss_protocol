@@ -22,7 +22,7 @@ export const Xerion3 = "0x4a169d0e0dEF9C1a6a6ab3BBf6870371C830626D";
 export const useDAVToken = () => useContext(DAVTokenContext);
 
 export const DAVTokenProvider = ({ children }) => {
-  const { stateUsdPrice, FluxinRatioPrice } = useContext(PriceContext);
+  const { stateUsdPrice } = useContext(PriceContext);
 
   //contract initialization states
   const [provider, setProvider] = useState(null);
@@ -60,7 +60,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [FluxinSupply, setFluxinSupply] = useState("0.0");
   const [XerionSupply, setXerionSupply] = useState("0.0");
   const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
-  const [FluxinBalanceN, setnoramalFluxin] = useState("0.0");
+//   const [FluxinBalanceN, setnoramalFluxin] = useState("0.0");
   const [OnePBalance, setOnePBalance] = useState({
     Fluxin: "0",
     Xerion: "0",

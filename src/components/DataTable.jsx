@@ -6,20 +6,18 @@ import stateLogo from "../assets/state_logo.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import {
-  STATE_TOKEN_ADDRESS,
+//   STATE_TOKEN_ADDRESS,
   useDAVToken,
   Xerion,
 } from "../Context/DavTokenContext";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
-import { Fluxin, Xerion2, Xerion3 } from "../Context/DavTokenContext";
+import { Fluxin } from "../Context/DavTokenContext";
 import { PriceContext } from "../api/StatePrice";
-import axios from "axios";
 
 const DataTable = () => {
   const {
     stateUsdPrice,
-    error,
     XerionUsdPrice,
     XerionRatioPrice,
     FluxinRatioPrice,
@@ -41,8 +39,7 @@ const DataTable = () => {
 	OnePBalance,
 	OutBalance,
 	OutBalanceXerion,
-    handleAddXerion2,
-    handleAddXerion3,
+
   } = useDAVToken();
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
@@ -204,7 +201,6 @@ const DataTable = () => {
                   Liquidity,
                   Price,
                   onChart,
-				  ratioPrice,
                   distributedAmount,
                   inputTokenAmount,
                   handleAddXerion,
