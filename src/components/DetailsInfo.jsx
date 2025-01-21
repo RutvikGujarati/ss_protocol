@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from "react";
 import {
   DAV_TOKEN_ADDRESS,
   STATE_TOKEN_ADDRESS,
-//   Ratio_TOKEN_ADDRESS,
+  //   Ratio_TOKEN_ADDRESS,
 } from "../Context/DavTokenContext";
 import { PriceContext } from "../api/StatePrice";
 
@@ -18,8 +18,7 @@ export const formatWithCommas = (value) => {
   return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger;
 };
 const DetailsInfo = ({ searchQuery, selectedToken }) => {
-  const {  FluxinRatioPrice, XerionRatioPrice } =
-    useContext(PriceContext);
+  const { FluxinRatioPrice, XerionRatioPrice } = useContext(PriceContext);
 
   const {
     // StartMarketPlaceListing,
@@ -69,7 +68,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     BatchAmount,
     // saveTokenName,
     LastDevShare,
-
+    AuctionTimeRunning,
+	AuctionTimeXerionRunning,
     AddTokensToContract,
     StartAuction,
     Approve,
@@ -84,7 +84,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     formatted: "",
   });
   const [authorized, setAuthorized] = useState(false);
-//   const auctionStatus = AuctionRunning ? "True" : "False";
+  //   const auctionStatus = AuctionRunning ? "True" : "False";
 
   const AuthAddress =
     "0xB1bD9F3B5F64dE482485A41c84ea4a90DAc5F98e".toLowerCase();
@@ -104,7 +104,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     if (!address) return "";
     return `${address.slice(0, 6)}...${address.slice(-6)}`;
   };
-//   const shortened = shortenAddress(Ratio_TOKEN_ADDRESS);
+  //   const shortened = shortenAddress(Ratio_TOKEN_ADDRESS);
   const davShortened = shortenAddress(DAV_TOKEN_ADDRESS);
   const stateShortened = shortenAddress(STATE_TOKEN_ADDRESS);
   const FluxinShortened = shortenAddress(Fluxin);
@@ -150,6 +150,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       Ratio: FluxinRatioPrice,
       claimLPToken: LPStateTransferred,
       SetDuration: () => SetAUctionDuration(),
+      AuctionTimeRunning: AuctionTimeRunning,
 
       mintAddTOkens: "250,000,000,000",
       ApproveAmount: "10,000,000,000",
@@ -180,9 +181,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       address: Xerion,
       Ratio: XerionRatioPrice,
       AuctionRunning: AuctionRunning.Xerion,
-
       Balance: XerionBalance,
       pair: "Xerion/pSTATE",
+	  AuctionTimeRunning: AuctionTimeXerionRunning,
+
       mintAddTOkens: "125,000,000,000",
       ApproveAmount: "10,000,000,000",
       transactionHash: XerionTransactionHash,
@@ -530,6 +532,15 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                       </td>
                       <td className="d-flex align-items-center justify-content-center">
                         {`1:${dataToShow.Ratio}`}
+                      </td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        Time Left In auction{" "}
+                      </td>
+                      <td className="d-flex align-items-center justify-content-center">
+                        {dataToShow.AuctionTimeRunning}
                       </td>
                       <td></td>
                     </tr>

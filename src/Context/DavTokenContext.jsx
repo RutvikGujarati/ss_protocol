@@ -11,7 +11,7 @@ const DAVTokenContext = createContext();
 //0xd75fA7c2380f539320F9ABD29D09f48DbEB0E13E
 export const DAV_TOKEN_ADDRESS = "0xDBfb087D16eF29Fd6c0872C4C0525B38fBAEB319";
 export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
-export const Ratio_TOKEN_ADDRESS = "0x46Cc58450C3b759feEEe61d2A62AC57D4b3fbF25";
+export const Ratio_TOKEN_ADDRESS = "0x5a696F7E9885947f24D228CC2Ad7fCA32Cfb6574";
 
 export const Fluxin = "0xdE45C7EEED1E776dC266B58Cf863b9B9518cb7aa";
 export const Xerion = "0xda5eF27FE698970526dFA7E47E824A843907AC71";
@@ -60,7 +60,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [FluxinSupply, setFluxinSupply] = useState("0.0");
   const [XerionSupply, setXerionSupply] = useState("0.0");
   const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
-//   const [FluxinBalanceN, setnoramalFluxin] = useState("0.0");
+  //   const [FluxinBalanceN, setnoramalFluxin] = useState("0.0");
   const [OnePBalance, setOnePBalance] = useState({
     Fluxin: "0",
     Xerion: "0",
@@ -90,6 +90,8 @@ export const DAVTokenProvider = ({ children }) => {
   const [StateBurned, setStateBurnAMount] = useState("0.0");
 
   const [AuctionTime, SetAuctionTime] = useState("0");
+  const [AuctionTimeRunning, SetAuctionTimeRunning] = useState("0");
+  const [AuctionTimeXerionRunning, SetAuctionTimeXerionRunning] = useState("0");
   const [RatioValues, SetRatioTarget] = useState({
     Fluxin: "0",
     Xerion: "0",
@@ -489,6 +491,8 @@ export const DAVTokenProvider = ({ children }) => {
             AuctioTimeInterval().catch((error) =>
               console.error("Error fetching DAVTokenfive_Amount:", error)
             ),
+           
+
             RatioTargetValues(Fluxin, STATE_TOKEN_ADDRESS).catch((error) =>
               console.error("Error fetching DAVTokenfive_Amount:", error)
             ),
@@ -501,7 +505,7 @@ export const DAVTokenProvider = ({ children }) => {
         }
       }
     };
-
+    // Clear the interval when the component unmounts
     fetchLiveData();
 
     interval = setInterval(fetchLiveData, 10000);
@@ -953,6 +957,70 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching auction interval:", e);
     }
   };
+  let timer; // Declare timer outside to persist across calls
+
+  const AuctionTimeLeft = async () => {
+    try {
+      // Fetch remaining time from the contract
+      const Time = await handleContractCall(
+        RatioContract,
+        "getTimeLeftInAuction",
+        [Fluxin, STATE_TOKEN_ADDRESS]
+      );
+
+      const timeInSeconds = Number(Time);
+      SetAuctionTimeRunning(timeInSeconds);
+
+      // Clear any existing timer
+      if (timer) clearInterval(timer);
+
+      // If time is 0, stop further execution
+      if (timeInSeconds <= 0) {
+        clearInterval(timer);
+      }
+      
+    } catch (e) {
+      console.error("Error fetching auction time:", e);
+      // Cleanup timer if an error occurs
+      if (timer) clearInterval(timer);
+    }
+  };
+  let XerionTimer;
+  const AuctionTimeLeftOfXerion = async () => {
+    try {
+      // Fetch remaining time from the contract
+      const Time = await handleContractCall(
+        RatioContract,
+        "getTimeLeftInAuction",
+        [Xerion, STATE_TOKEN_ADDRESS]
+      );
+
+      const timeInSeconds = Number(Time);
+      SetAuctionTimeXerionRunning(timeInSeconds);
+
+      // If time is 0, stop further execution
+      if (timeInSeconds <= 0) {
+        clearInterval(XerionTimer);
+      }
+    } catch (e) {
+      console.error("Error fetching auction time:", e);
+      clearInterval(XerionTimer); // Cleanup timer if an error occurs
+    }
+  };
+
+  useEffect(() => {
+	AuctionTimeLeftOfXerion();
+	AuctionTimeLeft()
+    // Start polling every 2 seconds
+    const interval = setInterval(() => {
+      AuctionTimeLeftOfXerion();
+	  AuctionTimeLeft()
+    }, 2000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
+  }, [Xerion, STATE_TOKEN_ADDRESS, RatioContract]);
+
   const SetAUctionDuration = async (time) => {
     try {
       await handleContractCall(RatioContract, "setAuctionDuration", [time]);
@@ -1514,6 +1582,8 @@ export const DAVTokenProvider = ({ children }) => {
         OutBalance,
         OutBalanceXerion,
         StartAuction,
+        AuctionTimeRunning,
+        AuctionTimeXerionRunning,
       }}
     >
       {children}
