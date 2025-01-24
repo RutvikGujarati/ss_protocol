@@ -691,7 +691,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               </button>
                             </td>
                           </tr>
-                          {/* <tr>
+                          <tr>
                             <td className="d-flex align-items-center">
                               set Current Ratio
                             </td>
@@ -719,7 +719,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 Set
                               </button>
                             </td>
-                          </tr> */}
+                          </tr>
                           <tr>
                             <td className="d-flex align-items-center">
                               set Ratio Target

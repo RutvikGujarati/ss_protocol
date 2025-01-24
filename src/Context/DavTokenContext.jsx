@@ -10,10 +10,10 @@ import { PriceContext } from "../api/StatePrice";
 const DAVTokenContext = createContext();
 //0xd75fA7c2380f539320F9ABD29D09f48DbEB0E13E
 export const DAV_TOKEN_ADDRESS = "0xDBfb087D16eF29Fd6c0872C4C0525B38fBAEB319";
-export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
+export const STATE_TOKEN_ADDRESS = "0xcE8Ca38744B9a5598E990704e5Ba3756A54C7CEf";
 export const Ratio_TOKEN_ADDRESS = "0x6FA1050eaAedd519e3F34Aa2edC1ABB4C562026e";
 
-export const Fluxin = "0xdE45C7EEED1E776dC266B58Cf863b9B9518cb7aa";
+export const Fluxin = "0x60fe86aF11F760A0a87fDD2325F94D73594023B1";
 export const Xerion = "0xda5eF27FE698970526dFA7E47E824A843907AC71";
 
 export const Xerion2 = "0x3391c40E62499Aa498503902b8712195db2624DD";
@@ -838,7 +838,7 @@ export const DAVTokenProvider = ({ children }) => {
       );
 
       const balance = parseFloat(rawFluxinBalance || "0");
-
+      console.log("out -> Raw Fluxin Balance:", rawFluxinBalance);
       setOutBalance({
         Fluxin: balance,
       });
@@ -1630,7 +1630,7 @@ export const DAVTokenProvider = ({ children }) => {
         TotalStateHoldsInUS,
         DAVTokensFiveWithdraw,
         SetAUctionDuration,
-		SetAUctionInterval,
+        SetAUctionInterval,
         AuctionTime,
         AuctionDuration,
         Approve,
