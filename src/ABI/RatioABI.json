@@ -3,91 +3,22 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "tokenIn",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenOut",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_CurrentRatio",
-				"type": "uint256"
-			}
-		],
-		"name": "addAuctionPair",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			}
-		],
-		"name": "addSupportedToken",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "approved",
-				"type": "address"
-			},
-			{
-				"internalType": "bool",
-				"name": "status",
-				"type": "bool"
-			}
-		],
-		"name": "approveSwap",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
 				"name": "state",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "davToken",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_fluxin",
 				"type": "address"
 			}
 		],
 		"stateMutability": "nonpayable",
 		"type": "constructor"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "spender",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "status",
-				"type": "bool"
-			}
-		],
-		"name": "ApprovalForSwap",
-		"type": "event"
 	},
 	{
 		"anonymous": false,
@@ -120,13 +51,13 @@
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "tokenIn",
+				"name": "fluxinAddress",
 				"type": "address"
 			},
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "tokenOut",
+				"name": "stateToken",
 				"type": "address"
 			}
 		],
@@ -151,13 +82,13 @@
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "tokenIn",
+				"name": "fluxinAddress",
 				"type": "address"
 			},
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "tokenOut",
+				"name": "stateToken",
 				"type": "address"
 			},
 			{
@@ -171,30 +102,11 @@
 		"type": "event"
 	},
 	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "isPaused",
-				"type": "bool"
-			}
-		],
-		"name": "ContractPaused",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "isStopped",
-				"type": "bool"
-			}
-		],
-		"name": "ContractStopped",
-		"type": "event"
+		"inputs": [],
+		"name": "burnTokens",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
 	},
 	{
 		"inputs": [
@@ -210,51 +122,6 @@
 			}
 		],
 		"name": "depositTokens",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "tokenIn",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "address",
-				"name": "tokenOut",
-				"type": "address"
-			}
-		],
-		"name": "PairAdded",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bool",
-				"name": "_pause",
-				"type": "bool"
-			}
-		],
-		"name": "pauseContract",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			}
-		],
-		"name": "removeSupportedToken",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -288,12 +155,38 @@
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "_newGovernance",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "_auctionDuration",
+				"type": "uint256"
 			}
 		],
-		"name": "setGovernanceAddress",
+		"name": "setBurnDuration",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_burnRate",
+				"type": "uint256"
+			}
+		],
+		"name": "setBurnRate",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "ratioTarget",
+				"type": "uint256"
+			}
+		],
+		"name": "setCurrentRatioTarget",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -315,14 +208,22 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "tokenIn",
+				"name": "token",
 				"type": "address"
 			},
 			{
-				"internalType": "address",
-				"name": "tokenOut",
-				"type": "address"
-			},
+				"internalType": "uint256",
+				"name": "_maxSupply",
+				"type": "uint256"
+			}
+		],
+		"name": "setMaxSupply",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
 			{
 				"internalType": "uint256",
 				"name": "ratioTarget",
@@ -338,11 +239,11 @@
 		"inputs": [
 			{
 				"internalType": "bool",
-				"name": "_enabled",
+				"name": "_swap",
 				"type": "bool"
 			}
 		],
-		"name": "setReverseSwapEnabled",
+		"name": "setReverseSwap",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -360,20 +261,7 @@
 				"type": "uint256"
 			}
 		],
-		"name": "setReverseSwapTimeRange",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_state",
-				"type": "address"
-			}
-		],
-		"name": "setStateToken",
+		"name": "setReverseSwapTimeRangeForPair",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -389,19 +277,50 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "tokenIn",
+				"name": "user",
 				"type": "address"
 			},
 			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "extraGas",
+				"type": "uint256"
 			}
 		],
 		"name": "swapTokens",
 		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "token",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "burnedAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "rewardAmount",
+				"type": "uint256"
+			}
+		],
+		"name": "TokensBurned",
+		"type": "event"
 	},
 	{
 		"anonymous": false,
@@ -453,13 +372,13 @@
 			{
 				"indexed": true,
 				"internalType": "address",
-				"name": "tokenIn",
+				"name": "fluxinAddress",
 				"type": "address"
 			},
 			{
 				"indexed": true,
 				"internalType": "address",
-				"name": "tokenOut",
+				"name": "stateToken",
 				"type": "address"
 			},
 			{
@@ -541,50 +460,6 @@
 				"type": "address"
 			}
 		],
-		"name": "auctionAllInfo",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "cycle",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "currentRatio",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "ratioTarget",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "reverseCurrentRatio",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "reverseRatioTarget",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
 		"name": "auctionCycles",
 		"outputs": [
 			{
@@ -596,16 +471,6 @@
 				"internalType": "bool",
 				"name": "isInitialized",
 				"type": "bool"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenIn",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenOut",
-				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -640,22 +505,58 @@
 	{
 		"inputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "address",
 				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "burnInfo",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "remainingamount",
 				"type": "uint256"
 			},
+			{
+				"internalType": "uint256",
+				"name": "bountyAMount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "time",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "burnRate",
+		"outputs": [
 			{
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
 			}
 		],
-		"name": "auctionPairs",
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "burnWindowDuration",
 		"outputs": [
 			{
-				"internalType": "address",
+				"internalType": "uint256",
 				"name": "",
-				"type": "address"
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -667,16 +568,6 @@
 				"internalType": "uint256",
 				"name": "amountIn",
 				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenIn",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenOut",
-				"type": "address"
 			}
 		],
 		"name": "calculateAmountOut",
@@ -715,18 +606,61 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
+		"inputs": [],
+		"name": "dav",
+		"outputs": [
 			{
-				"internalType": "address",
-				"name": "tokenIn",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenOut",
+				"internalType": "contract IERC20",
+				"name": "",
 				"type": "address"
 			}
 		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "fluxin",
+		"outputs": [
+			{
+				"internalType": "contract Fluxin",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getBurnCycleInfo",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "currentCycle",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "nextBurnStartTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "nextBurnEndTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "isBurnWindowActive",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "getCurrentAuctionCycle",
 		"outputs": [
 			{
@@ -739,18 +673,7 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "tokenIn",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenOut",
-				"type": "address"
-			}
-		],
+		"inputs": [],
 		"name": "getNextAuctionStart",
 		"outputs": [
 			{
@@ -763,18 +686,7 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "tokenAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			}
-		],
+		"inputs": [],
 		"name": "getOnepercentOfUserBalance",
 		"outputs": [
 			{
@@ -787,18 +699,7 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "tokenIn",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenOut",
-				"type": "address"
-			}
-		],
+		"inputs": [],
 		"name": "getTimeLeftInAuction",
 		"outputs": [
 			{
@@ -811,24 +712,13 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			}
-		],
-		"name": "getUserSwappedAmount",
+		"inputs": [],
+		"name": "governanceAddress",
 		"outputs": [
 			{
-				"internalType": "uint256",
+				"internalType": "address",
 				"name": "",
-				"type": "uint256"
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -848,18 +738,7 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "tokenIn",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenOut",
-				"type": "address"
-			}
-		],
+		"inputs": [],
 		"name": "isAuctionActive",
 		"outputs": [
 			{
@@ -872,13 +751,67 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "isPaused",
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "lastBurnCycle",
 		"outputs": [
 			{
-				"internalType": "bool",
+				"internalType": "uint256",
 				"name": "",
-				"type": "bool"
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "lastBurnTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "maxSupply",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -922,63 +855,33 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "reverseSwapEndTime",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "reverseSwapStartTime",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
 			{
 				"internalType": "address",
 				"name": "",
 				"type": "address"
 			}
 		],
-		"name": "supportedTokens",
+		"name": "reverseSwapSettings",
 		"outputs": [
 			{
 				"internalType": "bool",
-				"name": "",
+				"name": "isEnabled",
 				"type": "bool"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "userSwaps",
-		"outputs": [
+			},
 			{
 				"internalType": "uint256",
-				"name": "totalSwapped",
+				"name": "startTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "endTime",
 				"type": "uint256"
 			}
 		],
@@ -1019,16 +922,6 @@
 				"internalType": "uint256",
 				"name": "cycle",
 				"type": "uint256"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenIn",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "tokenOut",
-				"type": "address"
 			}
 		],
 		"stateMutability": "view",

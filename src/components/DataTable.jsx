@@ -6,7 +6,7 @@ import stateLogo from "../assets/state_logo.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import {
-//   STATE_TOKEN_ADDRESS,
+  //   STATE_TOKEN_ADDRESS,
   useDAVToken,
   Xerion,
 } from "../Context/DavTokenContext";
@@ -30,16 +30,16 @@ const DataTable = () => {
     CheckMintBalance,
     // claiming,
     contracts,
-	RatioValues,
+    ButtonText,
+    RatioValues,
     Distributed,
     DavBalance,
     ClaimTokens,
     handleAddFluxin,
     handleAddXerion,
-	OnePBalance,
-	OutBalance,
-	OutBalanceXerion,
-
+    OnePBalance,
+    OutBalance,
+    OutBalanceXerion,
   } = useDAVToken();
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
@@ -104,13 +104,6 @@ const DataTable = () => {
     return `$${parseFloat(price).toFixed(7)}`;
   };
 
-  const Swapping = async (id,) => {
-    setSwappingStates((prev) => ({ ...prev, [id]: true }));
-    console.log("token id", id);
-    await SwapTokens(id);
-    setSwappingStates((prev) => ({ ...prev, [id]: false })); // Reset swapping state
-  };
-
   const handleClaimTokens = async (id, ContractName) => {
     setClaimingStates((prev) => ({ ...prev, [id]: true }));
     const contract = contracts[ContractName];
@@ -165,8 +158,8 @@ const DataTable = () => {
                 distributedAmount: Distributed["Fluxin"],
                 token: Fluxin,
                 handleAddXerion: handleAddFluxin,
-                inputTokenAmount: `${OnePBalance.Fluxin} Fluxin`,
-				ratioPrice: FluxinRatioPrice,
+                inputTokenAmount: `${OnePBalance} Fluxin`,
+                ratioPrice: FluxinRatioPrice,
                 outputToken: `${OutBalance.Fluxin} State`,
               },
               {
@@ -183,9 +176,9 @@ const DataTable = () => {
                 // Liquidity: "0.0",
                 distributedAmount: Distributed["Xerion"],
                 token: Xerion,
-				ratioPrice: XerionRatioPrice,
+                ratioPrice: XerionRatioPrice,
                 handleAddXerion: handleAddXerion,
-                inputTokenAmount: `${OnePBalance.Xerion} Xerion`,
+                inputTokenAmount: `${0} Xerion`,
                 outputToken: `${OutBalanceXerion.Xerion} State`,
               },
             ].map(
@@ -304,11 +297,13 @@ const DataTable = () => {
                     <div className="d-flex align-items-center gap-2">
                       {id !== "state" && (
                         <button
-                          onClick={() => Swapping(name)} // Just pass the id, no need for token
+                          onClick={() => SwapTokens()}
                           disabled={swappingStates[id]}
                           className="btn btn-primary btn-sm swap-btn"
                         >
-                          {swappingStates[id] ? "Swapping..." : "Swap"}
+                          {swappingStates[id]
+                            ? "Swapping..."
+                            : ButtonText || "Swap"}
                         </button>
                       )}
 
