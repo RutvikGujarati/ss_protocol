@@ -44,6 +44,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     PercentageOfState,
     PercentageFluxin,
     SetAUctionDuration,
+    SetAUctionInterval,
     PercentageXerion,
     DAVTokensWithdraw,
     StateSupply,
@@ -80,6 +81,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const [numerator, setNumerator] = useState("");
   const [Currentnumerator, setCurrentNumerator] = useState("");
   const [numeratorOfAUction, setNumeratorOfAuction] = useState("");
+  const [numeratorOfInterval, setNumeratorOfInterval] = useState("");
   const [Denominator, setDenominator] = useState("");
 
   const [StateDenominator, setStateDenominator] = useState("");
@@ -171,7 +173,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         setCurrentRatio: (value) => setCurrentRatioTarget(value),
         Approval: (value) => Approve("Fluxin", value),
         ApprovalState: (value) => Approve("state", value),
-
         DepositTokens: (value) => DepositToken("Fluxin", Fluxin, value),
         DepositStateTokens: (value) =>
           DepositToken("state", STATE_TOKEN_ADDRESS, value),
@@ -258,6 +259,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const handleInputChangeAuction = (e) => {
     const value = e.target.value;
     setNumeratorOfAuction(value);
+  };
+  const handleInputChangeInterval = (e) => {
+    const value = e.target.value;
+    setNumeratorOfInterval(value);
   };
   const handleInputChangeofToken = (e) => {
     const value = e.target.value;
@@ -644,15 +649,15 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                   type="text"
                                   className="form-control text-center mh-30"
                                   placeholder={AuctionTime}
-                                  value={numeratorOfAUction}
-                                  onChange={(e) => handleInputChangeAuction(e)}
+                                  value={numeratorOfInterval}
+                                  onChange={(e) => handleInputChangeInterval(e)}
                                 />
                               </div>
                             </td>
                             <td className="d-flex justify-content-end">
                               <button
                                 onClick={() =>
-                                  SetAUctionDuration(numeratorOfAUction)
+                                  SetAUctionInterval(numeratorOfInterval)
                                 }
                                 className="btn btn-primary btn-sm swap-btn info-icon"
                               >
@@ -686,7 +691,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               </button>
                             </td>
                           </tr>
-                          <tr>
+                          {/* <tr>
                             <td className="d-flex align-items-center">
                               set Current Ratio
                             </td>
@@ -714,7 +719,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 Set
                               </button>
                             </td>
-                          </tr>
+                          </tr> */}
                           <tr>
                             <td className="d-flex align-items-center">
                               set Ratio Target

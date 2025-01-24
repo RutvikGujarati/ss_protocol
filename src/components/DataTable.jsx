@@ -30,7 +30,7 @@ const DataTable = () => {
     CheckMintBalance,
     // claiming,
     contracts,
-    ButtonText,
+    // ButtonText,
     RatioValues,
     Distributed,
     DavBalance,
@@ -40,12 +40,13 @@ const DataTable = () => {
     OnePBalance,
     OutBalance,
     OutBalanceXerion,
+    swappingStates,
+    buttonTextStates,
   } = useDAVToken();
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
   const [errorPopup, setErrorPopup] = useState({});
   const [checkingStates, setCheckingStates] = useState({}); // State for checking buttons
-  const [swappingStates, setSwappingStates] = useState({}); // State for swapping buttons
   const [claimingStates, setClaimingStates] = useState({}); // Separate claiming state for each
 
   const Checking = async (id, ContractName) => {
@@ -68,6 +69,7 @@ const DataTable = () => {
     }
     setCheckingStates((prev) => ({ ...prev, [id]: false })); // Reset checking state
   };
+
   const formatPrice = (price) => {
     if (!price || isNaN(price)) {
       return "$0.0000"; // Default display for invalid or null prices
@@ -297,13 +299,13 @@ const DataTable = () => {
                     <div className="d-flex align-items-center gap-2">
                       {id !== "state" && (
                         <button
-                          onClick={() => SwapTokens()}
+                          onClick={() => SwapTokens(id)}
                           disabled={swappingStates[id]}
                           className="btn btn-primary btn-sm swap-btn"
                         >
                           {swappingStates[id]
                             ? "Swapping..."
-                            : ButtonText || "Swap"}
+                            : buttonTextStates[id] || "Swap"}
                         </button>
                       )}
 

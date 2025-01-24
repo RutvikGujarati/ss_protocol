@@ -15,6 +15,11 @@
 				"internalType": "address",
 				"name": "_fluxin",
 				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_gov",
+				"type": "address"
 			}
 		],
 		"stateMutability": "nonpayable",
@@ -118,6 +123,11 @@
 			{
 				"internalType": "uint256",
 				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_RatioTarget",
 				"type": "uint256"
 			}
 		],
@@ -282,7 +292,7 @@
 			},
 			{
 				"internalType": "uint256",
-				"name": "extraGas",
+				"name": "extraFee",
 				"type": "uint256"
 			}
 		],
@@ -403,6 +413,11 @@
 				"internalType": "address",
 				"name": "tokenAddress",
 				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
 			}
 		],
 		"name": "withdrawToken",

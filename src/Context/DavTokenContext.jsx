@@ -11,7 +11,7 @@ const DAVTokenContext = createContext();
 //0xd75fA7c2380f539320F9ABD29D09f48DbEB0E13E
 export const DAV_TOKEN_ADDRESS = "0xDBfb087D16eF29Fd6c0872C4C0525B38fBAEB319";
 export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
-export const Ratio_TOKEN_ADDRESS = "0x926800B8d756b130C5EA2c8f9374B4b22A6a7bF5";
+export const Ratio_TOKEN_ADDRESS = "0x6FA1050eaAedd519e3F34Aa2edC1ABB4C562026e";
 
 export const Fluxin = "0xdE45C7EEED1E776dC266B58Cf863b9B9518cb7aa";
 export const Xerion = "0xda5eF27FE698970526dFA7E47E824A843907AC71";
@@ -22,7 +22,7 @@ export const Xerion3 = "0x4a169d0e0dEF9C1a6a6ab3BBf6870371C830626D";
 export const useDAVToken = () => useContext(DAVTokenContext);
 
 export const DAVTokenProvider = ({ children }) => {
-  const { stateUsdPrice } = useContext(PriceContext);
+  const { stateUsdPrice, FluxinRatioPrice } = useContext(PriceContext);
 
   //contract initialization states
   const [provider, setProvider] = useState(null);
@@ -66,6 +66,8 @@ export const DAVTokenProvider = ({ children }) => {
   const [OutBalanceXerion, setOutBalanceXerion] = useState({
     Xerion: "0",
   });
+  const [buttonTextStates, setButtonTextStates] = useState({});
+  const [swappingStates, setSwappingStates] = useState({});
   const [DAVTokensFiveWithdraw, setFiveAvTokens] = useState("0.0");
   const [StateBalance, setStateBalance] = useState("0.0");
   const [FluxinBalance, setFluxinBalance] = useState("0.0");
@@ -1009,6 +1011,13 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching auction interval:", e);
     }
   };
+  const SetAUctionInterval = async (time) => {
+    try {
+      await handleContractCall(RatioContract, "setAuctionInterval", [time]);
+    } catch (e) {
+      console.error("Error fetching auction interval:", e);
+    }
+  };
   const RatioTargetValues = async () => {
     try {
       const RatioTargetFluxin = await handleContractCall(
@@ -1100,42 +1109,59 @@ export const DAVTokenProvider = ({ children }) => {
   };
   console.log("Contract functions:", RatioContract);
 
-  const SwapTokens = async () => {
+  const SwapTokens = async (id) => {
     try {
-      setButtonText("Checking allowance...");
+      setSwappingStates((prev) => ({ ...prev, [id]: true }));
+      setButtonTextStates((prev) => ({
+        ...prev,
+        [id]: "Checking allowance...",
+      }));
 
-      // Ensure `tokenInContract` is defined
-      let tokenInContract = FluxinContract;
-      if (!tokenInContract) {
-        throw new Error("Token contract not found");
-      }
-      console.log("Token contract initialized:", tokenInContract);
+      const amountInWei = ethers.parseUnits(OnePBalance.toString(), 18);
 
-      // Check Allowance
-      const allowanceIn = await tokenInContract.allowance(
-        account,
-        RatioContract
+      // Check current allowance
+      const allowance = await handleContractCall(
+        contracts["Fluxin"],
+        "allowance",
+        [account, Ratio_TOKEN_ADDRESS],
+        (s) => ethers.formatUnits(s, 18)
       );
-      console.log("Current allowance (in wei):", allowanceIn.toString());
 
-	  console.log("one p balance", OnePBalance);
-      // Correct comparison for BigNumber
-      if (allowanceIn == 0) {
-        console.log("Allowance is zero, approving token...");
-        setButtonText("Approving input token...");
-        // Approve the maximum amount of tokens
-        const approveTx = await FluxinContract.approve(
-          RatioContract,
-          OnePBalance
+      console.log(`Current allowance: ${allowance}`);
+      console.log(`Amount to approve (in wei): ${amountInWei.toString()}`);
+
+      // Approve if insufficient allowance
+      if (
+        parseFloat(allowance) < parseFloat(ethers.formatUnits(amountInWei, 18))
+      ) {
+        setButtonTextStates((prev) => ({
+          ...prev,
+          [id]: "Approving input token...",
+        }));
+        console.log("Insufficient allowance. Sending approval transaction...");
+        const approvalResult = await ApproveToken(
+          "Fluxin",
+          Ratio_TOKEN_ADDRESS,
+          amountInWei.toString()
         );
-        console.log("Approval transaction sent:", approveTx.hash);
 
-        // Wait for transaction confirmation
-        await approveTx.wait();
-        console.log("Token approval successful!");
+        if (!approvalResult) {
+          setSwappingStates((prev) => ({ ...prev, [id]: false }));
+          console.error("Approval failed. Cannot proceed with swap.");
+          return false;
+        }
+        setButtonTextStates((prev) => ({
+          ...prev,
+          [id]: "Approval successful",
+        }));
+
+        console.log("Approval successful!");
       } else {
-        console.log("Sufficient allowance already granted.");
+        console.log(
+          "Sufficient allowance already granted. Proceeding to swap."
+        );
       }
+      setButtonTextStates((prev) => ({ ...prev, [id]: "Swapping..." }));
 
       // Proceed with the swap logic
       const gasprice = (await provider.getFeeData()).gasPrice;
@@ -1156,12 +1182,16 @@ export const DAVTokenProvider = ({ children }) => {
         [account, extraFee],
         { value: extraFee } // Include value for payable function
       );
+      setButtonTextStates((prev) => ({ ...prev, [id]: "Swap successful!" }));
 
       setButtonText("Swap successful!");
       console.log("Swap successful!");
     } catch (e) {
       console.error("Error during token swap:", e);
       setButtonText("Swap");
+      setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
+    } finally {
+      setSwappingStates((prev) => ({ ...prev, [id]: false }));
     }
   };
 
@@ -1306,11 +1336,37 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error setting ratio target:", error);
     }
   };
-  const DepositToken = async (name, TokenAddress, amount) => {
+  const ApproveToken = async (name, spenderAddress, amount) => {
     try {
       const amountInWei = ethers.parseUnits(amount, 18);
 
-      // Step 1: Check Allowance
+      const approvalTx = await handleContractCall(
+        contracts[name],
+        "approve",
+        [spenderAddress, amountInWei],
+        (s) => ethers.formatUnits(s, 18)
+      );
+
+      const approvalReceipt = await approvalTx.wait();
+      console.log("receipt", approvalReceipt);
+      if (approvalReceipt.status === 1) {
+        console.log(`Approval successful for ${name}`);
+        return true;
+      } else {
+        console.error(`Approval failed for ${name}`);
+        return false;
+      }
+    } catch (error) {
+      console.error(`Error during ${name} approval:`, error);
+      return false;
+    }
+  };
+
+  const DepositToken = async (name, TokenAddress, amount) => {
+    try {
+      const amountInWei = ethers.parseUnits(amount, 18);
+      console.log("fluxinRationPrice", ethers.parseUnits(FluxinRatioPrice, 18));
+      // Check current allowance
       const allowance = await handleContractCall(
         contracts[name],
         "allowance",
@@ -1318,35 +1374,43 @@ export const DAVTokenProvider = ({ children }) => {
         (s) => ethers.formatUnits(s, 18)
       );
 
+      // Approve if insufficient allowance
       if (parseFloat(allowance) < parseFloat(amount)) {
-        // Approve Tokens for Transfer
-        const tx = await handleContractCall(
-          contracts[name],
-          "approve",
-          [Ratio_TOKEN_ADDRESS, amountInWei],
-          (s) => ethers.formatUnits(s, 18)
+        const approvalResult = await ApproveToken(
+          name,
+          Ratio_TOKEN_ADDRESS,
+          amount
         );
-
-        // Wait for approval transaction to be mined
-        await tx.wait();
-        console.log("Approval transaction confirmed!");
-      } else {
-        console.log("Sufficient allowance already granted.");
+        if (!approvalResult) {
+          console.error("Approval failed. Cannot proceed with deposit.");
+          return false;
+        }
       }
-
+      // Proceed with deposit
       const depositTx = await handleContractCall(
         RatioContract,
         "depositTokens",
-        [TokenAddress, amountInWei],
+        [TokenAddress, amountInWei, ethers.parseUnits(FluxinRatioPrice, 18)],
+
         (s) => ethers.formatUnits(s, 18)
       );
 
-      await depositTx.wait(); // Wait for deposit transaction to be mined
-      console.log(`Deposit successful for ${TokenAddress}`);
+      const depositReceipt = await depositTx.wait();
+      console.log("receipt", depositReceipt);
+
+      if (depositReceipt.status === 1) {
+        console.log(`Deposit successful for ${TokenAddress}`);
+        return true;
+      } else {
+        console.error("Deposit transaction failed.");
+        return false;
+      }
     } catch (error) {
-      console.error("Error during deposit:", error);
+      console.error("Error during deposit process:", error);
+      return false;
     }
   };
+
   const StartAuction = async () => {
     try {
       await handleContractCall(RatioContract, "startAuction", [], (s) =>
@@ -1566,6 +1630,7 @@ export const DAVTokenProvider = ({ children }) => {
         TotalStateHoldsInUS,
         DAVTokensFiveWithdraw,
         SetAUctionDuration,
+		SetAUctionInterval,
         AuctionTime,
         AuctionDuration,
         Approve,
@@ -1579,6 +1644,8 @@ export const DAVTokenProvider = ({ children }) => {
         AuctionTimeRunning,
         AuctionTimeXerionRunning,
         setCurrentRatioTarget,
+        buttonTextStates,
+        swappingStates,
       }}
     >
       {children}
