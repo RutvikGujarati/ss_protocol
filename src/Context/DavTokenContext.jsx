@@ -45,6 +45,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [AuctionRunning, setIsAuctionRunning] = useState({
     Fluxin: false,
     Xerion: false,
+    state: true,
   });
   const [ButtonText, setButtonText] = useState();
   const [davHolds, setDavHoldings] = useState("0.0");
@@ -514,12 +515,18 @@ export const DAVTokenProvider = ({ children }) => {
       );
 
       const runningFluxin = isRunningFluxin.toString();
-
+      console.log("isAuctionRunning -> Fluxin:", runningFluxin);
       setIsAuctionRunning({
-        Fluxin: runningFluxin,
+        Fluxin: isRunningFluxin,
+        state: true,
       });
     } catch (error) {
       console.error("Error fetching auction status:", error);
+      setIsAuctionRunning({
+        Fluxin: false,
+        Xerion: false,
+        state: true,
+      });
     }
   };
   //claiming functions
@@ -1025,15 +1032,11 @@ export const DAVTokenProvider = ({ children }) => {
         "RatioTarget",
         [Fluxin, STATE_TOKEN_ADDRESS]
       );
-      const RatioTargetXerion = await handleContractCall(
-        RatioContract,
-        "RatioTarget",
-        [Xerion, STATE_TOKEN_ADDRESS]
-      );
 
+      console.log("RatioTargetValues", RatioTargetFluxin);
       SetRatioTarget({
         Fluxin: RatioTargetFluxin,
-        Xerion: RatioTargetXerion,
+        // Xerion: RatioTargetXerion,
       }); // Update state with the formatted time
     } catch (e) {
       console.error("Error fetching ratio targets:", e);

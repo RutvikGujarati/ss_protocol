@@ -33,6 +33,7 @@ const DataTable = () => {
     // ButtonText,
     RatioValues,
     Distributed,
+    AuctionRunning,
     DavBalance,
     ClaimTokens,
     handleAddFluxin,
@@ -141,6 +142,7 @@ const DataTable = () => {
                 ContractName: "state",
                 image: stateLogo,
                 Price: stateUsdPrice,
+                AuctionStatus: AuctionRunning.state,
                 onChart:
                   "https://www.geckoterminal.com/pulsechain/pools/0x894fd7d05fe360a1d713c10b0e356af223fde88c",
                 handleAddXerion: handleAddTokenState,
@@ -155,6 +157,7 @@ const DataTable = () => {
                 ratio: `1:${RatioValues.Fluxin}`,
                 currentRatio: `1:${FluxinRatioPrice}`,
                 Price: FluxinUsdPrice,
+                AuctionStatus: AuctionRunning.Fluxin,
                 onChart:
                   "https://www.geckoterminal.com/pulsechain/pools/0x361afa3f5ef839bed6071c9f0c225b078eb8089a",
                 distributedAmount: Distributed["Fluxin"],
@@ -173,6 +176,7 @@ const DataTable = () => {
                 ratio: `1:${RatioValues.Xerion}`,
                 currentRatio: `1:${XerionRatioPrice}`,
                 Price: XerionUsdPrice,
+                AuctionStatus: AuctionRunning.Xerion,
                 onChart:
                   "https://www.geckoterminal.com/pulsechain/pools/0xc6359cd2c70f643888d556d377a4e8e25caadf77",
                 // Liquidity: "0.0",
@@ -183,147 +187,154 @@ const DataTable = () => {
                 inputTokenAmount: `${0} Xerion`,
                 outputToken: `${OutBalanceXerion.Xerion} State`,
               },
-            ].map(
-              (
-                {
-                  id,
-                  name,
-                  Pname,
-                  image,
-                  ratio,
-                  currentRatio,
-                  ContractName,
-                  Liquidity,
-                  Price,
-                  onChart,
-                  distributedAmount,
-                  inputTokenAmount,
-                  handleAddXerion,
-                  outputToken,
-                },
-                index
-              ) => (
-                <tr key={index}>
-                  <td>{index === 0 ? "±" : index}</td>
-                  <td>
-                    <div className="tableName d-flex gap-4 align-items-center">
-                      <div className="nameImage">
-                        <img src={image} width={40} height={40} alt="Logo" />
+            ]
+              .filter(({ AuctionStatus }) => AuctionStatus)
+              .map(
+                (
+                  {
+                    id,
+                    name,
+                    Pname,
+                    image,
+                    ratio,
+                    currentRatio,
+                    ContractName,
+                    Liquidity,
+                    Price,
+                    onChart,
+                    distributedAmount,
+                    inputTokenAmount,
+                    handleAddXerion,
+                    outputToken,
+                  },
+                  index
+                ) => (
+                  <tr key={index}>
+                    <td>{index === 0 ? "±" : index}</td>
+                    <td>
+                      <div className="tableName d-flex gap-4 align-items-center">
+                        <div className="nameImage">
+                          <img src={image} width={40} height={40} alt="Logo" />
+                        </div>
+                        <div className="nameDetails">
+                          <h5 className="nameBig">{name}</h5>
+                          <p className="nameSmall mb-1 uppercase">{Pname}</p>
+                        </div>
                       </div>
-                      <div className="nameDetails">
-                        <h5 className="nameBig">{name}</h5>
-                        <p className="nameSmall mb-1 uppercase">{Pname}</p>
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => Checking(id, ContractName)}
+                        className="btn btn-primary btn-sm swap-btn"
+                        disabled={
+                          checkingStates[id] ||
+                          Distributed > 0 ||
+                          DavBalance == 0
+                        }
+                      >
+                        {checkingStates[id] ? "Checking..." : "Mint Balance"}
+                      </button>
+                    </td>
+                    <td>
+                      <div
+                        onClick={
+                          Distributed !== "0.0" && !claimingStates[id]
+                            ? () => handleClaimTokens(id, ContractName)
+                            : null
+                        }
+                        className={` btn btn-primary btn-sm swap-btn ${
+                          claimingStates[id] || distributedAmount === "0.0"
+                            ? "disabled"
+                            : ""
+                        }`}
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        {claimingStates[id]
+                          ? "minting..."
+                          : `${formatWithCommas(distributedAmount) ?? "0.0"}`}
                       </div>
-                    </div>
-                  </td>
-                  <td>
-                    <button
-                      onClick={() => Checking(id, ContractName)}
-                      className="btn btn-primary btn-sm swap-btn"
-                      disabled={
-                        checkingStates[id] || Distributed > 0 || DavBalance == 0
-                      }
-                    >
-                      {checkingStates[id] ? "Checking..." : "Mint Balance"}
-                    </button>
-                  </td>
-                  <td>
-                    <div
-                      onClick={
-                        Distributed !== "0.0" && !claimingStates[id]
-                          ? () => handleClaimTokens(id, ContractName)
-                          : null
-                      }
-                      className={` btn btn-primary btn-sm swap-btn ${
-                        claimingStates[id] || distributedAmount === "0.0"
-                          ? "disabled"
-                          : ""
-                      }`}
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      {claimingStates[id]
-                        ? "minting..."
-                        : `${formatWithCommas(distributedAmount) ?? "0.0"}`}
-                    </div>
-                  </td>
+                    </td>
 
-                  <td>
-                    <a
-                      href={onChart}
-                      target="_blank"
-                      style={{ fontSize: "13px" }}
-                      className="font-color"
-                    >
-                      $ {formatPrice(Price)}
-                    </a>
-                  </td>
-                  <td className="text-success">{Liquidity}</td>
-                  <td>{currentRatio}</td>
-                  <td>{ratio}</td>
-                  <td>
-                    <div className="d-flex justify-content-center gap-3 w-100">
-                      {id !== "state" && (
-                        <>
-                          <div className="tableClaim">{inputTokenAmount}</div>
-                          <div className="tableClaim">{outputToken} </div>
-                        </>
-                      )}
-                    </div>
-                  </td>
-                  {errorPopup[id] && (
-                    <div className="popup-overlay">
-                      <div className="popup-content">
-                        <h4 className="popup-header">
-                          Mint Additional DAV Tokens
-                        </h4>
-                        <p className="popup-para">
-                          You need to mint additional DAV tokens to claim your
-                          reward.
-                        </p>
-                        <button
-                          onClick={() =>
-                            setErrorPopup((prev) => ({ ...prev, [id]: false }))
-                          }
-                          className="btn btn-secondary popup-button"
-                        >
-                          Close
-                        </button>
+                    <td>
+                      <a
+                        href={onChart}
+                        target="_blank"
+                        style={{ fontSize: "13px" }}
+                        className="font-color"
+                      >
+                        $ {formatPrice(Price)}
+                      </a>
+                    </td>
+                    <td className="text-success">{Liquidity}</td>
+                    <td>{currentRatio}</td>
+                    <td>{ratio}</td>
+                    <td>
+                      <div className="d-flex justify-content-center gap-3 w-100">
+                        {id !== "state" && (
+                          <>
+                            <div className="tableClaim">{inputTokenAmount}</div>
+                            <div className="tableClaim">{outputToken} </div>
+                          </>
+                        )}
                       </div>
-                    </div>
-                  )}
-                  <td>
-                    <div className="d-flex align-items-center gap-2">
-                      {id !== "state" && (
-                        <button
-                          onClick={() => SwapTokens(id)}
-                          disabled={swappingStates[id]}
-                          className="btn btn-primary btn-sm swap-btn"
-                        >
-                          {swappingStates[id]
-                            ? "Swapping..."
-                            : buttonTextStates[id] || "Swap"}
-                        </button>
-                      )}
+                    </td>
+                    {errorPopup[id] && (
+                      <div className="popup-overlay">
+                        <div className="popup-content">
+                          <h4 className="popup-header">
+                            Mint Additional DAV Tokens
+                          </h4>
+                          <p className="popup-para">
+                            You need to mint additional DAV tokens to claim your
+                            reward.
+                          </p>
+                          <button
+                            onClick={() =>
+                              setErrorPopup((prev) => ({
+                                ...prev,
+                                [id]: false,
+                              }))
+                            }
+                            className="btn btn-secondary popup-button"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    <td>
+                      <div className="d-flex align-items-center gap-2">
+                        {id !== "state" && (
+                          <button
+                            onClick={() => SwapTokens(id)}
+                            disabled={swappingStates[id]}
+                            className="btn btn-primary btn-sm swap-btn"
+                          >
+                            {swappingStates[id]
+                              ? "Swapping..."
+                              : buttonTextStates[id] || "Swap"}
+                          </button>
+                        )}
 
-                      {id !== "state" && (
-                        <img
-                          src={MetaMaskIcon}
-                          width={20}
-                          height={20}
-                          onClick={handleAddXerion}
-                          alt="Logo"
-                          style={{ cursor: "pointer" }}
-                        />
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              )
-            )}
+                        {id !== "state" && (
+                          <img
+                            src={MetaMaskIcon}
+                            width={20}
+                            height={20}
+                            onClick={handleAddXerion}
+                            alt="Logo"
+                            style={{ cursor: "pointer" }}
+                          />
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )
+              )}
           </tbody>
         </table>
       </div>

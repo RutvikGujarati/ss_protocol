@@ -2,81 +2,110 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "Fluxin.sol";
 
 contract AuctionRatioSwapping {
     address public admin;
-    uint256 public auctionInterval = 120 minutes;
+    uint256 public auctionInterval = 45 minutes;
     uint256 public auctionDuration = 20 minutes;
+    uint256 public burnWindowDuration = 20 minutes;
+    uint256 public inputAmountRate = 1;
+    Fluxin public fluxin;
+    address fluxinAddress;
+    address private constant BURN_ADDRESS =
+        0x0000000000000000000000000000000000000000;
 
-    bool public isPaused = false;
-    bool public isStopped = false;
+    bool public reverseSwapEnabled = true; // Initially enabled
     address stateToken;
+    modifier onlyGovernance() {
+        require(
+            msg.sender == governanceAddress,
+            "Swapping: You are not authorized to perform this action"
+        );
+        _;
+    }
 
     struct Vault {
         uint256 totalDeposited;
         uint256 totalAuctioned;
     }
+    struct AuctionInfo {
+        uint256 cycle;
+        uint256 currentRatio;
+        uint256 ratioTarget;
+        uint256 reverseCurrentRatio;
+        uint256 reverseRatioTarget;
+    }
+
     struct Auction {
         uint256 startTime;
         uint256 endTime;
         bool isActive;
-        address tokenIn;
-        address tokenOut;
+        address fluxinAddress;
+        address stateToken;
     }
 
-    struct UserSwap {
-        uint256 totalSwapped;
-        mapping(address => uint256) tokenSwapped; // Track amounts per token
+    struct UserSwapInfo {
+        bool hasSwapped; // Whether the user has swapped in this cycle for this pair
+        uint256 cycle; // The auction cycle for the token pair
+    }
+    struct BurnInfo {
+        address user;
+        uint256 remainingamount;
+        uint256 bountyAMount;
+        uint256 time;
+    }
+    // Struct to store reverse swap settings for a pair
+    struct ReverseSwapSettings {
+        bool isEnabled; // Whether reverse swap is enabled for the pair
+        uint256 startTime; // Start time for reverse swap
+        uint256 endTime; // End time for reverse swap
     }
 
     mapping(address => Vault) public vaults;
-    mapping(address => bool) public supportedTokens;
-    mapping(address => UserSwap) public userSwaps;
-    mapping(address => uint256) public totalBurnedTokens;
-    mapping(address => mapping(address => uint256)) public lastAuctionTime;
+    mapping(address => BurnInfo) public burnInfo;
     mapping(address => mapping(address => uint256)) public RatioTarget;
     mapping(address => mapping(address => uint256)) public CurrentRatio;
-    mapping(address => mapping(address => bool)) public isTerminated;
     mapping(address => mapping(address => bool)) public approvals;
+    mapping(address => mapping(address => uint256)) public lastBurnTime;
+    mapping(address => mapping(address => mapping(address => mapping(uint256 => UserSwapInfo))))
+        public userSwapTotalInfo;
+    mapping(address => mapping(address => ReverseSwapSettings))
+        public reverseSwapSettings;
+    uint256 public burnRate = 1; // Default burn rate in thousandths (0.001)
+    mapping(address => mapping(address => uint256)) public lastBurnCycle; // Track last burn cycle per token pair
+    mapping(address => uint256) public maxSupply; // Max supply per token
 
-    Auction[] public currentAuctions;
-    address[][] public auctionPairs; // List of token pairs for auctions
+    event TokensBurned(
+        address indexed user,
+        address indexed token,
+        uint256 burnedAmount,
+        uint256 rewardAmount
+    );
 
     event AuctionStarted(
         uint256 startTime,
         uint256 endTime,
-        address tokenIn,
-        address tokenOut
-    );
-    // Event for tracking approvals
-    event ApprovalForSwap(
-        address indexed owner,
-        address indexed spender,
-        bool status
+        address fluxinAddress,
+        address stateToken
     );
 
-    event PairRemoved(address tokenIn, address tokenOut);
-    event AuctionTerminated(address tokenIn, address tokenOut);
-
-    event PairAdded(address tokenIn, address tokenOut);
     event TokensDeposited(address indexed token, uint256 amount);
     event AuctionStarted(
         uint256 startTime,
         uint256 endTime,
-        address tokenIn,
-        address tokenOut,
+        address fluxinAddress,
+        address stateToken,
         uint256 collectionPercentage
     );
     event TokensSwapped(
         address indexed user,
-        address indexed tokenIn,
-        address indexed tokenOut,
+        address indexed fluxinAddress,
+        address indexed stateToken,
         uint256 amountIn,
         uint256 amountOut
     );
     event TokensBurned(address indexed token, uint256 amountBurned);
-    event ContractPaused(bool isPaused);
-    event ContractStopped(bool isStopped);
     event AuctionIntervalUpdated(uint256 newInterval);
 
     modifier onlyAdmin() {
@@ -87,52 +116,39 @@ contract AuctionRatioSwapping {
         _;
     }
 
-    modifier notPausedOrStopped() {
-        require(!isPaused, "Contract is paused");
-        require(!isStopped, "Contract is stopped");
-        _;
-    }
+    IERC20 public dav;
 
-    constructor(address state) {
-        governanceAddress = msg.sender;
+    constructor(
+        address state,
+        address davToken,
+        address _fluxin,
+        address _gov
+    ) {
+        governanceAddress = _gov;
+        fluxin = Fluxin(_fluxin);
+        fluxinAddress = _fluxin;
         stateToken = state;
+        dav = IERC20(payable(davToken));
     }
 
-    address private governanceAddress;
-    event GovernanceChanged(
-        address indexed oldGovernance,
-        address indexed newGovernance
-    );
-    event RewardDistributed(address indexed user, uint256 amount);
+    address public governanceAddress;
 
-    modifier onlyGovernance() {
-        require(
-            msg.sender == governanceAddress,
-            "Swapping: You are not authorized to perform this action"
-        );
-        _;
+    function setCurrentRatioTarget(uint256 ratioTarget) public onlyAdmin {
+        CurrentRatio[fluxinAddress][stateToken] = ratioTarget;
+        CurrentRatio[stateToken][fluxinAddress] = ratioTarget;
+        RatioTarget[fluxinAddress][stateToken] = ratioTarget + 1;
+        RatioTarget[stateToken][fluxinAddress] = ratioTarget + 1;
     }
 
-    function setGovernanceAddress(address _newGovernance)
-        external
-        onlyGovernance
-    {
-        require(
-            _newGovernance != address(0),
-            "New governance address cannot be zero"
-        );
-        governanceAddress = _newGovernance;
-        emit GovernanceChanged(governanceAddress, _newGovernance);
-    }
-
-    function depositTokens(address token, uint256 amount) external onlyAdmin {
-        require(supportedTokens[token], "Unsupported token");
-
-        Vault storage vault = vaults[token];
-        vault.totalDeposited += amount;
+    function depositTokens(
+        address token,
+        uint256 amount,
+        uint256 _RatioTarget
+    ) external onlyGovernance {
+        vaults[token].totalDeposited += amount;
 
         IERC20(token).transferFrom(msg.sender, address(this), amount);
-
+        setCurrentRatioTarget(_RatioTarget);
         emit TokensDeposited(token, amount);
     }
 
@@ -142,29 +158,14 @@ contract AuctionRatioSwapping {
         emit AuctionIntervalUpdated(_newInterval);
     }
 
-    struct AuctionPairStatus {
-        uint256 lastAuctionEndTime; // Track when the last auction ended
-        bool isCurrentlyActive; // Is there an active auction for this pair
-        uint256 currentAuctionIndex; // Index in currentAuctions array if active
-    }
     struct AuctionCycle {
         uint256 firstAuctionStart; // Timestamp when the first auction started
         bool isInitialized; // Whether this pair has been initialized
-        address tokenIn;
-        address tokenOut;
     }
     mapping(address => mapping(address => AuctionCycle)) public auctionCycles;
 
-    mapping(address => mapping(address => AuctionPairStatus)) public pairStatus;
-
-    mapping(address => mapping(address => bool)) public processedPairs;
-
-    function isAuctionActive(address tokenIn, address tokenOut)
-        public
-        view
-        returns (bool)
-    {
-        AuctionCycle memory cycle = auctionCycles[tokenIn][tokenOut];
+    function isAuctionActive() public view returns (bool) {
+        AuctionCycle memory cycle = auctionCycles[fluxinAddress][stateToken];
 
         if (!cycle.isInitialized) {
             return false;
@@ -183,35 +184,9 @@ contract AuctionRatioSwapping {
         return false;
     }
 
-    function terminateAuctionPair(address tokenIn, address tokenOut)
-        public
-        onlyAdmin
-    {
-        require(
-            supportedTokens[tokenIn] && supportedTokens[tokenOut],
-            "Unsupported tokens"
-        );
-        require(!isTerminated[tokenIn][tokenOut], "Pair already terminated");
-
-        // Mark both directions as terminated
-        isTerminated[tokenIn][tokenOut] = true;
-        isTerminated[tokenOut][tokenIn] = true;
-
-        // Clear the auction cycle
-        delete auctionCycles[tokenIn][tokenOut];
-        delete auctionCycles[tokenOut][tokenIn];
-
-        emit AuctionTerminated(tokenIn, tokenOut);
-        emit AuctionTerminated(tokenOut, tokenIn);
-    }
-
     // Function to get the next auction start time for a pair
-    function getNextAuctionStart(address tokenIn, address tokenOut)
-        public
-        view
-        returns (uint256)
-    {
-        AuctionCycle memory cycle = auctionCycles[tokenIn][tokenOut];
+    function getNextAuctionStart() public view returns (uint256) {
+        AuctionCycle memory cycle = auctionCycles[fluxinAddress][stateToken];
 
         if (!cycle.isInitialized) {
             return 0;
@@ -230,308 +205,352 @@ contract AuctionRatioSwapping {
     }
 
     function startAuction() public onlyAdmin {
-        require(auctionPairs.length > 0, "No auction pairs available");
+        require(
+            fluxinAddress != address(0) && stateToken != address(0),
+            "Invalid token addresses"
+        );
+
         uint256 currentTime = block.timestamp;
 
-        for (uint256 i = 0; i < auctionPairs.length; i++) {
-            address tokenIn = auctionPairs[i][0];
-            address tokenOut = auctionPairs[i][1];
+        AuctionCycle storage cycle = auctionCycles[fluxinAddress][stateToken];
 
-            // Only initialize if not already initialized
-            if (!auctionCycles[tokenIn][tokenOut].isInitialized) {
-                auctionCycles[tokenIn][tokenOut] = AuctionCycle({
-                    firstAuctionStart: currentTime,
-                    isInitialized: true,
-                    tokenIn: tokenIn,
-                    tokenOut: tokenOut
-                });
+        // Check if the auction for the specified pair is already initialized
+        if (cycle.isInitialized) {
+            uint256 auctionEndTime = cycle.firstAuctionStart + auctionDuration;
 
-                // Also initialize reverse pair
-                auctionCycles[tokenOut][tokenIn] = AuctionCycle({
-                    firstAuctionStart: currentTime,
-                    isInitialized: true,
-                    tokenIn: tokenOut,
-                    tokenOut: tokenIn
-                });
-
-                emit AuctionStarted(
-                    currentTime,
-                    currentTime + auctionDuration,
-                    tokenIn,
-                    tokenOut
-                );
-            }
+            // Ensure no auction is currently running for this pair
+            require(
+                currentTime >= auctionEndTime,
+                "Auction already in progress, wait until it ends"
+            );
         }
+
+        // Initialize and start the auction for the specified pair
+        cycle.firstAuctionStart = currentTime;
+        cycle.isInitialized = true;
+
+        // Initialize reverse pair
+        auctionCycles[stateToken][fluxinAddress] = AuctionCycle({
+            firstAuctionStart: currentTime,
+            isInitialized: true
+        });
+
+        // Reset burn tracking for the new auction cycle
+        uint256 newCycle = (currentTime - cycle.firstAuctionStart) /
+            auctionDuration +
+            1;
+        lastBurnCycle[fluxinAddress][stateToken] = newCycle - 1; // Set last burn to the previous cycle
+        lastBurnCycle[stateToken][fluxinAddress] = newCycle - 1;
+
+        emit AuctionStarted(
+            currentTime,
+            currentTime + auctionDuration,
+            fluxinAddress,
+            stateToken
+        );
     }
 
-    function swapTokens(
-        address tokenIn,
-        uint256 amountOut,
-        uint256 amountIn
-    ) external notPausedOrStopped {
-        address tokenOut = stateToken;
-        require(tokenOut != address(0), "state token can not be null");
+    function calculateAmountOut(uint256 amountIn)
+        public
+        view
+        returns (uint256)
+    {
+        require(CurrentRatio[fluxinAddress][stateToken] > 0, "Ratio not set");
+        // Assuming ratio is in 1e18 precision
+        return (amountIn * (CurrentRatio[fluxinAddress][stateToken] * 2));
+    }
+
+    // Get current auction cycle number for a pair
+    function getCurrentAuctionCycle() public view returns (uint256) {
+        AuctionCycle memory cycle = auctionCycles[fluxinAddress][stateToken];
+        if (!cycle.isInitialized) return 0;
+
+        uint256 timeSinceStart = block.timestamp - cycle.firstAuctionStart;
+        uint256 fullCycleLength = auctionDuration + auctionInterval;
+        return timeSinceStart / fullCycleLength;
+    }
+
+    function checkIfReverseSwap() internal view returns (bool) {
+        ReverseSwapSettings memory settings = reverseSwapSettings[
+            fluxinAddress
+        ][stateToken];
+        uint256 currentTime = block.timestamp;
+
+        // Check if the current time is within the reverse swap time range
+        if (
+            currentTime >= settings.startTime && currentTime <= settings.endTime
+        ) {
+            // Check if the ratio condition for reverse swap is met
+            return (CurrentRatio[stateToken][fluxinAddress] <
+                RatioTarget[stateToken][fluxinAddress] ||
+                CurrentRatio[fluxinAddress][stateToken] <
+                RatioTarget[fluxinAddress][stateToken]);
+        }
+
+        return false; // Default to no reverse swap if conditions are not met
+    }
+
+    function swapTokens(address user, uint256 extraFee) external payable {
+        require(stateToken != address(0), "State token cannot be null");
+
+        // Get current auction cycle
+        uint256 currentAuctionCycle = getCurrentAuctionCycle();
+
+        // Ensure the user has not swapped for this token pair in the current auction cycle
+        UserSwapInfo storage userSwapInfo = userSwapTotalInfo[user][
+            fluxinAddress
+        ][stateToken][currentAuctionCycle];
         require(
-            supportedTokens[tokenIn] && supportedTokens[tokenOut],
-            "Unsupported tokens"
-        );
-        require(msg.sender != address(0), "Sender cannot be null");
-        require(tokenIn != tokenOut, "Input and output tokens must differ");
-        require(amountOut > 0, "Output amount must be greater than zero");
-        require(
-            isAuctionActive(tokenIn, tokenOut),
-            "No active auction for this pair"
+            !userSwapInfo.hasSwapped,
+            "User already swapped in this auction cycle for this pair"
         );
 
-        if (amountIn == 0) {
-            amountIn = 1;
-        }
-        if (amountOut == 0) {
-            amountOut = 1;
-        }
+        require(msg.sender != address(0), "Sender cannot be null");
+        require(isAuctionActive(), "No active auction for this pair");
 
         address spender = msg.sender;
         if (msg.sender != tx.origin) {
             require(approvals[tx.origin][msg.sender], "Caller not approved");
             spender = tx.origin;
         }
-        // Check if currentRatio reached or exceeded the ratioTarget for the pair
-        uint256 currentRatio = CurrentRatio[tokenIn][tokenOut];
-        uint256 ratioTarget = RatioTarget[tokenIn][tokenOut];
 
-        uint256 reverseCurrentRatio = CurrentRatio[tokenOut][tokenIn];
-        uint256 reverseRatioTarget = RatioTarget[tokenOut][tokenIn];
+        // Reverse swap check
+        bool reverseSwap = checkIfReverseSwap();
 
-        // If currentRatio >= ratioTarget, apply reverse swap logic
+        // Adjust token addresses if reverse swap is enabled
+        address inputToken = fluxinAddress;
+        address outputToken = stateToken;
 
-        bool reverseSwap = (currentRatio >= ratioTarget) ||
-            (reverseCurrentRatio >= reverseRatioTarget);
         if (reverseSwap) {
-            // Reverse swap logic: Swap tokenOut for tokenIn
-            (tokenIn, tokenOut) = (tokenOut, tokenIn);
-            uint256 temp = amountIn;
-            amountIn = amountOut;
-            amountOut = temp;
+            require(reverseSwapEnabled, "Reverse swaps are disabled");
+            (inputToken, outputToken) = (outputToken, inputToken);
         }
 
-        // Process the swap
-        Vault storage vaultOut = vaults[tokenOut];
+        uint256 amountIn = getOnepercentOfUserBalance();
+        require(
+            amountIn > 0,
+            "Not enough balance in user wallet of input token"
+        );
+
+        uint256 amountOut = calculateAmountOut(amountIn);
+        require(amountOut > 0, "Output amount must be greater than zero");
+
+        Vault storage vaultOut = vaults[outputToken];
         require(
             vaultOut.totalDeposited >= vaultOut.totalAuctioned + amountOut,
-            "Insufficient tokenOut in vault"
+            "Insufficient tokens in vault for the output token"
         );
+
+        // Mark the user's swap for the current cycle
+        userSwapInfo.hasSwapped = true;
+        userSwapInfo.cycle = currentAuctionCycle;
 
         vaultOut.totalAuctioned += amountOut;
 
-        UserSwap storage userSwap = userSwaps[spender];
-        userSwap.totalSwapped += amountIn;
-        userSwap.tokenSwapped[tokenIn] += amountIn;
-
         // Transfer tokens
-        IERC20(tokenIn).transferFrom(spender, address(this), amountIn);
-        IERC20(tokenOut).transfer(spender, amountOut);
+        IERC20(inputToken).transferFrom(spender, address(this), amountIn);
+        IERC20(outputToken).transfer(spender, amountOut);
 
-        emit TokensSwapped(spender, tokenIn, tokenOut, amountIn, amountOut);
-    }
-
-    function addAuctionPair(
-        address tokenIn,
-        address tokenOut,
-        uint256 _CurrentRatio
-    ) external onlyAdmin {
         require(
-            tokenIn != address(0) && tokenOut != address(0),
-            "Invalid token pair"
+            msg.value >= extraFee,
+            "Insufficient Ether to cover the extra fee"
         );
-        require(tokenIn != tokenOut, "Tokens must be different");
 
-        // Add the new pair (tokenIn, tokenOut)
-        auctionPairs.push([tokenIn, tokenOut]);
-        supportedTokens[tokenIn] = true;
-        supportedTokens[tokenOut] = true;
-
-        RatioTarget[tokenIn][tokenOut] = 0;
-        CurrentRatio[tokenIn][tokenOut] = _CurrentRatio;
-
-        // Add the reverse pair (tokenOut, tokenIn)
-        auctionPairs.push([tokenOut, tokenIn]);
-        RatioTarget[tokenOut][tokenIn] = 0; // Default ratio target
-        CurrentRatio[tokenOut][tokenIn] = _CurrentRatio;
-
-        // Start auctions for both pairs
-        startAuction();
-
-        emit PairAdded(tokenIn, tokenOut);
-        emit PairAdded(tokenOut, tokenIn);
+        // Transfer the extra fee to the governance address
+        payable(governanceAddress).transfer(extraFee);
+        emit TokensSwapped(
+            spender,
+            inputToken,
+            outputToken,
+            amountIn,
+            amountOut
+        );
     }
 
-    function startSingleAuction(
-        address tokenIn,
-        address tokenOut,
-        uint256 collectionPercentage
-    ) external onlyGovernance {
+    function burnTokens() external {
+        AuctionCycle storage cycle = auctionCycles[fluxinAddress][stateToken];
+        require(cycle.isInitialized, "Auction not initialized for this pair");
+
+        uint256 currentTime = block.timestamp;
+
+        // Check if the auction is inactive before proceeding
+        require(!isAuctionActive(), "Auction still active");
+
+        uint256 fullCycleLength = auctionDuration + auctionInterval;
+        uint256 timeSinceStart = currentTime - cycle.firstAuctionStart;
+        uint256 currentCycle = (timeSinceStart / fullCycleLength) + 1;
+        uint256 auctionEndTime = cycle.firstAuctionStart +
+            currentCycle *
+            fullCycleLength -
+            auctionInterval;
+
+        // Ensure we're within the burn window (after auction but before interval ends)
         require(
-            supportedTokens[tokenIn] && supportedTokens[tokenOut],
-            "Unsupported tokens"
-        );
-        uint256 startTime = block.timestamp;
-        uint256 endTime = startTime + auctionDuration;
-
-        currentAuctions.push(
-            Auction({
-                startTime: startTime,
-                endTime: endTime,
-                isActive: true,
-                tokenIn: tokenIn,
-                tokenOut: tokenOut
-            })
+            currentTime >= auctionEndTime &&
+                currentTime < auctionEndTime + burnWindowDuration,
+            "Burn window has passed or not started"
         );
 
-        emit AuctionStarted(
-            startTime,
-            endTime,
-            tokenIn,
-            tokenOut,
-            collectionPercentage
+        // Allow burn only once per cycle
+        require(
+            lastBurnCycle[fluxinAddress][stateToken] < currentCycle,
+            "Burn already occurred for this cycle"
+        );
+
+        uint256 burnAmount = (fluxin.balanceOf(address(this)) * burnRate) /
+            1000;
+
+        // Mark this cycle as burned
+        lastBurnCycle[fluxinAddress][stateToken] = currentCycle;
+        lastBurnTime[fluxinAddress][stateToken] = currentTime;
+
+        // Reward user with 1% of burn amount
+        uint256 reward = burnAmount / 100;
+        fluxin.transfer(msg.sender, reward);
+
+        // Burn the remaining tokens
+        uint256 remainingBurnAmount = burnAmount - reward;
+        burnInfo[msg.sender].remainingamount = remainingBurnAmount;
+        burnInfo[msg.sender].bountyAMount = reward;
+        fluxin.transfer(BURN_ADDRESS, remainingBurnAmount);
+
+        emit TokensBurned(
+            msg.sender,
+            fluxinAddress,
+            remainingBurnAmount,
+            reward
         );
     }
 
-    function setRatioTarget(
-        address tokenIn,
-        address tokenOut,
-        uint256 ratioTarget
-    ) external onlyAdmin {
+    function getBurnCycleInfo()
+        external
+        view
+        returns (
+            uint256 currentCycle,
+            uint256 nextBurnStartTime,
+            uint256 nextBurnEndTime,
+            bool isBurnWindowActive
+        )
+    {
+        AuctionCycle storage cycle = auctionCycles[fluxinAddress][stateToken];
+        require(cycle.isInitialized, "Auction not initialized for this pair");
+
+        // Get the current auction cycle
+        currentCycle = getCurrentAuctionCycle();
+
+        // Calculate the auction end time for the current cycle
+        uint256 auctionStartTime = cycle.firstAuctionStart +
+            (currentCycle - 1) *
+            auctionDuration;
+        uint256 auctionEndTime = auctionStartTime + auctionDuration;
+
+        // Determine the next burn start and end time
+        nextBurnStartTime = auctionEndTime; // Burn starts immediately after auction ends
+        nextBurnEndTime = auctionEndTime + burnWindowDuration; // Burn window duration
+
+        // Check if the current time falls within the burn window
+        uint256 currentTime = block.timestamp;
+        isBurnWindowActive = (currentTime >= nextBurnStartTime &&
+            currentTime <= nextBurnEndTime);
+
+        return (
+            currentCycle,
+            nextBurnStartTime,
+            nextBurnEndTime,
+            isBurnWindowActive
+        );
+    }
+
+    function setRatioTarget(uint256 ratioTarget) external onlyAdmin {
         require(ratioTarget > 0, "Target ratio must be greater than zero");
 
-        require(CurrentRatio[tokenIn][tokenOut] != 0, "Pair not initialized");
-
-        RatioTarget[tokenIn][tokenOut] = ratioTarget;
-        RatioTarget[tokenOut][tokenIn] = ratioTarget;
+        RatioTarget[fluxinAddress][stateToken] = ratioTarget;
+        RatioTarget[stateToken][fluxinAddress] = ratioTarget;
     }
 
-    // Function to approve another user
-    function approveSwap(address approved, bool status) external {
-        approvals[msg.sender][approved] = status;
-        emit ApprovalForSwap(msg.sender, approved, status);
-    }
-
-    function endAuction(uint256 auctionIndex, bool forceEnd)
-        external
+    function withdrawToken(address tokenAddress, uint256 amount)
+        public
         onlyAdmin
     {
-        require(auctionIndex < currentAuctions.length, "Invalid auction index");
+        require(tokenAddress.code.length > 0, "Token must be a contract");
 
-        // Check if the auction is already inactive
-        require(
-            currentAuctions[auctionIndex].isActive,
-            "Auction is not active"
-        );
-
-        // Allow force end or check if the auction's endTime has passed
-        if (!forceEnd) {
-            require(
-                block.timestamp > currentAuctions[auctionIndex].endTime,
-                "Auction is still active"
-            );
-        }
-
-        // End the auction
-        currentAuctions[auctionIndex].isActive = false;
+        IERC20 token = IERC20(tokenAddress);
+        uint256 balance = token.balanceOf(address(this));
+        require(balance >= amount, "not enough tokens available in contract");
+        bool success = token.transfer(governanceAddress, amount);
+        require(success, "Transfer failed");
     }
 
     function setAuctionDuration(uint256 _auctionDuration) external onlyAdmin {
-        require(
-            _auctionDuration > 0,
-            "Auction duration must be greater than 0"
-        );
         auctionDuration = _auctionDuration;
     }
 
-    function removePair(address tokenIn, address tokenOut) external onlyAdmin {
-        require(
-            supportedTokens[tokenIn] && supportedTokens[tokenOut],
-            "Unsupported tokens"
-        );
-
-        // First terminate the auction if not already terminated
-        if (!isTerminated[tokenIn][tokenOut]) {
-            terminateAuctionPair(tokenIn, tokenOut);
-        }
-
-        // Remove pairs from auctionPairs array
-        for (uint256 i = 0; i < auctionPairs.length; i++) {
-            if (
-                (auctionPairs[i][0] == tokenIn &&
-                    auctionPairs[i][1] == tokenOut) ||
-                (auctionPairs[i][0] == tokenOut &&
-                    auctionPairs[i][1] == tokenIn)
-            ) {
-                // Replace with last element and pop
-                auctionPairs[i] = auctionPairs[auctionPairs.length - 1];
-                auctionPairs.pop();
-                // Adjust index to check the swapped element
-                i--;
-            }
-        }
-
-        // Check if tokens are used in other pairs before removing support
-        bool tokenInUsed = false;
-        bool tokenOutUsed = false;
-
-        for (uint256 i = 0; i < auctionPairs.length; i++) {
-            if (
-                auctionPairs[i][0] == tokenIn || auctionPairs[i][1] == tokenIn
-            ) {
-                tokenInUsed = true;
-            }
-            if (
-                auctionPairs[i][0] == tokenOut || auctionPairs[i][1] == tokenOut
-            ) {
-                tokenOutUsed = true;
-            }
-        }
-
-        // Remove token support if not used in other pairs
-        if (!tokenInUsed) {
-            supportedTokens[tokenIn] = false;
-        }
-        if (!tokenOutUsed) {
-            supportedTokens[tokenOut] = false;
-        }
-
-        // Clean up related mappings
-        delete RatioTarget[tokenIn][tokenOut];
-        delete RatioTarget[tokenOut][tokenIn];
-        delete isTerminated[tokenIn][tokenOut];
-        delete isTerminated[tokenOut][tokenIn];
-
-        emit PairRemoved(tokenIn, tokenOut);
-        emit PairRemoved(tokenOut, tokenIn);
+    function setBurnDuration(uint256 _auctionDuration) external onlyAdmin {
+        burnWindowDuration = _auctionDuration;
     }
 
-    function pauseContract(bool _pause) external onlyAdmin {
-        isPaused = _pause;
-        emit ContractPaused(_pause);
+    function setReverseSwapTimeRangeForPair(
+        uint256 _startTime,
+        uint256 _endTime
+    ) external onlyAdmin {
+        require(_startTime < _endTime, "Start time must be before end time");
+        reverseSwapSettings[fluxinAddress][stateToken].startTime = _startTime;
+        reverseSwapSettings[fluxinAddress][stateToken].endTime = _endTime;
+
+        // Ensure reverse mapping is consistent
+        reverseSwapSettings[stateToken][fluxinAddress].startTime = _startTime;
+        reverseSwapSettings[stateToken][fluxinAddress].endTime = _endTime;
     }
 
-    function stopContract(bool _stop) external onlyAdmin {
-        isStopped = _stop;
-        emit ContractStopped(_stop);
+    function setInputAmountRate(uint256 rate) public onlyAdmin {
+        inputAmountRate = rate;
     }
 
-    function addSupportedToken(address token) external onlyAdmin {
-        supportedTokens[token] = true;
+    function setReverseSwap(bool _swap) public onlyAdmin {
+        reverseSwapEnabled = _swap;
     }
 
-    function removeSupportedToken(address token) external onlyAdmin {
-        supportedTokens[token] = false;
+    function getOnepercentOfUserBalance() public view returns (uint256) {
+        uint256 davbalance = dav.balanceOf(msg.sender);
+        if (davbalance == 0) {
+            return 0;
+        }
+        uint256 balance = fluxin.balanceOf(msg.sender);
+        uint256 onePercent = (balance * inputAmountRate) / 100;
+        return onePercent;
     }
 
-    function getUserSwappedAmount(address user, address token)
+    function setBurnRate(uint256 _burnRate) external onlyAdmin {
+        require(_burnRate > 0, "Burn rate must be greater than 0");
+        burnRate = _burnRate;
+    }
+
+    function setMaxSupply(address token, uint256 _maxSupply)
         external
-        view
-        returns (uint256)
+        onlyAdmin
     {
-        return userSwaps[user].tokenSwapped[token];
+        maxSupply[token] = _maxSupply;
+    }
+
+    function getTimeLeftInAuction() public view returns (uint256) {
+        if (!isAuctionActive()) {
+            return 0; // Auction is not active
+        }
+
+        AuctionCycle storage cycle = auctionCycles[fluxinAddress][stateToken];
+        uint256 currentTime = block.timestamp;
+
+        uint256 timeSinceStart = currentTime - cycle.firstAuctionStart;
+        uint256 fullCycleLength = auctionDuration + auctionInterval;
+
+        // Calculate the current auction cycle position
+        uint256 currentCyclePosition = timeSinceStart % fullCycleLength;
+
+        // Calculate and return the remaining time if within auction duration
+        if (currentCyclePosition < auctionDuration) {
+            return auctionDuration - currentCyclePosition;
+        }
+
+        return 0; // No time left in the auction
     }
 }
