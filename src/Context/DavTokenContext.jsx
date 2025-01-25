@@ -11,11 +11,11 @@ import { pulsechainV4 } from "viem/chains";
 
 const DAVTokenContext = createContext();
 //0xd75fA7c2380f539320F9ABD29D09f48DbEB0E13E
-export const DAV_TOKEN_ADDRESS = "0xDBfb087D16eF29Fd6c0872C4C0525B38fBAEB319";
-export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
-export const Ratio_TOKEN_ADDRESS = "0x4AeC866500aA89394B12Ab970e7d2b7CEa4EDE86";
+export const DAV_TOKEN_ADDRESS = "0xB044420Bd99b7dbcc412c1E0D998963C1162Cb15";
+export const STATE_TOKEN_ADDRESS = "0xcE8Ca38744B9a5598E990704e5Ba3756A54C7CEf";
+export const Ratio_TOKEN_ADDRESS = "0x25B7E2a3438a04C3030ac06710CC09be3500dabb";
 
-export const Fluxin = "0xdE45C7EEED1E776dC266B58Cf863b9B9518cb7aa";
+export const Fluxin = "0x60fe86aF11F760A0a87fDD2325F94D73594023B1";
 export const Xerion = "0xda5eF27FE698970526dFA7E47E824A843907AC71";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
@@ -64,8 +64,10 @@ export const DAVTokenProvider = ({ children }) => {
   const [XerionSupply, setXerionSupply] = useState("0.0");
   const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
   const [OnePBalance, setOnePBalance] = useState("0");
+  const [FormattedInbalance, setFormatedBalance] = useState("0");
   const [OutBalance, setOutBalance] = useState({
     Fluxin: "0",
+    formattedFluxin: "0",
   });
 
   const [buttonTextStates, setButtonTextStates] = useState({});
@@ -90,6 +92,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [AuctionTimeRunning, SetAuctionTimeRunning] = useState("0");
   const [AuctionNextTime, SetAuctionNextTime] = useState("0");
   const [RatioValues, SetRatioTarget] = useState("0");
+  const [userSwapped, SetUserSwapped] = useState("0");
 
   const walletClient = createWalletClient({
     chain: pulsechainV4, // Change to your desired chain, e.g., goerli, polygon, etc.
@@ -409,6 +412,9 @@ export const DAVTokenProvider = ({ children }) => {
             RatioTargetValues().catch((error) =>
               console.error("Error fetching DAVTokenfive_Amount:", error)
             ),
+            UserhasSwapped().catch((error) =>
+              console.error("Error fetching DAVTokenfive_Amount:", error)
+            ),
           ]);
         } catch (error) {
           console.error("Error fetching live data:", error);
@@ -646,6 +652,7 @@ export const DAVTokenProvider = ({ children }) => {
 
       // Update the state
       setOnePBalance(balance);
+      setFormatedBalance(balance.toLocaleString());
     } catch (e) {
       console.error("Error fetching One Percentage balance of tokens:", e);
     }
@@ -673,6 +680,7 @@ export const DAVTokenProvider = ({ children }) => {
       console.log("out -> Raw Fluxin Balance:", calculation);
       setOutBalance({
         Fluxin: balance,
+        formattedFluxin: balance.toLocaleString(),
       });
     } catch (e) {
       console.error("Error fetching AmountOut balances:", e);
@@ -803,6 +811,24 @@ export const DAVTokenProvider = ({ children }) => {
       );
       console.log("RatioTargetValues", Number(RatioTargetFluxin));
       SetRatioTarget(RatioTargetFluxin);
+    } catch (e) {
+      console.error("Error fetching ratio targets:", e);
+    }
+  };
+  const UserhasSwapped = async () => {
+    try {
+      const getCurrentCycle = await handleContractCall(
+        RatioContract,
+        "getCurrentAuctionCycle",
+        []
+      );
+      const userhSwapped = await handleContractCall(
+        RatioContract,
+        "userSwapTotalInfo",
+        [account, Fluxin, STATE_TOKEN_ADDRESS, getCurrentCycle]
+      );
+      console.log("RatioTargetValues", Number(userhSwapped));
+      SetUserSwapped(userhSwapped);
     } catch (e) {
       console.error("Error fetching ratio targets:", e);
     }
@@ -1246,9 +1272,9 @@ export const DAVTokenProvider = ({ children }) => {
         handleAddTokenRatio,
         handleAddFluxin,
         handleAddXerion,
-
+        FormattedInbalance,
         withdraw_5,
-
+        userSwapped,
         // WithdrawLPTokens,
         mintAdditionalTOkens,
         isRenounced,

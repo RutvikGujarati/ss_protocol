@@ -31,7 +31,7 @@ const DataTable = () => {
     // claiming,
     contracts,
     // ButtonText,
-	
+    userSwapped,
     RatioValues,
     Distributed,
     AuctionRunning,
@@ -39,7 +39,7 @@ const DataTable = () => {
     ClaimTokens,
     handleAddFluxin,
     handleAddXerion,
-    OnePBalance,
+    FormattedInbalance,
     OutBalance,
     swappingStates,
     buttonTextStates,
@@ -142,6 +142,8 @@ const DataTable = () => {
                 ContractName: "state",
                 image: stateLogo,
                 Price: stateUsdPrice,
+                userHasSwapped: false,
+
                 AuctionStatus: AuctionRunning.state,
                 onChart:
                   "https://www.geckoterminal.com/pulsechain/pools/0x894fd7d05fe360a1d713c10b0e356af223fde88c",
@@ -158,14 +160,15 @@ const DataTable = () => {
                 currentRatio: `1:${FluxinRatioPrice}`,
                 Price: FluxinUsdPrice,
                 AuctionStatus: AuctionRunning.Fluxin,
+                userHasSwapped: userSwapped,
                 onChart:
                   "https://www.geckoterminal.com/pulsechain/pools/0x361afa3f5ef839bed6071c9f0c225b078eb8089a",
                 distributedAmount: Distributed["Fluxin"],
                 token: Fluxin,
                 handleAddXerion: handleAddFluxin,
-                inputTokenAmount: `${OnePBalance} Fluxin`,
+                inputTokenAmount: `${FormattedInbalance} Fluxin`,
                 ratioPrice: FluxinRatioPrice,
-                outputToken: `${OutBalance.Fluxin} State`,
+                outputToken: `${OutBalance.formattedFluxin} State`,
               },
               {
                 id: "Xerion",
@@ -174,6 +177,7 @@ const DataTable = () => {
                 ContractName: "Xerion",
                 image: XerionLogo,
                 ratio: `1:${RatioValues.Xerion}`,
+                userHasSwapped: false,
                 currentRatio: `1:${XerionRatioPrice}`,
                 Price: XerionUsdPrice,
                 AuctionStatus: AuctionRunning.Xerion,
@@ -189,6 +193,7 @@ const DataTable = () => {
               },
             ]
               .filter(({ AuctionStatus }) => AuctionStatus)
+            //   .filter(({ userHasSwapped }) => !userHasSwapped)
               .map(
                 (
                   {

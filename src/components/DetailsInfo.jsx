@@ -574,7 +574,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                         <>
                           <tr>
                             <td className="d-flex align-items-center">
-                              Deposit into Main Contract
+                              {`Deposit ${dataToShow.name}`} 
                             </td>
                             <td>
                               <div className="w-100">
@@ -602,7 +602,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           </tr>
                           <tr>
                             <td className="d-flex align-items-center">
-                              Deposit State into Main Contract
+							Deposit STATE Tokens
                             </td>
                             <td>
                               <div className="w-100">
@@ -633,7 +633,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
 
                           <tr>
                             <td className="d-flex align-items-center">
-                              Auction Interval (in seconds)
+                              Auction Interval
                             </td>
                             <td>
                               <div className="w-100">
@@ -659,7 +659,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           </tr>
                           <tr>
                             <td className="d-flex align-items-center">
-                              Auction Duration (in seconds)
+                              Auction Duration
                             </td>
                             <td>
                               <div className="w-100">
@@ -686,7 +686,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
 
                           <tr>
                             <td className="d-flex align-items-center">
-                              set Ratio Target
+                              Set Ratio Target
                             </td>
                             <td>
                               <div className="w-100">
@@ -714,7 +714,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
 
                           <tr>
                             <td className="d-flex align-items-center">
-                              Start Auction For all pairs{" "}
+                              Start Auction
                             </td>
                             <td className="d-flex align-items-center justify-content-center">
                               {dataToShow.AuctionRunning}
