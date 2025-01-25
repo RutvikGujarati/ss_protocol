@@ -9,7 +9,7 @@ import { formatWithCommas } from "./DetailsInfo";
 import { PriceContext } from "../api/StatePrice";
 
 const InfoCards = () => {
-	const { stateUsdPrice, error } = useContext(PriceContext);
+  const { stateUsdPrice } = useContext(PriceContext);
 
   const {
     mintDAV,
@@ -21,26 +21,19 @@ const InfoCards = () => {
     StateBurned,
     StateBurnedRatio,
     StateSupply,
-	TotalStateHoldsInUS,
+    TotalStateHoldsInUS,
     davHolds,
     davPercentage,
     StateHolds,
   } = useDAVToken();
   const [amount, setAmount] = useState("");
   const [load, setLoad] = useState(false);
-  const [successMessage, setSuccessMessage] = useState(""); // Tracks success message
-
 
   const handleMint = async () => {
     setLoad(true);
-    setSuccessMessage("");
     try {
-      await mintDAV(amount); // Call the mint function with the entered amount
-      setSuccessMessage("Successful Mint!");
-      setAmount(""); // Reset the input box
-      setTimeout(() => {
-        setSuccessMessage("");
-      }, 2000); // Clear success message after 2 seconds
+      await mintDAV(amount);
+      setAmount("");
     } catch (error) {
       console.error("Error minting:", error);
       alert("Minting failed! Please try again.");
@@ -87,10 +80,7 @@ const InfoCards = () => {
                       value={amount}
                       onChange={handleInputChange}
                     />
-                    <h5 className="detailAmount">
-
-					1 DAV TOKEN = 200,000 PLS
-                    </h5>
+                    <h5 className="detailAmount">1 DAV TOKEN = 200,000 PLS</h5>
                     <h5 className="detailAmount mb-4">
                       {TotalCost
                         ? formatNumber(ethers.formatUnits(TotalCost, 18))
@@ -147,7 +137,9 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token holdings</p>
-                      <h5 className="">{StateHolds} / $ {TotalStateHoldsInUS}</h5>
+                      <h5 className="">
+                        {StateHolds} / $ {TotalStateHoldsInUS}
+                      </h5>
                     </div>
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token price</p>
@@ -169,8 +161,7 @@ const InfoCards = () => {
             </div>
             <div className="announcement text-center">
               <div className="">
-                Ratio
-                Swapping auctions will start on <span>01/02/2025.</span>
+                Ratio Swapping auctions will start on <span>01/02/2025.</span>
               </div>
             </div>
           </div>

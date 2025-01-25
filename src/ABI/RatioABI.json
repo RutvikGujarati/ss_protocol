@@ -124,11 +124,6 @@
 				"internalType": "uint256",
 				"name": "amount",
 				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_RatioTarget",
-				"type": "uint256"
 			}
 		],
 		"name": "depositTokens",
@@ -192,42 +187,11 @@
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "ratioTarget",
-				"type": "uint256"
-			}
-		],
-		"name": "setCurrentRatioTarget",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
 				"name": "rate",
 				"type": "uint256"
 			}
 		],
 		"name": "setInputAmountRate",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_maxSupply",
-				"type": "uint256"
-			}
-		],
-		"name": "setMaxSupply",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -292,7 +256,12 @@
 			},
 			{
 				"internalType": "uint256",
-				"name": "extraFee",
+				"name": "amountOut",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "extraGas",
 				"type": "uint256"
 			}
 		],
@@ -578,49 +547,6 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "amountIn",
-				"type": "uint256"
-			}
-		],
-		"name": "calculateAmountOut",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "CurrentRatio",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"name": "dav",
 		"outputs": [
@@ -703,6 +629,19 @@
 	{
 		"inputs": [],
 		"name": "getOnepercentOfUserBalance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getRatioTarget",
 		"outputs": [
 			{
 				"internalType": "uint256",

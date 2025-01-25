@@ -31,6 +31,7 @@ const DataTable = () => {
     // claiming,
     contracts,
     // ButtonText,
+	
     RatioValues,
     Distributed,
     AuctionRunning,
@@ -40,7 +41,6 @@ const DataTable = () => {
     handleAddXerion,
     OnePBalance,
     OutBalance,
-    OutBalanceXerion,
     swappingStates,
     buttonTextStates,
   } = useDAVToken();
@@ -154,7 +154,7 @@ const DataTable = () => {
                 Pname: "Fluxin",
                 ContractName: "Fluxin",
                 image: FluxinLogo,
-                ratio: `1:${RatioValues.Fluxin}`,
+                ratio: `1:${RatioValues}`,
                 currentRatio: `1:${FluxinRatioPrice}`,
                 Price: FluxinUsdPrice,
                 AuctionStatus: AuctionRunning.Fluxin,
@@ -185,7 +185,7 @@ const DataTable = () => {
                 ratioPrice: XerionRatioPrice,
                 handleAddXerion: handleAddXerion,
                 inputTokenAmount: `${0} Xerion`,
-                outputToken: `${OutBalanceXerion.Xerion} State`,
+                outputToken: `${0} State`,
               },
             ]
               .filter(({ AuctionStatus }) => AuctionStatus)

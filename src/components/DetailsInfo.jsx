@@ -41,6 +41,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     // mintStateTokens,
     // mintFluxinTokens,
     LPStateTransferred,
+    AuctionRunningLocalString,
     PercentageOfState,
     PercentageFluxin,
     SetAUctionDuration,
@@ -58,6 +59,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     isRenounced,
     DAVTokensFiveWithdraw,
     LastLiquidity,
+    transactionStatus,
     Batch,
     ReanounceFluxinContract,
     ReanounceXerionContract,
@@ -72,14 +74,11 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     // saveTokenName,
     LastDevShare,
     AuctionTimeRunning,
-    AuctionTimeXerionRunning,
     AddTokensToContract,
     StartAuction,
-    Approve,
   } = useDAVToken();
 
   const [numerator, setNumerator] = useState("");
-  const [Currentnumerator, setCurrentNumerator] = useState("");
   const [numeratorOfAUction, setNumeratorOfAuction] = useState("");
   const [numeratorOfInterval, setNumeratorOfInterval] = useState("");
   const [Denominator, setDenominator] = useState("");
@@ -138,7 +137,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         claimLiquidityDAVToken: withdraw_95,
         claimFiveDAVToken: withdraw_5,
         ReanounceContract: ReanounceContract,
-        // MoveTokens: () => MoveTokens(Amount),
       },
     },
     {
@@ -151,7 +149,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       percentage: PercentageFluxin,
       address: Fluxin,
       Balance: FluxinBalance,
-      AuctionRunning: AuctionRunning.Fluxin,
+      AuctionRunning: AuctionRunningLocalString.Fluxin,
       pair: "Fluxin/pSTATE",
       Ratio: FluxinRatioPrice,
       claimLPToken: LPStateTransferred,
@@ -171,8 +169,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
           AddTokensToContract(Fluxin, STATE_TOKEN_ADDRESS, FluxinRatioPrice),
         setRatio: (value) => setRatioTarget(value),
         setCurrentRatio: (value) => setCurrentRatioTarget(value),
-        Approval: (value) => Approve("Fluxin", value),
-        ApprovalState: (value) => Approve("state", value),
         DepositTokens: (value) => DepositToken("Fluxin", Fluxin, value),
         DepositStateTokens: (value) =>
           DepositToken("state", STATE_TOKEN_ADDRESS, value),
@@ -188,11 +184,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       percentage: PercentageXerion,
       address: Xerion,
       Ratio: XerionRatioPrice,
-      AuctionRunning: AuctionRunning.Xerion,
+      AuctionRunning: AuctionRunningLocalString.Xerion,
       Balance: XerionBalance,
       pair: "Xerion/pSTATE",
-      AuctionTimeRunning: AuctionTimeXerionRunning,
-
       mintAddTOkens: "125,000,000,000",
       ApproveAmount: "10,000,000,000",
       transactionHash: XerionTransactionHash,
@@ -206,7 +200,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         AddTokenToContract: () =>
           AddTokensToContract(Xerion, STATE_TOKEN_ADDRESS, XerionRatioPrice),
         setRatio: (value) => setRatioTarget(Xerion, value),
-        Approval: (value) => Approve("Xerion", value),
         DepositTokens: (value) => DepositToken("Xerion", Xerion, value),
         StartingAuction: StartAuction,
       },
@@ -240,22 +233,19 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         WithdrawState: WithdrawState,
         mintAdditionalTOkens: mintAdditionalTOkens,
         AddTokenToContract: () => AddTokens(),
-        Approval: (value) => Approve("state", value),
         DepositTokens: (value) =>
           DepositToken("state", STATE_TOKEN_ADDRESS, value),
         StartingAuction: StartAuction,
       },
     },
   ];
+  console.log("auction running from detailInfo", AuctionRunning.Fluxin);
   console.log("renounced ", stateTransactionHash);
   const handleInputChange = (e) => {
     const value = e.target.value;
     setNumerator(value);
   };
-  const handleInputCurrentChange = (e) => {
-    const value = e.target.value;
-    setCurrentNumerator(value);
-  };
+
   const handleInputChangeAuction = (e) => {
     const value = e.target.value;
     setNumeratorOfAuction(value);
@@ -604,7 +594,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 }}
                                 className="btn btn-primary btn-sm swap-btn info-icon"
                               >
-                                Deposit
+                                {transactionStatus === "pending"
+                                  ? "Processing..."
+                                  : "Deposit"}
                               </button>
                             </td>
                           </tr>
@@ -627,8 +619,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                             </td>
                             <td className="d-flex justify-content-end">
                               <button
-                                onClick={async () => {
-                                  await dataToShow.actions.DepositStateTokens(
+                                onClick={() => {
+                                  dataToShow.actions.DepositStateTokens(
                                     StateDenominator
                                   );
                                 }}
@@ -691,35 +683,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               </button>
                             </td>
                           </tr>
-                          <tr>
-                            <td className="d-flex align-items-center">
-                              set Current Ratio
-                            </td>
-                            <td>
-                              <div className="w-100">
-                                <input
-                                  type="text"
-                                  className="form-control text-center mh-30"
-                                  placeholder="Enter Target"
-                                  value={Currentnumerator}
-                                  onChange={(e) => handleInputCurrentChange(e)}
-                                />
-                              </div>
-                            </td>
 
-                            <td className="d-flex justify-content-end">
-                              <button
-                                onClick={() =>
-                                  dataToShow.actions.setCurrentRatio(
-                                    Currentnumerator
-                                  )
-                                }
-                                className="btn btn-primary btn-sm swap-btn info-icon"
-                              >
-                                Set
-                              </button>
-                            </td>
-                          </tr>
                           <tr>
                             <td className="d-flex align-items-center">
                               set Ratio Target

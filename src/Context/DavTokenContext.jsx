@@ -6,18 +6,17 @@ import StateABI from "../ABI/StateTokenABI.json";
 import RatioABI from "../ABI/RatioABI.json";
 import PropTypes from "prop-types";
 import { PriceContext } from "../api/StatePrice";
+import { createWalletClient, http } from "viem";
+import { pulsechainV4 } from "viem/chains";
 
 const DAVTokenContext = createContext();
 //0xd75fA7c2380f539320F9ABD29D09f48DbEB0E13E
 export const DAV_TOKEN_ADDRESS = "0xDBfb087D16eF29Fd6c0872C4C0525B38fBAEB319";
-export const STATE_TOKEN_ADDRESS = "0xcE8Ca38744B9a5598E990704e5Ba3756A54C7CEf";
-export const Ratio_TOKEN_ADDRESS = "0x6FA1050eaAedd519e3F34Aa2edC1ABB4C562026e";
+export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
+export const Ratio_TOKEN_ADDRESS = "0x4AeC866500aA89394B12Ab970e7d2b7CEa4EDE86";
 
-export const Fluxin = "0x60fe86aF11F760A0a87fDD2325F94D73594023B1";
+export const Fluxin = "0xdE45C7EEED1E776dC266B58Cf863b9B9518cb7aa";
 export const Xerion = "0xda5eF27FE698970526dFA7E47E824A843907AC71";
-
-export const Xerion2 = "0x3391c40E62499Aa498503902b8712195db2624DD";
-export const Xerion3 = "0x4a169d0e0dEF9C1a6a6ab3BBf6870371C830626D";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -32,7 +31,7 @@ export const DAVTokenProvider = ({ children }) => {
 
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
-  const [LpTokens, setLpTokens] = useState(false);
+  const [transactionStatus, setTransactionStatus] = useState(null); // 'pending', 'success', or 'failed'
 
   //contract state
   const [davContract, setDavContract] = useState(null);
@@ -43,6 +42,11 @@ export const DAVTokenProvider = ({ children }) => {
 
   const [TotalCost, setTotalCost] = useState(null);
   const [AuctionRunning, setIsAuctionRunning] = useState({
+    Fluxin: false,
+    Xerion: false,
+    state: true,
+  });
+  const [AuctionRunningLocalString, setIsAuctionRunningLocalString] = useState({
     Fluxin: false,
     Xerion: false,
     state: true,
@@ -59,14 +63,11 @@ export const DAVTokenProvider = ({ children }) => {
   const [FluxinSupply, setFluxinSupply] = useState("0.0");
   const [XerionSupply, setXerionSupply] = useState("0.0");
   const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
-  //   const [FluxinBalanceN, setnoramalFluxin] = useState("0.0");
   const [OnePBalance, setOnePBalance] = useState("0");
   const [OutBalance, setOutBalance] = useState({
     Fluxin: "0",
   });
-  const [OutBalanceXerion, setOutBalanceXerion] = useState({
-    Xerion: "0",
-  });
+
   const [buttonTextStates, setButtonTextStates] = useState({});
   const [swappingStates, setSwappingStates] = useState({});
   const [DAVTokensFiveWithdraw, setFiveAvTokens] = useState("0.0");
@@ -83,17 +84,20 @@ export const DAVTokenProvider = ({ children }) => {
     xerion2: "0.0",
     xerion3: "0.0",
   });
-  const [StateBurned, setStateBurnAMount] = useState("0.0");
 
   const [AuctionTime, SetAuctionTime] = useState("0");
   const [AuctionDuration, SetAuctionDuration] = useState("0");
   const [AuctionTimeRunning, SetAuctionTimeRunning] = useState("0");
   const [AuctionNextTime, SetAuctionNextTime] = useState("0");
-  const [AuctionTimeXerionRunning, SetAuctionTimeXerionRunning] = useState("0");
-  const [RatioValues, SetRatioTarget] = useState({
-    Fluxin: "0",
-    Xerion: "0",
+  const [RatioValues, SetRatioTarget] = useState("0");
+
+  const walletClient = createWalletClient({
+    chain: pulsechainV4, // Change to your desired chain, e.g., goerli, polygon, etc.
+    transport: http("pulsechain-testnet-rpc.publicnode.com"), // Replace with your RPC URL
+    account: account, // Your wallet address
   });
+
+  console.log("walletClient", walletClient);
 
   useEffect(() => {
     const initialize = async () => {
@@ -188,23 +192,6 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const MoveTokens = async (amount) => {
-    try {
-      if (!amount || isNaN(amount)) {
-        throw new Error("Invalid amount");
-      }
-
-      const value = ethers.parseEther(amount.toString());
-
-      await handleContractCall(stateContract, "moveTokens", [
-        DAV_TOKEN_ADDRESS,
-        value,
-      ]);
-    } catch (error) {
-      console.error("Error in MoveTokens:", error);
-    }
-  };
-
   const CalculationOfCost = async (amount) => {
     setTotalCost(ethers.parseEther((amount * 200000).toString()));
   };
@@ -216,6 +203,7 @@ export const DAVTokenProvider = ({ children }) => {
       [account],
       (h) => ethers.formatUnits(h, 18)
     );
+    console.log("DavHoldings: ", holdings);
     setDavHoldings(holdings);
   };
   const fetchStateHoldingsAndCalculateUSD = async () => {
@@ -331,53 +319,6 @@ export const DAVTokenProvider = ({ children }) => {
     setXerionSupply(supply);
   };
 
-  const releases = [
-    { dav: 1000000, releaseState: 50000000000000 },
-    { dav: 1000000, releaseState: 40000000000000 },
-    { dav: 1000000, releaseState: 30000000000000 },
-    { dav: 1000000, releaseState: 20000000000000 },
-    { dav: 1000000, releaseState: 10000000000000 },
-  ];
-
-  const releaseNextBatch = async (batchIndex) => {
-    try {
-      console.log("Batch Index:", batchIndex);
-
-      // Validate batchIndex and releases array
-      if (batchIndex < 0 || batchIndex >= releases.length) {
-        throw new Error("Invalid batch index");
-      }
-
-      const releaseData = releases[batchIndex];
-
-      // Ensure releaseData is not undefined
-      if (!releaseData) {
-        throw new Error(`No release data found for batch index ${batchIndex}`);
-      }
-
-      const { releaseState } = releaseData;
-
-      console.log(
-        `Releasing batch ${
-          batchIndex + 1
-        } with releaseState: ${releaseState}...`
-      );
-
-      // Call `releaseNextBatch` on DAV contract
-      await handleContractCall(davContract, "releaseNextBatch");
-
-      // Move tokens on the state contract
-      await handleContractCall(stateContract, "moveTokens", [
-        DAV_TOKEN_ADDRESS,
-        releaseState,
-      ]);
-
-      console.log(`Batch ${batchIndex + 1} released successfully.`);
-    } catch (error) {
-      console.error("Error releasing next batch:", error);
-    }
-  };
-
   useEffect(() => {
     let interval;
 
@@ -436,21 +377,9 @@ export const DAVTokenProvider = ({ children }) => {
             XerionTotalMintedSupply().catch((error) =>
               console.error("Error fetching XerionTotalMintedSupply:", error)
             ),
-            getBurnedSTATE().catch((error) =>
-              console.error("Error fetching getBurnedSTATE:", error)
-            ),
-            // StateTokenBurnRatio().catch((error) =>
-            //   console.error("Error fetching StateTokenBurnRatio:", error)
-            // ),
-            // getRatioTarget().catch((error) =>
-            //   console.error("Error fetching getRatioTarget:", error)
-            // ),
+
             isAuctionRunning().catch((error) =>
               console.error("Error fetching isAuctionRunning:", error)
-            ),
-
-            LpTokenAmount().catch((error) =>
-              console.error("Error fetching LpTokenAmount:", error)
             ),
             ContractStateBalance().catch((error) =>
               console.error("Error fetching ContractStateBalance:", error)
@@ -470,9 +399,6 @@ export const DAVTokenProvider = ({ children }) => {
             AmountOutOfFluxin().catch((error) =>
               console.error("Error fetching DAVTokenAmount:", error)
             ),
-            AmountOutOfXerion().catch((error) =>
-              console.error("Error fetching DAVTokenAmount:", error)
-            ),
             DAVTokenfive_Amount().catch((error) =>
               console.error("Error fetching DAVTokenfive_Amount:", error)
             ),
@@ -480,10 +406,7 @@ export const DAVTokenProvider = ({ children }) => {
               console.error("Error fetching DAVTokenfive_Amount:", error)
             ),
 
-            RatioTargetValues(Fluxin, STATE_TOKEN_ADDRESS).catch((error) =>
-              console.error("Error fetching DAVTokenfive_Amount:", error)
-            ),
-            RatioTargetValues(Xerion, STATE_TOKEN_ADDRESS).catch((error) =>
+            RatioTargetValues().catch((error) =>
               console.error("Error fetching DAVTokenfive_Amount:", error)
             ),
           ]);
@@ -502,11 +425,7 @@ export const DAVTokenProvider = ({ children }) => {
 
   // Ratio Token Contracts
   // -- auction
-  const StartMarketPlaceListing = async () => {
-    await handleContractCall(RatioContract, "startAuction", [], (s) =>
-      ethers.formatUnits(s, 18)
-    );
-  };
+
   const isAuctionRunning = async () => {
     try {
       const isRunningFluxin = await handleContractCall(
@@ -520,9 +439,18 @@ export const DAVTokenProvider = ({ children }) => {
         Fluxin: isRunningFluxin,
         state: true,
       });
+      setIsAuctionRunningLocalString({
+        Fluxin: runningFluxin,
+        state: true,
+      });
     } catch (error) {
       console.error("Error fetching auction status:", error);
       setIsAuctionRunning({
+        Fluxin: false,
+        Xerion: false,
+        state: true,
+      });
+      setIsAuctionRunningLocalString({
         Fluxin: false,
         Xerion: false,
         state: true,
@@ -581,14 +509,14 @@ export const DAVTokenProvider = ({ children }) => {
   const [XerionTransactionHash, setXerionTransactionHash] = useState(null);
   const [stateTransactionHash, setStateTransactionHash] = useState(null);
 
-  const ReanounceContract = async () => {
+  const renounceOwnership = async (contract, contractName, setHash) => {
     try {
-      const tx = await handleContractCall(davContract, "renounceOwnership", []);
-      console.log("DAV Transaction:", tx);
+      const tx = await handleContractCall(contract, "renounceOwnership", []);
+      console.log(`${contractName} Transaction:`, tx);
 
-      if (tx && tx.hash) {
-        console.log("DAV Transaction Hash:", tx.hash);
-        setDavTransactionHash(tx.hash); // Set DAV transaction hash
+      if (tx?.hash) {
+        console.log(`${contractName} Transaction Hash:`, tx.hash);
+        setHash(tx.hash);
       } else {
         console.error(
           "Transaction object doesn't contain transactionHash:",
@@ -596,76 +524,18 @@ export const DAVTokenProvider = ({ children }) => {
         );
       }
     } catch (e) {
-      console.error("Error renouncing ownership for DAV:", e);
-    }
-  };
-  const ReanounceFluxinContract = async () => {
-    try {
-      const tx = await handleContractCall(
-        FluxinContract,
-        "renounceOwnership",
-        []
-      );
-      console.log("Fluxin Transaction:", tx);
-
-      if (tx && tx.hash) {
-        console.log("Fluxin Transaction Hash:", tx.hash);
-        setFluxinTransactionHash(tx.hash); // Set Fluxin transaction hash
-      } else {
-        console.error(
-          "Transaction object doesn't contain transactionHash:",
-          tx
-        );
-      }
-    } catch (e) {
-      console.error("Error renouncing ownership for Fluxin:", e);
-    }
-  };
-  const ReanounceXerionContract = async () => {
-    try {
-      const tx = await handleContractCall(
-        XerionContract,
-        "renounceOwnership",
-        []
-      );
-      console.log("Xerion Transaction:", tx);
-      if (tx && tx.hash) {
-        console.log("Xerion Transaction Hash:", tx.hash);
-        setXerionTransactionHash(tx.hash); // Set Fluxin transaction hash
-      } else {
-        console.error(
-          "Transaction object doesn't contain transactionHash:",
-          tx
-        );
-      }
-    } catch (e) {
-      console.error("Error renouncing ownership for Xerion:", e);
+      console.error(`Error renouncing ownership for ${contractName}:`, e);
     }
   };
 
-  //   console.log(account)
-  const RenounceState = async () => {
-    try {
-      const tx = await handleContractCall(
-        stateContract,
-        "renounceOwnership",
-        []
-      );
-      console.log("State Transaction:", tx);
-
-      if (tx && tx.hash) {
-        console.log("State Transaction Hash:", tx.hash);
-        setStateTransactionHash(tx.hash); // Set State transaction hash
-      } else {
-        console.error(
-          "Transaction object doesn't contain transactionHash:",
-          tx
-        );
-      }
-    } catch (e) {
-      console.error("Error renouncing ownership for State:", e);
-    }
-  };
+  const ReanounceContract = () =>
+    renounceOwnership(davContract, "DAV", setDavTransactionHash);
+  const ReanounceFluxinContract = () =>
+    renounceOwnership(FluxinContract, "Fluxin", setFluxinTransactionHash);
+  const ReanounceXerionContract = () =>
+    renounceOwnership(XerionContract, "Xerion", setXerionTransactionHash);
+  const RenounceState = () =>
+    renounceOwnership(stateContract, "State", setStateTransactionHash);
 
   const contracts = {
     state: stateContract,
@@ -673,13 +543,7 @@ export const DAVTokenProvider = ({ children }) => {
     Fluxin: FluxinContract,
     Xerion: XerionContract,
   };
-  //   const contractAddress = {
-  //     state: STATE_TOKEN_ADDRESS,
-  //     dav: DAV_TOKEN_ADDRESS,
-  //     Fluxin: Fluxin,
-  //     Xerion: Xerion,
-  //     Ratio: Ratio_TOKEN_ADDRESS,
-  //   };
+
   const CheckMintBalance = async (contract) => {
     try {
       const tx = await handleContractCall(contract, "distributeReward", [
@@ -689,24 +553,6 @@ export const DAVTokenProvider = ({ children }) => {
     } catch (e) {
       console.error("Error claiming tokens:", e);
       throw e; // Rethrow the error for the caller to handle it.
-    }
-  };
-
-  const LpTokenAmount = async () => {
-    try {
-      const balance = await handleContractCall(
-        RatioContract,
-        "balanceOf",
-        ["0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483"],
-        (s) => ethers.formatUnits(s, 18)
-      );
-
-      // Calculate 60% of the balance
-      const sixtyPercent = (parseFloat(balance) * 25) / 100;
-      setLpTokens(sixtyPercent);
-    } catch (e) {
-      console.error("Error fetching LP tokens:", e);
-      setLpTokens(null); // Handle error state
     }
   };
 
@@ -720,42 +566,29 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
-  const WithdrawState = async (amount) => {
+
+  const handleTokenWithdraw = async (contract, amount) => {
     try {
       setClaiming(true);
       const amountInWei = ethers.parseUnits(amount, 18);
-
-      await handleContractCall(stateContract, "transferToken", [amountInWei]);
+      await handleContractCall(contract, "transferToken", [amountInWei]);
     } catch (e) {
       console.error(`Error withdrawing with method transferToken:`, e);
     } finally {
       setClaiming(false);
     }
   };
-  const WithdrawFluxin = async (amount) => {
-    try {
-      setClaiming(true);
-      const amountInWei = ethers.parseUnits(amount, 18);
 
-      await handleContractCall(FluxinContract, "transferToken", [amountInWei]);
-    } catch (e) {
-      console.error(`Error withdrawing with method transferToken:`, e);
-    } finally {
-      setClaiming(false);
-    }
-  };
-  const WithdrawXerion = async (amount) => {
-    try {
-      setClaiming(true);
-      const amountInWei = ethers.parseUnits(amount, 18);
+  // Specific withdrawal functions
+  const WithdrawState = (amount) => handleTokenWithdraw(stateContract, amount);
+  const WithdrawFluxin = (amount) =>
+    handleTokenWithdraw(FluxinContract, amount);
+  const WithdrawXerion = (amount) =>
+    handleTokenWithdraw(XerionContract, amount);
 
-      await handleContractCall(XerionContract, "transferToken", [amountInWei]);
-    } catch (e) {
-      console.error(`Error withdrawing with method transferToken:`, e);
-    } finally {
-      setClaiming(false);
-    }
-  };
+  const withdraw_5 = () => handleWithdraw("withdrawDevelopmentFunds");
+  const withdraw_95 = () => handleWithdraw("withdrawLiquidityFunds");
+
   const mintAdditionalTOkens = async (contractType, amount) => {
     try {
       setClaiming(true);
@@ -783,9 +616,6 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
-
-  const withdraw_5 = () => handleWithdraw("withdrawDevelopmentFunds");
-  const withdraw_95 = () => handleWithdraw("withdrawLiquidityFunds");
 
   const DAVTokenAmount = async () => {
     try {
@@ -837,49 +667,12 @@ export const DAVTokenProvider = ({ children }) => {
 
       console.log("AmountOut -> Raw Fluxin Balance:", balanceOfFluxin);
 
-      const rawFluxinBalance = await handleContractCall(
-        RatioContract,
-        "calculateAmountOut",
-        [balanceOfFluxin]
-        // (s) => ethers.formatUnits(s, 18)
-      );
+      const calculation = balanceOfFluxin * FluxinRatioPrice * 2;
 
-      const balance = parseFloat(rawFluxinBalance || "0");
-      console.log("out -> Raw Fluxin Balance:", rawFluxinBalance);
+      const balance = parseFloat(calculation || "0");
+      console.log("out -> Raw Fluxin Balance:", calculation);
       setOutBalance({
         Fluxin: balance,
-      });
-    } catch (e) {
-      console.error("Error fetching AmountOut balances:", e);
-    }
-  };
-  const AmountOutOfXerion = async () => {
-    try {
-      const rawXerionBalanceUser = await handleContractCall(
-        RatioContract,
-        "getOnepercentOfUserBalance",
-        [Xerion, account],
-        (s) => ethers.formatUnits(s, 18)
-      );
-      console.log("AmountOut -> Raw Xerion Balance:", rawXerionBalanceUser);
-
-      const balanceOfXerion = Math.floor(
-        parseFloat(rawXerionBalanceUser || "0")
-      );
-
-      console.log("AmountOut -> Raw Xerion Balance:", balanceOfXerion);
-
-      const rawXerionBalance = await handleContractCall(
-        RatioContract,
-        "calculateAmountOut",
-        [balanceOfXerion, Xerion, STATE_TOKEN_ADDRESS]
-        // (s) => ethers.formatUnits(s, 18)
-      );
-
-      const balance = parseFloat(rawXerionBalance || "0");
-
-      setOutBalanceXerion({
-        Xerion: balance,
       });
     } catch (e) {
       console.error("Error fetching AmountOut balances:", e);
@@ -975,35 +768,11 @@ export const DAVTokenProvider = ({ children }) => {
       if (timer) clearInterval(timer);
     }
   };
-  let XerionTimer;
-  const AuctionTimeLeftOfXerion = async () => {
-    try {
-      // Fetch remaining time from the contract
-      const Time = await handleContractCall(
-        RatioContract,
-        "getTimeLeftInAuction",
-        [Xerion, STATE_TOKEN_ADDRESS]
-      );
-
-      const timeInSeconds = Number(Time);
-      SetAuctionTimeXerionRunning(timeInSeconds);
-
-      // If time is 0, stop further execution
-      if (timeInSeconds <= 0) {
-        clearInterval(XerionTimer);
-      }
-    } catch (e) {
-      console.error("Error fetching auction time:", e);
-      clearInterval(XerionTimer); // Cleanup timer if an error occurs
-    }
-  };
 
   useEffect(() => {
-    AuctionTimeLeftOfXerion();
     AuctionTimeLeft();
     // Start polling every 2 seconds
     const interval = setInterval(() => {
-      AuctionTimeLeftOfXerion();
       AuctionTimeLeft();
     }, 2000);
 
@@ -1029,15 +798,11 @@ export const DAVTokenProvider = ({ children }) => {
     try {
       const RatioTargetFluxin = await handleContractCall(
         RatioContract,
-        "RatioTarget",
-        [Fluxin, STATE_TOKEN_ADDRESS]
+        "getRatioTarget",
+        []
       );
-
-      console.log("RatioTargetValues", RatioTargetFluxin);
-      SetRatioTarget({
-        Fluxin: RatioTargetFluxin,
-        // Xerion: RatioTargetXerion,
-      }); // Update state with the formatted time
+      console.log("RatioTargetValues", Number(RatioTargetFluxin));
+      SetRatioTarget(RatioTargetFluxin);
     } catch (e) {
       console.error("Error fetching ratio targets:", e);
     }
@@ -1122,77 +887,96 @@ export const DAVTokenProvider = ({ children }) => {
 
       const amountInWei = ethers.parseUnits(OnePBalance.toString(), 18);
 
-      // Check current allowance
-      const allowance = await handleContractCall(
-        contracts["Fluxin"],
-        "allowance",
-        [account, Ratio_TOKEN_ADDRESS],
-        (s) => ethers.formatUnits(s, 18)
+      // Check current allowance directly
+      const allowance = await FluxinContract.allowance(
+        account,
+        Ratio_TOKEN_ADDRESS
       );
+      const formattedAllowance = ethers.formatUnits(allowance, 18);
 
-      console.log(`Current allowance: ${allowance}`);
+      console.log(`Current allowance: ${formattedAllowance}`);
       console.log(`Amount to approve (in wei): ${amountInWei.toString()}`);
 
       // Approve if insufficient allowance
       if (
-        parseFloat(allowance) < parseFloat(ethers.formatUnits(amountInWei, 18))
+        parseFloat(formattedAllowance) <
+        parseFloat(ethers.formatUnits(amountInWei, 18))
       ) {
         setButtonTextStates((prev) => ({
           ...prev,
           [id]: "Approving input token...",
         }));
         console.log("Insufficient allowance. Sending approval transaction...");
-        const approvalResult = await ApproveToken(
-          "Fluxin",
-          Ratio_TOKEN_ADDRESS,
-          amountInWei.toString()
-        );
 
-        if (!approvalResult) {
+        const approveTx = await FluxinContract.approve(
+          Ratio_TOKEN_ADDRESS,
+          amountInWei
+        );
+        const approveReceipt = await approveTx.wait();
+
+        if (approveReceipt.status !== 1) {
+          console.error(
+            "Approval transaction failed. Cannot proceed with swap."
+          );
           setSwappingStates((prev) => ({ ...prev, [id]: false }));
-          console.error("Approval failed. Cannot proceed with swap.");
           return false;
         }
+
+        console.log("Approval successful!");
         setButtonTextStates((prev) => ({
           ...prev,
           [id]: "Approval successful",
         }));
-
-        console.log("Approval successful!");
       } else {
         console.log(
           "Sufficient allowance already granted. Proceeding to swap."
         );
       }
+
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swapping..." }));
 
-      // Proceed with the swap logic
-      const gasprice = (await provider.getFeeData()).gasPrice;
-      console.log("Gas Price (in wei):", gasprice.toString());
+      // Get gas price and calculate extra fee
+      const gasPrice = (await provider.getFeeData()).gasPrice;
+      console.log("Gas Price (in wei):", gasPrice.toString());
 
-      const extraFee = gasprice / 100n; // 1% of gas price
+      const extraFee = gasPrice / 100n; // Calculate extra fee
       console.log("Extra Fee (in wei):", extraFee.toString());
 
       console.log(
         `Swapping tokens with extra fee: ${ethers.formatEther(extraFee)} ETH`
       );
-      setButtonText("Swapping...");
 
-      // Call the swapTokens function
-      await handleContractCall(
-        RatioContract,
-        "swapTokens",
-        [account, extraFee],
-        { value: extraFee } // Include value for payable function
+      const covertOutIntoWei = ethers.parseUnits(
+        OutBalance.Fluxin.toString(),
+        18
       );
-      setButtonTextStates((prev) => ({ ...prev, [id]: "Swap successful!" }));
+      console.log(
+        "Converted OutBalance (in wei):",
+        covertOutIntoWei.toString()
+      );
 
-      setButtonText("Swap successful!");
-      console.log("Swap successful!");
-    } catch (e) {
-      console.error("Error during token swap:", e);
+      // Call the `swapTokens` function directly
+      const swapTx = await RatioContract.swapTokens(
+        account,
+        covertOutIntoWei,
+        extraFee,
+        {
+          value: extraFee,
+        }
+      );
+
+      const swapReceipt = await swapTx.wait();
+      if (swapReceipt.status === 1) {
+        console.log("Swap successful!");
+        setButtonTextStates((prev) => ({ ...prev, [id]: "Swap successful!" }));
+      } else {
+        console.error("Swap transaction failed.");
+        setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
+      }
+    } catch (error) {
+      console.error("Error during token swap:", error);
       setButtonText("Swap");
-      setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
+      setButtonTextStates((prev) => ({ ...prev, [id]: "Swap" }));
     } finally {
       setSwappingStates((prev) => ({ ...prev, [id]: false }));
     }
@@ -1245,81 +1029,6 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const getBurnedSTATE = async () => {
-    const amount = await handleContractCall(
-      RatioContract,
-      "getBurnedSTATE",
-      [],
-      (s) => ethers.formatUnits(s, 18)
-    );
-    setStateBurnAMount(amount);
-  };
-
-  //   const ratioOfBurn = async () => {
-  //     try {
-  //       const totalBurnAmount = await calculateBurnAmount(); // Await the value
-  //       const OnePercent = await calculateOnePercentBurnAmount(); // Await the async function
-
-  //       // Debugging logs for clarity
-  //       console.log("Total Burn Amount:", totalBurnAmount);
-  //       console.log("1% Burn Amount:", OnePercent);
-
-  //       // Validate totalBurnAmount and OnePercent
-  //       if (!totalBurnAmount || isNaN(totalBurnAmount) || totalBurnAmount <= 0) {
-  //         console.warn(
-  //           "Invalid or zero total burn amount. Returning ratio as 1:0."
-  //         );
-  //         setBurnAMountRatio("1:0");
-  //         return "1:0";
-  //       }
-
-  //       if (!OnePercent || isNaN(Number(OnePercent))) {
-  //         console.warn("Invalid 1% burn amount. Returning ratio as 1:0.");
-  //         setBurnAMountRatio("1:0");
-  //         return "1:0";
-  //       }
-
-  //       const onePercentValue = Number(OnePercent);
-
-  //       const ratio = onePercentValue / totalBurnAmount;
-
-  //       if (isNaN(ratio)) {
-  //         console.warn("Calculated ratio is NaN. Returning 1:0.");
-  //         setBurnAMountRatio("1:0");
-  //         return "1:0";
-  //       }
-
-  //       const ratioInFormat = `1:${(1 / ratio).toFixed(0)}`;
-  //       console.log("Formatted Ratio:", ratioInFormat);
-
-  //       setBurnAMountRatio(ratioInFormat);
-  //       return ratioInFormat;
-  //     } catch (error) {
-  //       console.error("Error in ratioOfBurn calculation:", error);
-  //       setBurnAMountRatio("1:0");
-  //       return "1:0";
-  //     }
-  //   };
-
-  const HandleBurn = async () => {
-    setButtonText("Burning...");
-    try {
-      await handleContractCall(
-        RatioContract,
-        "burnAndDistributeListedTokens",
-        []
-      );
-      setButtonText("Burn Complete");
-    } catch (error) {
-      console.error("Error :", error);
-      setButtonText("Burn Failed");
-    } finally {
-      setTimeout(() => {
-        setButtonText("Burn");
-      }, 3000);
-    }
-  };
-
   const setRatioTarget = async (Target) => {
     try {
       // Call the contract to set both numerator and denominator
@@ -1329,87 +1038,61 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error setting ratio target:", error);
     }
   };
-  const setCurrentRatioTarget = async (Target) => {
-    try {
-      await handleContractCall(RatioContract, "setCurrentRatioTarget", [
-        Target,
-      ]);
-      console.log(`Ratio target set to `);
-    } catch (error) {
-      console.error("Error setting ratio target:", error);
-    }
-  };
-  const ApproveToken = async (name, spenderAddress, amount) => {
-    try {
-      const amountInWei = ethers.parseUnits(amount, 18);
-
-      const approvalTx = await handleContractCall(
-        contracts[name],
-        "approve",
-        [spenderAddress, amountInWei],
-        (s) => ethers.formatUnits(s, 18)
-      );
-
-      const approvalReceipt = await approvalTx.wait();
-      console.log("receipt", approvalReceipt);
-      if (approvalReceipt.status === 1) {
-        console.log(`Approval successful for ${name}`);
-        return true;
-      } else {
-        console.error(`Approval failed for ${name}`);
-        return false;
-      }
-    } catch (error) {
-      console.error(`Error during ${name} approval:`, error);
-      return false;
-    }
-  };
 
   const DepositToken = async (name, TokenAddress, amount) => {
     try {
-      const amountInWei = ethers.parseUnits(amount, 18);
-      console.log("fluxinRationPrice", ethers.parseUnits(FluxinRatioPrice, 18));
-      // Check current allowance
-      const allowance = await handleContractCall(
-        contracts[name],
-        "allowance",
-        [account, Ratio_TOKEN_ADDRESS],
-        (s) => ethers.formatUnits(s, 18)
+      const amountInWei = ethers.parseUnits(amount, 18); // Convert amount to Wei
+      setButtonText("pending");
+      // Check current allowance directly
+      const allowance = await contracts[name].allowance(
+        account,
+        Ratio_TOKEN_ADDRESS
       );
+      const formattedAllowance = ethers.formatUnits(allowance, 18);
 
       // Approve if insufficient allowance
-      if (parseFloat(allowance) < parseFloat(amount)) {
-        const approvalResult = await ApproveToken(
-          name,
+      if (parseFloat(formattedAllowance) < parseFloat(amount)) {
+        const approveTx = await contracts[name].approve(
           Ratio_TOKEN_ADDRESS,
-          amount
+          amountInWei
         );
-        if (!approvalResult) {
-          console.error("Approval failed. Cannot proceed with deposit.");
+        const approveReceipt = await approveTx.wait();
+
+        if (approveReceipt.status !== 1) {
+          console.error("Approval transaction failed.");
+          setTransactionStatus("failed");
           return false;
         }
-      }
-      // Proceed with deposit
-      const depositTx = await handleContractCall(
-        RatioContract,
-        "depositTokens",
-        [TokenAddress, amountInWei, ethers.parseUnits(FluxinRatioPrice, 18)],
 
-        (s) => ethers.formatUnits(s, 18)
+        console.log("Approval successful");
+      }
+
+      // Proceed with deposit transaction
+      const depositTx = await RatioContract.depositTokens(
+        TokenAddress,
+        amountInWei
       );
+      setTransactionStatus("pending");
 
       const depositReceipt = await depositTx.wait();
-      console.log("receipt", depositReceipt);
+      console.log("Receipt:", depositReceipt);
 
       if (depositReceipt.status === 1) {
         console.log(`Deposit successful for ${TokenAddress}`);
+        setTransactionStatus("success");
+        setButtonText("success");
+
         return true;
       } else {
         console.error("Deposit transaction failed.");
+        setTransactionStatus("failed");
         return false;
       }
     } catch (error) {
       console.error("Error during deposit process:", error);
+      setTransactionStatus("failed");
+      setButtonText("success");
+
       return false;
     }
   };
@@ -1446,60 +1129,6 @@ export const DAVTokenProvider = ({ children }) => {
       throw error; // Re-throw the error to propagate it
     }
   };
-  //   const getRatioTarget = async () => {
-  //     try {
-  //       // Fetch both numerator and denominator from the contract
-  //       const [numerator, denominator] = await handleContractCall(
-  //         RatioContract,
-  //         "getRatioTarget",
-  //         [],
-  //         (result) => result.map((s) => parseFloat(ethers.formatUnits(s, 18))) // Format each value separately
-  //       );
-
-  //       // Check if denominator is valid (non-zero)
-  //       if (denominator > 0) {
-  //         const ratio = `${numerator}:${denominator.toFixed(0)}`;
-  //         setRatioTargetAmount(ratio); // Update the state with the ratio
-  //       } else {
-  //         console.warn("Invalid denominator.");
-  //         setRatioTargetAmount(`${numerator}:0`); // Default to "numerator:0" in case of error
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching ratio target:", error);
-  //       setRatioTargetAmount(null); // Handle error state properly
-  //     }
-  //   };
-
-  //   const StateTokenBurnRatio = async () => {
-  //     try {
-  //       const burnAmount = await handleContractCall(
-  //         RatioContract,
-  //         "getBurnedSTATE",
-  //         [],
-  //         (s) => parseFloat(ethers.formatUnits(s, 18))
-  //       );
-  //       console.log("Burn Amount:", burnAmount);
-
-  //       const totalSupply = await handleContractCall(
-  //         RatioContract,
-  //         "totalSupply",
-  //         [],
-  //         (s) => parseFloat(ethers.formatUnits(s, 18))
-  //       );
-  //       console.log("Total Supply:", totalSupply);
-
-  //       if (totalSupply > 0) {
-  //         const ratio = burnAmount / totalSupply;
-  //         setStateBurnRatio(ratio.toFixed(10)); // Store ratio as a string for precision
-  //         console.log("State Burn Ratio:", ratio);
-  //         return ratio;
-  //       } else {
-  //         console.error("Total supply is zero. Cannot calculate ratio.");
-  //       }
-  //     } catch (error) {
-  //       console.error("Error calculating state burn ratio:", error);
-  //     }
-  //   };
 
   const handleAddToken = async (
     tokenAddress,
@@ -1548,53 +1177,58 @@ export const DAVTokenProvider = ({ children }) => {
     handleAddToken(STATE_TOKEN_ADDRESS, "tState");
   const handleAddFluxin = () => handleAddToken(Fluxin, "Fluxin");
   const handleAddXerion = () => handleAddToken(Xerion, "Xerion");
-  const handleAddXerion2 = () => handleAddToken(Xerion2, "Xerion2");
-  const handleAddXerion3 = () => handleAddToken(Xerion3, "Xerion3");
 
   return (
     <DAVTokenContext.Provider
       value={{
+        //WALLET States
         provider,
         signer,
-        davContract,
         loading,
         account,
+
+        //DAV Contract
+        davContract,
         mintDAV,
-        releaseNextBatch,
         CalculationOfCost,
         TotalCost,
-
-        setClaiming,
         DavHoldings,
         davHolds,
         DavHoldingsPercentage,
         davPercentage,
+        DavSupply,
+        DavBalance,
+        DAVTokensWithdraw,
+        handleAddTokenDAV,
+        davTransactionHash,
+        DAVTokensFiveWithdraw,
+
+        //STATE Token
+        StateHolds,
+        StateSupply,
+        StateBalance,
+        RenounceState,
+        stateTransactionHash,
+        Supply,
+        WithdrawState,
+        handleAddTokenState,
+        PercentageOfState,
+        TotalStateHoldsInUS,
+
+        ViewDistributedTokens,
+        setClaiming,
+
+        contracts,
         FluxinBalance,
         XerionBalance,
-        // StateHoldings,
-        StateHolds,
-        DavSupply,
-        StateSupply,
-        contracts,
-        Supply,
-        getBurnedSTATE,
-        StartMarketPlaceListing,
         ClaimTokens,
-        ViewDistributedTokens,
         Distributed,
         claiming,
-        HandleBurn,
-        StateBurned,
-        DavBalance,
         SwapTokens,
         ButtonText,
         ReanounceContract,
         ReanounceFluxinContract,
         ReanounceXerionContract,
-        RenounceState,
-        MoveTokens,
-
-        StateBalance,
 
         handleAddToken,
         setRatioTarget,
@@ -1604,34 +1238,23 @@ export const DAVTokenProvider = ({ children }) => {
         XerionSupply,
 
         AuctionRunning,
-        WithdrawState,
         WithdrawFluxin,
         WithdrawXerion,
         CheckMintBalance,
-        LpTokenAmount,
-        LpTokens,
-        DAVTokensWithdraw,
+
         withdraw_95,
         handleAddTokenRatio,
-        handleAddTokenState,
-        handleAddTokenDAV,
         handleAddFluxin,
         handleAddXerion,
-        handleAddXerion2,
-        handleAddXerion3,
-        PercentageOfState,
+
         withdraw_5,
 
         // WithdrawLPTokens,
         mintAdditionalTOkens,
         isRenounced,
         checkOwnershipStatus,
-        davTransactionHash,
-        stateTransactionHash,
         fluxinTransactionHash,
         XerionTransactionHash,
-        TotalStateHoldsInUS,
-        DAVTokensFiveWithdraw,
         SetAUctionDuration,
         SetAUctionInterval,
         AuctionTime,
@@ -1642,13 +1265,12 @@ export const DAVTokenProvider = ({ children }) => {
         RatioValues,
         OnePBalance,
         OutBalance,
-        OutBalanceXerion,
         StartAuction,
         AuctionTimeRunning,
-        AuctionTimeXerionRunning,
-        setCurrentRatioTarget,
         buttonTextStates,
         swappingStates,
+        AuctionRunningLocalString,
+        transactionStatus,
       }}
     >
       {children}
