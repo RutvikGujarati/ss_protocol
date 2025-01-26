@@ -1047,8 +1047,8 @@ export const DAVTokenProvider = ({ children }) => {
       const swapReceipt = await swapTx.wait();
 
       if (swapReceipt.status === 1) {
-        console.log("Swap successful!");
-        setButtonTextStates((prev) => ({ ...prev, [id]: "Swap successful!" }));
+        console.log("Swap Complete!");
+        setButtonTextStates((prev) => ({ ...prev, [id]: "Swap Complete!" }));
       } else {
         console.error("Swap transaction failed.");
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
