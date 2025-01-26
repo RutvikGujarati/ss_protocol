@@ -919,30 +919,30 @@ export const DAVTokenProvider = ({ children }) => {
         [id]: "Checking allowance...",
       }));
 
-      let amountInWei;
+      const amountInWei = ethers.parseUnits(OutBalance.Fluxin.toString(), 18);
       let approvalAmount;
       let contractToUse = FluxinContract;
 
-      console.log("Ratio Values:", RatioValues);
-      console.log("Fluxin Ratio Price:", FluxinRatioPrice);
-      console.log("isReversed:", isReversed);
+      const rp = await getCachedRatioTarget();
+      console.log("FluxinRatioPrice:", FluxinRatioPrice);
+      console.log("Ratio Price (rp):", parseFloat(rp).toString());
+      console.log("isReversed:", isReversed.toString());
+      const rp1 = parseFloat(rp);
+      const isreverse = isReversed.toString();
 
-      if (FluxinRatioPrice > RatioValues && isReversed === "true") {
-        amountInWei = ethers.parseUnits(OnePBalance.toString(), 18);
+      if (FluxinRatioPrice > rp1 && isreverse) {
+        console.log(
+          "Condition: FluxinRatioPrice > rp && isReversed === 'true'"
+        );
         contractToUse = stateContract;
         approvalAmount = ethers.parseUnits(OutBalance.Fluxin.toString(), 18);
         console.log(
           "Reversed swap, approving OutBalance:",
           approvalAmount.toString()
         );
-      } else if (
-        FluxinRatioPrice < RatioValues &&
-        (isReversed === "true" || isReversed === "false")
-      ) {
-        amountInWei = ethers.parseUnits(OutBalance.Fluxin.toString(), 18);
+      } else if (FluxinRatioPrice < rp1) {
         console.log(
-          "passing amount into contract : outPut Amount",
-          amountInWei
+          "Condition: FluxinRatioPrice < rp && isReversed === 'false'"
         );
         approvalAmount = ethers.parseUnits(OnePBalance.toString(), 18);
         console.log("approval amount: ", approvalAmount);
@@ -1032,6 +1032,7 @@ export const DAVTokenProvider = ({ children }) => {
     } finally {
       // Reset swapping state
       setSwappingStates((prev) => ({ ...prev, [id]: false }));
+      setButtonTextStates((prev) => ({ ...prev, [id]: "Swap" }));
     }
   };
 
@@ -1119,22 +1120,22 @@ export const DAVTokenProvider = ({ children }) => {
       console.log("Ratio Price (rp):", parseFloat(rp).toString());
       console.log("isReversed:", isReversed.toString());
       const rp1 = parseFloat(rp);
-	  const isreverse = isReversed.toString();
+      const isreverse = isReversed.toString();
       let adjustedBalance;
 
       // Determine balance adjustment based on conditions
-      if ( FluxinRatioPrice > rp && isreverse) {
+      if (FluxinRatioPrice > rp && isreverse) {
         console.log(
           "Condition: FluxinRatioPrice > rp && isReversed === 'true'"
         );
         adjustedBalance = balance + balance;
       } else if (FluxinRatioPrice < rp1) {
         console.log("Condition: FluxinRatioPrice < rp");
-        adjustedBalance = balance ;
+        adjustedBalance = balance;
       } else {
         console.warn("No matching conditions. Defaulting to raw balance.");
         console.log("fluxinRatioPrice", FluxinRatioPrice);
-		console.log("Ratio Price (rp):", parseFloat(rp).toString());
+        console.log("Ratio Price (rp):", parseFloat(rp).toString());
 
         adjustedBalance = balance;
       }
