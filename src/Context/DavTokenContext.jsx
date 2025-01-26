@@ -935,7 +935,7 @@ export const DAVTokenProvider = ({ children }) => {
 	  let approvalAmount;
 	  let contractToUse = FluxinContract;
   
-	  if (FluxinRatioPrice > RatioValues) {
+	  if ((FluxinRatioPrice > RatioValues) && isReversed =="true") {
 		// If the condition is true, update amountInWei and use stateContract for approval
 		const covertOutIntoWei = ethers.parseUnits(
 		  OutBalance.Fluxin.toString(),

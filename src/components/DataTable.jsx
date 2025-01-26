@@ -159,6 +159,7 @@ const DataTable = () => {
                 image: FluxinLogo,
                 ratio: `1:${RatioValues}`,
                 currentRatio: `1:${FluxinRatioPrice}`,
+                reverseRatio: `2:${FluxinRatioPrice}`,
                 Price: FluxinUsdPrice,
                 AuctionStatus: AuctionRunning.Fluxin,
                 userHasSwapped: userHashSwapped,
@@ -204,6 +205,7 @@ const DataTable = () => {
                     image,
                     ratio,
                     currentRatio,
+                    reverseRatio,
                     ContractName,
                     Liquidity,
                     Price,
@@ -276,13 +278,19 @@ const DataTable = () => {
                       </a>
                     </td>
                     <td className="text-success">{Liquidity}</td>
-                    <td>{currentRatio}</td>
+                    <td>
+                      {isReversed === "true" && FluxinRatioPrice > RatioValues
+                        ? reverseRatio
+                        : currentRatio}
+                    </td>
+
                     <td>{ratio}</td>
                     <td>
                       <div className="d-flex justify-content-center gap-3 w-100">
                         {id !== "state" && (
                           <>
-                            {isReversed =="true" ? (
+                            {isReversed == "true" &&
+                            FluxinRatioPrice > RatioValues ? (
                               <>
                                 <div className="tableClaim">{outputToken}</div>{" "}
                                 <div className="tableClaim">
