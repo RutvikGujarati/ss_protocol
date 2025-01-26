@@ -290,7 +290,7 @@ const DataTable = () => {
                         {id !== "state" && (
                           <>
                             {isReversed == "true" &&
-                            FluxinRatioPrice > RatioValues ? (
+                           ( FluxinRatioPrice > RatioValues) ? (
                               <>
                                 <div className="tableClaim">{outputToken}</div>{" "}
                                 <div className="tableClaim">
