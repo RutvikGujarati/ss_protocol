@@ -643,44 +643,45 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   const SetOnePercentageOfBalance = async () => {
-	try {
-	  // Fetch raw one percent balance
-	  const rawFluxinBalance = await handleContractCall(
-		RatioContract,
-		"getOnepercentOfUserBalance",
-		[],
-		(s) => ethers.formatUnits(s, 18)
-	  );
-  
-	  const balance = Math.floor(parseFloat(rawFluxinBalance || "0"));
-  
-	  console.log("SetOnePercentageOfBalance -> Fluxin:", balance);
-	  console.log("Ratio Price:", RatioValues);
-  
-	  let adjustedBalance;
-  
-	  // Determine balance adjustment based on conditions
-	  if (FluxinRatioPrice > RatioValues && isReversed === "true") {
-		console.log("Condition: FluxinRatioPrice > RatioValues && isReversed === 'true'");
-		adjustedBalance = balance * 2;
-	  } else if (FluxinRatioPrice < RatioValues) {
-		console.log("Condition: FluxinRatioPrice < RatioValues");
-		adjustedBalance = balance; // Covers both `isReversed === "true"` and `isReversed === "false"`
-	  } else {
-		console.warn("No matching conditions. Defaulting to raw balance.");
-		adjustedBalance = balance; // Fallback case, though this shouldn't occur given the conditions.
-	  }
-  
-	  console.log("Adjusted Balance:", adjustedBalance);
-  
-	  // Update states
-	  setOnePBalance(adjustedBalance);
-	  setFormatedBalance(adjustedBalance);
-	} catch (e) {
-	  console.error("Error fetching One Percentage balance of tokens:", e);
-	}
+    try {
+      // Fetch raw one percent balance
+      const rawFluxinBalance = await handleContractCall(
+        RatioContract,
+        "getOnepercentOfUserBalance",
+        [],
+        (s) => ethers.formatUnits(s, 18)
+      );
+
+      const balance = Math.floor(parseFloat(rawFluxinBalance || "0"));
+
+      console.log("SetOnePercentageOfBalance -> Fluxin:", balance);
+      console.log("Ratio Price:", RatioValues);
+
+      let adjustedBalance;
+
+      // Determine balance adjustment based on conditions
+      if (FluxinRatioPrice > RatioValues && isReversed === "true") {
+        console.log(
+          "Condition: FluxinRatioPrice > RatioValues && isReversed === 'true'"
+        );
+        adjustedBalance = balance * 2;
+      } else if (FluxinRatioPrice < RatioValues) {
+        console.log("Condition: FluxinRatioPrice < RatioValues");
+        adjustedBalance = balance; // Covers both `isReversed === "true"` and `isReversed === "false"`
+      } else {
+        console.warn("No matching conditions. Defaulting to raw balance.");
+        adjustedBalance = balance; // Fallback case, though this shouldn't occur given the conditions.
+      }
+
+      console.log("Adjusted Balance:", adjustedBalance);
+
+      // Update states
+      setOnePBalance(adjustedBalance);
+      setFormatedBalance(adjustedBalance);
+    } catch (e) {
+      console.error("Error fetching One Percentage balance of tokens:", e);
+    }
   };
-  
 
   const AmountOutOfFluxin = async () => {
     try {
@@ -953,15 +954,30 @@ export const DAVTokenProvider = ({ children }) => {
       console.log("Fluxin Ratio Price:", FluxinRatioPrice);
       console.log("isReversed:", isReversed);
 
-      // Determine the amount and contract based on conditions
       if (FluxinRatioPrice > RatioValues && isReversed === "true") {
-        amountInWei = ethers.parseUnits(OutBalance.Fluxin.toString(), 18);
-        contractToUse = stateContract; // Use `stateContract` in this condition
+        amountInWei = ethers.parseUnits(OnePBalance.toString(), 18);
+        contractToUse = stateContract;
+        approvalAmount = ethers.parseUnits(OutBalance.Fluxin.toString(), 18);
+        console.log(
+          "Reversed swap, approving OutBalance:",
+          approvalAmount.toString()
+        );
       } else if (
         FluxinRatioPrice < RatioValues &&
         (isReversed === "true" || isReversed === "false")
       ) {
-        amountInWei = ethers.parseUnits(OnePBalance.toString(), 18);
+        amountInWei = ethers.parseUnits(OutBalance.Fluxin.toString(), 18);
+        console.log(
+          "passing amount into contract : outPut Amount",
+          amountInWei
+        );
+        approvalAmount = ethers.parseUnits(OnePBalance.toString(), 18);
+        console.log("approval amount: ", approvalAmount);
+
+        console.log(
+          "Normal swap, approving OnePBalance:",
+          approvalAmount.toString()
+        );
       } else {
         console.error(
           "Invalid swap conditions. Cannot determine token amount."
@@ -970,12 +986,10 @@ export const DAVTokenProvider = ({ children }) => {
         setSwappingStates((prev) => ({ ...prev, [id]: false }));
         return false;
       }
+      approvalAmount = approvalAmount + ethers.parseUnits("100", 18);
 
       console.log("Amount in wei:", amountInWei.toString());
-
-      // Add extra approval buffer
-      const extraApprovalAmount = ethers.parseUnits("100", 18); // 100 tokens as buffer
-      approvalAmount = amountInWei + extraApprovalAmount;
+      console.log("Approval Amount:", approvalAmount.toString());
 
       // Check current allowance
       const allowance = await contractToUse.allowance(
