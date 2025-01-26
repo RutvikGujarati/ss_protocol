@@ -754,46 +754,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
 
                           <tr>
                             <td className="d-flex align-items-center">
-                              Set Reverse Time
-                            </td>
-                            <td>
-                              <div className="w-100">
-                                <input
-                                  type="text"
-                                  className="form-control text-center mh-30"
-                                  placeholder="start Time"
-                                  value={startTime}
-                                  onChange={(e) => handleInputStartChange(e)}
-                                />
-                              </div>
-                              <div className="w-100">
-                                <input
-                                  type="text"
-                                  className="form-control text-center mh-30"
-                                  placeholder="end Time"
-                                  value={endTime}
-                                  onChange={(e) => handleInputendChange(e)}
-                                />
-                              </div>
-                            </td>
-
-                            <td className="d-flex justify-content-end">
-                              <button
-                                onClick={() =>
-                                  dataToShow.actions.setReverse(
-                                    startTime,
-                                    endTime
-                                  )
-                                }
-                                className="btn btn-primary btn-sm swap-btn info-icon"
-                              >
-                                Set
-                              </button>
-                            </td>
-                          </tr>
-
-                          <tr>
-                            <td className="d-flex align-items-center">
                               Start Auction
                             </td>
                             <td className="d-flex align-items-center justify-content-center">
