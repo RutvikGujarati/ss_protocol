@@ -35,12 +35,15 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     WithdrawState,
     WithdrawFluxin,
     WithdrawXerion,
+	
     // OutBalance,
     // OutBalanceXerion,
     account,
     // mintStateTokens,
     // mintFluxinTokens,
     LPStateTransferred,
+    setReverseEnable,
+    isReversed,
     AuctionRunningLocalString,
     PercentageOfState,
     PercentageFluxin,
@@ -61,6 +64,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     LastLiquidity,
     transactionStatus,
     Batch,
+    setReverseTime,
     ReanounceFluxinContract,
     ReanounceXerionContract,
     StateBalance,
@@ -79,6 +83,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   } = useDAVToken();
 
   const [numerator, setNumerator] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   const [numeratorOfAUction, setNumeratorOfAuction] = useState("");
   const [numeratorOfInterval, setNumeratorOfInterval] = useState("");
   const [Denominator, setDenominator] = useState("");
@@ -168,6 +174,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         AddTokenToContract: () =>
           AddTokensToContract(Fluxin, STATE_TOKEN_ADDRESS, FluxinRatioPrice),
         setRatio: (value) => setRatioTarget(value),
+        setReverseEnabled: (value) => setReverseEnable(value),
+        setReverse: (value, value2) => setReverseTime(value, value2),
         setCurrentRatio: (value) => setCurrentRatioTarget(value),
         DepositTokens: (value) => DepositToken("Fluxin", Fluxin, value),
         DepositStateTokens: (value) =>
@@ -244,6 +252,14 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const handleInputChange = (e) => {
     const value = e.target.value;
     setNumerator(value);
+  };
+  const handleInputStartChange = (e) => {
+    const value = e.target.value;
+    setStartTime(value);
+  };
+  const handleInputendChange = (e) => {
+    const value = e.target.value;
+    setEndTime(value);
   };
 
   const handleInputChangeAuction = (e) => {
@@ -574,7 +590,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                         <>
                           <tr>
                             <td className="d-flex align-items-center">
-                              {`Deposit ${dataToShow.name}`} 
+                              {`Deposit ${dataToShow.name}`}
                             </td>
                             <td>
                               <div className="w-100">
@@ -602,7 +618,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           </tr>
                           <tr>
                             <td className="d-flex align-items-center">
-							Deposit STATE Tokens
+                              Deposit STATE Tokens
                             </td>
                             <td>
                               <div className="w-100">
@@ -691,7 +707,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                             <td>
                               <div className="w-100">
                                 <input
-                                  type="text"
+                                  type="number"
                                   className="form-control text-center mh-30"
                                   placeholder="Enter Target"
                                   value={numerator}
@@ -704,6 +720,70 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               <button
                                 onClick={() =>
                                   dataToShow.actions.setRatio(numerator)
+                                }
+                                className="btn btn-primary btn-sm swap-btn info-icon"
+                              >
+                                Set
+                              </button>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="d-flex align-items-center">
+                              Set reverse Swap
+                            </td>
+                            <td>
+                              {" "}
+                              <div className="w-100">{isReversed}</div>
+                            </td>
+
+                            <td className="d-flex justify-content-end">
+                              <button
+                                onClick={() => {
+                                  if (isReversed == "true") {
+                                    dataToShow.actions.setReverseEnabled(false); 
+                                  } else {
+                                    dataToShow.actions.setReverseEnabled(true); 
+                                  }
+                                }}
+                                className="btn btn-primary btn-sm swap-btn info-icon"
+                              >
+                                Set
+                              </button>
+                            </td>
+                          </tr>
+
+                          <tr>
+                            <td className="d-flex align-items-center">
+                              Set Reverse Time
+                            </td>
+                            <td>
+                              <div className="w-100">
+                                <input
+                                  type="text"
+                                  className="form-control text-center mh-30"
+                                  placeholder="start Time"
+                                  value={startTime}
+                                  onChange={(e) => handleInputStartChange(e)}
+                                />
+                              </div>
+                              <div className="w-100">
+                                <input
+                                  type="text"
+                                  className="form-control text-center mh-30"
+                                  placeholder="end Time"
+                                  value={endTime}
+                                  onChange={(e) => handleInputendChange(e)}
+                                />
+                              </div>
+                            </td>
+
+                            <td className="d-flex justify-content-end">
+                              <button
+                                onClick={() =>
+                                  dataToShow.actions.setReverse(
+                                    startTime,
+                                    endTime
+                                  )
                                 }
                                 className="btn btn-primary btn-sm swap-btn info-icon"
                               >

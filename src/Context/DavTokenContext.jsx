@@ -13,7 +13,7 @@ const DAVTokenContext = createContext();
 //0xd75fA7c2380f539320F9ABD29D09f48DbEB0E13E
 export const DAV_TOKEN_ADDRESS = "0xDBfb087D16eF29Fd6c0872C4C0525B38fBAEB319";
 export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
-export const Ratio_TOKEN_ADDRESS = "0x4AeC866500aA89394B12Ab970e7d2b7CEa4EDE86";
+export const Ratio_TOKEN_ADDRESS = "0xE986E72A148C4EFF3A2227fb25B0F880333B0740";
 
 export const Fluxin = "0xdE45C7EEED1E776dC266B58Cf863b9B9518cb7aa";
 export const Xerion = "0xda5eF27FE698970526dFA7E47E824A843907AC71";
@@ -53,6 +53,7 @@ export const DAVTokenProvider = ({ children }) => {
   });
   const [ButtonText, setButtonText] = useState();
   const [davHolds, setDavHoldings] = useState("0.0");
+  const [isReversed, setisReversed] = useState(false);
   const [StateHolds, setStateHoldings] = useState("0.0");
 
   const [TotalStateHoldsInUS, setTotalStateHoldsInUS] = useState("0.00");
@@ -88,6 +89,7 @@ export const DAVTokenProvider = ({ children }) => {
   });
 
   const [AuctionTime, SetAuctionTime] = useState("0");
+  const [userHashSwapped, setUserHashSwapped] = useState(false);
   const [AuctionDuration, SetAuctionDuration] = useState("0");
   const [AuctionTimeRunning, SetAuctionTimeRunning] = useState("0");
   const [AuctionNextTime, SetAuctionNextTime] = useState("0");
@@ -374,6 +376,9 @@ export const DAVTokenProvider = ({ children }) => {
             StateTotalMintedSupply().catch((error) =>
               console.error("Error fetching StateTotalMintedSupply:", error)
             ),
+            reverseSwapEnabled().catch((error) =>
+              console.error("Error fetching StateTotalMintedSupply:", error)
+            ),
             FluxinTotalMintedSupply().catch((error) =>
               console.error("Error fetching FluxinTotalMintedSupply:", error)
             ),
@@ -652,7 +657,13 @@ export const DAVTokenProvider = ({ children }) => {
 
       // Update the state
       setOnePBalance(balance);
-      setFormatedBalance(balance.toLocaleString());
+	  let value;
+	  if(FluxinRatioPrice > RatioValues){
+		value = balance *2;
+	  }else{
+		value = balance;
+	  }
+      setFormatedBalance(value.toLocaleString());
     } catch (e) {
       console.error("Error fetching One Percentage balance of tokens:", e);
     }
@@ -700,6 +711,7 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching LP tokens:", e);
     }
   };
+  
   const AuctioTimeInterval = async () => {
     try {
       const formatTimestamp = (timestamp) => {
@@ -728,6 +740,14 @@ export const DAVTokenProvider = ({ children }) => {
         "auctionDuration",
         []
       );
+	  
+      const HasSwapped = await handleContractCall(
+        RatioContract,
+        "getUserHasSwapped",
+        [],
+      );
+	  setUserHashSwapped(HasSwapped);
+	  console.log("hasSwapped", HasSwapped)
       const NextTime = await handleContractCall(
         RatioContract,
         "getNextAuctionStart",
@@ -904,109 +924,118 @@ export const DAVTokenProvider = ({ children }) => {
   console.log("Contract functions:", RatioContract);
 
   const SwapTokens = async (id) => {
-    try {
-      setSwappingStates((prev) => ({ ...prev, [id]: true }));
-      setButtonTextStates((prev) => ({
-        ...prev,
-        [id]: "Checking allowance...",
-      }));
-
-      const amountInWei = ethers.parseUnits(OnePBalance.toString(), 18);
-
-      // Check current allowance directly
-      const allowance = await FluxinContract.allowance(
-        account,
-        Ratio_TOKEN_ADDRESS
-      );
-      const formattedAllowance = ethers.formatUnits(allowance, 18);
-
-      console.log(`Current allowance: ${formattedAllowance}`);
-      console.log(`Amount to approve (in wei): ${amountInWei.toString()}`);
-
-      // Approve if insufficient allowance
-      if (
-        parseFloat(formattedAllowance) <
-        parseFloat(ethers.formatUnits(amountInWei, 18))
-      ) {
-        setButtonTextStates((prev) => ({
-          ...prev,
-          [id]: "Approving input token...",
-        }));
-        console.log("Insufficient allowance. Sending approval transaction...");
-
-        const approveTx = await FluxinContract.approve(
-          Ratio_TOKEN_ADDRESS,
-          amountInWei
-        );
-        const approveReceipt = await approveTx.wait();
-
-        if (approveReceipt.status !== 1) {
-          console.error(
-            "Approval transaction failed. Cannot proceed with swap."
-          );
-          setSwappingStates((prev) => ({ ...prev, [id]: false }));
-          return false;
-        }
-
-        console.log("Approval successful!");
-        setButtonTextStates((prev) => ({
-          ...prev,
-          [id]: "Approval successful",
-        }));
-      } else {
-        console.log(
-          "Sufficient allowance already granted. Proceeding to swap."
-        );
-      }
-
-      setButtonTextStates((prev) => ({ ...prev, [id]: "Swapping..." }));
-
-      // Get gas price and calculate extra fee
-      const gasPrice = (await provider.getFeeData()).gasPrice;
-      console.log("Gas Price (in wei):", gasPrice.toString());
-
-      const extraFee = gasPrice / 100n; // Calculate extra fee
-      console.log("Extra Fee (in wei):", extraFee.toString());
-
-      console.log(
-        `Swapping tokens with extra fee: ${ethers.formatEther(extraFee)} ETH`
-      );
-
-      const covertOutIntoWei = ethers.parseUnits(
-        OutBalance.Fluxin.toString(),
-        18
-      );
-      console.log(
-        "Converted OutBalance (in wei):",
-        covertOutIntoWei.toString()
-      );
-
-      // Call the `swapTokens` function directly
-      const swapTx = await RatioContract.swapTokens(
-        account,
-        covertOutIntoWei,
-        extraFee,
-        {
-          value: extraFee,
-        }
-      );
-
-      const swapReceipt = await swapTx.wait();
-      if (swapReceipt.status === 1) {
-        console.log("Swap successful!");
-        setButtonTextStates((prev) => ({ ...prev, [id]: "Swap successful!" }));
-      } else {
-        console.error("Swap transaction failed.");
-        setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
-      }
-    } catch (error) {
-      console.error("Error during token swap:", error);
-      setButtonText("Swap");
-      setButtonTextStates((prev) => ({ ...prev, [id]: "Swap" }));
-    } finally {
-      setSwappingStates((prev) => ({ ...prev, [id]: false }));
-    }
+	try {
+	  setSwappingStates((prev) => ({ ...prev, [id]: true }));
+	  setButtonTextStates((prev) => ({
+		...prev,
+		[id]: "Checking allowance...",
+	  }));
+  
+	  let amountInWei;
+	  let approvalAmount;
+	  let contractToUse = FluxinContract;
+  
+	  if (FluxinRatioPrice > RatioValues) {
+		// If the condition is true, update amountInWei and use stateContract for approval
+		const covertOutIntoWei = ethers.parseUnits(
+		  OutBalance.Fluxin.toString(),
+		  18
+		);
+		amountInWei = covertOutIntoWei;
+		contractToUse = stateContract;  // Change the contract to stateContract
+	  } else {
+		amountInWei = ethers.parseUnits(OnePBalance.toString(), 18);
+	  }
+  
+	  const extraApprovalAmount = ethers.parseUnits("100", 18); // 100 tokens
+	  approvalAmount = amountInWei + extraApprovalAmount;
+  
+	  // Check current allowance directly
+	  const allowance = await contractToUse.allowance(
+		account,
+		Ratio_TOKEN_ADDRESS
+	  );
+	  const formattedAllowance = ethers.formatUnits(allowance, 18);
+  
+	  console.log(`Current allowance: ${formattedAllowance}`);
+	  console.log(`Amount to approve (in wei): ${amountInWei.toString()}`);
+  
+	  // Approve if insufficient allowance
+	  if (
+		parseFloat(formattedAllowance) <
+		parseFloat(ethers.formatUnits(approvalAmount, 18))
+	  ) {
+		setButtonTextStates((prev) => ({
+		  ...prev,
+		  [id]: "Approving input token...",
+		}));
+		console.log("Insufficient allowance. Sending approval transaction...");
+  
+		const approveTx = await contractToUse.approve(
+		  Ratio_TOKEN_ADDRESS,
+		  approvalAmount
+		);
+		const approveReceipt = await approveTx.wait();
+  
+		if (approveReceipt.status !== 1) {
+		  console.error(
+			"Approval transaction failed. Cannot proceed with swap."
+		  );
+		  setSwappingStates((prev) => ({ ...prev, [id]: false }));
+		  return false;
+		}
+  
+		console.log("Approval successful!");
+		setButtonTextStates((prev) => ({
+		  ...prev,
+		  [id]: "Approval successful",
+		}));
+	  } else {
+		console.log(
+		  "Sufficient allowance already granted. Proceeding to swap."
+		);
+	  }
+  
+	  setButtonTextStates((prev) => ({ ...prev, [id]: "Swapping..." }));
+  
+	  // Get gas price and calculate extra fee
+	  const gasPrice = (await provider.getFeeData()).gasPrice;
+	  console.log("Gas Price (in wei):", gasPrice.toString());
+  
+	  const extraFee = gasPrice / 100n; // Calculate extra fee
+	  console.log("Extra Fee (in wei):", extraFee.toString());
+  
+	  console.log(
+		`Swapping tokens with extra fee: ${ethers.formatEther(extraFee)} ETH`
+	  );
+  
+	  // Call the `swapTokens` function directly
+	  const swapTx = await RatioContract.swapTokens(
+		account,
+		amountInWei,  // Use the updated amountInWei here
+		extraFee,
+		{
+		  value: extraFee,
+		}
+	  );
+  
+	  const swapReceipt = await swapTx.wait();
+	  if (swapReceipt.status === 1) {
+		console.log("Swap successful!");
+		setButtonTextStates((prev) => ({ ...prev, [id]: "Swap successful!" }));
+	  } else {
+		console.error("Swap transaction failed.");
+		setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
+	  }
+	} catch (error) {
+	  console.error("Error during token swap:", error);
+	  setButtonText("Swap");
+	  setButtonTextStates((prev) => ({ ...prev, [id]: "Swap" }));
+	} finally {
+	  setSwappingStates((prev) => ({ ...prev, [id]: false }));
+	}
   };
+  
 
   const ViewDistributedTokens = async () => {
     try {
@@ -1062,6 +1091,41 @@ export const DAVTokenProvider = ({ children }) => {
       console.log(`Ratio target set to `);
     } catch (error) {
       console.error("Error setting ratio target:", error);
+    }
+  };
+  const setReverseTime = async (start, end) => {
+    try {
+      // Call the contract to set both numerator and denominator
+      await RatioContract.setReverseSwapTimeRangeForPair(start, end);
+
+      console.log(`seted reverse time`);
+    } catch (error) {
+      console.error("Error setting reverse target:", error);
+    }
+  };
+  const setReverseEnable = async (condition) => {
+    try {
+      // Call the contract to set both numerator and denominator
+      await RatioContract.setReverseSwap(condition);
+
+      console.log(`seted reverse time`);
+    } catch (error) {
+      console.error("Error setting reverse target:", error);
+    }
+  };
+  const reverseSwapEnabled = async () => {
+    try {
+      // Call the contract to set both numerator and denominator
+      const isrevers = await handleContractCall(
+        RatioContract,
+        "reverseSwapEnabled",
+        []
+      );
+
+      setisReversed(isrevers.toString());
+      console.log(`seted reverse`, isrevers.toString());
+    } catch (error) {
+      console.error("Error setting reverse target:", error);
     }
   };
 
@@ -1262,7 +1326,7 @@ export const DAVTokenProvider = ({ children }) => {
         PercentageXerion,
         FluxinSupply,
         XerionSupply,
-
+        setReverseEnable,
         AuctionRunning,
         WithdrawFluxin,
         WithdrawXerion,
@@ -1292,11 +1356,14 @@ export const DAVTokenProvider = ({ children }) => {
         OnePBalance,
         OutBalance,
         StartAuction,
+        setReverseTime,
+		userHashSwapped,
         AuctionTimeRunning,
         buttonTextStates,
         swappingStates,
         AuctionRunningLocalString,
         transactionStatus,
+        isReversed,
       }}
     >
       {children}

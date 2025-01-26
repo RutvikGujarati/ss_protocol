@@ -32,9 +32,11 @@ const DataTable = () => {
     contracts,
     // ButtonText,
     userSwapped,
+    isReversed,
     RatioValues,
     Distributed,
     AuctionRunning,
+    userHashSwapped,
     DavBalance,
     ClaimTokens,
     handleAddFluxin,
@@ -143,7 +145,6 @@ const DataTable = () => {
                 image: stateLogo,
                 Price: stateUsdPrice,
                 userHasSwapped: false,
-
                 AuctionStatus: AuctionRunning.state,
                 onChart:
                   "https://www.geckoterminal.com/pulsechain/pools/0x894fd7d05fe360a1d713c10b0e356af223fde88c",
@@ -160,7 +161,7 @@ const DataTable = () => {
                 currentRatio: `1:${FluxinRatioPrice}`,
                 Price: FluxinUsdPrice,
                 AuctionStatus: AuctionRunning.Fluxin,
-                userHasSwapped: userSwapped,
+                userHasSwapped: userHashSwapped,
                 onChart:
                   "https://www.geckoterminal.com/pulsechain/pools/0x361afa3f5ef839bed6071c9f0c225b078eb8089a",
                 distributedAmount: Distributed["Fluxin"],
@@ -192,8 +193,8 @@ const DataTable = () => {
                 outputToken: `${0} State`,
               },
             ]
+              .filter(({ userHasSwapped }) => !userHasSwapped)
               .filter(({ AuctionStatus }) => AuctionStatus)
-            //   .filter(({ userHasSwapped }) => !userHasSwapped)
               .map(
                 (
                   {
@@ -281,8 +282,21 @@ const DataTable = () => {
                       <div className="d-flex justify-content-center gap-3 w-100">
                         {id !== "state" && (
                           <>
-                            <div className="tableClaim">{inputTokenAmount}</div>
-                            <div className="tableClaim">{outputToken} </div>
+                            {isReversed =="true" ? (
+                              <>
+                                <div className="tableClaim">{outputToken}</div>{" "}
+                                <div className="tableClaim">
+                                  {inputTokenAmount}
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div className="tableClaim">
+                                  {inputTokenAmount}
+                                </div>
+                                <div className="tableClaim">{outputToken}</div>{" "}
+                              </>
+                            )}
                           </>
                         )}
                       </div>

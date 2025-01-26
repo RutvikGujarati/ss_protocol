@@ -653,6 +653,59 @@
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_amountIn",
+				"type": "uint256"
+			}
+		],
+		"name": "getReverseSwapAmounts",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "amountOut",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "reverseAmountIn",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_amountIn",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_amountOut",
+				"type": "uint256"
+			}
+		],
+		"name": "getSwapAmounts",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "newAmountIn",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "newAmountOut",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "getTimeLeftInAuction",
 		"outputs": [
@@ -660,6 +713,19 @@
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getUserHasSwapped",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
