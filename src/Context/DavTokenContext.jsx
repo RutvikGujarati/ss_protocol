@@ -642,47 +642,6 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const SetOnePercentageOfBalance = async () => {
-    try {
-      // Fetch raw one percent balance
-      const rawFluxinBalance = await handleContractCall(
-        RatioContract,
-        "getOnepercentOfUserBalance",
-        [],
-        (s) => ethers.formatUnits(s, 18)
-      );
-
-      const balance = Math.floor(parseFloat(rawFluxinBalance || "0"));
-
-      console.log("SetOnePercentageOfBalance -> Fluxin:", balance);
-      console.log("Ratio Price:", RatioValues);
-
-      let adjustedBalance;
-
-      // Determine balance adjustment based on conditions
-      if (FluxinRatioPrice > RatioValues && isReversed === "true") {
-        console.log(
-          "Condition: FluxinRatioPrice > RatioValues && isReversed === 'true'"
-        );
-        adjustedBalance = balance * 2;
-      } else if (FluxinRatioPrice < RatioValues) {
-        console.log("Condition: FluxinRatioPrice < RatioValues");
-        adjustedBalance = balance; // Covers both `isReversed === "true"` and `isReversed === "false"`
-      } else {
-        console.warn("No matching conditions. Defaulting to raw balance.");
-        adjustedBalance = balance; // Fallback case, though this shouldn't occur given the conditions.
-      }
-
-      console.log("Adjusted Balance:", adjustedBalance);
-
-      // Update states
-      setOnePBalance(adjustedBalance);
-      setFormatedBalance(adjustedBalance);
-    } catch (e) {
-      console.error("Error fetching One Percentage balance of tokens:", e);
-    }
-  };
-
   const AmountOutOfFluxin = async () => {
     try {
       const rawFluxinBalanceUser = await handleContractCall(
@@ -844,11 +803,25 @@ export const DAVTokenProvider = ({ children }) => {
         []
       );
       console.log("RatioTargetValues", Number(RatioTargetFluxin));
-      SetRatioTarget(RatioTargetFluxin);
+      SetRatioTarget(Number(RatioTargetFluxin));
+      return RatioTargetFluxin;
     } catch (e) {
       console.error("Error fetching ratio targets:", e);
     }
   };
+  let cachedRatioTarget = null; // Cache in memory
+
+  const getCachedRatioTarget = async () => {
+    if (cachedRatioTarget !== null) {
+      console.log("Using cached Ratio Target:", cachedRatioTarget);
+      return cachedRatioTarget;
+    }
+
+    const ratioTargetValue = await RatioTargetValues();
+    cachedRatioTarget = ratioTargetValue; // Cache the value
+    return ratioTargetValue;
+  };
+
   const UserhasSwapped = async () => {
     try {
       const getCurrentCycle = await handleContractCall(
@@ -1126,6 +1099,53 @@ export const DAVTokenProvider = ({ children }) => {
       console.log(`seted reverse time`);
     } catch (error) {
       console.error("Error setting reverse target:", error);
+    }
+  };
+  const SetOnePercentageOfBalance = async () => {
+    try {
+      // Fetch raw one percent balance
+      const rawFluxinBalance = await handleContractCall(
+        RatioContract,
+        "getOnepercentOfUserBalance",
+        [],
+        (s) => ethers.formatUnits(s, 18)
+      );
+
+      const balance = Math.floor(parseFloat(rawFluxinBalance || "0"));
+      console.log("SetOnePercentageOfBalance -> Fluxin:", balance);
+
+      const rp = await getCachedRatioTarget();
+      console.log("FluxinRatioPrice:", FluxinRatioPrice);
+      console.log("Ratio Price (rp):", parseFloat(rp).toString());
+      console.log("isReversed:", isReversed.toString());
+      const rp1 = parseFloat(rp);
+	  const isreverse = isReversed.toString();
+      let adjustedBalance;
+
+      // Determine balance adjustment based on conditions
+      if ( FluxinRatioPrice > rp && isreverse) {
+        console.log(
+          "Condition: FluxinRatioPrice > rp && isReversed === 'true'"
+        );
+        adjustedBalance = balance + balance;
+      } else if (FluxinRatioPrice < rp1) {
+        console.log("Condition: FluxinRatioPrice < rp");
+        adjustedBalance = balance ;
+      } else {
+        console.warn("No matching conditions. Defaulting to raw balance.");
+        console.log("fluxinRatioPrice", FluxinRatioPrice);
+		console.log("Ratio Price (rp):", parseFloat(rp).toString());
+
+        adjustedBalance = balance;
+      }
+
+      console.log("Adjusted Balance:", adjustedBalance);
+
+      // Update states
+      setOnePBalance(adjustedBalance);
+      setFormatedBalance(adjustedBalance);
+    } catch (e) {
+      console.error("Error fetching One Percentage balance of tokens:", e);
     }
   };
   const setReverseEnable = async (condition) => {
