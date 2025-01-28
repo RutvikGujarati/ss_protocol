@@ -10,7 +10,7 @@ import { PriceContext } from "../api/StatePrice";
 
 const InfoCards = () => {
   const { stateUsdPrice } = useContext(PriceContext);
-
+  const [BurnRatio, setBurnRatio] = useState("0.0");
   const {
     mintDAV,
     // handleAddTokenRatio,
@@ -18,12 +18,11 @@ const InfoCards = () => {
     handleAddTokenDAV,
     CalculationOfCost,
     TotalCost,
-    StateBurned,
-    StateBurnedRatio,
     StateSupply,
     TotalStateHoldsInUS,
     davHolds,
     davPercentage,
+    StateBurnBalance,
     StateHolds,
   } = useDAVToken();
   const [amount, setAmount] = useState("");
@@ -41,7 +40,16 @@ const InfoCards = () => {
       setLoad(false);
     }
   };
-
+  const calculateBurnRatio = async () => {
+    try {
+      const maxSupply = 999000000000000;
+      const calculate = ((StateBurnBalance).toString() / maxSupply) || 0;
+		console.log("burn ratio calculation",calculate)
+      setBurnRatio(calculate.toFixed(17));
+    } catch (error) {
+      console.error("Error calculating burn ratio:", error);
+    }
+  };
   const handleInputChange = (e) => {
     setAmount(e.target.value);
     CalculationOfCost(e.target.value);
@@ -56,6 +64,7 @@ const InfoCards = () => {
 
   useEffect(() => {
     CalculationOfCost(amount);
+    calculateBurnRatio();
     // GetCurrentStateReward();
   }, [amount]);
 
@@ -188,7 +197,7 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State tokens burn</p>
-                      <h5 className="">{StateBurned}</h5>
+                      <h5 className="">{formatWithCommas(StateBurnBalance)}</h5>
                     </div>
                   </div>
                 </div>
@@ -197,10 +206,8 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">
-                        State tokens % burn & burn ratio
-                      </p>
-                      <h5 className="">{StateBurnedRatio}%</h5>
+                      <p className="mb-1 detailText">State tokens % burn</p>
+                      <h5 className="">{BurnRatio} %</h5>
                     </div>
                   </div>
                 </div>

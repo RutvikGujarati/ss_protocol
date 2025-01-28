@@ -35,7 +35,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     WithdrawState,
     WithdrawFluxin,
     WithdrawXerion,
-	
+
     // OutBalance,
     // OutBalanceXerion,
     account,
@@ -62,17 +62,16 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     isRenounced,
     DAVTokensFiveWithdraw,
     LastLiquidity,
-    transactionStatus,
+
+    AuctionTimeRunningXerion,
     Batch,
+    auctionDetails,
     setReverseTime,
     ReanounceFluxinContract,
     ReanounceXerionContract,
     StateBalance,
-    FluxinBalance,
+    balances,
     XerionBalance,
-    AuctionNextTime,
-    AuctionTime,
-    AuctionDuration,
     mintAdditionalTOkens,
     BatchAmount,
     // saveTokenName,
@@ -83,8 +82,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   } = useDAVToken();
 
   const [numerator, setNumerator] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
+
   const [numeratorOfAUction, setNumeratorOfAuction] = useState("");
   const [numeratorOfInterval, setNumeratorOfInterval] = useState("");
   const [Denominator, setDenominator] = useState("");
@@ -154,14 +152,17 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       Supply: FluxinSupply,
       percentage: PercentageFluxin,
       address: Fluxin,
-      Balance: FluxinBalance,
+      isReversing: isReversed.Fluxin,
+      Balance: balances.fluxinBalance,
+      Duration: auctionDetails["Fluxin"],
+      interval: auctionDetails["Fluxin"],
       AuctionRunning: AuctionRunningLocalString.Fluxin,
       pair: "Fluxin/pSTATE",
       Ratio: FluxinRatioPrice,
       claimLPToken: LPStateTransferred,
       SetDuration: () => SetAUctionDuration(),
       AuctionTimeRunning: AuctionTimeRunning,
-      AuctionNextTime: AuctionNextTime,
+      AuctionNextTime: auctionDetails["Fluxin"],
       mintAddTOkens: "250,000,000,000",
       ApproveAmount: "10,000,000,000",
       transactionHash:
@@ -171,16 +172,20 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         ReanounceContract: ReanounceFluxinContract,
         WithdrawState: WithdrawFluxin,
         mintAdditionalTOkens: mintAdditionalTOkens,
+        SetDuration: (value) => SetAUctionDuration(value, "fluxinRatio"),
+        SetInterval: (value) => SetAUctionInterval(value, "fluxinRatio"),
+
         AddTokenToContract: () =>
           AddTokensToContract(Fluxin, STATE_TOKEN_ADDRESS, FluxinRatioPrice),
-        setRatio: (value) => setRatioTarget(value),
-        setReverseEnabled: (value) => setReverseEnable(value),
+        setRatio: (value) => setRatioTarget(value, "fluxinRatio"),
+        setReverseEnabled: (value) => setReverseEnable(value, "fluxinRatio"),
         setReverse: (value, value2) => setReverseTime(value, value2),
         setCurrentRatio: (value) => setCurrentRatioTarget(value),
-        DepositTokens: (value) => DepositToken("Fluxin", Fluxin, value),
+        DepositTokens: (value) =>
+          DepositToken("Fluxin", Fluxin, value, "fluxinRatio"),
         DepositStateTokens: (value) =>
-          DepositToken("state", STATE_TOKEN_ADDRESS, value),
-        StartingAuction: StartAuction,
+          DepositToken("state", STATE_TOKEN_ADDRESS, value, "fluxinRatio"),
+        StartingAuction: () => StartAuction("fluxinRatio"),
       },
     },
     {
@@ -189,12 +194,17 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       name: "Xerion",
       supply: "500,000,000,000.00",
       Supply: XerionSupply,
+      Balance: balances.xerionBalance,
       percentage: PercentageXerion,
+      Duration: auctionDetails["Xerion"],
+      interval: auctionDetails["Xerion"],
       address: Xerion,
+      isReversing: isReversed.Xerion,
+      timeRunning: AuctionTimeRunningXerion,
       Ratio: XerionRatioPrice,
       AuctionRunning: AuctionRunningLocalString.Xerion,
-      Balance: XerionBalance,
       pair: "Xerion/pSTATE",
+      AuctionNextTime: auctionDetails["Xerion"],
       mintAddTOkens: "125,000,000,000",
       ApproveAmount: "10,000,000,000",
       transactionHash: XerionTransactionHash,
@@ -202,14 +212,20 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       actions: {
         ReanounceContract: ReanounceXerionContract,
         WithdrawState: WithdrawXerion,
-        SetDuration: () => SetAUctionDuration(),
+        SetDuration: (value) => SetAUctionDuration(value, "XerionRatio"),
+        SetInterval: (value) => SetAUctionInterval(value, "XerionRatio"),
+        setRatio: (value) => setRatioTarget(value, "XerionRatio"),
+        setReverseEnabled: (value) => setReverseEnable(value, "XerionRatio"),
 
         mintAdditionalTOkens: mintAdditionalTOkens,
         AddTokenToContract: () =>
           AddTokensToContract(Xerion, STATE_TOKEN_ADDRESS, XerionRatioPrice),
-        setRatio: (value) => setRatioTarget(Xerion, value),
-        DepositTokens: (value) => DepositToken("Xerion", Xerion, value),
-        StartingAuction: StartAuction,
+
+        DepositTokens: (value) =>
+          DepositToken("Xerion", Xerion, value, "XerionRatio"),
+        DepositStateTokens: (value) =>
+          DepositToken("state", STATE_TOKEN_ADDRESS, value, "XerionRatio"),
+        StartingAuction: () => StartAuction("XerionRatio"),
       },
     },
     {
@@ -227,7 +243,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       Treasury: "999,000,000,000,000.00",
       Supply: StateSupply,
       percentage: PercentageOfState,
-      Balance: StateBalance,
+      Balance: balances.stateBalance,
       address: STATE_TOKEN_ADDRESS,
       claimLPToken: LPStateTransferred,
       mintAddTOkens: "1,000,000,000,000",
@@ -243,7 +259,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         AddTokenToContract: () => AddTokens(),
         DepositTokens: (value) =>
           DepositToken("state", STATE_TOKEN_ADDRESS, value),
-        StartingAuction: StartAuction,
       },
     },
   ];
@@ -252,14 +267,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const handleInputChange = (e) => {
     const value = e.target.value;
     setNumerator(value);
-  };
-  const handleInputStartChange = (e) => {
-    const value = e.target.value;
-    setStartTime(value);
-  };
-  const handleInputendChange = (e) => {
-    const value = e.target.value;
-    setEndTime(value);
   };
 
   const handleInputChangeAuction = (e) => {
@@ -451,6 +458,42 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   </td>
                   <td></td>
                 </tr>
+                <tr>
+                  <td className="d-flex align-items-center">
+                    Renounce Smart Contract
+                  </td>
+
+                  <td className="d-flex align-items-center justify-content-center">
+                    {dataToShow.renounceSmartContract == null
+                      ? "Loading..."
+                      : dataToShow.renounceSmartContract
+                      ? "Yes"
+                      : "No"}{" "}
+                  </td>
+                  <td className="d-flex justify-content-end">
+                    {dataToShow.renounceSmartContract ? (
+                      <button
+                        onClick={() =>
+                          window.open(
+                            `https://otter.pulsechain.com/tx/${dataToShow.transactionHash}`,
+                            "_blank",
+                            "noopener,noreferrer"
+                          )
+                        }
+                        className="btn btn-primary btn-sm swap-btn info-icon"
+                      >
+                        View
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => dataToShow.actions.ReanounceContract()}
+                        className="btn btn-primary btn-sm swap-btn info-icon"
+                      >
+                        Set
+                      </button>
+                    )}
+                  </td>
+                </tr>
                 {authorized && (
                   <>
                     <tr>
@@ -508,86 +551,18 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                         </button>
                       </td>
                     </tr>
-                  </>
-                )}
-
-                <tr>
-                  <td className="d-flex align-items-center">
-                    Renounce Smart Contract
-                  </td>
-
-                  <td className="d-flex align-items-center justify-content-center">
-                    {dataToShow.renounceSmartContract == null
-                      ? "Loading..."
-                      : dataToShow.renounceSmartContract
-                      ? "Yes"
-                      : "No"}{" "}
-                  </td>
-                  <td className="d-flex justify-content-end">
-                    {dataToShow.renounceSmartContract ? (
-                      <button
-                        onClick={() =>
-                          window.open(
-                            `https://otter.pulsechain.com/tx/${dataToShow.transactionHash}`,
-                            "_blank",
-                            "noopener,noreferrer"
-                          )
-                        }
-                        className="btn btn-primary btn-sm swap-btn info-icon"
-                      >
-                        View
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => dataToShow.actions.ReanounceContract()}
-                        className="btn btn-primary btn-sm swap-btn info-icon"
-                      >
-                        Set
-                      </button>
-                    )}
-                  </td>
-                </tr>
-                {dataToShow.tokenName !== "STATE" && (
-                  <>
-                    <tr>
-                      <td className="d-flex align-items-center">
-                        Current Ratio
-                      </td>
-                      <td className="d-flex align-items-center justify-content-center">
-                        {`1:${dataToShow.Ratio}`}
-                      </td>
-                      <td></td>
-                    </tr>
-                    <tr>
-                      <td className="d-flex align-items-center">
-                        Time Left In auction{" "}
-                      </td>
-                      <td className="d-flex align-items-center justify-content-center">
-                        {dataToShow.AuctionTimeRunning}
-                      </td>
-                      <td></td>
-                    </tr>
-                    <tr>
-                      <td className="d-flex align-items-center">
-                        Next Start Time of the Auction
-                      </td>
-                      <td className="d-flex align-items-center justify-content-center">
-                        {dataToShow.AuctionNextTime}
-                      </td>
-                      <td></td>
-                    </tr>
-                  </>
-                )}
-                {authorized ? (
-                  <>
-                    {dataToShow.tokenName != "STATE" && (
-                      <table className="table table-dark infoTable">
-                        <thead>
-                          <th className="fw-bold d-flex align-items-center uppercase">
-                            Auction Settings
-                          </th>
-                        </thead>
+                    {dataToShow.tokenName != "STATE" &&
+                      dataToShow.tokenName != "DAV" && (
                         <>
+                          <div className="">
+                            <h6
+                              className="fw-bold fontSetting text-uppercase mb-0 infoTable text-light rounded-2xl shadow-sm my-1 py-3 px-2"
+                              style={{ lineHeight: "1.6" }}
+                            >
+                              Auction Settings
+                            </h6>
+                          </div>
+
                           <tr>
                             <td className="d-flex align-items-center">
                               {`Deposit ${dataToShow.name}`}
@@ -610,9 +585,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 }}
                                 className="btn btn-primary btn-sm swap-btn info-icon"
                               >
-                                {transactionStatus === "pending"
-                                  ? "Processing..."
-                                  : "Deposit"}
+                                Deposit
                               </button>
                             </td>
                           </tr>
@@ -656,7 +629,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 <input
                                   type="text"
                                   className="form-control text-center mh-30"
-                                  placeholder={AuctionTime}
+                                  placeholder={
+                                    dataToShow.interval.auctionInterval
+                                  }
                                   value={numeratorOfInterval}
                                   onChange={(e) => handleInputChangeInterval(e)}
                                 />
@@ -665,7 +640,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                             <td className="d-flex justify-content-end">
                               <button
                                 onClick={() =>
-                                  SetAUctionInterval(numeratorOfInterval)
+                                  dataToShow.actions.SetInterval(
+                                    numeratorOfInterval
+                                  )
                                 }
                                 className="btn btn-primary btn-sm swap-btn info-icon"
                               >
@@ -682,7 +659,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 <input
                                   type="text"
                                   className="form-control text-center mh-30"
-                                  placeholder={AuctionDuration}
+                                  placeholder={
+                                    dataToShow.Duration.auctionDuration
+                                  }
                                   value={numeratorOfAUction}
                                   onChange={(e) => handleInputChangeAuction(e)}
                                 />
@@ -691,7 +670,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                             <td className="d-flex justify-content-end">
                               <button
                                 onClick={() =>
-                                  SetAUctionDuration(numeratorOfAUction)
+                                  dataToShow.actions.SetDuration(
+                                    numeratorOfAUction
+                                  )
                                 }
                                 className="btn btn-primary btn-sm swap-btn info-icon"
                               >
@@ -699,7 +680,15 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               </button>
                             </td>
                           </tr>
-
+                          <tr>
+                            <td className="d-flex align-items-center">
+                              Current Ratio
+                            </td>
+                            <td className="d-flex align-items-center justify-content-center">
+                              {`1:${dataToShow.Ratio}`}
+                            </td>
+                            <td></td>
+                          </tr>
                           <tr>
                             <td className="d-flex align-items-center">
                               Set Ratio Target
@@ -733,16 +722,18 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                             </td>
                             <td>
                               {" "}
-                              <div className="w-100">{isReversed}</div>
+                              <div className="w-100">
+                                {dataToShow.isReversing}
+                              </div>
                             </td>
 
                             <td className="d-flex justify-content-end">
                               <button
                                 onClick={() => {
-                                  if (isReversed == "true") {
-                                    dataToShow.actions.setReverseEnabled(false); 
+                                  if (dataToShow.isReversing == "true") {
+                                    dataToShow.actions.setReverseEnabled(false);
                                   } else {
-                                    dataToShow.actions.setReverseEnabled(true); 
+                                    dataToShow.actions.setReverseEnabled(true);
                                   }
                                 }}
                                 className="btn btn-primary btn-sm swap-btn info-icon"
@@ -770,13 +761,31 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               </button>
                             </td>
                           </tr>
+
+                          <tr>
+                            <td className="d-flex align-items-center">
+                              Time Left In auction{" "}
+                            </td>
+                            <td className="d-flex align-items-center justify-content-center">
+                              {dataToShow.AuctionTimeRunning}
+                            </td>
+                            <td></td>
+                          </tr>
+                          <tr>
+                            <td className="d-flex align-items-center">
+                              Next Start Time of the Auction
+                            </td>
+                            <td className="d-flex align-items-center justify-content-center">
+                              {dataToShow.AuctionNextTime.nextAuctionStart}
+                            </td>
+                            <td></td>
+                          </tr>
                         </>
-                      </table>
-                    )}
+                      )}
                   </>
-                ) : (
-                  <></>
                 )}
+
+                <></>
               </>
             )}
           </tbody>

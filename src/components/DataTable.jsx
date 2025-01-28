@@ -14,6 +14,7 @@ import { useContext, useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
 import { Fluxin } from "../Context/DavTokenContext";
 import { PriceContext } from "../api/StatePrice";
+import BurnDataTable from "./BurnDataTable";
 
 const DataTable = () => {
   const {
@@ -31,27 +32,29 @@ const DataTable = () => {
     // claiming,
     contracts,
     // ButtonText,
-    userSwapped,
     isReversed,
-    RatioValues,
+    RatioTargetsofTokens,
+    outAmounts,
     Distributed,
     AuctionRunning,
+    auctionDetails,
     userHashSwapped,
     DavBalance,
     ClaimTokens,
+    XerionOnepBalance,
     handleAddFluxin,
     handleAddXerion,
-    FormattedInbalance,
-    OutBalance,
+    FluxinOnepBalance,
     swappingStates,
     buttonTextStates,
   } = useDAVToken();
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
   const [errorPopup, setErrorPopup] = useState({});
-  const [checkingStates, setCheckingStates] = useState({}); // State for checking buttons
-  const [claimingStates, setClaimingStates] = useState({}); // Separate claiming state for each
-
+  const [checkingStates, setCheckingStates] = useState({});
+  const [claimingStates, setClaimingStates] = useState({});
+  console.log("is auction running", auctionDetails["Fluxin"]);
+  console.log("use has swappeddddd", AuctionRunning.Xerion);
   const Checking = async (id, ContractName) => {
     setCheckingStates((prev) => ({ ...prev, [id]: true })); // Set checking state for specific button
     try {
@@ -145,7 +148,7 @@ const DataTable = () => {
                 image: stateLogo,
                 Price: stateUsdPrice,
                 userHasSwapped: false,
-                AuctionStatus: AuctionRunning.state,
+                AuctionStatus: true,
                 onChart:
                   "https://www.geckoterminal.com/pulsechain/pools/0x894fd7d05fe360a1d713c10b0e356af223fde88c",
                 handleAddXerion: handleAddTokenState,
@@ -157,20 +160,25 @@ const DataTable = () => {
                 Pname: "Fluxin",
                 ContractName: "Fluxin",
                 image: FluxinLogo,
-                ratio: `1:${RatioValues}`,
+                ratio: `1:${RatioTargetsofTokens["Fluxin"]}`,
                 currentRatio: `1:${FluxinRatioPrice}`,
+                currentTokenRatio: FluxinRatioPrice,
+                RatioTargetToken: RatioTargetsofTokens["Fluxin"],
                 reverseRatio: `2:${FluxinRatioPrice}`,
                 Price: FluxinUsdPrice,
-                AuctionStatus: AuctionRunning.Fluxin,
-                userHasSwapped: userHashSwapped,
+                isReversing: isReversed.Fluxin.toString(),
+
+                AuctionStatus: AuctionRunning.Fluxin === "true",
+                userHasSwapped: userHashSwapped.Fluxin,
                 onChart:
                   "https://www.geckoterminal.com/pulsechain/pools/0x361afa3f5ef839bed6071c9f0c225b078eb8089a",
                 distributedAmount: Distributed["Fluxin"],
                 token: Fluxin,
                 handleAddXerion: handleAddFluxin,
-                inputTokenAmount: `${FormattedInbalance} Fluxin`,
+                inputTokenAmount: `${FluxinOnepBalance} Fluxin`,
+                SwapT: () => SwapTokens("Fluxin", "Fluxin"),
                 ratioPrice: FluxinRatioPrice,
-                outputToken: `${OutBalance.formattedFluxin} State`,
+                outputToken: `${outAmounts.Fluxin} State`,
               },
               {
                 id: "Xerion",
@@ -178,24 +186,34 @@ const DataTable = () => {
                 Pname: "Xerion",
                 ContractName: "Xerion",
                 image: XerionLogo,
-                ratio: `1:${RatioValues.Xerion}`,
-                userHasSwapped: false,
+                ratio: `1:${RatioTargetsofTokens["Xerion"]}`,
+                userHasSwapped: userHashSwapped?.Xerion || false,
                 currentRatio: `1:${XerionRatioPrice}`,
+                reverseRatio: `2:${XerionRatioPrice}`,
                 Price: XerionUsdPrice,
-                AuctionStatus: AuctionRunning.Xerion,
+                currentTokenRatio: XerionRatioPrice,
+
+                RatioTargetToken: RatioTargetsofTokens["Xerion"],
+                isReversing: isReversed.Xerion.toString(),
+                AuctionStatus: AuctionRunning.Xerion === "true",
                 onChart:
                   "https://www.geckoterminal.com/pulsechain/pools/0xc6359cd2c70f643888d556d377a4e8e25caadf77",
                 // Liquidity: "0.0",
                 distributedAmount: Distributed["Xerion"],
                 token: Xerion,
+                SwapT: () => SwapTokens("Xerion", "Xerion"),
+
                 ratioPrice: XerionRatioPrice,
                 handleAddXerion: handleAddXerion,
-                inputTokenAmount: `${0} Xerion`,
-                outputToken: `${0} State`,
+                inputTokenAmount: `${XerionOnepBalance} Xerion`,
+                outputToken: `${outAmounts.Xerion} State`,
               },
             ]
-              .filter(({ userHasSwapped }) => !userHasSwapped)
-              .filter(({ AuctionStatus }) => AuctionStatus)
+              .filter(
+                ({ userHasSwapped, AuctionStatus }) =>
+                  !userHasSwapped && AuctionStatus
+              ) 
+
               .map(
                 (
                   {
@@ -206,9 +224,13 @@ const DataTable = () => {
                     ratio,
                     currentRatio,
                     reverseRatio,
+                    SwapT,
+                    isReversing,
                     ContractName,
                     Liquidity,
                     Price,
+                    currentTokenRatio,
+                    RatioTargetToken,
                     onChart,
                     distributedAmount,
                     inputTokenAmount,
@@ -279,7 +301,8 @@ const DataTable = () => {
                     </td>
                     <td className="text-success">{Liquidity}</td>
                     <td>
-                      {isReversed === "true" && FluxinRatioPrice > RatioValues
+                      {isReversing === "true" &&
+                      currentTokenRatio > RatioTargetToken
                         ? reverseRatio
                         : currentRatio}
                     </td>
@@ -289,8 +312,8 @@ const DataTable = () => {
                       <div className="d-flex justify-content-center gap-3 w-100">
                         {id !== "state" && (
                           <>
-                            {isReversed == "true" &&
-                           ( FluxinRatioPrice > RatioValues) ? (
+                            {isReversing == "true" &&
+                            currentTokenRatio > RatioTargetToken ? (
                               <>
                                 <div className="tableClaim">{outputToken}</div>{" "}
                                 <div className="tableClaim">
@@ -337,12 +360,14 @@ const DataTable = () => {
                       <div className="d-flex align-items-center gap-2">
                         {id !== "state" && (
                           <button
-                            onClick={() => SwapTokens(id)}
+                            onClick={() => SwapT()}
                             disabled={swappingStates[id]}
                             className="btn btn-primary btn-sm swap-btn"
                           >
                             {swappingStates[id]
                               ? "Swapping..."
+                              : isReversing == "true"
+                              ? "Reverse Swap"
                               : buttonTextStates[id] || "Swap"}
                           </button>
                         )}
@@ -366,7 +391,11 @@ const DataTable = () => {
         </table>
       </div>
     </div>
-  ) : null;
+  ) : (
+    <>
+      <BurnDataTable />
+    </>
+  );
 };
 
 export default DataTable;

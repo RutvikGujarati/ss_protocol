@@ -223,24 +223,6 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_startTime",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_endTime",
-				"type": "uint256"
-			}
-		],
-		"name": "setReverseSwapTimeRangeForPair",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"name": "startAuction",
 		"outputs": [],
@@ -521,6 +503,35 @@
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "burnOccurredInCycle",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "burnRate",
 		"outputs": [
@@ -574,26 +585,11 @@
 	},
 	{
 		"inputs": [],
-		"name": "getBurnCycleInfo",
+		"name": "getBurnOccured",
 		"outputs": [
 			{
-				"internalType": "uint256",
-				"name": "currentCycle",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "nextBurnStartTime",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "nextBurnEndTime",
-				"type": "uint256"
-			},
-			{
 				"internalType": "bool",
-				"name": "isBurnWindowActive",
+				"name": "",
 				"type": "bool"
 			}
 		],
@@ -658,30 +654,6 @@
 				"internalType": "uint256",
 				"name": "_amountIn",
 				"type": "uint256"
-			}
-		],
-		"name": "getReverseSwapAmounts",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "amountOut",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "reverseAmountIn",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_amountIn",
-				"type": "uint256"
 			},
 			{
 				"internalType": "uint256",
@@ -708,6 +680,19 @@
 	{
 		"inputs": [],
 		"name": "getTimeLeftInAuction",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTotalStateBurned",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -760,6 +745,19 @@
 	{
 		"inputs": [],
 		"name": "isAuctionActive",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isBurnCycleActive",
 		"outputs": [
 			{
 				"internalType": "bool",
@@ -875,33 +873,12 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"name": "reverseSwapSettings",
+		"inputs": [],
+		"name": "TotalBurnedStates",
 		"outputs": [
 			{
-				"internalType": "bool",
-				"name": "isEnabled",
-				"type": "bool"
-			},
-			{
 				"internalType": "uint256",
-				"name": "startTime",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "endTime",
+				"name": "",
 				"type": "uint256"
 			}
 		],

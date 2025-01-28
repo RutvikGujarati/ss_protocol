@@ -6,22 +6,28 @@ import StateABI from "../ABI/StateTokenABI.json";
 import RatioABI from "../ABI/RatioABI.json";
 import PropTypes from "prop-types";
 import { PriceContext } from "../api/StatePrice";
-import { createWalletClient, http } from "viem";
-import { pulsechainV4 } from "viem/chains";
 
 const DAVTokenContext = createContext();
-//0xd75fA7c2380f539320F9ABD29D09f48DbEB0E13E
+
+// export const DAV_TOKEN_ADDRESS = "0xB044420Bd99b7dbcc412c1E0D998963C1162Cb15";
+// export const STATE_TOKEN_ADDRESS = "0xcE8Ca38744B9a5598E990704e5Ba3756A54C7CEf";
+// export const Ratio_TOKEN_ADDRESS = "0x5DbC0c8019B8701Df1b7923BB1074D16131834C0";
+// export const XerionRatioAddress = "0xD7721C8420008CED169694612F823d028CA9f3d4";
+// export const Fluxin = "0x60fe86aF11F760A0a87fDD2325F94D73594023B1";
+// export const Xerion = "0xaE4733A33Dd8382B43466D572F0a94eF9579Ee45";
+
 export const DAV_TOKEN_ADDRESS = "0xDBfb087D16eF29Fd6c0872C4C0525B38fBAEB319";
 export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
-export const Ratio_TOKEN_ADDRESS = "0x1e66FD350dBb84A55Ed46A93B358ee374864cC8A";
-
+export const Ratio_TOKEN_ADDRESS = "0xA2116C4bDD7bf62d4d6D439674d8Ecd3C84FdFfb";
+export const XerionRatioAddress = "0x44010811890Ecb98D9cc0afD91b8578F5c31fc07";
 export const Fluxin = "0xdE45C7EEED1E776dC266B58Cf863b9B9518cb7aa";
 export const Xerion = "0xda5eF27FE698970526dFA7E47E824A843907AC71";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
 export const DAVTokenProvider = ({ children }) => {
-  const { stateUsdPrice, FluxinRatioPrice } = useContext(PriceContext);
+  const { stateUsdPrice, FluxinRatioPrice, XerionRatioPrice } =
+    useContext(PriceContext);
 
   //contract initialization states
   const [provider, setProvider] = useState(null);
@@ -39,6 +45,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [FluxinContract, setFluxinContract] = useState(null);
   const [XerionContract, setXerionContract] = useState(null);
   const [RatioContract, setRatioContract] = useState(null);
+  const [XerionRatioContract, setXerionRatioContract] = useState(null);
 
   const [TotalCost, setTotalCost] = useState(null);
   const [AuctionRunning, setIsAuctionRunning] = useState({
@@ -53,7 +60,10 @@ export const DAVTokenProvider = ({ children }) => {
   });
   const [ButtonText, setButtonText] = useState();
   const [davHolds, setDavHoldings] = useState("0.0");
-  const [isReversed, setisReversed] = useState(false);
+  const [isReversed, setisReversed] = useState({
+    Fluxin: false,
+    Xerion: false,
+  });
   const [StateHolds, setStateHoldings] = useState("0.0");
 
   const [TotalStateHoldsInUS, setTotalStateHoldsInUS] = useState("0.00");
@@ -64,19 +74,20 @@ export const DAVTokenProvider = ({ children }) => {
   const [FluxinSupply, setFluxinSupply] = useState("0.0");
   const [XerionSupply, setXerionSupply] = useState("0.0");
   const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
-  const [OnePBalance, setOnePBalance] = useState("0");
-  const [FormattedInbalance, setFormatedBalance] = useState("0");
-  const [OutBalance, setOutBalance] = useState({
-    Fluxin: "0",
-    formattedFluxin: "0",
-  });
+  const [OnePBalance, setOnePBalance] = useState({});
+  const [FluxinOnepBalance, setFluxinOnepBalnce] = useState("0");
+  const [XerionOnepBalance, setXerionOnepBalnce] = useState("0");
 
   const [buttonTextStates, setButtonTextStates] = useState({});
   const [swappingStates, setSwappingStates] = useState({});
   const [DAVTokensFiveWithdraw, setFiveAvTokens] = useState("0.0");
-  const [StateBalance, setStateBalance] = useState("0.0");
-  const [FluxinBalance, setFluxinBalance] = useState("0.0");
-  const [XerionBalance, setXerionBalance] = useState("0.0");
+
+  const [StateBurnBalance, setStateBurnBalance] = useState({});
+  const [RatioTargetsofTokens, setRatioTargetsOfTokens] = useState({});
+  const [bountyBalances, setBountyBalances] = useState({
+    fluxinBounty: 0,
+    xerionBounty: 0,
+  });
   const [PercentageOfState, setPercentage] = useState("0.0");
   const [PercentageFluxin, setFluxinPercentage] = useState("0.0");
   const [PercentageXerion, setXerionPercentage] = useState("0.0");
@@ -88,21 +99,14 @@ export const DAVTokenProvider = ({ children }) => {
     xerion3: "0.0",
   });
 
-  const [AuctionTime, SetAuctionTime] = useState("0");
-  const [userHashSwapped, setUserHashSwapped] = useState(false);
-  const [AuctionDuration, SetAuctionDuration] = useState("0");
+  const [auctionDetails, setAuctionDetails] = useState({});
+
+  const [userHashSwapped, setUserHashSwapped] = useState({});
+  const [BurnOccuredForToken, setBurnOccuredForToken] = useState({});
+  const [BurnCycleACtive, setBurnCycleActive] = useState({});
   const [AuctionTimeRunning, SetAuctionTimeRunning] = useState("0");
-  const [AuctionNextTime, SetAuctionNextTime] = useState("0");
-  const [RatioValues, SetRatioTarget] = useState("0");
-  const [userSwapped, SetUserSwapped] = useState("0");
-
-  const walletClient = createWalletClient({
-    chain: pulsechainV4, // Change to your desired chain, e.g., goerli, polygon, etc.
-    transport: http("pulsechain-testnet-rpc.publicnode.com"), // Replace with your RPC URL
-    account: account, // Your wallet address
-  });
-
-  console.log("walletClient", walletClient);
+  const [AuctionTimeRunningXerion, SetAuctionTimeRunningXerion] = useState("0");
+  const [RatioValues, SetRatioTargets] = useState("0");
 
   useEffect(() => {
     const initialize = async () => {
@@ -130,6 +134,9 @@ export const DAVTokenProvider = ({ children }) => {
 
           setRatioContract(
             new ethers.Contract(Ratio_TOKEN_ADDRESS, RatioABI, newSigner)
+          );
+          setXerionRatioContract(
+            new ethers.Contract(XerionRatioAddress, RatioABI, newSigner)
           );
         } catch (error) {
           console.error("Error initializing contract:", error);
@@ -328,7 +335,12 @@ export const DAVTokenProvider = ({ children }) => {
     let interval;
 
     const fetchLiveData = async () => {
-      if (davContract && stateContract && RatioContract) {
+      if (
+        davContract &&
+        stateContract &&
+        RatioContract &&
+        XerionRatioContract
+      ) {
         try {
           // Concurrent fetching with Promise.all
           await Promise.all([
@@ -376,6 +388,9 @@ export const DAVTokenProvider = ({ children }) => {
             ViewDistributedTokens().catch((error) =>
               console.error("Error fetching ViewDistributedTokens:", error)
             ),
+            getCachedRatioTarget().catch((error) =>
+              console.error("Error fetching ViewDistributedTokens:", error)
+            ),
             StateTotalMintedSupply().catch((error) =>
               console.error("Error fetching StateTotalMintedSupply:", error)
             ),
@@ -395,7 +410,19 @@ export const DAVTokenProvider = ({ children }) => {
             ContractStateBalance().catch((error) =>
               console.error("Error fetching ContractStateBalance:", error)
             ),
+            StateBurnAmount().catch((error) =>
+              console.error("Error fetching ContractStateBalance:", error)
+            ),
+            calculateBounty().catch((error) =>
+              console.error("Error fetching ContractStateBalance:", error)
+            ),
             ContractFluxinBalance().catch((error) =>
+              console.error("Error fetching ContractFluxinBalance:", error)
+            ),
+            ContractRatioFluxinBalance().catch((error) =>
+              console.error("Error fetching ContractFluxinBalance:", error)
+            ),
+            ContractRatioXerionBalance().catch((error) =>
               console.error("Error fetching ContractFluxinBalance:", error)
             ),
             ContractXerionBalance().catch((error) =>
@@ -404,20 +431,38 @@ export const DAVTokenProvider = ({ children }) => {
             DAVTokenAmount().catch((error) =>
               console.error("Error fetching DAVTokenAmount:", error)
             ),
-            SetOnePercentageOfBalance().catch((error) =>
+            SetOnePercentageOfBalance(RatioContract, "Fluxin").catch((error) =>
               console.error("Error fetching DAVTokenAmount:", error)
             ),
-            AmountOutOfFluxin().catch((error) =>
+            SetOnePercentageOfBalance(XerionRatioContract, "Xerion").catch(
+              (error) => console.error("Error fetching DAVTokenAmount:", error)
+            ),
+            calculateBalancesForAllContracts().catch((error) =>
+              console.error("Error fetching DAVTokenAmount:", error)
+            ),
+            AmountOutTokens().catch((error) =>
+              console.error("Error fetching DAVTokenAmount:", error)
+            ),
+            AmountOut().catch((error) =>
+              console.error("Error fetching DAVTokenAmount:", error)
+            ),
+            displayBalances().catch((error) =>
               console.error("Error fetching DAVTokenAmount:", error)
             ),
             DAVTokenfive_Amount().catch((error) =>
               console.error("Error fetching DAVTokenfive_Amount:", error)
             ),
-            AuctioTimeInterval().catch((error) =>
+            AuctionTimeInterval().catch((error) =>
               console.error("Error fetching DAVTokenfive_Amount:", error)
             ),
 
-            UserhasSwapped().catch((error) =>
+            HasSwappedAucton().catch((error) =>
+              console.error("Error fetching DAVTokenfive_Amount:", error)
+            ),
+            BurningOccurred().catch((error) =>
+              console.error("Error fetching DAVTokenfive_Amount:", error)
+            ),
+            BurnCycleActive().catch((error) =>
               console.error("Error fetching DAVTokenfive_Amount:", error)
             ),
           ]);
@@ -432,35 +477,46 @@ export const DAVTokenProvider = ({ children }) => {
     interval = setInterval(fetchLiveData, 10000);
 
     return () => clearInterval(interval); // Clean up interval on component unmount
-  }, [davContract, stateContract, RatioContract, account]);
+  }, [davContract, stateContract, RatioContract, XerionRatioContract, account]);
 
   // Ratio Token Contracts
   // -- auction
 
   const isAuctionRunning = async () => {
     try {
-      const isRunningFluxin = await handleContractCall(
-        RatioContract,
-        "isAuctionActive"
-      );
+      const contracts = [
+        { contract: RatioContract, name: "Fluxin" },
+        { contract: XerionRatioContract, name: "Xerion" },
+        // Add more contracts here as needed
+      ];
 
-      const runningFluxin = isRunningFluxin.toString();
-      console.log("isAuctionRunning -> Fluxin:", runningFluxin);
+      const auctionStatus = {};
+
+      // Loop through all contracts
+      for (const { contract, name } of contracts) {
+        const isRunning = await handleContractCall(contract, "isAuctionActive");
+        auctionStatus[name] = isRunning.toString();
+        console.log(`isAuctionRunning -> ${name}:`, isRunning.toString());
+      }
+
       setIsAuctionRunning({
-        Fluxin: isRunningFluxin,
+        ...auctionStatus,
         state: true,
       });
+
       setIsAuctionRunningLocalString({
-        Fluxin: runningFluxin,
+        ...auctionStatus,
         state: true,
       });
     } catch (error) {
       console.error("Error fetching auction status:", error);
+
       setIsAuctionRunning({
         Fluxin: false,
         Xerion: false,
         state: true,
       });
+
       setIsAuctionRunningLocalString({
         Fluxin: false,
         Xerion: false,
@@ -468,6 +524,7 @@ export const DAVTokenProvider = ({ children }) => {
       });
     }
   };
+
   //claiming functions
   const ClaimTokens = async (contract) => {
     try {
@@ -642,33 +699,105 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const AmountOutOfFluxin = async () => {
+  const AmountOutTokens = async () => {
     try {
-      const rawFluxinBalanceUser = await handleContractCall(
-        RatioContract,
-        "getOnepercentOfUserBalance",
-        [],
-        (s) => ethers.formatUnits(s, 18)
-      );
-      console.log("AmountOut -> Raw Fluxin Balance:", rawFluxinBalanceUser);
+      const contracts = [
+        {
+          contract: RatioContract,
+          name: "Fluxin",
+          ratioPrice: FluxinRatioPrice,
+        },
+        {
+          contract: XerionRatioContract,
+          name: "Xerion",
+          ratioPrice: XerionRatioPrice,
+        },
+      ];
 
-      const balanceOfFluxin = Math.floor(
-        parseFloat(rawFluxinBalanceUser || "0")
-      );
+      const amounts = {};
 
-      console.log("AmountOut -> Raw Fluxin Balance:", balanceOfFluxin);
+      // Loop through all contracts
+      for (const { contract, name, ratioPrice } of contracts) {
+        const rawTokenBalanceUser = await handleContractCall(
+          contract,
+          "getOnepercentOfUserBalance",
+          [],
+          (s) => ethers.formatUnits(s, 18)
+        );
+        console.log(`${name} -> Raw Token Balance:`, rawTokenBalanceUser);
 
-      const calculation = balanceOfFluxin * FluxinRatioPrice * 2;
+        const tokenBalance = Math.floor(parseFloat(rawTokenBalanceUser || "0"));
+        console.log(`${name} -> Parsed Token Balance:`, tokenBalance);
 
-      const balance = parseFloat(calculation || "0");
-      console.log("out -> Raw Fluxin Balance:", balance);
-      setOutBalance({
-        Fluxin: balance,
-        formattedFluxin: balance.toLocaleString(),
-      });
+        const calculation = tokenBalance * ratioPrice * 2;
+        const adjustedBalance = parseFloat(calculation || "0");
+        console.log(`${name} -> Calculated Balance:`, adjustedBalance);
+
+        amounts[name] = {
+          rawBalance: tokenBalance,
+          adjustedBalance,
+          formattedBalance: adjustedBalance.toLocaleString(),
+        };
+
+        // Update state with the results
+        setOnePBalance((prevState) => ({
+          ...prevState,
+          [name]: {
+            rawBalance: tokenBalance,
+            adjustedBalance,
+            formattedBalance: adjustedBalance.toLocaleString(),
+          },
+        }));
+      }
+
+      console.log("Final Balances in State:", OnePBalance);
+
+      return amounts;
     } catch (e) {
       console.error("Error fetching AmountOut balances:", e);
+      return null;
     }
+  };
+  const [outAmounts, setOutAmounts] = useState({
+    Fluxin: "0",
+    Xerion: "0",
+  });
+
+  const AmountOut = async () => {
+    const value = await AmountOutTokens();
+    console.log("from dt", value.Fluxin.adjustedBalance);
+    console.log("from dt1", value.Xerion.adjustedBalance);
+
+    // Update the state with both Fluxin and Xerion values
+    setOutAmounts({
+      Fluxin: value.Fluxin.adjustedBalance,
+      Xerion: value.Xerion.adjustedBalance,
+    });
+
+    return value.Fluxin.adjustedBalance;
+  };
+
+  const displayBalances = async () => {
+    const values = await AmountOutTokens();
+    console.log("Fluxin Raw Balance:", values.Fluxin.adjustedBalance || 0);
+    console.log(
+      "Fluxin Adjusted Balance:",
+      OnePBalance?.Fluxin?.adjustedBalance || 0
+    );
+    console.log(
+      "Fluxin Formatted Balance:",
+      OnePBalance?.Fluxin?.formattedBalance || "0.00"
+    );
+
+    console.log("Xerion Raw Balance:", OnePBalance?.Xerion?.rawBalance || 0);
+    console.log(
+      "Xerion Adjusted Balance:",
+      OnePBalance?.Xerion?.adjustedBalance || 0
+    );
+    console.log(
+      "Xerion Formatted Balance:",
+      OnePBalance?.Xerion?.formattedBalance || "0.00"
+    );
   };
 
   const DAVTokenfive_Amount = async () => {
@@ -685,7 +814,7 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const AuctioTimeInterval = async () => {
+  const AuctionTimeInterval = async () => {
     try {
       const formatTimestamp = (timestamp) => {
         const timestampSeconds = parseFloat(timestamp);
@@ -703,145 +832,366 @@ export const DAVTokenProvider = ({ children }) => {
         });
       };
 
-      const Time = await handleContractCall(
-        RatioContract,
-        "auctionInterval",
-        []
-      );
-      const TimeOfDuration = await handleContractCall(
-        RatioContract,
-        "auctionDuration",
-        []
-      );
+      // List of token contracts to handle
+      const contracts = [
+        { contract: RatioContract, name: "Fluxin" },
+        { contract: XerionRatioContract, name: "Xerion" }, // Example for another token
+      ];
 
-      const HasSwapped = await handleContractCall(
-        RatioContract,
-        "getUserHasSwapped",
-        []
-      );
-      setUserHashSwapped(HasSwapped);
-      console.log("hasSwapped", HasSwapped);
-      const NextTime = await handleContractCall(
-        RatioContract,
-        "getNextAuctionStart",
-        []
-        // (s) => ethers.formatUnits(s, 18)
-      );
-      if (NextTime == 0 || NextTime == undefined) {
-        SetAuctionNextTime("0");
-      } else {
-        const formattedNextTime = formatTimestamp(NextTime);
+      const auctionData = {};
 
-        console.log("Auction Time Left:", NextTime);
-        SetAuctionNextTime(formattedNextTime);
+      for (const { contract, name } of contracts) {
+        // Fetch the auction details for each token contract
+        const auctionInterval = await handleContractCall(
+          contract,
+          "auctionInterval",
+          []
+        );
+        const auctionDuration = await handleContractCall(
+          contract,
+          "auctionDuration",
+          []
+        );
+
+        const nextAuctionStart = await handleContractCall(
+          contract,
+          "getNextAuctionStart",
+          []
+        );
+
+        let formattedNextTime = "0";
+        if (nextAuctionStart !== 0 && nextAuctionStart !== undefined) {
+          formattedNextTime = formatTimestamp(nextAuctionStart);
+        }
+
+        auctionData[name] = {
+          auctionInterval,
+          auctionDuration,
+          nextAuctionStart: formattedNextTime,
+        };
       }
 
-      SetAuctionDuration(TimeOfDuration);
-      SetAuctionTime(Time);
-      console.log("Auction Time Interval in Days:", Time);
+      setAuctionDetails(auctionData);
+
+      console.log("Auction Data:", auctionData);
     } catch (e) {
       console.error("Error fetching auction interval:", e);
     }
   };
-  let timer; // Declare timer outside to persist across calls
-
-  const AuctionTimeLeft = async () => {
+  const HasSwappedAucton = async () => {
     try {
-      // Fetch remaining time from the contract
-      const Time = await handleContractCall(
-        RatioContract,
-        "getTimeLeftInAuction"
+      // List of contracts with identifiers
+      const contracts = [
+        { name: "Fluxin", contract: RatioContract },
+        { name: "Xerion", contract: XerionRatioContract },
+      ];
+
+      // Fetch data for all contracts
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          const hasSwapped = await handleContractCall(
+            contract,
+            "getUserHasSwapped",
+            []
+          );
+          return { name, hasSwapped };
+        })
       );
 
-      const timeInSeconds = Number(Time);
-      SetAuctionTimeRunning(timeInSeconds);
+      // Update state as an object with contract names as keys
+      const newStates = results.reduce((acc, { name, hasSwapped }) => {
+        acc[name] = hasSwapped;
+        return acc;
+      }, {});
 
-      // Clear any existing timer
-      if (timer) clearInterval(timer);
+      setUserHashSwapped(newStates); // Update state with the combined object
+      console.log("Updated swap states:", newStates);
+    } catch (e) {
+      console.error("Error fetching swap status:", e);
+    }
+  };
+  const BurningOccurred = async () => {
+    try {
+      const contracts = [
+        { name: "Fluxin", contract: RatioContract },
+        { name: "Xerion", contract: XerionRatioContract },
+      ];
 
-      // If time is 0, stop further execution
-      if (timeInSeconds <= 0) {
-        clearInterval(timer);
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          const BurnOccurred = await handleContractCall(
+            contract,
+            "getBurnOccured",
+            []
+          );
+
+          return { name, BurnOccurred: BurnOccurred.toString() };
+        })
+      );
+
+      const newStates = results.reduce((acc, { name, BurnOccurred }) => {
+        acc[name] = BurnOccurred;
+        return acc;
+      }, {});
+      console.log("state of burn", newStates);
+      setBurnOccuredForToken(newStates); // Update state with the combined object
+      console.log("Updated burn occurrences:", newStates);
+    } catch (e) {
+      console.error("Error fetching burn status:", e);
+    }
+  };
+  const BurnCycleActive = async () => {
+    try {
+      const contracts = [
+        { name: "Fluxin", contract: RatioContract },
+        { name: "Xerion", contract: XerionRatioContract },
+      ];
+
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          const BurnOccurred = await handleContractCall(
+            contract,
+            "isBurnCycleActive",
+            []
+          );
+
+          return { name, BurnOccurred: BurnOccurred.toString() };
+        })
+      );
+
+      const newStates = results.reduce((acc, { name, BurnOccurred }) => {
+        acc[name] = BurnOccurred;
+        return acc;
+      }, {});
+      console.log("state of burn", newStates);
+      setBurnCycleActive(newStates); // Update state with the combined object
+      console.log("Updated burn occurrences:", newStates);
+    } catch (e) {
+      console.error("Error fetching burn status:", e);
+    }
+  };
+  const AuctionTimeLeft = async () => {
+    try {
+      // List of token contracts to handle
+      const contracts = [
+        { contract: RatioContract, name: "Fluxin" },
+        { contract: XerionRatioContract, name: "Xerion" },
+      ];
+
+      const auctionTimes = {};
+
+      for (const { contract, name } of contracts) {
+        const remainingTime = await handleContractCall(
+          contract,
+          "getTimeLeftInAuction"
+        );
+
+        auctionTimes[name] = Number(remainingTime);
       }
+
+      SetAuctionTimeRunning(auctionTimes.Fluxin);
+      SetAuctionTimeRunningXerion(auctionTimes.Xerion);
+
+      console.log("Auction Times Left:", auctionTimes);
     } catch (e) {
       console.error("Error fetching auction time:", e);
-      // Cleanup timer if an error occurs
-      if (timer) clearInterval(timer);
     }
   };
 
   useEffect(() => {
     AuctionTimeLeft();
-    // Start polling every 2 seconds
     const interval = setInterval(() => {
       AuctionTimeLeft();
     }, 2000);
 
-    // Cleanup interval on component unmount
     return () => clearInterval(interval);
   }, [Xerion, STATE_TOKEN_ADDRESS, RatioContract]);
 
-  const SetAUctionDuration = async (time) => {
+  const contractMapping = {
+    fluxinRatio: RatioContract,
+    XerionRatio: XerionRatioContract,
+  };
+  const SetAUctionDuration = async (time, ContractName) => {
     try {
-      await handleContractCall(RatioContract, "setAuctionDuration", [time]);
+      await handleContractCall(
+        contractMapping[ContractName],
+        "setAuctionDuration",
+        [time]
+      );
     } catch (e) {
       console.error("Error fetching auction interval:", e);
     }
   };
-  const SetAUctionInterval = async (time) => {
+  const SetAUctionInterval = async (time, contractName) => {
     try {
-      await handleContractCall(RatioContract, "setAuctionInterval", [time]);
+      await handleContractCall(
+        contractMapping[contractName],
+        "setAuctionInterval",
+        [time]
+      );
     } catch (e) {
       console.error("Error fetching auction interval:", e);
     }
   };
   const RatioTargetValues = async () => {
     try {
-      const RatioTargetFluxin = await handleContractCall(
-        RatioContract,
-        "getRatioTarget",
-        []
-      );
-      console.log("RatioTargetValues", Number(RatioTargetFluxin));
-      SetRatioTarget(Number(RatioTargetFluxin));
-      return RatioTargetFluxin;
+      // List of token contracts to handle
+      const contracts = [
+        { contract: RatioContract, name: "Fluxin" },
+        { contract: XerionRatioContract, name: "Xerion" }, // Example for another token
+      ];
+
+      const ratioTargets = {};
+
+      for (const { contract, name } of contracts) {
+        const RatioTarget = await handleContractCall(
+          contract,
+          "getRatioTarget",
+          []
+        );
+        console.log(`${name} Ratio Target:`, Number(RatioTarget));
+
+        ratioTargets[name] = Number(RatioTarget);
+      }
+
+      SetRatioTargets(ratioTargets);
+      console.log("Ratio Targets:", ratioTargets);
+      return ratioTargets;
     } catch (e) {
       console.error("Error fetching ratio targets:", e);
     }
   };
-  let cachedRatioTarget = null; // Cache in memory
+  let cachedRatioTargets = {}; // Store cached ratio targets for multiple tokens
 
   const getCachedRatioTarget = async () => {
-    if (cachedRatioTarget !== null) {
-      console.log("Using cached Ratio Target:", cachedRatioTarget);
-      return cachedRatioTarget;
-    }
-
-    const ratioTargetValue = await RatioTargetValues();
-    cachedRatioTarget = ratioTargetValue; // Cache the value
-    return ratioTargetValue;
-  };
-
-  const UserhasSwapped = async () => {
     try {
-      const getCurrentCycle = await handleContractCall(
-        RatioContract,
-        "getCurrentAuctionCycle",
-        []
-      );
-      const userhSwapped = await handleContractCall(
-        RatioContract,
-        "userSwapTotalInfo",
-        [account, Fluxin, STATE_TOKEN_ADDRESS, getCurrentCycle]
-      );
-      console.log("RatioTargetValues", Number(userhSwapped));
-      SetUserSwapped(userhSwapped);
+      // If cached value exists for each token, return it
+      if (Object.keys(cachedRatioTargets).length > 0) {
+        console.log("Using cached Ratio Targets:", cachedRatioTargets);
+        return cachedRatioTargets;
+      }
+
+      // Fetch the ratio target values from the contracts
+      const ratioTargetValues = await RatioTargetValues();
+
+      // Cache the fetched values
+      cachedRatioTargets = ratioTargetValues;
+      console.log("Fetched and cached Ratio Targets:", cachedRatioTargets);
+      setRatioTargetsOfTokens(cachedRatioTargets);
+      return ratioTargetValues;
     } catch (e) {
       console.error("Error fetching ratio targets:", e);
     }
   };
 
-  const fetchContractBalance = async (contract, tokenAddress, setState) => {
+  const StateBurnAmount = async () => {
+    try {
+      const contractDetails = [
+        { name: "Fluxin", contract: RatioContract },
+        { name: "Xerion", contract: XerionRatioContract },
+      ];
+
+      let totalBurnedAmount = 0;
+
+      for (const { name, contract } of contractDetails) {
+        const burnedAmount = await handleContractCall(
+          contract,
+          "getTotalStateBurned",
+          [],
+          (s) => ethers.formatUnits(s, 18)
+        );
+
+        console.log(`Total burned for ${name}:`, burnedAmount);
+
+        // Add the burned amount to the total sum
+        totalBurnedAmount += parseFloat(burnedAmount);
+      }
+
+      console.log("Total burned amount for all contracts:", totalBurnedAmount);
+
+      // Set the summed value in the state
+      setStateBurnBalance(totalBurnedAmount);
+    } catch (e) {
+      console.error("Error fetching burned amounts:", e);
+    }
+  };
+
+  const calculateBounty = async () => {
+    try {
+      // Fetch Fluxin balance and calculate bounty
+      const fluxinTransaction = await handleContractCall(
+        FluxinContract,
+        "balanceOf",
+        [Ratio_TOKEN_ADDRESS],
+        (s) => ethers.formatUnits(s, 18)
+      );
+      const fluxinUseableAmount = fluxinTransaction * 0.00001;
+      const fluxinBounty = (fluxinUseableAmount * 1) / 100;
+
+      // Fetch Xerion balance and calculate bounty
+      const xerionTransaction = await handleContractCall(
+        XerionContract,
+        "balanceOf",
+        [XerionRatioAddress],
+        (s) => ethers.formatUnits(s, 18)
+      );
+      const xerionUseableAmount = xerionTransaction * 0.00001;
+      const xerionBounty = (xerionUseableAmount * 1) / 100;
+
+      // Update the state with both bounty values
+      setBountyBalances({
+        fluxinBounty: fluxinBounty.toFixed(6),
+        xerionBounty: xerionBounty.toFixed(6),
+      });
+
+      // Log the values
+      console.log("Fluxin Bounty Balance:", fluxinBounty.toFixed(6));
+      console.log("Xerion Bounty Balance:", xerionBounty.toFixed(6));
+    } catch (error) {
+      console.error("Error calculating bounty:", error);
+    }
+  };
+
+  const [balances, setBalances] = useState({
+    stateBalance: 0,
+    fluxinBalance: 0,
+    ratioFluxinBalance: 0,
+    ratioXerionBalance: 0,
+    xerionBalance: 0,
+  });
+
+  const ContractStateBalance = async () => {
+    await fetchContractBalance(
+      stateContract,
+      STATE_TOKEN_ADDRESS,
+      "stateBalance"
+    );
+  };
+
+  const ContractFluxinBalance = async () => {
+    await fetchContractBalance(FluxinContract, Fluxin, "fluxinBalance");
+  };
+
+  const ContractRatioFluxinBalance = async () => {
+    await fetchContractBalance(
+      FluxinContract,
+      Ratio_TOKEN_ADDRESS,
+      "ratioFluxinBalance"
+    );
+  };
+  const ContractRatioXerionBalance = async () => {
+    await fetchContractBalance(
+      XerionContract,
+      XerionRatioAddress,
+      "ratioXerionBalance"
+    );
+  };
+
+  const ContractXerionBalance = async () => {
+    await fetchContractBalance(XerionContract, Xerion, "xerionBalance");
+  };
+
+  const fetchContractBalance = async (contract, tokenAddress, balanceKey) => {
     try {
       const transaction = await handleContractCall(
         contract,
@@ -850,26 +1200,15 @@ export const DAVTokenProvider = ({ children }) => {
         (s) => ethers.formatUnits(s, 18)
       );
 
-      console.log("balance", transaction);
-      setState(transaction);
+      console.log(`${balanceKey} balance:`, transaction);
+
+      setBalances((prevBalances) => ({
+        ...prevBalances,
+        [balanceKey]: transaction,
+      }));
     } catch (e) {
       console.error("Error fetching token balance:", e);
     }
-  };
-
-  const ContractStateBalance = async () => {
-    await fetchContractBalance(
-      stateContract,
-      STATE_TOKEN_ADDRESS,
-      setStateBalance
-    );
-  };
-
-  const ContractFluxinBalance = async () => {
-    await fetchContractBalance(FluxinContract, Fluxin, setFluxinBalance);
-  };
-  const ContractXerionBalance = async () => {
-    await fetchContractBalance(XerionContract, Xerion, setXerionBalance);
   };
 
   const getDecayPercentage = async (contractName) => {
@@ -910,64 +1249,102 @@ export const DAVTokenProvider = ({ children }) => {
   };
   console.log("Contract functions:", RatioContract);
 
-  const SwapTokens = async (id) => {
+  const SwapTokens = async (id, ContractName) => {
     try {
-      // Set initial swapping states
       setSwappingStates((prev) => ({ ...prev, [id]: true }));
       setButtonTextStates((prev) => ({
         ...prev,
         [id]: "Checking allowance...",
       }));
 
-      const amountInWei = ethers.parseUnits(OutBalance.Fluxin.toString(), 18);
+      const OutAmountsMapping = {
+        Fluxin: outAmounts.Fluxin,
+        Xerion: outAmounts.Xerion,
+      };
+      const ContractAddressToUse = {
+        Fluxin: Ratio_TOKEN_ADDRESS,
+        Xerion: XerionRatioAddress,
+      };
+      console.log("output amount:", OutAmountsMapping[ContractName]);
+      const InAmountMapping = {
+        Fluxin: FluxinOnepBalance,
+        Xerion: XerionOnepBalance,
+      };
+      console.log("input amount:", InAmountMapping[ContractName]);
+
+      const amountInWei = ethers.parseUnits(
+        OutAmountsMapping[ContractName].toString(),
+        18
+      );
+
       let approvalAmount;
-      let contractToUse = FluxinContract;
+      let contractToUse = {
+        Fluxin: FluxinContract,
+        Xerion: XerionContract,
+        state: stateContract,
+      };
+      const ReverseMapping = {
+        Fluxin: isReversed.Fluxin,
+        Xerion: isReversed.Xerion,
+      };
+
+      console.log("contract to use:", contractToUse[ContractName]);
 
       const rp = await getCachedRatioTarget();
-      console.log("FluxinRatioPrice:", FluxinRatioPrice);
-      console.log("Ratio Price (rp):", parseFloat(rp).toString());
-      console.log("isReversed:", isReversed.toString());
-      const rp1 = parseFloat(rp);
-      const isreverse = isReversed.toString();
+      const forContract = rp[ContractName];
+      const rp1 = parseFloat(forContract);
+      console.log("rps", rp1);
+      const isreverse = ReverseMapping[ContractName];
+      console.log("reversing yes", isreverse);
+      let selectedContract;
+      if (
+        (ContractName == "Fluxin" && FluxinRatioPrice > rp1) ||
+        (ContractName == "Xerion" && XerionRatioPrice > rp1)
+      ) {
+        if (isreverse) {
+          selectedContract = contractToUse["state"];
+          approvalAmount = ethers.parseUnits(
+            OutAmountsMapping[ContractName].toString(),
+            18
+          );
+          console.log("firs condition");
+          console.log(
+            "Reversed swap, approving OutBalance:",
+            approvalAmount.toString()
+          );
+        } else {
+          approvalAmount = ethers.parseUnits(
+            InAmountMapping[ContractName].toString(),
+            18
+          );
+          console.log("second condition");
+          console.log(
+            "Normal swap, approving OnePBalance:",
+            approvalAmount.toString()
+          );
+        }
+      } else {
+        selectedContract = contractToUse[ContractName]; // Use the original contract
 
-      if (FluxinRatioPrice > rp1 && isreverse) {
-        console.log(
-          "Condition: FluxinRatioPrice > rp && isReversed === 'true'"
+        approvalAmount = ethers.parseUnits(
+          InAmountMapping[ContractName].toString(),
+          18
         );
-        contractToUse = stateContract;
-        approvalAmount = ethers.parseUnits(OutBalance.Fluxin.toString(), 18);
-        console.log(
-          "Reversed swap, approving OutBalance:",
-          approvalAmount.toString()
-        );
-      } else if (FluxinRatioPrice < rp1) {
-        console.log(
-          "Condition: FluxinRatioPrice < rp && isReversed === 'false'"
-        );
-        approvalAmount = ethers.parseUnits(OnePBalance.toString(), 18);
-        console.log("approval amount: ", approvalAmount);
-
+        console.log("second condition");
         console.log(
           "Normal swap, approving OnePBalance:",
           approvalAmount.toString()
         );
-      } else {
-        console.error(
-          "Invalid swap conditions. Cannot determine token amount."
-        );
-        setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
-        setSwappingStates((prev) => ({ ...prev, [id]: false }));
-        return false;
       }
-      approvalAmount = approvalAmount + ethers.parseUnits("100", 18);
 
+      approvalAmount = approvalAmount + ethers.parseUnits("100", 18); // Add extra amount
       console.log("Amount in wei:", amountInWei.toString());
       console.log("Approval Amount:", approvalAmount.toString());
 
       // Check current allowance
-      const allowance = await contractToUse.allowance(
+      const allowance = await selectedContract.allowance(
         account,
-        Ratio_TOKEN_ADDRESS
+        ContractAddressToUse[ContractName]
       );
       console.log("Current allowance:", ethers.formatUnits(allowance, 18));
 
@@ -979,8 +1356,8 @@ export const DAVTokenProvider = ({ children }) => {
         console.log("Insufficient allowance. Sending approval transaction...");
 
         try {
-          const approveTx = await contractToUse.approve(
-            Ratio_TOKEN_ADDRESS,
+          const approveTx = await selectedContract.approve(
+            ContractAddressToUse[ContractName],
             approvalAmount
           );
           await approveTx.wait();
@@ -997,25 +1374,23 @@ export const DAVTokenProvider = ({ children }) => {
         );
       }
 
-      // Update button state for swapping
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swapping..." }));
 
-      // Calculate gas price and extra fee
       const gasPriceData = await provider.getFeeData();
-      if (!gasPriceData || !gasPriceData.gasPrice) {
+      if (!gasPriceData || !gasPriceData.gasPrice)
         throw new Error("Failed to fetch gas price.");
-      }
       const extraFee = gasPriceData.gasPrice / BigInt(100); // 1% of gas price
       console.log(`Extra Fee (in wei): ${extraFee.toString()}`);
-
+      const contracts = {
+        Fluxin: RatioContract,
+        Xerion: XerionRatioContract,
+      };
       // Perform the token swap
-      const swapTx = await RatioContract.swapTokens(
+      const swapTx = await contracts[ContractName].swapTokens(
         account,
         amountInWei,
         extraFee,
-        {
-          value: extraFee, // Provide extra fee as value
-        }
+        { value: extraFee }
       );
       const swapReceipt = await swapTx.wait();
 
@@ -1032,6 +1407,7 @@ export const DAVTokenProvider = ({ children }) => {
     } finally {
       // Reset swapping state
       setSwappingStates((prev) => ({ ...prev, [id]: false }));
+      setButtonTextStates((prev) => ({ ...prev, [id]: "Swap Completed" }));
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swap" }));
     }
   };
@@ -1083,10 +1459,22 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const setRatioTarget = async (Target) => {
+  const setRatioTarget = async (Target, contractName) => {
     try {
       // Call the contract to set both numerator and denominator
-      await handleContractCall(RatioContract, "setRatioTarget", [Target]);
+      await handleContractCall(
+        contractMapping[contractName],
+        "setRatioTarget",
+        [Target]
+      );
+      console.log(`Ratio target set to `);
+    } catch (error) {
+      console.error("Error setting ratio target:", error);
+    }
+  };
+  const ClickBurn = async (ContractName) => {
+    try {
+      await contractMapping[ContractName].burnTokens();
       console.log(`Ratio target set to `);
     } catch (error) {
       console.error("Error setting ratio target:", error);
@@ -1102,57 +1490,56 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error setting reverse target:", error);
     }
   };
-  const SetOnePercentageOfBalance = async () => {
+  const SetOnePercentageOfBalance = async (contract, tokenName) => {
     try {
-      // Fetch raw one percent balance
-      const rawFluxinBalance = await handleContractCall(
-        RatioContract,
+      // Fetch raw one percent balance for the given contract
+      const rawBalance = await handleContractCall(
+        contract,
         "getOnepercentOfUserBalance",
         [],
         (s) => ethers.formatUnits(s, 18)
       );
 
-      const balance = Math.floor(parseFloat(rawFluxinBalance || "0"));
-      console.log("SetOnePercentageOfBalance -> Fluxin:", balance);
+      const balance = Math.floor(parseFloat(rawBalance || "0"));
+      console.log(`SetOnePercentageOfBalance -> ${tokenName}:`, balance);
 
-      const rp = await getCachedRatioTarget();
-      console.log("FluxinRatioPrice:", FluxinRatioPrice);
-      console.log("Ratio Price (rp):", parseFloat(rp).toString());
-      console.log("isReversed:", isReversed.toString());
-      const rp1 = parseFloat(rp);
-      const isreverse = isReversed.toString();
-      let adjustedBalance;
+      console.log(`Adjusted Balance for ${tokenName}:`, balance);
 
-      // Determine balance adjustment based on conditions
-      if (FluxinRatioPrice > rp && isreverse) {
-        console.log(
-          "Condition: FluxinRatioPrice > rp && isReversed === 'true'"
-        );
-        adjustedBalance = balance + balance;
-      } else if (FluxinRatioPrice < rp1) {
-        console.log("Condition: FluxinRatioPrice < rp");
-        adjustedBalance = balance;
-      } else {
-        console.warn("No matching conditions. Defaulting to raw balance.");
-        console.log("fluxinRatioPrice", FluxinRatioPrice);
-        console.log("Ratio Price (rp):", parseFloat(rp).toString());
-
-        adjustedBalance = balance;
-      }
-
-      console.log("Adjusted Balance:", adjustedBalance);
-
-      // Update states
-      setOnePBalance(adjustedBalance);
-      setFormatedBalance(adjustedBalance);
+      // Update state with the results
+      setOnePBalance((prevState) => ({
+        ...prevState,
+        [tokenName]: {
+          balance,
+        },
+      }));
+      return {
+        tokenName,
+        balance,
+      };
     } catch (e) {
-      console.error("Error fetching One Percentage balance of tokens:", e);
+      console.error(`Error in SetOnePercentageOfBalance for ${tokenName}:`, e);
+      return null;
     }
   };
-  const setReverseEnable = async (condition) => {
+  const calculateBalancesForAllContracts = async () => {
+    try {
+      const value = await SetOnePercentageOfBalance(RatioContract, "Fluxin");
+      const valueXerion = await SetOnePercentageOfBalance(
+        XerionRatioContract,
+        "Xerion"
+      );
+      setFluxinOnepBalnce(value.balance);
+      setXerionOnepBalnce(valueXerion.balance);
+      console.log("Final Balances in State:", value.balance);
+    } catch (e) {
+      console.error("Error calculating balances for all contracts:", e);
+    }
+  };
+
+  const setReverseEnable = async (condition, contractName) => {
     try {
       // Call the contract to set both numerator and denominator
-      await RatioContract.setReverseSwap(condition);
+      await contractMapping[contractName].setReverseSwap(condition);
 
       console.log(`seted reverse time`);
     } catch (error) {
@@ -1161,35 +1548,45 @@ export const DAVTokenProvider = ({ children }) => {
   };
   const reverseSwapEnabled = async () => {
     try {
-      // Call the contract to set both numerator and denominator
       const isrevers = await handleContractCall(
         RatioContract,
         "reverseSwapEnabled",
         []
       );
+      const isreverseXerion = await handleContractCall(
+        XerionRatioContract,
+        "reverseSwapEnabled",
+        []
+      );
 
-      setisReversed(isrevers.toString());
+      setisReversed({
+        Fluxin: isrevers.toString(),
+        Xerion: isreverseXerion.toString(),
+      });
       console.log(`seted reverse`, isrevers.toString());
     } catch (error) {
       console.error("Error setting reverse target:", error);
     }
   };
 
-  const DepositToken = async (name, TokenAddress, amount) => {
+  const DepositToken = async (name, TokenAddress, amount, contractName) => {
     try {
       const amountInWei = ethers.parseUnits(amount, 18); // Convert amount to Wei
       setButtonText("pending");
-      // Check current allowance directly
+      const addressMapping = {
+        fluxinRatio: Ratio_TOKEN_ADDRESS,
+        XerionRatio: XerionRatioAddress,
+      };
       const allowance = await contracts[name].allowance(
         account,
-        Ratio_TOKEN_ADDRESS
+        addressMapping[contractName]
       );
       const formattedAllowance = ethers.formatUnits(allowance, 18);
 
       // Approve if insufficient allowance
       if (parseFloat(formattedAllowance) < parseFloat(amount)) {
         const approveTx = await contracts[name].approve(
-          Ratio_TOKEN_ADDRESS,
+          addressMapping[contractName],
           amountInWei
         );
         const approveReceipt = await approveTx.wait();
@@ -1204,7 +1601,7 @@ export const DAVTokenProvider = ({ children }) => {
       }
 
       // Proceed with deposit transaction
-      const depositTx = await RatioContract.depositTokens(
+      const depositTx = await contractMapping[contractName].depositTokens(
         TokenAddress,
         amountInWei
       );
@@ -1233,10 +1630,13 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const StartAuction = async () => {
+  const StartAuction = async (contractName) => {
     try {
-      await handleContractCall(RatioContract, "startAuction", [], (s) =>
-        ethers.formatUnits(s, 18)
+      await handleContractCall(
+        contractMapping[contractName],
+        "startAuction",
+        [],
+        (s) => ethers.formatUnits(s, 18)
       );
     } catch (error) {
       console.error("Error setting ratio target:", error);
@@ -1342,7 +1742,7 @@ export const DAVTokenProvider = ({ children }) => {
         //STATE Token
         StateHolds,
         StateSupply,
-        StateBalance,
+        balances,
         RenounceState,
         stateTransactionHash,
         Supply,
@@ -1355,8 +1755,6 @@ export const DAVTokenProvider = ({ children }) => {
         setClaiming,
 
         contracts,
-        FluxinBalance,
-        XerionBalance,
         ClaimTokens,
         Distributed,
         claiming,
@@ -1377,14 +1775,12 @@ export const DAVTokenProvider = ({ children }) => {
         WithdrawFluxin,
         WithdrawXerion,
         CheckMintBalance,
-
         withdraw_95,
         handleAddTokenRatio,
         handleAddFluxin,
         handleAddXerion,
-        FormattedInbalance,
         withdraw_5,
-        userSwapped,
+        userHashSwapped,
         // WithdrawLPTokens,
         mintAdditionalTOkens,
         isRenounced,
@@ -1393,23 +1789,30 @@ export const DAVTokenProvider = ({ children }) => {
         XerionTransactionHash,
         SetAUctionDuration,
         SetAUctionInterval,
-        AuctionTime,
-        AuctionDuration,
+        outAmounts,
         Approve,
-        AuctionNextTime,
+        auctionDetails,
         DepositToken,
         RatioValues,
         OnePBalance,
-        OutBalance,
         StartAuction,
+        ClickBurn,
         setReverseTime,
-        userHashSwapped,
+        getCachedRatioTarget,
         AuctionTimeRunning,
         buttonTextStates,
         swappingStates,
         AuctionRunningLocalString,
         transactionStatus,
+        AuctionTimeRunningXerion,
         isReversed,
+        StateBurnBalance,
+        RatioTargetsofTokens,
+        FluxinOnepBalance,
+        XerionOnepBalance,
+        BurnOccuredForToken,
+		BurnCycleACtive,
+        bountyBalances,
       }}
     >
       {children}
