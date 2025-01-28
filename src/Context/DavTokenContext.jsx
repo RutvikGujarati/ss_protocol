@@ -18,8 +18,8 @@ const DAVTokenContext = createContext();
 
 export const DAV_TOKEN_ADDRESS = "0xDBfb087D16eF29Fd6c0872C4C0525B38fBAEB319";
 export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
-export const Ratio_TOKEN_ADDRESS = "0xA2116C4bDD7bf62d4d6D439674d8Ecd3C84FdFfb";
-export const XerionRatioAddress = "0x44010811890Ecb98D9cc0afD91b8578F5c31fc07";
+export const Ratio_TOKEN_ADDRESS = "0x3d8c16a21e110958fF0E5FA7E76a7EC41fe61EAe";
+export const XerionRatioAddress = "0x08cbAE49E15d0C63d2c2A33BE641f9C6d0DF56cA";
 export const Fluxin = "0xdE45C7EEED1E776dC266B58Cf863b9B9518cb7aa";
 export const Xerion = "0xda5eF27FE698970526dFA7E47E824A843907AC71";
 
@@ -104,6 +104,9 @@ export const DAVTokenProvider = ({ children }) => {
   const [userHashSwapped, setUserHashSwapped] = useState({});
   const [BurnOccuredForToken, setBurnOccuredForToken] = useState({});
   const [BurnCycleACtive, setBurnCycleActive] = useState({});
+  const [BurnTimeLeft, setBurnTimeLeft] = useState({});
+  const [TotalTokensBurned, setTotalTokenBurned] = useState({});
+  const [TotalBounty, setTotalTokenBounty] = useState({});
   const [AuctionTimeRunning, SetAuctionTimeRunning] = useState("0");
   const [AuctionTimeRunningXerion, SetAuctionTimeRunningXerion] = useState("0");
   const [RatioValues, SetRatioTargets] = useState("0");
@@ -419,6 +422,12 @@ export const DAVTokenProvider = ({ children }) => {
             ContractFluxinBalance().catch((error) =>
               console.error("Error fetching ContractFluxinBalance:", error)
             ),
+            ContractFluxinStateBalance().catch((error) =>
+              console.error("Error fetching ContractFluxinBalance:", error)
+            ),
+            ContractXerionStateBalance().catch((error) =>
+              console.error("Error fetching ContractFluxinBalance:", error)
+            ),
             ContractRatioFluxinBalance().catch((error) =>
               console.error("Error fetching ContractFluxinBalance:", error)
             ),
@@ -463,6 +472,15 @@ export const DAVTokenProvider = ({ children }) => {
               console.error("Error fetching DAVTokenfive_Amount:", error)
             ),
             BurnCycleActive().catch((error) =>
+              console.error("Error fetching DAVTokenfive_Amount:", error)
+            ),
+            BurnTimingLeft().catch((error) =>
+              console.error("Error fetching DAVTokenfive_Amount:", error)
+            ),
+            TotalTokensBurn().catch((error) =>
+              console.error("Error fetching DAVTokenfive_Amount:", error)
+            ),
+            TotalBountyAmount().catch((error) =>
               console.error("Error fetching DAVTokenfive_Amount:", error)
             ),
           ]);
@@ -970,6 +988,98 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching burn status:", e);
     }
   };
+  const BurnTimingLeft = async () => {
+    try {
+      const contracts = [
+        { name: "Fluxin", contract: RatioContract },
+        { name: "Xerion", contract: XerionRatioContract },
+      ];
+
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          const BurnOccurred = await handleContractCall(
+            contract,
+            "getTimeLeftInBurnCycle",
+            []
+          );
+
+          return { name, BurnOccurred: parseFloat(BurnOccurred) };
+        })
+      );
+
+      const newStates = results.reduce((acc, { name, BurnOccurred }) => {
+        acc[name] = BurnOccurred;
+        return acc;
+      }, {});
+      console.log("state of burn", newStates);
+      setBurnTimeLeft(newStates); // Update state with the combined object
+      console.log("Updated burn occurrences:", newStates);
+    } catch (e) {
+      console.error("Error fetching burn status:", e);
+    }
+  };
+  const TotalTokensBurn = async () => {
+    try {
+      const contracts = [
+        { name: "Fluxin", contract: RatioContract },
+        { name: "Xerion", contract: XerionRatioContract },
+      ];
+
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          const TotalTokensBurned = await handleContractCall(
+            contract,
+            "getTotalTokensBurned",
+            [],
+            (s) => ethers.formatUnits(s, 18)
+          );
+
+          return { name, TotalTokensBurned: parseFloat(TotalTokensBurned) };
+        })
+      );
+
+      const newStates = results.reduce((acc, { name, TotalTokensBurned }) => {
+        acc[name] = TotalTokensBurned;
+        return acc;
+      }, {});
+      console.log("state of burn", newStates);
+      setTotalTokenBurned(newStates); // Update state with the combined object
+      console.log("Updated burn occurrences:", newStates);
+    } catch (e) {
+      console.error("Error fetching burn status:", e);
+    }
+  };
+  const TotalBountyAmount = async () => {
+    try {
+      const contracts = [
+        { name: "Fluxin", contract: RatioContract },
+        { name: "Xerion", contract: XerionRatioContract },
+      ];
+
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          const TotalBounty = await handleContractCall(
+            contract,
+            "getTotalBountyCollected",
+            [],
+			(s) => ethers.formatUnits(s, 18)
+          );
+
+          return { name, TotalBounty: parseFloat(TotalBounty) };
+        })
+      );
+
+      const newStates = results.reduce((acc, { name, TotalBounty }) => {
+        acc[name] = TotalBounty;
+        return acc;
+      }, {});
+      console.log("state of burn", newStates);
+      setTotalTokenBounty(newStates); // Update state with the combined object
+      console.log("Updated burn occurrences:", newStates);
+    } catch (e) {
+      console.error("Error fetching burn status:", e);
+    }
+  };
   const AuctionTimeLeft = async () => {
     try {
       // List of token contracts to handle
@@ -1155,6 +1265,8 @@ export const DAVTokenProvider = ({ children }) => {
   const [balances, setBalances] = useState({
     stateBalance: 0,
     fluxinBalance: 0,
+    StateFluxin: 0,
+    StateXerion: 0,
     ratioFluxinBalance: 0,
     ratioXerionBalance: 0,
     xerionBalance: 0,
@@ -1170,6 +1282,20 @@ export const DAVTokenProvider = ({ children }) => {
 
   const ContractFluxinBalance = async () => {
     await fetchContractBalance(FluxinContract, Fluxin, "fluxinBalance");
+  };
+  const ContractFluxinStateBalance = async () => {
+    await fetchContractBalance(
+      stateContract,
+      Ratio_TOKEN_ADDRESS,
+      "StateFluxin"
+    );
+  };
+  const ContractXerionStateBalance = async () => {
+    await fetchContractBalance(
+      stateContract,
+      XerionRatioAddress,
+      "StateXerion"
+    );
   };
 
   const ContractRatioFluxinBalance = async () => {
@@ -1190,7 +1316,6 @@ export const DAVTokenProvider = ({ children }) => {
   const ContractXerionBalance = async () => {
     await fetchContractBalance(XerionContract, Xerion, "xerionBalance");
   };
-
   const fetchContractBalance = async (contract, tokenAddress, balanceKey) => {
     try {
       const transaction = await handleContractCall(
@@ -1200,11 +1325,13 @@ export const DAVTokenProvider = ({ children }) => {
         (s) => ethers.formatUnits(s, 18)
       );
 
-      console.log(`${balanceKey} balance:`, transaction);
+      const formattedBalance = parseFloat(transaction).toFixed(2);
+
+      console.log(`${balanceKey} balance:`, formattedBalance);
 
       setBalances((prevBalances) => ({
         ...prevBalances,
-        [balanceKey]: transaction,
+        [balanceKey]: formattedBalance,
       }));
     } catch (e) {
       console.error("Error fetching token balance:", e);
@@ -1781,6 +1908,7 @@ export const DAVTokenProvider = ({ children }) => {
         handleAddXerion,
         withdraw_5,
         userHashSwapped,
+        BurnTimeLeft,
         // WithdrawLPTokens,
         mintAdditionalTOkens,
         isRenounced,
@@ -1811,8 +1939,10 @@ export const DAVTokenProvider = ({ children }) => {
         FluxinOnepBalance,
         XerionOnepBalance,
         BurnOccuredForToken,
-		BurnCycleACtive,
+        BurnCycleACtive,
         bountyBalances,
+        TotalBounty,
+        TotalTokensBurned,
       }}
     >
       {children}

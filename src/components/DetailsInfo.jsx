@@ -35,14 +35,15 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     WithdrawState,
     WithdrawFluxin,
     WithdrawXerion,
-
     // OutBalance,
     // OutBalanceXerion,
     account,
+    BurnTimeLeft,
     // mintStateTokens,
     // mintFluxinTokens,
     LPStateTransferred,
     setReverseEnable,
+    TotalTokensBurned,
     isReversed,
     AuctionRunningLocalString,
     PercentageOfState,
@@ -60,18 +61,17 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     XerionTransactionHash,
     Supply,
     isRenounced,
+    TotalBounty,
     DAVTokensFiveWithdraw,
     LastLiquidity,
-
+    RatioTargetsofTokens,
     AuctionTimeRunningXerion,
     Batch,
     auctionDetails,
     setReverseTime,
     ReanounceFluxinContract,
     ReanounceXerionContract,
-    StateBalance,
     balances,
-    XerionBalance,
     mintAdditionalTOkens,
     BatchAmount,
     // saveTokenName,
@@ -96,7 +96,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   //   const auctionStatus = AuctionRunning ? "True" : "False";
 
   const AuthAddress =
-    "0xB1bD9F3B5F64dE482485A41c84ea4a90DAc5F98e".toLowerCase();
+    "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483".toLowerCase();
 
   // Fetch and update token data when the selectedToken changes
   const handleSetAddress = () => {
@@ -152,8 +152,14 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       Supply: FluxinSupply,
       percentage: PercentageFluxin,
       address: Fluxin,
+      stateBalance: balances.StateFluxin,
+      target: RatioTargetsofTokens["Fluxin"],
       isReversing: isReversed.Fluxin,
       Balance: balances.fluxinBalance,
+      BurnTimeLeft: BurnTimeLeft.Fluxin,
+      TotalTokensBurn: TotalTokensBurned.Fluxin,
+      TotalBounty: TotalBounty.Fluxin,
+      RatioBalance: balances.ratioFluxinBalance,
       Duration: auctionDetails["Fluxin"],
       interval: auctionDetails["Fluxin"],
       AuctionRunning: AuctionRunningLocalString.Fluxin,
@@ -194,13 +200,20 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       name: "Xerion",
       supply: "500,000,000,000.00",
       Supply: XerionSupply,
+      target: RatioTargetsofTokens["Xerion"],
       Balance: balances.xerionBalance,
       percentage: PercentageXerion,
       Duration: auctionDetails["Xerion"],
       interval: auctionDetails["Xerion"],
       address: Xerion,
+      TotalTokensBurn: TotalTokensBurned.Xerion,
+      stateBalance: balances.StateXerion,
+      RatioBalance: balances.ratioXerionBalance,
       isReversing: isReversed.Xerion,
+      TotalBounty: TotalBounty.Xerion,
       timeRunning: AuctionTimeRunningXerion,
+      AuctionTimeRunning: AuctionTimeRunningXerion,
+      BurnTimeLeft: BurnTimeLeft.Xerion,
       Ratio: XerionRatioPrice,
       AuctionRunning: AuctionRunningLocalString.Xerion,
       pair: "Xerion/pSTATE",
@@ -458,6 +471,66 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   </td>
                   <td></td>
                 </tr>
+                {dataToShow.tokenName !== "STATE" && (
+                  <>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        {dataToShow.tokenName} in DAV vaults
+                      </td>
+                      <td className="d-flex align-items-center justify-content-center">
+                        {formatWithCommas(dataToShow.RatioBalance)}
+                      </td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        State Token in DAV vaults
+                      </td>
+                      <td className="d-flex align-items-center justify-content-center">
+                        {formatWithCommas(dataToShow.stateBalance)}
+                      </td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        Total {dataToShow.tokenName} Burned
+                      </td>
+                      <td className="d-flex align-items-center justify-content-center">
+                        {dataToShow.TotalTokensBurn}
+                      </td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        Total Bounty
+                      </td>
+                      <td className="d-flex align-items-center justify-content-center">
+                        {dataToShow.TotalBounty}
+                      </td>
+                      <td></td>
+                    </tr>
+
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        Current Ratio
+                      </td>
+                      <td className="d-flex align-items-center justify-content-center">
+                        {`1:${dataToShow.Ratio}`}
+                      </td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td className="d-flex align-items-center">
+                        Target Ratio
+                      </td>
+                      <td className="d-flex align-items-center justify-content-center">
+                        {`1:${dataToShow.target}`}
+                      </td>
+                      <td></td>
+                    </tr>
+                  </>
+                )}
+
                 <tr>
                   <td className="d-flex align-items-center">
                     Renounce Smart Contract
@@ -680,15 +753,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               </button>
                             </td>
                           </tr>
-                          <tr>
-                            <td className="d-flex align-items-center">
-                              Current Ratio
-                            </td>
-                            <td className="d-flex align-items-center justify-content-center">
-                              {`1:${dataToShow.Ratio}`}
-                            </td>
-                            <td></td>
-                          </tr>
+
                           <tr>
                             <td className="d-flex align-items-center">
                               Set Ratio Target
@@ -768,6 +833,15 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                             </td>
                             <td className="d-flex align-items-center justify-content-center">
                               {dataToShow.AuctionTimeRunning}
+                            </td>
+                            <td></td>
+                          </tr>
+                          <tr>
+                            <td className="d-flex align-items-center">
+                              Time Left In burn Cycle{" "}
+                            </td>
+                            <td className="d-flex align-items-center justify-content-center">
+                              {dataToShow.BurnTimeLeft}
                             </td>
                             <td></td>
                           </tr>
