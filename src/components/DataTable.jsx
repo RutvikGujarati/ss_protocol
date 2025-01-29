@@ -29,7 +29,6 @@ const DataTable = () => {
     RatioTargetsofTokens,
     outAmounts,
     Distributed,
-	Outloading,
     AuctionRunning,
     auctionDetails,
     userHashSwapped,
@@ -154,10 +153,10 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-                .filter(
-                  ({ userHasSwapped, AuctionStatus }) =>
-                    !userHasSwapped && AuctionStatus
-                )
+              .filter(
+                ({ userHasSwapped, AuctionStatus }) =>
+                  !userHasSwapped && AuctionStatus
+              )
               .map(
                 (
                   {
@@ -173,6 +172,7 @@ const DataTable = () => {
                     ContractName,
                     Liquidity,
                     Price,
+                    ReverseName,
                     currentTokenRatio,
                     RatioTargetToken,
                     onChart,
@@ -192,7 +192,14 @@ const DataTable = () => {
                         </div>
                         <div className="nameDetails">
                           <h5 className="nameBig">{name}</h5>
-                          <p className="nameSmall mb-1 uppercase">{Pname}</p>
+                          {isReversing == "true" &&
+                          currentTokenRatio > RatioTargetToken ? (
+                            <p className="nameSmall mb-1 uppercase">
+                              {ReverseName}
+                            </p>
+                          ) : (
+                            <p className="nameSmall mb-1 uppercase">{Pname}</p>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -314,7 +321,8 @@ const DataTable = () => {
                           >
                             {swappingStates[id]
                               ? "Swapping..."
-                              : isReversing == "true" && (currentTokenRatio >= RatioTargetToken)
+                              : isReversing == "true" &&
+                                currentTokenRatio >= RatioTargetToken
                               ? "Reverse Swap"
                               : buttonTextStates[id] || "Swap"}
                           </button>

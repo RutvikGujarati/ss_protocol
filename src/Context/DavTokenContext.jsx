@@ -638,7 +638,7 @@ export const DAVTokenProvider = ({ children }) => {
       await tx.wait();
     } catch (e) {
       console.error("Error claiming tokens:", e);
-      throw e; // Rethrow the error for the caller to handle it.
+      throw e;
     }
   };
 
@@ -1048,7 +1048,7 @@ export const DAVTokenProvider = ({ children }) => {
             (s) => ethers.formatUnits(s, 18)
           );
 
-          return { name, TotalTokensBurned: parseFloat(TotalTokensBurned) };
+          return { name, TotalTokensBurned: parseFloat(TotalTokensBurned).toFixed(2) };
         })
       );
 
@@ -1079,7 +1079,7 @@ export const DAVTokenProvider = ({ children }) => {
             (s) => ethers.formatUnits(s, 18)
           );
 
-          return { name, TotalBounty: parseFloat(TotalBounty) };
+          return { name, TotalBounty: parseFloat(TotalBounty).toFixed(2) };
         })
       );
 
@@ -1264,8 +1264,8 @@ export const DAVTokenProvider = ({ children }) => {
 
       // Update the state with both bounty values
       setBountyBalances({
-        fluxinBounty: fluxinBounty.toFixed(6),
-        xerionBounty: xerionBounty.toFixed(6),
+        fluxinBounty: fluxinBounty.toFixed(2),
+        xerionBounty: xerionBounty.toFixed(2),
       });
 
       // Log the values
@@ -1620,6 +1620,7 @@ export const DAVTokenProvider = ({ children }) => {
       console.log(`Ratio target set to `);
     } catch (error) {
       console.error("Error setting ratio target:", error);
+	  throw error;
     }
   };
   const setReverseTime = async (start, end) => {

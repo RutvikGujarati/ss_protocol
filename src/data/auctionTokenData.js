@@ -1,4 +1,3 @@
-import stateLogo from "../assets/state_logo.png";
 import XerionLogo from "../assets/XerionLogo.png";
 import FluxinLogo from "../assets/FluxinLogo.png";
 import { Fluxin, Xerion } from "../Context/DavTokenContext";
@@ -20,38 +19,24 @@ export const getAuctionTokens = (
 	SwapTokens,
 	handleAddFluxin,
 	handleAddXerion,
-	handleAddTokenState
 ) => [
-		// {
-		// 	id: "state",
-		// 	name: "STATE",
-		// 	Pname: "pSTATE",
-		// 	ContractName: "state",
-		// 	image: stateLogo,
-		// 	Price: stateUsdPrice,
-		// 	userHasSwapped: false,
-		// 	AuctionStatus: true,
-		// 	onChart:
-		// 		"https://www.geckoterminal.com/pulsechain/pools/0x894fd7d05fe360a1d713c10b0e356af223fde88c",
-		// 	handleAddXerion: handleAddTokenState,
-		// 	distributedAmount: Distributed["state"],
-		// },
 		{
 			id: "Fluxin",
 			name: "Fluxin",
-			Pname: "Fluxin",
+			Pname: "Fluxin - State - Fluxin",
+			ReverseName: "State - Fluxin",
 			ContractName: "Fluxin",
 			image: FluxinLogo,
 			ratio: `1:${RatioTargetsofTokens["Fluxin"]}`,
 			currentRatio: `1:${FluxinRatioPrice}`,
 			currentTokenRatio: FluxinRatioPrice,
 			RatioTargetToken: RatioTargetsofTokens["Fluxin"],
-			reverseRatio: `2:${FluxinRatioPrice}`,
+			reverseRatio: `1:${FluxinRatioPrice}`,
 			Price: FluxinUsdPrice,
 			isReversing: isReversed.Fluxin.toString(),
 			AuctionStatus: AuctionRunning.Fluxin === "true",
 			userHasSwapped: userHashSwapped.Fluxin,
-			ErrorName:"Fluxin",
+			ErrorName: "Fluxin",
 			onChart:
 				"https://www.geckoterminal.com/pulsechain/pools/0x361afa3f5ef839bed6071c9f0c225b078eb8089a",
 			distributedAmount: Distributed["Fluxin"],
@@ -65,16 +50,17 @@ export const getAuctionTokens = (
 		{
 			id: "Xerion",
 			name: "Xerion",
-			Pname: "Xerion",
+			Pname: "Xerion - State - Xerion",
+			ReverseName: "State - Xerion",
 			ContractName: "Xerion",
 			image: XerionLogo,
 			ratio: `1:${RatioTargetsofTokens["Xerion"]}`,
 			userHasSwapped: userHashSwapped?.Xerion || false,
 			currentRatio: `1:${XerionRatioPrice}`,
-			reverseRatio: `2:${XerionRatioPrice}`,
+			reverseRatio: `1:${XerionRatioPrice}`,
 			Price: XerionUsdPrice,
 			currentTokenRatio: XerionRatioPrice,
-			ErrorName:"Xerion",
+			ErrorName: "Xerion",
 			RatioTargetToken: RatioTargetsofTokens["Xerion"],
 			isReversing: isReversed.Xerion.toString(),
 			AuctionStatus: AuctionRunning.Xerion === "true",

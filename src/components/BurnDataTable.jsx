@@ -1,9 +1,16 @@
+import  { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import { useDAVToken } from "../Context/DavTokenContext";
-import { getTokens } from "../data/BurntokenData"; // Import token data function
+import { getTokens } from "../data/BurntokenData";
 
 const BurnDataTable = () => {
+  const [isProcessing, setIsProcessing] = useState({});
+  const [errorPopup, setErrorPopup] = useState({
+    state: false,
+    message: "",
+  });
+
   const {
     balances,
     bountyBalances,
@@ -24,79 +31,140 @@ const BurnDataTable = () => {
     ClickBurn
   );
 
+  const handleBurn = async (id, clickBurnFn) => {
+    setIsProcessing((prev) => ({ ...prev, [id]: true }));
+    try {
+      await clickBurnFn();
+    } catch (err) {
+      console.error("Error processing burn:", err);
+
+      if (
+        err.reason === "Burn already occurred for this cycle" ||
+        (err.revert &&
+          err.revert.args &&
+          err.revert.args[0] === "Burn already occurred for this cycle")
+      ) {
+        setErrorPopup({
+          state: true,
+          message: "Burn already occurred for this cycle",
+        });
+      } else {
+        setErrorPopup({
+          state: true,
+          message: "An error occurred while processing the burn",
+        });
+      }
+    } finally {
+      setIsProcessing((prev) => ({ ...prev, [id]: false }));
+    }
+  };
+
   return (
-    <div className="container mt-4 datatablemarginbottom">
-      <div className="table-responsive">
-        <div className="announcement text-center">
-          <div className=""></div>
+    <>
+      {errorPopup.state && (
+        <div
+          className="position-fixed top-50 start-50 translate-middle d-flex justify-content-center align-items-center"
+          style={{ zIndex: 1050 }}
+        >
+          <div
+            className="card bg-dark text-white shadow-lg border border-secondary"
+            style={{ minWidth: "320px", maxWidth: "400px" }}
+          >
+            <div className="card-body text-center">
+              <h5 className="card-title text-danger fw-bold">Error</h5>
+              <p className="card-text">{errorPopup.message}</p>
+
+              <div className="text-end">
+                <button
+                  onClick={() =>
+                    setErrorPopup((prev) => ({ ...prev, state: false }))
+                  }
+                  className="btn btn-outline-light btn-sm px-4"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <table className="table table-dark mt-3">
-          <thead>
-            <tr className="align-item-center">
-              <th>#</th>
-              <th></th>
-              <th>Name</th>
-              <th>Burn Ratio</th>
-              <th>Bounty</th>
-              <th>Burn Amount</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tokens
-              .filter(({ BurnOccured, burnCycle }) => !BurnOccured && burnCycle)
-              .map(
-                ({
-                  id,
-                  name,
-                  logo,
-                  burnRatio,
-                  bounty,
-                  burnAmount,
-                  clickBurn,
-                }) => (
-                  <tr key={id}>
-                    <td>{id}</td>
-                    <td>
-                      <div className="nameImage">
-                        <img
-                          src={logo}
-                          width={40}
-                          height={40}
-                          alt={`${name} Logo`}
-                        />
-                      </div>
-                    </td>
-                    <td>
-                      <div className="nameDetails">
-                        <h5 className="nameBig">{name}</h5>
-                        <p className="nameSmall mb-1 uppercase">{name}</p>
-                      </div>
-                    </td>
-                    <td>{burnRatio}</td>
-                    <td>
-                      {bounty} {name}
-                    </td>
-                    <td>
-                      {burnAmount} {name}
-                    </td>
-                    <td>
-                      <div className="d-flex align-items-center justify-content-center">
-                        <button
-                          className="btn btn-primary btn-sm swap-btn"
-                          onClick={clickBurn}
-                        >
-                          Burn
-                        </button>
-                      </div>
-                    </td>
-                  </tr>	
+      )}
+      <div className="container mt-4 datatablemarginbottom">
+        <div className="table-responsive">
+          <div className="announcement text-center">
+            <div className=""></div>
+          </div>
+          <table className="table table-dark mt-3">
+            <thead>
+              <tr className="align-item-center">
+                <th>#</th>
+                <th></th>
+                <th>Name</th>
+                <th>Burn Ratio</th>
+                <th>Bounty</th>
+                <th>Burn Amount</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {tokens
+                .filter(
+                  ({ BurnOccured, burnCycle }) => !BurnOccured && burnCycle
                 )
-              )}
-          </tbody>
-        </table>
+                .map(
+                  ({
+                    id,
+                    name,
+                    logo,
+                    burnRatio,
+                    bounty,
+                    burnAmount,
+                    clickBurn,
+                  }) => (
+                    <tr key={id}>
+                      <td>{id}</td>
+                      <td>
+                        <div className="nameImage">
+                          <img
+                            src={logo}
+                            width={40}
+                            height={40}
+                            alt={`${name} Logo`}
+                          />
+                        </div>
+                      </td>
+                      <td>
+                        <div className="nameDetails">
+                          <h5 className="nameBig">{name}</h5>
+                          <p className="nameSmall mb-1 uppercase">{name}</p>
+                        </div>
+                      </td>
+                      <td>{burnRatio}</td>
+                      <td>
+                        {bounty} {name}
+                      </td>
+                      <td>
+                        {burnAmount} {name}
+                      </td>
+
+                      <td>
+                        <div className="d-flex align-items-center justify-content-center">
+                          <button
+                            className="btn btn-primary btn-sm swap-btn"
+                            onClick={() => handleBurn(id, clickBurn)}
+                            disabled={isProcessing[id]}
+                          >
+                            {isProcessing[id] ? "Processing..." : "Burn"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                )}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

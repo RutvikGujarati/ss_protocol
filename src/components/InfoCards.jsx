@@ -10,7 +10,7 @@ import { PriceContext } from "../api/StatePrice";
 
 const InfoCards = () => {
   const { stateUsdPrice } = useContext(PriceContext);
-  const [BurnRatio, setBurnRatio] = useState("0.0");
+  const [setBurnRatio] = useState("0.0");
   const {
     mintDAV,
     // handleAddTokenRatio,
@@ -102,7 +102,7 @@ const InfoCards = () => {
           e.revert.args[0] === "StateToken: No new DAV minted")
       ) {
         console.error("StateToken: No new DAV minted:", e);
-        setErrorPopup((prev) => ({ ...prev, [id]: true })); // Show error popup for the specific token
+        setErrorPopup((prev) => ({ ...prev, [id]: true }));
       } else {
         console.error("Error calling CheckMintBalance:", e);
       }
