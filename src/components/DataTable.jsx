@@ -1,20 +1,13 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
-import XerionLogo from "../assets/XerionLogo.png";
-import FluxinLogo from "../assets/FluxinLogo.png";
-import stateLogo from "../assets/state_logo.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
-import {
-  //   STATE_TOKEN_ADDRESS,
-  useDAVToken,
-  Xerion,
-} from "../Context/DavTokenContext";
+import { useDAVToken } from "../Context/DavTokenContext";
 import { useContext, useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
-import { Fluxin } from "../Context/DavTokenContext";
 import { PriceContext } from "../api/StatePrice";
 import BurnDataTable from "./BurnDataTable";
+import { getAuctionTokens } from "../data/auctionTokenData";
 
 const DataTable = () => {
   const {
@@ -119,6 +112,26 @@ const DataTable = () => {
     setClaimingStates((prev) => ({ ...prev, [id]: false })); // Reset claiming state
   };
 
+  const tokens = getAuctionTokens(
+    stateUsdPrice,
+    XerionUsdPrice,
+    XerionRatioPrice,
+    FluxinRatioPrice,
+    FluxinUsdPrice,
+    isReversed,
+    AuctionRunning,
+    userHashSwapped,
+    RatioTargetsofTokens,
+    outAmounts,
+    Distributed,
+    FluxinOnepBalance,
+    XerionOnepBalance,
+    SwapTokens,
+    handleAddFluxin,
+    handleAddXerion,
+    handleAddTokenState
+  );
+
   return isAuction ? (
     <div className="container mt-4 datatablemarginbottom">
       <div className="table-responsive">
@@ -139,80 +152,11 @@ const DataTable = () => {
             </tr>
           </thead>
           <tbody>
-            {[
-              {
-                id: "state",
-                name: "STATE",
-                Pname: "pSTATE",
-                ContractName: "state",
-                image: stateLogo,
-                Price: stateUsdPrice,
-                userHasSwapped: false,
-                AuctionStatus: true,
-                onChart:
-                  "https://www.geckoterminal.com/pulsechain/pools/0x894fd7d05fe360a1d713c10b0e356af223fde88c",
-                handleAddXerion: handleAddTokenState,
-                distributedAmount: Distributed["state"],
-              },
-              {
-                id: "Fluxin",
-                name: "Fluxin",
-                Pname: "Fluxin",
-                ContractName: "Fluxin",
-                image: FluxinLogo,
-                ratio: `1:${RatioTargetsofTokens["Fluxin"]}`,
-                currentRatio: `1:${FluxinRatioPrice}`,
-                currentTokenRatio: FluxinRatioPrice,
-                RatioTargetToken: RatioTargetsofTokens["Fluxin"],
-                reverseRatio: `2:${FluxinRatioPrice}`,
-                Price: FluxinUsdPrice,
-                isReversing: isReversed.Fluxin.toString(),
-
-                AuctionStatus: AuctionRunning.Fluxin === "true",
-                userHasSwapped: userHashSwapped.Fluxin,
-                onChart:
-                  "https://www.geckoterminal.com/pulsechain/pools/0x361afa3f5ef839bed6071c9f0c225b078eb8089a",
-                distributedAmount: Distributed["Fluxin"],
-                token: Fluxin,
-                handleAddXerion: handleAddFluxin,
-                inputTokenAmount: `${FluxinOnepBalance} Fluxin`,
-                SwapT: () => SwapTokens("Fluxin", "Fluxin"),
-                ratioPrice: FluxinRatioPrice,
-                outputToken: `${outAmounts.Fluxin} State`,
-              },
-              {
-                id: "Xerion",
-                name: "Xerion",
-                Pname: "Xerion",
-                ContractName: "Xerion",
-                image: XerionLogo,
-                ratio: `1:${RatioTargetsofTokens["Xerion"]}`,
-                userHasSwapped: userHashSwapped?.Xerion || false,
-                currentRatio: `1:${XerionRatioPrice}`,
-                reverseRatio: `2:${XerionRatioPrice}`,
-                Price: XerionUsdPrice,
-                currentTokenRatio: XerionRatioPrice,
-
-                RatioTargetToken: RatioTargetsofTokens["Xerion"],
-                isReversing: isReversed.Xerion.toString(),
-                AuctionStatus: AuctionRunning.Xerion === "true",
-                onChart:
-                  "https://www.geckoterminal.com/pulsechain/pools/0xc6359cd2c70f643888d556d377a4e8e25caadf77",
-                // Liquidity: "0.0",
-                distributedAmount: Distributed["Xerion"],
-                token: Xerion,
-                SwapT: () => SwapTokens("Xerion", "Xerion"),
-
-                ratioPrice: XerionRatioPrice,
-                handleAddXerion: handleAddXerion,
-                inputTokenAmount: `${XerionOnepBalance} Xerion`,
-                outputToken: `${outAmounts.Xerion} State`,
-              },
-            ]
+            {tokens
               .filter(
                 ({ userHasSwapped, AuctionStatus }) =>
                   !userHasSwapped && AuctionStatus
-              ) 
+              )
 
               .map(
                 (

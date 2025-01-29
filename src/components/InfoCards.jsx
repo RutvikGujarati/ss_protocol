@@ -40,6 +40,41 @@ const InfoCards = () => {
       setLoad(false);
     }
   };
+  const formatPrice = (price) => {
+    if (!price || isNaN(price)) {
+      return "$0.0000"; // Default display for invalid or null prices
+    }
+
+    const formattedPrice = parseFloat(price).toFixed(10); // Format to 9 decimals for processing
+    const [integerPart, decimalPart] = formattedPrice.split(".");
+
+    // Check for leading zeros in the decimal part
+    const leadingZerosMatch = decimalPart.match(/^0+(.)/); // Match leading zeros and capture the first non-zero digit
+    if (leadingZerosMatch) {
+      const leadingZeros = leadingZerosMatch[0].slice(0, -1); // Extract all leading zeros except the last digit
+      const firstSignificantDigit = leadingZerosMatch[1]; // Capture the first significant digit
+      const zeroCount = leadingZeros.length;
+      if (zeroCount < 4) {
+        return `${integerPart}.${"0".repeat(
+          zeroCount
+        )}${firstSignificantDigit}${decimalPart
+          .slice(zeroCount + 1)
+          .slice(0, 3)}`;
+      } else {
+        return (
+          <>
+            {integerPart}.<span>0</span>
+            <sub>{zeroCount}</sub>
+            {firstSignificantDigit}
+            {decimalPart.slice(zeroCount + 1).slice(0, 3)}
+          </>
+        );
+      }
+    }
+
+    // General case: No significant leading zeros
+    return `$${parseFloat(price).toFixed(7)}`;
+  };
   const calculateBurnRatio = async () => {
     try {
       const maxSupply = 999000000000000;
@@ -152,7 +187,7 @@ const InfoCards = () => {
                     </div>
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token price</p>
-                      <h5 className="">$ {stateUsdPrice}</h5>
+                      <h5 className="">$ {formatPrice(stateUsdPrice)}</h5>
                     </div>
                     <div className="carddetails2">
                       <img

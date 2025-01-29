@@ -21,26 +21,19 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const { FluxinRatioPrice, XerionRatioPrice } = useContext(PriceContext);
 
   const {
-    // StartMarketPlaceListing,
     withdraw_95,
     AuctionRunning,
     withdraw_5,
-    // ClaimLPTokens,
     AddTokens,
     FluxinSupply,
     XerionSupply,
-    // AddTokensToContract,
     setRatioTarget,
     setCurrentRatioTarget,
     WithdrawState,
     WithdrawFluxin,
     WithdrawXerion,
-    // OutBalance,
-    // OutBalanceXerion,
     account,
     BurnTimeLeft,
-    // mintStateTokens,
-    // mintFluxinTokens,
     LPStateTransferred,
     setReverseEnable,
     TotalTokensBurned,
@@ -55,7 +48,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     StateSupply,
     RenounceState,
     ReanounceContract,
-    // davTransactionHash,
     stateTransactionHash,
     DepositToken,
     XerionTransactionHash,
@@ -74,7 +66,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     balances,
     mintAdditionalTOkens,
     BatchAmount,
-    // saveTokenName,
     LastDevShare,
     AuctionTimeRunning,
     AddTokensToContract,
@@ -93,18 +84,15 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     formatted: "",
   });
   const [authorized, setAuthorized] = useState(false);
-  //   const auctionStatus = AuctionRunning ? "True" : "False";
 
   const AuthAddress =
     "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483".toLowerCase();
 
-  // Fetch and update token data when the selectedToken changes
   const handleSetAddress = () => {
     setAuthorized(AuthAddress === account);
     console.log(account);
   };
 
-  // Update authorization whenever 'account' or 'AuthAddress' changes
   useEffect(() => {
     handleSetAddress();
   }, [account, AuthAddress]);
@@ -113,7 +101,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     if (!address) return "";
     return `${address.slice(0, 6)}...${address.slice(-6)}`;
   };
-  //   const shortened = shortenAddress(Ratio_TOKEN_ADDRESS);
   const davShortened = shortenAddress(DAV_TOKEN_ADDRESS);
   const stateShortened = shortenAddress(STATE_TOKEN_ADDRESS);
   const FluxinShortened = shortenAddress(Fluxin);
@@ -180,7 +167,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
         mintAdditionalTOkens: mintAdditionalTOkens,
         SetDuration: (value) => SetAUctionDuration(value, "fluxinRatio"),
         SetInterval: (value) => SetAUctionInterval(value, "fluxinRatio"),
-
         AddTokenToContract: () =>
           AddTokensToContract(Fluxin, STATE_TOKEN_ADDRESS, FluxinRatioPrice),
         setRatio: (value) => setRatioTarget(value, "fluxinRatio"),
@@ -240,11 +226,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
           DepositToken("state", STATE_TOKEN_ADDRESS, value, "XerionRatio"),
         StartingAuction: () => StartAuction("XerionRatio"),
       },
-    },
-    {
-      tokenName: "AuctionRatioSwapping",
-
-      actions: {},
     },
 
     //state token
