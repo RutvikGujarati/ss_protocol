@@ -69,6 +69,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     LastDevShare,
     AuctionTimeRunning,
     AddTokensToContract,
+    StateBurnBalance,
     StartAuction,
   } = useDAVToken();
 
@@ -86,7 +87,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const [authorized, setAuthorized] = useState(false);
 
   const AuthAddress =
-    "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483".toLowerCase();
+    "0xB1bD9F3B5F64dE482485A41c84ea4a90DAc5F98e".toLowerCase();
 
   const handleSetAddress = () => {
     setAuthorized(AuthAddress === account);
@@ -431,7 +432,15 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                 )}
               </>
             )}
-
+            {dataToShow.tokenName == "STATE" && (
+              <tr>
+                <td className="d-flex align-items-center">State tokens burn</td>
+                <td className="d-flex align-items-center justify-content-center">
+                  {formatWithCommas(StateBurnBalance)}
+                </td>
+                <td></td>
+              </tr>
+            )}
             {(dataToShow.tokenName == "STATE" ||
               dataToShow.tokenName == "Fluxin" ||
               dataToShow.tokenName == "Xerion") && (
@@ -458,56 +467,58 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                       <td className="d-flex align-items-center">
                         {dataToShow.tokenName} in DAV vaults
                       </td>
-                      <td className="d-flex align-items-center justify-content-center">
+                      <td className="d-flex align-items-center justify-content-center position-relative px-3 small py-0">
                         {formatWithCommas(dataToShow.RatioBalance)}
+                        <span
+                          className="border-end h-75 position-absolute"
+                          style={{ right: 0, opacity: 0.3 }}
+                        ></span>
                       </td>
-                      <td></td>
-                    </tr>
-                    <tr>
                       <td className="d-flex align-items-center">
                         State Token in DAV vaults
                       </td>
-                      <td className="d-flex align-items-center justify-content-center">
+                      <td className="d-flex align-items-center justify-content-center px-3">
                         {formatWithCommas(dataToShow.stateBalance)}
                       </td>
-                      <td></td>
                     </tr>
+
                     <tr>
                       <td className="d-flex align-items-center">
                         Total {dataToShow.tokenName} Burned
                       </td>
-                      <td className="d-flex align-items-center justify-content-center">
+                      <td className="d-flex align-items-center justify-content-center position-relative px-3 small py-0">
+                        <span
+                          className="border-end h-75 position-absolute"
+                          style={{ right: 0,opacity: 0.3}}
+                        ></span>
                         {dataToShow.TotalTokensBurn}
                       </td>
-                      <td></td>
-                    </tr>
-                    <tr>
                       <td className="d-flex align-items-center">
                         Total Bounty
                       </td>
-                      <td className="d-flex align-items-center justify-content-center">
+                      <td className="d-flex align-items-center justify-content-center px-3">
                         {dataToShow.TotalBounty}
                       </td>
-                      <td></td>
                     </tr>
 
                     <tr>
                       <td className="d-flex align-items-center">
                         Current Ratio
                       </td>
-                      <td className="d-flex align-items-center justify-content-center">
+                      <td className="d-flex align-items-center justify-content-center position-relative px-3 small py-0">
+                        <span
+                          className="border-end h-75 position-absolute border-opacity-25"
+                          style={{ right: 0, opacity: 0.3 }}
+                        ></span>
                         {`1:${dataToShow.Ratio}`}
                       </td>
-                      <td></td>
-                    </tr>
-                    <tr>
+
                       <td className="d-flex align-items-center">
                         Target Ratio
                       </td>
-                      <td className="d-flex align-items-center justify-content-center">
+                      <td className="d-flex align-items-center justify-content-center px-3">
                         {`1:${dataToShow.target}`}
                       </td>
-                      <td></td>
                     </tr>
                   </>
                 )}

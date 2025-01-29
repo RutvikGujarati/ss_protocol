@@ -22,20 +22,20 @@ export const getAuctionTokens = (
 	handleAddXerion,
 	handleAddTokenState
 ) => [
-		{
-			id: "state",
-			name: "STATE",
-			Pname: "pSTATE",
-			ContractName: "state",
-			image: stateLogo,
-			Price: stateUsdPrice,
-			userHasSwapped: false,
-			AuctionStatus: true,
-			onChart:
-				"https://www.geckoterminal.com/pulsechain/pools/0x894fd7d05fe360a1d713c10b0e356af223fde88c",
-			handleAddXerion: handleAddTokenState,
-			distributedAmount: Distributed["state"],
-		},
+		// {
+		// 	id: "state",
+		// 	name: "STATE",
+		// 	Pname: "pSTATE",
+		// 	ContractName: "state",
+		// 	image: stateLogo,
+		// 	Price: stateUsdPrice,
+		// 	userHasSwapped: false,
+		// 	AuctionStatus: true,
+		// 	onChart:
+		// 		"https://www.geckoterminal.com/pulsechain/pools/0x894fd7d05fe360a1d713c10b0e356af223fde88c",
+		// 	handleAddXerion: handleAddTokenState,
+		// 	distributedAmount: Distributed["state"],
+		// },
 		{
 			id: "Fluxin",
 			name: "Fluxin",

@@ -27,7 +27,10 @@ const BurnDataTable = () => {
   return (
     <div className="container mt-4 datatablemarginbottom">
       <div className="table-responsive">
-        <table className="table table-dark">
+        <div className="announcement text-center">
+          <div className=""></div>
+        </div>
+        <table className="table table-dark mt-3">
           <thead>
             <tr className="align-item-center">
               <th>#</th>

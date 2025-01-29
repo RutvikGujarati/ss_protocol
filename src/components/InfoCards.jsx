@@ -18,16 +18,22 @@ const InfoCards = () => {
     handleAddTokenDAV,
     CalculationOfCost,
     TotalCost,
-    StateSupply,
+    Distributed,
+    DavBalance,
     TotalStateHoldsInUS,
     davHolds,
+    contracts,
+	ClaimTokens,
+    CheckMintBalance,
     davPercentage,
     StateBurnBalance,
     StateHolds,
   } = useDAVToken();
   const [amount, setAmount] = useState("");
   const [load, setLoad] = useState(false);
-
+  const [errorPopup, setErrorPopup] = useState({});
+  const [checkingStates, setCheckingStates] = useState({});
+  const [claimingStates, setClaimingStates] = useState({});
   const handleMint = async () => {
     setLoad(true);
     try {
@@ -40,6 +46,14 @@ const InfoCards = () => {
       setLoad(false);
     }
   };
+  
+  const handleClaimTokens = async (id, ContractName) => {
+    setClaimingStates((prev) => ({ ...prev, [id]: true }));
+    const contract = contracts[ContractName];
+    await ClaimTokens(contract);
+    setClaimingStates((prev) => ({ ...prev, [id]: false })); // Reset claiming state
+  };
+
   const formatPrice = (price) => {
     if (!price || isNaN(price)) {
       return "$0.0000"; // Default display for invalid or null prices
@@ -75,11 +89,31 @@ const InfoCards = () => {
     // General case: No significant leading zeros
     return `$${parseFloat(price).toFixed(7)}`;
   };
+  const Checking = async (id, ContractName) => {
+    setCheckingStates((prev) => ({ ...prev, [id]: true })); // Set checking state for specific button
+    try {
+      const contract = contracts[ContractName]; // Get the dynamic contract based on the ContractName
+      await CheckMintBalance(contract);
+    } catch (e) {
+      if (
+        e.reason === "StateToken: No new DAV minted" ||
+        (e.revert &&
+          e.revert.args &&
+          e.revert.args[0] === "StateToken: No new DAV minted")
+      ) {
+        console.error("StateToken: No new DAV minted:", e);
+        setErrorPopup((prev) => ({ ...prev, [id]: true })); // Show error popup for the specific token
+      } else {
+        console.error("Error calling CheckMintBalance:", e);
+      }
+    }
+    setCheckingStates((prev) => ({ ...prev, [id]: false })); // Reset checking state
+  };
   const calculateBurnRatio = async () => {
     try {
       const maxSupply = 999000000000000;
-      const calculate = ((StateBurnBalance).toString() / maxSupply) || 0;
-		console.log("burn ratio calculation",calculate)
+      const calculate = StateBurnBalance.toString() / maxSupply || 0;
+      console.log("burn ratio calculation", calculate);
       setBurnRatio(calculate.toFixed(17));
     } catch (error) {
       console.error("Error calculating burn ratio:", error);
@@ -144,27 +178,30 @@ const InfoCards = () => {
               </div>
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
-                  <div className="carddetaildiv uppercase">
-                    <div className="carddetails2">
-                      <p className="mb-1 detailText">Dav holdings</p>
-
-                      <h5 className="">{davHolds}</h5>
+                  <div>
+                    <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
+                      <div className="carddetails2">
+                        <p className="mb-1 detailText">Dav holdings</p>
+                        <h5 className="">{davHolds}</h5>
+                      </div>
+                      <div className="mb-0 mx-1">
+                        <img
+                          src={MetaMaskIcon}
+                          width={20}
+                          height={20}
+                          alt="Logo"
+                          style={{ cursor: "pointer", marginLeft: "5px" }}
+                          onClick={handleAddTokenDAV}
+                        />
+                      </div>
                     </div>
                     <div className="carddetails2">
                       <p className="mb-1 detailText">Dav Rank</p>
                       <h5 className="">{davPercentage}</h5>
                     </div>
-                    <div className="carddetails2 d-flex align-items-center">
-                      <img
-                        src={MetaMaskIcon}
-                        width={20}
-                        height={20}
-                        alt="Logo"
-                        style={{ cursor: "pointer", marginRight: "5px" }}
-                        onClick={handleAddTokenDAV}
-                      />
+                    <div className="carddetails2 ">
                       <h6
-                        className="detailText mx-3 mt-2 "
+                        className="detailText  mt-4 "
                         style={{
                           fontSize: "14px",
                           textTransform: "capitalize",
@@ -178,26 +215,94 @@ const InfoCards = () => {
               </div>
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
-                  <div className="carddetaildiv uppercase">
-                    <div className="carddetails2">
-                      <p className="mb-1 detailText">State token holdings</p>
-                      <h5 className="">
-                        {StateHolds} / $ {TotalStateHoldsInUS}
-                      </h5>
+                  <div>
+                    <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
+                      <div className="carddetails2">
+                        <p className="mb-1 detailText">State token holdings</p>
+                        <h5 className="">
+                          {StateHolds} / $ {TotalStateHoldsInUS}
+                        </h5>
+                      </div>
+                      <div className="mb-0 mx-1">
+                        <img
+                          src={MetaMaskIcon}
+                          width={20}
+                          height={20}
+                          alt="Logo"
+                          style={{ cursor: "pointer" }}
+                          onClick={handleAddTokenState}
+                        />
+                      </div>
                     </div>
+					{errorPopup["state"] && (
+                      <div className="popup-overlay">
+                        <div className="popup-content">
+                          <h4 className="popup-header">
+                            Mint Additional DAV Tokens
+                          </h4>
+                          <p className="popup-para">
+                            You need to mint additional DAV tokens to claim your
+                            reward.
+                          </p>
+                          <button
+                            onClick={() =>
+                              setErrorPopup((prev) => ({
+                                ...prev,
+                                ["state"]: false,
+                              }))
+                            }
+                            className="btn btn-secondary popup-button"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token price</p>
                       <h5 className="">$ {formatPrice(stateUsdPrice)}</h5>
                     </div>
-                    <div className="carddetails2">
-                      <img
-                        src={MetaMaskIcon}
-                        width={20}
-                        height={20}
-                        alt="Logo"
-                        style={{ cursor: "pointer" }}
-                        onClick={handleAddTokenState}
-                      />
+                    <div className="d-flex justify-content-between w-100">
+                      <div className="carddetails2 text-center w-50">
+                        <p className="mb-1 detailText">Check</p>
+                        <button
+                          onClick={() => Checking("state", "state")}
+                          className="btn btn-primary btn-sm swap-btn"
+                          disabled={
+                            checkingStates["state"] ||
+                            Distributed > 0 ||
+                            DavBalance == 0
+                          }
+                        >
+                          {checkingStates["state"]
+                            ? "Checking..."
+                            : "Mint Balance"}
+                        </button>
+                      </div>
+                      <div className="carddetails2 text-center w-50">
+                        <p className="mb-1 detailText">Mint</p>
+						<div
+                        onClick={
+                          Distributed !== "0.0" && !claimingStates["state"]
+                            ? () => handleClaimTokens("state", "state")
+                            : null
+                        }
+                        className={` btn btn-primary btn-sm swap-btn ${
+                          claimingStates["state"] || Distributed["state"] === "0.0"
+                            ? "disabled"
+                            : ""
+                        }`}
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        {claimingStates["state"]
+                          ? "minting..."
+                          : `${formatWithCommas(Distributed["state"]) ?? "0.0"}`}
+                      </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -212,7 +317,7 @@ const InfoCards = () => {
         </>
       ) : isBurn ? (
         <>
-          <div className="container mt-4">
+          {/* <div className="container mt-4">
             <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom">
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
@@ -220,9 +325,7 @@ const InfoCards = () => {
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token supply</p>
                       <h5 className="mb-0"> {formatWithCommas(StateSupply)}</h5>
-                      {/* <p className="detailAmount">
-                        {formatWithCommas(StateSupply)}
-                      </p> */}
+                     
                     </div>
                   </div>
                 </div>
@@ -248,7 +351,7 @@ const InfoCards = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </>
       ) : (
         <></>
