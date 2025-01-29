@@ -17,6 +17,7 @@
     "bootstrap-icons": "^1.11.3",
     "ethers": "^6.13.4",
     "react": "^18.3.1",
+    "react-bootstrap": "^2.10.8",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.0.2",
     "s-s-protocol": "file:",

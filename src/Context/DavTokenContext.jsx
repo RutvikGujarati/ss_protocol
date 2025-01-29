@@ -782,18 +782,32 @@ export const DAVTokenProvider = ({ children }) => {
   });
 
   const AmountOut = async () => {
-    const value = await AmountOutTokens();
-    console.log("from dt", value.Fluxin.adjustedBalance);
-    console.log("from dt1", value.Xerion.adjustedBalance);
+    try {
+      const value = await AmountOutTokens();
+      setOutAmounts((prev) => ({
+        Fluxin:
+          prev.Fluxin !== value.Fluxin.adjustedBalance
+            ? value.Fluxin.adjustedBalance
+            : prev.Fluxin,
+        Xerion:
+          prev.Xerion !== value.Xerion.adjustedBalance
+            ? value.Xerion.adjustedBalance
+            : prev.Xerion,
+      }));
 
-    // Update the state with both Fluxin and Xerion values
-    setOutAmounts({
-      Fluxin: value.Fluxin.adjustedBalance,
-      Xerion: value.Xerion.adjustedBalance,
-    });
+      console.log("from dt", value.Fluxin.adjustedBalance);
+      console.log("from dt1", value.Xerion.adjustedBalance);
 
-    return value.Fluxin.adjustedBalance;
+      return value.Fluxin.adjustedBalance;
+    } catch (error) {
+      console.error("Error fetching AmountOut:", error);
+    }
   };
+
+  // Load data as soon as the component mounts
+  useEffect(() => {
+    AmountOut();
+  }, []);
 
   const displayBalances = async () => {
     const values = await AmountOutTokens();
@@ -1062,7 +1076,7 @@ export const DAVTokenProvider = ({ children }) => {
             contract,
             "getTotalBountyCollected",
             [],
-			(s) => ethers.formatUnits(s, 18)
+            (s) => ethers.formatUnits(s, 18)
           );
 
           return { name, TotalBounty: parseFloat(TotalBounty) };
@@ -1506,6 +1520,7 @@ export const DAVTokenProvider = ({ children }) => {
       const gasPriceData = await provider.getFeeData();
       if (!gasPriceData || !gasPriceData.gasPrice)
         throw new Error("Failed to fetch gas price.");
+	
       const extraFee = gasPriceData.gasPrice / BigInt(100); // 1% of gas price
       console.log(`Extra Fee (in wei): ${extraFee.toString()}`);
       const contracts = {

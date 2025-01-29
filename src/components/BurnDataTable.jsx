@@ -90,7 +90,7 @@ const BurnDataTable = () => {
                         </button>
                       </div>
                     </td>
-                  </tr>
+                  </tr>	
                 )
               )}
           </tbody>

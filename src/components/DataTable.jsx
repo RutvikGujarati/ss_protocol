@@ -29,6 +29,7 @@ const DataTable = () => {
     RatioTargetsofTokens,
     outAmounts,
     Distributed,
+	Outloading,
     AuctionRunning,
     auctionDetails,
     userHashSwapped,
@@ -157,7 +158,6 @@ const DataTable = () => {
                   ({ userHasSwapped, AuctionStatus }) =>
                     !userHasSwapped && AuctionStatus
                 )
-
               .map(
                 (
                   {
@@ -184,7 +184,7 @@ const DataTable = () => {
                   index
                 ) => (
                   <tr key={index}>
-                    <td>{index + 1}</td>
+                    <td></td>
                     <td>
                       <div className="tableName d-flex gap-4 align-items-center">
                         <div className="nameImage">
@@ -314,7 +314,7 @@ const DataTable = () => {
                           >
                             {swappingStates[id]
                               ? "Swapping..."
-                              : isReversing == "true"
+                              : isReversing == "true" && (currentTokenRatio >= RatioTargetToken)
                               ? "Reverse Swap"
                               : buttonTextStates[id] || "Swap"}
                           </button>
