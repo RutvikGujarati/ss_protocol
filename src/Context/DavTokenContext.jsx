@@ -279,6 +279,7 @@ export const DAVTokenProvider = ({ children }) => {
         [account],
         (b) => ethers.formatUnits(b, 18)
       );
+	  console.log("dav balance.......", balance)
       setDavBalance(balance);
 
       const totalSupply = 5000000;

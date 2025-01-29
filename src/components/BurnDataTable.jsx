@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import { useDAVToken } from "../Context/DavTokenContext";
@@ -15,13 +15,17 @@ const BurnDataTable = () => {
     balances,
     bountyBalances,
     ClickBurn,
+	DavBalance,
     BurnCycleACtive,
     BurnOccuredForToken,
   } = useDAVToken();
 
   // Log for debugging
   console.log("BurnOccuredForToken:", BurnCycleACtive);
+  console.log("BurnOccuredForToken:", parseFloat(DavBalance));
 
+  const db= parseFloat(DavBalance)
+  console.log("db", db);
   // Get token data
   const tokens = getTokens(
     balances,
@@ -107,9 +111,10 @@ const BurnDataTable = () => {
             </thead>
             <tbody>
               {tokens
-                .filter(
-                  ({ BurnOccured, burnCycle }) => !BurnOccured && burnCycle
-                )
+                 .filter(
+					({ BurnOccured, burnCycle }) =>
+					  !BurnOccured && burnCycle && db >= 5
+				  )
                 .map(
                   ({
                     id,

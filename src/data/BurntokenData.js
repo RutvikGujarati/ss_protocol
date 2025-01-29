@@ -1,12 +1,13 @@
 import XerionLogo from "../assets/XerionLogo.png";
 import FluxinLogo from "../assets/FluxinLogo.png";
 
-export const getTokens = (balances, bountyBalances, BurnCycleACtive, BurnOccuredForToken, ClickBurn) => [
+export const getTokens = (balances, bountyBalances, BurnCycleACtive, BurnOccuredForToken, ClickBurn,) => [
 	{
 		id: 1,
 		name: "Fluxin",
 		logo: FluxinLogo,
 		burnCycle: BurnCycleACtive.Fluxin === "true",
+		// burnCycle:"true",
 		BurnOccured: BurnOccuredForToken.Fluxin === "true",
 		burnRatio: 0.00001,
 		bounty: bountyBalances.fluxinBounty,

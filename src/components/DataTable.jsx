@@ -36,6 +36,7 @@ const DataTable = () => {
     ClaimTokens,
     XerionOnepBalance,
     handleAddFluxin,
+	
     handleAddXerion,
     FluxinOnepBalance,
     swappingStates,
@@ -104,6 +105,8 @@ const DataTable = () => {
     // General case: No significant leading zeros
     return `$${parseFloat(price).toFixed(7)}`;
   };
+  const db= parseFloat(DavBalance)
+  console.log("db", db);
 
   const handleClaimTokens = async (id, ContractName) => {
     setClaimingStates((prev) => ({ ...prev, [id]: true }));
@@ -155,7 +158,7 @@ const DataTable = () => {
             {tokens
               .filter(
                 ({ userHasSwapped, AuctionStatus }) =>
-                  !userHasSwapped && AuctionStatus
+                  !userHasSwapped && AuctionStatus && db >= 1
               )
               .map(
                 (
