@@ -51,6 +51,7 @@ export const getAuctionTokens = (
 			isReversing: isReversed.Fluxin.toString(),
 			AuctionStatus: AuctionRunning.Fluxin === "true",
 			userHasSwapped: userHashSwapped.Fluxin,
+			ErrorName:"Fluxin",
 			onChart:
 				"https://www.geckoterminal.com/pulsechain/pools/0x361afa3f5ef839bed6071c9f0c225b078eb8089a",
 			distributedAmount: Distributed["Fluxin"],
@@ -73,6 +74,7 @@ export const getAuctionTokens = (
 			reverseRatio: `2:${XerionRatioPrice}`,
 			Price: XerionUsdPrice,
 			currentTokenRatio: XerionRatioPrice,
+			ErrorName:"Xerion",
 			RatioTargetToken: RatioTargetsofTokens["Xerion"],
 			isReversing: isReversed.Xerion.toString(),
 			AuctionStatus: AuctionRunning.Xerion === "true",

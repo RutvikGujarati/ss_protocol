@@ -273,12 +273,20 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     setNumeratorOfInterval(value);
   };
   const handleInputChangeofToken = (e) => {
-    const value = e.target.value;
-    setDenominator(value);
+    const rawValue = e.target.value.replace(/,/g, "");
+    if (!isNaN(rawValue) && rawValue !== "") {
+      setDenominator(rawValue);
+    } else if (rawValue === "") {
+      setDenominator("");
+    }
   };
   const handleInputChangeofStateToken = (e) => {
-    const value = e.target.value;
-    setStateDenominator(value);
+    const rawValue = e.target.value.replace(/,/g, "");
+    if (!isNaN(rawValue) && rawValue !== "") {
+      setStateDenominator(rawValue);
+    } else if (rawValue === "") {
+      setStateDenominator("");
+    }
   };
 
   const handleInputChanged = (e) => {
@@ -489,7 +497,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                       <td className="d-flex align-items-center justify-content-center position-relative px-3 small py-0">
                         <span
                           className="border-end h-75 position-absolute"
-                          style={{ right: 0,opacity: 0.3}}
+                          style={{ right: 0, opacity: 0.3 }}
                         ></span>
                         {dataToShow.TotalTokensBurn}
                       </td>
@@ -638,7 +646,11 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                   type="text"
                                   className="form-control text-center mh-30"
                                   placeholder="Enter amount"
-                                  value={Denominator}
+                                  value={
+                                    Denominator
+                                      ? Number(Denominator).toLocaleString()
+                                      : ""
+                                  }
                                   onChange={(e) => handleInputChangeofToken(e)}
                                 />
                               </div>
@@ -664,7 +676,13 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                   type="text"
                                   className="form-control text-center mh-30"
                                   placeholder="Enter amount"
-                                  value={StateDenominator}
+                                  value={
+                                    StateDenominator
+                                      ? Number(
+                                          StateDenominator
+                                        ).toLocaleString()
+                                      : ""
+                                  }
                                   onChange={(e) =>
                                     handleInputChangeofStateToken(e)
                                   }

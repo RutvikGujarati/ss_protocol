@@ -23,7 +23,7 @@ const InfoCards = () => {
     TotalStateHoldsInUS,
     davHolds,
     contracts,
-	ClaimTokens,
+    ClaimTokens,
     CheckMintBalance,
     davPercentage,
     StateBurnBalance,
@@ -46,7 +46,7 @@ const InfoCards = () => {
       setLoad(false);
     }
   };
-  
+
   const handleClaimTokens = async (id, ContractName) => {
     setClaimingStates((prev) => ({ ...prev, [id]: true }));
     const contract = contracts[ContractName];
@@ -220,7 +220,8 @@ const InfoCards = () => {
                       <div className="carddetails2">
                         <p className="mb-1 detailText">State token holdings</p>
                         <h5 className="">
-                          {StateHolds} / $ {formatWithCommas(TotalStateHoldsInUS)}
+                          {StateHolds} / ${" "}
+                          {formatWithCommas(TotalStateHoldsInUS)}
                         </h5>
                       </div>
                       <div className="mb-0 mx-1">
@@ -234,7 +235,7 @@ const InfoCards = () => {
                         />
                       </div>
                     </div>
-					{errorPopup["state"] && (
+                    {errorPopup["state"] && (
                       <div className="popup-overlay">
                         <div className="popup-content">
                           <h4 className="popup-header">
@@ -281,27 +282,30 @@ const InfoCards = () => {
                       </div>
                       <div className="carddetails2 text-center w-50">
                         <p className="mb-1 detailText">Mint</p>
-						<div
-                        onClick={
-                          Distributed !== "0.0" && !claimingStates["state"]
-                            ? () => handleClaimTokens("state", "state")
-                            : null
-                        }
-                        className={` btn btn-primary btn-sm swap-btn ${
-                          claimingStates["state"] || Distributed["state"] === "0.0"
-                            ? "disabled"
-                            : ""
-                        }`}
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        {claimingStates["state"]
-                          ? "minting..."
-                          : `${formatWithCommas(Distributed["state"]) ?? "0.0"}`}
-                      </div>
+                        <div
+                          onClick={
+                            Distributed !== "0.0" && !claimingStates["state"]
+                              ? () => handleClaimTokens("state", "state")
+                              : null
+                          }
+                          className={` btn btn-primary btn-sm swap-btn ${
+                            claimingStates["state"] ||
+                            Distributed["state"] === "0.0"
+                              ? "disabled"
+                              : ""
+                          }`}
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          {claimingStates["state"]
+                            ? "minting..."
+                            : `${
+                                formatWithCommas(Distributed["state"]) ?? "0.0"
+                              }`}
+                        </div>
                       </div>
                     </div>
                   </div>

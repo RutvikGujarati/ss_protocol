@@ -48,40 +48,40 @@ const DataTable = () => {
   const [claimingStates, setClaimingStates] = useState({});
   console.log("is auction running", auctionDetails["Fluxin"]);
   console.log("use has swappeddddd", AuctionRunning.Xerion);
+
   const Checking = async (id, ContractName) => {
-    setCheckingStates((prev) => ({ ...prev, [id]: true })); // Set checking state for specific button
+    setCheckingStates((prev) => ({ ...prev, [id]: true }));
     try {
-      const contract = contracts[ContractName]; // Get the dynamic contract based on the ContractName
+      const contract = contracts[ContractName];
       await CheckMintBalance(contract);
     } catch (e) {
       if (
-        e.reason === "StateToken: No new DAV minted" ||
+        e.reason === `${id}: No new DAV minted` ||
         (e.revert &&
           e.revert.args &&
-          e.revert.args[0] === "StateToken: No new DAV minted")
+          e.revert.args[0] === `${id}: No new DAV minted`)
       ) {
-        console.error("StateToken: No new DAV minted:", e);
-        setErrorPopup((prev) => ({ ...prev, [id]: true })); // Show error popup for the specific token
+        console.error(`${id}: No new DAV minted:`, e);
+        setErrorPopup((prev) => ({ ...prev, [id]: true }));
       } else {
         console.error("Error calling CheckMintBalance:", e);
       }
     }
-    setCheckingStates((prev) => ({ ...prev, [id]: false })); // Reset checking state
+    setCheckingStates((prev) => ({ ...prev, [id]: false }));
   };
 
   const formatPrice = (price) => {
     if (!price || isNaN(price)) {
-      return "$0.0000"; // Default display for invalid or null prices
+      return "$0.0000";
     }
 
-    const formattedPrice = parseFloat(price).toFixed(10); // Format to 9 decimals for processing
+    const formattedPrice = parseFloat(price).toFixed(10);
     const [integerPart, decimalPart] = formattedPrice.split(".");
 
-    // Check for leading zeros in the decimal part
-    const leadingZerosMatch = decimalPart.match(/^0+(.)/); // Match leading zeros and capture the first non-zero digit
+    const leadingZerosMatch = decimalPart.match(/^0+(.)/);
     if (leadingZerosMatch) {
-      const leadingZeros = leadingZerosMatch[0].slice(0, -1); // Extract all leading zeros except the last digit
-      const firstSignificantDigit = leadingZerosMatch[1]; // Capture the first significant digit
+      const leadingZeros = leadingZerosMatch[0].slice(0, -1);
+      const firstSignificantDigit = leadingZerosMatch[1];
       const zeroCount = leadingZeros.length;
       if (zeroCount < 4) {
         return `${integerPart}.${"0".repeat(
@@ -153,10 +153,10 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-              .filter(
-                ({ userHasSwapped, AuctionStatus }) =>
-                  !userHasSwapped && AuctionStatus
-              )
+                .filter(
+                  ({ userHasSwapped, AuctionStatus }) =>
+                    !userHasSwapped && AuctionStatus
+                )
 
               .map(
                 (
@@ -184,7 +184,7 @@ const DataTable = () => {
                   index
                 ) => (
                   <tr key={index}>
-                    <td>{index === 0 ? "±" : index}</td>
+                    <td>{index + 1}</td>
                     <td>
                       <div className="tableName d-flex gap-4 align-items-center">
                         <div className="nameImage">
@@ -259,17 +259,21 @@ const DataTable = () => {
                             {isReversing == "true" &&
                             currentTokenRatio > RatioTargetToken ? (
                               <>
-                                <div className="tableClaim">{outputToken}</div>{" "}
                                 <div className="tableClaim">
-                                  {inputTokenAmount}
+                                  {formatWithCommas(outputToken)}
+                                </div>{" "}
+                                <div className="tableClaim">
+                                  {formatWithCommas(inputTokenAmount)}
                                 </div>
                               </>
                             ) : (
                               <>
                                 <div className="tableClaim">
-                                  {inputTokenAmount}
+                                  {formatWithCommas(inputTokenAmount)}
                                 </div>
-                                <div className="tableClaim">{outputToken}</div>{" "}
+                                <div className="tableClaim">
+                                  {formatWithCommas(outputToken)}
+                                </div>{" "}
                               </>
                             )}
                           </>
