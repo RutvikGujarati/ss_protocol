@@ -18,7 +18,7 @@ export const formatWithCommas = (value) => {
   return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger;
 };
 const DetailsInfo = ({ searchQuery, selectedToken }) => {
-  const { FluxinRatioPrice, XerionRatioPrice } = useContext(PriceContext);
+  const { FluxinRatioPrice, XerionRatioPrice ,FluxinUsdPrice,XerionUsdPrice} = useContext(PriceContext);
 
   const {
     withdraw_95,
@@ -153,6 +153,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       AuctionRunning: AuctionRunningLocalString.Fluxin,
       pair: "Fluxin/pSTATE",
       Ratio: FluxinRatioPrice,
+	  Price:FluxinUsdPrice,
       claimLPToken: LPStateTransferred,
       SetDuration: () => SetAUctionDuration(),
       AuctionTimeRunning: AuctionTimeRunning,
@@ -198,6 +199,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       RatioBalance: balances.ratioXerionBalance,
       isReversing: isReversed.Xerion,
       TotalBounty: TotalBounty.Xerion,
+	  Price:XerionUsdPrice,
       timeRunning: AuctionTimeRunningXerion,
       AuctionTimeRunning: AuctionTimeRunningXerion,
       BurnTimeLeft: BurnTimeLeft.Xerion,
@@ -519,6 +521,16 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           style={{ right: 0, opacity: 0.3 }}
                         ></span>
                         {`1:${dataToShow.Ratio}`}
+                      </td>
+                      <td className="d-flex align-items-center">
+                        Price
+                      </td>
+                      <td className="d-flex align-items-center justify-content-center position-relative px-3 small py-0">
+                        <span
+                          className="border-end h-75 position-absolute border-opacity-25"
+                          style={{ right: 0, opacity: 0.3 }}
+                        ></span>
+                        {dataToShow.Price}
                       </td>
 
                       <td className="d-flex align-items-center">
