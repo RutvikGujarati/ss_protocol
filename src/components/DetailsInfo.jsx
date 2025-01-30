@@ -65,6 +65,11 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     ReanounceFluxinContract,
     ReanounceXerionContract,
     balances,
+    setDBRequired,
+    DavBalanceRequire,
+    DavBalanceRequireForBurn,
+    saveData,
+    setDBForBurnRequired,
     mintAdditionalTOkens,
     BatchAmount,
     LastDevShare,
@@ -88,7 +93,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const [authorized, setAuthorized] = useState(false);
 
   const AuthAddress =
-    "0xB1bD9F3B5F64dE482485A41c84ea4a90DAc5F98e".toLowerCase();
+    "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483".toLowerCase();
 
   const handleSetAddress = () => {
     setAuthorized(AuthAddress === account);
@@ -291,6 +296,21 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
       setStateDenominator("");
     }
   };
+  useEffect(() => {
+    const handleStorageChange = (event) => {
+      if (event.key === "DavBalanceRequire") {
+        setDBRequired(event.newValue);
+      }
+      if (event.key === "DavBalanceRequireForBurn") {
+        setDBForBurnRequired(event.newValue);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
 
   const handleInputChanged = (e) => {
     const rawValue = e.target.value.replace(/,/g, "");
@@ -802,6 +822,46 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               </button>
                             </td>
                           </tr>
+                          {/* <tr>
+                            <td className="d-flex align-items-center">
+                              Auction and Burn - DAV Required
+                            </td>
+
+                            <td>
+                              <div className="w-100">
+                                <input
+                                  type="number"
+                                  className="form-control text-center mh-30"
+                                  placeholder="Enter for DAV"
+                                  value={DavBalanceRequire}
+                                  onChange={(e) =>
+                                    setDBRequired(e.target.value)
+                                  }
+                                />
+                              </div>
+                            </td>
+                            <td>
+                              <div className="w-100">
+                                <input
+                                  type="number"
+                                  className="form-control text-center mh-30"
+                                  placeholder="Enter for Burn"
+                                  value={DavBalanceRequireForBurn}
+                                  onChange={(e) =>
+                                    setDBForBurnRequired(e.target.value)
+                                  }
+                                />
+                              </div>
+                            </td>
+                            <td className="d-flex justify-content-end">
+                              <button
+                                onClick={saveData}
+                                className="btn btn-primary btn-sm swap-btn info-icon"
+                              >
+                                Save
+                              </button>
+                            </td>
+                          </tr> */}
                           <tr>
                             <td className="d-flex align-items-center">
                               Set reverse Swap

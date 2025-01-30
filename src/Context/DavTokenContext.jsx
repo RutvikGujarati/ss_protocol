@@ -9,19 +9,19 @@ import { PriceContext } from "../api/StatePrice";
 
 const DAVTokenContext = createContext();
 
-// export const DAV_TOKEN_ADDRESS = "0xB044420Bd99b7dbcc412c1E0D998963C1162Cb15";
-// export const STATE_TOKEN_ADDRESS = "0xcE8Ca38744B9a5598E990704e5Ba3756A54C7CEf";
-// export const Ratio_TOKEN_ADDRESS = "0x5DbC0c8019B8701Df1b7923BB1074D16131834C0";
-// export const XerionRatioAddress = "0xD7721C8420008CED169694612F823d028CA9f3d4";
-// export const Fluxin = "0x60fe86aF11F760A0a87fDD2325F94D73594023B1";
-// export const Xerion = "0xaE4733A33Dd8382B43466D572F0a94eF9579Ee45";
+export const DAV_TOKEN_ADDRESS = "0xB044420Bd99b7dbcc412c1E0D998963C1162Cb15";
+export const STATE_TOKEN_ADDRESS = "0xcE8Ca38744B9a5598E990704e5Ba3756A54C7CEf";
+export const Ratio_TOKEN_ADDRESS = "0xEFcF3C0d4dFA31D280f17bE63C41CCE86EfF47e5";
+export const XerionRatioAddress = "0xF84eA29efBde818186dbA13286693151Cf5024C7";
+export const Fluxin = "0x60fe86aF11F760A0a87fDD2325F94D73594023B1";
+export const Xerion = "0xaE4733A33Dd8382B43466D572F0a94eF9579Ee45";
 
-export const DAV_TOKEN_ADDRESS = "0xDBfb087D16eF29Fd6c0872C4C0525B38fBAEB319";
-export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
-export const Ratio_TOKEN_ADDRESS = "0x3d8c16a21e110958fF0E5FA7E76a7EC41fe61EAe";
-export const XerionRatioAddress = "0x08cbAE49E15d0C63d2c2A33BE641f9C6d0DF56cA";
-export const Fluxin = "0xdE45C7EEED1E776dC266B58Cf863b9B9518cb7aa";
-export const Xerion = "0xda5eF27FE698970526dFA7E47E824A843907AC71";
+// export const DAV_TOKEN_ADDRESS = "0xDBfb087D16eF29Fd6c0872C4C0525B38fBAEB319";
+// export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
+// export const Ratio_TOKEN_ADDRESS = "0x3d8c16a21e110958fF0E5FA7E76a7EC41fe61EAe";
+// export const XerionRatioAddress = "0x08cbAE49E15d0C63d2c2A33BE641f9C6d0DF56cA";
+// export const Fluxin = "0xdE45C7EEED1E776dC266B58Cf863b9B9518cb7aa";
+// export const Xerion = "0xda5eF27FE698970526dFA7E47E824A843907AC71";
 
 export const useDAVToken = () => useContext(DAVTokenContext);
 
@@ -110,6 +110,19 @@ export const DAVTokenProvider = ({ children }) => {
   const [AuctionTimeRunning, SetAuctionTimeRunning] = useState("0");
   const [AuctionTimeRunningXerion, SetAuctionTimeRunningXerion] = useState("0");
   const [RatioValues, SetRatioTargets] = useState("0");
+  const [DavBalanceRequire, setDBRequired] = useState(
+    localStorage.getItem("DavBalanceRequire") || "1"
+  );
+  const [DavBalanceRequireForBurn, setDBForBurnRequired] = useState(
+    localStorage.getItem("DavBalanceRequireForBurn") || "5"
+  );
+  useEffect(() => {
+    localStorage.setItem("DavBalanceRequire", DavBalanceRequire);
+  }, [DavBalanceRequire]);
+
+  useEffect(() => {
+    localStorage.setItem("DavBalanceRequireForBurn", DavBalanceRequireForBurn);
+  }, [DavBalanceRequireForBurn]);
 
   useEffect(() => {
     const initialize = async () => {
@@ -279,7 +292,7 @@ export const DAVTokenProvider = ({ children }) => {
         [account],
         (b) => ethers.formatUnits(b, 18)
       );
-	  console.log("dav balance.......", balance)
+      console.log("dav balance.......", balance);
       setDavBalance(balance);
 
       const totalSupply = 5000000;
@@ -1049,7 +1062,10 @@ export const DAVTokenProvider = ({ children }) => {
             (s) => ethers.formatUnits(s, 18)
           );
 
-          return { name, TotalTokensBurned: parseFloat(TotalTokensBurned).toFixed(2) };
+          return {
+            name,
+            TotalTokensBurned: parseFloat(TotalTokensBurned).toFixed(2),
+          };
         })
       );
 
@@ -1095,6 +1111,7 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching burn status:", e);
     }
   };
+
   const AuctionTimeLeft = async () => {
     try {
       // List of token contracts to handle
@@ -1158,6 +1175,40 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching auction interval:", e);
     }
   };
+  //   const SetDAVRequired = async (time, contractName) => {
+  //     try {
+  //       await handleContractCall(
+  //         contractMapping[contractName],
+  //         "setDAVRequiredForAuction",
+  //         [time]
+  //       );
+  //     } catch (e) {
+  //       console.error("Error setting dav", e);
+  //     }
+  //   };
+  //   const SetDAVRequiredForBurn = async (time, contractName) => {
+  //     try {
+  //       await handleContractCall(
+  //         contractMapping[contractName],
+  //         "setDAVRequiredForBurn",
+  //         [time]
+  //       );
+  //     } catch (e) {
+  //       console.error("Error setting dav for burn", e);
+  //     }
+  //   };
+  //   const getDAVRequired = async (contractName) => {
+  //     try {
+  //       const db = await handleContractCall(
+  //         contractMapping[contractName],
+  //         "DAVRequiredForAuction",
+  //         []
+  //       );
+  //       setDBRequired(db);
+  //     } catch (e) {
+  //       console.error("Error fetching dav required", e);
+  //     }
+  //   };
   const RatioTargetValues = async () => {
     try {
       // List of token contracts to handle
@@ -1521,7 +1572,7 @@ export const DAVTokenProvider = ({ children }) => {
       const gasPriceData = await provider.getFeeData();
       if (!gasPriceData || !gasPriceData.gasPrice)
         throw new Error("Failed to fetch gas price.");
-	
+
       const extraFee = gasPriceData.gasPrice / BigInt(100); // 1% of gas price
       console.log(`Extra Fee (in wei): ${extraFee.toString()}`);
       const contracts = {
@@ -1621,7 +1672,7 @@ export const DAVTokenProvider = ({ children }) => {
       console.log(`Ratio target set to `);
     } catch (error) {
       console.error("Error setting ratio target:", error);
-	  throw error;
+      throw error;
     }
   };
   const setReverseTime = async (start, end) => {
@@ -1960,6 +2011,10 @@ export const DAVTokenProvider = ({ children }) => {
         bountyBalances,
         TotalBounty,
         TotalTokensBurned,
+        setDBRequired,
+        DavBalanceRequire,
+        setDBForBurnRequired,
+        DavBalanceRequireForBurn,
       }}
     >
       {children}
