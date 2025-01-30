@@ -219,13 +219,13 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   <>
                     <TableRowWithClick
                       label="Withdraw 5%"
-                      value={dataToShow.claimFiveDAVToken}
+                      value={formatWithCommas(dataToShow.claimFiveDAVToken)}
                       action={dataToShow.actions.claimFiveDAVToken}
                       buttonText="Withdraw"
                     />
                     <TableRowWithClick
                       label="Withdraw 95%"
-                      value={dataToShow.claimDAVToken}
+                      value={formatWithCommas(dataToShow.claimDAVToken)}
                       action={dataToShow.actions.claimLiquidityDAVToken}
                       buttonText="Withdraw"
                     />
