@@ -70,7 +70,7 @@ export const TableRowForTokens = ({
         </td>
       </tr>
       <tr>
-        <td className="d-flex align-items-center">Price</td>
+        <td className="d-flex align-items-center">Minted Supply</td>
         <td className="d-flex align-items-center justify-content-center position-relative px-3 small py-0">
           <span
             className="border-end h-75 position-absolute"

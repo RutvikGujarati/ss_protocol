@@ -165,7 +165,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     label2={"Contract/Token Address"}
                     TokenAddress={dataToShow.address}
                     value={dataToShow.key}
-                    priceTag={dataToShow.Price}
+                    priceTag={formatWithCommas(dataToShow.Supply)}
                     PercentageOfToken={dataToShow.percentage}
                   />
                 </>
@@ -250,10 +250,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               dataToShow.tokenName == "Fluxin" ||
               dataToShow.tokenName == "Xerion") && (
               <>
-                <SmallTokenDetails
+                {/* <SmallTokenDetails
                   label={"Minted Supply"}
                   data={formatWithCommas(dataToShow.Supply)}
-                />
+                /> */}
 
                 {dataToShow.tokenName !== "STATE" && (
                   <>

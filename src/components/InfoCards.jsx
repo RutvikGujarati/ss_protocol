@@ -314,7 +314,8 @@ const InfoCards = () => {
             </div>
             <div className="announcement text-center">
               <div className="">
-                Ratio Swapping auctions will start on <span>01/02/2025.</span>
+                1 DAV TOKENS REQUIRED TO PARTICIPATE IN THE DAILY AUCTION AND
+                RECEIVE ±100% ROI ON SWAPS
               </div>
             </div>
           </div>
