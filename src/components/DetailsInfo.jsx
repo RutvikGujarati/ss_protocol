@@ -1,14 +1,14 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DetailsInfo.css";
-import { Fluxin, useDAVToken, Xerion } from "../Context/DavTokenContext";
+import { useDAVToken } from "../Context/DavTokenContext";
 import PropTypes from "prop-types";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { TokensDetails } from "../data/TokensDetails";
 import {
-  DAV_TOKEN_ADDRESS,
-  STATE_TOKEN_ADDRESS,
-  //   Ratio_TOKEN_ADDRESS,
-} from "../Context/DavTokenContext";
-import { PriceContext } from "../api/StatePrice";
+  TableRowDataShow,
+  TableRowForTokens,
+  TableRowWithClick,
+} from "./SeperateComps/TableRow";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -18,65 +18,14 @@ export const formatWithCommas = (value) => {
   return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger;
 };
 const DetailsInfo = ({ searchQuery, selectedToken }) => {
-  const { FluxinRatioPrice, XerionRatioPrice, FluxinUsdPrice, XerionUsdPrice } =
-    useContext(PriceContext);
-
   const {
-    withdraw_95,
     AuctionRunning,
-    withdraw_5,
-    AddTokens,
-    FluxinSupply,
-    XerionSupply,
-    setRatioTarget,
-    setCurrentRatioTarget,
-    WithdrawState,
-    WithdrawFluxin,
-    WithdrawXerion,
     account,
-    BurnTimeLeft,
-    LPStateTransferred,
-    setReverseEnable,
-    TotalTokensBurned,
-    isReversed,
-    AuctionRunningLocalString,
-    PercentageOfState,
-    PercentageFluxin,
-    SetAUctionDuration,
-    SetAUctionInterval,
-    PercentageXerion,
-    DAVTokensWithdraw,
-    StateSupply,
-    RenounceState,
-    ReanounceContract,
     stateTransactionHash,
-    DepositToken,
-    XerionTransactionHash,
-    Supply,
-    isRenounced,
-    TotalBounty,
-    DAVTokensFiveWithdraw,
-    LastLiquidity,
-    RatioTargetsofTokens,
-    AuctionTimeRunningXerion,
-    Batch,
-    auctionDetails,
-    setReverseTime,
-    ReanounceFluxinContract,
-    ReanounceXerionContract,
-    balances,
     setDBRequired,
-    DavBalanceRequire,
-    DavBalanceRequireForBurn,
-    saveData,
     setDBForBurnRequired,
     mintAdditionalTOkens,
-    BatchAmount,
-    LastDevShare,
-    AuctionTimeRunning,
-    AddTokensToContract,
     StateBurnBalance,
-    StartAuction,
   } = useDAVToken();
 
   const [numerator, setNumerator] = useState("");
@@ -93,7 +42,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const [authorized, setAuthorized] = useState(false);
 
   const AuthAddress =
-    "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483".toLowerCase();
+    "0xB1bD9F3B5F64dE482485A41c84ea4a90DAc5F98e".toLowerCase();
 
   const handleSetAddress = () => {
     setAuthorized(AuthAddress === account);
@@ -104,167 +53,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     handleSetAddress();
   }, [account, AuthAddress]);
 
-  const shortenAddress = (address) => {
-    if (!address) return "";
-    return `${address.slice(0, 6)}...${address.slice(-6)}`;
-  };
-  const davShortened = shortenAddress(DAV_TOKEN_ADDRESS);
-  const stateShortened = shortenAddress(STATE_TOKEN_ADDRESS);
-  const FluxinShortened = shortenAddress(Fluxin);
-  const XerionShortened = shortenAddress(Xerion);
-
-  const tokens = [
-    {
-      tokenName: "DAV",
-      key: davShortened,
-      name: "pDAV",
-      supply: "5,000,000.00",
-      BatchRelease: "1M",
-      transactionHash:
-        "0xa7edbeaf4dabb78ef6385220bc75f7266c144a4c9da19393245ab62999195d90",
-      claimDAVToken: DAVTokensWithdraw,
-      claimFiveDAVToken: DAVTokensFiveWithdraw,
-      address: DAV_TOKEN_ADDRESS,
-      renounceSmartContract: isRenounced?.dav ?? "Unknown",
-      BatchAmount: BatchAmount,
-      Batch: Batch,
-      Supply: Supply,
-      LastDevShare: LastDevShare,
-      LastLiquidity: LastLiquidity,
-      actions: {
-        claimLiquidityDAVToken: withdraw_95,
-        claimFiveDAVToken: withdraw_5,
-        ReanounceContract: ReanounceContract,
-      },
-    },
-    {
-      tokenName: "Fluxin",
-      key: FluxinShortened,
-      name: "Fluxin",
-      supply: "1,000,000,000,000.00",
-      Treasury: "1,000,000,000,000.00",
-      Supply: FluxinSupply,
-      percentage: PercentageFluxin,
-      address: Fluxin,
-      stateBalance: balances.StateFluxin,
-      target: RatioTargetsofTokens["Fluxin"],
-      isReversing: isReversed.Fluxin,
-      Balance: balances.fluxinBalance,
-      BurnTimeLeft: BurnTimeLeft.Fluxin,
-      TotalTokensBurn: TotalTokensBurned.Fluxin,
-      TotalBounty: TotalBounty.Fluxin,
-      RatioBalance: balances.ratioFluxinBalance,
-      Duration: auctionDetails["Fluxin"],
-      interval: auctionDetails["Fluxin"],
-      AuctionRunning: AuctionRunningLocalString.Fluxin,
-      pair: "Fluxin/pSTATE",
-      Ratio: FluxinRatioPrice,
-      Price: FluxinUsdPrice,
-      claimLPToken: LPStateTransferred,
-      SetDuration: () => SetAUctionDuration(),
-      AuctionTimeRunning: AuctionTimeRunning,
-      AuctionNextTime: auctionDetails["Fluxin"],
-      mintAddTOkens: "250,000,000,000",
-      ApproveAmount: "10,000,000,000",
-      transactionHash:
-        "0xcc7e04c885a56607fbc2417a9f894bda0fbdd68418ce189168adcb1c10406208",
-      renounceSmartContract: isRenounced?.Fluxin ?? "Unknown",
-      actions: {
-        ReanounceContract: ReanounceFluxinContract,
-        WithdrawState: WithdrawFluxin,
-        mintAdditionalTOkens: mintAdditionalTOkens,
-        SetDuration: (value) => SetAUctionDuration(value, "fluxinRatio"),
-        SetInterval: (value) => SetAUctionInterval(value, "fluxinRatio"),
-        AddTokenToContract: () =>
-          AddTokensToContract(Fluxin, STATE_TOKEN_ADDRESS, FluxinRatioPrice),
-        setRatio: (value) => setRatioTarget(value, "fluxinRatio"),
-        setReverseEnabled: (value) => setReverseEnable(value, "fluxinRatio"),
-        setReverse: (value, value2) => setReverseTime(value, value2),
-        setCurrentRatio: (value) => setCurrentRatioTarget(value),
-        DepositTokens: (value) =>
-          DepositToken("Fluxin", Fluxin, value, "fluxinRatio"),
-        DepositStateTokens: (value) =>
-          DepositToken("state", STATE_TOKEN_ADDRESS, value, "fluxinRatio"),
-        StartingAuction: () => StartAuction("fluxinRatio"),
-      },
-    },
-    {
-      tokenName: "Xerion",
-      key: XerionShortened,
-      name: "Xerion",
-      supply: "500,000,000,000.00",
-      Supply: XerionSupply,
-      target: RatioTargetsofTokens["Xerion"],
-      Balance: balances.xerionBalance,
-      percentage: PercentageXerion,
-      Duration: auctionDetails["Xerion"],
-      interval: auctionDetails["Xerion"],
-      address: Xerion,
-      TotalTokensBurn: TotalTokensBurned.Xerion,
-      stateBalance: balances.StateXerion,
-      RatioBalance: balances.ratioXerionBalance,
-      isReversing: isReversed.Xerion,
-      TotalBounty: TotalBounty.Xerion,
-      Price: XerionUsdPrice,
-      timeRunning: AuctionTimeRunningXerion,
-      AuctionTimeRunning: AuctionTimeRunningXerion,
-      BurnTimeLeft: BurnTimeLeft.Xerion,
-      Ratio: XerionRatioPrice,
-      AuctionRunning: AuctionRunningLocalString.Xerion,
-      pair: "Xerion/pSTATE",
-      AuctionNextTime: auctionDetails["Xerion"],
-      mintAddTOkens: "125,000,000,000",
-      ApproveAmount: "10,000,000,000",
-      transactionHash: XerionTransactionHash,
-      renounceSmartContract: isRenounced?.Xerion ?? "Unknown",
-      actions: {
-        ReanounceContract: ReanounceXerionContract,
-        WithdrawState: WithdrawXerion,
-        SetDuration: (value) => SetAUctionDuration(value, "XerionRatio"),
-        SetInterval: (value) => SetAUctionInterval(value, "XerionRatio"),
-        setRatio: (value) => setRatioTarget(value, "XerionRatio"),
-        setReverseEnabled: (value) => setReverseEnable(value, "XerionRatio"),
-
-        mintAdditionalTOkens: mintAdditionalTOkens,
-        AddTokenToContract: () =>
-          AddTokensToContract(Xerion, STATE_TOKEN_ADDRESS, XerionRatioPrice),
-
-        DepositTokens: (value) =>
-          DepositToken("Xerion", Xerion, value, "XerionRatio"),
-        DepositStateTokens: (value) =>
-          DepositToken("state", STATE_TOKEN_ADDRESS, value, "XerionRatio"),
-        StartingAuction: () => StartAuction("XerionRatio"),
-      },
-    },
-
-    //state token
-    {
-      tokenName: "STATE",
-      key: stateShortened,
-      name: "pSTATE",
-      supply: "999,000,000,000,000.00",
-      Treasury: "999,000,000,000,000.00",
-      Supply: StateSupply,
-      percentage: PercentageOfState,
-      Balance: balances.stateBalance,
-      address: STATE_TOKEN_ADDRESS,
-      claimLPToken: LPStateTransferred,
-      mintAddTOkens: "1,000,000,000,000",
-      ApproveAmount: "10,000,000,000",
-      transactionHash:
-        "0xf562341d1f0f5469809553f07cd9f19da479a9af3b074d0982594899a6595b10",
-
-      renounceSmartContract: isRenounced?.state ?? "Unknown",
-      actions: {
-        ReanounceContract: RenounceState,
-        WithdrawState: WithdrawState,
-        mintAdditionalTOkens: mintAdditionalTOkens,
-        AddTokenToContract: () => AddTokens(),
-        DepositTokens: (value) =>
-          DepositToken("state", STATE_TOKEN_ADDRESS, value),
-      },
-    },
-  ];
+  const tokens = TokensDetails();
   console.log("auction running from detailInfo", AuctionRunning.Fluxin);
   console.log("renounced ", stateTransactionHash);
   const handleInputChange = (e) => {
@@ -343,29 +132,38 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             </th>
           </thead>
           <tbody>
-            <tr>
-              <td className="d-flex align-items-center">Token Name</td>
-              <td className="d-flex align-items-center justify-content-center">
-                {dataToShow.name || ""}
-              </td>
-              <td></td>
-            </tr>
-            <tr>
-              <td className="d-flex align-items-center">
-                Contract/Token Address
-              </td>
-              <td className="d-flex align-items-center justify-content-center">
-                <a
-                  href={`https://otter.pulsechain.com/address/${dataToShow.address}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ fontSize: "12px" }}
-                >
-                  {dataToShow.key || ""}
-                </a>
-              </td>
-              <td></td>
-            </tr>
+            {(dataToShow.tokenName === "DAV" ||
+              dataToShow.tokenName === "STATE") && (
+              <>
+                <tr>
+                  <td className="d-flex align-items-center">Token Name</td>
+                  <td className="d-flex align-items-center justify-content-center">
+                    {dataToShow.name || ""}
+                  </td>
+                  <td></td>
+                </tr>
+                <TableRowDataShow
+                  label={"Contract/Token Address"}
+                  address={dataToShow.address}
+                  value={dataToShow.key}
+                />
+              </>
+            )}
+
+            {dataToShow.tokenName !== "DAV" &&
+              dataToShow.tokenName !== "STATE" && (
+                <>
+                  <TableRowForTokens
+                    label={"Token Name"}
+                    tokenName={dataToShow.name}
+                    label2={"Contract/Token Address"}
+                    TokenAddress={dataToShow.address}
+                    value={dataToShow.key}
+                    priceTag={dataToShow.Price}
+                    PercentageOfToken={dataToShow.percentage}
+                  />
+                </>
+              )}
 
             {dataToShow.tokenName == "DAV" && (
               <>
@@ -423,63 +221,30 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                 </tr>
                 {authorized && (
                   <>
-                    <tr>
-                      <td className="d-flex align-items-center">
-                        Withdraw 95%
-                      </td>
-                      <td>
-                        <td className="d-flex align-items-center justify-content-center">
-                          {dataToShow.claimDAVToken || ""}
-                        </td>
-                      </td>
-                      <td className="d-flex justify-content-end">
-                        <button
-                          onClick={() =>
-                            dataToShow.actions.claimLiquidityDAVToken()
-                          }
-                          className="btn btn-primary btn-sm swap-btn info-icon"
-                        >
-                          Withdraw
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="d-flex align-items-center">Withdraw 5%</td>
-                      <td>
-                        <td className="d-flex align-items-center justify-content-center">
-                          {dataToShow.claimFiveDAVToken || ""}
-                        </td>
-                      </td>
-                      <td className="d-flex justify-content-end">
-                        <button
-                          onClick={() => dataToShow.actions.claimFiveDAVToken()}
-                          className="btn btn-primary btn-sm swap-btn info-icon"
-                        >
-                          Withdraw
-                        </button>
-                      </td>
-                    </tr>
+                    <TableRowWithClick
+                      label="Withdraw 5%"
+                      value={dataToShow.claimFiveDAVToken}
+                      action={dataToShow.actions.claimFiveDAVToken}
+                      buttonText="Withdraw"
+                    />
+                    <TableRowWithClick
+                      label="Withdraw 95%"
+                      value={dataToShow.claimDAVToken}
+                      action={dataToShow.actions.claimLiquidityDAVToken}
+                      buttonText="Withdraw"
+                    />
                   </>
                 )}
               </>
             )}
             {dataToShow.tokenName == "STATE" && (
-              <tr>
-                <td className="d-flex align-items-center">State tokens burn</td>
-                <td className="d-flex align-items-center justify-content-center">
-                  {formatWithCommas(StateBurnBalance)}
-                </td>
-                <td></td>
-              </tr>
-            )}
-            {(dataToShow.tokenName == "STATE" ||
-              dataToShow.tokenName == "Fluxin" ||
-              dataToShow.tokenName == "Xerion") && (
               <>
                 <tr>
-                  <td className="d-flex align-items-center">Minted Supply</td>
+                  <td className="d-flex align-items-center">
+                    State tokens burn
+                  </td>
                   <td className="d-flex align-items-center justify-content-center">
-                    {formatWithCommas(dataToShow.Supply)}
+                    {formatWithCommas(StateBurnBalance)}
                   </td>
                   <td></td>
                 </tr>
@@ -492,6 +257,20 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   </td>
                   <td></td>
                 </tr>
+              </>
+            )}
+            {(dataToShow.tokenName == "STATE" ||
+              dataToShow.tokenName == "Fluxin" ||
+              dataToShow.tokenName == "Xerion") && (
+              <>
+                <tr>
+                  <td className="d-flex align-items-center">Minted Supply</td>
+                  <td className="d-flex align-items-center justify-content-center">
+                    {formatWithCommas(dataToShow.Supply)}
+                  </td>
+                  <td></td>
+                </tr>
+
                 {dataToShow.tokenName !== "STATE" && (
                   <>
                     <tr>
@@ -542,14 +321,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           style={{ right: 0, opacity: 0.3 }}
                         ></span>
                         {`1:${dataToShow.Ratio}`}
-                      </td>
-                      <td className="d-flex align-items-center">Price</td>
-                      <td className="d-flex align-items-center justify-content-center position-relative px-3 small py-0">
-                        <span
-                          className="border-end h-75 position-absolute border-opacity-25"
-                          style={{ right: 0, opacity: 0.3 }}
-                        ></span>
-                        {dataToShow.Price}
                       </td>
 
                       <td className="d-flex align-items-center">
@@ -822,46 +593,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               </button>
                             </td>
                           </tr>
-                          {/* <tr>
-                            <td className="d-flex align-items-center">
-                              Auction and Burn - DAV Required
-                            </td>
-
-                            <td>
-                              <div className="w-100">
-                                <input
-                                  type="number"
-                                  className="form-control text-center mh-30"
-                                  placeholder="Enter for DAV"
-                                  value={DavBalanceRequire}
-                                  onChange={(e) =>
-                                    setDBRequired(e.target.value)
-                                  }
-                                />
-                              </div>
-                            </td>
-                            <td>
-                              <div className="w-100">
-                                <input
-                                  type="number"
-                                  className="form-control text-center mh-30"
-                                  placeholder="Enter for Burn"
-                                  value={DavBalanceRequireForBurn}
-                                  onChange={(e) =>
-                                    setDBForBurnRequired(e.target.value)
-                                  }
-                                />
-                              </div>
-                            </td>
-                            <td className="d-flex justify-content-end">
-                              <button
-                                onClick={saveData}
-                                className="btn btn-primary btn-sm swap-btn info-icon"
-                              >
-                                Save
-                              </button>
-                            </td>
-                          </tr> */}
                           <tr>
                             <td className="d-flex align-items-center">
                               Set reverse Swap
