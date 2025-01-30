@@ -2,8 +2,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { ethers } from "ethers";
 // import DAVTokenABI from "../ABI/DavTokenABI.json";
-import StateABI from "../ABI/StateTokenABI.json";
-import RatioABI from "../ABI/RatioABI.json";
+// import StateABI from "../ABI/StateTokenABI.json";
+// import RatioABI from "../ABI/RatioABI.json";
 import PropTypes from "prop-types";
 import { PriceContext } from "../api/StatePrice";
 import { ContractContext } from "../Functions/ContractIntialize";
@@ -18,7 +18,7 @@ const DAVTokenContext = createContext();
 // export const Xerion = "0xaE4733A33Dd8382B43466D572F0a94eF9579Ee45";
 
 export const DAV_TOKEN_ADDRESS = "0x16D608f2cB1E229374d3930c273361b1e83A8129";
-export const STATE_TOKEN_ADDRESS = "0x8B2DAB17e7382a251Aa3F0364D0cC276C2cB3282";
+export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
 export const Ratio_TOKEN_ADDRESS = "0x3d8c16a21e110958fF0E5FA7E76a7EC41fe61EAe";
 export const XerionRatioAddress = "0x08cbAE49E15d0C63d2c2A33BE641f9C6d0DF56cA";
 export const Fluxin = "0xdE45C7EEED1E776dC266B58Cf863b9B9518cb7aa";
@@ -29,24 +29,12 @@ export const useDAVToken = () => useContext(DAVTokenContext);
 export const DAVTokenProvider = ({ children }) => {
   const { stateUsdPrice, FluxinRatioPrice, XerionRatioPrice } =
     useContext(PriceContext);
-  const { AllContracts } = useContext(ContractContext);
+  const { loading, provider, signer, account,AllContracts } = useContext(ContractContext);
 
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
-  const [account, setAccount] = useState(null);
   const [DavBalance, setDavBalance] = useState(null);
 
-  const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
-  const [transactionStatus, setTransactionStatus] = useState(null); // 'pending', 'success', or 'failed'
-
-  //contract state
-  //   const [davContract, setDavContract] = useState(null);
-  //   const [stateContract, setStateContract] = useState(null);
-  const [FluxinContract, setFluxinContract] = useState(null);
-  const [XerionContract, setXerionContract] = useState(null);
-  const [RatioContract, setRatioContract] = useState(null);
-  const [XerionRatioContract, setXerionRatioContract] = useState(null);
+  const [transactionStatus, setTransactionStatus] = useState(null); // 'pending', 'success', or 
 
   const [TotalCost, setTotalCost] = useState(null);
   const [AuctionRunning, setIsAuctionRunning] = useState({
@@ -112,66 +100,6 @@ export const DAVTokenProvider = ({ children }) => {
   const [AuctionTimeRunningXerion, SetAuctionTimeRunningXerion] = useState("0");
   const [RatioValues, SetRatioTargets] = useState("0");
 
-  useEffect(() => {
-    const initialize = async () => {
-      if (typeof window.ethereum !== "undefined") {
-        try {
-          const newProvider = new ethers.BrowserProvider(
-            window.ethereum,
-            "any"
-          );
-          const accounts = await newProvider.send("eth_requestAccounts", []);
-          const newSigner = await newProvider.getSigner();
-
-          setProvider(newProvider);
-          setSigner(newSigner);
-          setAccount(accounts[0]);
-
-          //   setDavContract(
-          //     new ethers.Contract(DAV_TOKEN_ADDRESS, DAVTokenABI, newSigner)
-          //   );
-          //   setStateContract(
-          //     new ethers.Contract(STATE_TOKEN_ADDRESS, StateABI, newSigner)
-          //   );
-          setFluxinContract(new ethers.Contract(Fluxin, StateABI, newSigner));
-          setXerionContract(new ethers.Contract(Xerion, StateABI, newSigner));
-
-          setRatioContract(
-            new ethers.Contract(Ratio_TOKEN_ADDRESS, RatioABI, newSigner)
-          );
-          setXerionRatioContract(
-            new ethers.Contract(XerionRatioAddress, RatioABI, newSigner)
-          );
-        } catch (error) {
-          console.error("Error initializing contract:", error);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        console.error("Ethereum wallet is not installed");
-        setLoading(false);
-      }
-    };
-    initialize();
-    if (window.ethereum) {
-      window.ethereum.on("accountsChanged", (accounts) => {
-        if (accounts.length > 0) {
-          setAccount(accounts[0]);
-          initialize();
-        } else {
-          setAccount(null);
-          setSigner(null);
-          setProvider(null);
-        }
-      });
-    }
-
-    return () => {
-      if (window.ethereum) {
-        window.ethereum.removeAllListeners("accountsChanged");
-      }
-    };
-  }, []);
 
   const handleContractCall = async (
     contract,
@@ -320,7 +248,7 @@ export const DAVTokenProvider = ({ children }) => {
 
   const FluxinTotalMintedSupply = async () => {
     const supply = await handleContractCall(
-      FluxinContract,
+      AllContracts.FluxinContract,
       "totalSupply",
       [],
       (s) => ethers.formatUnits(s, 18)
@@ -329,7 +257,7 @@ export const DAVTokenProvider = ({ children }) => {
   };
   const XerionTotalMintedSupply = async () => {
     const supply = await handleContractCall(
-      XerionContract,
+		AllContracts.XerionContract,
       "totalSupply",
       [],
       (s) => ethers.formatUnits(s, 18)
@@ -344,8 +272,8 @@ export const DAVTokenProvider = ({ children }) => {
       if (
         AllContracts.davContract &&
         AllContracts.stateContract &&
-        RatioContract &&
-        XerionRatioContract
+        AllContracts.RatioContract &&
+        AllContracts.XerionRatioContract
       ) {
         try {
           // Concurrent fetching with Promise.all
@@ -443,10 +371,10 @@ export const DAVTokenProvider = ({ children }) => {
             DAVTokenAmount().catch((error) =>
               console.error("Error fetching DAVTokenAmount:", error)
             ),
-            SetOnePercentageOfBalance(RatioContract, "Fluxin").catch((error) =>
+            SetOnePercentageOfBalance(AllContracts.RatioContract, "Fluxin").catch((error) =>
               console.error("Error fetching DAVTokenAmount:", error)
             ),
-            SetOnePercentageOfBalance(XerionRatioContract, "Xerion").catch(
+            SetOnePercentageOfBalance(AllContracts.XerionRatioContract, "Xerion").catch(
               (error) => console.error("Error fetching DAVTokenAmount:", error)
             ),
             calculateBalancesForAllContracts().catch((error) =>
@@ -501,8 +429,8 @@ export const DAVTokenProvider = ({ children }) => {
   }, [
     AllContracts.davContract,
     AllContracts.stateContract,
-    RatioContract,
-    XerionRatioContract,
+    AllContracts.RatioContract,
+    AllContracts.XerionRatioContract,
     account,
   ]);
 
@@ -512,8 +440,8 @@ export const DAVTokenProvider = ({ children }) => {
   const isAuctionRunning = async () => {
     try {
       const contracts = [
-        { contract: RatioContract, name: "Fluxin" },
-        { contract: XerionRatioContract, name: "Xerion" },
+        { contract: AllContracts.RatioContract, name: "Fluxin" },
+        { contract: AllContracts.XerionRatioContract, name: "Xerion" },
         // Add more contracts here as needed
       ];
 
@@ -626,9 +554,13 @@ export const DAVTokenProvider = ({ children }) => {
   const ReanounceContract = () =>
     renounceOwnership(AllContracts.davContract, "DAV", setDavTransactionHash);
   const ReanounceFluxinContract = () =>
-    renounceOwnership(FluxinContract, "Fluxin", setFluxinTransactionHash);
+    renounceOwnership(
+      AllContracts.FluxinContract,
+      "Fluxin",
+      setFluxinTransactionHash
+    );
   const ReanounceXerionContract = () =>
-    renounceOwnership(XerionContract, "Xerion", setXerionTransactionHash);
+    renounceOwnership(AllContracts.XerionContract, "Xerion", setXerionTransactionHash);
   const RenounceState = () =>
     renounceOwnership(
       AllContracts.stateContract,
@@ -639,8 +571,8 @@ export const DAVTokenProvider = ({ children }) => {
   const contracts = {
     state: AllContracts.stateContract,
     dav: AllContracts.davContract,
-    Fluxin: FluxinContract,
-    Xerion: XerionContract,
+    Fluxin: AllContracts.FluxinContract,
+    Xerion: AllContracts.XerionContract,
   };
 
   const CheckMintBalance = async (contract) => {
@@ -682,9 +614,9 @@ export const DAVTokenProvider = ({ children }) => {
   const WithdrawState = (amount) =>
     handleTokenWithdraw(AllContracts.stateContract, amount);
   const WithdrawFluxin = (amount) =>
-    handleTokenWithdraw(FluxinContract, amount);
+    handleTokenWithdraw(AllContracts.FluxinContract, amount);
   const WithdrawXerion = (amount) =>
-    handleTokenWithdraw(XerionContract, amount);
+    handleTokenWithdraw(AllContracts.XerionContract, amount);
 
   const withdraw_5 = () => handleWithdraw("withdrawDevelopmentFunds");
   const withdraw_95 = () => handleWithdraw("withdrawLiquidityFunds");
@@ -698,11 +630,11 @@ export const DAVTokenProvider = ({ children }) => {
 
       // Select the correct contract based on contractType
       if (contractType === "fluxin") {
-        contract = FluxinContract;
+        contract = AllContracts.FluxinContract;
       } else if (contractType === "state") {
         contract = AllContracts.stateContract;
       } else if (contractType === "Xerion") {
-        contract = XerionContract;
+        contract = AllContracts.XerionContract;
       }
 
       if (!contract) {
@@ -735,12 +667,12 @@ export const DAVTokenProvider = ({ children }) => {
     try {
       const contracts = [
         {
-          contract: RatioContract,
+          contract: AllContracts.RatioContract,
           name: "Fluxin",
           ratioPrice: FluxinRatioPrice,
         },
         {
-          contract: XerionRatioContract,
+          contract: AllContracts.XerionRatioContract,
           name: "Xerion",
           ratioPrice: XerionRatioPrice,
         },
@@ -880,8 +812,8 @@ export const DAVTokenProvider = ({ children }) => {
 
       // List of token contracts to handle
       const contracts = [
-        { contract: RatioContract, name: "Fluxin" },
-        { contract: XerionRatioContract, name: "Xerion" }, // Example for another token
+        { contract: AllContracts.RatioContract, name: "Fluxin" },
+        { contract: AllContracts.XerionRatioContract, name: "Xerion" }, // Example for another token
       ];
 
       const auctionData = {};
@@ -928,8 +860,8 @@ export const DAVTokenProvider = ({ children }) => {
     try {
       // List of contracts with identifiers
       const contracts = [
-        { name: "Fluxin", contract: RatioContract },
-        { name: "Xerion", contract: XerionRatioContract },
+        { name: "Fluxin", contract: AllContracts.RatioContract },
+        { name: "Xerion", contract: AllContracts.XerionRatioContract },
       ];
 
       // Fetch data for all contracts
@@ -959,8 +891,8 @@ export const DAVTokenProvider = ({ children }) => {
   const BurningOccurred = async () => {
     try {
       const contracts = [
-        { name: "Fluxin", contract: RatioContract },
-        { name: "Xerion", contract: XerionRatioContract },
+        { name: "Fluxin", contract: AllContracts.RatioContract },
+        { name: "Xerion", contract: AllContracts.XerionRatioContract },
       ];
 
       const results = await Promise.all(
@@ -989,8 +921,8 @@ export const DAVTokenProvider = ({ children }) => {
   const BurnCycleActive = async () => {
     try {
       const contracts = [
-        { name: "Fluxin", contract: RatioContract },
-        { name: "Xerion", contract: XerionRatioContract },
+        { name: "Fluxin", contract: AllContracts.RatioContract },
+        { name: "Xerion", contract: AllContracts.XerionRatioContract },
       ];
 
       const results = await Promise.all(
@@ -1019,8 +951,8 @@ export const DAVTokenProvider = ({ children }) => {
   const BurnTimingLeft = async () => {
     try {
       const contracts = [
-        { name: "Fluxin", contract: RatioContract },
-        { name: "Xerion", contract: XerionRatioContract },
+        { name: "Fluxin", contract: AllContracts.RatioContract },
+        { name: "Xerion", contract: AllContracts.XerionRatioContract },
       ];
 
       const results = await Promise.all(
@@ -1049,8 +981,8 @@ export const DAVTokenProvider = ({ children }) => {
   const TotalTokensBurn = async () => {
     try {
       const contracts = [
-        { name: "Fluxin", contract: RatioContract },
-        { name: "Xerion", contract: XerionRatioContract },
+        { name: "Fluxin", contract: AllContracts.RatioContract },
+        { name: "Xerion", contract: AllContracts.XerionRatioContract },
       ];
 
       const results = await Promise.all(
@@ -1083,8 +1015,8 @@ export const DAVTokenProvider = ({ children }) => {
   const TotalBountyAmount = async () => {
     try {
       const contracts = [
-        { name: "Fluxin", contract: RatioContract },
-        { name: "Xerion", contract: XerionRatioContract },
+        { name: "Fluxin", contract: AllContracts.RatioContract },
+        { name: "Xerion", contract: AllContracts.XerionRatioContract },
       ];
 
       const results = await Promise.all(
@@ -1116,8 +1048,8 @@ export const DAVTokenProvider = ({ children }) => {
     try {
       // List of token contracts to handle
       const contracts = [
-        { contract: RatioContract, name: "Fluxin" },
-        { contract: XerionRatioContract, name: "Xerion" },
+        { contract: AllContracts.RatioContract, name: "Fluxin" },
+        { contract: AllContracts.XerionRatioContract, name: "Xerion" },
       ];
 
       const auctionTimes = {};
@@ -1147,11 +1079,11 @@ export const DAVTokenProvider = ({ children }) => {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [Xerion, STATE_TOKEN_ADDRESS, RatioContract]);
+  }, [Xerion, STATE_TOKEN_ADDRESS, AllContracts.RatioContract]);
 
   const contractMapping = {
-    fluxinRatio: RatioContract,
-    XerionRatio: XerionRatioContract,
+    fluxinRatio: AllContracts.RatioContract,
+    XerionRatio: AllContracts.XerionRatioContract,
   };
   const SetAUctionDuration = async (time, ContractName) => {
     try {
@@ -1213,8 +1145,8 @@ export const DAVTokenProvider = ({ children }) => {
     try {
       // List of token contracts to handle
       const contracts = [
-        { contract: RatioContract, name: "Fluxin" },
-        { contract: XerionRatioContract, name: "Xerion" }, // Example for another token
+        { contract: AllContracts.RatioContract, name: "Fluxin" },
+        { contract: AllContracts.XerionRatioContract, name: "Xerion" }, // Example for another token
       ];
 
       const ratioTargets = {};
@@ -1263,8 +1195,8 @@ export const DAVTokenProvider = ({ children }) => {
   const StateBurnAmount = async () => {
     try {
       const contractDetails = [
-        { name: "Fluxin", contract: RatioContract },
-        { name: "Xerion", contract: XerionRatioContract },
+        { name: "Fluxin", contract: AllContracts.RatioContract },
+        { name: "Xerion", contract: AllContracts.XerionRatioContract },
       ];
 
       let totalBurnedAmount = 0;
@@ -1296,7 +1228,7 @@ export const DAVTokenProvider = ({ children }) => {
     try {
       // Fetch Fluxin balance and calculate bounty
       const fluxinTransaction = await handleContractCall(
-        FluxinContract,
+        AllContracts.FluxinContract,
         "balanceOf",
         [Ratio_TOKEN_ADDRESS],
         (s) => ethers.formatUnits(s, 18)
@@ -1306,7 +1238,7 @@ export const DAVTokenProvider = ({ children }) => {
 
       // Fetch Xerion balance and calculate bounty
       const xerionTransaction = await handleContractCall(
-        XerionContract,
+        AllContracts.XerionContract,
         "balanceOf",
         [XerionRatioAddress],
         (s) => ethers.formatUnits(s, 18)
@@ -1347,7 +1279,11 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   const ContractFluxinBalance = async () => {
-    await fetchContractBalance(FluxinContract, Fluxin, "fluxinBalance");
+    await fetchContractBalance(
+      AllContracts.FluxinContract,
+      Fluxin,
+      "fluxinBalance"
+    );
   };
   const ContractFluxinStateBalance = async () => {
     await fetchContractBalance(
@@ -1366,21 +1302,21 @@ export const DAVTokenProvider = ({ children }) => {
 
   const ContractRatioFluxinBalance = async () => {
     await fetchContractBalance(
-      FluxinContract,
+      AllContracts.FluxinContract,
       Ratio_TOKEN_ADDRESS,
       "ratioFluxinBalance"
     );
   };
   const ContractRatioXerionBalance = async () => {
     await fetchContractBalance(
-      XerionContract,
+		AllContracts.XerionContract,
       XerionRatioAddress,
       "ratioXerionBalance"
     );
   };
 
   const ContractXerionBalance = async () => {
-    await fetchContractBalance(XerionContract, Xerion, "xerionBalance");
+    await fetchContractBalance(AllContracts.XerionContract, Xerion, "xerionBalance");
   };
   const fetchContractBalance = async (contract, tokenAddress, balanceKey) => {
     try {
@@ -1440,7 +1376,7 @@ export const DAVTokenProvider = ({ children }) => {
       );
     }
   };
-  console.log("Contract functions:", RatioContract);
+  console.log("Contract functions:", AllContracts.RatioContract);
 
   const SwapTokens = async (id, ContractName) => {
     try {
@@ -1472,8 +1408,8 @@ export const DAVTokenProvider = ({ children }) => {
 
       let approvalAmount;
       let contractToUse = {
-        Fluxin: FluxinContract,
-        Xerion: XerionContract,
+        Fluxin: AllContracts.FluxinContract,
+        Xerion: AllContracts.XerionContract,
         state: AllContracts.stateContract,
       };
       const ReverseMapping = {
@@ -1576,8 +1512,8 @@ export const DAVTokenProvider = ({ children }) => {
       const extraFee = gasPriceData.gasPrice / BigInt(100); // 1% of gas price
       console.log(`Extra Fee (in wei): ${extraFee.toString()}`);
       const contracts = {
-        Fluxin: RatioContract,
-        Xerion: XerionRatioContract,
+        Fluxin: AllContracts.RatioContract,
+        Xerion: AllContracts.XerionRatioContract,
       };
       // Perform the token swap
       const swapTx = await contracts[ContractName].swapTokens(
@@ -1678,7 +1614,7 @@ export const DAVTokenProvider = ({ children }) => {
   const setReverseTime = async (start, end) => {
     try {
       // Call the contract to set both numerator and denominator
-      await RatioContract.setReverseSwapTimeRangeForPair(start, end);
+      await AllContracts.RatioContract.setReverseSwapTimeRangeForPair(start, end);
 
       console.log(`seted reverse time`);
     } catch (error) {
@@ -1718,9 +1654,9 @@ export const DAVTokenProvider = ({ children }) => {
   };
   const calculateBalancesForAllContracts = async () => {
     try {
-      const value = await SetOnePercentageOfBalance(RatioContract, "Fluxin");
+      const value = await SetOnePercentageOfBalance(AllContracts.RatioContract, "Fluxin");
       const valueXerion = await SetOnePercentageOfBalance(
-        XerionRatioContract,
+        AllContracts.XerionRatioContract,
         "Xerion"
       );
       setFluxinOnepBalnce(value.balance);
@@ -1744,12 +1680,12 @@ export const DAVTokenProvider = ({ children }) => {
   const reverseSwapEnabled = async () => {
     try {
       const isrevers = await handleContractCall(
-        RatioContract,
+        AllContracts.RatioContract,
         "reverseSwapEnabled",
         []
       );
       const isreverseXerion = await handleContractCall(
-        XerionRatioContract,
+        AllContracts.XerionRatioContract,
         "reverseSwapEnabled",
         []
       );

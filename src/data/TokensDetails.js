@@ -29,6 +29,7 @@ export const TokensDetails = () => {
 			address: DAV_TOKEN_ADDRESS,
 			renounceSmartContract: isRenounced?.dav ?? "Unknown",
 			Supply: Supply,
+			Price: 0,
 			LastDevShare: LastDevShare,
 			LastLiquidity: LastLiquidity,
 			actions: {

@@ -51,7 +51,38 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     setAuthorized(AuthAddress === account);
     console.log(account);
   };
+  const formatPrice = (price) => {
+    if (!price || isNaN(price)) {
+      return "0.0000";
+    }
 
+    const formattedPrice = parseFloat(price).toFixed(10);
+    const [integerPart, decimalPart] = formattedPrice.split(".");
+
+    const leadingZerosMatch = decimalPart.match(/^0+(.)/);
+    if (leadingZerosMatch) {
+      const leadingZeros = leadingZerosMatch[0].slice(0, -1);
+      const firstSignificantDigit = leadingZerosMatch[1];
+      const zeroCount = leadingZeros.length;
+      if (zeroCount < 4) {
+        return `${integerPart}.${"0".repeat(
+          zeroCount
+        )}${firstSignificantDigit}${decimalPart
+          .slice(zeroCount + 1)
+          .slice(0, 3)}`;
+      } else {
+        return (
+          <>
+            {integerPart}.<span>0</span>
+            <sub>{zeroCount}</sub>
+            {firstSignificantDigit}
+            {decimalPart.slice(zeroCount + 1).slice(0, 3)}
+          </>
+        );
+      }
+    }
+    return `${parseFloat(price).toFixed(7)}`;
+  };
   useEffect(() => {
     handleSetAddress();
   }, [account, AuthAddress]);
@@ -129,14 +160,17 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     <div className="container mt-3 p-0">
       {dataToShow ? (
         <table className="table table-dark infoTable">
-          <thead className="d-flex">
+          <thead className="d-flex ">
             <th className="fw-bold d-flex align-items-center uppercase">
               Information
             </th>
-            <th className="fw-bold d-flex justify-content-end align-items-center text-end w-100 uppercase py-4 ">
-              Price : {dataToShow.Price ?? 0}
+            <th className="fw-bold d-flex  justify-content-end align-items-center text-end w-100 uppercase py-4">
+              <span className="px-2 py-1 bg-secondary  rounded-pill">
+                Price : $ {formatPrice(dataToShow.Price)}
+              </span>
             </th>
           </thead>
+
           <tbody>
             {(dataToShow.tokenName === "DAV" ||
               dataToShow.tokenName === "STATE") && (

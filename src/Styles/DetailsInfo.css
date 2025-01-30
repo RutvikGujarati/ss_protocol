@@ -6,7 +6,9 @@
   width: 100%;
   border-collapse: collapse;
 }
-
+.tc {
+  color: white;
+}
 .infoTable tr {
   display: flex;
   flex-wrap: wrap;
