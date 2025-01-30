@@ -17,7 +17,7 @@ const BurnDataTable = () => {
     ClickBurn,
     DavBalanceRequireForBurn,
     DavBalance,
-	DavBalanceRequire,
+    DavBalanceRequire,
     BurnCycleACtive,
     BurnOccuredForToken,
   } = useDAVToken();
@@ -27,8 +27,8 @@ const BurnDataTable = () => {
   console.log("BurnOccuredForToken:", parseFloat(DavBalance));
   const db = parseFloat(DavBalance);
   console.log("db", db);
-  console.log("db required for burn",DavBalanceRequireForBurn)
-  console.log("db required for Auction",DavBalanceRequire)
+  console.log("db required for burn", DavBalanceRequireForBurn);
+  console.log("db required for Auction", DavBalanceRequire);
   // Get token data
   const tokens = getTokens(
     balances,
@@ -98,7 +98,9 @@ const BurnDataTable = () => {
       <div className="container mt-4 datatablemarginbottom">
         <div className="table-responsive">
           <div className="announcement text-center">
-            <div className=""></div>
+            <div className="">
+              5 DAV TOKENS REQUIRED TO BURN LISTED TOKENS AND RECEIVE THE BOUNTY.
+            </div>
           </div>
           <table className="table table-dark mt-3">
             <thead>
@@ -116,7 +118,7 @@ const BurnDataTable = () => {
               {tokens
                 .filter(
                   ({ BurnOccured, burnCycle }) =>
-                    !BurnOccured && burnCycle && db >= DavBalanceRequireForBurn
+                    !BurnOccured && burnCycle && db >= 1
                 )
                 .map(
                   ({
