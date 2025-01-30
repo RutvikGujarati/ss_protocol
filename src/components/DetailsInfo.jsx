@@ -5,6 +5,9 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { TokensDetails } from "../data/TokensDetails";
 import {
+  DoubleValues,
+  ReanounceContractsComponent,
+  SmallTokenDetails,
   TableRowDataShow,
   TableRowForTokens,
   TableRowWithClick,
@@ -126,9 +129,12 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     <div className="container mt-3 p-0">
       {dataToShow ? (
         <table className="table table-dark infoTable">
-          <thead>
+          <thead className="d-flex">
             <th className="fw-bold d-flex align-items-center uppercase">
               Information
+            </th>
+            <th className="fw-bold d-flex justify-content-end align-items-center text-end w-100 uppercase py-4 ">
+              Price : {dataToShow.Price ?? 0}
             </th>
           </thead>
           <tbody>
@@ -167,22 +173,12 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
 
             {dataToShow.tokenName == "DAV" && (
               <>
-                <tr>
-                  <td className="d-flex align-items-center">Supply</td>
-                  <td className="d-flex align-items-center justify-content-center">
-                    {"5,000,000.00"}
-                  </td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td className="d-flex align-items-center">
-                    Total Dav Tokens Minted
-                  </td>
-                  <td className="d-flex align-items-center justify-content-center">
-                    {dataToShow.Supply || ""}
-                  </td>
-                  <td></td>
-                </tr>
+                <SmallTokenDetails label={"Supply"} data={"5,000,000.00"} />
+                <SmallTokenDetails
+                  label={"Total Dav Tokens Minted"}
+                  data={dataToShow.Supply || ""}
+                />
+
                 <tr>
                   <td className="d-flex align-items-center">
                     Renounce Smart Contract
@@ -239,136 +235,55 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             )}
             {dataToShow.tokenName == "STATE" && (
               <>
-                <tr>
-                  <td className="d-flex align-items-center">
-                    State tokens burn
-                  </td>
-                  <td className="d-flex align-items-center justify-content-center">
-                    {formatWithCommas(StateBurnBalance)}
-                  </td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td className="d-flex align-items-center">
-                    Current Distribution Rate
-                  </td>
-                  <td className="d-flex align-items-center justify-content-center">
-                    {dataToShow.percentage} %
-                  </td>
-                  <td></td>
-                </tr>
+                <SmallTokenDetails
+                  label={"State tokens burn"}
+                  data={formatWithCommas(StateBurnBalance)}
+                />
+
+                <SmallTokenDetails
+                  label={"Current Distribution Rate"}
+                  data={`${dataToShow.percentage} %`}
+                />
               </>
             )}
             {(dataToShow.tokenName == "STATE" ||
               dataToShow.tokenName == "Fluxin" ||
               dataToShow.tokenName == "Xerion") && (
               <>
-                <tr>
-                  <td className="d-flex align-items-center">Minted Supply</td>
-                  <td className="d-flex align-items-center justify-content-center">
-                    {formatWithCommas(dataToShow.Supply)}
-                  </td>
-                  <td></td>
-                </tr>
+                <SmallTokenDetails
+                  label={"Minted Supply"}
+                  data={formatWithCommas(dataToShow.Supply)}
+                />
 
                 {dataToShow.tokenName !== "STATE" && (
                   <>
-                    <tr>
-                      <td className="d-flex align-items-center">
-                        {dataToShow.tokenName} in DAV vaults
-                      </td>
-                      <td className="d-flex align-items-center justify-content-center position-relative px-3 small py-0">
-                        {formatWithCommas(dataToShow.RatioBalance)}
-                        <span
-                          className="border-end h-75 position-absolute"
-                          style={{ right: 0, opacity: 0.3 }}
-                        ></span>
-                      </td>
-                      <td className="d-flex align-items-center">
-                        State Token in DAV vaults
-                      </td>
-                      <td className="d-flex align-items-center justify-content-center px-3">
-                        {formatWithCommas(dataToShow.stateBalance)}
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td className="d-flex align-items-center">
-                        Total {dataToShow.tokenName} Burned
-                      </td>
-                      <td className="d-flex align-items-center justify-content-center position-relative px-3 small py-0">
-                        <span
-                          className="border-end h-75 position-absolute"
-                          style={{ right: 0, opacity: 0.3 }}
-                        ></span>
-                        {dataToShow.TotalTokensBurn}
-                      </td>
-                      <td className="d-flex align-items-center">
-                        Total Bounty
-                      </td>
-                      <td className="d-flex align-items-center justify-content-center px-3">
-                        {dataToShow.TotalBounty}
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td className="d-flex align-items-center">
-                        Current Ratio
-                      </td>
-                      <td className="d-flex align-items-center justify-content-center position-relative px-3 small py-0">
-                        <span
-                          className="border-end h-75 position-absolute border-opacity-25"
-                          style={{ right: 0, opacity: 0.3 }}
-                        ></span>
-                        {`1:${dataToShow.Ratio}`}
-                      </td>
-
-                      <td className="d-flex align-items-center">
-                        Target Ratio
-                      </td>
-                      <td className="d-flex align-items-center justify-content-center px-3">
-                        {`1:${dataToShow.target}`}
-                      </td>
-                    </tr>
+                    <DoubleValues
+                      label1={`${dataToShow.tokenName} in DAV vaults`}
+                      firstData={formatWithCommas(dataToShow.RatioBalance)}
+                      label2={"State Token in DAV vaults"}
+                      SecondData={formatWithCommas(dataToShow.stateBalance)}
+                    />
+                    <DoubleValues
+                      label1={`Total ${dataToShow.tokenName} Burned`}
+                      firstData={dataToShow.TotalTokensBurn}
+                      label2={"Total Bounty"}
+                      SecondData={dataToShow.TotalBounty}
+                    />
+                    <DoubleValues
+                      label1={`Current Ratio`}
+                      firstData={`1:${dataToShow.Ratio}`}
+                      label2={"Target Ratio"}
+                      SecondData={`1:${dataToShow.target}`}
+                    />
                   </>
                 )}
 
-                <tr>
-                  <td className="d-flex align-items-center">
-                    Renounce Smart Contract
-                  </td>
+                <ReanounceContractsComponent
+                  condition1={dataToShow.renounceSmartContract}
+                  hash={dataToShow.transactionHash}
+                  ClickAction={() => dataToShow.actions.ReanounceContract()}
+                />
 
-                  <td className="d-flex align-items-center justify-content-center">
-                    {dataToShow.renounceSmartContract == null
-                      ? "Loading..."
-                      : dataToShow.renounceSmartContract
-                      ? "Yes"
-                      : "No"}{" "}
-                  </td>
-                  <td className="d-flex justify-content-end">
-                    {dataToShow.renounceSmartContract ? (
-                      <button
-                        onClick={() =>
-                          window.open(
-                            `https://otter.pulsechain.com/tx/${dataToShow.transactionHash}`,
-                            "_blank",
-                            "noopener,noreferrer"
-                          )
-                        }
-                        className="btn btn-primary btn-sm swap-btn info-icon"
-                      >
-                        View
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => dataToShow.actions.ReanounceContract()}
-                        className="btn btn-primary btn-sm swap-btn info-icon"
-                      >
-                        Set
-                      </button>
-                    )}
-                  </td>
-                </tr>
                 {authorized && (
                   <>
                     <tr>
@@ -638,34 +553,18 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               </button>
                             </td>
                           </tr>
-
-                          <tr>
-                            <td className="d-flex align-items-center">
-                              Time Left In auction{" "}
-                            </td>
-                            <td className="d-flex align-items-center justify-content-center">
-                              {dataToShow.AuctionTimeRunning}
-                            </td>
-                            <td></td>
-                          </tr>
-                          <tr>
-                            <td className="d-flex align-items-center">
-                              Time Left In burn Cycle{" "}
-                            </td>
-                            <td className="d-flex align-items-center justify-content-center">
-                              {dataToShow.BurnTimeLeft}
-                            </td>
-                            <td></td>
-                          </tr>
-                          <tr>
-                            <td className="d-flex align-items-center">
-                              Next Start Time of the Auction
-                            </td>
-                            <td className="d-flex align-items-center justify-content-center">
-                              {dataToShow.AuctionNextTime.nextAuctionStart}
-                            </td>
-                            <td></td>
-                          </tr>
+                          <SmallTokenDetails
+                            label={"Time Left In auction"}
+                            data={dataToShow.AuctionTimeRunning}
+                          />
+                          <SmallTokenDetails
+                            label={"Time Left In burn Cycle"}
+                            data={dataToShow.BurnTimeLeft}
+                          />
+                          <SmallTokenDetails
+                            label={"Next Start Time of the Auction"}
+                            data={dataToShow.AuctionNextTime.nextAuctionStart}
+                          />
                         </>
                       )}
                   </>

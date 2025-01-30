@@ -1,11 +1,12 @@
 // DAVTokenContext.js
 import { createContext, useContext, useState, useEffect } from "react";
 import { ethers } from "ethers";
-import DAVTokenABI from "../ABI/DavTokenABI.json";
+// import DAVTokenABI from "../ABI/DavTokenABI.json";
 import StateABI from "../ABI/StateTokenABI.json";
 import RatioABI from "../ABI/RatioABI.json";
 import PropTypes from "prop-types";
 import { PriceContext } from "../api/StatePrice";
+import { ContractContext } from "../Functions/ContractIntialize";
 
 const DAVTokenContext = createContext();
 
@@ -16,7 +17,7 @@ const DAVTokenContext = createContext();
 // export const Fluxin = "0x60fe86aF11F760A0a87fDD2325F94D73594023B1";
 // export const Xerion = "0xaE4733A33Dd8382B43466D572F0a94eF9579Ee45";
 
-export const DAV_TOKEN_ADDRESS = "0xDBfb087D16eF29Fd6c0872C4C0525B38fBAEB319";
+export const DAV_TOKEN_ADDRESS = "0x16D608f2cB1E229374d3930c273361b1e83A8129";
 export const STATE_TOKEN_ADDRESS = "0x5Fe613215C6B6EFB846B92B24409E11450398aC5";
 export const Ratio_TOKEN_ADDRESS = "0x3d8c16a21e110958fF0E5FA7E76a7EC41fe61EAe";
 export const XerionRatioAddress = "0x08cbAE49E15d0C63d2c2A33BE641f9C6d0DF56cA";
@@ -28,8 +29,8 @@ export const useDAVToken = () => useContext(DAVTokenContext);
 export const DAVTokenProvider = ({ children }) => {
   const { stateUsdPrice, FluxinRatioPrice, XerionRatioPrice } =
     useContext(PriceContext);
+  const { AllContracts } = useContext(ContractContext);
 
-  //contract initialization states
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [account, setAccount] = useState(null);
@@ -40,8 +41,8 @@ export const DAVTokenProvider = ({ children }) => {
   const [transactionStatus, setTransactionStatus] = useState(null); // 'pending', 'success', or 'failed'
 
   //contract state
-  const [davContract, setDavContract] = useState(null);
-  const [stateContract, setStateContract] = useState(null);
+  //   const [davContract, setDavContract] = useState(null);
+  //   const [stateContract, setStateContract] = useState(null);
   const [FluxinContract, setFluxinContract] = useState(null);
   const [XerionContract, setXerionContract] = useState(null);
   const [RatioContract, setRatioContract] = useState(null);
@@ -110,19 +111,6 @@ export const DAVTokenProvider = ({ children }) => {
   const [AuctionTimeRunning, SetAuctionTimeRunning] = useState("0");
   const [AuctionTimeRunningXerion, SetAuctionTimeRunningXerion] = useState("0");
   const [RatioValues, SetRatioTargets] = useState("0");
-  const [DavBalanceRequire, setDBRequired] = useState(
-    localStorage.getItem("DavBalanceRequire") || "1"
-  );
-  const [DavBalanceRequireForBurn, setDBForBurnRequired] = useState(
-    localStorage.getItem("DavBalanceRequireForBurn") || "5"
-  );
-  useEffect(() => {
-    localStorage.setItem("DavBalanceRequire", DavBalanceRequire);
-  }, [DavBalanceRequire]);
-
-  useEffect(() => {
-    localStorage.setItem("DavBalanceRequireForBurn", DavBalanceRequireForBurn);
-  }, [DavBalanceRequireForBurn]);
 
   useEffect(() => {
     const initialize = async () => {
@@ -139,12 +127,12 @@ export const DAVTokenProvider = ({ children }) => {
           setSigner(newSigner);
           setAccount(accounts[0]);
 
-          setDavContract(
-            new ethers.Contract(DAV_TOKEN_ADDRESS, DAVTokenABI, newSigner)
-          );
-          setStateContract(
-            new ethers.Contract(STATE_TOKEN_ADDRESS, StateABI, newSigner)
-          );
+          //   setDavContract(
+          //     new ethers.Contract(DAV_TOKEN_ADDRESS, DAVTokenABI, newSigner)
+          //   );
+          //   setStateContract(
+          //     new ethers.Contract(STATE_TOKEN_ADDRESS, StateABI, newSigner)
+          //   );
           setFluxinContract(new ethers.Contract(Fluxin, StateABI, newSigner));
           setXerionContract(new ethers.Contract(Xerion, StateABI, newSigner));
 
@@ -207,12 +195,13 @@ export const DAVTokenProvider = ({ children }) => {
   const mintDAV = async (amount) => {
     try {
       const value = ethers.parseEther(amount.toString());
-      const cost = ethers.parseEther((amount * 200000).toString()); //200000
+      const cost = ethers.parseEther((amount * 250000).toString()); //200000
 
-      const transaction = await handleContractCall(davContract, "mintDAV", [
-        value,
-        { value: cost },
-      ]);
+      const transaction = await handleContractCall(
+        AllContracts.davContract,
+        "mintDAV",
+        [value, { value: cost }]
+      );
       await transaction.wait();
       console.log("Minting successful!");
     } catch (error) {
@@ -221,12 +210,12 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   const CalculationOfCost = async (amount) => {
-    setTotalCost(ethers.parseEther((amount * 200000).toString()));
+    setTotalCost(ethers.parseEther((amount * 250000).toString()));
   };
 
   const DavHoldings = async () => {
     const holdings = await handleContractCall(
-      davContract,
+      AllContracts.davContract,
       "getDAVHoldings",
       [account],
       (h) => ethers.formatUnits(h, 18)
@@ -237,7 +226,7 @@ export const DAVTokenProvider = ({ children }) => {
   const fetchStateHoldingsAndCalculateUSD = async () => {
     try {
       const holdings = await handleContractCall(
-        stateContract,
+        AllContracts.stateContract,
         "balanceOf",
         [account],
         (h) => ethers.formatUnits(h, 18) // This formats from Wei to Ether
@@ -287,7 +276,7 @@ export const DAVTokenProvider = ({ children }) => {
   const DavHoldingsPercentage = async () => {
     try {
       const balance = await handleContractCall(
-        davContract,
+        AllContracts.davContract,
         "balanceOf",
         [account],
         (b) => ethers.formatUnits(b, 18)
@@ -311,7 +300,7 @@ export const DAVTokenProvider = ({ children }) => {
 
   const DavSupply = async () => {
     const supply = await handleContractCall(
-      davContract,
+      AllContracts.davContract,
       "totalSupply",
       [],
       (s) => ethers.formatUnits(s, 18)
@@ -321,7 +310,7 @@ export const DAVTokenProvider = ({ children }) => {
 
   const StateTotalMintedSupply = async () => {
     const supply = await handleContractCall(
-      stateContract,
+      AllContracts.stateContract,
       "totalSupply",
       [],
       (s) => ethers.formatUnits(s, 18)
@@ -353,8 +342,8 @@ export const DAVTokenProvider = ({ children }) => {
 
     const fetchLiveData = async () => {
       if (
-        davContract &&
-        stateContract &&
+        AllContracts.davContract &&
+        AllContracts.stateContract &&
         RatioContract &&
         XerionRatioContract
       ) {
@@ -509,7 +498,13 @@ export const DAVTokenProvider = ({ children }) => {
     interval = setInterval(fetchLiveData, 10000);
 
     return () => clearInterval(interval); // Clean up interval on component unmount
-  }, [davContract, stateContract, RatioContract, XerionRatioContract, account]);
+  }, [
+    AllContracts.davContract,
+    AllContracts.stateContract,
+    RatioContract,
+    XerionRatioContract,
+    account,
+  ]);
 
   // Ratio Token Contracts
   // -- auction
@@ -629,17 +624,21 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   const ReanounceContract = () =>
-    renounceOwnership(davContract, "DAV", setDavTransactionHash);
+    renounceOwnership(AllContracts.davContract, "DAV", setDavTransactionHash);
   const ReanounceFluxinContract = () =>
     renounceOwnership(FluxinContract, "Fluxin", setFluxinTransactionHash);
   const ReanounceXerionContract = () =>
     renounceOwnership(XerionContract, "Xerion", setXerionTransactionHash);
   const RenounceState = () =>
-    renounceOwnership(stateContract, "State", setStateTransactionHash);
+    renounceOwnership(
+      AllContracts.stateContract,
+      "State",
+      setStateTransactionHash
+    );
 
   const contracts = {
-    state: stateContract,
-    dav: davContract,
+    state: AllContracts.stateContract,
+    dav: AllContracts.davContract,
     Fluxin: FluxinContract,
     Xerion: XerionContract,
   };
@@ -659,7 +658,7 @@ export const DAVTokenProvider = ({ children }) => {
   const handleWithdraw = async (methodName) => {
     try {
       setClaiming(true);
-      await handleContractCall(davContract, methodName, []);
+      await handleContractCall(AllContracts.davContract, methodName, []);
     } catch (e) {
       console.error(`Error withdrawing with method ${methodName}:`, e);
     } finally {
@@ -680,7 +679,8 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   // Specific withdrawal functions
-  const WithdrawState = (amount) => handleTokenWithdraw(stateContract, amount);
+  const WithdrawState = (amount) =>
+    handleTokenWithdraw(AllContracts.stateContract, amount);
   const WithdrawFluxin = (amount) =>
     handleTokenWithdraw(FluxinContract, amount);
   const WithdrawXerion = (amount) =>
@@ -700,7 +700,7 @@ export const DAVTokenProvider = ({ children }) => {
       if (contractType === "fluxin") {
         contract = FluxinContract;
       } else if (contractType === "state") {
-        contract = stateContract;
+        contract = AllContracts.stateContract;
       } else if (contractType === "Xerion") {
         contract = XerionContract;
       }
@@ -720,7 +720,7 @@ export const DAVTokenProvider = ({ children }) => {
   const DAVTokenAmount = async () => {
     try {
       const balance = await handleContractCall(
-        davContract,
+        AllContracts.davContract,
         "liquidityFunds",
         [],
         (s) => ethers.formatUnits(s, 18)
@@ -849,7 +849,7 @@ export const DAVTokenProvider = ({ children }) => {
   const DAVTokenfive_Amount = async () => {
     try {
       const balance = await handleContractCall(
-        davContract,
+        AllContracts.davContract,
         "developmentFunds",
         [],
         (s) => ethers.formatUnits(s, 18)
@@ -1340,7 +1340,7 @@ export const DAVTokenProvider = ({ children }) => {
 
   const ContractStateBalance = async () => {
     await fetchContractBalance(
-      stateContract,
+      AllContracts.stateContract,
       STATE_TOKEN_ADDRESS,
       "stateBalance"
     );
@@ -1351,14 +1351,14 @@ export const DAVTokenProvider = ({ children }) => {
   };
   const ContractFluxinStateBalance = async () => {
     await fetchContractBalance(
-      stateContract,
+      AllContracts.stateContract,
       Ratio_TOKEN_ADDRESS,
       "StateFluxin"
     );
   };
   const ContractXerionStateBalance = async () => {
     await fetchContractBalance(
-      stateContract,
+      AllContracts.stateContract,
       XerionRatioAddress,
       "StateXerion"
     );
@@ -1474,7 +1474,7 @@ export const DAVTokenProvider = ({ children }) => {
       let contractToUse = {
         Fluxin: FluxinContract,
         Xerion: XerionContract,
-        state: stateContract,
+        state: AllContracts.stateContract,
       };
       const ReverseMapping = {
         Fluxin: isReversed.Fluxin,
@@ -1919,7 +1919,7 @@ export const DAVTokenProvider = ({ children }) => {
         account,
 
         //DAV Contract
-        davContract,
+        // davContract,
         mintDAV,
         CalculationOfCost,
         TotalCost,
@@ -2011,10 +2011,6 @@ export const DAVTokenProvider = ({ children }) => {
         bountyBalances,
         TotalBounty,
         TotalTokensBurned,
-        setDBRequired,
-        DavBalanceRequire,
-        setDBForBurnRequired,
-        DavBalanceRequireForBurn,
       }}
     >
       {children}

@@ -1,3 +1,5 @@
+import PropTypes from "prop-types";
+
 export const TableRowWithClick = ({ label, value, action, buttonText }) => (
   <tr>
     <td className="d-flex align-items-center">{label}</td>
@@ -83,4 +85,115 @@ export const TableRowForTokens = ({
       </tr>
     </>
   );
+};
+
+export const SmallTokenDetails = ({ label, data }) => {
+  return (
+    <>
+      <tr>
+        <td className="d-flex align-items-center">{label}</td>
+        <td className="d-flex align-items-center justify-content-center">
+          {data}
+        </td>
+        <td></td>
+      </tr>
+    </>
+  );
+};
+
+export const DoubleValues = ({ label1, firstData, label2, SecondData }) => {
+  return (
+    <tr>
+      <td className="d-flex align-items-center">{label1}</td>
+      <td className="d-flex align-items-center justify-content-center position-relative px-3 small py-0">
+        {firstData}
+        <span
+          className="border-end h-75 position-absolute"
+          style={{ right: 0, opacity: 0.3 }}
+        ></span>
+      </td>
+      <td className="d-flex align-items-center">{label2}</td>
+      <td className="d-flex align-items-center justify-content-center px-3">
+        {SecondData}
+      </td>
+    </tr>
+  );
+};
+
+export const ReanounceContractsComponent = ({
+  condition1,
+  hash,
+  ClickAction,
+}) => {
+  return (
+    <tr>
+      <td className="d-flex align-items-center">Renounce Smart Contract</td>
+
+      <td className="d-flex align-items-center justify-content-center">
+        {condition1 == null ? "Loading..." : condition1 ? "Yes" : "No"}{" "}
+      </td>
+      <td className="d-flex justify-content-end">
+        {condition1 ? (
+          <button
+            onClick={() =>
+              window.open(
+                `https://otter.pulsechain.com/tx/${hash}`,
+                "_blank",
+                "noopener,noreferrer"
+              )
+            }
+            className="btn btn-primary btn-sm swap-btn info-icon"
+          >
+            View
+          </button>
+        ) : (
+          <button
+            onClick={ClickAction}
+            className="btn btn-primary btn-sm swap-btn info-icon"
+          >
+            Set
+          </button>
+        )}
+      </td>
+    </tr>
+  );
+};
+TableRowForTokens.propTypes = {
+  label: PropTypes.isRequired,
+  label2: PropTypes.isRequired,
+  tokenName: PropTypes.isRequired,
+  TokenAddress: PropTypes.isRequired,
+  value: PropTypes.isRequired,
+  priceTag: PropTypes.isRequired,
+  PercentageOfToken: PropTypes.isRequired,
+};
+
+TableRowWithClick.propTypes = {
+  label: PropTypes.isRequired,
+  value: PropTypes.isRequired,
+  action: PropTypes.func,
+  buttonText: PropTypes.string,
+};
+
+TableRowDataShow.propTypes = {
+  label: PropTypes.isRequired,
+  address: PropTypes.isRequired,
+  value: PropTypes.isRequired,
+};
+SmallTokenDetails.propTypes = {
+  label: PropTypes.isRequired,
+  data: PropTypes.isRequired,
+};
+DoubleValues.propTypes = {
+  label1: PropTypes.isRequired,
+  firstData: PropTypes.isRequired,
+  label2: PropTypes.isRequired,
+  SecondData: PropTypes.isRequired,
+};
+
+ReanounceContractsComponent.propTypes = {
+  condition1: PropTypes.any,
+  condition2: PropTypes.any,
+  hash: PropTypes.string,
+  ClickAction: PropTypes.func,
 };

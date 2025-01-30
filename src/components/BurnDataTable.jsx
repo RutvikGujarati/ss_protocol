@@ -78,7 +78,7 @@ const BurnDataTable = () => {
             style={{ minWidth: "320px", maxWidth: "400px" }}
           >
             <div className="card-body text-center">
-              <h5 className="card-title text-danger fw-bold">Error</h5>
+              <h5 className="card-title text-danger fw-bold">Note:</h5>
               <p className="card-text">{errorPopup.message}</p>
 
               <div className="text-end">

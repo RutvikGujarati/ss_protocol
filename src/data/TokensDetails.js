@@ -11,7 +11,7 @@ const FluxinShortened = shortenAddress(Fluxin);
 const stateShortened = shortenAddress(STATE_TOKEN_ADDRESS);
 const XerionShortened = shortenAddress(Xerion);
 export const TokensDetails = () => {
-	const { FluxinRatioPrice, XerionRatioPrice, FluxinUsdPrice, XerionUsdPrice } =
+	const { FluxinRatioPrice, XerionRatioPrice, stateUsdPrice, FluxinUsdPrice, XerionUsdPrice } =
 		useContext(PriceContext);
 
 	const { Supply, LastDevShare, isRenounced, DAVTokensWithdraw, LastLiquidity, FluxinSupply, PercentageFluxin, balances, DAVTokensFiveWithdraw, XerionSupply, RatioTargetsofTokens, TotalTokensBurned, BurnTimeLeft, isReversed, withdraw_95, PercentageXerion, AuctionTimeRunningXerion, withdraw_5, ReanounceContract, TotalBounty, auctionDetails, AuctionRunningLocalString, SetAUctionDuration, mintAdditionalTOkens, WithdrawFluxin, AuctionTimeRunning, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, XerionTransactionHash, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, StateSupply, PercentageOfState, LPStateTransferred, RenounceState, WithdrawState, AddTokens } = useDAVToken();
@@ -149,6 +149,7 @@ export const TokensDetails = () => {
 			ApproveAmount: "10,000,000,000",
 			transactionHash:
 				"0xf562341d1f0f5469809553f07cd9f19da479a9af3b074d0982594899a6595b10",
+			Price: stateUsdPrice,
 
 			renounceSmartContract: isRenounced?.state ?? "Unknown",
 			actions: {
