@@ -164,11 +164,15 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             <th className="fw-bold d-flex align-items-center uppercase">
               Information
             </th>
-            <th className="fw-bold d-flex  justify-content-end align-items-center text-end w-100 uppercase py-4">
-              <span className="px-2 py-1 bg-secondary  rounded-pill">
-                Price : $ {formatPrice(dataToShow.Price)}
-              </span>
-            </th>
+            {dataToShow.tokenName !== "DAV" ? (
+              <th className="fw-bold  d-flex  justify-content-end align-items-center text-end w-100 uppercase py-4">
+                <button className="py-1  mx-3 btn btn-primary btn-sm swap-btn">
+                  Price : $ {formatPrice(dataToShow.Price)}
+                </button>
+              </th>
+            ) : (
+              <th className="fw-bold d-flex  justify-content-end align-items-center text-end w-100 uppercase py-4"></th>
+            )}
           </thead>
 
           <tbody>

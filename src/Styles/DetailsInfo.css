@@ -15,6 +15,11 @@
   align-items: flex-start;
   justify-content: space-between;
 }
+.infoTable span {
+  color: white !important; /* Ensures bright text */
+  filter: none !important; /* Removes any dimming effect */
+  opacity: 1 !important; /* Ensures full visibility */
+}
 
 .infoTable td {
   display: flex;
