@@ -8,6 +8,7 @@ import { formatWithCommas } from "./DetailsInfo";
 import { PriceContext } from "../api/StatePrice";
 import BurnDataTable from "./BurnDataTable";
 import { getAuctionTokens } from "../data/auctionTokenData";
+import { useDAvContract } from "../Functions/DavTokenFunctions";
 
 const DataTable = () => {
   const {
@@ -17,7 +18,8 @@ const DataTable = () => {
     FluxinRatioPrice,
     FluxinUsdPrice,
   } = useContext(PriceContext);
-
+  const { DavBalance } =
+  useDAvContract();
   const {
     SwapTokens,
     handleAddTokenState,
@@ -32,7 +34,6 @@ const DataTable = () => {
     AuctionRunning,
     auctionDetails,
     userHashSwapped,
-    DavBalance,
     ClaimTokens,
     XerionOnepBalance,
     handleAddFluxin,
