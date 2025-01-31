@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import { useDAVToken } from "../Context/DavTokenContext";
 import { getTokens } from "../data/BurntokenData";
+import { useDAvContract } from "../Functions/DavTokenFunctions";
 
 const BurnDataTable = () => {
   const [isProcessing, setIsProcessing] = useState({});
@@ -10,13 +11,12 @@ const BurnDataTable = () => {
     state: false,
     message: "",
   });
-
+  const { DavBalance } = useDAvContract();
   const {
     balances,
     bountyBalances,
     ClickBurn,
     DavBalanceRequireForBurn,
-    DavBalance,
     DavBalanceRequire,
     BurnCycleACtive,
     BurnOccuredForToken,
@@ -99,7 +99,8 @@ const BurnDataTable = () => {
         <div className="table-responsive">
           <div className="announcement text-center">
             <div className="">
-              5 DAV TOKENS REQUIRED TO BURN LISTED TOKENS AND RECEIVE THE BOUNTY.
+              5 DAV TOKENS REQUIRED TO BURN LISTED TOKENS AND RECEIVE THE
+              BOUNTY.
             </div>
           </div>
           <table className="table table-dark mt-3">
