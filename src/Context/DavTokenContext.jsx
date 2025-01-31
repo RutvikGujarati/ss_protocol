@@ -1518,7 +1518,7 @@ export const DAVTokenProvider = ({ children }) => {
       );
 
       const balance = Math.floor(parseFloat(rawBalance || "0"));
-      console.log(`SetOnePercentageOfBalance -> ${tokenName}:`, balance);
+      console.log(`SetOnePercentageOfBalance -> ${tokenName}:`, rawBalance);
 
       console.log(`Adjusted Balance for ${tokenName}:`, balance);
 
@@ -1548,6 +1548,7 @@ export const DAVTokenProvider = ({ children }) => {
         AllContracts.XerionRatioContract,
         "Xerion"
       );
+	  console.log("Value Calculation",value)
       setFluxinOnepBalnce(value.balance);
       setXerionOnepBalnce(valueXerion.balance);
       console.log("Final Balances in State:", value.balance);
