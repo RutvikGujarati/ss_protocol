@@ -1,7 +1,9 @@
 import XerionLogo from "../assets/XerionLogo.png";
 import FluxinLogo from "../assets/FluxinLogo.png";
-import { Fluxin, Xerion } from "../Context/DavTokenContext";
-
+import {
+	Fluxin,
+	Xerion,
+} from "../ContractAddresses";
 export const getAuctionTokens = (
 	stateUsdPrice,
 	XerionUsdPrice,

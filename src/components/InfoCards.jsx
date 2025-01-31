@@ -7,25 +7,26 @@ import { useLocation } from "react-router-dom";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { formatWithCommas } from "./DetailsInfo";
 import { PriceContext } from "../api/StatePrice";
-
+import { useDAvContract } from "../Functions/DavTokenFunctions";
+import DotAnimation from "../Animations/Animation";
 const InfoCards = () => {
   const { stateUsdPrice } = useContext(PriceContext);
   const [setBurnRatio] = useState("0.0");
+  const { mintDAV, davHolds, isLoading, DavBalance, davPercentage } =
+    useDAvContract();
+
   const {
-    mintDAV,
+    // mintDAV,
     // handleAddTokenRatio,
     handleAddTokenState,
     handleAddTokenDAV,
     CalculationOfCost,
     TotalCost,
     Distributed,
-    DavBalance,
     TotalStateHoldsInUS,
-    davHolds,
     contracts,
     ClaimTokens,
     CheckMintBalance,
-    davPercentage,
     StateBurnBalance,
     StateHolds,
   } = useDAVToken();
@@ -182,7 +183,9 @@ const InfoCards = () => {
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
                       <div className="carddetails2">
                         <p className="mb-1 detailText">Dav holdings</p>
-                        <h5 className="">{davHolds}</h5>
+                        <h5 className="">
+                          {isLoading ? <DotAnimation /> : davHolds}
+                        </h5>
                       </div>
                       <div className="mb-0 mx-1">
                         <img
@@ -197,7 +200,9 @@ const InfoCards = () => {
                     </div>
                     <div className="carddetails2">
                       <p className="mb-1 detailText">Dav Rank</p>
-                      <h5 className="">{davPercentage}</h5>
+                      <h5 className="">
+                        {isLoading ? <DotAnimation /> : davPercentage}
+                      </h5>
                     </div>
                     <div className="carddetails2 ">
                       <h6

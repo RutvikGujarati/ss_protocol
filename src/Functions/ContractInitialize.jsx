@@ -1,13 +1,13 @@
 import { ethers } from "ethers";
 import { createContext, useEffect, useState } from "react";
 import {
-  DAV_TOKEN_ADDRESS,
-  Fluxin,
-  Ratio_TOKEN_ADDRESS,
-  STATE_TOKEN_ADDRESS,
-  Xerion,
-  XerionRatioAddress,
-} from "../Context/DavTokenContext";
+	DAV_TOKEN_ADDRESS,
+	Fluxin,
+	Ratio_TOKEN_ADDRESS,
+	STATE_TOKEN_ADDRESS,
+	Xerion,
+	XerionRatioAddress,
+  } from "../ContractAddresses";
 import DAVTokenABI from "../ABI/DavTokenABI.json";
 import StateABI from "../ABI/StateTokenABI.json";
 import RatioABI from "../ABI/RatioABI.json";

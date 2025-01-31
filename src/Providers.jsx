@@ -7,7 +7,8 @@ import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { config } from "../WalletConfig.js";
 import { PriceProvider } from "./api/StatePrice.jsx";
 import { DAVTokenProvider } from "./Context/DavTokenContext.jsx";
-import { ContractProvider } from "./Functions/ContractIntialize.jsx";
+import { ContractProvider } from "./Functions/ContractInitialize.jsx";
+import { DavProvider } from "./Functions/DavTokenFunctions.jsx";
 
 const queryClient = new QueryClient();
 export default function Providers({ children }) {
@@ -28,13 +29,15 @@ export default function Providers({ children }) {
             })}
           >
             <PriceProvider>
-                <ContractProvider>
-              <DAVTokenProvider>
+              <ContractProvider>
+                <DAVTokenProvider>
+				<DavProvider>
                   <Suspense fallback={<div>Loading...</div>}>
                     {children}
                   </Suspense>
-              </DAVTokenProvider>
-                </ContractProvider>
+				</DavProvider>
+                </DAVTokenProvider>
+              </ContractProvider>
             </PriceProvider>
           </RainbowKitProvider>
         </QueryClientProvider>

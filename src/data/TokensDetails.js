@@ -1,6 +1,13 @@
 import { useContext } from "react";
-import { DAV_TOKEN_ADDRESS, Fluxin, STATE_TOKEN_ADDRESS, Xerion, useDAVToken } from "../Context/DavTokenContext";
+import { useDAVToken } from "../Context/DavTokenContext";
+import {
+	DAV_TOKEN_ADDRESS,
+	Fluxin,
+	STATE_TOKEN_ADDRESS,
+	Xerion,
+} from "../ContractAddresses";
 import { PriceContext } from "../api/StatePrice";
+import { useDAvContract } from "../Functions/DavTokenFunctions";
 
 const shortenAddress = (address) => {
 	if (!address) return "";
@@ -13,8 +20,10 @@ const XerionShortened = shortenAddress(Xerion);
 export const TokensDetails = () => {
 	const { FluxinRatioPrice, XerionRatioPrice, stateUsdPrice, FluxinUsdPrice, XerionUsdPrice } =
 		useContext(PriceContext);
-
-	const { Supply, LastDevShare, isRenounced, DAVTokensWithdraw, LastLiquidity, FluxinSupply, PercentageFluxin, balances, DAVTokensFiveWithdraw, XerionSupply, RatioTargetsofTokens, TotalTokensBurned, BurnTimeLeft, isReversed, withdraw_95, PercentageXerion, AuctionTimeRunningXerion, withdraw_5, ReanounceContract, TotalBounty, auctionDetails, AuctionRunningLocalString, SetAUctionDuration, mintAdditionalTOkens, WithdrawFluxin, AuctionTimeRunning, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, XerionTransactionHash, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, StateSupply, PercentageOfState, LPStateTransferred, RenounceState, WithdrawState, AddTokens } = useDAVToken();
+	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
+		withdraw_95, } =
+		useDAvContract();
+	const { LastDevShare, isRenounced, LastLiquidity, FluxinSupply, PercentageFluxin, balances, XerionSupply, RatioTargetsofTokens, TotalTokensBurned, BurnTimeLeft, isReversed, PercentageXerion, AuctionTimeRunningXerion, ReanounceContract, TotalBounty, auctionDetails, AuctionRunningLocalString, SetAUctionDuration, mintAdditionalTOkens, WithdrawFluxin, AuctionTimeRunning, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, XerionTransactionHash, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, StateSupply, PercentageOfState, LPStateTransferred, RenounceState, WithdrawState, AddTokens } = useDAVToken();
 
 	return [
 		{

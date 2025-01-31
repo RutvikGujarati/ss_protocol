@@ -30,7 +30,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     mintAdditionalTOkens,
     StateBurnBalance,
   } = useDAVToken();
-
   const [numerator, setNumerator] = useState("");
 
   const [numeratorOfAUction, setNumeratorOfAuction] = useState("");

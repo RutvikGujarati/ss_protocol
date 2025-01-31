@@ -36,7 +36,7 @@ const DataTable = () => {
     ClaimTokens,
     XerionOnepBalance,
     handleAddFluxin,
-	DavBalanceRequire,
+    DavBalanceRequire,
     handleAddXerion,
     FluxinOnepBalance,
     swappingStates,
@@ -105,7 +105,7 @@ const DataTable = () => {
     // General case: No significant leading zeros
     return `$${parseFloat(price).toFixed(7)}`;
   };
-  const db= parseFloat(DavBalance)
+  const db = parseFloat(DavBalance);
   console.log("db required for Auction", DavBalanceRequire);
 
   const handleClaimTokens = async (id, ContractName) => {

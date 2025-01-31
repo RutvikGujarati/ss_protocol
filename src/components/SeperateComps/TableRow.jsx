@@ -1,4 +1,6 @@
 import PropTypes from "prop-types";
+import { useDAvContract } from "../../Functions/DavTokenFunctions";
+import DotAnimation from "../../Animations/Animation";
 
 export const TableRowWithClick = ({ label, value, action, buttonText }) => (
   <tr>
@@ -88,12 +90,13 @@ export const TableRowForTokens = ({
 };
 
 export const SmallTokenDetails = ({ label, data }) => {
+  const { isLoading } = useDAvContract();
   return (
     <>
       <tr>
         <td className="d-flex align-items-center">{label}</td>
         <td className="d-flex align-items-center justify-content-center">
-          {data}
+          {isLoading ? <DotAnimation /> : data}
         </td>
         <td></td>
       </tr>

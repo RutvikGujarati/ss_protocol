@@ -28,7 +28,8 @@ const Header = () => {
           <NavLink className="navbar-brand text-light pb-0 mb-0" to="/">
             <h5 className="uppercase fs-2 fw-bolder">THE STATE</h5>
             <p className="detailAmount mb-1 " style={{ fontSize: "12px" }}>
-              Limited User Blockchain Economy <br /> by System State Protocol
+              Ratio Swapping Decentralized Exchange <br /> by System State
+              Protocol
             </p>
           </NavLink>
 
