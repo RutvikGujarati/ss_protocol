@@ -130,7 +130,7 @@ export const ReanounceContractsComponent = ({
 }) => {
   return (
     <tr>
-      <td className="d-flex align-items-center">Renounce Smart Contract</td>
+      <td className="d-flex align-items-center">Contract Renounced</td>
 
       <td className="d-flex align-items-center justify-content-center">
         {condition1 == null ? "Loading..." : condition1 ? "Yes" : "No"}{" "}

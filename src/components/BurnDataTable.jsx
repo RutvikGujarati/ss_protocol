@@ -4,6 +4,7 @@ import "../Styles/DataTable.css";
 import { useDAVToken } from "../Context/DavTokenContext";
 import { getTokens } from "../data/BurntokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
+import { formatWithCommas } from "./DetailsInfo";
 
 const BurnDataTable = () => {
   const [isProcessing, setIsProcessing] = useState({});
@@ -151,10 +152,10 @@ const BurnDataTable = () => {
                       </td>
                       <td>{burnRatio}</td>
                       <td>
-                        {bounty} {name}
+                        {formatWithCommas(bounty)} {name}
                       </td>
                       <td>
-                        {burnAmount} {name}
+                        {formatWithCommas(burnAmount)} {name}
                       </td>
 
                       <td>

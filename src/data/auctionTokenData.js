@@ -44,10 +44,10 @@ export const getAuctionTokens = (
 			distributedAmount: Distributed["Fluxin"],
 			token: Fluxin,
 			handleAddXerion: handleAddFluxin,
-			inputTokenAmount: `${FluxinOnepBalance} Fluxin`,
+			inputTokenAmount: isReversed.Fluxin === "true" ? `${FluxinOnepBalance * 2} Fluxin` : `${FluxinOnepBalance} Fluxin`,
 			SwapT: () => SwapTokens("Fluxin", "Fluxin"),
 			ratioPrice: FluxinRatioPrice,
-			outputToken: `${outAmounts.Fluxin} State`,
+			outputToken: isReversed.Fluxin === "true" ? `${outAmounts.Fluxin * 2} State` : `${outAmounts.Fluxin} State`,
 		},
 		{
 			id: "Xerion",
@@ -73,7 +73,7 @@ export const getAuctionTokens = (
 			SwapT: () => SwapTokens("Xerion", "Xerion"),
 			ratioPrice: XerionRatioPrice,
 			handleAddXerion: handleAddXerion,
-			inputTokenAmount: `${XerionOnepBalance} Xerion`,
-			outputToken: `${outAmounts.Xerion} State`,
+			inputTokenAmount: isReversed.Xerion === "true" ? `${XerionOnepBalance * 2} Xerion` : `${XerionOnepBalance} Xerion`,
+			outputToken: isReversed.Xerion === "true" ? `${outAmounts.Xerion * 2} State` : `${outAmounts.Xerion} State`,
 		},
 	];

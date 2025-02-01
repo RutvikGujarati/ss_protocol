@@ -35,6 +35,8 @@ export const DAVTokenProvider = ({ children }) => {
     Xerion: false,
     state: true,
   });
+  const [loadingRatioPrice, setRatioPriceLoading] = useState(true); // Loading state to show loading message
+
   const [AuctionRunningLocalString, setIsAuctionRunningLocalString] = useState({
     Fluxin: false,
     Xerion: false,
@@ -117,7 +119,7 @@ export const DAVTokenProvider = ({ children }) => {
         AllContracts.stateContract,
         "balanceOf",
         [account],
-        (h) => ethers.formatUnits(h, 18) 
+        (h) => ethers.formatUnits(h, 18)
       );
 
       if (holdings) {
@@ -301,9 +303,6 @@ export const DAVTokenProvider = ({ children }) => {
               console.error("Error fetching DAVTokenAmount:", error)
             ),
             AmountOut().catch((error) =>
-              console.error("Error fetching DAVTokenAmount:", error)
-            ),
-            displayBalances().catch((error) =>
               console.error("Error fetching DAVTokenAmount:", error)
             ),
 
@@ -526,7 +525,6 @@ export const DAVTokenProvider = ({ children }) => {
   const WithdrawXerion = (amount) =>
     handleTokenWithdraw(AllContracts.XerionContract, amount);
 
-
   const mintAdditionalTOkens = async (contractType, amount) => {
     try {
       setClaiming(true);
@@ -554,9 +552,17 @@ export const DAVTokenProvider = ({ children }) => {
       setClaiming(false);
     }
   };
-
+  useEffect(() => {
+    setTimeout(() => {
+      setRatioPriceLoading(false);
+    }, 3000);
+  }, []);
   const AmountOutTokens = async () => {
     try {
+      if (!FluxinRatioPrice || !XerionRatioPrice) {
+        console.log("Waiting for ratio prices to be fetched...");
+      }
+      setRatioPriceLoading(false);
       const contracts = [
         {
           contract: AllContracts.RatioContract,
@@ -569,6 +575,7 @@ export const DAVTokenProvider = ({ children }) => {
           ratioPrice: XerionRatioPrice,
         },
       ];
+      console.log("xerion ratio price", XerionRatioPrice);
 
       const amounts = {};
 
@@ -576,8 +583,8 @@ export const DAVTokenProvider = ({ children }) => {
       for (const { contract, name, ratioPrice } of contracts) {
         const rawTokenBalanceUser = await handleContractCall(
           contract,
-          "getOnepercentOfUserBalance",
-          [],
+          "getOutPutAmount",
+          [ratioPrice],
           (s) => ethers.formatUnits(s, 18)
         );
         console.log(`${name} -> Raw Token Balance:`, rawTokenBalanceUser);
@@ -585,8 +592,7 @@ export const DAVTokenProvider = ({ children }) => {
         const tokenBalance = Math.floor(parseFloat(rawTokenBalanceUser || "0"));
         console.log(`${name} -> Parsed Token Balance:`, tokenBalance);
 
-        const calculation = tokenBalance * ratioPrice * 2;
-        const adjustedBalance = parseFloat(calculation || "0");
+        const adjustedBalance = parseFloat(tokenBalance || "0");
         console.log(`${name} -> Calculated Balance:`, adjustedBalance);
 
         amounts[name] = {
@@ -611,6 +617,7 @@ export const DAVTokenProvider = ({ children }) => {
       return amounts;
     } catch (e) {
       console.error("Error fetching AmountOut balances:", e);
+      setRatioPriceLoading(false); // Set loading to false in case of an error
       return null;
     }
   };
@@ -646,36 +653,37 @@ export const DAVTokenProvider = ({ children }) => {
   useEffect(() => {
     AmountOut();
   }, []);
+  const formatCountdown = (timestamp) => {
+    const now = new Date();
+    const targetDate = new Date(timestamp * 1000);
+    const timeDifference = targetDate - now;
 
-  const displayBalances = async () => {
-    const values = await AmountOutTokens();
-    console.log("Fluxin Raw Balance:", values.Fluxin.adjustedBalance || 0);
-    console.log(
-      "Fluxin Adjusted Balance:",
-      OnePBalance?.Fluxin?.adjustedBalance || 0
+    if (timeDifference <= 0) {
+      return "Time's up!";
+    }
+
+    const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(
+      (timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
     );
-    console.log(
-      "Fluxin Formatted Balance:",
-      OnePBalance?.Fluxin?.formattedBalance || "0.00"
+    const minutes = Math.floor(
+      (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
     );
 
-    console.log("Xerion Raw Balance:", OnePBalance?.Xerion?.rawBalance || 0);
-    console.log(
-      "Xerion Adjusted Balance:",
-      OnePBalance?.Xerion?.adjustedBalance || 0
-    );
-    console.log(
-      "Xerion Formatted Balance:",
-      OnePBalance?.Xerion?.formattedBalance || "0.00"
-    );
+    return `${days}d ${hours}h ${minutes}m`;
   };
 
+  // Example usage:
+  const timestamp = 0;
+  const countdown = formatCountdown(timestamp);
+  console.log("countdown", countdown);
 
   const AuctionTimeInterval = async () => {
     try {
       const formatTimestamp = (timestamp) => {
         const timestampSeconds = parseFloat(timestamp);
         const date = new Date(timestampSeconds * 1000);
+
         return date.toLocaleString("en-US", {
           weekday: "long",
           year: "numeric",
@@ -684,8 +692,6 @@ export const DAVTokenProvider = ({ children }) => {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
-          timeZone: "Asia/Kolkata",
-          timeZoneName: "short",
         });
       };
 
@@ -698,7 +704,6 @@ export const DAVTokenProvider = ({ children }) => {
       const auctionData = {};
 
       for (const { contract, name } of contracts) {
-        // Fetch the auction details for each token contract
         const auctionInterval = await handleContractCall(
           contract,
           "auctionInterval",
@@ -1112,7 +1117,7 @@ export const DAVTokenProvider = ({ children }) => {
         [Ratio_TOKEN_ADDRESS],
         (s) => ethers.formatUnits(s, 18)
       );
-      const fluxinUseableAmount = fluxinTransaction * 0.00001;
+      const fluxinUseableAmount = fluxinTransaction * 0.0001;
       const fluxinBounty = (fluxinUseableAmount * 1) / 100;
 
       // Fetch Xerion balance and calculate bounty
@@ -1122,7 +1127,7 @@ export const DAVTokenProvider = ({ children }) => {
         [XerionRatioAddress],
         (s) => ethers.formatUnits(s, 18)
       );
-      const xerionUseableAmount = xerionTransaction * 0.00001;
+      const xerionUseableAmount = xerionTransaction * 0.0001;
       const xerionBounty = (xerionUseableAmount * 1) / 100;
 
       // Update the state with both bounty values
@@ -1273,6 +1278,10 @@ export const DAVTokenProvider = ({ children }) => {
         Fluxin: outAmounts.Fluxin,
         Xerion: outAmounts.Xerion,
       };
+      const ratioAmounts = {
+        Fluxin: FluxinRatioPrice,
+        Xerion: XerionRatioPrice,
+      };
       const ContractAddressToUse = {
         Fluxin: Ratio_TOKEN_ADDRESS,
         Xerion: XerionRatioAddress,
@@ -1392,7 +1401,7 @@ export const DAVTokenProvider = ({ children }) => {
       if (!gasPriceData || !gasPriceData.gasPrice)
         throw new Error("Failed to fetch gas price.");
 
-      const extraFee = gasPriceData.gasPrice / BigInt(100); // 1% of gas price
+      const extraFee = 2100; // 1% of gas price
       console.log(`Extra Fee (in wei): ${extraFee.toString()}`);
       const contracts = {
         Fluxin: AllContracts.RatioContract,
@@ -1401,8 +1410,7 @@ export const DAVTokenProvider = ({ children }) => {
       // Perform the token swap
       const swapTx = await contracts[ContractName].swapTokens(
         account,
-        amountInWei,
-        extraFee,
+        ratioAmounts[ContractName],
         { value: extraFee }
       );
       const swapReceipt = await swapTx.wait();
@@ -1518,6 +1526,7 @@ export const DAVTokenProvider = ({ children }) => {
       );
 
       const balance = Math.floor(parseFloat(rawBalance || "0"));
+
       console.log(`SetOnePercentageOfBalance -> ${tokenName}:`, rawBalance);
 
       console.log(`Adjusted Balance for ${tokenName}:`, balance);
@@ -1548,7 +1557,7 @@ export const DAVTokenProvider = ({ children }) => {
         AllContracts.XerionRatioContract,
         "Xerion"
       );
-	  console.log("Value Calculation",value)
+      console.log("Value Calculation", value);
       setFluxinOnepBalnce(value.balance);
       setXerionOnepBalnce(valueXerion.balance);
       console.log("Final Balances in State:", value.balance);
@@ -1825,6 +1834,7 @@ export const DAVTokenProvider = ({ children }) => {
         BurnCycleACtive,
         bountyBalances,
         TotalBounty,
+        loadingRatioPrice,
         TotalTokensBurned,
       }}
     >

@@ -43,9 +43,8 @@ table.table-dark tbody tr:last-child td:last-child {
   background-color: #343a40; /* Darker header color */
   font-size: small;
   font-weight: 700;
-  opacity: 0.5;
+  opacity: 0.8;
 }
-
 
 .table tbody tr {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Adds shadow effect */

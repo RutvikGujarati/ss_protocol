@@ -9,6 +9,7 @@
 .tc {
   color: white;
 }
+
 .infoTable tr {
   display: flex;
   flex-wrap: wrap;

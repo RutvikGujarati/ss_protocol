@@ -11,7 +11,7 @@ export const getTokens = (balances, bountyBalances, BurnCycleACtive, BurnOccured
 		BurnOccured: BurnOccuredForToken.Fluxin === "true",
 		burnRatio: "1/10000",
 		bounty: bountyBalances.fluxinBounty,
-		burnAmount: (balances.ratioFluxinBalance * 0.00001).toFixed(2),
+		burnAmount: (balances.ratioFluxinBalance * 0.0001).toFixed(2),
 		clickBurn: () => ClickBurn("fluxinRatio"),
 	},
 	{
@@ -22,7 +22,7 @@ export const getTokens = (balances, bountyBalances, BurnCycleACtive, BurnOccured
 		BurnOccured: BurnOccuredForToken.Xerion === "true",
 		burnRatio: "1/10000",
 		bounty: bountyBalances.xerionBounty,
-		burnAmount: (balances.ratioXerionBalance * 0.00001).toFixed(2),
+		burnAmount: (balances.ratioXerionBalance * 0.0001).toFixed(2),
 		clickBurn: () => ClickBurn("XerionRatio"),
 	},
 ];

@@ -164,8 +164,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               Information
             </th>
             {dataToShow.tokenName !== "DAV" ? (
-              <th className="fw-bold  d-flex  justify-content-end align-items-center text-end w-100 uppercase py-4">
-                <button className="py-1  mx-3 btn btn-primary btn-sm swap-btn">
+              <th className="fw-bold d-flex justify-content-end align-items-center text-end w-100 uppercase py-4">
+                <button className=" swap-btn py-1 mx-3 btn btn-primary btn-sm ">
                   Price : $ {formatPrice(dataToShow.Price)}
                 </button>
               </th>
@@ -186,7 +186,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   <td></td>
                 </tr>
                 <TableRowDataShow
-                  label={"Contract/Token Address"}
+                  label={"Token Address"}
                   address={dataToShow.address}
                   value={dataToShow.key}
                 />
@@ -199,7 +199,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   <TableRowForTokens
                     label={"Token Name"}
                     tokenName={dataToShow.name}
-                    label2={"Contract/Token Address"}
+                    label2={"Token Address"}
                     TokenAddress={dataToShow.address}
                     value={dataToShow.key}
                     priceTag={formatWithCommas(dataToShow.Supply)}
@@ -218,7 +218,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
 
                 <tr>
                   <td className="d-flex align-items-center">
-                    Renounce Smart Contract
+                    Contract Renounced
                   </td>
 
                   <td className="d-flex align-items-center justify-content-center">
@@ -276,6 +276,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   label={"State tokens burn"}
                   data={formatWithCommas(StateBurnBalance)}
                 />
+                <SmallTokenDetails
+                  label={"Minted Supply"}
+                  data={formatWithCommas(dataToShow.Supply)}
+                />
 
                 <SmallTokenDetails
                   label={"Current Distribution Rate"}
@@ -287,17 +291,12 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               dataToShow.tokenName == "Fluxin" ||
               dataToShow.tokenName == "Xerion") && (
               <>
-                {/* <SmallTokenDetails
-                  label={"Minted Supply"}
-                  data={formatWithCommas(dataToShow.Supply)}
-                /> */}
-
                 {dataToShow.tokenName !== "STATE" && (
                   <>
                     <DoubleValues
                       label1={`${dataToShow.tokenName} in DAV vaults`}
                       firstData={formatWithCommas(dataToShow.RatioBalance)}
-                      label2={"State Token in DAV vaults"}
+                      label2={"STATE Tokens in DAV vaults"}
                       SecondData={formatWithCommas(dataToShow.stateBalance)}
                     />
                     <DoubleValues
