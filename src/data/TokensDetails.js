@@ -8,7 +8,7 @@ import {
 } from "../ContractAddresses";
 import { PriceContext } from "../api/StatePrice";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
-
+import { useGeneralTokens, useSimpleTokens } from "../Functions/GeneralTokensFunctions";
 const shortenAddress = (address) => {
 	if (!address) return "";
 	return `${address.slice(0, 6)}...${address.slice(-6)}`;
@@ -20,10 +20,12 @@ const XerionShortened = shortenAddress(Xerion);
 export const TokensDetails = () => {
 	const { FluxinRatioPrice, XerionRatioPrice, stateUsdPrice, FluxinUsdPrice, XerionUsdPrice } =
 		useContext(PriceContext);
+	const { FluxinSupply, XerionSupply, stateSupply } = useSimpleTokens()
+	const {AuctionRunningLocalString} = useGeneralTokens()
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, isRenounced, LastLiquidity, FluxinSupply, PercentageFluxin, balances, XerionSupply, RatioTargetsofTokens, TotalTokensBurned, BurnTimeLeft, isReversed, PercentageXerion, AuctionTimeRunningXerion, ReanounceContract, TotalBounty, auctionDetails, AuctionRunningLocalString, SetAUctionDuration, mintAdditionalTOkens, WithdrawFluxin, AuctionTimeRunning, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, XerionTransactionHash, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, StateSupply, PercentageOfState, LPStateTransferred, RenounceState, WithdrawState, AddTokens } = useDAVToken();
+	const { LastDevShare, isRenounced, LastLiquidity, PercentageFluxin, balances, RatioTargetsofTokens, TotalTokensBurned, BurnTimeLeft, isReversed, PercentageXerion, AuctionTimeRunningXerion, ReanounceContract, TotalBounty, auctionDetails, SetAUctionDuration, mintAdditionalTOkens, WithdrawFluxin, AuctionTimeRunning, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, XerionTransactionHash, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, PercentageOfState, LPStateTransferred, RenounceState, WithdrawState, AddTokens } = useDAVToken();
 
 	return [
 		{
@@ -66,7 +68,7 @@ export const TokensDetails = () => {
 			RatioBalance: balances.ratioFluxinBalance,
 			Duration: auctionDetails["Fluxin"],
 			interval: auctionDetails["Fluxin"],
-			AuctionRunning: AuctionRunningLocalString.Fluxin,
+			AuctionRunning: AuctionRunningLocalString.Fluxin.toString(),
 			pair: "Fluxin/pSTATE",
 			Ratio: FluxinRatioPrice,
 			Price: FluxinUsdPrice,
@@ -118,7 +120,7 @@ export const TokensDetails = () => {
 			AuctionTimeRunning: AuctionTimeRunningXerion,
 			BurnTimeLeft: BurnTimeLeft.Xerion,
 			Ratio: XerionRatioPrice,
-			AuctionRunning: AuctionRunningLocalString.Xerion,
+			AuctionRunning: AuctionRunningLocalString.Xerion.toString(),
 			pair: "Xerion/pSTATE",
 			AuctionNextTime: auctionDetails["Xerion"],
 			mintAddTOkens: "125,000,000,000",
@@ -150,7 +152,7 @@ export const TokensDetails = () => {
 			name: "pSTATE",
 			supply: "999,000,000,000,000.00",
 			Treasury: "999,000,000,000,000.00",
-			Supply: StateSupply,
+			Supply: stateSupply,
 			percentage: PercentageOfState,
 			Balance: balances.stateBalance,
 			address: STATE_TOKEN_ADDRESS,

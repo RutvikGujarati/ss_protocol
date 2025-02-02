@@ -10,7 +10,7 @@ import { PriceContext } from "../api/StatePrice";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import DotAnimation from "../Animations/Animation";
 const InfoCards = () => {
-  const { stateUsdPrice } = useContext(PriceContext);
+  const { stateUsdPrice, priceLoading } = useContext(PriceContext);
   const [setBurnRatio] = useState("0.0");
   const { mintDAV, davHolds, isLoading, DavBalance, davPercentage } =
     useDAvContract();
@@ -20,6 +20,7 @@ const InfoCards = () => {
     // handleAddTokenRatio,
     handleAddTokenState,
     handleAddTokenDAV,
+    LoadingState,
     CalculationOfCost,
     TotalCost,
     Distributed,
@@ -225,8 +226,12 @@ const InfoCards = () => {
                       <div className="carddetails2">
                         <p className="mb-1 detailText">State token holdings</p>
                         <h5 className="">
-                          {StateHolds} / ${" "}
-                          {formatWithCommas(TotalStateHoldsInUS)}
+                          {LoadingState ? <DotAnimation /> : StateHolds}/ $
+                          {LoadingState ? (
+                            <DotAnimation />
+                          ) : (
+                            formatWithCommas(TotalStateHoldsInUS)
+                          )}
                         </h5>
                       </div>
                       <div className="mb-0 mx-1">
@@ -266,7 +271,14 @@ const InfoCards = () => {
                     )}
                     <div className="carddetails2">
                       <p className="mb-1 detailText">State token price</p>
-                      <h5 className="">$ {formatPrice(stateUsdPrice)}</h5>
+                      <h5 className="">
+                        ${" "}
+                        {priceLoading ? (
+                          <DotAnimation />
+                        ) : (
+                          formatPrice(stateUsdPrice)
+                        )}
+                      </h5>
                     </div>
                     <div className="d-flex justify-content-between w-100">
                       <div className="carddetails2 text-center w-50">

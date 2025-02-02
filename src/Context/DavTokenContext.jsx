@@ -48,14 +48,13 @@ export const DAVTokenProvider = ({ children }) => {
     Xerion: false,
   });
   const [StateHolds, setStateHoldings] = useState("0.0");
+  const [LoadingState, setLoadingState] = useState(true);
 
   const [TotalStateHoldsInUS, setTotalStateHoldsInUS] = useState("0.00");
 
-  const [StateSupply, setStateSupply] = useState("0.0");
-  const [FluxinSupply, setFluxinSupply] = useState("0.0");
-  const [XerionSupply, setXerionSupply] = useState("0.0");
   const [OnePBalance, setOnePBalance] = useState({});
   const [FluxinOnepBalance, setFluxinOnepBalnce] = useState("0");
+  const [DavRequiredAmount, setDavRequiredAmount] = useState("0");
   const [XerionOnepBalance, setXerionOnepBalnce] = useState("0");
 
   const [buttonTextStates, setButtonTextStates] = useState({});
@@ -153,40 +152,15 @@ export const DAVTokenProvider = ({ children }) => {
         setTotalStateHoldsInUS("0.0");
         console.error("Failed to fetch state holdings.");
       }
+      setLoadingState(false);
     } catch (error) {
       setStateHoldings("0");
       setTotalStateHoldsInUS("0.0");
+      setLoadingState(false);
       console.error("Error fetching state holdings:", error);
+    } finally {
+      setLoadingState(false);
     }
-  };
-
-  const StateTotalMintedSupply = async () => {
-    const supply = await handleContractCall(
-      AllContracts.stateContract,
-      "totalSupply",
-      [],
-      (s) => ethers.formatUnits(s, 18)
-    );
-    setStateSupply(supply);
-  };
-
-  const FluxinTotalMintedSupply = async () => {
-    const supply = await handleContractCall(
-      AllContracts.FluxinContract,
-      "totalSupply",
-      [],
-      (s) => ethers.formatUnits(s, 18)
-    );
-    setFluxinSupply(supply);
-  };
-  const XerionTotalMintedSupply = async () => {
-    const supply = await handleContractCall(
-      AllContracts.XerionContract,
-      "totalSupply",
-      [],
-      (s) => ethers.formatUnits(s, 18)
-    );
-    setXerionSupply(supply);
   };
 
   useEffect(() => {
@@ -240,17 +214,8 @@ export const DAVTokenProvider = ({ children }) => {
             getCachedRatioTarget().catch((error) =>
               console.error("Error fetching ViewDistributedTokens:", error)
             ),
-            StateTotalMintedSupply().catch((error) =>
-              console.error("Error fetching StateTotalMintedSupply:", error)
-            ),
             reverseSwapEnabled().catch((error) =>
               console.error("Error fetching StateTotalMintedSupply:", error)
-            ),
-            FluxinTotalMintedSupply().catch((error) =>
-              console.error("Error fetching FluxinTotalMintedSupply:", error)
-            ),
-            XerionTotalMintedSupply().catch((error) =>
-              console.error("Error fetching XerionTotalMintedSupply:", error)
             ),
 
             isAuctionRunning().catch((error) =>
@@ -297,6 +262,9 @@ export const DAVTokenProvider = ({ children }) => {
               console.error("Error fetching DAVTokenAmount:", error)
             ),
             calculateBalancesForAllContracts().catch((error) =>
+              console.error("Error fetching DAVTokenAmount:", error)
+            ),
+            getDavRequiredAmount().catch((error) =>
               console.error("Error fetching DAVTokenAmount:", error)
             ),
             AmountOutTokens().catch((error) =>
@@ -629,6 +597,10 @@ export const DAVTokenProvider = ({ children }) => {
   const AmountOut = async () => {
     try {
       const value = await AmountOutTokens();
+      if (!value || !value.Fluxin || !value.Xerion) {
+        console.error("Invalid data received from AmountOutTokens:", value);
+        return;
+      }
       setOutAmounts((prev) => ({
         Fluxin:
           prev.Fluxin !== value.Fluxin.adjustedBalance
@@ -1565,11 +1537,22 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error calculating balances for all contracts:", e);
     }
   };
+  const getDavRequiredAmount = async () => {
+    try {
+      const value = await AllContracts.davContract.getRequiredDAVAmount();
+    //   const wei = ethers.parseUnits(value, 18);
+	  console.log("required dav", parseFloat(value).toString());
+      setDavRequiredAmount(parseFloat(value).toString());
+      console.log("Final Balances in State:", value);
+    } catch (e) {
+      console.error("Error calculating balances for all contracts:", e);
+    }
+  };
 
   const setReverseEnable = async (condition, contractName) => {
     try {
       // Call the contract to set both numerator and denominator
-      await contractMapping[contractName].setReverseSwap(condition);
+      await contractMapping[contractName].setReverseSwapEnabled(condition);
 
       console.log(`seted reverse time`);
     } catch (error) {
@@ -1578,22 +1561,26 @@ export const DAVTokenProvider = ({ children }) => {
   };
   const reverseSwapEnabled = async () => {
     try {
-      const isrevers = await handleContractCall(
-        AllContracts.RatioContract,
-        "reverseSwapEnabled",
-        []
-      );
-      const isreverseXerion = await handleContractCall(
-        AllContracts.XerionRatioContract,
-        "reverseSwapEnabled",
-        []
+      const contracts = [
+        { name: "Fluxin", contract: AllContracts.RatioContract },
+        { name: "Xerion", contract: AllContracts.XerionRatioContract },
+      ];
+
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          const isReverse = await handleContractCall(
+            contract,
+            "isReverseSwapEnabled",
+            []
+          );
+          return { [name]: isReverse.toString() };
+        })
       );
 
-      setisReversed({
-        Fluxin: isrevers.toString(),
-        Xerion: isreverseXerion.toString(),
-      });
-      console.log(`seted reverse`, isrevers.toString());
+      const reversedState = Object.assign({}, ...results);
+      setisReversed(reversedState);
+
+      console.log("set reverse", reversedState);
     } catch (error) {
       console.error("Error setting reverse target:", error);
     }
@@ -1763,7 +1750,6 @@ export const DAVTokenProvider = ({ children }) => {
 
         //STATE Token
         StateHolds,
-        StateSupply,
         balances,
         RenounceState,
         stateTransactionHash,
@@ -1789,8 +1775,6 @@ export const DAVTokenProvider = ({ children }) => {
         setRatioTarget,
         PercentageFluxin,
         PercentageXerion,
-        FluxinSupply,
-        XerionSupply,
         setReverseEnable,
         AuctionRunning,
         WithdrawFluxin,
@@ -1832,8 +1816,10 @@ export const DAVTokenProvider = ({ children }) => {
         XerionOnepBalance,
         BurnOccuredForToken,
         BurnCycleACtive,
+		DavRequiredAmount,
         bountyBalances,
         TotalBounty,
+        LoadingState,
         loadingRatioPrice,
         TotalTokensBurned,
       }}

@@ -9,6 +9,7 @@ import { PriceProvider } from "./api/StatePrice.jsx";
 import { DAVTokenProvider } from "./Context/DavTokenContext.jsx";
 import { ContractProvider } from "./Functions/ContractInitialize.jsx";
 import { DavProvider } from "./Functions/DavTokenFunctions.jsx";
+import { GeneralTokenProvider } from "./Functions/GeneralTokensFunctions.jsx";
 
 const queryClient = new QueryClient();
 export default function Providers({ children }) {
@@ -32,9 +33,11 @@ export default function Providers({ children }) {
               <ContractProvider>
                 <DAVTokenProvider>
 				<DavProvider>
+					<GeneralTokenProvider>
                   <Suspense fallback={<div>Loading...</div>}>
                     {children}
                   </Suspense>
+				</GeneralTokenProvider>
 				</DavProvider>
                 </DAVTokenProvider>
               </ContractProvider>

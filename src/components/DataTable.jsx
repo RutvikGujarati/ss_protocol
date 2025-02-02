@@ -18,8 +18,7 @@ const DataTable = () => {
     FluxinRatioPrice,
     FluxinUsdPrice,
   } = useContext(PriceContext);
-  const { DavBalance } =
-  useDAvContract();
+  const { DavBalance } = useDAvContract();
   const {
     SwapTokens,
     handleAddTokenState,
@@ -32,6 +31,7 @@ const DataTable = () => {
     outAmounts,
     Distributed,
     AuctionRunning,
+    DavRequiredAmount,
     auctionDetails,
     userHashSwapped,
     ClaimTokens,
@@ -50,7 +50,7 @@ const DataTable = () => {
   const [claimingStates, setClaimingStates] = useState({});
   console.log("is auction running", auctionDetails["Fluxin"]);
   console.log("use has swappeddddd", AuctionRunning.Xerion);
-
+  console.log("required dav amount", DavRequiredAmount);
   const Checking = async (id, ContractName) => {
     setCheckingStates((prev) => ({ ...prev, [id]: true }));
     try {
@@ -159,7 +159,7 @@ const DataTable = () => {
             {tokens
               .filter(
                 ({ userHasSwapped, AuctionStatus }) =>
-                  !userHasSwapped && AuctionStatus && db >= 1
+                  !userHasSwapped && AuctionStatus && db >= DavRequiredAmount
               )
               .map(
                 (

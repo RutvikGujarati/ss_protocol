@@ -21,6 +21,7 @@ const BurnDataTable = () => {
     DavBalanceRequire,
     BurnCycleACtive,
     BurnOccuredForToken,
+	DavRequiredAmount,
   } = useDAVToken();
 
   // Log for debugging
@@ -120,7 +121,7 @@ const BurnDataTable = () => {
               {tokens
                 .filter(
                   ({ BurnOccured, burnCycle }) =>
-                    !BurnOccured && burnCycle && db >= 1
+                    !BurnOccured && burnCycle && db >= DavRequiredAmount
                 )
                 .map(
                   ({
