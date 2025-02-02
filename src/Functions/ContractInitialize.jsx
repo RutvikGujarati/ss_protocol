@@ -1,13 +1,13 @@
 import { ethers } from "ethers";
 import { createContext, useEffect, useState } from "react";
 import {
-	DAV_TOKEN_ADDRESS,
-	Fluxin,
-	Ratio_TOKEN_ADDRESS,
-	STATE_TOKEN_ADDRESS,
-	Xerion,
-	XerionRatioAddress,
-  } from "../ContractAddresses";
+  DAV_TOKEN_ADDRESS,
+  Fluxin,
+  Ratio_TOKEN_ADDRESS,
+  STATE_TOKEN_ADDRESS,
+  Xerion,
+  XerionRatioAddress,
+} from "../ContractAddresses";
 import DAVTokenABI from "../ABI/DavTokenABI.json";
 import StateABI from "../ABI/StateTokenABI.json";
 import RatioABI from "../ABI/RatioABI.json";
@@ -60,7 +60,7 @@ export const ContractProvider = ({ children }) => {
             newSigner
           ),
         });
-		console.log("all contracts",AllContracts)
+        console.log("all contracts", AllContracts);
       } catch (error) {
         console.error("Error initializing contract:", error);
       } finally {
@@ -93,10 +93,16 @@ export const ContractProvider = ({ children }) => {
       }
     };
   }, []);
-
+  const contracts = {
+    state: AllContracts.stateContract,
+    dav: AllContracts.davContract,
+    Fluxin: AllContracts.FluxinContract,
+    Xerion: AllContracts.XerionContract,
+  };
+console.log("obj of contracts",contracts);
   return (
     <ContractContext.Provider
-      value={{ loading, provider, signer, account, AllContracts }}
+      value={{ loading, provider, signer, account, AllContracts, contracts }}
     >
       {children}
     </ContractContext.Provider>

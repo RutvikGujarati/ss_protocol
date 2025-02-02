@@ -10,6 +10,7 @@ import { DAVTokenProvider } from "./Context/DavTokenContext.jsx";
 import { ContractProvider } from "./Functions/ContractInitialize.jsx";
 import { DavProvider } from "./Functions/DavTokenFunctions.jsx";
 import { GeneralTokenProvider } from "./Functions/GeneralTokensFunctions.jsx";
+import { GeneralAuctionProvider } from "./Functions/GeneralAuctionFunctions.jsx";
 
 const queryClient = new QueryClient();
 export default function Providers({ children }) {
@@ -31,15 +32,17 @@ export default function Providers({ children }) {
           >
             <PriceProvider>
               <ContractProvider>
-                <DAVTokenProvider>
-				<DavProvider>
-					<GeneralTokenProvider>
-                  <Suspense fallback={<div>Loading...</div>}>
-                    {children}
-                  </Suspense>
-				</GeneralTokenProvider>
-				</DavProvider>
-                </DAVTokenProvider>
+                <DavProvider>
+                  <DAVTokenProvider>
+                      <GeneralTokenProvider>
+                    <GeneralAuctionProvider>
+                        <Suspense fallback={<div>Loading...</div>}>
+                          {children}
+                        </Suspense>
+                    </GeneralAuctionProvider>
+                      </GeneralTokenProvider>
+                  </DAVTokenProvider>
+                </DavProvider>
               </ContractProvider>
             </PriceProvider>
           </RainbowKitProvider>

@@ -9,15 +9,15 @@ import { formatWithCommas } from "./DetailsInfo";
 import { PriceContext } from "../api/StatePrice";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import DotAnimation from "../Animations/Animation";
+import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
 const InfoCards = () => {
   const { stateUsdPrice, priceLoading } = useContext(PriceContext);
   const [setBurnRatio] = useState("0.0");
   const { mintDAV, davHolds, isLoading, DavBalance, davPercentage } =
     useDAvContract();
+	const {ClaimTokens,CheckMintBalance}= useGeneralTokens()
 
   const {
-    // mintDAV,
-    // handleAddTokenRatio,
     handleAddTokenState,
     handleAddTokenDAV,
     LoadingState,
@@ -26,10 +26,9 @@ const InfoCards = () => {
     Distributed,
     TotalStateHoldsInUS,
     contracts,
-    ClaimTokens,
-    CheckMintBalance,
     StateBurnBalance,
     StateHolds,
+	DavRequiredAmount,
   } = useDAVToken();
   const [amount, setAmount] = useState("");
   const [load, setLoad] = useState(false);
@@ -294,7 +293,7 @@ const InfoCards = () => {
                         >
                           {checkingStates["state"]
                             ? "Checking..."
-                            : "Mint Balance"}
+                            : "Check Balance"}
                         </button>
                       </div>
                       <div className="carddetails2 text-center w-50">
@@ -331,7 +330,7 @@ const InfoCards = () => {
             </div>
             <div className="announcement text-center">
               <div className="">
-                1 DAV TOKEN REQUIRED TO PARTICIPATE IN THE DAILY AUCTION AND
+                {DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE DAILY AUCTION AND
                 RECEIVE ±100% ROI ON SWAPS
               </div>
             </div>

@@ -9,6 +9,8 @@ import { PriceContext } from "../api/StatePrice";
 import BurnDataTable from "./BurnDataTable";
 import { getAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
+import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
+import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions";
 
 const DataTable = () => {
   const {
@@ -19,10 +21,11 @@ const DataTable = () => {
     FluxinUsdPrice,
   } = useContext(PriceContext);
   const { DavBalance } = useDAvContract();
+  const { ClaimTokens,CheckMintBalance } = useGeneralTokens();
+
   const {
     SwapTokens,
     handleAddTokenState,
-    CheckMintBalance,
     // claiming,
     contracts,
     // ButtonText,
@@ -30,11 +33,10 @@ const DataTable = () => {
     RatioTargetsofTokens,
     outAmounts,
     Distributed,
-    AuctionRunning,
+    // AuctionRunning,
     DavRequiredAmount,
     auctionDetails,
     userHashSwapped,
-    ClaimTokens,
     XerionOnepBalance,
     handleAddFluxin,
     DavBalanceRequire,
@@ -43,6 +45,8 @@ const DataTable = () => {
     swappingStates,
     buttonTextStates,
   } = useDAVToken();
+  	const { AuctionRunning }= useGeneralAuctionFunctions()
+  
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
   const [errorPopup, setErrorPopup] = useState({});

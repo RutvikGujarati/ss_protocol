@@ -30,18 +30,10 @@ export const DAVTokenProvider = ({ children }) => {
   const [transactionStatus, setTransactionStatus] = useState(null); // 'pending', 'success', or
 
   const [TotalCost, setTotalCost] = useState(null);
-  const [AuctionRunning, setIsAuctionRunning] = useState({
-    Fluxin: false,
-    Xerion: false,
-    state: true,
-  });
+
   const [loadingRatioPrice, setRatioPriceLoading] = useState(true); // Loading state to show loading message
 
-  const [AuctionRunningLocalString, setIsAuctionRunningLocalString] = useState({
-    Fluxin: false,
-    Xerion: false,
-    state: true,
-  });
+ 
   const [ButtonText, setButtonText] = useState();
   const [isReversed, setisReversed] = useState({
     Fluxin: false,
@@ -218,9 +210,6 @@ export const DAVTokenProvider = ({ children }) => {
               console.error("Error fetching StateTotalMintedSupply:", error)
             ),
 
-            isAuctionRunning().catch((error) =>
-              console.error("Error fetching isAuctionRunning:", error)
-            ),
             ContractStateBalance().catch((error) =>
               console.error("Error fetching ContractStateBalance:", error)
             ),
@@ -319,61 +308,7 @@ export const DAVTokenProvider = ({ children }) => {
   // Ratio Token Contracts
   // -- auction
 
-  const isAuctionRunning = async () => {
-    try {
-      const contracts = [
-        { contract: AllContracts.RatioContract, name: "Fluxin" },
-        { contract: AllContracts.XerionRatioContract, name: "Xerion" },
-        // Add more contracts here as needed
-      ];
-
-      const auctionStatus = {};
-
-      // Loop through all contracts
-      for (const { contract, name } of contracts) {
-        const isRunning = await handleContractCall(contract, "isAuctionActive");
-        auctionStatus[name] = isRunning.toString();
-        console.log(`isAuctionRunning -> ${name}:`, isRunning.toString());
-      }
-
-      setIsAuctionRunning({
-        ...auctionStatus,
-        state: true,
-      });
-
-      setIsAuctionRunningLocalString({
-        ...auctionStatus,
-        state: true,
-      });
-    } catch (error) {
-      console.error("Error fetching auction status:", error);
-
-      setIsAuctionRunning({
-        Fluxin: false,
-        Xerion: false,
-        state: true,
-      });
-
-      setIsAuctionRunningLocalString({
-        Fluxin: false,
-        Xerion: false,
-        state: true,
-      });
-    }
-  };
-
-  //claiming functions
-  const ClaimTokens = async (contract) => {
-    try {
-      setClaiming(true);
-      const tx = await handleContractCall(contract, "mintReward", []);
-      await tx.wait();
-      setClaiming(false);
-    } catch (e) {
-      console.error("Error claiming tokens:", e);
-      setClaiming(false);
-    }
-  };
+ 
   const [isRenounced, setIsRenounced] = useState({
     state: null,
     dav: null,
@@ -459,18 +394,6 @@ export const DAVTokenProvider = ({ children }) => {
     dav: AllContracts.davContract,
     Fluxin: AllContracts.FluxinContract,
     Xerion: AllContracts.XerionContract,
-  };
-
-  const CheckMintBalance = async (contract) => {
-    try {
-      const tx = await handleContractCall(contract, "distributeReward", [
-        account,
-      ]);
-      await tx.wait();
-    } catch (e) {
-      console.error("Error claiming tokens:", e);
-      throw e;
-    }
   };
 
   const handleTokenWithdraw = async (contract, amount) => {
@@ -1465,6 +1388,19 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error setting ratio target:", error);
     }
   };
+  const setBurnRate = async (Target, contractName) => {
+    try {
+      // Call the contract to set both numerator and denominator
+      await handleContractCall(
+        contractMapping[contractName],
+        "setBurnRate",
+        [Target]
+      );
+      console.log(`Ratio target set to `);
+    } catch (error) {
+      console.error("Error setting ratio target:", error);
+    }
+  };
   const ClickBurn = async (ContractName) => {
     try {
       await contractMapping[ContractName].burnTokens();
@@ -1540,8 +1476,8 @@ export const DAVTokenProvider = ({ children }) => {
   const getDavRequiredAmount = async () => {
     try {
       const value = await AllContracts.davContract.getRequiredDAVAmount();
-    //   const wei = ethers.parseUnits(value, 18);
-	  console.log("required dav", parseFloat(value).toString());
+      //   const wei = ethers.parseUnits(value, 18);
+      console.log("required dav", parseFloat(value).toString());
       setDavRequiredAmount(parseFloat(value).toString());
       console.log("Final Balances in State:", value);
     } catch (e) {
@@ -1762,7 +1698,6 @@ export const DAVTokenProvider = ({ children }) => {
         setClaiming,
 
         contracts,
-        ClaimTokens,
         Distributed,
         claiming,
         SwapTokens,
@@ -1776,10 +1711,8 @@ export const DAVTokenProvider = ({ children }) => {
         PercentageFluxin,
         PercentageXerion,
         setReverseEnable,
-        AuctionRunning,
         WithdrawFluxin,
         WithdrawXerion,
-        CheckMintBalance,
         handleAddTokenRatio,
         handleAddFluxin,
         handleAddXerion,
@@ -1806,9 +1739,9 @@ export const DAVTokenProvider = ({ children }) => {
         AuctionTimeRunning,
         buttonTextStates,
         swappingStates,
-        AuctionRunningLocalString,
         transactionStatus,
         AuctionTimeRunningXerion,
+		setBurnRate,
         isReversed,
         StateBurnBalance,
         RatioTargetsofTokens,
@@ -1816,7 +1749,7 @@ export const DAVTokenProvider = ({ children }) => {
         XerionOnepBalance,
         BurnOccuredForToken,
         BurnCycleACtive,
-		DavRequiredAmount,
+        DavRequiredAmount,
         bountyBalances,
         TotalBounty,
         LoadingState,

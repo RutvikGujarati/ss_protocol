@@ -8,7 +8,8 @@ import {
 } from "../ContractAddresses";
 import { PriceContext } from "../api/StatePrice";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
-import { useGeneralTokens, useSimpleTokens } from "../Functions/GeneralTokensFunctions";
+import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
+import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions";
 const shortenAddress = (address) => {
 	if (!address) return "";
 	return `${address.slice(0, 6)}...${address.slice(-6)}`;
@@ -20,12 +21,13 @@ const XerionShortened = shortenAddress(Xerion);
 export const TokensDetails = () => {
 	const { FluxinRatioPrice, XerionRatioPrice, stateUsdPrice, FluxinUsdPrice, XerionUsdPrice } =
 		useContext(PriceContext);
-	const { FluxinSupply, XerionSupply, stateSupply } = useSimpleTokens()
-	const {AuctionRunningLocalString} = useGeneralTokens()
+	const {  simpleSupplies } = useGeneralTokens()
+		const { AuctionRunningLocalString }= useGeneralAuctionFunctions()
+	
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, isRenounced, LastLiquidity, PercentageFluxin, balances, RatioTargetsofTokens, TotalTokensBurned, BurnTimeLeft, isReversed, PercentageXerion, AuctionTimeRunningXerion, ReanounceContract, TotalBounty, auctionDetails, SetAUctionDuration, mintAdditionalTOkens, WithdrawFluxin, AuctionTimeRunning, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, XerionTransactionHash, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, PercentageOfState, LPStateTransferred, RenounceState, WithdrawState, AddTokens } = useDAVToken();
+	const { LastDevShare, isRenounced, LastLiquidity, PercentageFluxin, balances, RatioTargetsofTokens, TotalTokensBurned, BurnTimeLeft, isReversed, PercentageXerion, AuctionTimeRunningXerion, ReanounceContract, TotalBounty, auctionDetails, SetAUctionDuration, mintAdditionalTOkens, WithdrawFluxin, AuctionTimeRunning, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, XerionTransactionHash, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, PercentageOfState, LPStateTransferred, RenounceState, WithdrawState, AddTokens ,setBurnRate} = useDAVToken();
 
 	return [
 		{
@@ -55,7 +57,7 @@ export const TokensDetails = () => {
 			name: "Fluxin",
 			supply: "1,000,000,000,000.00",
 			Treasury: "1,000,000,000,000.00",
-			Supply: FluxinSupply,
+			Supply: simpleSupplies.FluxinSupply,
 			percentage: PercentageFluxin,
 			address: Fluxin,
 			stateBalance: balances.StateFluxin,
@@ -88,6 +90,7 @@ export const TokensDetails = () => {
 				AddTokenToContract: () =>
 					AddTokensToContract(Fluxin, STATE_TOKEN_ADDRESS, FluxinRatioPrice),
 				setRatio: (value) => setRatioTarget(value, "fluxinRatio"),
+				setBurn: (value) => setBurnRate(value, "fluxinRatio"),
 				setReverseEnabled: (value) => setReverseEnable(value, "fluxinRatio"),
 				setReverse: (value, value2) => setReverseTime(value, value2),
 				setCurrentRatio: (value) => setCurrentRatioTarget(value),
@@ -103,7 +106,7 @@ export const TokensDetails = () => {
 			key: XerionShortened,
 			name: "Xerion",
 			supply: "500,000,000,000.00",
-			Supply: XerionSupply,
+			Supply: simpleSupplies.XerionSupply,
 			target: RatioTargetsofTokens["Xerion"],
 			Balance: balances.xerionBalance,
 			percentage: PercentageXerion,
@@ -133,6 +136,7 @@ export const TokensDetails = () => {
 				SetDuration: (value) => SetAUctionDuration(value, "XerionRatio"),
 				SetInterval: (value) => SetAUctionInterval(value, "XerionRatio"),
 				setRatio: (value) => setRatioTarget(value, "XerionRatio"),
+				setBurn: (value) => setBurnRate(value, "XerionRatio"),
 				setReverseEnabled: (value) => setReverseEnable(value, "XerionRatio"),
 
 				mintAdditionalTOkens: mintAdditionalTOkens,
@@ -152,7 +156,7 @@ export const TokensDetails = () => {
 			name: "pSTATE",
 			supply: "999,000,000,000,000.00",
 			Treasury: "999,000,000,000,000.00",
-			Supply: stateSupply,
+			Supply: simpleSupplies.stateSupply,
 			percentage: PercentageOfState,
 			Balance: balances.stateBalance,
 			address: STATE_TOKEN_ADDRESS,

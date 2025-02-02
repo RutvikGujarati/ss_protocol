@@ -12,6 +12,7 @@ import {
   TableRowForTokens,
   TableRowWithClick,
 } from "./SeperateComps/TableRow";
+import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -22,15 +23,18 @@ export const formatWithCommas = (value) => {
 };
 const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const {
-    AuctionRunning,
     account,
     stateTransactionHash,
     setDBRequired,
+    // AuctionRunning,
     setDBForBurnRequired,
     mintAdditionalTOkens,
     StateBurnBalance,
   } = useDAVToken();
+  const { AuctionRunning } = useGeneralAuctionFunctions();
+
   const [numerator, setNumerator] = useState("");
+  const [burningRate, setBurningRate] = useState("");
 
   const [numeratorOfAUction, setNumeratorOfAuction] = useState("");
   const [numeratorOfInterval, setNumeratorOfInterval] = useState("");
@@ -101,6 +105,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const handleInputChangeInterval = (e) => {
     const value = e.target.value;
     setNumeratorOfInterval(value);
+  };
+  const handleInputChangeBurnRate = (e) => {
+    const value = e.target.value;
+    setBurningRate(value);
   };
   const handleInputChangeofToken = (e) => {
     const rawValue = e.target.value.replace(/,/g, "");
@@ -355,7 +363,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     </tr>
                     <tr>
                       <td className="d-flex align-items-center">
-                        Mint Additional state tokens
+                        Mint Additional {dataToShow.tokenName} tokens
                       </td>
                       <td className="d-flex align-items-center justify-content-center">
                         {dataToShow.mintAddTOkens}
@@ -415,7 +423,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 }}
                                 className="btn btn-primary btn-sm swap-btn info-icon"
                               >
-                                Deposit
+                                {`Deposit ${dataToShow.name}`}
                               </button>
                             </td>
                           </tr>
@@ -451,7 +459,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 }}
                                 className="btn btn-primary btn-sm swap-btn info-icon"
                               >
-                                Deposit
+                                Deposit State
                               </button>
                             </td>
                           </tr>
@@ -479,6 +487,32 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                   dataToShow.actions.SetInterval(
                                     numeratorOfInterval
                                   )
+                                }
+                                className="btn btn-primary btn-sm swap-btn info-icon"
+                              >
+                                Set
+                              </button>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="d-flex align-items-center">
+                              set BurnRate
+                            </td>
+                            <td>
+                              <div className="w-100">
+                                <input
+                                  type="text"
+                                  className="form-control text-center mh-30"
+                                  placeholder="Enter Rate"
+                                  value={burningRate}
+                                  onChange={(e) => handleInputChangeBurnRate(e)}
+                                />
+                              </div>
+                            </td>
+                            <td className="d-flex justify-content-end">
+                              <button
+                                onClick={() =>
+                                  dataToShow.actions.setBurn(burningRate)
                                 }
                                 className="btn btn-primary btn-sm swap-btn info-icon"
                               >
@@ -585,7 +619,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 }
                                 className="btn btn-primary btn-sm swap-btn info-icon"
                               >
-                                Start
+                                {`Start ${dataToShow.name}`}
                               </button>
                             </td>
                           </tr>

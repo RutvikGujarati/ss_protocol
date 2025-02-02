@@ -4,23 +4,13 @@ import { ContractContext } from "./ContractInitialize";
 import PropTypes from "prop-types";
 
 export const GeneralTokens = createContext();
-export const SimpleTokens = createContext();
 
 export const GeneralTokenProvider = ({ children }) => {
-  const { AllContracts } = useContext(ContractContext);
+  const { AllContracts, account, contracts } = useContext(ContractContext);
   const [supplies, setSupplies] = useState({});
   const [simpleSupplies, setSimpleSupplies] = useState({});
+  const [claiming, setClaiming] = useState(false);
   const [initialized, setInitialized] = useState(false);
-  const [AuctionRunningLocalString, setIsAuctionRunningLocalString] = useState({
-    Fluxin: false,
-    Xerion: false,
-    state: true,
-  });
-  const [AuctionRunning, setIsAuctionRunning] = useState({
-    Fluxin: false,
-    Xerion: false,
-    state: true,
-  });
 
   const fetchTotalSupplies = async () => {
     try {
@@ -84,64 +74,128 @@ export const GeneralTokenProvider = ({ children }) => {
       setInitialized(false);
     }
   };
-  const isAuctionRunning = async () => {
+  const ClaimTokens = async (contract) => {
     try {
-      const contracts = [
-        { contract: AllContracts.RatioContract, name: "Fluxin" },
-        { contract: AllContracts.XerionRatioContract, name: "Xerion" },
-      ];
-
-      const auctionStatus = {};
-
-      for (const { contract, name } of contracts) {
-        const isRunning = await contract.isAuctionActive();
-        auctionStatus[name] = isRunning.toString();
-        console.log(
-          `isAuctionRunning from g context-> ${name}:`,
-          isRunning.toString()
-        );
-      }
-
-      setIsAuctionRunning({
-        ...auctionStatus,
-        state: true,
-      });
-
-      setIsAuctionRunningLocalString({
-        ...auctionStatus,
-        state: true,
-      });
-    } catch (error) {
-      console.error("Error fetching auction status:", error);
-
-      setIsAuctionRunning({
-        Fluxin: false,
-        Xerion: false,
-        state: true,
-      });
-
-      setIsAuctionRunningLocalString({
-        Fluxin: false,
-        Xerion: false,
-        state: true,
-      });
+      setClaiming(true);
+      const tx = await contract.mintReward();
+      await tx.wait();
+      setClaiming(false);
+    } catch (e) {
+      console.error("Error claiming tokens:", e);
+      setClaiming(false);
     }
   };
+  const CheckMintBalance = async (contract) => {
+    try {
+      const tx = await contract.distributeReward(account);
+      await tx.wait();
+    } catch (e) {
+      console.error("Error claiming tokens:", e);
+      throw e;
+    }
+  };
+  const [isRenounced, setIsRenounced] = useState({
+    state: null,
+    dav: null,
+    Fluxin: null,
+    Xerion: null,
+  });
+
+  const setRenounceStatus = (name, status) => {
+    setIsRenounced((prevState) => ({
+      ...prevState,
+      [name]: status,
+    }));
+  };
+
+  const checkOwnershipStatus = async () => {
+    try {
+      if (!contracts || Object.keys(contracts).length === 0) {
+        console.error("No contracts available to check.");
+        return;
+      }
+
+      const contractNames = Object.keys(contracts);
+
+      await Promise.all(
+        contractNames.map(async (name) => {
+          try {
+            const contract = contracts[name];
+            if (!contract || !contract.owner) {
+              console.warn(
+                `Contract ${name} does not exist or lacks an owner function.`
+              );
+              setRenounceStatus(name, null);
+              return;
+            }
+
+            const owner = await contract.owner();
+            console.log(`Checking ownership for ${name}:`, owner);
+            setRenounceStatus(
+              name,
+              owner === "0x0000000000000000000000000000000000000000"
+            );
+          } catch (error) {
+            console.error(`Error checking ownership for ${name}:`, error);
+            setRenounceStatus(name, null);
+          }
+        })
+      );
+    } catch (error) {
+      console.error("Error in checkOwnershipStatus:", error);
+    }
+  };
+
+//   useEffect(() => {
+//     checkOwnershipStatus();
+//   }, [contracts]); // Re-run when contracts change
+
+  const renounceOwnership = async (
+    contract,
+    contractName,
+    setTransactionHashes
+  ) => {
+    try {
+      if (!contract) {
+        console.error(`Contract ${contractName} not found.`);
+        return;
+      }
+
+      const tx = await contract.renounceOwnership();
+      console.log(`${contractName} Transaction:`, tx);
+
+      if (tx?.hash) {
+        console.log(`${contractName} Transaction Hash:`, tx.hash);
+        setTransactionHashes((prev) => ({ ...prev, [contractName]: tx.hash }));
+      } else {
+        console.error(
+          "Transaction object doesn't contain transactionHash:",
+          tx
+        );
+      }
+    } catch (e) {
+      console.error(`Error renouncing ownership for ${contractName}:`, e);
+    }
+  };
+
   useEffect(() => {
     if (AllContracts && Object.keys(AllContracts).length > 0 && !initialized) {
       fetchTotalSupplies();
     }
-	isAuctionRunning();
   }, [AllContracts, initialized]);
 
   console.log("fluxin supply", simpleSupplies.stateSupply); // Now using FluxinSupply
   return (
     <GeneralTokens.Provider
-      value={{ supplies, AuctionRunningLocalString, AuctionRunning }}
+      value={{
+        supplies,
+        simpleSupplies,
+        ClaimTokens,
+        claiming,
+        CheckMintBalance,
+      }}
     >
-      <SimpleTokens.Provider value={simpleSupplies}>
-        {children}
-      </SimpleTokens.Provider>
+      {children}
     </GeneralTokens.Provider>
   );
 };
@@ -151,4 +205,3 @@ GeneralTokenProvider.propTypes = {
 };
 
 export const useGeneralTokens = () => useContext(GeneralTokens);
-export const useSimpleTokens = () => useContext(SimpleTokens);
