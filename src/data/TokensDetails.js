@@ -27,7 +27,7 @@ export const TokensDetails = () => {
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, isRenounced, LastLiquidity, PercentageFluxin, balances, RatioTargetsofTokens, TotalTokensBurned, BurnTimeLeft, isReversed, PercentageXerion, AuctionTimeRunningXerion, ReanounceContract, TotalBounty, auctionDetails, SetAUctionDuration, mintAdditionalTOkens, WithdrawFluxin, AuctionTimeRunning, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, XerionTransactionHash, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, PercentageOfState, LPStateTransferred, RenounceState, WithdrawState, AddTokens ,setBurnRate} = useDAVToken();
+	const { LastDevShare, isRenounced, LastLiquidity, PercentageFluxin, balances, RatioTargetsofTokens, TotalTokensBurned, BurnTimeLeft, PercentageXerion, AuctionTimeRunningXerion, ReanounceContract, TotalBounty, auctionDetails, SetAUctionDuration, mintAdditionalTOkens, WithdrawFluxin, AuctionTimeRunning, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, XerionTransactionHash, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, PercentageOfState, LPStateTransferred, RenounceState, WithdrawState, AddTokens ,setBurnRate} = useDAVToken();
 
 	return [
 		{
@@ -62,7 +62,7 @@ export const TokensDetails = () => {
 			address: Fluxin,
 			stateBalance: balances.StateFluxin,
 			target: RatioTargetsofTokens["Fluxin"],
-			isReversing: isReversed.Fluxin,
+			// isReversing: isReversed.Fluxin,
 			Balance: balances.fluxinBalance,
 			BurnTimeLeft: BurnTimeLeft.Fluxin,
 			TotalTokensBurn: TotalTokensBurned.Fluxin,
@@ -116,7 +116,7 @@ export const TokensDetails = () => {
 			TotalTokensBurn: TotalTokensBurned.Xerion,
 			stateBalance: balances.StateXerion,
 			RatioBalance: balances.ratioXerionBalance,
-			isReversing: isReversed.Xerion,
+			// isReversing: isReversed.Xerion,
 			TotalBounty: TotalBounty.Xerion,
 			Price: XerionUsdPrice,
 			timeRunning: AuctionTimeRunningXerion,

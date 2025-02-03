@@ -33,15 +33,15 @@ export default function Providers({ children }) {
             <PriceProvider>
               <ContractProvider>
                 <DavProvider>
-                  <DAVTokenProvider>
                       <GeneralTokenProvider>
+                  <DAVTokenProvider>
                     <GeneralAuctionProvider>
                         <Suspense fallback={<div>Loading...</div>}>
                           {children}
                         </Suspense>
                     </GeneralAuctionProvider>
-                      </GeneralTokenProvider>
                   </DAVTokenProvider>
+                      </GeneralTokenProvider>
                 </DavProvider>
               </ContractProvider>
             </PriceProvider>

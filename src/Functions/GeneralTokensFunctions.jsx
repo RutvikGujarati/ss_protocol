@@ -6,10 +6,9 @@ import PropTypes from "prop-types";
 export const GeneralTokens = createContext();
 
 export const GeneralTokenProvider = ({ children }) => {
-  const { AllContracts, account, contracts } = useContext(ContractContext);
+  const { AllContracts, account } = useContext(ContractContext);
   const [supplies, setSupplies] = useState({});
   const [simpleSupplies, setSimpleSupplies] = useState({});
-  const [claiming, setClaiming] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
   const fetchTotalSupplies = async () => {
@@ -76,13 +75,13 @@ export const GeneralTokenProvider = ({ children }) => {
   };
   const ClaimTokens = async (contract) => {
     try {
-      setClaiming(true);
+    //   setClaiming(true);
       const tx = await contract.mintReward();
       await tx.wait();
-      setClaiming(false);
+    //   setClaiming(false);
     } catch (e) {
       console.error("Error claiming tokens:", e);
-      setClaiming(false);
+    //   setClaiming(false);
     }
   };
   const CheckMintBalance = async (contract) => {
@@ -94,89 +93,7 @@ export const GeneralTokenProvider = ({ children }) => {
       throw e;
     }
   };
-  const [isRenounced, setIsRenounced] = useState({
-    state: null,
-    dav: null,
-    Fluxin: null,
-    Xerion: null,
-  });
-
-  const setRenounceStatus = (name, status) => {
-    setIsRenounced((prevState) => ({
-      ...prevState,
-      [name]: status,
-    }));
-  };
-
-  const checkOwnershipStatus = async () => {
-    try {
-      if (!contracts || Object.keys(contracts).length === 0) {
-        console.error("No contracts available to check.");
-        return;
-      }
-
-      const contractNames = Object.keys(contracts);
-
-      await Promise.all(
-        contractNames.map(async (name) => {
-          try {
-            const contract = contracts[name];
-            if (!contract || !contract.owner) {
-              console.warn(
-                `Contract ${name} does not exist or lacks an owner function.`
-              );
-              setRenounceStatus(name, null);
-              return;
-            }
-
-            const owner = await contract.owner();
-            console.log(`Checking ownership for ${name}:`, owner);
-            setRenounceStatus(
-              name,
-              owner === "0x0000000000000000000000000000000000000000"
-            );
-          } catch (error) {
-            console.error(`Error checking ownership for ${name}:`, error);
-            setRenounceStatus(name, null);
-          }
-        })
-      );
-    } catch (error) {
-      console.error("Error in checkOwnershipStatus:", error);
-    }
-  };
-
-//   useEffect(() => {
-//     checkOwnershipStatus();
-//   }, [contracts]); // Re-run when contracts change
-
-  const renounceOwnership = async (
-    contract,
-    contractName,
-    setTransactionHashes
-  ) => {
-    try {
-      if (!contract) {
-        console.error(`Contract ${contractName} not found.`);
-        return;
-      }
-
-      const tx = await contract.renounceOwnership();
-      console.log(`${contractName} Transaction:`, tx);
-
-      if (tx?.hash) {
-        console.log(`${contractName} Transaction Hash:`, tx.hash);
-        setTransactionHashes((prev) => ({ ...prev, [contractName]: tx.hash }));
-      } else {
-        console.error(
-          "Transaction object doesn't contain transactionHash:",
-          tx
-        );
-      }
-    } catch (e) {
-      console.error(`Error renouncing ownership for ${contractName}:`, e);
-    }
-  };
+ 
 
   useEffect(() => {
     if (AllContracts && Object.keys(AllContracts).length > 0 && !initialized) {
@@ -191,7 +108,6 @@ export const GeneralTokenProvider = ({ children }) => {
         supplies,
         simpleSupplies,
         ClaimTokens,
-        claiming,
         CheckMintBalance,
       }}
     >

@@ -14,7 +14,6 @@ import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions
 
 const DataTable = () => {
   const {
-    stateUsdPrice,
     XerionUsdPrice,
     XerionRatioPrice,
     FluxinRatioPrice,
@@ -25,16 +24,16 @@ const DataTable = () => {
 
   const {
     SwapTokens,
-    handleAddTokenState,
     // claiming,
     contracts,
     // ButtonText,
-    isReversed,
+    // isReversed,
     RatioTargetsofTokens,
     outAmounts,
     Distributed,
     // AuctionRunning,
     DavRequiredAmount,
+	// userHasReverseSwapped,
     auctionDetails,
     userHashSwapped,
     XerionOnepBalance,
@@ -121,15 +120,14 @@ const DataTable = () => {
   };
 
   const tokens = getAuctionTokens(
-    stateUsdPrice,
     XerionUsdPrice,
     XerionRatioPrice,
     FluxinRatioPrice,
     FluxinUsdPrice,
-    isReversed,
     AuctionRunning,
     userHashSwapped,
     RatioTargetsofTokens,
+	// userHasReverseSwapped,
     outAmounts,
     Distributed,
     FluxinOnepBalance,
@@ -137,7 +135,6 @@ const DataTable = () => {
     SwapTokens,
     handleAddFluxin,
     handleAddXerion,
-    handleAddTokenState
   );
 
   return isAuction ? (
@@ -162,8 +159,8 @@ const DataTable = () => {
           <tbody>
             {tokens
               .filter(
-                ({ userHasSwapped, userHasReverseSwapped, AuctionStatus }) =>
-                  !(userHasSwapped && userHasReverseSwapped) &&
+                ({ userHasSwapped,  AuctionStatus }) =>
+                  !(userHasSwapped) &&
                   AuctionStatus &&
                   db >= DavRequiredAmount
               )
@@ -176,7 +173,6 @@ const DataTable = () => {
                     image,
                     ratio,
                     currentRatio,
-                    reverseRatio,
                     SwapT,
                     ContractName,
                     Liquidity,
@@ -260,9 +256,7 @@ const DataTable = () => {
                     </td>
                     <td className="text-success">{Liquidity}</td>
                     <td>
-                      {currentTokenRatio >= RatioTargetToken
-                        ? reverseRatio
-                        : currentRatio}
+                      {currentRatio}
                     </td>
 
                     <td>{ratio}</td>
