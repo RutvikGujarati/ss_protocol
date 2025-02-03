@@ -21,7 +21,7 @@ const DataTable = () => {
     FluxinUsdPrice,
   } = useContext(PriceContext);
   const { DavBalance } = useDAvContract();
-  const { ClaimTokens,CheckMintBalance } = useGeneralTokens();
+  const { ClaimTokens, CheckMintBalance } = useGeneralTokens();
 
   const {
     SwapTokens,
@@ -45,8 +45,8 @@ const DataTable = () => {
     swappingStates,
     buttonTextStates,
   } = useDAVToken();
-  	const { AuctionRunning }= useGeneralAuctionFunctions()
-  
+  const { AuctionRunning } = useGeneralAuctionFunctions();
+
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
   const [errorPopup, setErrorPopup] = useState({});
@@ -162,8 +162,10 @@ const DataTable = () => {
           <tbody>
             {tokens
               .filter(
-                ({ userHasSwapped, AuctionStatus }) =>
-                  !userHasSwapped && AuctionStatus && db >= DavRequiredAmount
+                ({ userHasSwapped, userHasReverseSwapped, AuctionStatus }) =>
+                  !(userHasSwapped && userHasReverseSwapped) &&
+                  AuctionStatus &&
+                  db >= DavRequiredAmount
               )
               .map(
                 (
@@ -176,7 +178,6 @@ const DataTable = () => {
                     currentRatio,
                     reverseRatio,
                     SwapT,
-                    isReversing,
                     ContractName,
                     Liquidity,
                     Price,
@@ -200,8 +201,7 @@ const DataTable = () => {
                         </div>
                         <div className="nameDetails">
                           <h5 className="nameBig">{name}</h5>
-                          {isReversing == "true" &&
-                          currentTokenRatio > RatioTargetToken ? (
+                          {currentTokenRatio >= RatioTargetToken ? (
                             <p className="nameSmall mb-1 uppercase">
                               {ReverseName}
                             </p>
@@ -260,8 +260,7 @@ const DataTable = () => {
                     </td>
                     <td className="text-success">{Liquidity}</td>
                     <td>
-                      {isReversing === "true" &&
-                      currentTokenRatio > RatioTargetToken
+                      {currentTokenRatio >= RatioTargetToken
                         ? reverseRatio
                         : currentRatio}
                     </td>
@@ -271,8 +270,7 @@ const DataTable = () => {
                       <div className="d-flex justify-content-center gap-3 w-100">
                         {id !== "state" && (
                           <>
-                            {isReversing == "true" &&
-                            currentTokenRatio > RatioTargetToken ? (
+                            {currentTokenRatio >= RatioTargetToken ? (
                               <>
                                 <div className="tableClaim">
                                   {formatWithCommas(outputToken)}
@@ -329,8 +327,7 @@ const DataTable = () => {
                           >
                             {swappingStates[id]
                               ? "Swapping..."
-                              : isReversing == "true" &&
-                                currentTokenRatio >= RatioTargetToken
+                              : currentTokenRatio >= RatioTargetToken
                               ? "Reverse Swap"
                               : buttonTextStates[id] || "Swap"}
                           </button>

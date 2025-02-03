@@ -33,7 +33,6 @@ export const DAVTokenProvider = ({ children }) => {
 
   const [loadingRatioPrice, setRatioPriceLoading] = useState(true); // Loading state to show loading message
 
- 
   const [ButtonText, setButtonText] = useState();
   const [isReversed, setisReversed] = useState({
     Fluxin: false,
@@ -72,6 +71,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [auctionDetails, setAuctionDetails] = useState({});
 
   const [userHashSwapped, setUserHashSwapped] = useState({});
+  const [userHasReverseSwapped, setUserHasReverseSwapped] = useState({});
   const [BurnOccuredForToken, setBurnOccuredForToken] = useState({});
   const [BurnCycleACtive, setBurnCycleActive] = useState({});
   const [BurnTimeLeft, setBurnTimeLeft] = useState({});
@@ -79,7 +79,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [TotalBounty, setTotalTokenBounty] = useState({});
   const [AuctionTimeRunning, SetAuctionTimeRunning] = useState("0");
   const [AuctionTimeRunningXerion, SetAuctionTimeRunningXerion] = useState("0");
-  const [RatioValues, SetRatioTargets] = useState("0");
+  const [RatioValues, SetRatioTargets] = useState("1000");
 
   const handleContractCall = async (
     contract,
@@ -308,7 +308,6 @@ export const DAVTokenProvider = ({ children }) => {
   // Ratio Token Contracts
   // -- auction
 
- 
   const [isRenounced, setIsRenounced] = useState({
     state: null,
     dav: null,
@@ -651,16 +650,27 @@ export const DAVTokenProvider = ({ children }) => {
             "getUserHasSwapped",
             []
           );
-          return { name, hasSwapped };
+          const hasReverseSwapped = await handleContractCall(
+            contract,
+            "getUserHasReverseSwapped",
+            []
+          );
+          return { name, hasSwapped, hasReverseSwapped };
         })
       );
 
       // Update state as an object with contract names as keys
       const newStates = results.reduce((acc, { name, hasSwapped }) => {
         acc[name] = hasSwapped;
-        return acc;
       }, {});
-
+      const newStatesForReverse = results.reduce(
+        (acc, { name, hasReverseSwapped }) => {
+          acc[name] = hasReverseSwapped;
+          return acc;
+        },
+        {}
+      );
+      setUserHasReverseSwapped(newStatesForReverse);
       setUserHashSwapped(newStates); // Update state with the combined object
       console.log("Updated swap states:", newStates);
     } catch (e) {
@@ -1217,28 +1227,16 @@ export const DAVTokenProvider = ({ children }) => {
         (ContractName == "Fluxin" && FluxinRatioPrice > rp1) ||
         (ContractName == "Xerion" && XerionRatioPrice > rp1)
       ) {
-        if (isreverse) {
-          selectedContract = contractToUse["state"];
-          approvalAmount = ethers.parseUnits(
-            OutAmountsMapping[ContractName].toString(),
-            18
-          );
-          console.log("firs condition");
-          console.log(
-            "Reversed swap, approving OutBalance:",
-            approvalAmount.toString()
-          );
-        } else {
-          approvalAmount = ethers.parseUnits(
-            InAmountMapping[ContractName].toString(),
-            18
-          );
-          console.log("second condition");
-          console.log(
-            "Normal swap, approving OnePBalance:",
-            approvalAmount.toString()
-          );
-        }
+        selectedContract = contractToUse["state"];
+        approvalAmount = ethers.parseUnits(
+          OutAmountsMapping[ContractName].toString(),
+          18
+        );
+        console.log("firs condition");
+        console.log(
+          "Reversed swap, approving OutBalance:",
+          approvalAmount.toString()
+        );
       } else {
         selectedContract = contractToUse[ContractName]; // Use the original contract
 
@@ -1391,11 +1389,9 @@ export const DAVTokenProvider = ({ children }) => {
   const setBurnRate = async (Target, contractName) => {
     try {
       // Call the contract to set both numerator and denominator
-      await handleContractCall(
-        contractMapping[contractName],
-        "setBurnRate",
-        [Target]
-      );
+      await handleContractCall(contractMapping[contractName], "setBurnRate", [
+        Target,
+      ]);
       console.log(`Ratio target set to `);
     } catch (error) {
       console.error("Error setting ratio target:", error);
@@ -1741,7 +1737,8 @@ export const DAVTokenProvider = ({ children }) => {
         swappingStates,
         transactionStatus,
         AuctionTimeRunningXerion,
-		setBurnRate,
+        setBurnRate,
+		userHasReverseSwapped,
         isReversed,
         StateBurnBalance,
         RatioTargetsofTokens,
