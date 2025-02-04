@@ -1,5 +1,5 @@
 // DAVTokenContext.js
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { ethers } from "ethers";
 // import DAVTokenABI from "../ABI/DavTokenABI.json";
 // import StateABI from "../ABI/StateTokenABI.json";
@@ -34,10 +34,10 @@ export const DAVTokenProvider = ({ children }) => {
   const [loadingRatioPrice, setRatioPriceLoading] = useState(true); // Loading state to show loading message
 
   const [ButtonText, setButtonText] = useState();
-  //   const [isReversed, setisReversed] = useState({
-  //     Fluxin: false,
-  //     Xerion: false,
-  //   });
+  const [isReversed, setisReversed] = useState({
+    Fluxin: false,
+    Xerion: false,
+  });
   const [StateHolds, setStateHoldings] = useState("0.0");
   const [LoadingState, setLoadingState] = useState(true);
 
@@ -160,146 +160,62 @@ export const DAVTokenProvider = ({ children }) => {
 
     const fetchLiveData = async () => {
       if (
-        AllContracts.davContract &&
-        AllContracts.stateContract &&
-        AllContracts.RatioContract &&
-        AllContracts.XerionRatioContract
+        !AllContracts.davContract ||
+        !AllContracts.stateContract ||
+        !AllContracts.RatioContract ||
+        !AllContracts.XerionRatioContract
       ) {
-        try {
-          // Concurrent fetching with Promise.all
-          await Promise.all([
-            fetchStateHoldingsAndCalculateUSD().catch((error) =>
-              console.error("Error fetching StateHoldings:", error)
-            ),
+        console.warn("Waiting for contracts to load...");
+        return;
+      }
 
-            RatioTargetValues().catch((error) =>
-              console.error("Error fetching DAVTokenfive_Amount:", error)
-            ),
-
-            getDecayPercentage("state").catch((error) =>
-              console.error("Error fetching getDecayPercentage (state):", error)
-            ),
-            getDecayPercentage("Xerion").catch((error) =>
-              console.error("Error fetching getDecayPercentage (state):", error)
-            ),
-            checkOwnershipStatus("state").catch((error) =>
-              console.error("Error fetching getDecayPercentage (state):", error)
-            ),
-            checkOwnershipStatus("dav").catch((error) =>
-              console.error("Error fetching getDecayPercentage (state):", error)
-            ),
-            checkOwnershipStatus("Fluxin").catch((error) =>
-              console.error("Error fetching getDecayPercentage (state):", error)
-            ),
-            checkOwnershipStatus("Xerion").catch((error) =>
-              console.error("Error fetching getDecayPercentage (state):", error)
-            ),
-            getDecayPercentage("Fluxin").catch((error) =>
-              console.error(
-                "Error fetching getDecayPercentage (Fluxin):",
-                error
-              )
-            ),
-            ViewDistributedTokens().catch((error) =>
-              console.error("Error fetching ViewDistributedTokens:", error)
-            ),
-            getCachedRatioTarget().catch((error) =>
-              console.error("Error fetching ViewDistributedTokens:", error)
-            ),
-            // reverseSwapEnabled().catch((error) =>
-            //   console.error("Error fetching StateTotalMintedSupply:", error)
-            // ),
-
-            ContractStateBalance().catch((error) =>
-              console.error("Error fetching ContractStateBalance:", error)
-            ),
-            StateBurnAmount().catch((error) =>
-              console.error("Error fetching ContractStateBalance:", error)
-            ),
-            calculateBounty().catch((error) =>
-              console.error("Error fetching ContractStateBalance:", error)
-            ),
-            ContractFluxinBalance().catch((error) =>
-              console.error("Error fetching ContractFluxinBalance:", error)
-            ),
-            ContractFluxinStateBalance().catch((error) =>
-              console.error("Error fetching ContractFluxinBalance:", error)
-            ),
-            ContractXerionStateBalance().catch((error) =>
-              console.error("Error fetching ContractFluxinBalance:", error)
-            ),
-            ContractRatioFluxinBalance().catch((error) =>
-              console.error("Error fetching ContractFluxinBalance:", error)
-            ),
-            ContractRatioXerionBalance().catch((error) =>
-              console.error("Error fetching ContractFluxinBalance:", error)
-            ),
-            ContractXerionBalance().catch((error) =>
-              console.error("Error fetching ContractXerionBalance:", error)
-            ),
-
-            SetOnePercentageOfBalance(
-              AllContracts.RatioContract,
-              "Fluxin"
-            ).catch((error) =>
-              console.error("Error fetching DAVTokenAmount:", error)
-            ),
-            SetOnePercentageOfBalance(
-              AllContracts.XerionRatioContract,
-              "Xerion"
-            ).catch((error) =>
-              console.error("Error fetching DAVTokenAmount:", error)
-            ),
-            calculateBalancesForAllContracts().catch((error) =>
-              console.error("Error fetching DAVTokenAmount:", error)
-            ),
-            getDavRequiredAmount().catch((error) =>
-              console.error("Error fetching DAVTokenAmount:", error)
-            ),
-            AmountOutTokens().catch((error) =>
-              console.error("Error fetching DAVTokenAmount:", error)
-            ),
-            AmountOut().catch((error) =>
-              console.error("Error fetching DAVTokenAmount:", error)
-            ),
-
-            AuctionTimeInterval().catch((error) =>
-              console.error("Error fetching DAVTokenfive_Amount:", error)
-            ),
-
-            HasSwappedAucton().catch((error) =>
-              console.error("Error fetching DAVTokenfive_Amount:", error)
-            ),
-            HasReverseSwappedAucton().catch((error) =>
-              console.error("Error fetching DAVTokenfive_Amount:", error)
-            ),
-            BurningOccurred().catch((error) =>
-              console.error("Error fetching DAVTokenfive_Amount:", error)
-            ),
-            BurnCycleActive().catch((error) =>
-              console.error("Error fetching DAVTokenfive_Amount:", error)
-            ),
-            BurnTimingLeft().catch((error) =>
-              console.error("Error fetching DAVTokenfive_Amount:", error)
-            ),
-            TotalTokensBurn().catch((error) =>
-              console.error("Error fetching DAVTokenfive_Amount:", error)
-            ),
-            TotalBountyAmount().catch((error) =>
-              console.error("Error fetching DAVTokenfive_Amount:", error)
-            ),
-          ]);
-        } catch (error) {
-          console.error("Error fetching live data:", error);
-        }
+      try {
+        await Promise.all([
+          fetchStateHoldingsAndCalculateUSD(),
+          RatioTargetValues(),
+          getDecayPercentage("state"),
+          getDecayPercentage("Xerion"),
+          getDecayPercentage("Fluxin"),
+          checkOwnershipStatus("state"),
+          checkOwnershipStatus("dav"),
+          checkOwnershipStatus("Fluxin"),
+          checkOwnershipStatus("Xerion"),
+          ViewDistributedTokens(),
+          getCachedRatioTarget(),
+          reverseSwapEnabled(),
+          ContractStateBalance(),
+          StateBurnAmount(),
+          calculateBounty(),
+          ContractFluxinBalance(),
+          ContractFluxinStateBalance(),
+          ContractXerionStateBalance(),
+          ContractRatioFluxinBalance(),
+          ContractRatioXerionBalance(),
+          ContractXerionBalance(),
+          SetOnePercentageOfBalance(AllContracts.RatioContract, "Fluxin"),
+          SetOnePercentageOfBalance(AllContracts.XerionRatioContract, "Xerion"),
+          calculateBalancesForAllContracts(),
+          getDavRequiredAmount(),
+          AmountOutTokens(),
+          AmountOut(),
+          AuctionTimeInterval(),
+          HasReverseSwappedAucton(),
+          HasSwappedAucton(),
+          BurningOccurred(),
+          BurnCycleActive(),
+          BurnTimingLeft(),
+          TotalTokensBurn(),
+          TotalBountyAmount(),
+        ]);
+      } catch (error) {
+        console.error("Error fetching live data:", error);
       }
     };
-    // Clear the interval when the component unmounts
-    fetchLiveData();
 
-    interval = setInterval(fetchLiveData, 10000);
+    fetchLiveData(); // Fetch data once initially
+    interval = setInterval(fetchLiveData, 10000); // Poll every 10 seconds
 
-    return () => clearInterval(interval); // Clean up interval on component unmount
+    return () => clearInterval(interval); // Cleanup on unmount
   }, [
     AllContracts.davContract,
     AllContracts.stateContract,
@@ -514,6 +430,7 @@ export const DAVTokenProvider = ({ children }) => {
       return null;
     }
   };
+
   const [outAmounts, setOutAmounts] = useState({
     Fluxin: "0",
     Xerion: "0",
@@ -651,8 +568,9 @@ export const DAVTokenProvider = ({ children }) => {
           const hasSwapped = await handleContractCall(
             contract,
             "getUserHasSwapped",
-            []
+            [account]
           );
+          console.log(`Updated swap states for ${name}:`, hasSwapped);
 
           return { name, hasSwapped };
         })
@@ -661,8 +579,10 @@ export const DAVTokenProvider = ({ children }) => {
       // Update state as an object with contract names as keys
       const newStates = results.reduce((acc, { name, hasSwapped }) => {
         acc[name] = hasSwapped;
+        return acc; // Add this line to return the accumulated object
       }, {});
 
+      console.log(`Updated swap states below:${contracts[name]} `, newStates);
       setUserHashSwapped(newStates); // Update state with the combined object
     } catch (e) {
       console.error("Error fetching swap status:", e);
@@ -677,33 +597,38 @@ export const DAVTokenProvider = ({ children }) => {
       ];
 
       // Fetch data for all contracts
-	  const results = await Promise.all(
-		contracts.map(async ({ name, contract }) => {
-		  try {
-			const hasReverseSwapped = await handleContractCall(
-			  contract,
-			  "getUserHasReverseSwapped",
-			  []
-			);
-			console.log("has reverse swapped", hasReverseSwapped);
-			return { name, hasReverseSwapped };
-		  } catch (error) {
-			console.error(`Error fetching swap status for ${name}:`, error);
-			return { name, hasReverseSwapped: false }; 
-		  }
-		})
-	  );
-        // Update state as an object with contract names as keys
-      const newStates = results.reduce((acc, { name, hasReverseSwapped }) => {
-        acc[name] = hasReverseSwapped;
-      }, {});
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          const hasReverseSwapped = await handleContractCall(
+            contract,
+            "getUserHasReverseSwapped",
+            [account]
+          );
+          console.log(
+            `Updated swap state for reverse: ${name}`,
+            hasReverseSwapped
+          );
 
-      setUserHasReverseSwapped(newStates);
-        console.log("Updated swap states for reverse:", newStates);
+          return { name, hasReverseSwapped }; // Ensure each result contains the name
+        })
+      );
+
+      // Convert the array into an object with contract names as keys
+      const newReverseStates = results.reduce(
+        (acc, { name, hasReverseSwapped }) => {
+          acc[name] = hasReverseSwapped;
+          return acc; // Make sure to return acc in reduce
+        },
+        {}
+      ); // Start with an empty object
+
+      console.log("Updated swap states for reverse:", newReverseStates);
+      setUserHasReverseSwapped(newReverseStates);
     } catch (e) {
       console.error("Error fetching swap status:", e);
     }
   };
+
   const BurningOccurred = async () => {
     try {
       const contracts = [
@@ -985,32 +910,37 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching ratio targets:", e);
     }
   };
-  let cachedRatioTargets = {}; // Store cached ratio targets for multiple tokens
+  const cachedRatioTargetsRef = useRef({});
 
   const getCachedRatioTarget = async () => {
     try {
-      // If cached value exists for each token, return it
-      if (Object.keys(cachedRatioTargets).length > 0) {
-        console.log("Using cached Ratio Targets:", cachedRatioTargets);
-        return cachedRatioTargets;
+      // If cached value exists, return it
+      if (Object.keys(cachedRatioTargetsRef.current).length > 0) {
+        console.log(
+          "Using cached Ratio Targets:",
+          cachedRatioTargetsRef.current
+        );
+        return cachedRatioTargetsRef.current;
       }
 
-      // Fetch the ratio target values from the contracts
+      // Fetch the ratio target values
       const ratioTargetValues = await RatioTargetValues();
 
       // Cache the fetched values
-      cachedRatioTargets = ratioTargetValues;
-      console.log("Fetched and cached Ratio Targets:", cachedRatioTargets);
-      setRatioTargetsOfTokens(cachedRatioTargets);
+      cachedRatioTargetsRef.current = ratioTargetValues;
+      console.log(
+        "Fetched and cached Ratio Targets:",
+        cachedRatioTargetsRef.current
+      );
+
+      setRatioTargetsOfTokens(ratioTargetValues);
       return ratioTargetValues;
     } catch (e) {
       console.error("Error fetching ratio targets:", e);
     }
   };
-  console.log(
-    "================================",
-    RatioTargetsofTokens["Fluxin"]
-  );
+
+  console.log("================================", RatioValues);
   const StateBurnAmount = async () => {
     try {
       const contractDetails = [
@@ -1521,32 +1451,43 @@ export const DAVTokenProvider = ({ children }) => {
   //       console.error("Error setting reverse target:", error);
   //     }
   //   };
-  //   const reverseSwapEnabled = async () => {
-  //     try {
-  //       const contracts = [
-  //         { name: "Fluxin", contract: AllContracts.RatioContract },
-  //         { name: "Xerion", contract: AllContracts.XerionRatioContract },
-  //       ];
-
-  //       const results = await Promise.all(
-  //         contracts.map(async ({ name, contract }) => {
-  //           const isReverse = await handleContractCall(
-  //             contract,
-  //             "isReverseSwapEnabled",
-  //             []
-  //           );
-  //           return { [name]: isReverse.toString() };
-  //         })
-  //       );
-
-  //       const reversedState = Object.assign({}, ...results);
-  //       setisReversed(reversedState);
-
-  //       console.log("set reverse", reversedState);
-  //     } catch (error) {
-  //       console.error("Error setting reverse target:", error);
-  //     }
-  //   };
+  const reverseSwapEnabled = async () => {
+	try {
+	  const contracts = [
+		{
+		  name: "Fluxin",
+		  contract: AllContracts.RatioContract,
+		  currentRatio: FluxinRatioPrice,
+		},
+		{
+		  name: "Xerion",
+		  contract: AllContracts.XerionRatioContract,
+		  currentRatio: XerionRatioPrice,
+		},
+	  ];
+  
+	  const results = await Promise.all(
+		contracts.map(async ({ name, contract, currentRatio }) => {
+		  if (!contract) {
+			console.error(`${name} contract is null or undefined`);
+			return { [name]: "Contract not available" };
+		  }
+  
+		  const isReverse = await contract.isReverseSwapEnabled(currentRatio);
+		  console.log(`isReverseSwapEnabled ${name}`, isReverse);
+		  return { [name]: isReverse.toString() };
+		})
+	  );
+  
+	  const reversedState = Object.assign({}, ...results);
+	  setisReversed(reversedState);
+  
+	  console.log("set reverse", reversedState);
+	} catch (error) {
+	  console.error("Error setting reverse target:", error);
+	}
+  };
+  
 
   const DepositToken = async (name, TokenAddress, amount, contractName) => {
     try {
@@ -1743,7 +1684,7 @@ export const DAVTokenProvider = ({ children }) => {
         handleAddFluxin,
         handleAddXerion,
         userHashSwapped,
-		userHasReverseSwapped,
+        userHasReverseSwapped,
         BurnTimeLeft,
         // WithdrawLPTokens,
         mintAdditionalTOkens,
@@ -1770,7 +1711,7 @@ export const DAVTokenProvider = ({ children }) => {
         AuctionTimeRunningXerion,
         setBurnRate,
         // userHasReverseSwapped,
-        // isReversed,
+        isReversed,
         StateBurnBalance,
         RatioTargetsofTokens,
         FluxinOnepBalance,

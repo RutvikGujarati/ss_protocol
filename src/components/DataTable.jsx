@@ -3,44 +3,24 @@ import "../Styles/DataTable.css";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useDAVToken } from "../Context/DavTokenContext";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
-import { PriceContext } from "../api/StatePrice";
 import BurnDataTable from "./BurnDataTable";
-import { getAuctionTokens } from "../data/auctionTokenData";
+import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
 import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions";
 
 const DataTable = () => {
-  const {
-    XerionUsdPrice,
-    XerionRatioPrice,
-    FluxinRatioPrice,
-    FluxinUsdPrice,
-  } = useContext(PriceContext);
   const { DavBalance } = useDAvContract();
   const { ClaimTokens, CheckMintBalance } = useGeneralTokens();
 
   const {
-    SwapTokens,
-    // claiming,
     contracts,
-    // ButtonText,
-    // isReversed,
-    RatioTargetsofTokens,
-    outAmounts,
     Distributed,
-    // AuctionRunning,
     DavRequiredAmount,
-	// userHasReverseSwapped,
     auctionDetails,
-    userHashSwapped,
-    XerionOnepBalance,
-    handleAddFluxin,
     DavBalanceRequire,
-    handleAddXerion,
-    FluxinOnepBalance,
     swappingStates,
     buttonTextStates,
   } = useDAVToken();
@@ -119,24 +99,8 @@ const DataTable = () => {
     setClaimingStates((prev) => ({ ...prev, [id]: false })); // Reset claiming state
   };
 
-  const tokens = getAuctionTokens(
-    XerionUsdPrice,
-    XerionRatioPrice,
-    FluxinRatioPrice,
-    FluxinUsdPrice,
-    AuctionRunning,
-    userHashSwapped,
-    RatioTargetsofTokens,
-	// userHasReverseSwapped,
-    outAmounts,
-    Distributed,
-    FluxinOnepBalance,
-    XerionOnepBalance,
-    SwapTokens,
-    handleAddFluxin,
-    handleAddXerion,
-  );
-
+  const tokens = useAuctionTokens();
+  console.log("obj tokens", tokens);
   return isAuction ? (
     <div className="container mt-4 datatablemarginbottom">
       <div className="table-responsive">
@@ -159,10 +123,65 @@ const DataTable = () => {
           <tbody>
             {tokens
               .filter(
-                ({ userHasSwapped,  AuctionStatus }) =>
-                  !(userHasSwapped) &&
-                  AuctionStatus &&
-                  db >= DavRequiredAmount
+                ({
+                  userHasSwapped,
+                  name,
+                  userHasReverse,
+                  isReversing,
+                  AuctionStatus,
+                }) => {
+                  console.log(`Filter Conditions:${name}`, {
+                    userHasSwapped,
+                    userHasReverse,
+                    isReversing,
+                    AuctionStatus,
+                    dbCheck: db >= DavRequiredAmount,
+                  });
+
+                  if (AuctionStatus == "false" && !(db >= DavRequiredAmount)) {
+                    if (userHasSwapped && isReversing == "false") {
+                      return false;
+                    } else if (
+                      userHasSwapped &&
+                      userHasReverse &&
+                      isReversing == "true"
+                    ) {
+                      return false;
+                    }
+                  } else if (
+                    AuctionStatus == "true" &&
+                    db >= DavRequiredAmount
+                  ) {
+                    if (!userHasSwapped && isReversing == "false") {
+                      return true;
+                    } else if (
+                      userHasSwapped &&
+                      !userHasReverse &&
+                      isReversing == "true"
+                    ) {
+                      return true;
+                    } else if (userHasReverse && isReversing == "true") {
+                      return false;
+                    } else if (
+                      !userHasReverse &&
+                      !userHasSwapped &&
+                      isReversing == "true"
+                    ) {
+                      return true;
+                    } else if (
+                      userHasSwapped &&
+                      userHasReverse &&
+                      (isReversing == "false" || isReversing == "true")
+                    ) {
+                      return false;
+                    } else if (
+                      userHasReverse &&
+                      (isReversing == "false" || isReversing == "true")
+                    ) {
+                      return false;
+                    }
+                  }
+                }
               )
               .map(
                 (
@@ -255,9 +274,7 @@ const DataTable = () => {
                       </a>
                     </td>
                     <td className="text-success">{Liquidity}</td>
-                    <td>
-                      {currentRatio}
-                    </td>
+                    <td>{currentRatio}</td>
 
                     <td>{ratio}</td>
                     <td>
