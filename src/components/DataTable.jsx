@@ -135,10 +135,10 @@ const DataTable = () => {
                     userHasReverse,
                     isReversing,
                     AuctionStatus,
-                    dbCheck: db >= 10,
+                    dbCheck: db >= DavRequiredAmount,
                   });
 
-                  if (AuctionStatus == "false" && !(db >= 10)) {
+                  if (AuctionStatus == "false" && !(db >= DavRequiredAmount)) {
                     if (userHasSwapped && isReversing == "false") {
                       return false;
                     } else if (
@@ -148,7 +148,7 @@ const DataTable = () => {
                     ) {
                       return false;
                     }
-                  } else if (AuctionStatus == "true" && db >= 10) {
+                  } else if (AuctionStatus == "true" && db >= DavRequiredAmount) {
                     if (!userHasSwapped && isReversing == "false") {
                       return true;
                     } else if (
