@@ -494,7 +494,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               </button>
                             </td>
                           </tr>
-                          <tr>
+                          {/* <tr>
                             <td className="d-flex align-items-center">
                               set BurnRate
                             </td>
@@ -519,7 +519,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 Set
                               </button>
                             </td>
-                          </tr>
+                          </tr> */}
                           <tr>
                             <td className="d-flex align-items-center">
                               Auction Duration

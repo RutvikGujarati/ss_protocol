@@ -135,10 +135,10 @@ const DataTable = () => {
                     userHasReverse,
                     isReversing,
                     AuctionStatus,
-                    dbCheck: db >= DavRequiredAmount,
+                    dbCheck: db >= 10,
                   });
 
-                  if (AuctionStatus == "false" && !(db >= DavRequiredAmount)) {
+                  if (AuctionStatus == "false" && !(db >= 10)) {
                     if (userHasSwapped && isReversing == "false") {
                       return false;
                     } else if (
@@ -148,10 +148,7 @@ const DataTable = () => {
                     ) {
                       return false;
                     }
-                  } else if (
-                    AuctionStatus == "true" &&
-                    db >= DavRequiredAmount
-                  ) {
+                  } else if (AuctionStatus == "true" && db >= 10) {
                     if (!userHasSwapped && isReversing == "false") {
                       return true;
                     } else if (
@@ -202,7 +199,7 @@ const DataTable = () => {
                     onChart,
                     distributedAmount,
                     inputTokenAmount,
-                    handleAddXerion,
+                    handleAddToken,
                     outputToken,
                   },
                   index
@@ -349,7 +346,7 @@ const DataTable = () => {
                             src={MetaMaskIcon}
                             width={20}
                             height={20}
-                            onClick={handleAddXerion}
+                            onClick={handleAddToken}
                             alt="Logo"
                             style={{ cursor: "pointer" }}
                           />
