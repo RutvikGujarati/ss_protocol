@@ -101,7 +101,7 @@ const BurnDataTable = () => {
         <div className="table-responsive">
           <div className="announcement text-center">
             <div className="">
-              5 DAV TOKENS REQUIRED TO BURN LISTED TOKENS AND RECEIVE THE
+              10 DAV TOKENS REQUIRED TO BURN LISTED TOKENS AND RECEIVE THE
               BOUNTY.
             </div>
           </div>
@@ -121,7 +121,7 @@ const BurnDataTable = () => {
               {tokens
                 .filter(
                   ({ BurnOccured, burnCycle }) =>
-                    !BurnOccured && burnCycle && db >= DavRequiredAmount
+                    !BurnOccured && burnCycle && db >= 10
                 )
                 .map(
                   ({
