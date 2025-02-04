@@ -85,7 +85,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
             <th>#</th>
             <th></th>
             <th className="">Name</th>
-            {/* <th></th> */}
+            <th></th>
             <th>ADD</th>
           </tr>
         </thead>
@@ -98,8 +98,8 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
                   <img src={item.logo} width={40} height={40} alt="Logo" />
                 </div>
               </td>
-              <td className="d-flex justify-content-center">{item.name}</td>
-			  {/* <td></td> */}
+              <td className="d-flex justify-content-center ">{item.name}</td>
+              <td></td>
               <td>
                 <div className="mb-0 mx-1">
                   <img
@@ -113,7 +113,6 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
                   />
                 </div>
               </td>
-
             </tr>
           ))}
         </tbody>
