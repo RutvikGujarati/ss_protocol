@@ -494,66 +494,56 @@ export const DAVTokenProvider = ({ children }) => {
 
   const AuctionTimeInterval = async () => {
     try {
-      const formatTimestamp = (timestamp) => {
-        const timestampSeconds = parseFloat(timestamp);
-        const date = new Date(timestampSeconds * 1000);
+        const formatTimestamp = (timestamp) => {
+            const timestampSeconds = parseFloat(timestamp);
+            const date = new Date(timestampSeconds * 1000);
 
-        return date.toLocaleString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        });
-      };
+            return date.toLocaleString("en-US", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: false, // Use 24-hour format
+            });
+        };
 
-      // List of token contracts to handle
-      const contracts = [
-        { contract: AllContracts.RatioContract, name: "Fluxin" },
-        { contract: AllContracts.XerionRatioContract, name: "Xerion" }, // Example for another token
-      ];
+        // List of token contracts to handle
+        const contracts = [
+            { contract: AllContracts.RatioContract, name: "Fluxin" },
+            { contract: AllContracts.XerionRatioContract, name: "Xerion" }, // Example for another token
+        ];
 
-      const auctionData = {};
+        const auctionData = {};
 
-      for (const { contract, name } of contracts) {
-        const auctionInterval = await handleContractCall(
-          contract,
-          "auctionInterval",
-          []
-        );
-        const auctionDuration = await handleContractCall(
-          contract,
-          "auctionDuration",
-          []
-        );
+        for (const { contract, name } of contracts) {
+            const auctionInterval = await handleContractCall(contract, "auctionInterval", []);
+            const auctionDuration = await handleContractCall(contract, "auctionDuration", []);
 
-        const nextAuctionStart = await handleContractCall(
-          contract,
-          "getNextAuctionStart",
-          []
-        );
+            const nextAuctionStart = await handleContractCall(contract, "getNextAuctionStart", []);
 
-        let formattedNextTime = "0";
-        if (nextAuctionStart !== 0 && nextAuctionStart !== undefined) {
-          formattedNextTime = formatTimestamp(nextAuctionStart);
+            let formattedNextTime = "0";
+            if (nextAuctionStart !== 0 && nextAuctionStart !== undefined) {
+                formattedNextTime = formatTimestamp(nextAuctionStart);
+            }
+
+            auctionData[name] = {
+                auctionInterval,
+                auctionDuration,
+                nextAuctionStart: formattedNextTime,
+            };
         }
 
-        auctionData[name] = {
-          auctionInterval,
-          auctionDuration,
-          nextAuctionStart: formattedNextTime,
-        };
-      }
+        setAuctionDetails(auctionData);
 
-      setAuctionDetails(auctionData);
-
-      console.log("Auction Data:", auctionData);
+        console.log("Auction Data:", auctionData);
     } catch (e) {
-      console.error("Error fetching auction interval:", e);
+        console.error("Error fetching auction interval:", e);
     }
-  };
+};
+
   const HasSwappedAucton = async () => {
     try {
       // List of contracts with identifiers
@@ -1452,42 +1442,41 @@ export const DAVTokenProvider = ({ children }) => {
   //     }
   //   };
   const reverseSwapEnabled = async () => {
-	try {
-	  const contracts = [
-		{
-		  name: "Fluxin",
-		  contract: AllContracts.RatioContract,
-		  currentRatio: FluxinRatioPrice,
-		},
-		{
-		  name: "Xerion",
-		  contract: AllContracts.XerionRatioContract,
-		  currentRatio: XerionRatioPrice,
-		},
-	  ];
-  
-	  const results = await Promise.all(
-		contracts.map(async ({ name, contract, currentRatio }) => {
-		  if (!contract) {
-			console.error(`${name} contract is null or undefined`);
-			return { [name]: "Contract not available" };
-		  }
-  
-		  const isReverse = await contract.isReverseSwapEnabled(currentRatio);
-		  console.log(`isReverseSwapEnabled ${name}`, isReverse);
-		  return { [name]: isReverse.toString() };
-		})
-	  );
-  
-	  const reversedState = Object.assign({}, ...results);
-	  setisReversed(reversedState);
-  
-	  console.log("set reverse", reversedState);
-	} catch (error) {
-	  console.error("Error setting reverse target:", error);
-	}
+    try {
+      const contracts = [
+        {
+          name: "Fluxin",
+          contract: AllContracts.RatioContract,
+          currentRatio: FluxinRatioPrice,
+        },
+        {
+          name: "Xerion",
+          contract: AllContracts.XerionRatioContract,
+          currentRatio: XerionRatioPrice,
+        },
+      ];
+
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract, currentRatio }) => {
+          if (!contract) {
+            console.error(`${name} contract is null or undefined`);
+            return { [name]: "Contract not available" };
+          }
+
+          const isReverse = await contract.isReverseSwapEnabled(currentRatio);
+          console.log(`isReverseSwapEnabled ${name}`, isReverse);
+          return { [name]: isReverse.toString() };
+        })
+      );
+
+      const reversedState = Object.assign({}, ...results);
+      setisReversed(reversedState);
+
+      console.log("set reverse", reversedState);
+    } catch (error) {
+      console.error("Error setting reverse target:", error);
+    }
   };
-  
 
   const DepositToken = async (name, TokenAddress, amount, contractName) => {
     try {

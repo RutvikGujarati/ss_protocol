@@ -214,7 +214,7 @@ const DataTable = () => {
                         <div className="nameDetails">
                           <h5 className="nameBig">{name}</h5>
                           {currentTokenRatio >= RatioTargetToken ? (
-                            <p className="nameSmall mb-1 uppercase">
+                            <p className="nameSmall mb-1 uppercase px-2 mx-4">
                               {ReverseName}
                             </p>
                           ) : (
@@ -331,8 +331,13 @@ const DataTable = () => {
                           <button
                             onClick={() => SwapT()}
                             disabled={swappingStates[id]}
-                            className="btn btn-primary btn-sm swap-btn"
-                          >
+							className={`btn btn-sm swap-btn ${
+								swappingStates[id]
+								  ? "btn-secondary"
+								  : currentTokenRatio >= RatioTargetToken
+								  ? "btn-primary" // Custom class for "Reverse Swap"
+								  : "btn-primary gap-0 mx-4 px-4"
+							  }`}                          >
                             {swappingStates[id]
                               ? "Swapping..."
                               : currentTokenRatio >= RatioTargetToken
