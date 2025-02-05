@@ -14,7 +14,7 @@ export const useAuctionTokens = () => {
 		FluxinRatioPrice,
 		FluxinUsdPrice
 	} = useContext(PriceContext);
-  const { AuctionRunning } = useGeneralAuctionFunctions();
+	const { AuctionRunning } = useGeneralAuctionFunctions();
 
 	const {
 		SwapTokens,
@@ -57,7 +57,7 @@ export const useAuctionTokens = () => {
 				: `${FluxinOnepBalance || 0} Fluxin`,
 			SwapT: () => SwapTokens("Fluxin", "Fluxin"),
 			ratioPrice: FluxinRatioPrice,
-			outputToken: `${outAmounts?.Fluxin || 0} State`,
+			outputToken: (FluxinRatioPrice >= (RatioTargetsofTokens?.["Fluxin"] || 0)) ? `${outAmounts?.Fluxin / 2 || 0} State` : `${outAmounts?.Fluxin || 0} State`,
 		},
 		{
 			id: "Xerion",
@@ -85,7 +85,7 @@ export const useAuctionTokens = () => {
 			inputTokenAmount: (XerionRatioPrice >= (RatioTargetsofTokens?.["Xerion"] || 0))
 				? `${(XerionOnepBalance || 0) * 2} Xerion`
 				: `${XerionOnepBalance || 0} Xerion`,
-			outputToken: `${outAmounts?.Xerion || 0} State`,
+			outputToken: (XerionRatioPrice >= (RatioTargetsofTokens?.["Xerion"] || 0)) ? `${outAmounts?.Xerion / 2 || 0} State` : `${outAmounts?.Xerion || 0} State`,
 		},
 	];
 

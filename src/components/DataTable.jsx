@@ -138,7 +138,7 @@ const DataTable = () => {
                     dbCheck: db >= DavRequiredAmount,
                   });
 
-                  if (AuctionStatus == "false" && !(db >= DavRequiredAmount)) {
+                  if (AuctionStatus == "false" && !(db >= 1)) {
                     if (userHasSwapped && isReversing == "false") {
                       return false;
                     } else if (
@@ -148,7 +148,7 @@ const DataTable = () => {
                     ) {
                       return false;
                     }
-                  } else if (AuctionStatus == "true" && db >= DavRequiredAmount) {
+                  } else if (AuctionStatus == "true" && db >= 1) {
                     if (!userHasSwapped && isReversing == "false") {
                       return true;
                     } else if (
@@ -335,8 +335,8 @@ const DataTable = () => {
 								swappingStates[id]
 								  ? "btn-secondary"
 								  : currentTokenRatio >= RatioTargetToken
-								  ? "btn-primary" // Custom class for "Reverse Swap"
-								  : "btn-primary gap-0 mx-4 px-4"
+								  ? "btn-primary btn-sm swap-btn" // Custom class for "Reverse Swap"
+								  : "btn-primary btn-sm swap-btn gap-0 mx-4 px-4"
 							  }`}                          >
                             {swappingStates[id]
                               ? "Swapping..."

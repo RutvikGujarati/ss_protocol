@@ -86,7 +86,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
             <th></th>
             <th className="">Name</th>
             {/* <th></th> */}
-            <th>ADD</th>
+            <th>Add</th>
           </tr>
         </thead>
         <tbody>

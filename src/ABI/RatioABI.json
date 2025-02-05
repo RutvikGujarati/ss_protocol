@@ -236,6 +236,24 @@
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_forNormalSwap",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_forReverseSwap",
+				"type": "uint256"
+			}
+		],
+		"name": "setStateLimit",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "startAuction",
 		"outputs": [],
@@ -893,6 +911,45 @@
 			}
 		],
 		"name": "lastBurnTime",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "MAX_State_limit",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "MAX_State_Reverse_limit",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "MaxLimitOfStateBurning",
 		"outputs": [
 			{
 				"internalType": "uint256",
