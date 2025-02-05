@@ -21,7 +21,6 @@ const BurnDataTable = () => {
     DavBalanceRequire,
     BurnCycleACtive,
     BurnOccuredForToken,
-	DavRequiredAmount,
   } = useDAVToken();
 
   // Log for debugging

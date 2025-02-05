@@ -328,22 +328,35 @@ const DataTable = () => {
                     <td>
                       <div className="d-flex align-items-center gap-2">
                         {id !== "state" && (
-                          <button
-                            onClick={() => SwapT()}
-                            disabled={swappingStates[id]}
-							className={`btn btn-sm swap-btn ${
-								swappingStates[id]
-								  ? "btn-secondary"
-								  : currentTokenRatio >= RatioTargetToken
-								  ? "btn-primary btn-sm swap-btn" // Custom class for "Reverse Swap"
-								  : "btn-primary btn-sm swap-btn gap-0 mx-4 px-4"
-							  }`}                          >
-                            {swappingStates[id]
-                              ? "Swapping..."
-                              : currentTokenRatio >= RatioTargetToken
-                              ? "Reverse Swap"
-                              : buttonTextStates[id] || "Swap"}
-                          </button>
+                          <>
+                            {currentTokenRatio >= RatioTargetToken && (
+                              <button
+                                onClick={() => SwapT()}
+                                disabled={swappingStates[id]}
+                                className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
+                              >
+                                {
+                                  swappingStates[id]
+                                    ? "Swapping..."
+                                    : "Reverse Swap"
+                                }
+                              </button>
+                            )}
+
+                            {currentTokenRatio < RatioTargetToken && (
+                              <button
+                                onClick={() => SwapT()}
+                                disabled={swappingStates[id]}
+                                className={`btn btn-sm swap-btn  btn-primary btn-sm swap-btn gap-0 mx-4 px-4`}
+                              >
+                                {
+                                  swappingStates[id]
+                                    ? "Swapping..."
+                                    : buttonTextStates[id] || "Swap" 
+                                }
+                              </button>
+                            )}
+                          </>
                         )}
 
                         {id !== "state" && (

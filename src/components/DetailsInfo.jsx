@@ -34,7 +34,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const { AuctionRunning } = useGeneralAuctionFunctions();
 
   const [numerator, setNumerator] = useState("");
-  const [burningRate, setBurningRate] = useState("");
 
   const [numeratorOfAUction, setNumeratorOfAuction] = useState("");
   const [numeratorOfInterval, setNumeratorOfInterval] = useState("");
@@ -106,10 +105,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     const value = e.target.value;
     setNumeratorOfInterval(value);
   };
-  const handleInputChangeBurnRate = (e) => {
-    const value = e.target.value;
-    setBurningRate(value);
-  };
+
   const handleInputChangeofToken = (e) => {
     const rawValue = e.target.value.replace(/,/g, "");
     if (!isNaN(rawValue) && rawValue !== "") {
@@ -264,7 +260,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   <>
                     <TableRowWithClick
                       label="Withdraw 5%"
-                      value={formatWithCommas(dataToShow.claimFiveDAVToken)}
+                      value={formatWithCommas(dataToShow.claimFiveDAVTokenValue)}
                       action={dataToShow.actions.claimFiveDAVToken}
                       buttonText="Withdraw"
                     />

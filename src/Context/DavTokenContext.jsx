@@ -377,11 +377,13 @@ export const DAVTokenProvider = ({ children }) => {
           contract: AllContracts.RatioContract,
           name: "Fluxin",
           ratioPrice: FluxinRatioPrice,
+          Target: RatioValues.Fluxin,
         },
         {
           contract: AllContracts.XerionRatioContract,
           name: "Xerion",
           ratioPrice: XerionRatioPrice,
+          Target: RatioValues.Xerion,
         },
       ];
       console.log("xerion ratio price", XerionRatioPrice);
@@ -389,7 +391,7 @@ export const DAVTokenProvider = ({ children }) => {
       const amounts = {};
 
       // Loop through all contracts
-      for (const { contract, name, ratioPrice } of contracts) {
+      for (const { contract, name, ratioPrice, Target } of contracts) {
         const rawTokenBalanceUser = await handleContractCall(
           contract,
           "getOutPutAmount",
@@ -401,8 +403,14 @@ export const DAVTokenProvider = ({ children }) => {
         const tokenBalance = Math.floor(parseFloat(rawTokenBalanceUser || "0"));
         console.log(`${name} -> Parsed Token Balance:`, tokenBalance);
 
-        const adjustedBalance = parseFloat(tokenBalance || "0");
+        let adjustedBalance = parseFloat(tokenBalance || "0");
         console.log(`${name} -> Calculated Balance:`, adjustedBalance);
+
+        // Check if currentTokenRatio >= RatioTargetToken and divide by 2 if true
+        if (ratioPrice >= Target) {
+          adjustedBalance = adjustedBalance / 2;
+          console.log(`${name} -> Adjusted (divided by 2):`, adjustedBalance);
+        }
 
         amounts[name] = {
           rawBalance: tokenBalance,
@@ -494,55 +502,67 @@ export const DAVTokenProvider = ({ children }) => {
 
   const AuctionTimeInterval = async () => {
     try {
-        const formatTimestamp = (timestamp) => {
-            const timestampSeconds = parseFloat(timestamp);
-            const date = new Date(timestampSeconds * 1000);
+      const formatTimestamp = (timestamp) => {
+        const timestampSeconds = parseFloat(timestamp);
+        const date = new Date(timestampSeconds * 1000);
 
-            return date.toLocaleString("en-US", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: false, // Use 24-hour format
-            });
-        };
+        return date.toLocaleString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false, // Use 24-hour format
+        });
+      };
 
-        // List of token contracts to handle
-        const contracts = [
-            { contract: AllContracts.RatioContract, name: "Fluxin" },
-            { contract: AllContracts.XerionRatioContract, name: "Xerion" }, // Example for another token
-        ];
+      // List of token contracts to handle
+      const contracts = [
+        { contract: AllContracts.RatioContract, name: "Fluxin" },
+        { contract: AllContracts.XerionRatioContract, name: "Xerion" }, // Example for another token
+      ];
 
-        const auctionData = {};
+      const auctionData = {};
 
-        for (const { contract, name } of contracts) {
-            const auctionInterval = await handleContractCall(contract, "auctionInterval", []);
-            const auctionDuration = await handleContractCall(contract, "auctionDuration", []);
+      for (const { contract, name } of contracts) {
+        const auctionInterval = await handleContractCall(
+          contract,
+          "auctionInterval",
+          []
+        );
+        const auctionDuration = await handleContractCall(
+          contract,
+          "auctionDuration",
+          []
+        );
 
-            const nextAuctionStart = await handleContractCall(contract, "getNextAuctionStart", []);
+        const nextAuctionStart = await handleContractCall(
+          contract,
+          "getNextAuctionStart",
+          []
+        );
 
-            let formattedNextTime = "0";
-            if (nextAuctionStart !== 0 && nextAuctionStart !== undefined) {
-                formattedNextTime = formatTimestamp(nextAuctionStart);
-            }
-
-            auctionData[name] = {
-                auctionInterval,
-                auctionDuration,
-                nextAuctionStart: formattedNextTime,
-            };
+        let formattedNextTime = "0";
+        if (nextAuctionStart !== 0 && nextAuctionStart !== undefined) {
+          formattedNextTime = formatTimestamp(nextAuctionStart);
         }
 
-        setAuctionDetails(auctionData);
+        auctionData[name] = {
+          auctionInterval,
+          auctionDuration,
+          nextAuctionStart: formattedNextTime,
+        };
+      }
 
-        console.log("Auction Data:", auctionData);
+      setAuctionDetails(auctionData);
+
+      console.log("Auction Data:", auctionData);
     } catch (e) {
-        console.error("Error fetching auction interval:", e);
+      console.error("Error fetching auction interval:", e);
     }
-};
+  };
 
   const HasSwappedAucton = async () => {
     try {
@@ -1369,7 +1389,12 @@ export const DAVTokenProvider = ({ children }) => {
   //       console.error("Error setting reverse target:", error);
   //     }
   //   };
-  const SetOnePercentageOfBalance = async (contract, tokenName) => {
+  const SetOnePercentageOfBalance = async (
+    contract,
+    tokenName,
+    CurrentRatio,
+    TargetRatio
+  ) => {
     try {
       // Fetch raw one percent balance for the given contract
       const rawBalance = await handleContractCall(
@@ -1379,8 +1404,10 @@ export const DAVTokenProvider = ({ children }) => {
         (s) => ethers.formatUnits(s, 18)
       );
 
-      const balance = Math.floor(parseFloat(rawBalance || "0"));
-
+      let balance = Math.floor(parseFloat(rawBalance || "0"));
+      if (CurrentRatio >= TargetRatio) {
+        balance = balance * 2;
+      }
       console.log(`SetOnePercentageOfBalance -> ${tokenName}:`, rawBalance);
 
       console.log(`Adjusted Balance for ${tokenName}:`, balance);
@@ -1405,12 +1432,17 @@ export const DAVTokenProvider = ({ children }) => {
     try {
       const value = await SetOnePercentageOfBalance(
         AllContracts.RatioContract,
-        "Fluxin"
+        "Fluxin",
+        FluxinRatioPrice,
+        RatioValues.Fluxin
       );
       const valueXerion = await SetOnePercentageOfBalance(
         AllContracts.XerionRatioContract,
-        "Xerion"
+        "Xerion",
+        XerionRatioPrice,
+        RatioValues.Xerion
       );
+
       console.log("Value Calculation", value);
       setFluxinOnepBalnce(value.balance);
       setXerionOnepBalnce(valueXerion.balance);

@@ -38,7 +38,7 @@ export const TokensDetails = () => {
 			transactionHash:
 				"0xa7edbeaf4dabb78ef6385220bc75f7266c144a4c9da19393245ab62999195d90",
 			claimDAVToken: DAVTokensWithdraw,
-			claimFiveDAVToken: DAVTokensFiveWithdraw,
+			claimFiveDAVTokenValue: DAVTokensFiveWithdraw,
 			address: DAV_TOKEN_ADDRESS,
 			renounceSmartContract: isRenounced?.dav ?? "Unknown",
 			Supply: Supply,

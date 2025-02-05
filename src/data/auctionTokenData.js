@@ -52,12 +52,10 @@ export const useAuctionTokens = () => {
 			distributedAmount: Distributed?.["Fluxin"] || 0,
 			token: Fluxin,
 			handleAddToken: handleAddFluxin,
-			inputTokenAmount: (FluxinRatioPrice >= (RatioTargetsofTokens?.["Fluxin"] || 0))
-				? `${(FluxinOnepBalance || 0) * 2} Fluxin`
-				: `${FluxinOnepBalance || 0} Fluxin`,
+			inputTokenAmount: `${FluxinOnepBalance || 0} Fluxin`,
 			SwapT: () => SwapTokens("Fluxin", "Fluxin"),
 			ratioPrice: FluxinRatioPrice,
-			outputToken: (FluxinRatioPrice >= (RatioTargetsofTokens?.["Fluxin"] || 0)) ? `${outAmounts?.Fluxin / 2 || 0} State` : `${outAmounts?.Fluxin || 0} State`,
+			outputToken: `${outAmounts?.Fluxin || 0} State`,
 		},
 		{
 			id: "Xerion",
@@ -82,10 +80,8 @@ export const useAuctionTokens = () => {
 			SwapT: () => SwapTokens("Xerion", "Xerion"),
 			ratioPrice: XerionRatioPrice,
 			handleAddToken: handleAddXerion,
-			inputTokenAmount: (XerionRatioPrice >= (RatioTargetsofTokens?.["Xerion"] || 0))
-				? `${(XerionOnepBalance || 0) * 2} Xerion`
-				: `${XerionOnepBalance || 0} Xerion`,
-			outputToken: (XerionRatioPrice >= (RatioTargetsofTokens?.["Xerion"] || 0)) ? `${outAmounts?.Xerion / 2 || 0} State` : `${outAmounts?.Xerion || 0} State`,
+			inputTokenAmount: `${XerionOnepBalance || 0} Xerion`,
+			outputToken: `${outAmounts?.Xerion || 0} State`,
 		},
 	];
 
