@@ -154,7 +154,12 @@ export const DAVTokenProvider = ({ children }) => {
       setLoadingState(false);
     }
   };
-
+  useEffect(() => {
+    console.log(
+      "Ratio target from cache",
+      cachedRatioTargetsRef.current.Xerion
+    );
+  });
   useEffect(() => {
     let interval;
 
@@ -1376,19 +1381,7 @@ export const DAVTokenProvider = ({ children }) => {
       throw error;
     }
   };
-  //   const setReverseTime = async (start, end) => {
-  //     try {
-  //       // Call the contract to set both numerator and denominator
-  //       await AllContracts.RatioContract.setReverseSwapTimeRangeForPair(
-  //         start,
-  //         end
-  //       );
 
-  //       console.log(`seted reverse time`);
-  //     } catch (error) {
-  //       console.error("Error setting reverse target:", error);
-  //     }
-  //   };
   const SetOnePercentageOfBalance = async (
     contract,
     tokenName,
@@ -1429,29 +1422,47 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
   const calculateBalancesForAllContracts = async () => {
+    const ratioTargetValues = await RatioTargetValues();
+    cachedRatioTargetsRef.current = ratioTargetValues;
+    console.log(
+      "Fetched and cached Ratio Targets:",
+      cachedRatioTargetsRef.current.Fluxin
+    );
     try {
-      const value = await SetOnePercentageOfBalance(
-        AllContracts.RatioContract,
-        "Fluxin",
-        FluxinRatioPrice,
-		RatioValues.Fluxin
+      const [value, valueXerion] = await Promise.all([
+        SetOnePercentageOfBalance(
+          AllContracts.RatioContract,
+          "Fluxin",
+          FluxinRatioPrice,
+		  cachedRatioTargetsRef.current.Fluxin
+        ),
+        SetOnePercentageOfBalance(
+          AllContracts.XerionRatioContract,
+          "Xerion",
+          XerionRatioPrice,
+          cachedRatioTargetsRef.current.Xerion
+        ),
+      ]);
+
+      console.log(
+        "Ratio target from cache",
+        cachedRatioTargetsRef.current.Xerion
       );
-	  console.log("ratio target from cache",RatioValues.Fluxin)
-      const valueXerion = await SetOnePercentageOfBalance(
-        AllContracts.XerionRatioContract,
-        "Xerion",
-        XerionRatioPrice,
-		RatioValues.Xerion
+      console.log("Value Calculation", valueXerion?.balance);
+
+      if (value) setFluxinOnepBalnce(value.balance);
+      if (valueXerion) setXerionOnepBalnce(valueXerion.balance);
+
+      console.log(
+        "Final Balances in State:",
+        value?.balance,
+        valueXerion?.balance
       );
-	  
-      console.log("Value Calculation", valueXerion.balance);
-      setFluxinOnepBalnce(value.balance);
-      setXerionOnepBalnce(valueXerion.balance);
-      console.log("Final Balances in State:", value.balance);
     } catch (e) {
       console.error("Error calculating balances for all contracts:", e);
     }
   };
+
   const getDavRequiredAmount = async () => {
     try {
       const value = await AllContracts.davContract.getRequiredDAVAmount();
