@@ -183,7 +183,7 @@ const DataTable = () => {
               .map(
                 (
                   {
-                    id,
+				id,
                     name,
                     Pname,
                     image,
