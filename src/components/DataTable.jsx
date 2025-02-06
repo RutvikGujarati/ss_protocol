@@ -148,7 +148,7 @@ const DataTable = () => {
                     ) {
                       return false;
                     }
-                  } else if (AuctionStatus == "true" && db >= 1) {
+                  } else if (AuctionStatus == "true" && (db >= 1)) {
                     if (!userHasSwapped && isReversing == "false") {
                       return true;
                     } else if (

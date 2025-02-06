@@ -940,7 +940,7 @@ export const DAVTokenProvider = ({ children }) => {
       cachedRatioTargetsRef.current = ratioTargetValues;
       console.log(
         "Fetched and cached Ratio Targets:",
-        cachedRatioTargetsRef.current
+        cachedRatioTargetsRef.current.Fluxin
       );
 
       setRatioTargetsOfTokens(ratioTargetValues);
@@ -1434,16 +1434,17 @@ export const DAVTokenProvider = ({ children }) => {
         AllContracts.RatioContract,
         "Fluxin",
         FluxinRatioPrice,
-        RatioValues.Fluxin
+		RatioValues.Fluxin
       );
+	  console.log("ratio target from cache",RatioValues.Fluxin)
       const valueXerion = await SetOnePercentageOfBalance(
         AllContracts.XerionRatioContract,
         "Xerion",
         XerionRatioPrice,
-        RatioValues.Xerion
+		RatioValues.Xerion
       );
-
-      console.log("Value Calculation", value);
+	  
+      console.log("Value Calculation", valueXerion.balance);
       setFluxinOnepBalnce(value.balance);
       setXerionOnepBalnce(valueXerion.balance);
       console.log("Final Balances in State:", value.balance);
