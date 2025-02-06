@@ -377,13 +377,11 @@ export const DAVTokenProvider = ({ children }) => {
           contract: AllContracts.RatioContract,
           name: "Fluxin",
           ratioPrice: FluxinRatioPrice,
-          Target: RatioValues.Fluxin,
         },
         {
           contract: AllContracts.XerionRatioContract,
           name: "Xerion",
           ratioPrice: XerionRatioPrice,
-          Target: RatioValues.Xerion,
         },
       ];
       console.log("xerion ratio price", XerionRatioPrice);
@@ -391,7 +389,7 @@ export const DAVTokenProvider = ({ children }) => {
       const amounts = {};
 
       // Loop through all contracts
-      for (const { contract, name, ratioPrice, Target } of contracts) {
+      for (const { contract, name, ratioPrice } of contracts) {
         const rawTokenBalanceUser = await handleContractCall(
           contract,
           "getOutPutAmount",

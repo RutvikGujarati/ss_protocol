@@ -34,6 +34,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const { AuctionRunning } = useGeneralAuctionFunctions();
 
   const [numerator, setNumerator] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
 
   const [numeratorOfAUction, setNumeratorOfAuction] = useState("");
   const [numeratorOfInterval, setNumeratorOfInterval] = useState("");
@@ -95,21 +96,25 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const handleInputChange = (e) => {
     const value = e.target.value;
     setNumerator(value);
+    setIsTyping(e.target.value.length > 0);
   };
 
   const handleInputChangeAuction = (e) => {
     const value = e.target.value;
     setNumeratorOfAuction(value);
+    setIsTyping(e.target.value.length > 0);
   };
   const handleInputChangeInterval = (e) => {
     const value = e.target.value;
     setNumeratorOfInterval(value);
+    setIsTyping(e.target.value.length > 0);
   };
 
   const handleInputChangeofToken = (e) => {
     const rawValue = e.target.value.replace(/,/g, "");
     if (!isNaN(rawValue) && rawValue !== "") {
       setDenominator(rawValue);
+      setIsTyping(e.target.value.length > 0);
     } else if (rawValue === "") {
       setDenominator("");
     }
@@ -118,6 +123,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     const rawValue = e.target.value.replace(/,/g, "");
     if (!isNaN(rawValue) && rawValue !== "") {
       setStateDenominator(rawValue);
+      setIsTyping(e.target.value.length > 0);
     } else if (rawValue === "") {
       setStateDenominator("");
     }
@@ -260,7 +266,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   <>
                     <TableRowWithClick
                       label="Withdraw 5%"
-                      value={formatWithCommas(dataToShow.claimFiveDAVTokenValue)}
+                      value={formatWithCommas(
+                        dataToShow.claimFiveDAVTokenValue
+                      )}
                       action={dataToShow.actions.claimFiveDAVToken}
                       buttonText="Withdraw"
                     />
@@ -401,8 +409,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               <div className="w-100">
                                 <input
                                   type="text"
-                                  className="form-control text-center mh-30"
-                                  placeholder="Enter amount"
+								  className={`form-control text-center mh-30 ${
+                                    isTyping ? "text-blue" : ""
+                                  }`}                                  placeholder="Enter amount"
                                   value={
                                     Denominator
                                       ? Number(Denominator).toLocaleString()
@@ -431,7 +440,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               <div className="w-100">
                                 <input
                                   type="text"
-                                  className="form-control text-center mh-30"
+                                  className={`form-control text-center mh-30 ${
+                                    isTyping ? "text-blue" : ""
+                                  }`}
                                   placeholder="Enter amount"
                                   value={
                                     StateDenominator
@@ -468,8 +479,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               <div className="w-100">
                                 <input
                                   type="text"
-                                  className="form-control text-center mh-30"
-                                  placeholder={
+								  className={`form-control text-center mh-30 ${
+                                    isTyping ? "text-blue" : ""
+                                  }`}                                  placeholder={
                                     dataToShow.interval.auctionInterval
                                   }
                                   value={numeratorOfInterval}
@@ -524,8 +536,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               <div className="w-100">
                                 <input
                                   type="text"
-                                  className="form-control text-center mh-30"
-                                  placeholder={
+								  className={`form-control text-center mh-30 ${
+                                    isTyping ? "text-blue" : ""
+                                  }`}                                  placeholder={
                                     dataToShow.Duration.auctionDuration
                                   }
                                   value={numeratorOfAUction}
@@ -555,8 +568,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               <div className="w-100">
                                 <input
                                   type="number"
-                                  className="form-control text-center mh-30"
-                                  placeholder="Enter Target"
+								  className={`form-control text-center mh-30 ${
+                                    isTyping ? "text-blue" : ""
+                                  }`}                                  placeholder="Enter Target"
                                   value={numerator}
                                   onChange={(e) => handleInputChange(e)}
                                 />

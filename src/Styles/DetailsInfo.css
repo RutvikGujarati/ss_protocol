@@ -9,7 +9,10 @@
 .tc {
   color: white;
 }
-
+.text-blue {
+	color: blue !important;
+  }
+  
 .infoTable tr {
   display: flex;
   flex-wrap: wrap;
