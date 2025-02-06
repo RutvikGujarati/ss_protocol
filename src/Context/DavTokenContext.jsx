@@ -154,12 +154,7 @@ export const DAVTokenProvider = ({ children }) => {
       setLoadingState(false);
     }
   };
-  useEffect(() => {
-    console.log(
-      "Ratio target from cache",
-      cachedRatioTargetsRef.current.Xerion
-    );
-  });
+
   useEffect(() => {
     let interval;
 
@@ -197,12 +192,12 @@ export const DAVTokenProvider = ({ children }) => {
           ContractRatioFluxinBalance(),
           ContractRatioXerionBalance(),
           ContractXerionBalance(),
+          AmountOut(),
+          AmountOutTokens(),
           SetOnePercentageOfBalance(AllContracts.RatioContract, "Fluxin"),
           SetOnePercentageOfBalance(AllContracts.XerionRatioContract, "Xerion"),
           calculateBalancesForAllContracts(),
           getDavRequiredAmount(),
-          AmountOutTokens(),
-          AmountOut(),
           AuctionTimeInterval(),
           HasReverseSwappedAucton(),
           HasSwappedAucton(),
@@ -412,10 +407,10 @@ export const DAVTokenProvider = ({ children }) => {
         console.log(`${name} -> Calculated Balance:`, adjustedBalance);
 
         // Check if currentTokenRatio >= RatioTargetToken and divide by 2 if true
-        if (ratioPrice >= Target) {
-          adjustedBalance = adjustedBalance / 2;
-          console.log(`${name} -> Adjusted (divided by 2):`, adjustedBalance);
-        }
+        // if (ratioPrice >= Target) {
+        //   adjustedBalance = adjustedBalance / 2;
+        //   console.log(`${name} -> Adjusted (divided by 2):`, adjustedBalance);
+        // }
 
         amounts[name] = {
           rawBalance: tokenBalance,
@@ -1399,6 +1394,7 @@ export const DAVTokenProvider = ({ children }) => {
 
       let balance = Math.floor(parseFloat(rawBalance || "0"));
       if (CurrentRatio >= TargetRatio) {
+		console.log("condition followed by one percent")
         balance = balance * 2;
       }
       console.log(`SetOnePercentageOfBalance -> ${tokenName}:`, rawBalance);
@@ -1434,7 +1430,7 @@ export const DAVTokenProvider = ({ children }) => {
           AllContracts.RatioContract,
           "Fluxin",
           FluxinRatioPrice,
-		  cachedRatioTargetsRef.current.Fluxin
+          cachedRatioTargetsRef.current.Fluxin
         ),
         SetOnePercentageOfBalance(
           AllContracts.XerionRatioContract,
