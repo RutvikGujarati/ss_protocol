@@ -613,6 +613,19 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               </button>
                             </td>
                           </tr>
+
+                          <SmallTokenDetails
+                            label={"Time Left In auction"}
+                            data={dataToShow.AuctionTimeRunning}
+                          />
+                          <SmallTokenDetails
+                            label={"Time Left In burn Cycle"}
+                            data={dataToShow.BurnTimeLeft}
+                          />
+                          <SmallTokenDetails
+                            label={"Next Start Time of the Auction"}
+                            data={dataToShow.AuctionNextTime.nextAuctionStart}
+                          />
                           <tr>
                             <td className="d-flex align-items-center">
                               Start Reverse Swap
@@ -661,18 +674,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               </button>
                             </td>
                           </tr>
-                          <SmallTokenDetails
-                            label={"Time Left In auction"}
-                            data={dataToShow.AuctionTimeRunning}
-                          />
-                          <SmallTokenDetails
-                            label={"Time Left In burn Cycle"}
-                            data={dataToShow.BurnTimeLeft}
-                          />
-                          <SmallTokenDetails
-                            label={"Next Start Time of the Auction"}
-                            data={dataToShow.AuctionNextTime.nextAuctionStart}
-                          />
                         </>
                       )}
                   </>

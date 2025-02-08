@@ -28,6 +28,7 @@ export default function Providers({ children }) {
               accentColorForeground: "white",
               fontStack: "Satoshi",
               overlayBlur: "small",
+			  
             })}
           >
             <PriceProvider>
