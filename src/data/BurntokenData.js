@@ -9,9 +9,9 @@ export const getTokens = (balances, bountyBalances, BurnCycleACtive, BurnOccured
 		burnCycle: BurnCycleACtive.Fluxin === "true",
 		// burnCycle:"true",
 		BurnOccured: BurnOccuredForToken.Fluxin === "true",
-		burnRatio: "1/10000",
+		burnRatio: "1/100000",
 		bounty: bountyBalances.fluxinBounty,
-		burnAmount: (balances.ratioFluxinBalance * 0.0001).toFixed(2),
+		burnAmount: (balances.ratioFluxinBalance * 0.00001).toFixed(2),
 		clickBurn: () => ClickBurn("fluxinRatio"),
 	},
 	{
@@ -20,9 +20,9 @@ export const getTokens = (balances, bountyBalances, BurnCycleACtive, BurnOccured
 		logo: XerionLogo,
 		burnCycle: BurnCycleACtive.Xerion === "true",
 		BurnOccured: BurnOccuredForToken.Xerion === "true",
-		burnRatio: "1/10000",
+		burnRatio: "1/100000",
 		bounty: bountyBalances.xerionBounty,
-		burnAmount: (balances.ratioXerionBalance * 0.0001).toFixed(2),
+		burnAmount: (balances.ratioXerionBalance * 0.00001).toFixed(2),
 		clickBurn: () => ClickBurn("XerionRatio"),
 	},
 ];

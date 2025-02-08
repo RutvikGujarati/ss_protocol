@@ -1000,7 +1000,7 @@ export const DAVTokenProvider = ({ children }) => {
         [Ratio_TOKEN_ADDRESS],
         (s) => ethers.formatUnits(s, 18)
       );
-      const fluxinUseableAmount = fluxinTransaction * 0.0001;
+      const fluxinUseableAmount = fluxinTransaction * 0.00001;
       const fluxinBounty = (fluxinUseableAmount * 1) / 100;
 
       // Fetch Xerion balance and calculate bounty
@@ -1010,7 +1010,7 @@ export const DAVTokenProvider = ({ children }) => {
         [XerionRatioAddress],
         (s) => ethers.formatUnits(s, 18)
       );
-      const xerionUseableAmount = xerionTransaction * 0.0001;
+      const xerionUseableAmount = xerionTransaction * 0.00001;
       const xerionBounty = (xerionUseableAmount * 1) / 100;
 
       // Update the state with both bounty values
