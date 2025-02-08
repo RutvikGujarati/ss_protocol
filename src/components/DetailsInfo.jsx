@@ -638,7 +638,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                         "true" ? (
                                         "Sated for next cycle."
                                       ) : (
-                                        "Not stated"
+                                        "Not sated"
                                       )}
                                     </Tooltip>
                                   }
