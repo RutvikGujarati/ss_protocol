@@ -139,40 +139,15 @@ const DataTable = () => {
                   });
 
                   if (AuctionStatus == "false" && db >= 1) {
-                    if (isReversing == "true") {
+                    if (isReversing == "true" && !userHasReverse) {
                       return true;
                     } else if (userHasSwapped && isReversing == "false") {
                       return false;
                     }
                   } else if (AuctionStatus == "true" && db >= 1) {
-                    if (!userHasSwapped && isReversing == "false") {
+                    if (!userHasSwapped) {
                       return true;
-                    } else if (
-                      userHasSwapped &&
-                      !userHasReverse &&
-                      isReversing == "true"
-                    ) {
-                      return true;
-                    } else if (userHasReverse && isReversing == "true") {
-                      return false;
-                    } else if (
-                      !userHasReverse &&
-                      !userHasSwapped &&
-                      isReversing == "true"
-                    ) {
-                      return true;
-                    } else if (
-                      userHasSwapped &&
-                      userHasReverse &&
-                      (isReversing == "false" || isReversing == "true")
-                    ) {
-                      return false;
-                    } else if (
-                      userHasReverse &&
-                      (isReversing == "false" || isReversing == "true")
-                    ) {
-                      return false;
-                    }
+                    } 
                   }
                 }
               )
