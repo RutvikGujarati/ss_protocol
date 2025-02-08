@@ -138,17 +138,13 @@ const DataTable = () => {
                     dbCheck: db >= DavRequiredAmount,
                   });
 
-                  if (AuctionStatus == "false" && !(db >= 1)) {
-                    if (userHasSwapped && isReversing == "false") {
-                      return false;
-                    } else if (
-                      userHasSwapped &&
-                      userHasReverse &&
-                      isReversing == "true"
-                    ) {
+                  if (AuctionStatus == "false" && db >= 1) {
+                    if (isReversing == "true") {
+                      return true;
+                    } else if (userHasSwapped && isReversing == "false") {
                       return false;
                     }
-                  } else if (AuctionStatus == "true" && (db >= 1)) {
+                  } else if (AuctionStatus == "true" && db >= 1) {
                     if (!userHasSwapped && isReversing == "false") {
                       return true;
                     } else if (
@@ -183,7 +179,7 @@ const DataTable = () => {
               .map(
                 (
                   {
-				id,
+                    id,
                     name,
                     Pname,
                     image,
@@ -193,9 +189,10 @@ const DataTable = () => {
                     ContractName,
                     Liquidity,
                     Price,
+					isReversing,
                     ReverseName,
-                    currentTokenRatio,
-                    RatioTargetToken,
+                    // currentTokenRatio,
+                    // RatioTargetToken,
                     onChart,
                     distributedAmount,
                     inputTokenAmount,
@@ -213,7 +210,7 @@ const DataTable = () => {
                         </div>
                         <div className="nameDetails">
                           <h5 className="nameBig">{name}</h5>
-                          {currentTokenRatio >= RatioTargetToken ? (
+                          {isReversing == "true" ? (
                             <p className="nameSmall mb-1 uppercase px-2 mx-4">
                               {ReverseName}
                             </p>
@@ -278,7 +275,7 @@ const DataTable = () => {
                       <div className="d-flex justify-content-center gap-3 w-100">
                         {id !== "state" && (
                           <>
-                            {currentTokenRatio >= RatioTargetToken ? (
+                            {isReversing == "true" ? (
                               <>
                                 <div className="tableClaim">
                                   {formatWithCommas(outputToken)}
@@ -329,31 +326,27 @@ const DataTable = () => {
                       <div className="d-flex align-items-center gap-2">
                         {id !== "state" && (
                           <>
-                            {currentTokenRatio >= RatioTargetToken && (
+                            {isReversing == "true" && (
                               <button
                                 onClick={() => SwapT()}
                                 disabled={swappingStates[id]}
                                 className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
                               >
-                                {
-                                  swappingStates[id]
-                                    ? "Swapping..."
-                                    : "Reverse Swap"
-                                }
+                                {swappingStates[id]
+                                  ? "Swapping..."
+                                  : "Reverse Swap"}
                               </button>
                             )}
 
-                            {currentTokenRatio < RatioTargetToken && (
+                            {isReversing == "false" && (
                               <button
                                 onClick={() => SwapT()}
                                 disabled={swappingStates[id]}
                                 className={`btn btn-sm swap-btn  btn-primary btn-sm swap-btn gap-0 mx-4 px-4`}
                               >
-                                {
-                                  swappingStates[id]
-                                    ? "Swapping..."
-                                    : buttonTextStates[id] || "Swap" 
-                                }
+                                {swappingStates[id]
+                                  ? "Swapping..."
+                                  : buttonTextStates[id] || "Swap"}
                               </button>
                             )}
                           </>

@@ -38,6 +38,14 @@ export const DAVTokenProvider = ({ children }) => {
     Fluxin: false,
     Xerion: false,
   });
+  const [ReverseForCycle, setForCycle] = useState({
+    Fluxin: false,
+    Xerion: false,
+  });
+  const [ReverseForNextCycle, setForNextCycle] = useState({
+    Fluxin: false,
+    Xerion: false,
+  });
   const [StateHolds, setStateHoldings] = useState("0.0");
   const [LoadingState, setLoadingState] = useState(true);
 
@@ -183,6 +191,8 @@ export const DAVTokenProvider = ({ children }) => {
           ViewDistributedTokens(),
           getCachedRatioTarget(),
           reverseSwapEnabled(),
+          CheckForCycle(),
+          CheckForNextCycle(),
           ContractStateBalance(),
           StateBurnAmount(),
           calculateBounty(),
@@ -1164,6 +1174,7 @@ export const DAVTokenProvider = ({ children }) => {
         Fluxin: FluxinOnepBalance,
         Xerion: XerionOnepBalance,
       };
+      console.log("reverse from swap", isReversed);
       console.log("input amount:", InAmountMapping[ContractName]);
 
       const amountInWei = ethers.parseUnits(
@@ -1177,23 +1188,13 @@ export const DAVTokenProvider = ({ children }) => {
         Xerion: AllContracts.XerionContract,
         state: AllContracts.stateContract,
       };
-      //   const ReverseMapping = {
-      //     Fluxin: isReversed.Fluxin,
-      //     Xerion: isReversed.Xerion,
-      //   };
 
       console.log("contract to use:", contractToUse[ContractName]);
-
-      const rp = await getCachedRatioTarget();
-      const forContract = rp[ContractName];
-      const rp1 = parseFloat(forContract);
-      console.log("rps", rp1);
-      //   const isreverse = ReverseMapping[ContractName];
-      //   console.log("reversing yes", isreverse);
+      console.log("rps", isReversed.Fluxin);
       let selectedContract;
       if (
-        (ContractName == "Fluxin" && FluxinRatioPrice > rp1) ||
-        (ContractName == "Xerion" && XerionRatioPrice > rp1)
+        (ContractName == "Fluxin" && isReversed.Fluxin == "true") ||
+        (ContractName == "Xerion" && isReversed.Xerion == "true")
       ) {
         selectedContract = contractToUse["state"];
         approvalAmount = ethers.parseUnits(
@@ -1374,13 +1375,116 @@ export const DAVTokenProvider = ({ children }) => {
       throw error;
     }
   };
+  const reverseSwapEnabled = async () => {
+    try {
+      const contracts = [
+        {
+          name: "Fluxin",
+          contract: AllContracts.RatioContract,
+          currentRatio: FluxinRatioPrice,
+        },
+        {
+          name: "Xerion",
+          contract: AllContracts.XerionRatioContract,
+          currentRatio: XerionRatioPrice,
+        },
+      ];
 
-  const SetOnePercentageOfBalance = async (
-    contract,
-    tokenName,
-    CurrentRatio,
-    TargetRatio
-  ) => {
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          if (!contract) {
+            console.error(`${name} contract is null or undefined`);
+            return { [name]: "Contract not available" };
+          }
+
+          const isReverse = await contract.isReverseAuctionActive();
+          console.log(`isReverseSwapEnabled ${name}`, isReverse);
+          return { [name]: isReverse.toString() };
+        })
+      );
+
+      const reversedState = Object.assign({}, ...results);
+      setisReversed(reversedState);
+
+      console.log("set reverse", reversedState);
+    } catch (error) {
+      console.error("Error setting reverse target:", error);
+    }
+  };
+  const CheckForCycle = async () => {
+    try {
+      const contracts = [
+        {
+          name: "Fluxin",
+          contract: AllContracts.RatioContract,
+          currentRatio: FluxinRatioPrice,
+        },
+        {
+          name: "Xerion",
+          contract: AllContracts.XerionRatioContract,
+          currentRatio: XerionRatioPrice,
+        },
+      ];
+
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          if (!contract) {
+            console.error(`${name} contract is null or undefined`);
+            return { [name]: "Contract not available" };
+          }
+		  const getCurrentCycle = await contract.getCurrentAuctionCycle();
+          const isReverse = await contract.reverseAuctionActive(getCurrentCycle);
+          console.log(`is reverse for cycle ${name}`, isReverse);
+          return { [name]: isReverse.toString() };
+        })
+      );
+
+      const reversedState = Object.assign({}, ...results);
+      setForCycle(reversedState);
+
+      console.log("set reverse for cycle", ReverseForCycle.Fluxin);
+    } catch (error) {
+      console.error("Error setting reverse target:", error);
+    }
+  };
+  const CheckForNextCycle = async () => {
+    try {
+      const contracts = [
+        {
+          name: "Fluxin",
+          contract: AllContracts.RatioContract,
+          currentRatio: FluxinRatioPrice,
+        },
+        {
+          name: "Xerion",
+          contract: AllContracts.XerionRatioContract,
+          currentRatio: XerionRatioPrice,
+        },
+      ];
+
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          if (!contract) {
+            console.error(`${name} contract is null or undefined`);
+            return { [name]: "Contract not available" };
+          }
+		  const getCurrentCycle = await contract.getCurrentAuctionCycle();
+		  const getNextCycle =  getCurrentCycle + BigInt(1);
+          const isReverse = await contract.reverseAuctionActive(getNextCycle);
+          console.log(`is reverse for next cycle ${name}`, isReverse);
+          return { [name]: isReverse.toString() };
+        })
+      );
+
+      const reversedState = Object.assign({}, ...results);
+      setForNextCycle(reversedState);
+
+      console.log("set reverse for cycle", ReverseForCycle.Fluxin);
+    } catch (error) {
+      console.error("Error setting reverse target:", error);
+    }
+  };
+  const SetOnePercentageOfBalance = async (contract, tokenName) => {
     try {
       // Fetch raw one percent balance for the given contract
       const rawBalance = await handleContractCall(
@@ -1391,10 +1495,7 @@ export const DAVTokenProvider = ({ children }) => {
       );
 
       let balance = Math.floor(parseFloat(rawBalance || "0"));
-      if (CurrentRatio >= TargetRatio) {
-		console.log("condition followed by one percent")
-        balance = balance * 2;
-      }
+
       console.log(`SetOnePercentageOfBalance -> ${tokenName}:`, rawBalance);
 
       console.log(`Adjusted Balance for ${tokenName}:`, balance);
@@ -1427,14 +1528,14 @@ export const DAVTokenProvider = ({ children }) => {
         SetOnePercentageOfBalance(
           AllContracts.RatioContract,
           "Fluxin",
-          FluxinRatioPrice,
-          cachedRatioTargetsRef.current.Fluxin
+          FluxinRatioPrice
+          //   cachedRatioTargetsRef.current.Fluxin
         ),
         SetOnePercentageOfBalance(
           AllContracts.XerionRatioContract,
           "Xerion",
-          XerionRatioPrice,
-          cachedRatioTargetsRef.current.Xerion
+          XerionRatioPrice
+          //   cachedRatioTargetsRef.current.Xerion
         ),
       ]);
 
@@ -1469,48 +1570,13 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  //   const setReverseEnable = async (condition, contractName) => {
-  //     try {
-  //       // Call the contract to set both numerator and denominator
-  //       await contractMapping[contractName].setReverseSwapEnabled(condition);
-
-  //       console.log(`seted reverse time`);
-  //     } catch (error) {
-  //       console.error("Error setting reverse target:", error);
-  //     }
-  //   };
-  const reverseSwapEnabled = async () => {
+  const setReverseEnable = async (condition, contractName) => {
     try {
-      const contracts = [
-        {
-          name: "Fluxin",
-          contract: AllContracts.RatioContract,
-          currentRatio: FluxinRatioPrice,
-        },
-        {
-          name: "Xerion",
-          contract: AllContracts.XerionRatioContract,
-          currentRatio: XerionRatioPrice,
-        },
-      ];
-
-      const results = await Promise.all(
-        contracts.map(async ({ name, contract, currentRatio }) => {
-          if (!contract) {
-            console.error(`${name} contract is null or undefined`);
-            return { [name]: "Contract not available" };
-          }
-
-          const isReverse = await contract.isReverseSwapEnabled(currentRatio);
-          console.log(`isReverseSwapEnabled ${name}`, isReverse);
-          return { [name]: isReverse.toString() };
-        })
+      await contractMapping[contractName].checkAndActivateReverseForNextCycle(
+        condition
       );
 
-      const reversedState = Object.assign({}, ...results);
-      setisReversed(reversedState);
-
-      console.log("set reverse", reversedState);
+      console.log(`started  reverse time`);
     } catch (error) {
       console.error("Error setting reverse target:", error);
     }
@@ -1750,6 +1816,9 @@ export const DAVTokenProvider = ({ children }) => {
         TotalBounty,
         LoadingState,
         loadingRatioPrice,
+        setReverseEnable,
+		ReverseForNextCycle,
+		ReverseForCycle,
         TotalTokensBurned,
       }}
     >

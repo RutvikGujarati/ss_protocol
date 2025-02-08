@@ -9,10 +9,10 @@ export const TableRowWithClick = ({ label, value, action, buttonText }) => (
       {value || ""}
     </td>
     {action && (
-      <td className="d-flex justify-content-end">
+      <td className="d-flex justify-content-end ">
         <button
           onClick={action}
-          className="btn btn-primary btn-sm swap-btn info-icon"
+          className="btn btn-primary btn-sm swap-btn info-icon "
         >
           {buttonText || "Action"}
         </button>

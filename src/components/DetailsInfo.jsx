@@ -4,6 +4,8 @@ import { useDAVToken } from "../Context/DavTokenContext";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { TokensDetails } from "../data/TokensDetails";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
+
 import {
   DoubleValues,
   ReanounceContractsComponent,
@@ -255,7 +257,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     ) : (
                       <button
                         onClick={() => dataToShow.actions.ReanounceContract()}
-                        className="btn btn-primary btn-sm swap-btn info-icon"
+                        className="btn btn-primary btn-sm swap-btn info-icon "
                       >
                         Set
                       </button>
@@ -359,7 +361,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           onClick={() =>
                             dataToShow.actions.WithdrawState(StateToken.raw)
                           }
-                          className="btn btn-primary btn-sm swap-btn info-icon"
+                          className="btn btn-primary btn-sm swap-btn info-icon mx-4"
                         >
                           Withdraw
                         </button>
@@ -383,7 +385,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               mintAdditionalTOkens("Xerion", 125000000000); // Amount for State
                             }
                           }}
-                          className="btn btn-primary btn-sm swap-btn info-icon"
+                          className="btn btn-primary btn-sm swap-btn info-icon mx-5"
                         >
                           Mint
                         </button>
@@ -409,9 +411,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               <div className="w-100">
                                 <input
                                   type="text"
-								  className={`form-control text-center mh-30 ${
+                                  className={`form-control text-center mh-30 ${
                                     isTyping ? "text-blue" : ""
-                                  }`}                                  placeholder="Enter amount"
+                                  }`}
+                                  placeholder="Enter amount"
                                   value={
                                     Denominator
                                       ? Number(Denominator).toLocaleString()
@@ -426,7 +429,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 onClick={() => {
                                   dataToShow.actions.DepositTokens(Denominator);
                                 }}
-                                className="btn btn-primary btn-sm swap-btn info-icon"
+                                className="btn btn-primary btn-sm swap-btn info-icon mx-3"
                               >
                                 {`Deposit ${dataToShow.name}`}
                               </button>
@@ -464,7 +467,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                     StateDenominator
                                   );
                                 }}
-                                className="btn btn-primary btn-sm swap-btn info-icon"
+                                className="btn btn-primary btn-sm swap-btn info-icon mx-3"
                               >
                                 Deposit State
                               </button>
@@ -479,9 +482,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               <div className="w-100">
                                 <input
                                   type="text"
-								  className={`form-control text-center mh-30 ${
+                                  className={`form-control text-center mh-30 ${
                                     isTyping ? "text-blue" : ""
-                                  }`}                                  placeholder={
+                                  }`}
+                                  placeholder={
                                     dataToShow.interval.auctionInterval
                                   }
                                   value={numeratorOfInterval}
@@ -536,9 +540,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               <div className="w-100">
                                 <input
                                   type="text"
-								  className={`form-control text-center mh-30 ${
+                                  className={`form-control text-center mh-30 ${
                                     isTyping ? "text-blue" : ""
-                                  }`}                                  placeholder={
+                                  }`}
+                                  placeholder={
                                     dataToShow.Duration.auctionDuration
                                   }
                                   value={numeratorOfAUction}
@@ -568,9 +573,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               <div className="w-100">
                                 <input
                                   type="number"
-								  className={`form-control text-center mh-30 ${
+                                  className={`form-control text-center mh-30 ${
                                     isTyping ? "text-blue" : ""
-                                  }`}                                  placeholder="Enter Target"
+                                  }`}
+                                  placeholder="Enter Target"
                                   value={numerator}
                                   onChange={(e) => handleInputChange(e)}
                                 />
@@ -588,32 +594,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               </button>
                             </td>
                           </tr>
-                          {/* <tr>
-                            <td className="d-flex align-items-center">
-                              Set reverse Swap
-                            </td>
-                            <td>
-                              {" "}
-                              <div className="w-100">
-                                {dataToShow.isReversing}
-                              </div>
-                            </td>
-
-                            <td className="d-flex justify-content-end">
-                              <button
-                                onClick={() => {
-                                  if (dataToShow.isReversing == "true") {
-                                    dataToShow.actions.setReverseEnabled(false);
-                                  } else {
-                                    dataToShow.actions.setReverseEnabled(true);
-                                  }
-                                }}
-                                className="btn btn-primary btn-sm swap-btn info-icon"
-                              >
-                                Set
-                              </button>
-                            </td>
-                          </tr> */}
 
                           <tr>
                             <td className="d-flex align-items-center">
@@ -627,9 +607,57 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 onClick={() =>
                                   dataToShow.actions.StartingAuction()
                                 }
-                                className="btn btn-primary btn-sm swap-btn info-icon"
+                                className="btn btn-primary btn-sm swap-btn info-icon mx-4"
                               >
                                 {`Start ${dataToShow.name}`}
+                              </button>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="d-flex align-items-center">
+                              Start Reverse Swap
+                            </td>
+                            <td className="d-flex">
+                              <div className="w-100 mt-3">
+                                <OverlayTrigger
+                                  placement="top"
+                                  overlay={
+                                    <Tooltip id="reverse-tooltip">
+                                      {dataToShow.WillStart === "true" &&
+                                      dataToShow.isReversing === "false" ? (
+                                        dataToShow.WillStartForNext ===
+                                        "true" ? (
+                                          <>
+                                            For this cycle - it is sated. <br />
+                                            For Next cycle - it is sated.
+                                          </>
+                                        ) : (
+                                          "For this cycle - it is sated."
+                                        )
+                                      ) : dataToShow.WillStartForNext ===
+                                        "true" ? (
+                                        "Sated for next cycle."
+                                      ) : (
+                                        "Not stated"
+                                      )}
+                                    </Tooltip>
+                                  }
+                                >
+                                  <span className="text-primary">
+                                    {dataToShow.isReversing}
+                                  </span>
+                                </OverlayTrigger>
+                              </div>
+                            </td>
+
+                            <td className="d-flex justify-content-end">
+                              <button
+                                onClick={() => {
+                                  dataToShow.actions.setReverseEnabled();
+                                }}
+                                className="btn btn-primary btn-sm swap-btn info-icon mx-3"
+                              >
+                                Start Reverse
                               </button>
                             </td>
                           </tr>
