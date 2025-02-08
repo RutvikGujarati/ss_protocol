@@ -641,17 +641,17 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                         dataToShow.WillStartForNext ===
                                         "true" ? (
                                           <>
-                                            For this cycle - it is sated. <br />
-                                            For Next cycle - it is sated.
+                                            For this cycle - it is setted. <br />
+                                            For Next cycle - it is setted.
                                           </>
                                         ) : (
-                                          "For this cycle - it is sated."
+                                          "For this cycle - it is setted."
                                         )
                                       ) : dataToShow.WillStartForNext ===
                                         "true" ? (
-                                        "Sated for next cycle."
+                                        "setted for next cycle."
                                       ) : (
-                                        "Not sated"
+                                        "Not setted"
                                       )}
                                     </Tooltip>
                                   }
