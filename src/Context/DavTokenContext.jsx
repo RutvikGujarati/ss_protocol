@@ -52,9 +52,7 @@ export const DAVTokenProvider = ({ children }) => {
   const [TotalStateHoldsInUS, setTotalStateHoldsInUS] = useState("0.00");
 
   const [OnePBalance, setOnePBalance] = useState({});
-  const [FluxinOnepBalance, setFluxinOnepBalnce] = useState("0");
   const [DavRequiredAmount, setDavRequiredAmount] = useState("0");
-  const [XerionOnepBalance, setXerionOnepBalnce] = useState("0");
 
   const [buttonTextStates, setButtonTextStates] = useState({});
   const [swappingStates, setSwappingStates] = useState({});
@@ -204,9 +202,8 @@ export const DAVTokenProvider = ({ children }) => {
           ContractXerionBalance(),
           AmountOut(),
           AmountOutTokens(),
-          SetOnePercentageOfBalance(AllContracts.RatioContract, "Fluxin"),
-          SetOnePercentageOfBalance(AllContracts.XerionRatioContract, "Xerion"),
-          calculateBalancesForAllContracts(),
+          SetOnePercentageOfBalance(),
+          SetOnePercentageOfBalance(),
           getDavRequiredAmount(),
           AuctionTimeInterval(),
           HasReverseSwappedAucton(),
@@ -323,6 +320,10 @@ export const DAVTokenProvider = ({ children }) => {
     Fluxin: AllContracts.FluxinContract,
     Xerion: AllContracts.XerionContract,
   };
+  const Swapcontracts = {
+    Fluxin: AllContracts.RatioContract,
+    Xerion: AllContracts.XerionRatioContract,
+  };
 
   const handleTokenWithdraw = async (contract, amount) => {
     try {
@@ -376,6 +377,27 @@ export const DAVTokenProvider = ({ children }) => {
       setRatioPriceLoading(false);
     }, 3000);
   }, []);
+
+  const checkUserBalanceForToken = async (contractName) => {
+    try {
+      if (!contracts[contractName]) {
+        console.error(`Contract "${contractName}" not found.`);
+        return;
+      }
+
+      if (!account) {
+        console.error("Account is undefined or null");
+        return;
+      }
+      const userBalance = await contracts[contractName].balanceOf(account);
+      const userBalanceInWei = ethers.formatEther(userBalance);
+      console.log("user balance...", userBalanceInWei);
+      return userBalanceInWei;
+    } catch (error) {
+      console.error("Error fetching user balance:", error);
+    }
+  };
+
   const AmountOutTokens = async () => {
     try {
       if (!FluxinRatioPrice || !XerionRatioPrice) {
@@ -1168,8 +1190,8 @@ export const DAVTokenProvider = ({ children }) => {
       };
       console.log("output amount:", OutAmountsMapping[ContractName]);
       const InAmountMapping = {
-        Fluxin: FluxinOnepBalance,
-        Xerion: XerionOnepBalance,
+        Fluxin: OnePBalance.Fluxin,
+        Xerion: OnePBalance.Xerion,
       };
       console.log("reverse from swap", isReversed);
       console.log("input amount:", InAmountMapping[ContractName]);
@@ -1473,79 +1495,43 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error setting reverse target:", error);
     }
   };
-  const SetOnePercentageOfBalance = async (contract, tokenName) => {
+
+  const SetOnePercentageOfBalance = async () => {
     try {
-      // Fetch raw one percent balance for the given contract
-      const rawBalance = await handleContractCall(
-        contract,
-        "getOnepercentOfUserBalance",
-        [],
-        (s) => ethers.formatUnits(s, 18)
-      );
+      const balances = {};
 
-      let balance = Math.floor(parseFloat(rawBalance || "0"));
+      for (const [tokenName, contract] of Object.entries(Swapcontracts)) {
+        // Fetch raw one percent balance
+        const rawBalance = await handleContractCall(
+          contract,
+          "getOnepercentOfUserBalance",
+          [],
+          (s) => ethers.formatUnits(s, 18)
+        );
 
-      console.log(`SetOnePercentageOfBalance -> ${tokenName}:`, rawBalance);
+        let balance = Math.floor(parseFloat(rawBalance || "0"));
 
-      console.log(`Adjusted Balance for ${tokenName}:`, balance);
+        console.log(`SetOnePercentageOfBalance -> ${tokenName}:`, rawBalance);
+        console.log(`Adjusted Balance for ${tokenName}:`, balance);
+        const userBalance = await checkUserBalanceForToken(tokenName);
+        console.log(`Adjusted user Balance for ${tokenName}:`, userBalance);
+        balances[tokenName] =
+          parseFloat(userBalance) < balance ? "0.0" : balance;
+      }
 
       // Update state with the results
       setOnePBalance((prevState) => ({
         ...prevState,
-        [tokenName]: {
-          balance,
-        },
+        ...balances,
       }));
-      return {
-        tokenName,
-        balance,
-      };
+      console.log("SetOnePercentageOfBalance cache:", OnePBalance.Fluxin);
+      //   return balances;
     } catch (e) {
-      console.error(`Error in SetOnePercentageOfBalance for ${tokenName}:`, e);
+      console.error("Error in SetOnePercentageOfBalance:", e);
       return null;
     }
   };
-  const calculateBalancesForAllContracts = async () => {
-    const ratioTargetValues = await RatioTargetValues();
-    cachedRatioTargetsRef.current = ratioTargetValues;
-    console.log(
-      "Fetched and cached Ratio Targets:",
-      cachedRatioTargetsRef.current.Fluxin
-    );
-    try {
-      const [value, valueXerion] = await Promise.all([
-        SetOnePercentageOfBalance(
-          AllContracts.RatioContract,
-          "Fluxin",
-          FluxinRatioPrice
-          //   cachedRatioTargetsRef.current.Fluxin
-        ),
-        SetOnePercentageOfBalance(
-          AllContracts.XerionRatioContract,
-          "Xerion",
-          XerionRatioPrice
-          //   cachedRatioTargetsRef.current.Xerion
-        ),
-      ]);
-
-      console.log(
-        "Ratio target from cache",
-        cachedRatioTargetsRef.current.Xerion
-      );
-      console.log("Value Calculation", valueXerion?.balance);
-
-      if (value) setFluxinOnepBalnce(value.balance);
-      if (valueXerion) setXerionOnepBalnce(valueXerion.balance);
-
-      console.log(
-        "Final Balances in State:",
-        value?.balance,
-        valueXerion?.balance
-      );
-    } catch (e) {
-      console.error("Error calculating balances for all contracts:", e);
-    }
-  };
+  console.log("SetOnePercentageOfBalance cache:", OnePBalance.Xerion);
 
   const getDavRequiredAmount = async () => {
     try {
@@ -1796,8 +1782,6 @@ export const DAVTokenProvider = ({ children }) => {
         isReversed,
         StateBurnBalance,
         RatioTargetsofTokens,
-        FluxinOnepBalance,
-        XerionOnepBalance,
         BurnOccuredForToken,
         BurnCycleACtive,
         DavRequiredAmount,

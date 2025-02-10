@@ -23,11 +23,10 @@ export const useAuctionTokens = () => {
 		outAmounts,
 		Distributed,
 		userHashSwapped,
-		XerionOnepBalance,
 		userHasReverseSwapped,
 		handleAddFluxin,
 		handleAddXerion,
-		FluxinOnepBalance,
+		OnePBalance,
 	} = useDAVToken();
 	console.log("is running from obj", isReversed.Fluxin)
 	const tokens = [
@@ -52,7 +51,7 @@ export const useAuctionTokens = () => {
 			distributedAmount: Distributed?.["Fluxin"] || 0,
 			token: Fluxin,
 			handleAddToken: handleAddFluxin,
-			inputTokenAmount: `${FluxinOnepBalance || 0} Fluxin`,
+			inputTokenAmount: `${OnePBalance.Fluxin || 0} Fluxin`,
 			SwapT: () => SwapTokens("Fluxin", "Fluxin"),
 			ratioPrice: FluxinRatioPrice,
 			outputToken: `${outAmounts?.Fluxin || 0} State`,
@@ -80,7 +79,7 @@ export const useAuctionTokens = () => {
 			SwapT: () => SwapTokens("Xerion", "Xerion"),
 			ratioPrice: XerionRatioPrice,
 			handleAddToken: handleAddXerion,
-			inputTokenAmount: `${XerionOnepBalance || 0} Xerion`,
+			inputTokenAmount: `${ OnePBalance.Xerion || 0} Xerion`,
 			outputToken: `${outAmounts?.Xerion || 0} State`,
 		},
 	];

@@ -98,6 +98,11 @@ const DataTable = () => {
     await ClaimTokens(contract);
     setClaimingStates((prev) => ({ ...prev, [id]: false })); // Reset claiming state
   };
+  const [showPopup, setShowPopup] = useState(false);
+
+  const handlePopup = () => {
+    setShowPopup(false);
+  };
 
   const tokens = useAuctionTokens();
   console.log("obj tokens", tokens);
@@ -122,35 +127,35 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-              .filter(
-                ({
-                  userHasSwapped,
-                  name,
-                  userHasReverse,
-                  isReversing,
-                  AuctionStatus,
-                }) => {
-                  console.log(`Filter Conditions:${name}`, {
+                .filter(
+                  ({
                     userHasSwapped,
+                    name,
                     userHasReverse,
                     isReversing,
                     AuctionStatus,
-                    dbCheck: db >= DavRequiredAmount,
-                  });
+                  }) => {
+                    console.log(`Filter Conditions:${name}`, {
+                      userHasSwapped,
+                      userHasReverse,
+                      isReversing,
+                      AuctionStatus,
+                      dbCheck: db >= DavRequiredAmount,
+                    });
 
-                  if (AuctionStatus == "false" && db >= 1) {
-                    if (isReversing == "true" && !userHasReverse) {
-                      return true;
-                    } else if (userHasSwapped && isReversing == "false") {
-                      return false;
+                    if (AuctionStatus == "false" && db >= 1) {
+                      if (isReversing == "true" && !userHasReverse) {
+                        return true;
+                      } else if (userHasSwapped && isReversing == "false") {
+                        return false;
+                      }
+                    } else if (AuctionStatus == "true" && db >= 1) {
+                      if (!userHasSwapped) {
+                        return true;
+                      }
                     }
-                  } else if (AuctionStatus == "true" && db >= 1) {
-                    if (!userHasSwapped) {
-                      return true;
-                    } 
                   }
-                }
-              )
+                )
               .map(
                 (
                   {
@@ -164,7 +169,7 @@ const DataTable = () => {
                     ContractName,
                     Liquidity,
                     Price,
-					isReversing,
+                    isReversing,
                     ReverseName,
                     // currentTokenRatio,
                     // RatioTargetToken,
@@ -261,6 +266,7 @@ const DataTable = () => {
                               </>
                             ) : (
                               <>
+                               
                                 <div className="tableClaim">
                                   {formatWithCommas(inputTokenAmount)}
                                 </div>
