@@ -399,11 +399,11 @@ export const DAVTokenProvider = ({ children }) => {
       const amounts = {};
 
       // Loop through all contracts
-      for (const { contract, name, ratioPrice } of contracts) {
+      for (const { contract, name } of contracts) {
         const rawTokenBalanceUser = await handleContractCall(
           contract,
           "getOutPutAmount",
-          [ratioPrice],
+          [],
           (s) => ethers.formatUnits(s, 18)
         );
         console.log(`${name} -> Raw Token Balance:`, rawTokenBalanceUser);
@@ -1161,10 +1161,7 @@ export const DAVTokenProvider = ({ children }) => {
         Fluxin: outAmounts.Fluxin,
         Xerion: outAmounts.Xerion,
       };
-      const ratioAmounts = {
-        Fluxin: FluxinRatioPrice,
-        Xerion: XerionRatioPrice,
-      };
+
       const ContractAddressToUse = {
         Fluxin: Ratio_TOKEN_ADDRESS,
         Xerion: XerionRatioAddress,
@@ -1259,22 +1256,12 @@ export const DAVTokenProvider = ({ children }) => {
 
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swapping..." }));
 
-      const gasPriceData = await provider.getFeeData();
-      if (!gasPriceData || !gasPriceData.gasPrice)
-        throw new Error("Failed to fetch gas price.");
-
-      const extraFee = 2100; // 1% of gas price
-      console.log(`Extra Fee (in wei): ${extraFee.toString()}`);
       const contracts = {
         Fluxin: AllContracts.RatioContract,
         Xerion: AllContracts.XerionRatioContract,
       };
       // Perform the token swap
-      const swapTx = await contracts[ContractName].swapTokens(
-        account,
-        ratioAmounts[ContractName],
-        { value: extraFee }
-      );
+      const swapTx = await contracts[ContractName].swapTokens(account);
       const swapReceipt = await swapTx.wait();
 
       if (swapReceipt.status === 1) {
@@ -1432,8 +1419,10 @@ export const DAVTokenProvider = ({ children }) => {
             console.error(`${name} contract is null or undefined`);
             return { [name]: "Contract not available" };
           }
-		  const getCurrentCycle = await contract.getCurrentAuctionCycle();
-          const isReverse = await contract.reverseAuctionActive(getCurrentCycle);
+          const getCurrentCycle = await contract.getCurrentAuctionCycle();
+          const isReverse = await contract.reverseAuctionActive(
+            getCurrentCycle
+          );
           console.log(`is reverse for cycle ${name}`, isReverse);
           return { [name]: isReverse.toString() };
         })
@@ -1468,8 +1457,8 @@ export const DAVTokenProvider = ({ children }) => {
             console.error(`${name} contract is null or undefined`);
             return { [name]: "Contract not available" };
           }
-		  const getCurrentCycle = await contract.getCurrentAuctionCycle();
-		  const getNextCycle =  getCurrentCycle + BigInt(1);
+          const getCurrentCycle = await contract.getCurrentAuctionCycle();
+          const getNextCycle = getCurrentCycle + BigInt(1);
           const isReverse = await contract.reverseAuctionActive(getNextCycle);
           console.log(`is reverse for next cycle ${name}`, isReverse);
           return { [name]: isReverse.toString() };
@@ -1721,9 +1710,9 @@ export const DAVTokenProvider = ({ children }) => {
   // Example usage for different tokens
   const handleAddTokenRatio = () =>
     handleAddToken(Ratio_TOKEN_ADDRESS, "Fluxin");
-  const handleAddTokenDAV = () => handleAddToken(DAV_TOKEN_ADDRESS, "tDAV");
+  const handleAddTokenDAV = () => handleAddToken(DAV_TOKEN_ADDRESS, "pDAV");
   const handleAddTokenState = () =>
-    handleAddToken(STATE_TOKEN_ADDRESS, "tState");
+    handleAddToken(STATE_TOKEN_ADDRESS, "pState");
   const handleAddFluxin = () => handleAddToken(Fluxin, "Fluxin");
   const handleAddXerion = () => handleAddToken(Xerion, "Xerion");
 
@@ -1817,8 +1806,8 @@ export const DAVTokenProvider = ({ children }) => {
         LoadingState,
         loadingRatioPrice,
         setReverseEnable,
-		ReverseForNextCycle,
-		ReverseForCycle,
+        ReverseForNextCycle,
+        ReverseForCycle,
         TotalTokensBurned,
       }}
     >
