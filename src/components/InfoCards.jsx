@@ -330,7 +330,7 @@ const InfoCards = () => {
             </div>
             <div className="announcement text-center">
               <div className="">
-                {1} DAV TOKEN REQUIRED TO PARTICIPATE IN THE DAILY AUCTION AND
+                {DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE DAILY AUCTION AND
                 RECEIVE ±100% ROI ON SWAPS
               </div>
             </div>
