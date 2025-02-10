@@ -1529,11 +1529,9 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const setReverseEnable = async (condition, contractName) => {
+  const setReverseEnable = async (contractName) => {
     try {
-      await contractMapping[contractName].checkAndActivateReverseForNextCycle(
-        condition
-      );
+      await contractMapping[contractName].checkAndActivateReverseForNextCycle();
 
       console.log(`started  reverse time`);
     } catch (error) {

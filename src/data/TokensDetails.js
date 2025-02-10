@@ -93,7 +93,7 @@ export const TokensDetails = () => {
 					AddTokensToContract(Fluxin, STATE_TOKEN_ADDRESS, FluxinRatioPrice),
 				setRatio: (value) => setRatioTarget(value, "fluxinRatio"),
 				setBurn: (value) => setBurnRate(value, "fluxinRatio"),
-				setReverseEnabled: () => setReverseEnable(FluxinRatioPrice, "fluxinRatio"),
+				setReverseEnabled: () => setReverseEnable( "fluxinRatio"),
 				setReverse: (value, value2) => setReverseTime(value, value2),
 				setCurrentRatio: (value) => setCurrentRatioTarget(value),
 				DepositTokens: (value) =>
@@ -141,7 +141,7 @@ export const TokensDetails = () => {
 				SetInterval: (value) => SetAUctionInterval(value, "XerionRatio"),
 				setRatio: (value) => setRatioTarget(value, "XerionRatio"),
 				setBurn: (value) => setBurnRate(value, "XerionRatio"),
-				setReverseEnabled: () => setReverseEnable(XerionRatioPrice, "XerionRatio"),
+				setReverseEnabled: () => setReverseEnable("XerionRatio"),
 
 				mintAdditionalTOkens: mintAdditionalTOkens,
 				AddTokenToContract: () =>
