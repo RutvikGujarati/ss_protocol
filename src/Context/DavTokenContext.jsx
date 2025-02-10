@@ -436,27 +436,11 @@ export const DAVTokenProvider = ({ children }) => {
         let adjustedBalance = parseFloat(tokenBalance || "0");
         console.log(`${name} -> Calculated Balance:`, adjustedBalance);
 
-        // Check if currentTokenRatio >= RatioTargetToken and divide by 2 if true
-        // if (ratioPrice >= Target) {
-        //   adjustedBalance = adjustedBalance / 2;
-        //   console.log(`${name} -> Adjusted (divided by 2):`, adjustedBalance);
-        // }
-
         amounts[name] = {
           rawBalance: tokenBalance,
           adjustedBalance,
           formattedBalance: adjustedBalance.toLocaleString(),
         };
-
-        // Update state with the results
-        setOnePBalance((prevState) => ({
-          ...prevState,
-          [name]: {
-            rawBalance: tokenBalance,
-            adjustedBalance,
-            formattedBalance: adjustedBalance.toLocaleString(),
-          },
-        }));
       }
 
       console.log("Final Balances in State:", OnePBalance);
