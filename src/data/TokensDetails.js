@@ -21,13 +21,13 @@ const XerionShortened = shortenAddress(Xerion);
 export const TokensDetails = () => {
 	const { FluxinRatioPrice, XerionRatioPrice, stateUsdPrice, FluxinUsdPrice, XerionUsdPrice } =
 		useContext(PriceContext);
-	const { simpleSupplies } = useGeneralTokens()
-	const { AuctionRunningLocalString } = useGeneralAuctionFunctions()
+	const { simpleSupplies,mintAdditionalTOkens } = useGeneralTokens()
+	const { AuctionRunningLocalString,auctionDetails,BurnTimeLeft ,TotalTokensBurned,TotalBounty,auctionTimeLeft} = useGeneralAuctionFunctions()
 
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, PercentageFluxin, balances, isReversed, RatioTargetsofTokens, TotalTokensBurned, BurnTimeLeft, PercentageXerion, AuctionTimeRunningXerion, ReanounceContract, TotalBounty, auctionDetails, SetAUctionDuration, mintAdditionalTOkens, WithdrawFluxin, AuctionTimeRunning, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, XerionTransactionHash, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, PercentageOfState, LPStateTransferred, RenounceState, WithdrawState, AddTokens, setBurnRate } = useDAVToken();
+	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, PercentageFluxin, balances, isReversed, RatioTargetsofTokens,   PercentageXerion,  ReanounceContract,   SetAUctionDuration,  WithdrawFluxin,  ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, XerionTransactionHash, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, PercentageOfState, LPStateTransferred, RenounceState, WithdrawState, AddTokens, setBurnRate } = useDAVToken();
 	console.log("isReversing", isReversed.Fluxin)
 	return [
 		{
@@ -77,7 +77,7 @@ export const TokensDetails = () => {
 			Ratio: FluxinRatioPrice,
 			Price: FluxinUsdPrice,
 			SetDuration: () => SetAUctionDuration(),
-			AuctionTimeRunning: AuctionTimeRunning,
+			AuctionTimeRunning: auctionTimeLeft.Fluxin,
 			AuctionNextTime: auctionDetails["Fluxin"],
 			mintAddTOkens: "250,000,000,000",
 			transactionHash:
@@ -123,8 +123,7 @@ export const TokensDetails = () => {
 			WillStartForNext: ReverseForNextCycle.Xerion,
 			TotalBounty: TotalBounty.Xerion,
 			Price: XerionUsdPrice,
-			timeRunning: AuctionTimeRunningXerion,
-			AuctionTimeRunning: AuctionTimeRunningXerion,
+			AuctionTimeRunning: auctionTimeLeft.Xerion,
 			BurnTimeLeft: BurnTimeLeft.Xerion,
 			Ratio: XerionRatioPrice,
 			AuctionRunning: AuctionRunningLocalString.Xerion.toString(),

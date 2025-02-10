@@ -12,6 +12,7 @@ export const DavProvider = ({ children }) => {
   const [DavBalance, setDavBalance] = useState(null);
   const [davPercentage, setDavPercentage] = useState("0.0");
   const [Supply, setSupply] = useState("0.0");
+  const [claimableAmount, setClaimableAmount] = useState("0.0");
   const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
   const [DAVTokensFiveWithdraw, setFiveAvTokens] = useState("0.0");
   const [claiming, setClaiming] = useState(false);
@@ -42,7 +43,7 @@ export const DavProvider = ({ children }) => {
       }
 
       const value = ethers.parseEther(amount.toString());
-      const cost = ethers.parseEther((amount * 1).toString());
+      const cost = ethers.parseEther((amount * 250000).toString());
 
       console.log("Minting with:", value.toString(), "cost:", cost.toString());
 
@@ -52,7 +53,7 @@ export const DavProvider = ({ children }) => {
 
       await transaction.wait();
       console.log("Minting successful!");
-      await DavHoldings(); // Refresh holdings after minting
+      await DavHoldings();
       return transaction;
     } catch (error) {
       console.error("Minting error:", error);
@@ -85,6 +86,24 @@ export const DavProvider = ({ children }) => {
     const sup = ethers.formatUnits(supply, 18);
     setSupply(sup);
   };
+  const claimAmount = async () => {
+    try {
+      if (!AllContracts?.davContract) {
+        throw new Error("Contract is not initialized.");
+      }
+      const transaction = await AllContracts.davContract.claimRewards();
+      await transaction.wait();
+      await ClaimableAmount();
+    } catch (e) {
+      console.error("Error claiming rewards:", e);
+    }
+  };
+  const ClaimableAmount = async () => {
+    const supply = await AllContracts.davContract.holderRewards(account);
+    const sup = ethers.formatUnits(supply, 18);
+    console.log("user claimable balance", supply);
+    setClaimableAmount(sup);
+  };
   const DAVTokenAmount = async () => {
     try {
       const balance = await AllContracts.davContract.liquidityFunds();
@@ -107,7 +126,7 @@ export const DavProvider = ({ children }) => {
   const handleWithdraw = async (methodName) => {
     try {
       setClaiming(true);
-      await AllContracts.davContract[methodName](); 
+      await AllContracts.davContract[methodName]();
     } catch (e) {
       console.error(`Error withdrawing with method ${methodName}:`, e);
     } finally {
@@ -122,6 +141,7 @@ export const DavProvider = ({ children }) => {
     if (AllContracts?.davContract && account) {
       const functions = [
         DavSupply,
+        ClaimableAmount,
         DAVTokenAmount,
         DavHoldingsPercentage,
         DavHoldings,
@@ -160,6 +180,8 @@ export const DavProvider = ({ children }) => {
         Supply,
         DAVTokensWithdraw,
         DAVTokensFiveWithdraw,
+        claimableAmount,
+        claimAmount,
       }}
     >
       {children}

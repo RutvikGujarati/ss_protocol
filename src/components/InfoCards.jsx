@@ -13,9 +13,16 @@ import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
 const InfoCards = () => {
   const { stateUsdPrice, priceLoading } = useContext(PriceContext);
   const [setBurnRatio] = useState("0.0");
-  const { mintDAV, davHolds, isLoading, DavBalance, davPercentage } =
-    useDAvContract();
-	const {ClaimTokens,CheckMintBalance}= useGeneralTokens()
+  const {
+    mintDAV,
+    claimableAmount,
+    davHolds,
+    isLoading,
+    DavBalance,
+    davPercentage,
+    claimAmount,
+  } = useDAvContract();
+  const { ClaimTokens, CheckMintBalance } = useGeneralTokens();
 
   const {
     handleAddTokenState,
@@ -28,10 +35,11 @@ const InfoCards = () => {
     contracts,
     StateBurnBalance,
     StateHolds,
-	DavRequiredAmount,
+    DavRequiredAmount,
   } = useDAVToken();
   const [amount, setAmount] = useState("");
   const [load, setLoad] = useState(false);
+  const [loadClaim, setLoadClaim] = useState(false);
   const [errorPopup, setErrorPopup] = useState({});
   const [checkingStates, setCheckingStates] = useState({});
   const [claimingStates, setClaimingStates] = useState({});
@@ -45,6 +53,17 @@ const InfoCards = () => {
       alert("Minting failed! Please try again.");
     } finally {
       setLoad(false);
+    }
+  };
+  const handleClaim = async () => {
+    setLoadClaim(true);
+    try {
+      await claimAmount();
+    } catch (error) {
+      console.error("Error minting:", error);
+      alert("claiming failed! Please try again.");
+    } finally {
+      setLoadClaim(false);
     }
   };
 
@@ -175,6 +194,17 @@ const InfoCards = () => {
                       {load ? "Minting..." : "Mint"}
                     </button>
                   </div>
+                  <div className="carddetails2">
+                    <h6
+                      className="detailText "
+                      style={{
+                        fontSize: "14px",
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      Transferring DAV tokens is not allowed after minting
+                    </h6>
+                  </div>
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
@@ -182,11 +212,24 @@ const InfoCards = () => {
                   <div>
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
                       <div className="carddetails2">
-                        <p className="mb-1 detailText">Dav holdings</p>
-                        <h5 className="">
-                          {isLoading ? <DotAnimation /> : davHolds}
-                        </h5>
+                        <div className="d-flex">
+                          <p className="mb-1 detailText">Dav holdings </p>
+                          <p className="mb-1 detailText mx-2"> / Dav Rank</p>
+                        </div>
+                        <div className="d-flex">
+                          <h5 className="">
+                            {isLoading ? <DotAnimation /> : davHolds}
+                          </h5>
+                          <h5 className="mx-5 px-4">
+                            {isLoading ? (
+                              <DotAnimation />
+                            ) : (
+                              `/ ${davPercentage}`
+                            )}
+                          </h5>
+                        </div>
                       </div>
+
                       <div className="mb-0 mx-1">
                         <img
                           src={MetaMaskIcon}
@@ -198,22 +241,27 @@ const InfoCards = () => {
                         />
                       </div>
                     </div>
-                    <div className="carddetails2">
-                      <p className="mb-1 detailText">Dav Rank</p>
-                      <h5 className="">
-                        {isLoading ? <DotAnimation /> : davPercentage}
-                      </h5>
-                    </div>
-                    <div className="carddetails2 ">
+                    <div className="carddetails2 mt-1">
                       <h6
-                        className="detailText  mt-4 "
+                        className="detailText d-flex "
                         style={{
                           fontSize: "14px",
                           textTransform: "capitalize",
                         }}
                       >
-                        Transferring DAV tokens are not allowed
+                        PLS - SWAP LEVY{" "}
                       </h6>
+                      <h5 className="">{claimableAmount}</h5>
+                      <div className="d-flex ">
+                        <button
+                          onClick={handleClaim}
+                          className="btn btn-primary d-flex btn-sm justify-content-center align-items-center  mt-3"
+                          style={{ width: "190px" }}
+                          disabled={loadClaim}
+                        >
+                          {loadClaim ? "Claiming..." : "Claim"}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -292,8 +340,8 @@ const InfoCards = () => {
                           }
                         >
                           {checkingStates["state"]
-                            ? "Checking..."
-                            : "Check Balance"}
+                            ? "AIRDROPPING..."
+                            : "AIRDROP"}
                         </button>
                       </div>
                       <div className="carddetails2 text-center w-50">
@@ -330,8 +378,8 @@ const InfoCards = () => {
             </div>
             <div className="announcement text-center">
               <div className="">
-                {DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE DAILY AUCTION AND
-                RECEIVE ±100% ROI ON SWAPS
+                {DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE
+                DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS
               </div>
             </div>
           </div>

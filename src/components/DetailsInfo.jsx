@@ -30,7 +30,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     setDBRequired,
     // AuctionRunning,
     setDBForBurnRequired,
-    mintAdditionalTOkens,
     StateBurnBalance,
   } = useDAVToken();
   const { AuctionRunning } = useGeneralAuctionFunctions();
@@ -378,11 +377,11 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                         <button
                           onClick={() => {
                             if (dataToShow.tokenName === "Fluxin") {
-                              mintAdditionalTOkens("fluxin", 250000000000); // Amount for Fluxin
+								dataToShow.actions.mintAdditionalTOkens("fluxin", 250000000000); // Amount for Fluxin
                             } else if (dataToShow.tokenName === "STATE") {
-                              mintAdditionalTOkens("state", 1000000000000); // Amount for State
+								dataToShow.actions.mintAdditionalTOkens("state", 1000000000000); // Amount for State
                             } else if (dataToShow.tokenName === "Xerion") {
-                              mintAdditionalTOkens("Xerion", 125000000000); // Amount for State
+								dataToShow.actions.mintAdditionalTOkens("Xerion", 125000000000); // Amount for State
                             }
                           }}
                           className="btn btn-primary btn-sm swap-btn info-icon mx-5"

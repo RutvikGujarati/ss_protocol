@@ -29,6 +29,7 @@ export const useAuctionTokens = () => {
 		OnePBalance,
 	} = useDAVToken();
 	console.log("is running from obj", isReversed.Fluxin)
+	
 	const tokens = [
 		{
 			id: "Fluxin",
@@ -79,7 +80,7 @@ export const useAuctionTokens = () => {
 			SwapT: () => SwapTokens("Xerion", "Xerion"),
 			ratioPrice: XerionRatioPrice,
 			handleAddToken: handleAddXerion,
-			inputTokenAmount: `${ OnePBalance.Xerion || 0} Xerion`,
+			inputTokenAmount: `${OnePBalance.Xerion || 0} Xerion`,
 			outputToken: `${outAmounts?.Xerion || 0} State`,
 		},
 	];

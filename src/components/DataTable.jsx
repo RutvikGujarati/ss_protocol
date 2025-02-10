@@ -19,12 +19,12 @@ const DataTable = () => {
     contracts,
     Distributed,
     DavRequiredAmount,
-    auctionDetails,
+    
     DavBalanceRequire,
     swappingStates,
     buttonTextStates,
   } = useDAVToken();
-  const { AuctionRunning } = useGeneralAuctionFunctions();
+  const { AuctionRunning,auctionDetails } = useGeneralAuctionFunctions();
 
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
@@ -97,11 +97,6 @@ const DataTable = () => {
     const contract = contracts[ContractName];
     await ClaimTokens(contract);
     setClaimingStates((prev) => ({ ...prev, [id]: false })); // Reset claiming state
-  };
-  const [showPopup, setShowPopup] = useState(false);
-
-  const handlePopup = () => {
-    setShowPopup(false);
   };
 
   const tokens = useAuctionTokens();
@@ -210,7 +205,7 @@ const DataTable = () => {
                           DavBalance == 0
                         }
                       >
-                        {checkingStates[id] ? "Checking..." : "Mint Balance"}
+                        {checkingStates[id] ? "AIRDROPPING..." : "AIRDROP"}
                       </button>
                     </td>
                     <td>
@@ -266,13 +261,18 @@ const DataTable = () => {
                               </>
                             ) : (
                               <>
-                               
-                                <div className="tableClaim">
+                                <div className="tableClaim hover-container">
+                                  {inputTokenAmount <= "1" && (
+                                    <div className="hover-box">
+                                      {`not enough ${name} available in your account`}
+                                    </div>
+                                  )}
                                   {formatWithCommas(inputTokenAmount)}
                                 </div>
+
                                 <div className="tableClaim">
                                   {formatWithCommas(outputToken)}
-                                </div>{" "}
+                                </div>
                               </>
                             )}
                           </>

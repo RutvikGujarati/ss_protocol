@@ -1,9 +1,6 @@
 // DAVTokenContext.js
 import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { ethers } from "ethers";
-// import DAVTokenABI from "../ABI/DavTokenABI.json";
-// import StateABI from "../ABI/StateTokenABI.json";
-// import RatioABI from "../ABI/RatioABI.json";
 import PropTypes from "prop-types";
 import { PriceContext } from "../api/StatePrice";
 import { ContractContext } from "../Functions/ContractInitialize";
@@ -74,17 +71,8 @@ export const DAVTokenProvider = ({ children }) => {
     xerion3: "0.0",
   });
 
-  const [auctionDetails, setAuctionDetails] = useState({});
-
   const [userHashSwapped, setUserHashSwapped] = useState({});
   const [userHasReverseSwapped, setUserHasReverseSwapped] = useState({});
-  const [BurnOccuredForToken, setBurnOccuredForToken] = useState({});
-  const [BurnCycleACtive, setBurnCycleActive] = useState({});
-  const [BurnTimeLeft, setBurnTimeLeft] = useState({});
-  const [TotalTokensBurned, setTotalTokenBurned] = useState({});
-  const [TotalBounty, setTotalTokenBounty] = useState({});
-  const [AuctionTimeRunning, SetAuctionTimeRunning] = useState("0");
-  const [AuctionTimeRunningXerion, SetAuctionTimeRunningXerion] = useState("0");
   const [RatioValues, SetRatioTargets] = useState("1000");
 
   const handleContractCall = async (
@@ -205,14 +193,8 @@ export const DAVTokenProvider = ({ children }) => {
           SetOnePercentageOfBalance(),
           SetOnePercentageOfBalance(),
           getDavRequiredAmount(),
-          AuctionTimeInterval(),
           HasReverseSwappedAucton(),
           HasSwappedAucton(),
-          BurningOccurred(),
-          BurnCycleActive(),
-          BurnTimingLeft(),
-          TotalTokensBurn(),
-          TotalBountyAmount(),
         ]);
       } catch (error) {
         console.error("Error fetching live data:", error);
@@ -345,33 +327,6 @@ export const DAVTokenProvider = ({ children }) => {
   const WithdrawXerion = (amount) =>
     handleTokenWithdraw(AllContracts.XerionContract, amount);
 
-  const mintAdditionalTOkens = async (contractType, amount) => {
-    try {
-      setClaiming(true);
-
-      const amountInWei = ethers.parseUnits(amount.toString(), 18);
-      let contract;
-
-      // Select the correct contract based on contractType
-      if (contractType === "fluxin") {
-        contract = AllContracts.FluxinContract;
-      } else if (contractType === "state") {
-        contract = AllContracts.stateContract;
-      } else if (contractType === "Xerion") {
-        contract = AllContracts.XerionContract;
-      }
-
-      if (!contract) {
-        throw new Error("Invalid contract type");
-      }
-
-      await handleContractCall(contract, "mintAdditionalTOkens", [amountInWei]);
-    } catch (e) {
-      console.error(`Error minting with method mintAdditionalTOkens:`, e);
-    } finally {
-      setClaiming(false);
-    }
-  };
   useEffect(() => {
     setTimeout(() => {
       setRatioPriceLoading(false);
@@ -489,94 +444,6 @@ export const DAVTokenProvider = ({ children }) => {
   useEffect(() => {
     AmountOut();
   }, []);
-  const formatCountdown = (timestamp) => {
-    const now = new Date();
-    const targetDate = new Date(timestamp * 1000);
-    const timeDifference = targetDate - now;
-
-    if (timeDifference <= 0) {
-      return "Time's up!";
-    }
-
-    const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-    const hours = Math.floor(
-      (timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-    );
-    const minutes = Math.floor(
-      (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
-    );
-
-    return `${days}d ${hours}h ${minutes}m`;
-  };
-
-  // Example usage:
-  const timestamp = 0;
-  const countdown = formatCountdown(timestamp);
-  console.log("countdown", countdown);
-
-  const AuctionTimeInterval = async () => {
-    try {
-      const formatTimestamp = (timestamp) => {
-        const timestampSeconds = parseFloat(timestamp);
-        const date = new Date(timestampSeconds * 1000);
-
-        return date.toLocaleString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false, // Use 24-hour format
-        });
-      };
-
-      // List of token contracts to handle
-      const contracts = [
-        { contract: AllContracts.RatioContract, name: "Fluxin" },
-        { contract: AllContracts.XerionRatioContract, name: "Xerion" }, // Example for another token
-      ];
-
-      const auctionData = {};
-
-      for (const { contract, name } of contracts) {
-        const auctionInterval = await handleContractCall(
-          contract,
-          "auctionInterval",
-          []
-        );
-        const auctionDuration = await handleContractCall(
-          contract,
-          "auctionDuration",
-          []
-        );
-
-        const nextAuctionStart = await handleContractCall(
-          contract,
-          "getNextAuctionStart",
-          []
-        );
-
-        let formattedNextTime = "0";
-        if (nextAuctionStart !== 0 && nextAuctionStart !== undefined) {
-          formattedNextTime = formatTimestamp(nextAuctionStart);
-        }
-
-        auctionData[name] = {
-          auctionInterval,
-          auctionDuration,
-          nextAuctionStart: formattedNextTime,
-        };
-      }
-
-      setAuctionDetails(auctionData);
-
-      console.log("Auction Data:", auctionData);
-    } catch (e) {
-      console.error("Error fetching auction interval:", e);
-    }
-  };
 
   const HasSwappedAucton = async () => {
     try {
@@ -653,199 +520,6 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const BurningOccurred = async () => {
-    try {
-      const contracts = [
-        { name: "Fluxin", contract: AllContracts.RatioContract },
-        { name: "Xerion", contract: AllContracts.XerionRatioContract },
-      ];
-
-      const results = await Promise.all(
-        contracts.map(async ({ name, contract }) => {
-          const BurnOccurred = await handleContractCall(
-            contract,
-            "getBurnOccured",
-            []
-          );
-
-          return { name, BurnOccurred: BurnOccurred.toString() };
-        })
-      );
-
-      const newStates = results.reduce((acc, { name, BurnOccurred }) => {
-        acc[name] = BurnOccurred;
-        return acc;
-      }, {});
-      console.log("state of burn", newStates);
-      setBurnOccuredForToken(newStates); // Update state with the combined object
-      console.log("Updated burn occurrences:", newStates);
-    } catch (e) {
-      console.error("Error fetching burn status:", e);
-    }
-  };
-  const BurnCycleActive = async () => {
-    try {
-      const contracts = [
-        { name: "Fluxin", contract: AllContracts.RatioContract },
-        { name: "Xerion", contract: AllContracts.XerionRatioContract },
-      ];
-
-      const results = await Promise.all(
-        contracts.map(async ({ name, contract }) => {
-          const BurnOccurred = await handleContractCall(
-            contract,
-            "isBurnCycleActive",
-            []
-          );
-
-          return { name, BurnOccurred: BurnOccurred.toString() };
-        })
-      );
-
-      const newStates = results.reduce((acc, { name, BurnOccurred }) => {
-        acc[name] = BurnOccurred;
-        return acc;
-      }, {});
-      console.log("state of burn", newStates);
-      setBurnCycleActive(newStates); // Update state with the combined object
-      console.log("Updated burn occurrences:", newStates);
-    } catch (e) {
-      console.error("Error fetching burn status:", e);
-    }
-  };
-  const BurnTimingLeft = async () => {
-    try {
-      const contracts = [
-        { name: "Fluxin", contract: AllContracts.RatioContract },
-        { name: "Xerion", contract: AllContracts.XerionRatioContract },
-      ];
-
-      const results = await Promise.all(
-        contracts.map(async ({ name, contract }) => {
-          const BurnOccurred = await handleContractCall(
-            contract,
-            "getTimeLeftInBurnCycle",
-            []
-          );
-
-          return { name, BurnOccurred: parseFloat(BurnOccurred) };
-        })
-      );
-
-      const newStates = results.reduce((acc, { name, BurnOccurred }) => {
-        acc[name] = BurnOccurred;
-        return acc;
-      }, {});
-      console.log("state of burn", newStates);
-      setBurnTimeLeft(newStates); // Update state with the combined object
-      console.log("Updated burn occurrences:", newStates);
-    } catch (e) {
-      console.error("Error fetching burn status:", e);
-    }
-  };
-  const TotalTokensBurn = async () => {
-    try {
-      const contracts = [
-        { name: "Fluxin", contract: AllContracts.RatioContract },
-        { name: "Xerion", contract: AllContracts.XerionRatioContract },
-      ];
-
-      const results = await Promise.all(
-        contracts.map(async ({ name, contract }) => {
-          const TotalTokensBurned = await handleContractCall(
-            contract,
-            "getTotalTokensBurned",
-            [],
-            (s) => ethers.formatUnits(s, 18)
-          );
-
-          return {
-            name,
-            TotalTokensBurned: parseFloat(TotalTokensBurned).toFixed(2),
-          };
-        })
-      );
-
-      const newStates = results.reduce((acc, { name, TotalTokensBurned }) => {
-        acc[name] = TotalTokensBurned;
-        return acc;
-      }, {});
-      console.log("state of burn", newStates);
-      setTotalTokenBurned(newStates); // Update state with the combined object
-      console.log("Updated burn occurrences:", newStates);
-    } catch (e) {
-      console.error("Error fetching burn status:", e);
-    }
-  };
-  const TotalBountyAmount = async () => {
-    try {
-      const contracts = [
-        { name: "Fluxin", contract: AllContracts.RatioContract },
-        { name: "Xerion", contract: AllContracts.XerionRatioContract },
-      ];
-
-      const results = await Promise.all(
-        contracts.map(async ({ name, contract }) => {
-          const TotalBounty = await handleContractCall(
-            contract,
-            "getTotalBountyCollected",
-            [],
-            (s) => ethers.formatUnits(s, 18)
-          );
-
-          return { name, TotalBounty: parseFloat(TotalBounty).toFixed(2) };
-        })
-      );
-
-      const newStates = results.reduce((acc, { name, TotalBounty }) => {
-        acc[name] = TotalBounty;
-        return acc;
-      }, {});
-      console.log("state of burn", newStates);
-      setTotalTokenBounty(newStates); // Update state with the combined object
-      console.log("Updated burn occurrences:", newStates);
-    } catch (e) {
-      console.error("Error fetching burn status:", e);
-    }
-  };
-
-  const AuctionTimeLeft = async () => {
-    try {
-      // List of token contracts to handle
-      const contracts = [
-        { contract: AllContracts.RatioContract, name: "Fluxin" },
-        { contract: AllContracts.XerionRatioContract, name: "Xerion" },
-      ];
-
-      const auctionTimes = {};
-
-      for (const { contract, name } of contracts) {
-        const remainingTime = await handleContractCall(
-          contract,
-          "getTimeLeftInAuction"
-        );
-
-        auctionTimes[name] = Number(remainingTime);
-      }
-
-      SetAuctionTimeRunning(auctionTimes.Fluxin);
-      SetAuctionTimeRunningXerion(auctionTimes.Xerion);
-
-      console.log("Auction Times Left:", auctionTimes);
-    } catch (e) {
-      console.error("Error fetching auction time:", e);
-    }
-  };
-
-  useEffect(() => {
-    AuctionTimeLeft();
-    const interval = setInterval(() => {
-      AuctionTimeLeft();
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [Xerion, STATE_TOKEN_ADDRESS, AllContracts.RatioContract]);
-
   const contractMapping = {
     fluxinRatio: AllContracts.RatioContract,
     XerionRatio: AllContracts.XerionRatioContract,
@@ -872,40 +546,7 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching auction interval:", e);
     }
   };
-  //   const SetDAVRequired = async (time, contractName) => {
-  //     try {
-  //       await handleContractCall(
-  //         contractMapping[contractName],
-  //         "setDAVRequiredForAuction",
-  //         [time]
-  //       );
-  //     } catch (e) {
-  //       console.error("Error setting dav", e);
-  //     }
-  //   };
-  //   const SetDAVRequiredForBurn = async (time, contractName) => {
-  //     try {
-  //       await handleContractCall(
-  //         contractMapping[contractName],
-  //         "setDAVRequiredForBurn",
-  //         [time]
-  //       );
-  //     } catch (e) {
-  //       console.error("Error setting dav for burn", e);
-  //     }
-  //   };
-  //   const getDAVRequired = async (contractName) => {
-  //     try {
-  //       const db = await handleContractCall(
-  //         contractMapping[contractName],
-  //         "DAVRequiredForAuction",
-  //         []
-  //       );
-  //       setDBRequired(db);
-  //     } catch (e) {
-  //       console.error("Error fetching dav required", e);
-  //     }
-  //   };
+ 
   const RatioTargetValues = async () => {
     try {
       // List of token contracts to handle
@@ -1036,11 +677,11 @@ export const DAVTokenProvider = ({ children }) => {
   const [balances, setBalances] = useState({
     stateBalance: 0,
     fluxinBalance: 0,
+    xerionBalance: 0,
     StateFluxin: 0,
     StateXerion: 0,
     ratioFluxinBalance: 0,
     ratioXerionBalance: 0,
-    xerionBalance: 0,
   });
 
   const ContractStateBalance = async () => {
@@ -1056,6 +697,13 @@ export const DAVTokenProvider = ({ children }) => {
       AllContracts.FluxinContract,
       Fluxin,
       "fluxinBalance"
+    );
+  };
+  const ContractXerionBalance = async () => {
+    await fetchContractBalance(
+      AllContracts.XerionContract,
+      Xerion,
+      "xerionBalance"
     );
   };
   const ContractFluxinStateBalance = async () => {
@@ -1088,13 +736,7 @@ export const DAVTokenProvider = ({ children }) => {
     );
   };
 
-  const ContractXerionBalance = async () => {
-    await fetchContractBalance(
-      AllContracts.XerionContract,
-      Xerion,
-      "xerionBalance"
-    );
-  };
+ 
   const fetchContractBalance = async (contract, tokenAddress, balanceKey) => {
     try {
       const transaction = await handleContractCall(
@@ -1735,9 +1377,7 @@ export const DAVTokenProvider = ({ children }) => {
         handleAddXerion,
         userHashSwapped,
         userHasReverseSwapped,
-        BurnTimeLeft,
         // WithdrawLPTokens,
-        mintAdditionalTOkens,
         isRenounced,
         checkOwnershipStatus,
         fluxinTransactionHash,
@@ -1746,7 +1386,6 @@ export const DAVTokenProvider = ({ children }) => {
         SetAUctionInterval,
         outAmounts,
         Approve,
-        auctionDetails,
         DepositToken,
         RatioValues,
         OnePBalance,
@@ -1754,27 +1393,21 @@ export const DAVTokenProvider = ({ children }) => {
         ClickBurn,
         // setReverseTime,
         getCachedRatioTarget,
-        AuctionTimeRunning,
         buttonTextStates,
         swappingStates,
         transactionStatus,
-        AuctionTimeRunningXerion,
         setBurnRate,
         // userHasReverseSwapped,
         isReversed,
         StateBurnBalance,
         RatioTargetsofTokens,
-        BurnOccuredForToken,
-        BurnCycleACtive,
         DavRequiredAmount,
         bountyBalances,
-        TotalBounty,
         LoadingState,
         loadingRatioPrice,
         setReverseEnable,
         ReverseForNextCycle,
         ReverseForCycle,
-        TotalTokensBurned,
       }}
     >
       {children}

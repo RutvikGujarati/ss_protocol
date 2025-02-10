@@ -75,13 +75,13 @@ export const GeneralTokenProvider = ({ children }) => {
   };
   const ClaimTokens = async (contract) => {
     try {
-    //   setClaiming(true);
+      //   setClaiming(true);
       const tx = await contract.mintReward();
       await tx.wait();
-    //   setClaiming(false);
+      //   setClaiming(false);
     } catch (e) {
       console.error("Error claiming tokens:", e);
-    //   setClaiming(false);
+      //   setClaiming(false);
     }
   };
   const CheckMintBalance = async (contract) => {
@@ -93,7 +93,30 @@ export const GeneralTokenProvider = ({ children }) => {
       throw e;
     }
   };
- 
+
+  const mintAdditionalTOkens = async (contractType, amount) => {
+    try {
+      const amountInWei = ethers.parseUnits(amount.toString(), 18);
+      let contract;
+
+      // Select the correct contract based on contractType
+      if (contractType === "fluxin") {
+        contract = AllContracts.FluxinContract;
+      } else if (contractType === "state") {
+        contract = AllContracts.stateContract;
+      } else if (contractType === "Xerion") {
+        contract = AllContracts.XerionContract;
+      }
+
+      if (!contract) {
+        throw new Error("Invalid contract type");
+      }
+
+      await contract.mintAdditionalTOkens(amountInWei);
+    } catch (e) {
+      console.error(`Error minting with method mintAdditionalTOkens:`, e);
+    }
+  };
 
   useEffect(() => {
     if (AllContracts && Object.keys(AllContracts).length > 0 && !initialized) {
@@ -109,6 +132,7 @@ export const GeneralTokenProvider = ({ children }) => {
         simpleSupplies,
         ClaimTokens,
         CheckMintBalance,
+        mintAdditionalTOkens,
       }}
     >
       {children}

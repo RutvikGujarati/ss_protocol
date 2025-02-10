@@ -5,6 +5,7 @@ import { useDAVToken } from "../Context/DavTokenContext";
 import { getTokens } from "../data/BurntokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { formatWithCommas } from "./DetailsInfo";
+import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions";
 
 const BurnDataTable = () => {
   const [isProcessing, setIsProcessing] = useState({});
@@ -19,10 +20,8 @@ const BurnDataTable = () => {
     ClickBurn,
     DavBalanceRequireForBurn,
     DavBalanceRequire,
-    BurnCycleACtive,
-    BurnOccuredForToken,
   } = useDAVToken();
-
+const {BurnOccuredForToken,BurnCycleACtive} = useGeneralAuctionFunctions()
   // Log for debugging
   console.log("BurnOccuredForToken:", BurnCycleACtive);
   console.log("BurnOccuredForToken:", parseFloat(DavBalance));
