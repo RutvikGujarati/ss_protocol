@@ -140,7 +140,9 @@ const InfoCards = () => {
     }
   };
   const handleInputChange = (e) => {
-    setAmount(e.target.value);
+    if (/^\d*$/.test(e.target.value)) {
+      setAmount(e.target.value);
+    }
     CalculationOfCost(e.target.value);
   };
 
@@ -251,7 +253,7 @@ const InfoCards = () => {
                       >
                         PLS - SWAP LEVY{" "}
                       </h6>
-                      <h5 className="">{claimableAmount}</h5>
+                      <h5 className="">{formatWithCommas(claimableAmount)}</h5>
                       <div className="d-flex ">
                         <button
                           onClick={handleClaim}

@@ -546,7 +546,7 @@ export const DAVTokenProvider = ({ children }) => {
       console.error("Error fetching auction interval:", e);
     }
   };
- 
+
   const RatioTargetValues = async () => {
     try {
       // List of token contracts to handle
@@ -736,7 +736,6 @@ export const DAVTokenProvider = ({ children }) => {
     );
   };
 
- 
   const fetchContractBalance = async (contract, tokenAddress, balanceKey) => {
     try {
       const transaction = await handleContractCall(
@@ -752,7 +751,7 @@ export const DAVTokenProvider = ({ children }) => {
 
       setBalances((prevBalances) => ({
         ...prevBalances,
-        [balanceKey]: formattedBalance,
+        [balanceKey]: Math.floor(formattedBalance),
       }));
     } catch (e) {
       console.error("Error fetching token balance:", e);

@@ -58,7 +58,7 @@ export const GeneralTokenProvider = ({ children }) => {
       Object.entries(suppliesData).forEach(([key, value]) => {
         // Remove 'Contract' and add 'Supply' to the key name
         const simplifiedKey = key.replace("Contract", "") + "Supply";
-        simplified[simplifiedKey] = value.supply;
+        simplified[simplifiedKey] = Math.floor(value.supply);
       });
 
       setSupplies(suppliesData);

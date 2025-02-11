@@ -250,7 +250,7 @@ export const GeneralAuctionProvider = ({ children }) => {
 
           return {
             name,
-            TotalTokensBurned: parseFloat(totalTokensBurned).toFixed(2),
+            TotalTokensBurned: Math.floor(totalTokensBurned),
           };
         })
       );
@@ -273,7 +273,7 @@ export const GeneralAuctionProvider = ({ children }) => {
           const TotalBounty = await contract.getTotalBountyCollected();
           const totalBounty = ethers.formatUnits(TotalBounty, 18);
 
-          return { name, TotalBounty: parseFloat(totalBounty).toFixed(2) };
+          return { name, TotalBounty: Math.floor(totalBounty) };
         })
       );
 
