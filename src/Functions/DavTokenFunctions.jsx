@@ -99,11 +99,12 @@ export const DavProvider = ({ children }) => {
     }
   };
   const ClaimableAmount = async () => {
-    const supply = await AllContracts.davContract.holderRewards(account);
-    const sup = ethers.formatUnits(supply, 18);
-    console.log("user claimable balance", supply);
-    setClaimableAmount(sup);
+	const supply = await AllContracts.davContract.holderRewards(account);
+	const sup = parseFloat(ethers.formatUnits(supply, 18)); // Convert to number
+	console.log("user claimable balance", supply);
+	setClaimableAmount(sup.toFixed(2)); // Now it will work
   };
+  
   const DAVTokenAmount = async () => {
     try {
       const balance = await AllContracts.davContract.liquidityFunds();

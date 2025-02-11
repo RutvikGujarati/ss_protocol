@@ -220,7 +220,7 @@ const InfoCards = () => {
                           <h5 className="">
                             {isLoading ? <DotAnimation /> : davHolds}
                           </h5>
-                          <h5 className="mx-5 px-4">
+                          <h5 className="mx-1 ">
                             {isLoading ? (
                               <DotAnimation />
                             ) : (
@@ -273,7 +273,7 @@ const InfoCards = () => {
                       <div className="carddetails2">
                         <p className="mb-1 detailText">State token holdings</p>
                         <h5 className="">
-                          {LoadingState ? <DotAnimation /> : StateHolds}/ $
+                          {LoadingState ? <DotAnimation /> : StateHolds} / $
                           {LoadingState ? (
                             <DotAnimation />
                           ) : (
