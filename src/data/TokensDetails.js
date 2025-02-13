@@ -125,7 +125,7 @@ export const TokensDetails = () => {
 			AuctionTimeRunning: auctionTimeLeft.Xerion,
 			BurnTimeLeft: BurnTimeLeft.Xerion,
 			Ratio: XerionRatioPrice,
-			AuctionRunning: AuctionRunningLocalString.Xerion.toString(),
+			AuctionRunning: "false",
 			pair: "Xerion/pSTATE",
 			AuctionNextTime: auctionDetails["Xerion"],
 			mintAddTOkens: "125,000,000,000",
