@@ -13,7 +13,7 @@
 			},
 			{
 				"internalType": "address",
-				"name": "_fluxin",
+				"name": "_orxa",
 				"type": "address"
 			},
 			{
@@ -24,6 +24,44 @@
 		],
 		"stateMutability": "nonpayable",
 		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "OwnableInvalidOwner",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "OwnableUnauthorizedAccount",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ReentrancyGuardReentrantCall",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "token",
+				"type": "address"
+			}
+		],
+		"name": "SafeERC20FailedOperation",
+		"type": "error"
 	},
 	{
 		"anonymous": false,
@@ -56,7 +94,7 @@
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "fluxinAddress",
+				"name": "orxaAddress",
 				"type": "address"
 			},
 			{
@@ -87,7 +125,7 @@
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "fluxinAddress",
+				"name": "orxaAddress",
 				"type": "address"
 			},
 			{
@@ -104,6 +142,25 @@
 			}
 		],
 		"name": "AuctionStarted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "previousOwner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
 		"type": "event"
 	},
 	{
@@ -149,25 +206,6 @@
 			{
 				"indexed": false,
 				"internalType": "uint256",
-				"name": "amountBurned",
-				"type": "uint256"
-			}
-		],
-		"name": "TokensBurned",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
 				"name": "amount",
 				"type": "uint256"
 			}
@@ -187,7 +225,7 @@
 			{
 				"indexed": true,
 				"internalType": "address",
-				"name": "fluxinAddress",
+				"name": "orxaAddress",
 				"type": "address"
 			},
 			{
@@ -355,19 +393,6 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "bufferFee",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -470,7 +495,7 @@
 		"name": "dav",
 		"outputs": [
 			{
-				"internalType": "contract Decentralized_Autonomous_Vaults_DAV_V1_0",
+				"internalType": "contract Decentralized_Autonomous_Vaults_DAV_V1_1",
 				"name": "",
 				"type": "address"
 			}
@@ -498,45 +523,6 @@
 	},
 	{
 		"inputs": [],
-		"name": "fluxin",
-		"outputs": [
-			{
-				"internalType": "contract Fluxin",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "fluxinAddress",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "fluxinToken",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
 		"name": "getBurnOccured",
 		"outputs": [
 			{
@@ -551,32 +537,6 @@
 	{
 		"inputs": [],
 		"name": "getCurrentAuctionCycle",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getCurrentgas",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getFluxinToPstateRatio",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -616,6 +576,19 @@
 	{
 		"inputs": [],
 		"name": "getOutPutAmount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getRatioPrice",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -905,6 +878,58 @@
 	},
 	{
 		"inputs": [],
+		"name": "orxa",
+		"outputs": [
+			{
+				"internalType": "contract Orxa",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "orxaAddress",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "orxaToken",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
 		"name": "pairAddress",
 		"outputs": [
 			{
@@ -940,6 +965,13 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "renounceOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -996,19 +1028,6 @@
 			}
 		],
 		"name": "setAuctionInterval",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "setBuffer",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -1122,6 +1141,19 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{

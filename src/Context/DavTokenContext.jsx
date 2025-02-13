@@ -95,7 +95,7 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   const CalculationOfCost = async (amount) => {
-    setTotalCost(ethers.parseEther((amount * 250000).toString()));
+    setTotalCost(ethers.parseEther((amount * 500).toString()));
   };
 
   const fetchStateHoldingsAndCalculateUSD = async () => {
@@ -251,19 +251,74 @@ export const DAVTokenProvider = ({ children }) => {
       setRenounceStatus(name, null); // Set to null if an error occurs
     }
   };
-  const [davTransactionHash, setDavTransactionHash] = useState(null);
-  const [fluxinTransactionHash, setFluxinTransactionHash] = useState(null);
-  const [XerionTransactionHash, setXerionTransactionHash] = useState(null);
-  const [stateTransactionHash, setStateTransactionHash] = useState(null);
+  const [transactionHashes, setTransactionHashes] = useState({});
+
+  useEffect(() => {
+    const loadStoredHashes = async () => {
+      if (!AllContracts || Object.keys(AllContracts).length === 0) {
+        console.warn("AllContracts is not ready yet.");
+        return;
+      }
+
+      // List of contracts with their identifiers
+      const contracts = [
+        { name: "dav", contract: AllContracts.davContract },
+        { name: "fluxin", contract: AllContracts.FluxinContract },
+        { name: "xerion", contract: AllContracts.XerionContract },
+        { name: "state", contract: AllContracts.stateContract },
+      ];
+
+      try {
+        // Fetch all transaction hashes in parallel
+        const results = await Promise.all(
+          contracts.map(async ({ name, contract }) => {
+            if (!contract) {
+              console.warn(`Contract ${name} is not available.`);
+              return { name, hash: null };
+            }
+
+            try {
+              const hash = await contract.getTransactionHash();
+              console.log(`Fetched hash for ${name}:`, hash);
+              return { name, hash };
+            } catch (error) {
+              console.error(`Error fetching hash for ${name}:`, error);
+              return { name, hash: null };
+            }
+          })
+        );
+
+        // Convert results array into an object and update state
+        const newHashes = results.reduce((acc, { name, hash }) => {
+          if (hash) acc[name] = hash;
+          return acc;
+        }, {});
+
+        setTransactionHashes(newHashes);
+        console.log("Updated transaction hashes:", newHashes);
+      } catch (error) {
+        console.error("Error loading transaction hashes:", error);
+      }
+    };
+
+    if (AllContracts) {
+      loadStoredHashes();
+    }
+  }, [AllContracts]); // Runs when `AllContracts` is available
 
   const renounceOwnership = async (contract, contractName, setHash) => {
     try {
-      const tx = await handleContractCall(contract, "renounceOwnership", []);
+      const tx = await contract.renounceOwnership();
       console.log(`${contractName} Transaction:`, tx);
 
       if (tx?.hash) {
         console.log(`${contractName} Transaction Hash:`, tx.hash);
         setHash(tx.hash);
+
+        const txStorage = await contract.setTransactionHash(tx.hash);
+        await txStorage.wait(); // Wait for confirmation
+
+        console.log(`${contractName} Hash stored on-chain!`);
       } else {
         console.error(
           "Transaction object doesn't contain transactionHash:",
@@ -276,25 +331,15 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   const ReanounceContract = () =>
-    renounceOwnership(AllContracts.davContract, "DAV", setDavTransactionHash);
+    renounceOwnership(AllContracts.davContract, "DAV");
   const ReanounceFluxinContract = () =>
-    renounceOwnership(
-      AllContracts.FluxinContract,
-      "Fluxin",
-      setFluxinTransactionHash
-    );
+    renounceOwnership(AllContracts.FluxinContract, "Fluxin");
   const ReanounceXerionContract = () =>
-    renounceOwnership(
-      AllContracts.XerionContract,
-      "Xerion",
-      setXerionTransactionHash
-    );
+    renounceOwnership(AllContracts.XerionContract, "Xerion");
   const RenounceState = () =>
-    renounceOwnership(
-      AllContracts.stateContract,
-      "State",
-      setStateTransactionHash
-    );
+    renounceOwnership(AllContracts.stateContract, "State");
+  const RenounceFluxinSwap = () =>
+    renounceOwnership(AllContracts.RatioContract, "FluxinRatio");
 
   const contracts = {
     state: AllContracts.stateContract,
@@ -1321,8 +1366,8 @@ export const DAVTokenProvider = ({ children }) => {
     handleAddToken(Ratio_TOKEN_ADDRESS, "Fluxin");
   const handleAddTokenDAV = () => handleAddToken(DAV_TOKEN_ADDRESS, "pDAV");
   const handleAddTokenState = () =>
-    handleAddToken(STATE_TOKEN_ADDRESS, "pState");
-  const handleAddFluxin = () => handleAddToken(Fluxin, "Fluxin");
+    handleAddToken(STATE_TOKEN_ADDRESS, "pState");	
+  const handleAddFluxin = () => handleAddToken(Fluxin, "Orxa");
   const handleAddXerion = () => handleAddToken(Xerion, "Xerion");
 
   return (
@@ -1340,13 +1385,11 @@ export const DAVTokenProvider = ({ children }) => {
         TotalCost,
 
         handleAddTokenDAV,
-        davTransactionHash,
 
         //STATE Token
         StateHolds,
         balances,
         RenounceState,
-        stateTransactionHash,
         WithdrawState,
         handleAddTokenState,
         PercentageOfState,
@@ -1379,8 +1422,7 @@ export const DAVTokenProvider = ({ children }) => {
         // WithdrawLPTokens,
         isRenounced,
         checkOwnershipStatus,
-        fluxinTransactionHash,
-        XerionTransactionHash,
+        transactionHashes,
         SetAUctionDuration,
         SetAUctionInterval,
         outAmounts,
@@ -1405,6 +1447,7 @@ export const DAVTokenProvider = ({ children }) => {
         LoadingState,
         loadingRatioPrice,
         setReverseEnable,
+        RenounceFluxinSwap,
         ReverseForNextCycle,
         ReverseForCycle,
       }}

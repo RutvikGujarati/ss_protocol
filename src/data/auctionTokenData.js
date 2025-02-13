@@ -29,14 +29,14 @@ export const useAuctionTokens = () => {
 		OnePBalance,
 	} = useDAVToken();
 	console.log("is running from obj", isReversed.Fluxin)
-	
+
 	const tokens = [
 		{
-			id: "Fluxin",
-			name: "Fluxin",
-			Pname: "Fluxin - State - Fluxin",
-			ReverseName: "State - Fluxin",
-			ContractName: "Fluxin",
+			id: "Orxa",
+			name: "Orxa",
+			Pname: "Orxa - State - Orxa",
+			ReverseName: "State - Orxa",
+			ContractName: "Orxa",
 			image: FluxinLogo,
 			ratio: `1:${RatioTargetsofTokens?.["Fluxin"] || 0}`,
 			currentRatio: `1:${FluxinRatioPrice || 0}`,
@@ -52,7 +52,7 @@ export const useAuctionTokens = () => {
 			distributedAmount: Distributed?.["Fluxin"] || 0,
 			token: Fluxin,
 			handleAddToken: handleAddFluxin,
-			inputTokenAmount: `${OnePBalance.Fluxin || 0} Fluxin`,
+			inputTokenAmount: `${OnePBalance.Fluxin || 0} Orxa`,
 			SwapT: () => SwapTokens("Fluxin", "Fluxin"),
 			ratioPrice: FluxinRatioPrice,
 			outputToken: `${outAmounts?.Fluxin || 0} State`,

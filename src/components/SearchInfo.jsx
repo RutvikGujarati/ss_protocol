@@ -18,8 +18,8 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
   const [filteredData, setFilteredData] = useState([
     { id: "∈", name: "DAV", logo: DAVLogo, AddToken: handleAddTokenDAV },
     { id: "±", name: "STATE", logo: stateLogo, AddToken: handleAddTokenState },
-    { id: 1, name: "Fluxin", logo: FluxinLogo, AddToken: handleAddFluxin },
-    { id: 2, name: "Xerion", logo: XerionLogo, AddToken: handleAddXerion },
+    { id: 1, name: "Orxa", logo: FluxinLogo, AddToken: handleAddFluxin },
+    // { id: 2, name: "Xerion", logo: XerionLogo, AddToken: handleAddXerion },
   ]);
   const searchInputRef = useRef(null);
 
@@ -54,7 +54,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
       { id: "∈", name: "DAV", logo: DAVLogo },
       { id: "±", name: "STATE", logo: stateLogo },
       //   { id: 1, name: "AuctionRatioSwapping", logo: XerionLogo },
-      { id: 1, name: "Fluxin", logo: FluxinLogo },
+      { id: 1, name: "Orxa", logo: FluxinLogo },
       { id: 2, name: "Xerion", logo: XerionLogo },
       //   { id: 4, name: "Polaris", logo: FluxinLogo },
     ];

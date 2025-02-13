@@ -242,16 +242,16 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   <td className="d-flex justify-content-end">
                     {dataToShow.renounceSmartContract ? (
                       <button
-                        onClick={() =>
-                          window.open(
-                            `https://otter.pulsechain.com/tx/${dataToShow.transactionHash}`,
-                            "_blank",
-                            "noopener,noreferrer"
-                          )
-                        }
+                        // onClick={() =>
+                        //   window.open(
+                        //     `https://otter.pulsechain.com/tx/${dataToShow.transactionHash}`,
+                        //     "_blank",
+                        //     "noopener,noreferrer"
+                        //   )
+                        // }
                         className="btn btn-primary btn-sm swap-btn info-icon"
                       >
-                        View
+                        Renounced
                       </button>
                     ) : (
                       <button
@@ -301,7 +301,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               </>
             )}
             {(dataToShow.tokenName == "STATE" ||
-              dataToShow.tokenName == "Fluxin" ||
+              dataToShow.tokenName == "Orxa" ||
               dataToShow.tokenName == "Xerion") && (
               <>
                 {dataToShow.tokenName !== "STATE" && (
@@ -324,10 +324,17 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                       label2={"Target Ratio"}
                       SecondData={`1:${dataToShow.target}`}
                     />
+                    <ReanounceContractsComponent
+                      label={"Swap Contract Renounced"}
+                      condition1={dataToShow.renounceSmartContract}
+                    //   hash={dataToShow.transactionHash}
+                      ClickAction={() => dataToShow.actions.ReanounceSwapContract()}
+                    />
                   </>
                 )}
 
                 <ReanounceContractsComponent
+                  label={"Contract Renounced"}
                   condition1={dataToShow.renounceSmartContract}
                   hash={dataToShow.transactionHash}
                   ClickAction={() => dataToShow.actions.ReanounceContract()}
@@ -341,7 +348,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           ? "State Balance (inside Contract)"
                           : dataToShow.tokenName.toLowerCase() === "xerion"
                           ? "Xerion Balance (inside Contract)"
-                          : "Fluxin Balance (inside Contract)"}
+                          : "Orxa Balance (inside Contract)"}
                       </td>
 
                       <td>
@@ -376,12 +383,21 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                       <td className="d-flex justify-content-end">
                         <button
                           onClick={() => {
-                            if (dataToShow.tokenName === "Fluxin") {
-								dataToShow.actions.mintAdditionalTOkens("fluxin", 250000000000); // Amount for Fluxin
+                            if (dataToShow.tokenName === "Orxa") {
+                              dataToShow.actions.mintAdditionalTOkens(
+                                "Orxa",
+                                250000000000
+                              ); // Amount for Orxa
                             } else if (dataToShow.tokenName === "STATE") {
-								dataToShow.actions.mintAdditionalTOkens("state", 1000000000000); // Amount for State
+                              dataToShow.actions.mintAdditionalTOkens(
+                                "state",
+                                1000000000000
+                              ); // Amount for State
                             } else if (dataToShow.tokenName === "Xerion") {
-								dataToShow.actions.mintAdditionalTOkens("Xerion", 125000000000); // Amount for State
+                              dataToShow.actions.mintAdditionalTOkens(
+                                "Xerion",
+                                125000000000
+                              ); // Amount for State
                             }
                           }}
                           className="btn btn-primary btn-sm swap-btn info-icon mx-5"
@@ -640,7 +656,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                         dataToShow.WillStartForNext ===
                                         "true" ? (
                                           <>
-                                            For this cycle - it is setted. <br />
+                                            For this cycle - it is setted.{" "}
+                                            <br />
                                             For Next cycle - it is setted.
                                           </>
                                         ) : (

@@ -124,13 +124,13 @@ export const DoubleValues = ({ label1, firstData, label2, SecondData }) => {
 };
 
 export const ReanounceContractsComponent = ({
+  label,
   condition1,
-  hash,
   ClickAction,
 }) => {
   return (
     <tr>
-      <td className="d-flex align-items-center">Contract Renounced</td>
+      <td className="d-flex align-items-center">{label}</td>
 
       <td className="d-flex align-items-center justify-content-center">
         {condition1 == null ? "Loading..." : condition1 ? "Yes" : "No"}{" "}
@@ -138,16 +138,16 @@ export const ReanounceContractsComponent = ({
       <td className="d-flex justify-content-end">
         {condition1 ? (
           <button
-            onClick={() =>
-              window.open(
-                `https://otter.pulsechain.com/tx/${hash}`,
-                "_blank",
-                "noopener,noreferrer"
-              )
-            }
+            // onClick={() =>
+            //   window.open(
+            //     `https://otter.pulsechain.com/tx/${hash}`,
+            //     "_blank",
+            //     "noopener,noreferrer"
+            //   )
+            // }
             className="btn btn-primary btn-sm swap-btn info-icon"
           >
-            View
+            Renounced
           </button>
         ) : (
           <button
@@ -196,6 +196,7 @@ DoubleValues.propTypes = {
 
 ReanounceContractsComponent.propTypes = {
   condition1: PropTypes.any,
+  label: PropTypes.any,
   condition2: PropTypes.any,
   hash: PropTypes.string,
   ClickAction: PropTypes.func,

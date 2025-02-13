@@ -21,13 +21,13 @@ const XerionShortened = shortenAddress(Xerion);
 export const TokensDetails = () => {
 	const { FluxinRatioPrice, XerionRatioPrice, stateUsdPrice, FluxinUsdPrice, XerionUsdPrice } =
 		useContext(PriceContext);
-	const { simpleSupplies,mintAdditionalTOkens } = useGeneralTokens()
-	const { AuctionRunningLocalString,auctionDetails,BurnTimeLeft ,TotalTokensBurned,TotalBounty,auctionTimeLeft} = useGeneralAuctionFunctions()
+	const { simpleSupplies, mintAdditionalTOkens } = useGeneralTokens()
+	const { AuctionRunningLocalString, auctionDetails, BurnTimeLeft, TotalTokensBurned, TotalBounty, auctionTimeLeft } = useGeneralAuctionFunctions()
 
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, PercentageFluxin, balances, isReversed, RatioTargetsofTokens,   PercentageXerion,  ReanounceContract,   SetAUctionDuration,  WithdrawFluxin,  ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, XerionTransactionHash, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, PercentageOfState, LPStateTransferred, RenounceState, WithdrawState, AddTokens, setBurnRate } = useDAVToken();
+	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced,transactionHashes, LastLiquidity, PercentageFluxin, balances, isReversed, RatioTargetsofTokens, PercentageXerion, ReanounceContract, SetAUctionDuration, WithdrawFluxin, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, PercentageOfState, LPStateTransferred, RenounceState,RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate } = useDAVToken();
 	console.log("isReversing", isReversed.Fluxin)
 	return [
 		{
@@ -35,8 +35,7 @@ export const TokensDetails = () => {
 			key: davShortened,
 			name: "pDAV",
 			supply: "5,000,000.00",
-			transactionHash:
-				"0xa7edbeaf4dabb78ef6385220bc75f7266c144a4c9da19393245ab62999195d90",
+			transactionHash: transactionHashes.dav,
 			claimDAVToken: DAVTokensWithdraw,
 			claimFiveDAVTokenValue: DAVTokensFiveWithdraw,
 			address: DAV_TOKEN_ADDRESS,
@@ -52,9 +51,9 @@ export const TokensDetails = () => {
 			},
 		},
 		{
-			tokenName: "Fluxin",
+			tokenName: "Orxa",
 			key: FluxinShortened,
-			name: "Fluxin",
+			name: "Orxa",
 			supply: "1,000,000,000,000.00",
 			Treasury: "1,000,000,000,000.00",
 			Supply: simpleSupplies.FluxinSupply,
@@ -80,11 +79,11 @@ export const TokensDetails = () => {
 			AuctionTimeRunning: auctionTimeLeft.Fluxin,
 			AuctionNextTime: auctionDetails["Fluxin"],
 			mintAddTOkens: "250,000,000,000",
-			transactionHash:
-				"0xcc7e04c885a56607fbc2417a9f894bda0fbdd68418ce189168adcb1c10406208",
+			transactionHash:transactionHashes.fluxin,
 			renounceSmartContract: isRenounced?.Fluxin ?? "Unknown",
 			actions: {
 				ReanounceContract: ReanounceFluxinContract,
+				ReanounceSwapContract: RenounceFluxinSwap,
 				WithdrawState: WithdrawFluxin,
 				mintAdditionalTOkens: mintAdditionalTOkens,
 				SetDuration: (value) => SetAUctionDuration(value, "fluxinRatio"),
@@ -93,7 +92,7 @@ export const TokensDetails = () => {
 					AddTokensToContract(Fluxin, STATE_TOKEN_ADDRESS, FluxinRatioPrice),
 				setRatio: (value) => setRatioTarget(value, "fluxinRatio"),
 				setBurn: (value) => setBurnRate(value, "fluxinRatio"),
-				setReverseEnabled: () => setReverseEnable( "fluxinRatio"),
+				setReverseEnabled: () => setReverseEnable("fluxinRatio"),
 				setReverse: (value, value2) => setReverseTime(value, value2),
 				setCurrentRatio: (value) => setCurrentRatioTarget(value),
 				DepositTokens: (value) =>
@@ -131,7 +130,7 @@ export const TokensDetails = () => {
 			AuctionNextTime: auctionDetails["Xerion"],
 			mintAddTOkens: "125,000,000,000",
 			ApproveAmount: "10,000,000,000",
-			transactionHash: XerionTransactionHash,
+			transactionHash: transactionHashes.xerion,
 			renounceSmartContract: isRenounced?.Xerion ?? "Unknown",
 			actions: {
 				ReanounceContract: ReanounceXerionContract,
@@ -166,8 +165,7 @@ export const TokensDetails = () => {
 			claimLPToken: LPStateTransferred,
 			mintAddTOkens: "1,000,000,000,000",
 			ApproveAmount: "10,000,000,000",
-			transactionHash:
-				"0xf562341d1f0f5469809553f07cd9f19da479a9af3b074d0982594899a6595b10",
+			transactionHash:transactionHashes.state,
 			Price: stateUsdPrice,
 
 			renounceSmartContract: isRenounced?.state ?? "Unknown",

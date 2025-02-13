@@ -180,7 +180,7 @@ const InfoCards = () => {
                       value={amount}
                       onChange={handleInputChange}
                     />
-                    <h5 className="detailAmount">1 DAV TOKEN = 250,000 PLS</h5>
+                    <h5 className="detailAmount">1 DAV TOKEN = 500 PLS</h5>
                     <h5 className="detailAmount mb-4">
                       {TotalCost
                         ? formatNumber(ethers.formatUnits(TotalCost, 18))
