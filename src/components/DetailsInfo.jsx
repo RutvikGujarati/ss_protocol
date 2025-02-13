@@ -385,7 +385,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           onClick={() => {
                             if (dataToShow.tokenName === "Orxa") {
                               dataToShow.actions.mintAdditionalTOkens(
-                                "Orxa",
+                                "fluxin",
                                 250000000000
                               ); // Amount for Orxa
                             } else if (dataToShow.tokenName === "STATE") {
