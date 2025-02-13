@@ -99,7 +99,7 @@ const {BurnOccuredForToken,BurnCycleACtive} = useGeneralAuctionFunctions()
         <div className="table-responsive">
           <div className="announcement text-center">
             <div className="">
-              1 DAV TOKENS REQUIRED TO BURN LISTED TOKENS AND RECEIVE THE
+              10 DAV TOKENS REQUIRED TO BURN LISTED TOKENS AND RECEIVE THE
               BOUNTY.
             </div>
           </div>
@@ -119,7 +119,7 @@ const {BurnOccuredForToken,BurnCycleACtive} = useGeneralAuctionFunctions()
               {tokens
                 .filter(
                   ({ BurnOccured, burnCycle }) =>
-                    !BurnOccured && burnCycle && db >= 1
+                    !BurnOccured && burnCycle && db >= 10
                 )
                 .map(
                   ({
