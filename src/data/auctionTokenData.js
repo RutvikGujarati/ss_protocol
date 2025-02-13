@@ -36,7 +36,7 @@ export const useAuctionTokens = () => {
 			name: "Orxa",
 			Pname: "Orxa - State - Orxa",
 			ReverseName: "State - Orxa",
-			ContractName: "Orxa",
+			ContractName: "Fluxin",
 			image: FluxinLogo,
 			ratio: `1:${RatioTargetsofTokens?.["Fluxin"] || 0}`,
 			currentRatio: `1:${FluxinRatioPrice || 0}`,
