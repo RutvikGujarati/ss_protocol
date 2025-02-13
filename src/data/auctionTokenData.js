@@ -73,7 +73,7 @@ export const useAuctionTokens = () => {
 			currentTokenRatio: XerionRatioPrice,
 			ErrorName: "Xerion",
 			RatioTargetToken: RatioTargetsofTokens?.["Xerion"] || 0,
-			AuctionStatus: AuctionRunning?.Xerion,
+			AuctionStatus: "false",
 			onChart: "https://www.geckoterminal.com/pulsechain/pools/0xc6359cd2c70f643888d556d377a4e8e25caadf77",
 			distributedAmount: Distributed?.["Xerion"] || 0,
 			token: Xerion,

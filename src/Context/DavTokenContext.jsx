@@ -655,7 +655,7 @@ export const DAVTokenProvider = ({ children }) => {
     try {
       const contractDetails = [
         { name: "Fluxin", contract: AllContracts.RatioContract },
-        { name: "Xerion", contract: AllContracts.XerionRatioContract },
+        // { name: "Xerion", contract: AllContracts.XerionRatioContract },
       ];
 
       let totalBurnedAmount = 0;
