@@ -88,6 +88,40 @@ export const TableRowForTokens = ({
     </>
   );
 };
+export const TableRowForSwapTokens = ({
+  label,
+  label2,
+  tokenName,
+  TokenAddress,
+  value,
+
+}) => {
+  return (
+    <>
+      <tr>
+        <td className="d-flex align-items-center">{label}</td>
+        <td className="d-flex align-items-center justify-content-center position-relative px-3 small py-0">
+          <span
+            className="border-end h-75 position-absolute border-opacity-25"
+            style={{ right: 0, opacity: 0.3 }}
+          ></span>{" "}
+          {tokenName || ""}
+        </td>
+        <td className="d-flex align-items-center">{label2}</td>
+        <td className="d-flex align-items-center justify-content-center px-3">
+          <a
+            href={`https://otter.pulsechain.com/address/${TokenAddress}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ fontSize: "12px" }}
+          >
+            {value || ""}
+          </a>
+        </td>
+      </tr>
+    </>
+  );
+};
 
 export const SmallTokenDetails = ({ label, data }) => {
   const { isLoading } = useDAvContract();
@@ -162,6 +196,15 @@ export const ReanounceContractsComponent = ({
   );
 };
 TableRowForTokens.propTypes = {
+  label: PropTypes.isRequired,
+  label2: PropTypes.isRequired,
+  tokenName: PropTypes.isRequired,
+  TokenAddress: PropTypes.isRequired,
+  value: PropTypes.isRequired,
+  priceTag: PropTypes.isRequired,
+  PercentageOfToken: PropTypes.isRequired,
+};
+TableRowForSwapTokens.propTypes = {
   label: PropTypes.isRequired,
   label2: PropTypes.isRequired,
   tokenName: PropTypes.isRequired,

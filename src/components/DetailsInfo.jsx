@@ -11,6 +11,7 @@ import {
   ReanounceContractsComponent,
   SmallTokenDetails,
   TableRowDataShow,
+  TableRowForSwapTokens,
   TableRowForTokens,
   TableRowWithClick,
 } from "./SeperateComps/TableRow";
@@ -207,14 +208,26 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             {dataToShow.tokenName !== "DAV" &&
               dataToShow.tokenName !== "STATE" && (
                 <>
-                  <TableRowForTokens
+                  <TableRowForSwapTokens
                     label={"Token Name"}
                     tokenName={dataToShow.name}
                     label2={"Token Address"}
                     TokenAddress={dataToShow.address}
                     value={dataToShow.key}
-                    priceTag={formatWithCommas(dataToShow.Supply)}
-                    PercentageOfToken={dataToShow.percentage}
+                  />
+
+                  <TableRowForSwapTokens
+                    label={"Contract Name"}
+                    tokenName={`Ratio_Swapping_Auctions_V1_1`}
+                    label2={"Contract Address"}
+                    TokenAddress={dataToShow.SwapContract}
+                    value={dataToShow.SwapShortContract}
+                  />
+                  <DoubleValues
+                    label1={"Minted Supply"}
+                    firstData={formatWithCommas(dataToShow.Supply)}
+                    label2={"Current Distribution Rate"}
+                    SecondData={`${dataToShow.percentage} %`}
                   />
                 </>
               )}
@@ -327,8 +340,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     <ReanounceContractsComponent
                       label={"Swap Contract Renounced"}
                       condition1={dataToShow.renounceSmartContract}
-                    //   hash={dataToShow.transactionHash}
-                      ClickAction={() => dataToShow.actions.ReanounceSwapContract()}
+                      //   hash={dataToShow.transactionHash}
+                      ClickAction={() =>
+                        dataToShow.actions.ReanounceSwapContract()
+                      }
                     />
                   </>
                 )}
