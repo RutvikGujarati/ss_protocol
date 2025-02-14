@@ -55,7 +55,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
       { id: "±", name: "STATE", logo: stateLogo },
       //   { id: 1, name: "AuctionRatioSwapping", logo: XerionLogo },
       { id: 1, name: "Orxa", logo: FluxinLogo },
-      { id: 2, name: "Xerion", logo: XerionLogo },
+    //   { id: 2, name: "Xerion", logo: XerionLogo },
       //   { id: 4, name: "Polaris", logo: FluxinLogo },
     ];
     const filtered = originalData.filter((item) =>
