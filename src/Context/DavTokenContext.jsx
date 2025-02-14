@@ -173,6 +173,7 @@ export const DAVTokenProvider = ({ children }) => {
           checkOwnershipStatus("state"),
           checkOwnershipStatus("dav"),
           checkOwnershipStatus("Fluxin"),
+          checkOwnershipStatus("FluxinRatio"),
           checkOwnershipStatus("Xerion"),
           ViewDistributedTokens(),
           getCachedRatioTarget(),
@@ -240,7 +241,7 @@ export const DAVTokenProvider = ({ children }) => {
         "Contract owner:",
         owner,
         "Contract address:",
-        contract.address
+        contract
       );
       setRenounceStatus(
         name,
@@ -344,7 +345,8 @@ export const DAVTokenProvider = ({ children }) => {
   const contracts = {
     state: AllContracts.stateContract,
     dav: AllContracts.davContract,
-    Fluxin: AllContracts.FluxinContract,
+    Fluxin: AllContracts.FluxinContract, 
+    FluxinRatio: AllContracts.RatioContract, 
     Xerion: AllContracts.XerionContract,
   };
   const Swapcontracts = {

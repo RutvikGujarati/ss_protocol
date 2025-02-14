@@ -4,7 +4,7 @@ import FluxinLogo from "../assets/FluxinLogo.png";
 export const getTokens = (balances, bountyBalances, BurnCycleACtive, BurnOccuredForToken, ClickBurn,) => [
 	{
 		id: 1,
-		name: "Fluxin",
+		name: "Orxa",
 		logo: FluxinLogo,
 		burnCycle: BurnCycleACtive.Fluxin === "true",
 		// burnCycle:"true",

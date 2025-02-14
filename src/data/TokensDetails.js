@@ -85,6 +85,7 @@ export const TokensDetails = () => {
 			mintAddTOkens: "250,000,000,000",
 			transactionHash:transactionHashes.fluxin,
 			renounceSmartContract: isRenounced?.Fluxin ?? "Unknown",
+			renounceSwapSmartContract: isRenounced?.FluxinRatio ?? "Unknown",
 			actions: {
 				ReanounceContract: ReanounceFluxinContract,
 				ReanounceSwapContract: RenounceFluxinSwap,

@@ -339,7 +339,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     />
                     <ReanounceContractsComponent
                       label={"Swap Contract Renounced"}
-                      condition1={dataToShow.renounceSmartContract}
+                      condition1={dataToShow.renounceSwapSmartContract}
                       //   hash={dataToShow.transactionHash}
                       ClickAction={() =>
                         dataToShow.actions.ReanounceSwapContract()
