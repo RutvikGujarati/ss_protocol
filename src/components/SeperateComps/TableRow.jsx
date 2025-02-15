@@ -169,7 +169,7 @@ export const ReanounceContractsComponent = ({
       <td className="d-flex align-items-center justify-content-center">
         {condition1 == null ? "Loading..." : condition1 ? "Yes" : "No"}{" "}
       </td>
-      <td className="d-flex justify-content-end">
+      <td className="d-flex justify-content-end ">
         {condition1 ? (
           <button
             // onClick={() =>
@@ -179,7 +179,7 @@ export const ReanounceContractsComponent = ({
             //     "noopener,noreferrer"
             //   )
             // }
-            className="btn btn-primary btn-sm swap-btn info-icon"
+            className="btn btn-primary btn-sm swap-btn info-icon mx-4"
           >
             Renounced
           </button>
