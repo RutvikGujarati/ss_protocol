@@ -95,7 +95,7 @@ export const DAVTokenProvider = ({ children }) => {
   };
 
   const CalculationOfCost = async (amount) => {
-    setTotalCost(ethers.parseEther((amount * 500).toString()));
+    setTotalCost(ethers.parseEther((amount * 5000).toString()));
   };
 
   const fetchStateHoldingsAndCalculateUSD = async () => {
@@ -180,15 +180,9 @@ export const DAVTokenProvider = ({ children }) => {
           reverseSwapEnabled(),
           CheckForCycle(),
           CheckForNextCycle(),
-          ContractStateBalance(),
           StateBurnAmount(),
           calculateBounty(),
-          ContractFluxinBalance(),
-          ContractFluxinStateBalance(),
-          ContractXerionStateBalance(),
-          ContractRatioFluxinBalance(),
-          ContractRatioXerionBalance(),
-          ContractXerionBalance(),
+		  fetchAllBalances(),
           AmountOut(),
           AmountOutTokens(),
           SetOnePercentageOfBalance(),
@@ -721,89 +715,42 @@ export const DAVTokenProvider = ({ children }) => {
     }
   };
 
-  const [balances, setBalances] = useState({
-    stateBalance: 0,
-    fluxinBalance: 0,
-    xerionBalance: 0,
-    StateFluxin: 0,
-    StateXerion: 0,
-    ratioFluxinBalance: 0,
-    ratioXerionBalance: 0,
-  });
+  const [balances, setBalances] = useState({});
 
-  const ContractStateBalance = async () => {
-    await fetchContractBalance(
-      AllContracts.stateContract,
-      STATE_TOKEN_ADDRESS,
-      "stateBalance"
-    );
+  const balanceConfigs = [
+	{ contract: AllContracts.stateContract, token: STATE_TOKEN_ADDRESS, key: "stateBalance" },
+	{ contract: AllContracts.FluxinContract, token: Fluxin, key: "fluxinBalance" },
+	{ contract: AllContracts.XerionContract, token: Xerion, key: "xerionBalance" },
+	{ contract: AllContracts.stateContract, token: Ratio_TOKEN_ADDRESS, key: "StateFluxin" },
+	{ contract: AllContracts.stateContract, token: XerionRatioAddress, key: "StateXerion" },
+	{ contract: AllContracts.FluxinContract, token: Ratio_TOKEN_ADDRESS, key: "ratioFluxinBalance" },
+	{ contract: AllContracts.XerionContract, token: XerionRatioAddress, key: "ratioXerionBalance" },
+  ];
+  
+  const fetchAllBalances = async () => {
+	try {
+	  for (const { contract, token, key } of balanceConfigs) {
+		const transaction = await handleContractCall(
+		  contract,
+		  "balanceOf",
+		  [token],
+		  (s) => ethers.formatUnits(s, 18)
+		);
+  
+		const balanceValue = Math.floor(parseFloat(transaction).toFixed(2));
+  
+		setBalances((prevBalances) => {
+		  const updatedBalances = { ...prevBalances, [key]: balanceValue };
+		  console.log(`${key} balance inside contract:`, updatedBalances[key]); // Now logs updated value
+		  return updatedBalances;
+		});
+	  }
+	} catch (e) {
+	  console.error("Error fetching balances:", e);
+	}
   };
-
-  const ContractFluxinBalance = async () => {
-    await fetchContractBalance(
-      AllContracts.FluxinContract,
-      Fluxin,
-      "fluxinBalance"
-    );
-  };
-  const ContractXerionBalance = async () => {
-    await fetchContractBalance(
-      AllContracts.XerionContract,
-      Xerion,
-      "xerionBalance"
-    );
-  };
-  const ContractFluxinStateBalance = async () => {
-    await fetchContractBalance(
-      AllContracts.stateContract,
-      Ratio_TOKEN_ADDRESS,
-      "StateFluxin"
-    );
-  };
-  const ContractXerionStateBalance = async () => {
-    await fetchContractBalance(
-      AllContracts.stateContract,
-      XerionRatioAddress,
-      "StateXerion"
-    );
-  };
-
-  const ContractRatioFluxinBalance = async () => {
-    await fetchContractBalance(
-      AllContracts.FluxinContract,
-      Ratio_TOKEN_ADDRESS,
-      "ratioFluxinBalance"
-    );
-  };
-  const ContractRatioXerionBalance = async () => {
-    await fetchContractBalance(
-      AllContracts.XerionContract,
-      XerionRatioAddress,
-      "ratioXerionBalance"
-    );
-  };
-
-  const fetchContractBalance = async (contract, tokenAddress, balanceKey) => {
-    try {
-      const transaction = await handleContractCall(
-        contract,
-        "balanceOf",
-        [tokenAddress],
-        (s) => ethers.formatUnits(s, 18)
-      );
-
-      const formattedBalance = parseFloat(transaction).toFixed(2);
-
-      console.log(`${balanceKey} balance:`, formattedBalance);
-
-      setBalances((prevBalances) => ({
-        ...prevBalances,
-        [balanceKey]: Math.floor(formattedBalance),
-      }));
-    } catch (e) {
-      console.error("Error fetching token balance:", e);
-    }
-  };
+  
+ 
 
   const getDecayPercentage = async (contractName) => {
     try {
@@ -1176,7 +1123,7 @@ export const DAVTokenProvider = ({ children }) => {
         // Fetch raw one percent balance
         const rawBalance = await handleContractCall(
           contract,
-          "getOnepercentOfUserBalance",
+          "calculateAuctionEligibleAmount",
           [],
           (s) => ethers.formatUnits(s, 18)
         );

@@ -153,6 +153,8 @@ export const GeneralAuctionProvider = ({ children }) => {
     }
   };
 
+  console.log("Auction Data in c156", auctionDetails)
+
   const AuctionTimeLeft = async () => {
     try {
       const contracts = [

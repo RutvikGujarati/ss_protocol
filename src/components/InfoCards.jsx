@@ -180,7 +180,7 @@ const InfoCards = () => {
                       value={amount}
                       onChange={handleInputChange}
                     />
-                    <h5 className="detailAmount">1 DAV TOKEN = 500 PLS</h5>
+                    <h5 className="detailAmount">1 DAV TOKEN = 5000 PLS</h5>
                     <h5 className="detailAmount mb-4">
                       {TotalCost
                         ? formatNumber(ethers.formatUnits(TotalCost, 18))
@@ -190,7 +190,7 @@ const InfoCards = () => {
 
                     <button
                       onClick={handleMint}
-                      className="btn btn-primary btn-sm d-flex justify-content-center align-items-center w-100"
+                      className="btn btn-primary btn-sm d-flex justify-content-center align-items-center mt-4 w-100 "
                       disabled={load}
                     >
                       {load ? "Minting..." : "Mint"}
@@ -254,10 +254,10 @@ const InfoCards = () => {
                         PLS - SWAP LEVY{" "}
                       </h6>
                       <h5 className="">{formatWithCommas(claimableAmount)}</h5>
-                      <div className="d-flex ">
+                      <div className="d-flex justify-content-center ">
                         <button
                           onClick={handleClaim}
-                          className="btn btn-primary d-flex btn-sm justify-content-center align-items-center  mt-3"
+                          className="btn btn-primary d-flex btn-sm justify-content-center align-items-center mx-5 mt-4"
                           style={{ width: "190px" }}
                           disabled={loadClaim}
                         >
