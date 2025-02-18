@@ -291,7 +291,7 @@ export const DAVTokenProvider = ({ children }) => {
   };
   const Swapcontracts = {
     Fluxin: AllContracts.RatioContract,
-    Xerion: AllContracts.XerionRatioContract,
+    // Xerion: AllContracts.XerionRatioContract,
   };
 
   const handleTokenWithdraw = async (contract, amount) => {
