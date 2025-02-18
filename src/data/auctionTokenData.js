@@ -53,7 +53,7 @@ export const useAuctionTokens = () => {
 			token: Fluxin,
 			handleAddToken: handleAddFluxin,
 			inputTokenAmount: `${OnePBalance.Fluxin || 0} Orxa`,
-			SwapT: () => SwapTokens("Fluxin", "Fluxin"),
+			SwapT: () => SwapTokens("Orxa", "Fluxin"),
 			ratioPrice: FluxinRatioPrice,
 			outputToken: `${outAmounts?.Fluxin || 0} State`,
 		},
