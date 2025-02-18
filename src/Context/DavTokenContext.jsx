@@ -246,60 +246,6 @@ export const DAVTokenProvider = ({ children }) => {
       setRenounceStatus(name, null); // Set to null if an error occurs
     }
   };
-  const [transactionHashes, setTransactionHashes] = useState({});
-
-  useEffect(() => {
-    const loadStoredHashes = async () => {
-      if (!AllContracts || Object.keys(AllContracts).length === 0) {
-        console.warn("AllContracts is not ready yet.");
-        return;
-      }
-
-      // List of contracts with their identifiers
-      const contracts = [
-        { name: "dav", contract: AllContracts.davContract },
-        { name: "fluxin", contract: AllContracts.FluxinContract },
-        { name: "xerion", contract: AllContracts.XerionContract },
-        { name: "state", contract: AllContracts.stateContract },
-      ];
-
-      try {
-        // Fetch all transaction hashes in parallel
-        const results = await Promise.all(
-          contracts.map(async ({ name, contract }) => {
-            if (!contract) {
-              console.warn(`Contract ${name} is not available.`);
-              return { name, hash: null };
-            }
-
-            try {
-              const hash = await contract.getTransactionHash();
-              console.log(`Fetched hash for ${name}:`, hash);
-              return { name, hash };
-            } catch (error) {
-              console.error(`Error fetching hash for ${name}:`, error);
-              return { name, hash: null };
-            }
-          })
-        );
-
-        // Convert results array into an object and update state
-        const newHashes = results.reduce((acc, { name, hash }) => {
-          if (hash) acc[name] = hash;
-          return acc;
-        }, {});
-
-        setTransactionHashes(newHashes);
-        console.log("Updated transaction hashes:", newHashes);
-      } catch (error) {
-        console.error("Error loading transaction hashes:", error);
-      }
-    };
-
-    if (AllContracts) {
-      loadStoredHashes();
-    }
-  }, [AllContracts]); // Runs when `AllContracts` is available
 
   const renounceOwnership = async (contract, contractName, setHash) => {
     try {
@@ -1371,7 +1317,6 @@ export const DAVTokenProvider = ({ children }) => {
         // WithdrawLPTokens,
         isRenounced,
         checkOwnershipStatus,
-        transactionHashes,
         SetAUctionDuration,
         SetAUctionInterval,
         outAmounts,

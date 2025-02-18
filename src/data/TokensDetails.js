@@ -29,7 +29,7 @@ export const TokensDetails = () => {
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced,transactionHashes, LastLiquidity, PercentageFluxin, balances, isReversed, RatioTargetsofTokens, PercentageXerion, ReanounceContract, SetAUctionDuration, WithdrawFluxin, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, PercentageOfState, LPStateTransferred, RenounceState,RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate } = useDAVToken();
+	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, PercentageFluxin, balances, isReversed, RatioTargetsofTokens, PercentageXerion, ReanounceContract, SetAUctionDuration, WithdrawFluxin, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, PercentageOfState, LPStateTransferred, RenounceState,RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate } = useDAVToken();
 	console.log("isReversing", isReversed.Fluxin)
 	return [
 		{
@@ -37,7 +37,6 @@ export const TokensDetails = () => {
 			key: davShortened,
 			name: "pDAV",
 			supply: "5,000,000.00",
-			transactionHash: transactionHashes.dav,
 			claimDAVToken: DAVTokensWithdraw,
 			claimFiveDAVTokenValue: DAVTokensFiveWithdraw,
 			address: DAV_TOKEN_ADDRESS,
@@ -83,7 +82,6 @@ export const TokensDetails = () => {
 			AuctionTimeRunning: auctionTimeLeft.Fluxin,
 			AuctionNextTime: auctionDetails["Fluxin"],
 			mintAddTOkens: "250,000,000,000",
-			transactionHash:transactionHashes.fluxin,
 			renounceSmartContract: isRenounced?.Fluxin ?? "Unknown",
 			renounceSwapSmartContract: isRenounced?.FluxinRatio ?? "Unknown",
 			actions: {
@@ -170,9 +168,7 @@ export const TokensDetails = () => {
 			claimLPToken: LPStateTransferred,
 			mintAddTOkens: "1,000,000,000,000",
 			ApproveAmount: "10,000,000,000",
-			transactionHash:transactionHashes.state,
 			Price: stateUsdPrice,
-
 			renounceSmartContract: isRenounced?.state ?? "Unknown",
 			actions: {
 				ReanounceContract: RenounceState,

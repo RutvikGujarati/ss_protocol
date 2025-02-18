@@ -12,7 +12,7 @@ import {
   SmallTokenDetails,
   TableRowDataShow,
   TableRowForSwapTokens,
-  TableRowForTokens,
+  //   TableRowForTokens,
   TableRowWithClick,
 } from "./SeperateComps/TableRow";
 import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions";
@@ -311,6 +311,12 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   label={"Current Distribution Rate"}
                   data={`${dataToShow.percentage} %`}
                 />
+                <ReanounceContractsComponent
+                  label={"Contract Renounced"}
+                  condition1={dataToShow.renounceSmartContract}
+                  hash={dataToShow.transactionHash}
+                  ClickAction={() => dataToShow.actions.ReanounceContract()}
+                />
               </>
             )}
             {(dataToShow.tokenName == "STATE" ||
@@ -338,6 +344,12 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                       SecondData={`1:${dataToShow.target}`}
                     />
                     <ReanounceContractsComponent
+                      label={"Contract Renounced"}
+                      condition1={dataToShow.renounceSmartContract}
+                      hash={dataToShow.transactionHash}
+                      ClickAction={() => dataToShow.actions.ReanounceContract()}
+                    />
+                    <ReanounceContractsComponent
                       label={"Swap Contract Renounced"}
                       condition1={dataToShow.renounceSwapSmartContract}
                       //   hash={dataToShow.transactionHash}
@@ -347,13 +359,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     />
                   </>
                 )}
-
-                <ReanounceContractsComponent
-                  label={"Contract Renounced"}
-                  condition1={dataToShow.renounceSmartContract}
-                  hash={dataToShow.transactionHash}
-                  ClickAction={() => dataToShow.actions.ReanounceContract()}
-                />
 
                 {authorized && (
                   <>
