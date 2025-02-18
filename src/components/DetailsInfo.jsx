@@ -333,9 +333,9 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     />
                     <DoubleValues
                       label1={`Total ${dataToShow.tokenName} Burned`}
-                      firstData={dataToShow.TotalTokensBurn}
+                      firstData={formatWithCommas(dataToShow.TotalTokensBurn)}
                       label2={"Total Bounty"}
-                      SecondData={dataToShow.TotalBounty}
+                      SecondData={formatWithCommas(dataToShow.TotalBounty)}
                     />
                     <DoubleValues
                       label1={`Current Ratio`}

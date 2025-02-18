@@ -32,41 +32,54 @@ export const GeneralAuctionProvider = ({ children }) => {
   ];
 
   useEffect(() => {
-	AuctionTimeLeft();
-	const interval = setInterval(() => {
-	  AuctionTimeLeft();
-	}, 2000);
+    AuctionTimeLeft();
+    const interval = setInterval(() => {
+      AuctionTimeLeft();
+    }, 2000);
 
-	return () => clearInterval(interval);
+    return () => clearInterval(interval);
   }, []);
+
   useEffect(() => {
     const safeExecution = async () => {
       try {
-        await isAuctionRunning();
+        // Run auction-related calls in parallel
+        const auctionPromises = [
+          isAuctionRunning(),
+          AuctionTimeInterval(),
+          AuctionTimeLeft(),
+        ];
+        await Promise.all(auctionPromises);
       } catch (error) {
-        console.error("Error in isAuctionRunning:", error);
+        console.error("Error in auction functions:", error);
       }
 
       try {
-        await AuctionTimeInterval();
-        await AuctionTimeLeft();
+        // Run token-related calls in parallel
+        const tokenPromises = [TotalTokensBurn(), TotalBountyAmount()];
+        await Promise.all(tokenPromises);
       } catch (error) {
-        console.error("Error in AuctionTimeInterval:", error);
+        console.error("Error in total burn/bounty fetching:", error);
       }
 
       try {
-        await BurningOccurred();
-        await BurnCycleActive();
-        await BurnTimingLeft();
-        await TotalTokensBurn();
-        await TotalBountyAmount();
+        // Run burn cycle-related calls in parallel
+        const burnPromises = [
+          BurningOccurred(),
+          BurnCycleActive(),
+          BurnTimingLeft(),
+        ];
+        await Promise.all(burnPromises);
       } catch (error) {
-        console.error("Error in burn occured fetching:", error);
+        console.error("Error in burn cycle fetching:", error);
       }
     };
 
-    safeExecution();
-  }, [AllContracts]);
+    if (AllContracts) {
+      // Prevent execution on initial render if `AllContracts` is undefined
+      safeExecution();
+    }
+  }, [AllContracts]); // Only run when `AllContracts` changes
 
   /*----------------------------------- Auction Functions------------------------------------- */
 
@@ -153,7 +166,7 @@ export const GeneralAuctionProvider = ({ children }) => {
     }
   };
 
-  console.log("Auction Data in c156", auctionDetails)
+  console.log("Auction Data in c156", auctionDetails);
 
   const AuctionTimeLeft = async () => {
     try {

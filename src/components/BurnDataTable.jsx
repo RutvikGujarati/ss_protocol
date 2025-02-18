@@ -2,7 +2,7 @@ import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import { useDAVToken } from "../Context/DavTokenContext";
-import { getTokens } from "../data/BurntokenData";
+import {  useTokens } from "../data/BurntokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { formatWithCommas } from "./DetailsInfo";
 import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions";
@@ -21,7 +21,7 @@ const BurnDataTable = () => {
     DavBalanceRequireForBurn,
     DavBalanceRequire,
   } = useDAVToken();
-const {BurnOccuredForToken,BurnCycleACtive} = useGeneralAuctionFunctions()
+  const { BurnOccuredForToken, BurnCycleACtive } = useGeneralAuctionFunctions();
   // Log for debugging
   console.log("BurnOccuredForToken:", BurnCycleACtive);
   console.log("BurnOccuredForToken:", parseFloat(DavBalance));
@@ -30,7 +30,7 @@ const {BurnOccuredForToken,BurnCycleACtive} = useGeneralAuctionFunctions()
   console.log("db required for burn", DavBalanceRequireForBurn);
   console.log("db required for Auction", DavBalanceRequire);
   // Get token data
-  const tokens = getTokens(
+  const tokens = useTokens(
     balances,
     bountyBalances,
     BurnCycleACtive,
