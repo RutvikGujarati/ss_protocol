@@ -544,7 +544,7 @@ export const DAVTokenProvider = ({ children }) => {
           contract,
           "getRatioTarget",
           [],
-		  (s) => ethers.formatUnits(s, 18)
+          (s) => ethers.formatUnits(s, 18)
         );
         console.log(`${name} Ratio Target:`, Number(RatioTarget));
 
@@ -1105,8 +1105,13 @@ export const DAVTokenProvider = ({ children }) => {
         console.log(`Adjusted Balance for ${tokenName}:`, balance);
         const userBalance = await checkUserBalanceForToken(tokenName);
         console.log(`Adjusted user Balance for ${tokenName}:`, userBalance);
-        balances[tokenName] =
-           balance;
+
+        if (!isReversed[tokenName]) {
+          balances[tokenName] =
+            parseFloat(userBalance) < balance ? "0.0" : balance;
+        } else {
+          balances[tokenName] = balance;
+        }
       }
 
       // Update state with the results
