@@ -534,7 +534,7 @@ export const DAVTokenProvider = ({ children }) => {
       // List of token contracts to handle
       const contracts = [
         { contract: AllContracts.RatioContract, name: "Fluxin" },
-        { contract: AllContracts.XerionRatioContract, name: "Xerion" }, // Example for another token
+        // { contract: AllContracts.XerionRatioContract, name: "Xerion" }, // Example for another token
       ];
 
       const ratioTargets = {};
@@ -543,7 +543,8 @@ export const DAVTokenProvider = ({ children }) => {
         const RatioTarget = await handleContractCall(
           contract,
           "getRatioTarget",
-          []
+          [],
+		  (s) => ethers.formatUnits(s, 18)
         );
         console.log(`${name} Ratio Target:`, Number(RatioTarget));
 
@@ -575,6 +576,7 @@ export const DAVTokenProvider = ({ children }) => {
 
       // Cache the fetched values
       cachedRatioTargetsRef.current = ratioTargetValues;
+
       console.log(
         "Fetched and cached Ratio Targets:",
         cachedRatioTargetsRef.current.Fluxin
@@ -1104,7 +1106,7 @@ export const DAVTokenProvider = ({ children }) => {
         const userBalance = await checkUserBalanceForToken(tokenName);
         console.log(`Adjusted user Balance for ${tokenName}:`, userBalance);
         balances[tokenName] =
-          parseFloat(userBalance) < balance ? "0.0" : balance;
+           balance;
       }
 
       // Update state with the results
