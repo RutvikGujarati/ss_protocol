@@ -332,17 +332,22 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                       SecondData={formatWithCommas(dataToShow.stateBalance)}
                     />
                     <DoubleValues
-                      label1={`Total ${dataToShow.tokenName} Burned`}
-                      firstData={formatWithCommas(dataToShow.TotalTokensBurn)}
-                      label2={"Total Bounty"}
-                      SecondData={formatWithCommas(dataToShow.TotalBounty)}
-                    />
-                    <DoubleValues
                       label1={`Current Ratio`}
                       firstData={`1:${dataToShow.Ratio}`}
                       label2={"Target Ratio"}
                       SecondData={`1:${dataToShow.target}`}
                     />
+                    <SmallTokenDetails
+                      label={`Total ${dataToShow.tokenName} Burned`}
+                      data={formatWithCommas(dataToShow.TotalTokensBurn)}
+                    />
+                    {/* <DoubleValues
+                      label1={`Total ${dataToShow.tokenName} Burned`}
+                      firstData={formatWithCommas(dataToShow.TotalTokensBurn)}
+                      label2={"Total Bounty"}
+                      SecondData={formatWithCommas(dataToShow.TotalBounty)}
+                    /> */}
+
                     <ReanounceContractsComponent
                       label={"Contract Renounced"}
                       condition1={dataToShow.renounceSmartContract}
