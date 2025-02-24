@@ -301,8 +301,8 @@ const InfoCards = () => {
                             Mint Additional DAV Tokens
                           </h4>
                           <p className="popup-para">
-                            You need to mint additional DAV tokens to claim your
-                            reward.
+                            You need to mint additional DAV tokens to claim
+                            extra reward
                           </p>
                           <button
                             onClick={() =>

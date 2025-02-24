@@ -19,12 +19,12 @@ const DataTable = () => {
     contracts,
     Distributed,
     DavRequiredAmount,
-    
+
     DavBalanceRequire,
     swappingStates,
     buttonTextStates,
   } = useDAVToken();
-  const { AuctionRunning,auctionDetails } = useGeneralAuctionFunctions();
+  const { AuctionRunning, auctionDetails } = useGeneralAuctionFunctions();
 
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
@@ -122,35 +122,35 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-                .filter(
-                  ({
+              .filter(
+                ({
+                  userHasSwapped,
+                  name,
+                  userHasReverse,
+                  isReversing,
+                  AuctionStatus,
+                }) => {
+                  console.log(`Filter Conditions:${name}`, {
                     userHasSwapped,
-                    name,
                     userHasReverse,
                     isReversing,
                     AuctionStatus,
-                  }) => {
-                    console.log(`Filter Conditions:${name}`, {
-                      userHasSwapped,
-                      userHasReverse,
-                      isReversing,
-                      AuctionStatus,
-                      dbCheck: db >= DavRequiredAmount,
-                    });
+                    dbCheck: db >= DavRequiredAmount,
+                  });
 
-                    if (AuctionStatus == "false" && db >= DavRequiredAmount) {
-                      if (isReversing == "true" && !userHasReverse) {
-                        return true;
-                      } else if (userHasSwapped && isReversing == "false") {
-                        return false;
-                      }
-                    } else if (AuctionStatus == "true" && db >= 1) {
-                      if (!userHasSwapped) {
-                        return true;
-                      }
+                  if (AuctionStatus == "false" && db >= DavRequiredAmount) {
+                    if (isReversing == "true" && !userHasReverse) {
+                      return true;
+                    } else if (userHasSwapped && isReversing == "false") {
+                      return false;
+                    }
+                  } else if (AuctionStatus == "true" && db >= 1) {
+                    if (!userHasSwapped) {
+                      return true;
                     }
                   }
-                )
+                }
+              )
               .map(
                 (
                   {
@@ -286,8 +286,8 @@ const DataTable = () => {
                             Mint Additional DAV Tokens
                           </h4>
                           <p className="popup-para">
-                            You need to mint additional DAV tokens to claim your
-                            reward.
+                            You need to mint additional DAV tokens to claim
+                            extra reward.
                           </p>
                           <button
                             onClick={() =>
