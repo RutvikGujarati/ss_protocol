@@ -2,7 +2,7 @@ import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import { useDAVToken } from "../Context/DavTokenContext";
-import {  useTokens } from "../data/BurntokenData";
+import { useTokens } from "../data/BurntokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { formatWithCommas } from "./DetailsInfo";
 import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions";
@@ -99,12 +99,12 @@ const BurnDataTable = () => {
         <div className="table-responsive">
           <div className="announcement text-center">
             <div className="">
-              10 DAV TOKENS REQUIRED TO BURN LISTED TOKENS AND RECEIVE THE
-              BOUNTY.
+              25 DAV TOKENS REQUIRED TO PARTICIPATE IN THE STATE LP. SEE
+              WHITEPAPER FOR MORE INFORMATION.
             </div>
           </div>
           <table className="table table-dark mt-3">
-            <thead>
+            {/* <thead>
               <tr className="align-item-center">
                 <th>#</th>
                 <th></th>
@@ -114,7 +114,7 @@ const BurnDataTable = () => {
                 <th>Burn Amount</th>
                 <th>Action</th>
               </tr>
-            </thead>
+            </thead> */}
             {/* <tbody>
               {tokens
                 .filter(
