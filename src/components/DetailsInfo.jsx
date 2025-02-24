@@ -653,10 +653,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                             label={"Time Left In auction"}
                             data={dataToShow.AuctionTimeRunning}
                           />
-                          <SmallTokenDetails
+                          {/* <SmallTokenDetails
                             label={"Time Left In burn Cycle"}
                             data={dataToShow.BurnTimeLeft}
-                          />
+                          /> */}
                           <SmallTokenDetails
                             label={"Next Start Time of the Auction"}
                             data={dataToShow.AuctionNextTime.nextAuctionStart}

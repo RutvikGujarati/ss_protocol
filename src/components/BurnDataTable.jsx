@@ -115,7 +115,7 @@ const BurnDataTable = () => {
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody>
+            {/* <tbody>
               {tokens
                 .filter(
                   ({ BurnOccured, burnCycle }) =>
@@ -171,7 +171,7 @@ const BurnDataTable = () => {
                     </tr>
                   )
                 )}
-            </tbody>
+            </tbody> */}
           </table>
         </div>
       </div>

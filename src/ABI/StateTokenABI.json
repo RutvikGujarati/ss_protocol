@@ -43,8 +43,8 @@
 				"type": "uint256"
 			}
 		],
-		"name": "ERC20InsufficientAllowance",
-		"type": "error"
+		"type": "error",
+		"name": "ERC20InsufficientAllowance"
 	},
 	{
 		"inputs": [
@@ -64,8 +64,8 @@
 				"type": "uint256"
 			}
 		],
-		"name": "ERC20InsufficientBalance",
-		"type": "error"
+		"type": "error",
+		"name": "ERC20InsufficientBalance"
 	},
 	{
 		"inputs": [
@@ -75,8 +75,8 @@
 				"type": "address"
 			}
 		],
-		"name": "ERC20InvalidApprover",
-		"type": "error"
+		"type": "error",
+		"name": "ERC20InvalidApprover"
 	},
 	{
 		"inputs": [
@@ -86,8 +86,8 @@
 				"type": "address"
 			}
 		],
-		"name": "ERC20InvalidReceiver",
-		"type": "error"
+		"type": "error",
+		"name": "ERC20InvalidReceiver"
 	},
 	{
 		"inputs": [
@@ -97,8 +97,8 @@
 				"type": "address"
 			}
 		],
-		"name": "ERC20InvalidSender",
-		"type": "error"
+		"type": "error",
+		"name": "ERC20InvalidSender"
 	},
 	{
 		"inputs": [
@@ -108,8 +108,8 @@
 				"type": "address"
 			}
 		],
-		"name": "ERC20InvalidSpender",
-		"type": "error"
+		"type": "error",
+		"name": "ERC20InvalidSpender"
 	},
 	{
 		"inputs": [
@@ -119,8 +119,8 @@
 				"type": "address"
 			}
 		],
-		"name": "OwnableInvalidOwner",
-		"type": "error"
+		"type": "error",
+		"name": "OwnableInvalidOwner"
 	},
 	{
 		"inputs": [
@@ -130,13 +130,13 @@
 				"type": "address"
 			}
 		],
-		"name": "OwnableUnauthorizedAccount",
-		"type": "error"
+		"type": "error",
+		"name": "OwnableUnauthorizedAccount"
 	},
 	{
 		"inputs": [],
-		"name": "ReentrancyGuardReentrantCall",
-		"type": "error"
+		"type": "error",
+		"name": "ReentrancyGuardReentrantCall"
 	},
 	{
 		"inputs": [
@@ -146,99 +146,101 @@
 				"type": "address"
 			}
 		],
-		"name": "SafeERC20FailedOperation",
-		"type": "error"
+		"type": "error",
+		"name": "SafeERC20FailedOperation"
 	},
 	{
-		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": true,
 				"internalType": "address",
 				"name": "owner",
-				"type": "address"
+				"type": "address",
+				"indexed": true
 			},
 			{
-				"indexed": true,
 				"internalType": "address",
 				"name": "spender",
-				"type": "address"
+				"type": "address",
+				"indexed": true
 			},
 			{
-				"indexed": false,
 				"internalType": "uint256",
 				"name": "value",
-				"type": "uint256"
+				"type": "uint256",
+				"indexed": false
 			}
 		],
+		"type": "event",
 		"name": "Approval",
-		"type": "event"
+		"anonymous": false
 	},
 	{
-		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": true,
 				"internalType": "address",
 				"name": "previousOwner",
-				"type": "address"
+				"type": "address",
+				"indexed": true
 			},
 			{
-				"indexed": true,
 				"internalType": "address",
 				"name": "newOwner",
-				"type": "address"
+				"type": "address",
+				"indexed": true
 			}
 		],
+		"type": "event",
 		"name": "OwnershipTransferred",
-		"type": "event"
+		"anonymous": false
 	},
 	{
-		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": true,
 				"internalType": "address",
 				"name": "user",
-				"type": "address"
+				"type": "address",
+				"indexed": true
 			},
 			{
-				"indexed": false,
 				"internalType": "uint256",
 				"name": "amount",
-				"type": "uint256"
+				"type": "uint256",
+				"indexed": false
 			}
 		],
+		"type": "event",
 		"name": "RewardDistributed",
-		"type": "event"
+		"anonymous": false
 	},
 	{
-		"anonymous": false,
 		"inputs": [
 			{
-				"indexed": true,
 				"internalType": "address",
 				"name": "from",
-				"type": "address"
+				"type": "address",
+				"indexed": true
 			},
 			{
-				"indexed": true,
 				"internalType": "address",
 				"name": "to",
-				"type": "address"
+				"type": "address",
+				"indexed": true
 			},
 			{
-				"indexed": false,
 				"internalType": "uint256",
 				"name": "value",
-				"type": "uint256"
+				"type": "uint256",
+				"indexed": false
 			}
 		],
+		"type": "event",
 		"name": "Transfer",
-		"type": "event"
+		"anonymous": false
 	},
 	{
 		"inputs": [],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "DECAY_INTERVAL",
 		"outputs": [
 			{
@@ -246,12 +248,12 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "DECAY_STEP",
 		"outputs": [
 			{
@@ -259,12 +261,12 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "MAX_SUPPLY",
 		"outputs": [
 			{
@@ -272,12 +274,12 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "REWARD_DECAY_START",
 		"outputs": [
 			{
@@ -285,9 +287,7 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -302,6 +302,8 @@
 				"type": "address"
 			}
 		],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "allowance",
 		"outputs": [
 			{
@@ -309,9 +311,7 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -326,6 +326,8 @@
 				"type": "uint256"
 			}
 		],
+		"stateMutability": "nonpayable",
+		"type": "function",
 		"name": "approve",
 		"outputs": [
 			{
@@ -333,9 +335,7 @@
 				"name": "",
 				"type": "bool"
 			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -345,6 +345,8 @@
 				"type": "address"
 			}
 		],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "balanceOf",
 		"outputs": [
 			{
@@ -352,9 +354,7 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -364,6 +364,8 @@
 				"type": "uint256"
 			}
 		],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "calculateBaseReward",
 		"outputs": [
 			{
@@ -371,9 +373,7 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -388,6 +388,8 @@
 				"type": "uint256"
 			}
 		],
+		"stateMutability": "pure",
+		"type": "function",
 		"name": "calculateDecayedReward",
 		"outputs": [
 			{
@@ -395,9 +397,7 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "pure",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -407,10 +407,9 @@
 				"type": "address"
 			}
 		],
-		"name": "changeDavToken",
-		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "function",
+		"name": "changeDavToken"
 	},
 	{
 		"inputs": [
@@ -420,10 +419,9 @@
 				"type": "uint256"
 			}
 		],
-		"name": "changeInterval",
-		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "function",
+		"name": "changeInterval"
 	},
 	{
 		"inputs": [
@@ -433,23 +431,9 @@
 				"type": "uint256"
 			}
 		],
-		"name": "changeMAXSupply",
-		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "newTimeStamp",
-				"type": "uint256"
-			}
-		],
-		"name": "changeTimeStamp",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "function",
+		"name": "changeMAXSupply"
 	},
 	{
 		"inputs": [
@@ -459,6 +443,8 @@
 				"type": "address"
 			}
 		],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "cumulativeMintableHoldings",
 		"outputs": [
 			{
@@ -466,12 +452,12 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "davToken",
 		"outputs": [
 			{
@@ -479,12 +465,12 @@
 				"name": "",
 				"type": "address"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "decimals",
 		"outputs": [
 			{
@@ -492,9 +478,7 @@
 				"name": "",
 				"type": "uint8"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -504,13 +488,14 @@
 				"type": "address"
 			}
 		],
-		"name": "distributeReward",
-		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "function",
+		"name": "distributeReward"
 	},
 	{
 		"inputs": [],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "getCurrentDecayPercentage",
 		"outputs": [
 			{
@@ -518,9 +503,7 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -530,6 +513,8 @@
 				"type": "uint256"
 			}
 		],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "getDecayPercentageAtTime",
 		"outputs": [
 			{
@@ -537,12 +522,12 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "governanceAddress",
 		"outputs": [
 			{
@@ -550,9 +535,7 @@
 				"name": "",
 				"type": "address"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -562,6 +545,8 @@
 				"type": "address"
 			}
 		],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "isAuthorized",
 		"outputs": [
 			{
@@ -569,9 +554,7 @@
 				"name": "",
 				"type": "bool"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -581,6 +564,8 @@
 				"type": "address"
 			}
 		],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "lastDavHolding",
 		"outputs": [
 			{
@@ -588,9 +573,7 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -600,6 +583,8 @@
 				"type": "address"
 			}
 		],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "lastDavMintTime",
 		"outputs": [
 			{
@@ -607,9 +592,7 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -619,10 +602,9 @@
 				"type": "uint256"
 			}
 		],
-		"name": "mintAdditionalTOkens",
-		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "function",
+		"name": "mintAdditionalTOkens"
 	},
 	{
 		"inputs": [
@@ -632,6 +614,8 @@
 				"type": "address"
 			}
 		],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "mintDecayPercentage",
 		"outputs": [
 			{
@@ -639,19 +623,18 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [],
-		"name": "mintReward",
-		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "function",
+		"name": "mintReward"
 	},
 	{
 		"inputs": [],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "multiplier",
 		"outputs": [
 			{
@@ -659,12 +642,12 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "name",
 		"outputs": [
 			{
@@ -672,12 +655,12 @@
 				"name": "",
 				"type": "string"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "owner",
 		"outputs": [
 			{
@@ -685,19 +668,18 @@
 				"name": "",
 				"type": "address"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [],
-		"name": "renounceOwnership",
-		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "function",
+		"name": "renounceOwnership"
 	},
 	{
 		"inputs": [],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "symbol",
 		"outputs": [
 			{
@@ -705,12 +687,12 @@
 				"name": "",
 				"type": "string"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "totalSupply",
 		"outputs": [
 			{
@@ -718,9 +700,7 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -735,6 +715,8 @@
 				"type": "uint256"
 			}
 		],
+		"stateMutability": "nonpayable",
+		"type": "function",
 		"name": "transfer",
 		"outputs": [
 			{
@@ -742,9 +724,7 @@
 				"name": "",
 				"type": "bool"
 			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -764,6 +744,8 @@
 				"type": "uint256"
 			}
 		],
+		"stateMutability": "nonpayable",
+		"type": "function",
 		"name": "transferFrom",
 		"outputs": [
 			{
@@ -771,9 +753,7 @@
 				"name": "",
 				"type": "bool"
 			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -783,10 +763,9 @@
 				"type": "address"
 			}
 		],
-		"name": "transferOwnership",
-		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "function",
+		"name": "transferOwnership"
 	},
 	{
 		"inputs": [
@@ -796,10 +775,21 @@
 				"type": "uint256"
 			}
 		],
-		"name": "transferToken",
-		"outputs": [],
 		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "function",
+		"name": "transferToken"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newGov",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function",
+		"name": "updateGovernance"
 	},
 	{
 		"inputs": [
@@ -809,6 +799,8 @@
 				"type": "address"
 			}
 		],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "userBaseReward",
 		"outputs": [
 			{
@@ -816,9 +808,7 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -828,6 +818,8 @@
 				"type": "address"
 			}
 		],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "userRewardAmount",
 		"outputs": [
 			{
@@ -835,9 +827,7 @@
 				"name": "",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	},
 	{
 		"inputs": [
@@ -847,6 +837,8 @@
 				"type": "address"
 			}
 		],
+		"stateMutability": "view",
+		"type": "function",
 		"name": "viewRewardDetails",
 		"outputs": [
 			{
@@ -869,8 +861,6 @@
 				"name": "decayAtMint",
 				"type": "uint256"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function"
+		]
 	}
 ]

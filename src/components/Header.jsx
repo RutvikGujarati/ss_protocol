@@ -28,7 +28,8 @@ const Header = () => {
           <NavLink className="navbar-brand text-light pb-0 mb-0" to="/">
             <h5 className="uppercase fs-2 fw-bolder">THE STATE</h5>
             <p className="detailAmount mb-0" style={{ fontSize: "0.8rem" }}>
-              Ratio Swapping DEX <br /> by System State Protocol
+              Tokenized Micro-Economy
+              <br /> by System State Protocol
             </p>
           </NavLink>
 
@@ -54,6 +55,7 @@ const Header = () => {
                   {/* <span className="active-dot"></span> */}
                 </NavLink>
               </li>
+
               <li className="nav-item mx-2">
                 <NavLink
                   className={({ isActive }) =>
@@ -63,7 +65,7 @@ const Header = () => {
                   }
                   to="/burn"
                 >
-                  Burn
+                  State LP
                 </NavLink>
               </li>
               <li className="nav-item mx-2">

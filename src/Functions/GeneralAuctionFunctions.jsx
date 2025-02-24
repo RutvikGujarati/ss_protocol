@@ -62,17 +62,17 @@ export const GeneralAuctionProvider = ({ children }) => {
         console.error("Error in total burn/bounty fetching:", error);
       }
 
-      try {
-        // Run burn cycle-related calls in parallel
-        const burnPromises = [
-          BurningOccurred(),
-          BurnCycleActive(),
-          BurnTimingLeft(),
-        ];
-        await Promise.all(burnPromises);
-      } catch (error) {
-        console.error("Error in burn cycle fetching:", error);
-      }
+    //   try {
+    //     // Run burn cycle-related calls in parallel
+    //     const burnPromises = [
+    //       BurningOccurred(),
+    //       BurnCycleActive(),
+    //       BurnTimingLeft(),
+    //     ];
+    //     await Promise.all(burnPromises);
+    //   } catch (error) {
+    //     console.error("Error in burn cycle fetching:", error);
+    //   }
     };
 
     if (AllContracts) {
