@@ -298,7 +298,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             {dataToShow.tokenName == "STATE" && (
               <>
                 <SmallTokenDetails
-                  label={"STATE tokens burn"}
+                  label={"STATE Tokens Burned"}
                   data={formatWithCommas(StateBurnBalance)}
                 />
                 <SmallTokenDetails
