@@ -20,9 +20,6 @@ export const GeneralAuctionProvider = ({ children }) => {
   const [auctionTimeLeft, setAuctionTimeLeft] = useState({});
 
   const [auctionDetails, setAuctionDetails] = useState({});
-  const [BurnOccuredForToken, setBurnOccuredForToken] = useState({});
-  const [BurnCycleACtive, setBurnCycleActive] = useState({});
-  const [BurnTimeLeft, setBurnTimeLeft] = useState({});
   const [TotalTokensBurned, setTotalTokenBurned] = useState({});
   const [TotalBounty, setTotalTokenBounty] = useState({});
 
@@ -62,17 +59,17 @@ export const GeneralAuctionProvider = ({ children }) => {
         console.error("Error in total burn/bounty fetching:", error);
       }
 
-    //   try {
-    //     // Run burn cycle-related calls in parallel
-    //     const burnPromises = [
-    //       BurningOccurred(),
-    //       BurnCycleActive(),
-    //       BurnTimingLeft(),
-    //     ];
-    //     await Promise.all(burnPromises);
-    //   } catch (error) {
-    //     console.error("Error in burn cycle fetching:", error);
-    //   }
+      //   try {
+      //     // Run burn cycle-related calls in parallel
+      //     const burnPromises = [
+      //       BurningOccurred(),
+      //       BurnCycleActive(),
+      //       BurnTimingLeft(),
+      //     ];
+      //     await Promise.all(burnPromises);
+      //   } catch (error) {
+      //     console.error("Error in burn cycle fetching:", error);
+      //   }
     };
 
     if (AllContracts) {
@@ -173,7 +170,6 @@ export const GeneralAuctionProvider = ({ children }) => {
       const contracts = [
         { name: "Fluxin", contract: AllContracts.RatioContract },
         { name: "Xerion", contract: AllContracts.XerionRatioContract },
-        // Future contracts can be added here
       ];
 
       const auctionTimes = {};
@@ -188,73 +184,9 @@ export const GeneralAuctionProvider = ({ children }) => {
       console.error("Error fetching auction time:", e);
     }
   };
+ 
 
   /*----------------------------------- Burn Functions------------------------------------- */
-  const BurningOccurred = async () => {
-    try {
-      const results = await Promise.all(
-        contracts.map(async ({ name, contract }) => {
-          const BurnOccurred = await contract.getBurnOccured();
-
-          return { name, BurnOccurred: BurnOccurred.toString() };
-        })
-      );
-
-      const newStates = results.reduce((acc, { name, BurnOccurred }) => {
-        acc[name] = BurnOccurred;
-        return acc;
-      }, {});
-      console.log("state of burn from ga", newStates);
-      setBurnOccuredForToken(newStates); // Update state with the combined object
-      console.log("Updated burn occurrences:", newStates);
-    } catch (e) {
-      console.error("Error fetching burn status:", e);
-    }
-  };
-
-  const BurnCycleActive = async () => {
-    try {
-      const results = await Promise.all(
-        contracts.map(async ({ name, contract }) => {
-          const BurnOccurred = await contract.isBurnCycleActive();
-
-          return { name, BurnOccurred: BurnOccurred.toString() };
-        })
-      );
-
-      const newStates = results.reduce((acc, { name, BurnOccurred }) => {
-        acc[name] = BurnOccurred;
-        return acc;
-      }, {});
-      console.log("state of burn", newStates);
-      setBurnCycleActive(newStates); // Update state with the combined object
-      console.log("Updated burn occurrences:", newStates);
-    } catch (e) {
-      console.error("Error fetching burn status:", e);
-    }
-  };
-
-  const BurnTimingLeft = async () => {
-    try {
-      const results = await Promise.all(
-        contracts.map(async ({ name, contract }) => {
-          const BurnOccurred = await contract.getTimeLeftInBurnCycle();
-
-          return { name, BurnOccurred: parseFloat(BurnOccurred) };
-        })
-      );
-
-      const newStates = results.reduce((acc, { name, BurnOccurred }) => {
-        acc[name] = BurnOccurred;
-        return acc;
-      }, {});
-      console.log("state of burn", newStates);
-      setBurnTimeLeft(newStates); // Update state with the combined object
-      console.log("Updated burn occurrences:", newStates);
-    } catch (e) {
-      console.error("Error fetching burn status:", e);
-    }
-  };
 
   const TotalTokensBurn = async () => {
     try {
@@ -313,9 +245,6 @@ export const GeneralAuctionProvider = ({ children }) => {
         AuctionRunningLocalString,
         AuctionRunning,
         auctionDetails,
-        BurnOccuredForToken,
-        BurnCycleACtive,
-        BurnTimeLeft,
         TotalBounty,
         TotalTokensBurned,
         auctionTimeLeft,

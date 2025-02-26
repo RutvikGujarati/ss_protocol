@@ -5,7 +5,7 @@ import {
 	Fluxin,
 	Ratio_TOKEN_ADDRESS,
 	STATE_TOKEN_ADDRESS,
-	Xerion,
+
 } from "../ContractAddresses";
 import { PriceContext } from "../api/StatePrice";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
@@ -19,17 +19,17 @@ const davShortened = shortenAddress(DAV_TOKEN_ADDRESS);
 const FluxinShortened = shortenAddress(Fluxin);
 const FluxinSwapShortened = shortenAddress(Ratio_TOKEN_ADDRESS);
 const stateShortened = shortenAddress(STATE_TOKEN_ADDRESS);
-const XerionShortened = shortenAddress(Xerion);
 export const TokensDetails = () => {
-	const { FluxinRatioPrice, XerionRatioPrice, stateUsdPrice, FluxinUsdPrice, XerionUsdPrice } =
+	const { stateUsdPrice, FluxinUsdPrice } =
 		useContext(PriceContext);
 	const { simpleSupplies, mintAdditionalTOkens } = useGeneralTokens()
-	const { AuctionRunningLocalString, auctionDetails, BurnTimeLeft, TotalTokensBurned, TotalBounty, auctionTimeLeft } = useGeneralAuctionFunctions()
+	const { AuctionRunningLocalString, auctionDetails, TotalTokensBurned, auctionTimeLeft } = useGeneralAuctionFunctions()
+	const { CurrentRatioPrice } = useGeneralTokens();
 
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, PercentageFluxin, balances, isReversed, RatioTargetsofTokens, PercentageXerion, ReanounceContract, SetAUctionDuration, WithdrawFluxin, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, ReanounceXerionContract, WithdrawXerion, PercentageOfState, LPStateTransferred, RenounceState,RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate } = useDAVToken();
+	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, PercentageFluxin, balances, isReversed, RatioTargetsofTokens, ReanounceContract, SetAUctionDuration, WithdrawFluxin, ReanounceFluxinContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, PercentageOfState, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate } = useDAVToken();
 	console.log("isReversing", isReversed.Fluxin)
 	return [
 		{
@@ -68,15 +68,13 @@ export const TokensDetails = () => {
 			WillStart: ReverseForCycle.Fluxin,
 			WillStartForNext: ReverseForNextCycle.Fluxin,
 			Balance: balances.fluxinBalance,
-			BurnTimeLeft: BurnTimeLeft.Fluxin,
 			TotalTokensBurn: TotalTokensBurned.Fluxin,
-			TotalBounty: TotalBounty.Fluxin,
 			RatioBalance: balances.ratioFluxinBalance,
 			Duration: auctionDetails["Fluxin"],
 			interval: auctionDetails["Fluxin"],
 			AuctionRunning: AuctionRunningLocalString.Fluxin.toString(),
 			pair: "Fluxin/pSTATE",
-			Ratio: FluxinRatioPrice,
+			Ratio: CurrentRatioPrice.Fluxin,
 			Price: FluxinUsdPrice,
 			SetDuration: () => SetAUctionDuration(),
 			AuctionTimeRunning: auctionTimeLeft.Fluxin,
@@ -92,7 +90,7 @@ export const TokensDetails = () => {
 				SetDuration: (value) => SetAUctionDuration(value, "fluxinRatio"),
 				SetInterval: (value) => SetAUctionInterval(value, "fluxinRatio"),
 				AddTokenToContract: () =>
-					AddTokensToContract(Fluxin, STATE_TOKEN_ADDRESS, FluxinRatioPrice),
+					AddTokensToContract(Fluxin, STATE_TOKEN_ADDRESS, CurrentRatioPrice.Fluxin),
 				setRatio: (value) => setRatioTarget(value, "fluxinRatio"),
 				setBurn: (value) => setBurnRate(value, "fluxinRatio"),
 				setReverseEnabled: () => setReverseEnable("fluxinRatio"),

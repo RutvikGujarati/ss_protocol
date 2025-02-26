@@ -98,10 +98,7 @@ const BurnDataTable = () => {
       <div className="container mt-4 datatablemarginbottom">
         <div className="table-responsive">
           <div className="announcement text-center">
-            <div className="">
-              25 DAV TOKENS REQUIRED TO PARTICIPATE IN THE STATE LP. SEE
-              WHITEPAPER FOR MORE INFORMATION.
-            </div>
+            <div className="">SEE WHITEPAPER FOR MORE INFORMATION.</div>
           </div>
           <table className="table table-dark mt-3">
             {/* <thead>

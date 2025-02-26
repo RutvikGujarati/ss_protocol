@@ -10,7 +10,21 @@ export const GeneralTokenProvider = ({ children }) => {
   const [supplies, setSupplies] = useState({});
   const [simpleSupplies, setSimpleSupplies] = useState({});
   const [initialized, setInitialized] = useState(false);
-
+  const [CurrentRatioPrice, setCurrentRatio] = useState({});
+  const [Distributed, setViewDistributed] = useState({
+    state: "0.0",
+    Fluxin: "0.0",
+    Xerion: "0.0",
+    xerion2: "0.0",
+    xerion3: "0.0",
+  });
+  const contracts = {
+    state: AllContracts.stateContract,
+    dav: AllContracts.davContract,
+    Fluxin: AllContracts.FluxinContract,
+    FluxinRatio: AllContracts.RatioContract,
+    Xerion: AllContracts.XerionContract,
+  };
   const fetchTotalSupplies = async () => {
     try {
       const contractEntries = Object.entries(AllContracts);
@@ -93,7 +107,48 @@ export const GeneralTokenProvider = ({ children }) => {
       throw e;
     }
   };
+  const ViewDistributedTokens = async () => {
+    try {
+      const amounts = {};
 
+      // Loop through each contract and fetch the userRewardAmount
+      for (const [key, contract] of Object.entries(contracts)) {
+        try {
+          // Check if the contract object is valid
+          if (!contract) {
+            console.warn(`Contract for key "${key}" is undefined or null.`);
+            continue;
+          }
+
+          // Log the contract details for debugging
+          console.log(`Fetching userRewardAmount for contract key: ${key}`);
+          console.log("Contract instance:", contract);
+
+          // Make the contract call
+          const rawAmount = await contract.userRewardAmount(account);
+          const formattedAmount = ethers.formatUnits(rawAmount, 18);
+
+          // Log the raw and formatted amounts
+          console.log(`Raw amount for key "${key}":`, formattedAmount);
+          amounts[key] = formattedAmount;
+        } catch (contractError) {
+          console.error(
+            `Error fetching userRewardAmount for key "${key}":`,
+            contractError
+          );
+          amounts[key] = "0.0"; // Default to 0.0 if an error occurs
+        }
+      }
+
+      // Update the state with the fetched amounts
+      setViewDistributed(amounts);
+
+      // Debugging output
+      console.log("Final Distributed amounts object:", amounts);
+    } catch (e) {
+      console.error("Error viewing distributed tokens:", e);
+    }
+  };
   const mintAdditionalTOkens = async (contractType, amount) => {
     try {
       const amountInWei = ethers.parseUnits(amount.toString(), 18);
@@ -118,9 +173,38 @@ export const GeneralTokenProvider = ({ children }) => {
     }
   };
 
+  const CurrentRatioPriceGetting = async () => {
+    try {
+      const contracts = [
+        { name: "Fluxin", contract: AllContracts.RatioContract },
+        // { name: "Xerion", contract: AllContracts.XerionRatioContract },
+      ];
+
+      const currentRP = {};
+
+      for (const { name, contract } of contracts) {
+        if (!contract) {
+          console.error(`Contract for ${name} is undefined`);
+          continue;
+        }
+
+        const rawValue = await contract.getRatioPrice();
+        const ethValue = Number(rawValue) / 1e18; // Convert wei to ETH
+        currentRP[name] = ethValue.toFixed(0); // Apply toFixed(0) correctly
+      }
+
+      setCurrentRatio(currentRP);
+      console.log("Ratio of token in ETH:", currentRP.Fluxin);
+    } catch (e) {
+      console.error("Error fetching ratio:", e);
+    }
+  };
+
   useEffect(() => {
     if (AllContracts && Object.keys(AllContracts).length > 0 && !initialized) {
       fetchTotalSupplies();
+      ViewDistributedTokens();
+      CurrentRatioPriceGetting();
     }
   }, [AllContracts, initialized]);
 
@@ -133,6 +217,8 @@ export const GeneralTokenProvider = ({ children }) => {
         ClaimTokens,
         CheckMintBalance,
         mintAdditionalTOkens,
+        Distributed,
+        CurrentRatioPrice,
       }}
     >
       {children}

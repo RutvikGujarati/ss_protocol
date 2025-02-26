@@ -1,17 +1,7 @@
 import { ethers } from "ethers";
 import { createContext, useEffect, useState } from "react";
-import {
-  DAV_TOKEN_ADDRESS,
-  Fluxin,
-  Ratio_TOKEN_ADDRESS,
-  STATE_TOKEN_ADDRESS,
-  Xerion,
-  XerionRatioAddress,
-} from "../ContractAddresses";
-import DAVTokenABI from "../ABI/DavTokenABI.json";
-import StateABI from "../ABI/StateTokenABI.json";
-import RatioABI from "../ABI/RatioABI.json";
 import PropTypes from "prop-types";
+import { contractConfigs } from "../Constants/ContractConfig";
 
 export const ContractContext = createContext(null);
 
@@ -36,31 +26,17 @@ export const ContractProvider = ({ children }) => {
         setSigner(newSigner);
         setAccount(accounts[0]);
 
-        setContracts({
-          davContract: new ethers.Contract(
-            DAV_TOKEN_ADDRESS,
-            DAVTokenABI,
-            newSigner
-          ),
-          stateContract: new ethers.Contract(
-            STATE_TOKEN_ADDRESS,
-            StateABI,
-            newSigner
-          ),
-          FluxinContract: new ethers.Contract(Fluxin, StateABI, newSigner),
-          XerionContract: new ethers.Contract(Xerion, StateABI, newSigner),
-          RatioContract: new ethers.Contract(
-            Ratio_TOKEN_ADDRESS,
-            RatioABI,
-            newSigner
-          ),
-          XerionRatioContract: new ethers.Contract(
-            XerionRatioAddress,
-            RatioABI,
-            newSigner
-          ),
-        });
-        console.log("all contracts", AllContracts);
+        // Dynamically create contract instances
+        const contractInstances = Object.fromEntries(
+          Object.entries(contractConfigs).map(([key, { address, abi }]) => [
+            key,
+            new ethers.Contract(address, abi, newSigner),
+          ])
+        );
+
+        setContracts(contractInstances);
+
+        console.log("All contracts initialized:", contractInstances);
       } catch (error) {
         console.error("Error initializing contract:", error);
       } finally {
@@ -99,7 +75,7 @@ export const ContractProvider = ({ children }) => {
     Fluxin: AllContracts.FluxinContract,
     Xerion: AllContracts.XerionContract,
   };
-console.log("obj of contracts",contracts);
+  console.log("obj of contracts", contracts);
   return (
     <ContractContext.Provider
       value={{ loading, provider, signer, account, AllContracts, contracts }}

@@ -1,31 +1,29 @@
 import { useContext } from 'react';
-import XerionLogo from "../assets/XerionLogo.png";
 import FluxinLogo from "../assets/FluxinLogo.png";
-import { Fluxin, Xerion } from "../ContractAddresses";
+import { Fluxin } from "../ContractAddresses";
 import { useDAVToken } from "../Context/DavTokenContext";
 import { PriceContext } from "../api/StatePrice";
 import { useGeneralAuctionFunctions } from '../Functions/GeneralAuctionFunctions';
+import { useGeneralTokens } from '../Functions/GeneralTokensFunctions';
 
 // Custom hook to get auction tokens data
 export const useAuctionTokens = () => {
 	const {
-		XerionUsdPrice,
-		XerionRatioPrice,
-		FluxinRatioPrice,
+
 		FluxinUsdPrice
 	} = useContext(PriceContext);
 	const { AuctionRunning } = useGeneralAuctionFunctions();
+	const { CurrentRatioPrice } = useGeneralTokens();
+	const { Distributed} = useGeneralTokens();
 
 	const {
 		SwapTokens,
 		isReversed,
 		RatioTargetsofTokens,
 		outAmounts,
-		Distributed,
 		userHashSwapped,
 		userHasReverseSwapped,
 		handleAddFluxin,
-		handleAddXerion,
 		OnePBalance,
 	} = useDAVToken();
 	console.log("is running from obj", isReversed.Fluxin)
@@ -39,8 +37,8 @@ export const useAuctionTokens = () => {
 			ContractName: "Fluxin",
 			image: FluxinLogo,
 			ratio: `1:${RatioTargetsofTokens?.["Fluxin"] || 0}`,
-			currentRatio: `1:${FluxinRatioPrice || 0}`,
-			currentTokenRatio: FluxinRatioPrice,
+			currentRatio: `1:${CurrentRatioPrice.Fluxin || 0}`,
+			currentTokenRatio: CurrentRatioPrice.Fluxin,
 			RatioTargetToken: RatioTargetsofTokens?.["Fluxin"] || 0,
 			Price: FluxinUsdPrice,
 			isReversing: isReversed?.Fluxin.toString(),
@@ -53,8 +51,8 @@ export const useAuctionTokens = () => {
 			token: Fluxin,
 			handleAddToken: handleAddFluxin,
 			inputTokenAmount: `${OnePBalance.Fluxin || 0} Orxa`,
-			SwapT: () => SwapTokens("Orxa", "Fluxin"),
-			ratioPrice: FluxinRatioPrice,
+		SwapT: () => SwapTokens("Orxa", "Fluxin"),
+			ratioPrice: CurrentRatioPrice.Fluxin,
 			outputToken: `${outAmounts?.Fluxin || 0} State`,
 		},
 		// {

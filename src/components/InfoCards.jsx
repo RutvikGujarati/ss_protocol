@@ -22,7 +22,7 @@ const InfoCards = () => {
     davPercentage,
     claimAmount,
   } = useDAvContract();
-  const { ClaimTokens, CheckMintBalance } = useGeneralTokens();
+  const { ClaimTokens, CheckMintBalance, Distributed } = useGeneralTokens();
 
   const {
     handleAddTokenState,
@@ -30,7 +30,6 @@ const InfoCards = () => {
     LoadingState,
     CalculationOfCost,
     TotalCost,
-    Distributed,
     TotalStateHoldsInUS,
     contracts,
     StateBurnBalance,

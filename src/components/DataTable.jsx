@@ -13,13 +13,11 @@ import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions
 
 const DataTable = () => {
   const { DavBalance } = useDAvContract();
-  const { ClaimTokens, CheckMintBalance } = useGeneralTokens();
+  const { ClaimTokens, CheckMintBalance, Distributed } = useGeneralTokens();
 
   const {
     contracts,
-    Distributed,
     DavRequiredAmount,
-
     DavBalanceRequire,
     swappingStates,
     buttonTextStates,
@@ -166,8 +164,6 @@ const DataTable = () => {
                     Price,
                     isReversing,
                     ReverseName,
-                    // currentTokenRatio,
-                    // RatioTargetToken,
                     onChart,
                     distributedAmount,
                     inputTokenAmount,
@@ -252,9 +248,14 @@ const DataTable = () => {
                           <>
                             {isReversing == "true" ? (
                               <>
-                                <div className="tableClaim">
+                                <div className="tableClaim hover-container">
+                                  {outputToken <= "1" && (
+                                    <div className="hover-box">
+                                      {`not enough State Token available in your account`}
+                                    </div>
+                                  )}
                                   {formatWithCommas(outputToken)}
-                                </div>{" "}
+                                </div>
                                 <div className="tableClaim">
                                   {formatWithCommas(inputTokenAmount)}
                                 </div>
@@ -310,7 +311,7 @@ const DataTable = () => {
                             {isReversing == "true" && (
                               <button
                                 onClick={() => SwapT()}
-                                disabled={swappingStates[id]}
+                                disabled={swappingStates[id] || outputToken <= "1"}
                                 className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
                               >
                                 {swappingStates[id]
@@ -322,7 +323,9 @@ const DataTable = () => {
                             {isReversing == "false" && (
                               <button
                                 onClick={() => SwapT()}
-                                disabled={swappingStates[id]}
+                                disabled={
+                                  swappingStates[id] || inputTokenAmount <= "1"
+                                }
                                 className={`btn btn-sm swap-btn  btn-primary btn-sm swap-btn gap-0 mx-4 px-4`}
                               >
                                 {swappingStates[id]
