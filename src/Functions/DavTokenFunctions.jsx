@@ -54,6 +54,7 @@ export const DavProvider = ({ children }) => {
       await transaction.wait();
       console.log("Minting successful!");
       await DavHoldings();
+      await DavHoldingsPercentage();
       return transaction;
     } catch (error) {
       console.error("Minting error:", error);

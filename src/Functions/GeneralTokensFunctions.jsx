@@ -93,6 +93,7 @@ export const GeneralTokenProvider = ({ children }) => {
       const tx = await contract.mintReward();
       await tx.wait();
       //   setClaiming(false);
+	  ViewDistributedTokens();
     } catch (e) {
       console.error("Error claiming tokens:", e);
       //   setClaiming(false);
@@ -102,6 +103,7 @@ export const GeneralTokenProvider = ({ children }) => {
     try {
       const tx = await contract.distributeReward(account);
       await tx.wait();
+	  ViewDistributedTokens()
     } catch (e) {
       console.error("Error claiming tokens:", e);
       throw e;
