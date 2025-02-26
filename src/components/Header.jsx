@@ -135,9 +135,10 @@ const Header = () => {
               : "text-light text-center"
           }
         >
-          <i className="bi bi-fire"></i>
-          <div>Burn</div>
+          <i className="bi bi-graph-up"></i>
+          <div> State LP</div>
         </NavLink>
+
         <NavLink
           to="/info"
           className={({ isActive }) =>
