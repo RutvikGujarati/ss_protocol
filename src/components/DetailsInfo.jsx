@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DetailsInfo.css";
-import { useDAVToken } from "../Context/DavTokenContext";
+import { useSwapContract } from "../Functions/SwapContractFunctions";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { TokensDetails } from "../data/TokensDetails";
@@ -32,7 +32,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
     // AuctionRunning,
     setDBForBurnRequired,
     StateBurnBalance,
-  } = useDAVToken();
+  } = useSwapContract();
   const { AuctionRunning } = useGeneralAuctionFunctions();
 
   const [numerator, setNumerator] = useState("");

@@ -6,7 +6,7 @@ import DAVLogo from "../assets/d_logo.png";
 import stateLogo from "../assets/state_logo.png";
 import PropTypes from "prop-types";
 import MetaMaskIcon from "../assets/metamask-icon.png";
-import { useDAVToken } from "../Context/DavTokenContext";
+import { useSwapContract } from "../Functions/SwapContractFunctions";
 
 const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
   const {
@@ -14,7 +14,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     handleAddTokenState,
     handleAddFluxin,
     handleAddXerion,
-  } = useDAVToken();
+  } = useSwapContract();
   const [filteredData, setFilteredData] = useState([
     { id: "∈", name: "DAV", logo: DAVLogo, AddToken: handleAddTokenDAV },
     { id: "±", name: "STATE", logo: stateLogo, AddToken: handleAddTokenState },

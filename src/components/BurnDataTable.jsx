@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
-import { useDAVToken } from "../Context/DavTokenContext";
+import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useTokens } from "../data/BurntokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { formatWithCommas } from "./DetailsInfo";
@@ -20,7 +20,7 @@ const BurnDataTable = () => {
     ClickBurn,
     DavBalanceRequireForBurn,
     DavBalanceRequire,
-  } = useDAVToken();
+  } = useSwapContract();
   const { BurnOccuredForToken, BurnCycleACtive } = useGeneralAuctionFunctions();
   // Log for debugging
   console.log("BurnOccuredForToken:", BurnCycleACtive);

@@ -1,9 +1,9 @@
-// DAVTokenContext.js
+// SwapContractContext.js
 import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { ethers } from "ethers";
 import PropTypes from "prop-types";
 import { PriceContext } from "../api/StatePrice";
-import { ContractContext } from "../Functions/ContractInitialize";
+import { ContractContext } from "./ContractInitialize";
 import {
   DAV_TOKEN_ADDRESS,
   Fluxin,
@@ -12,13 +12,13 @@ import {
   Xerion,
   XerionRatioAddress,
 } from "../ContractAddresses";
-import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
+import { useGeneralTokens } from "./GeneralTokensFunctions";
 
-const DAVTokenContext = createContext();
+const SwapContractContext = createContext();
 
-export const useDAVToken = () => useContext(DAVTokenContext);
+export const useSwapContract = () => useContext(SwapContractContext);
 
-export const DAVTokenProvider = ({ children }) => {
+export const SwapContractProvider = ({ children }) => {
   const { stateUsdPrice } = useContext(PriceContext);
   const { CurrentRatioPrice } = useGeneralTokens();
   const { loading, provider, signer, account, AllContracts } =
@@ -1219,7 +1219,7 @@ export const DAVTokenProvider = ({ children }) => {
   const handleAddXerion = () => handleAddToken(Xerion, "Xerion");
 
   return (
-    <DAVTokenContext.Provider
+    <SwapContractContext.Provider
       value={{
         //WALLET States
         provider,
@@ -1297,9 +1297,9 @@ export const DAVTokenProvider = ({ children }) => {
       }}
     >
       {children}
-    </DAVTokenContext.Provider>
+    </SwapContractContext.Provider>
   );
 };
-DAVTokenProvider.propTypes = {
+SwapContractProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };

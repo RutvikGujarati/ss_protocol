@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
-import { useDAVToken } from "../Context/DavTokenContext";
+import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
 import BurnDataTable from "./BurnDataTable";
@@ -21,7 +21,7 @@ const DataTable = () => {
     DavBalanceRequire,
     swappingStates,
     buttonTextStates,
-  } = useDAVToken();
+  } = useSwapContract();
   const { AuctionRunning, auctionDetails } = useGeneralAuctionFunctions();
 
   const location = useLocation();

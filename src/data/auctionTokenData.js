@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import FluxinLogo from "../assets/FluxinLogo.png";
 import { Fluxin } from "../ContractAddresses";
-import { useDAVToken } from "../Context/DavTokenContext";
+import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { PriceContext } from "../api/StatePrice";
 import { useGeneralAuctionFunctions } from '../Functions/GeneralAuctionFunctions';
 import { useGeneralTokens } from '../Functions/GeneralTokensFunctions';
@@ -25,7 +25,7 @@ export const useAuctionTokens = () => {
 		userHasReverseSwapped,
 		handleAddFluxin,
 		OnePBalance,
-	} = useDAVToken();
+	} = useSwapContract();
 	console.log("is running from obj", isReversed.Fluxin)
 
 	const tokens = [

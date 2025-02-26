@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/InfoCards.css";
-import { useDAVToken } from "../Context/DavTokenContext";
+import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
@@ -35,7 +35,7 @@ const InfoCards = () => {
     StateBurnBalance,
     StateHolds,
     DavRequiredAmount,
-  } = useDAVToken();
+  } = useSwapContract();
   const [amount, setAmount] = useState("");
   const [load, setLoad] = useState(false);
   const [loadClaim, setLoadClaim] = useState(false);
