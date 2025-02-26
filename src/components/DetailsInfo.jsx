@@ -177,7 +177,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             {dataToShow.tokenName !== "DAV" ? (
               <th className="fw-bold d-flex justify-content-end align-items-center text-end w-100 uppercase py-4">
                 <button className=" swap-btn py-1 mx-3 btn btn-primary btn-sm ">
-                  Price : $ {formatPrice(dataToShow.Price)}
+                  Price : $ 0.0
                 </button>
               </th>
             ) : (
