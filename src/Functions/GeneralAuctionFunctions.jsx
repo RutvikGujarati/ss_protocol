@@ -169,7 +169,7 @@ export const GeneralAuctionProvider = ({ children }) => {
     try {
       const contracts = [
         { name: "Fluxin", contract: AllContracts.RatioContract },
-        { name: "Xerion", contract: AllContracts.XerionRatioContract },
+        // { name: "Xerion", contract: AllContracts.XerionRatioContract },
       ];
 
       const auctionTimes = {};

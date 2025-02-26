@@ -41,7 +41,7 @@ const App = () => {
           }
         />
         <Route
-          path="/burn"
+          path="/StateLp"
           element={
             <>
               <InfoCards />

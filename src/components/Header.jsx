@@ -63,7 +63,7 @@ const Header = () => {
                       ? "nav-link active-link text-light"
                       : "nav-link text-light"
                   }
-                  to="/burn"
+                  to="/StateLp"
                 >
                   State LP
                 </NavLink>
@@ -128,7 +128,7 @@ const Header = () => {
           <div>Auction</div>
         </NavLink>
         <NavLink
-          to="/burn"
+          to="/StateLp"
           className={({ isActive }) =>
             isActive
               ? "text-light active-link text-center"
