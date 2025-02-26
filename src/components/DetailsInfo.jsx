@@ -177,7 +177,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             {dataToShow.tokenName !== "DAV" ? (
               <th className="fw-bold d-flex justify-content-end align-items-center text-end w-100 uppercase py-4">
                 <button className=" swap-btn py-1 mx-3 btn btn-primary btn-sm ">
-                  Price : $ 0.0
+                  Price : $ {formatPrice(dataToShow.Price)}
                 </button>
               </th>
             ) : (
@@ -217,7 +217,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
 
                   <TableRowForSwapTokens
                     label={"Contract Name"}
-                    tokenName={`Ratio_Swapping_Auctions_V1_1`}
+                    tokenName={`Orxa Swap`}
                     label2={"Contract Address"}
                     TokenAddress={dataToShow.SwapContract}
                     value={dataToShow.SwapShortContract}
@@ -298,7 +298,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             {dataToShow.tokenName == "STATE" && (
               <>
                 <SmallTokenDetails
-                  label={"State tokens burn"}
+                  label={"STATE tokens burn"}
                   data={formatWithCommas(StateBurnBalance)}
                 />
                 <SmallTokenDetails
@@ -332,7 +332,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     />
                     <DoubleValues
                       label1={`Current Ratio`}
-                      firstData={`1:${dataToShow.Ratio}`}
+                    //   firstData={`1:${dataToShow.Ratio}`}
+                      firstData={`1:0`}
                       label2={"Target Ratio"}
                       SecondData={`1:${dataToShow.target}`}
                     />
@@ -369,7 +370,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     <tr>
                       <td className="d-flex align-items-center">
                         {dataToShow.tokenName.toLowerCase() === "state"
-                          ? "State Balance (inside Contract)"
+                          ? "STATE Balance (inside Contract)"
                           : dataToShow.tokenName.toLowerCase() === "xerion"
                           ? "Xerion Balance (inside Contract)"
                           : "Orxa Balance (inside Contract)"}

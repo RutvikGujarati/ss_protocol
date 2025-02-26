@@ -93,7 +93,7 @@ export const GeneralTokenProvider = ({ children }) => {
       const tx = await contract.mintReward();
       await tx.wait();
       //   setClaiming(false);
-	  ViewDistributedTokens();
+      ViewDistributedTokens();
     } catch (e) {
       console.error("Error claiming tokens:", e);
       //   setClaiming(false);
@@ -103,7 +103,7 @@ export const GeneralTokenProvider = ({ children }) => {
     try {
       const tx = await contract.distributeReward(account);
       await tx.wait();
-	  ViewDistributedTokens()
+      ViewDistributedTokens();
     } catch (e) {
       console.error("Error claiming tokens:", e);
       throw e;
@@ -169,7 +169,9 @@ export const GeneralTokenProvider = ({ children }) => {
         throw new Error("Invalid contract type");
       }
 
-      await contract.mintAdditionalTOkens(amountInWei);
+      const tx = await contract.mintAdditionalTOkens(amountInWei);
+      await tx.wait();
+      await fetchTotalSupplies();
     } catch (e) {
       console.error(`Error minting with method mintAdditionalTOkens:`, e);
     }

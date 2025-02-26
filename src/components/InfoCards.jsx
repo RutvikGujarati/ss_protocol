@@ -324,7 +324,7 @@ const InfoCards = () => {
                         {priceLoading ? (
                           <DotAnimation />
                         ) : (
-                          "0.0"
+                          formatPrice(stateUsdPrice)
                         )}
                       </h5>
                     </div>

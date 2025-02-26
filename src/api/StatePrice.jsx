@@ -42,7 +42,7 @@ const PriceProvider = ({ children }) => {
 
   useEffect(() => {
     fetchPrice(
-      "https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0x894fd7d05fe360a1d713c10b0e356af223fde88c?include=dex",
+      "https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0xf15f1f64891a3e2797328445cb28ba11fe468505?include=dex",
       "base_token_price_usd",
       setStateUsdPrice,
       "state"
