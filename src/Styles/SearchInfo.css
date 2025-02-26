@@ -12,3 +12,16 @@
 .clickable-name {
   cursor: pointer;
 }
+.custom-tooltip .tooltip-inner {
+	background-color: #333; /* Dark background */
+	color: #fff; /* White text */
+	font-size: 12px;
+	padding: 6px 10px;
+	border-radius: 5px;
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .custom-tooltip.bs-tooltip-top .tooltip-arrow::before {
+	border-top-color: #333; /* Match background color */
+  }
+  

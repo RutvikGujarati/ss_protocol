@@ -5,15 +5,21 @@ import FluxinLogo from "../assets/FluxinLogo.png";
 import DAVLogo from "../assets/d_logo.png";
 import stateLogo from "../assets/state_logo.png";
 import PropTypes from "prop-types";
+import MetaMaskIcon from "../assets/metamask-icon.png";
+import { useSwapContract } from "../Functions/SwapContractFunctions";
 
 const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
+  const {
+    handleAddTokenDAV,
+    handleAddTokenState,
+    handleAddFluxin,
+    handleAddXerion,
+  } = useSwapContract();
   const [filteredData, setFilteredData] = useState([
-    { id: "∈", name: "DAV", logo: DAVLogo },
-    { id: "±", name: "STATE", logo: stateLogo },
-    // { id: 1, name: "AuctionRatioSwapping", logo: XerionLogo },
-    { id: 1, name: "Fluxin", logo: FluxinLogo },
-    { id: 2, name: "Xerion", logo: XerionLogo },
-    // { id: 4, name: "Polaris", logo: FluxinLogo },
+    { id: "∈", name: "DAV", logo: DAVLogo, AddToken: handleAddTokenDAV },
+    { id: "±", name: "STATE", logo: stateLogo, AddToken: handleAddTokenState },
+    { id: 1, name: "Orxa", logo: FluxinLogo, AddToken: handleAddFluxin },
+    // { id: 2, name: "Xerion", logo: XerionLogo, AddToken: handleAddXerion },
   ]);
   const searchInputRef = useRef(null);
 
@@ -48,8 +54,8 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
       { id: "∈", name: "DAV", logo: DAVLogo },
       { id: "±", name: "STATE", logo: stateLogo },
       //   { id: 1, name: "AuctionRatioSwapping", logo: XerionLogo },
-      { id: 1, name: "Fluxin", logo: FluxinLogo },
-      { id: 2, name: "Xerion", logo: XerionLogo },
+      { id: 1, name: "Orxa", logo: FluxinLogo },
+    //   { id: 2, name: "Xerion", logo: XerionLogo },
       //   { id: 4, name: "Polaris", logo: FluxinLogo },
     ];
     const filtered = originalData.filter((item) =>
@@ -78,7 +84,9 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
           <tr className="align-item-center">
             <th>#</th>
             <th></th>
-            <th>Name</th>
+            <th className="">Name</th>
+            {/* <th></th> */}
+            <th>Add</th>
           </tr>
         </thead>
         <tbody>
@@ -90,7 +98,21 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
                   <img src={item.logo} width={40} height={40} alt="Logo" />
                 </div>
               </td>
-              <td>{item.name}</td>
+              <td className=" justify-content-center  ">{item.name}</td>
+              {/* <td></td> */}
+              <td>
+                <div className="mb-0 mx-1">
+                  <img
+                    src={MetaMaskIcon}
+                    width={20}
+                    height={20}
+                    alt="Logo"
+                    title="Add Token"
+                    style={{ cursor: "pointer", marginLeft: "5px" }}
+                    onClick={item.AddToken}
+                  />
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>

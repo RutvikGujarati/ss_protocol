@@ -14,8 +14,10 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-
+import { useDAvContract } from "./Functions/DavTokenFunctions";
+import DotAnimation from "./Animations/Animation";
 const App = () => {
+  const { loadingRatioPrice } = useDAvContract();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedToken, setSelectedToken] = useState(null);
 
@@ -28,10 +30,14 @@ const App = () => {
         <Route
           path="/auction"
           element={
-            <>
-              <InfoCards />
-              <DataTable />
-            </>
+			loadingRatioPrice ? (
+				<DotAnimation />
+			  ) : (
+				<>
+				  <InfoCards />
+				  <DataTable />
+				</>
+			  )
           }
         />
         <Route
@@ -40,7 +46,6 @@ const App = () => {
             <>
               <InfoCards />
               <DataTable />
-			  {/* <NetworkSwitcher /> */}
             </>
           }
         />

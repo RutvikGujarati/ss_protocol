@@ -1,17 +1,18 @@
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
+import PropTypes from "prop-types";
 
 const PriceContext = createContext();
 
 const PriceProvider = ({ children }) => {
   const [stateUsdPrice, setStateUsdPrice] = useState(null);
+  const [priceLoading, setPriceLoading] = useState(true);
   const [FluxinUsdPrice, setFluxinUsdPrice] = useState(null);
-  const [FluxinRatioPrice, setFluxinRatioPrice] = useState(null);
   const [XerionUsdPrice, setXerionUsdPrice] = useState(null);
-  const [XerionRatioPrice, setXerionRatioPrice] = useState(null);
   const [error, setError] = useState(null);
 
   const fetchPrice = async (url, tokenId, setPrice, tokenName) => {
+    setPriceLoading(true);
     try {
       const response = await axios.get(url);
       let tokenPrice;
@@ -34,6 +35,8 @@ const PriceProvider = ({ children }) => {
     } catch (err) {
       setError("Failed to fetch token price. Please try again later.");
       console.error(err);
+    } finally {
+      setPriceLoading(false);
     }
   };
 
@@ -43,14 +46,6 @@ const PriceProvider = ({ children }) => {
       "base_token_price_usd",
       setStateUsdPrice,
       "state"
-    );
-  }, []);
-  useEffect(() => {
-    fetchPrice(
-      "https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0x361afa3f5ef839bed6071c9f0c225b078eb8089a?include=dex",
-      "base_token_price_quote_token",
-      setFluxinRatioPrice,
-      "Fluxin"
     );
   }, []);
 
@@ -69,14 +64,6 @@ const PriceProvider = ({ children }) => {
       setXerionUsdPrice
     );
   }, []);
-  useEffect(() => {
-    fetchPrice(
-      "https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0xc6359cd2c70f643888d556d377a4e8e25caadf77?include=dex",
-      "base_token_price_quote_token",
-      setXerionRatioPrice,
-      "Xerion"
-    );
-  }, []);
 
   return (
     <PriceContext.Provider
@@ -85,13 +72,15 @@ const PriceProvider = ({ children }) => {
         FluxinUsdPrice,
         XerionUsdPrice,
         error,
-        FluxinRatioPrice,
-        XerionRatioPrice,
+        priceLoading,
       }}
     >
       {children}
     </PriceContext.Provider>
   );
+};
+PriceProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export { PriceContext, PriceProvider };
