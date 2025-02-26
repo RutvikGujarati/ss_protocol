@@ -43,7 +43,7 @@ export const DavProvider = ({ children }) => {
       }
 
       const value = ethers.parseEther(amount.toString());
-      const cost = ethers.parseEther((amount * 500).toString());
+      const cost = ethers.parseEther((amount * 500000).toString());
 
       console.log("Minting with:", value.toString(), "cost:", cost.toString());
 

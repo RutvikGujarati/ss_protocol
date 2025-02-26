@@ -49,8 +49,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   });
   const [authorized, setAuthorized] = useState(false);
 
-  const AuthAddress =
-    "0xB1bD9F3B5F64dE482485A41c84ea4a90DAc5F98e".toLowerCase();
+  const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS.toLowerCase();
 
   const handleSetAddress = () => {
     setAuthorized(AuthAddress === account);

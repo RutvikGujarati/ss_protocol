@@ -102,7 +102,7 @@ export const SwapContractProvider = ({ children }) => {
   };
 
   const CalculationOfCost = async (amount) => {
-    setTotalCost(ethers.parseEther((amount * 500).toString()));
+    setTotalCost(ethers.parseEther((amount * 500000).toString()));
   };
 
   const fetchStateHoldingsAndCalculateUSD = async () => {
