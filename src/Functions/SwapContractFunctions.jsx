@@ -189,7 +189,6 @@ export const SwapContractProvider = ({ children }) => {
           AmountOut(),
           AmountOutTokens(),
           SetOnePercentageOfBalance(),
-          SetOnePercentageOfBalance(),
           getDavRequiredAmount(),
           HasReverseSwappedAucton(),
           HasSwappedAucton(),
@@ -849,8 +848,8 @@ export const SwapContractProvider = ({ children }) => {
       if (swapReceipt.status === 1) {
         console.log("Swap Complete!");
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap Complete!" }));
-        await TotalTokensBurn();
-        await StateBurnAmount();
+         TotalTokensBurn();
+         StateBurnAmount();
       } else {
         console.error("Swap transaction failed.");
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
@@ -1298,6 +1297,7 @@ export const SwapContractProvider = ({ children }) => {
         loadingRatioPrice,
         setReverseEnable,
         RenounceFluxinSwap,
+		SetOnePercentageOfBalance,
         ReverseForNextCycle,
         ReverseForCycle,
       }}

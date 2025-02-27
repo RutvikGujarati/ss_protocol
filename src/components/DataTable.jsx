@@ -29,6 +29,7 @@ const DataTable = () => {
   const [errorPopup, setErrorPopup] = useState({});
   const [checkingStates, setCheckingStates] = useState({});
   const [claimingStates, setClaimingStates] = useState({});
+
   console.log("is auction running", auctionDetails["Fluxin"]);
   console.log("use has swappeddddd", AuctionRunning.Xerion);
   console.log("required dav amount", DavRequiredAmount);
@@ -120,35 +121,41 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-              .filter(
-                ({
-                  userHasSwapped,
-                  name,
-                  userHasReverse,
-                  isReversing,
-                  AuctionStatus,
-                }) => {
-                  console.log(`Filter Conditions:${name}`, {
+                .filter(
+                  ({
                     userHasSwapped,
+                    name,
                     userHasReverse,
                     isReversing,
                     AuctionStatus,
-                    dbCheck: db >= DavRequiredAmount,
-                  });
+                    distributedAmount,
+                  }) => {
+                    console.log(`Filter Conditions:${name}`, {
+                      userHasSwapped,
+                      userHasReverse,
+                      isReversing,
+                      AuctionStatus,
+                      dbCheck: db >= DavRequiredAmount,
+                    });
 
-                  if (AuctionStatus == "false" && db >= DavRequiredAmount) {
-                    if (isReversing == "true" && !userHasReverse) {
-                      return true;
-                    } else if (userHasSwapped && isReversing == "false") {
-                      return false;
-                    }
-                  } else if (AuctionStatus == "true" && db >= 1) {
-                    if (!userHasSwapped) {
-                      return true;
+                    if (AuctionStatus == "false" && db >= DavRequiredAmount) {
+                      if (isReversing == "true" && !userHasReverse) {
+                        return true;
+                      } else if (distributedAmount > 1) {
+                        return true;
+                      } else if (userHasSwapped && isReversing == "false") {
+                        return false;
+                      }
+                    } else if (
+                      AuctionStatus == "true" &&
+                      db >= DavRequiredAmount
+                    ) {
+                      if (!userHasSwapped) {
+                        return true;
+                      }
                     }
                   }
-                }
-              )
+                )
               .map(
                 (
                   {
@@ -163,8 +170,9 @@ const DataTable = () => {
                     Liquidity,
                     Price,
                     isReversing,
+                    AuctionStatus,
                     ReverseName,
-                    onChart,
+                    // onChart,
                     distributedAmount,
                     inputTokenAmount,
                     handleAddToken,
@@ -311,7 +319,9 @@ const DataTable = () => {
                             {isReversing == "true" && (
                               <button
                                 onClick={() => SwapT()}
-                                disabled={swappingStates[id] || outputToken <= "1"}
+                                disabled={
+                                  swappingStates[id] || outputToken <= "1"
+                                }
                                 className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
                               >
                                 {swappingStates[id]
@@ -319,19 +329,28 @@ const DataTable = () => {
                                   : "Reverse Swap"}
                               </button>
                             )}
-
                             {isReversing == "false" && (
-                              <button
-                                onClick={() => SwapT()}
-                                disabled={
-                                  swappingStates[id] || inputTokenAmount <= "1"
-                                }
-                                className={`btn btn-sm swap-btn  btn-primary btn-sm swap-btn gap-0 mx-4 px-4`}
-                              >
-                                {swappingStates[id]
-                                  ? "Swapping..."
-                                  : buttonTextStates[id] || "Swap"}
-                              </button>
+                              <div className="position-relative d-inline-block">
+                                {distributedAmount > 0 && (
+                                  <div className="popup-message">
+                                    You must claim your airdrop before swapping!
+                                  </div>
+                                )}
+                                <button
+                                  onClick={() => SwapT()}
+                                  disabled={
+                                    swappingStates[id] ||
+                                    inputTokenAmount <= "1" ||
+                                    AuctionStatus == "false" ||
+                                    distributedAmount > 0
+                                  }
+                                  className={`btn btn-sm swap-btn  btn-primary btn-sm swap-btn gap-0 mx-4 px-4`}
+                                >
+                                  {swappingStates[id]
+                                    ? "Swapping..."
+                                    : buttonTextStates[id] || "Swap"}
+                                </button>
+                              </div>
                             )}
                           </>
                         )}

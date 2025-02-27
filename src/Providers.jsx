@@ -34,13 +34,13 @@ export default function Providers({ children }) {
               <ContractProvider>
                 <DavProvider>
                   <GeneralTokenProvider>
-                      <GeneralAuctionProvider>
-                    <SwapContractProvider>
+                    <GeneralAuctionProvider>
+                      <SwapContractProvider>
                         <Suspense fallback={<div>Loading...</div>}>
                           {children}
                         </Suspense>
-                    </SwapContractProvider>
-                      </GeneralAuctionProvider>
+                      </SwapContractProvider>
+                    </GeneralAuctionProvider>
                   </GeneralTokenProvider>
                 </DavProvider>
               </ContractProvider>
