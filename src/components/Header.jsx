@@ -106,7 +106,7 @@ const Header = () => {
                     ? "nav-link active-link text-light"
                     : "nav-link text-light"
                 }
-                to="https://pulsex.mypinata.cloud/ipfs/bafybeift2yakeymqmjmonkzlx2zyc4tty7clkwvg37suffn5bncjx4e6xq/"
+                to="https://pulsex.mypinata.cloud/ipfs/bafybeibzu7nje2o2tufb3ifitjrto3n3xcwon7fghq2igtcupulfubnrim/"
                 target="_blank"
               >
                 <img
@@ -182,6 +182,25 @@ const Header = () => {
           <i className="bi bi-file-earmark-text"></i>
           <div>Docs</div>
         </NavLink>
+        <div className="mt-2 ">
+          <NavLink
+            className={({ isActive }) =>
+              isActive
+                ? "nav-link active-link text-light"
+                : "nav-link text-light"
+            }
+            to="https://pulsex.mypinata.cloud/ipfs/bafybeibzu7nje2o2tufb3ifitjrto3n3xcwon7fghq2igtcupulfubnrim/"
+            target="_blank"
+          >
+            <img
+              src={pulsex}
+              alt="PulseX"
+              width="30"
+              height="30"
+              style={{ borderRadius: "50%", background: "transparent" }}
+            />
+          </NavLink>
+        </div>
       </div>
     </>
   );
