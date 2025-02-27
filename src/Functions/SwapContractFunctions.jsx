@@ -133,7 +133,7 @@ export const SwapContractProvider = ({ children }) => {
           const holdingsInUSD = Number(rawHoldings * priceNum);
           console.log("Holdings in USD:", holdingsInUSD);
           setTotalStateHoldsInUS(
-            holdingsInUSD === 0 ? "0.0" : holdingsInUSD.toFixed(2)
+            holdingsInUSD === 0 ? "0.0" : holdingsInUSD.toFixed(4)
           );
         } else {
           console.error("Invalid values for calculation:", {

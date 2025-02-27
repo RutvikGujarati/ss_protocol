@@ -46,7 +46,7 @@ export const useAuctionTokens = () => {
 			userHasSwapped: userHashSwapped?.Fluxin,
 			userHasReverse: userHasReverseSwapped?.Fluxin,
 			ErroutAmountsorName: "Fluxin",
-			onChart: "https://www.geckoterminal.com/pulsechain/pools/0x361afa3f5ef839bed6071c9f0c225b078eb8089a",
+			onChart: "https://www.geckoterminal.com/pulsechain/pools/0x79405385904b48112e90dbc4849b00eed4202bb8",
 			distributedAmount: Distributed?.["Fluxin"] || 0,
 			token: Fluxin,
 			handleAddToken: handleAddFluxin,
