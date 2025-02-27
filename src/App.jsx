@@ -1,7 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import "./Styles/styles.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import InfoCards from "./components/InfoCards";
 import DataTable from "./components/DataTable";
@@ -20,24 +20,71 @@ const App = () => {
   const { loadingRatioPrice } = useDAvContract();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedToken, setSelectedToken] = useState(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  // Function to check actual network status
+  const checkOnlineStatus = async () => {
+    try {
+      // Try fetching a known online resource (Google's favicon)
+      const response = await fetch("https://www.google.com/favicon.ico", {
+        mode: "no-cors",
+      });
+      setIsOnline(true);
+    } catch (error) {
+      setIsOnline(false);
+    }
+  };
+
+  useEffect(() => {
+    // Initial check
+    checkOnlineStatus();
+
+    // Listen for browser's built-in events
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    // Periodically check connection (every 5 seconds)
+    const interval = setInterval(checkOnlineStatus, 10000);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+      clearInterval(interval);
+    };
+  }, []);
 
   return (
     <Router>
       <Header />
+	  <div>
+      {!isOnline && (
+        <div
+          className="alert alert-danger text-center w-100 position-fixed top-0 start-0"
+          style={{ zIndex: 1050, padding: "15px", fontSize: "18px" }}
+          role="alert"
+        >
+          ⚠️ You are offline. Some features may not work properly.
+        </div>
+      )}
+      {/* Rest of your App */}
+    </div>
       <Routes>
         <Route path="/" element={<Navigate to="/auction" />} />
         {/* Auction Page (Default page when accessed directly) */}
         <Route
           path="/auction"
           element={
-			loadingRatioPrice ? (
-				<DotAnimation />
-			  ) : (
-				<>
-				  <InfoCards />
-				  <DataTable />
-				</>
-			  )
+            loadingRatioPrice ? (
+              <DotAnimation />
+            ) : (
+              <>
+                <InfoCards />
+                <DataTable />
+              </>
+            )
           }
         />
         <Route

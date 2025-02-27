@@ -332,8 +332,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     />
                     <DoubleValues
                       label1={`Current Ratio`}
-                    //   firstData={`1:${dataToShow.Ratio}`}
-                      firstData={`1:0`}
+                      firstData={`1:${dataToShow.Ratio}`}
+                      //   firstData={`1:0`}
                       label2={"Target Ratio"}
                       SecondData={`1:${dataToShow.target}`}
                     />
@@ -526,7 +526,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                     isTyping ? "text-blue" : ""
                                   }`}
                                   placeholder={
-                                    dataToShow.interval.auctionInterval
+                                    dataToShow.interval?.auctionInterval ||
+                                    "4320000"
                                   }
                                   value={numeratorOfInterval}
                                   onChange={(e) => handleInputChangeInterval(e)}
@@ -584,7 +585,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                     isTyping ? "text-blue" : ""
                                   }`}
                                   placeholder={
-                                    dataToShow.Duration.auctionDuration
+                                    dataToShow.Duration?.auctionDuration ||
+                                    "86400"
                                   }
                                   value={numeratorOfAUction}
                                   onChange={(e) => handleInputChangeAuction(e)}
@@ -664,7 +666,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           /> */}
                           <SmallTokenDetails
                             label={"Next Start Time of the Auction"}
-                            data={dataToShow.AuctionNextTime.nextAuctionStart}
+                            data={dataToShow.AuctionNextTime?.nextAuctionStart}
                           />
                           <tr>
                             <td className="d-flex align-items-center">

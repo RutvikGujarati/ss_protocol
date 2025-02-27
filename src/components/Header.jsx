@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import WalletConnector from "../WalletComps/WalletConnect";
 import { NavLink } from "react-router-dom";
+import pulsex from "../assets/pulsex.png";
 // import { Tooltip } from "bootstrap";
 // import { useDAVToken } from "../Context/DavTokenContext";
 
@@ -80,7 +81,7 @@ const Header = () => {
                   Info
                 </NavLink>
               </li>
-              <li className="nav-item mx-2">
+              <li className="nav-item mx-2 ">
                 <NavLink
                   className={({ isActive }) =>
                     isActive
@@ -97,6 +98,25 @@ const Header = () => {
             {/* Wallet Connector Button */}
             <div>
               <WalletConnector />
+            </div>
+            <div className="  ms-4">
+              <NavLink
+                className={({ isActive }) =>
+                  isActive
+                    ? "nav-link active-link text-light"
+                    : "nav-link text-light"
+                }
+                to="https://pulsex.mypinata.cloud/ipfs/bafybeift2yakeymqmjmonkzlx2zyc4tty7clkwvg37suffn5bncjx4e6xq/"
+                target="_blank"
+              >
+                <img
+                  src={pulsex}
+                  alt="PulseX"
+                  width="30"
+                  height="30"
+                  style={{ borderRadius: "50%", background: "transparent" }}
+                />
+              </NavLink>
             </div>
           </div>
         </div>

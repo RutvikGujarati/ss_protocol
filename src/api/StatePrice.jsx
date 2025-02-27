@@ -51,8 +51,8 @@ const PriceProvider = ({ children }) => {
 
   useEffect(() => {
     fetchPrice(
-      "https://api.geckoterminal.com/api/v2/simple/networks/pulsechain/token_price/0x6f01eec1111748b66f735944b18b0eb2835ae201",
-      "0x6f01eec1111748b66f735944b18b0eb2835ae201",
+      "https://api.geckoterminal.com/api/v2/simple/networks/pulsechain/token_price/0xfe4ec02e6fe069d90d4a721313f22d6461ec5a06",
+      "0xfe4ec02e6fe069d90d4a721313f22d6461ec5a06",
       setFluxinUsdPrice
     );
   }, []);

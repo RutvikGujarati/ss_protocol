@@ -13,6 +13,7 @@ import {
   XerionRatioAddress,
 } from "../ContractAddresses";
 import { useGeneralTokens } from "./GeneralTokensFunctions";
+import { useGeneralAuctionFunctions } from "./GeneralAuctionFunctions";
 
 const SwapContractContext = createContext();
 
@@ -21,6 +22,7 @@ export const useSwapContract = () => useContext(SwapContractContext);
 export const SwapContractProvider = ({ children }) => {
   const { stateUsdPrice } = useContext(PriceContext);
   const { CurrentRatioPrice } = useGeneralTokens();
+  const { isAuctionRunning, TotalTokensBurn } = useGeneralAuctionFunctions();
   const { loading, provider, signer, account, AllContracts } =
     useContext(ContractContext);
 
@@ -347,7 +349,7 @@ export const SwapContractProvider = ({ children }) => {
         // },
       ];
 
-    //   console.log("Xerion Ratio Price:", XerionRatioPrice);
+      //   console.log("Xerion Ratio Price:", XerionRatioPrice);
 
       const amounts = {};
 
@@ -424,7 +426,7 @@ export const SwapContractProvider = ({ children }) => {
       }));
 
       console.log("from dt", value.Fluxin.adjustedBalance);
-    //   console.log("from dt1", value.Xerion.adjustedBalance);
+      //   console.log("from dt1", value.Xerion.adjustedBalance);
 
       return value.Fluxin.adjustedBalance;
     } catch (error) {
@@ -847,6 +849,8 @@ export const SwapContractProvider = ({ children }) => {
       if (swapReceipt.status === 1) {
         console.log("Swap Complete!");
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap Complete!" }));
+        await TotalTokensBurn();
+        await StateBurnAmount();
       } else {
         console.error("Swap transaction failed.");
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
@@ -873,6 +877,7 @@ export const SwapContractProvider = ({ children }) => {
         [amountInWei]
       );
       console.log(`Ratio target set to `);
+      await RatioTargetValues();
     } catch (error) {
       console.error("Error setting ratio target:", error);
     }
@@ -1118,7 +1123,7 @@ export const SwapContractProvider = ({ children }) => {
         console.log(`Deposit successful for ${TokenAddress}`);
         setTransactionStatus("success");
         setButtonText("success");
-
+        await fetchAllBalances();
         return true;
       } else {
         console.error("Deposit transaction failed.");
@@ -1142,6 +1147,7 @@ export const SwapContractProvider = ({ children }) => {
         [],
         (s) => ethers.formatUnits(s, 18)
       );
+      await isAuctionRunning();
     } catch (error) {
       console.error("Error setting ratio target:", error);
     }

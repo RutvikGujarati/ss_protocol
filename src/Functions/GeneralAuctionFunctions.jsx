@@ -248,6 +248,7 @@ export const GeneralAuctionProvider = ({ children }) => {
         TotalBounty,
         TotalTokensBurned,
         auctionTimeLeft,
+		isAuctionRunning,
       }}
     >
       {children}
