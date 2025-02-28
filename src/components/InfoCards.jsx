@@ -301,7 +301,7 @@ const InfoCards = () => {
                           </h4>
                           <p className="popup-para">
                             You need to mint additional DAV tokens to claim
-                            extra reward
+                            extra rewards
                           </p>
                           <button
                             onClick={() =>
@@ -336,7 +336,7 @@ const InfoCards = () => {
                           className="btn btn-primary btn-sm swap-btn"
                           disabled={
                             checkingStates["state"] ||
-                            Distributed > 0 ||
+                            Distributed["state"] > 0 ||
                             DavBalance == 0
                           }
                         >

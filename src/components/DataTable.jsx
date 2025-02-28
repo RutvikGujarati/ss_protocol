@@ -100,6 +100,7 @@ const DataTable = () => {
 
   const tokens = useAuctionTokens();
   console.log("obj tokens", tokens);
+
   return isAuction ? (
     <div className="container mt-4 datatablemarginbottom">
       <div className="table-responsive">
@@ -121,41 +122,41 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-                .filter(
-                  ({
+              .filter(
+                ({
+                  userHasSwapped,
+                  name,
+                  userHasReverse,
+                  isReversing,
+                  AuctionStatus,
+                  distributedAmount,
+                }) => {
+                  console.log(`Filter Conditions:${name}`, {
                     userHasSwapped,
-                    name,
                     userHasReverse,
                     isReversing,
                     AuctionStatus,
-                    distributedAmount,
-                  }) => {
-                    console.log(`Filter Conditions:${name}`, {
-                      userHasSwapped,
-                      userHasReverse,
-                      isReversing,
-                      AuctionStatus,
-                      dbCheck: db >= DavRequiredAmount,
-                    });
+                    dbCheck: db >= DavRequiredAmount,
+                  });
 
-                    if (AuctionStatus == "false" && db >= DavRequiredAmount) {
-                      if (isReversing == "true" && !userHasReverse) {
-                        return true;
-                      } else if (distributedAmount > 1) {
-                        return true;
-                      } else if (userHasSwapped && isReversing == "false") {
-                        return false;
-                      }
-                    } else if (
-                      AuctionStatus == "true" &&
-                      db >= DavRequiredAmount
-                    ) {
-                      if (!userHasSwapped) {
-                        return true;
-                      }
+                  if (AuctionStatus == "false" && db >= DavRequiredAmount) {
+                    if (isReversing == "true" && !userHasReverse) {
+                      return true;
+                    } else if (distributedAmount > 1) {
+                      return true;
+                    } else if (userHasSwapped && isReversing == "false") {
+                      return false;
+                    }
+                  } else if (
+                    AuctionStatus == "true" &&
+                    db >= DavRequiredAmount
+                  ) {
+                    if (!userHasSwapped) {
+                      return true;
                     }
                   }
-                )
+                }
+              )
               .map(
                 (
                   {
@@ -205,7 +206,7 @@ const DataTable = () => {
                         className="btn btn-primary btn-sm swap-btn"
                         disabled={
                           checkingStates[id] ||
-                          Distributed > 0 ||
+                          distributedAmount > 0 ||
                           DavBalance == 0
                         }
                       >
@@ -296,7 +297,7 @@ const DataTable = () => {
                           </h4>
                           <p className="popup-para">
                             You need to mint additional DAV tokens to claim
-                            extra reward.
+                            extra rewards.
                           </p>
                           <button
                             onClick={() =>
@@ -332,8 +333,8 @@ const DataTable = () => {
                             {isReversing == "false" && (
                               <div className="position-relative d-inline-block">
                                 {distributedAmount > 0 && (
-                                  <div className="popup-message">
-                                    You must claim your airdrop before swapping!
+                                  <div className="popup-message font-size ">
+                                    Claim airdrop before swapping!
                                   </div>
                                 )}
                                 <button

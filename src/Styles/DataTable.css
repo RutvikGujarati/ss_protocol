@@ -12,6 +12,9 @@
   .hover-container:hover .hover-box {
 	display: block; /* Show tooltip on hover */
   }
+  .font-size{
+	font-size: 10px;
+  }
   
   .hover-box {
 	display: none; /* Initially hidden */
