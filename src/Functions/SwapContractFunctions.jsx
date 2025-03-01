@@ -74,6 +74,7 @@ export const SwapContractProvider = ({ children }) => {
     Fluxin: AllContracts.FluxinContract,
     FluxinRatio: AllContracts.RatioContract,
     Xerion: AllContracts.XerionContract,
+    XerionRatio: AllContracts.XerionRatioContract,
   };
   const Swapcontracts = {
     Fluxin: AllContracts.RatioContract,
@@ -279,6 +280,8 @@ export const SwapContractProvider = ({ children }) => {
     renounceOwnership(AllContracts.stateContract, "State");
   const RenounceFluxinSwap = () =>
     renounceOwnership(AllContracts.RatioContract, "FluxinRatio");
+  const RenounceXerionSwap = () =>
+    renounceOwnership(AllContracts.XerionRatioContract, "XerionRatio");
 
   const handleTokenWithdraw = async (contract, amount) => {
     try {
@@ -1221,7 +1224,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddTokenState = () =>
     handleAddToken(STATE_TOKEN_ADDRESS, "pState");
   const handleAddFluxin = () => handleAddToken(Fluxin, "Orxa");
-  const handleAddXerion = () => handleAddToken(Xerion, "Xerion");
+  const handleAddXerion = () => handleAddToken(Xerion, "Layti");
 
   return (
     <SwapContractContext.Provider
@@ -1297,6 +1300,7 @@ export const SwapContractProvider = ({ children }) => {
         loadingRatioPrice,
         setReverseEnable,
         RenounceFluxinSwap,
+		RenounceXerionSwap,
 		SetOnePercentageOfBalance,
         ReverseForNextCycle,
         ReverseForCycle,

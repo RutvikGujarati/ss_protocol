@@ -20,6 +20,7 @@
     "react-bootstrap": "^2.10.8",
     "react-dom": "^18.3.1",
     "react-error-boundary": "^5.0.0",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^7.0.2",
     "s-s-protocol": "file:",
     "viem": "^2.21.55",

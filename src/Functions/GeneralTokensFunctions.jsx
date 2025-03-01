@@ -14,9 +14,7 @@ export const GeneralTokenProvider = ({ children }) => {
   const [Distributed, setViewDistributed] = useState({
     state: "0.0",
     Fluxin: "0.0",
-    Xerion: "0.0",
-    xerion2: "0.0",
-    xerion3: "0.0",
+    Xerion: "0.0"
   });
   const contracts = {
     state: AllContracts.stateContract,

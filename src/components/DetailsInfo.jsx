@@ -217,7 +217,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
 
                   <TableRowForSwapTokens
                     label={"Contract Name"}
-                    tokenName={`Orxa Swap`}
+                    tokenName={`${dataToShow.tokenName} Swap`}
                     label2={"Contract Address"}
                     TokenAddress={dataToShow.SwapContract}
                     value={dataToShow.SwapShortContract}
@@ -320,7 +320,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             )}
             {(dataToShow.tokenName == "STATE" ||
               dataToShow.tokenName == "Orxa" ||
-              dataToShow.tokenName == "Xerion") && (
+              dataToShow.tokenName == "Layti") && (
               <>
                 {dataToShow.tokenName !== "STATE" && (
                   <>
@@ -418,7 +418,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 "state",
                                 1000000000000
                               ); // Amount for State
-                            } else if (dataToShow.tokenName === "Xerion") {
+                            } else if (dataToShow.tokenName === "Layti") {
                               dataToShow.actions.mintAdditionalTOkens(
                                 "Xerion",
                                 125000000000
