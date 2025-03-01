@@ -371,8 +371,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                       <td className="d-flex align-items-center">
                         {dataToShow.tokenName.toLowerCase() === "state"
                           ? "STATE Balance (inside Contract)"
-                          : dataToShow.tokenName.toLowerCase() === "xerion"
-                          ? "Xerion Balance (inside Contract)"
+                          : dataToShow.tokenName === "Layti"
+                          ? "Layti Balance (inside Contract)"
                           : "Orxa Balance (inside Contract)"}
                       </td>
 
