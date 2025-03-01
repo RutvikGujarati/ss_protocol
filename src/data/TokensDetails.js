@@ -111,7 +111,7 @@ export const TokensDetails = () => {
 			name: "Layti",
 			supply: "1,000,000,000,000.00",
 			Treasury: "1,000,000,000,000.00",
-			Supply: simpleSupplies.Xerion || "0",
+			Supply: simpleSupplies.XerionSupply,
 			percentage: PercentageXerion,
 			address: Xerion,
 			SwapContract: "null",
