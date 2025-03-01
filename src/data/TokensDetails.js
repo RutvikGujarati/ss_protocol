@@ -136,7 +136,7 @@ export const TokensDetails = () => {
 			SetDuration: () => SetAUctionDuration(),
 			AuctionTimeRunning: auctionTimeLeft.Xerion,
 			AuctionNextTime: auctionDetails["Xerion"],
-			mintAddTOkens: "250,000,000,000",
+			mintAddTOkens: "125,000,000,000",
 			renounceSmartContract: isRenounced?.Xerion ?? "Unknown",
 			renounceSwapSmartContract:false,
 			// renounceSwapSmartContract: isRenounced?.XerionRatio ?? "Unknown",
