@@ -55,9 +55,9 @@ const Header = () => {
                   href="https://twitter.com/thestate_x"
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontSize: "1.5rem" }}
+                  style={{ fontSize: "1.5rem",color: "white" }}
                 >
-                  <FaXTwitter className="text-black text-3xl" />
+                  <FaXTwitter className="text-white text-3xl" />
                 </a>
               </div>
               <li
