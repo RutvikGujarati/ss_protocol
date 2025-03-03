@@ -118,13 +118,6 @@ export const SwapContractProvider = ({ children }) => {
         (h) => ethers.formatUnits(h, 18)
       );
 
-      if (!holdingsRaw) {
-        console.error("Failed to fetch state holdings.");
-        setStateHoldings("0");
-        setTotalStateHoldsInUS("0.0");
-        return;
-      }
-
       const rawHoldings = parseFloat(holdingsRaw);
       const priceNum = Number(stateUsdPrice);
 
@@ -162,7 +155,7 @@ export const SwapContractProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    let interval;
+    // let interval;
 
     const fetchLiveData = async () => {
       if (
@@ -202,9 +195,9 @@ export const SwapContractProvider = ({ children }) => {
     };
 
     fetchLiveData(); // Fetch data once initially
-    interval = setInterval(fetchLiveData, 10000); // Poll every 10 seconds
+    // interval = setInterval(fetchLiveData, 10000); // Poll every 10 seconds
 
-    return () => clearInterval(interval); // Cleanup on unmount
+    // return () => clearInterval(interval); // Cleanup on unmount
   }, [
     AllContracts.davContract,
     AllContracts.stateContract,
