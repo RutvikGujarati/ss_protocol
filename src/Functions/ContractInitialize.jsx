@@ -47,6 +47,7 @@ export const ContractProvider = ({ children }) => {
       setLoading(false);
     }
   };
+  //   console.log("checksummed address",ethers.getAddress("0xc7d4d22af7a4ef1ffe25235c4d4cce9b7ab77edf"));
 
   useEffect(() => {
     initializeContracts();

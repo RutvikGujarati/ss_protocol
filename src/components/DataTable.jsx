@@ -173,7 +173,7 @@ const DataTable = () => {
                     isReversing,
                     AuctionStatus,
                     ReverseName,
-                    // onChart,
+                    onChart,
                     distributedAmount,
                     inputTokenAmount,
                     handleAddToken,
@@ -239,7 +239,7 @@ const DataTable = () => {
 
                     <td>
                       <a
-                        // href={onChart}
+                        href={onChart}
                         target="_blank"
                         style={{ fontSize: "13px" }}
                         className="font-color"

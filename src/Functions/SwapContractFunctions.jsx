@@ -78,7 +78,7 @@ export const SwapContractProvider = ({ children }) => {
   };
   const Swapcontracts = {
     Fluxin: AllContracts.RatioContract,
-    // Xerion: AllContracts.XerionRatioContract,
+    Xerion: AllContracts.XerionRatioContract,
   };
 
   const contractMapping = {
@@ -109,51 +109,53 @@ export const SwapContractProvider = ({ children }) => {
   };
 
   const fetchStateHoldingsAndCalculateUSD = async () => {
+    setLoadingState(true);
     try {
-      const holdings = await handleContractCall(
+      const holdingsRaw = await handleContractCall(
         AllContracts.stateContract,
         "balanceOf",
         [account],
         (h) => ethers.formatUnits(h, 18)
       );
 
-      if (holdings) {
-        const rawHoldings = parseFloat(holdings);
-        const priceNum = Number(stateUsdPrice);
-
-        const formattedHoldings = new Intl.NumberFormat("en-US").format(
-          rawHoldings
-        );
-        setStateHoldings(formattedHoldings);
-
-        console.log("Raw holdings (in Ether):", rawHoldings);
-        console.log("Price of token:", priceNum);
-
-        if (!isNaN(rawHoldings) && !isNaN(priceNum)) {
-          console.log("second time raw", Number(rawHoldings));
-          const holdingsInUSD = Number(rawHoldings * priceNum);
-          console.log("Holdings in USD:", holdingsInUSD);
-          setTotalStateHoldsInUS(
-            holdingsInUSD === 0 ? "0.0" : holdingsInUSD.toFixed(4)
-          );
-        } else {
-          console.error("Invalid values for calculation:", {
-            rawHoldings,
-            priceNum,
-          });
-          setTotalStateHoldsInUS("0.0");
-        }
-      } else {
+      if (!holdingsRaw) {
+        console.error("Failed to fetch state holdings.");
         setStateHoldings("0");
         setTotalStateHoldsInUS("0.0");
-        console.error("Failed to fetch state holdings.");
+        return;
       }
-      setLoadingState(false);
+
+      const rawHoldings = parseFloat(holdingsRaw);
+      const priceNum = Number(stateUsdPrice);
+
+      if (isNaN(rawHoldings) || isNaN(priceNum)) {
+        console.error("Invalid values for calculation:", {
+          rawHoldings,
+          priceNum,
+        });
+        setTotalStateHoldsInUS("0.0");
+        return;
+      }
+
+      const holdingsInUSD = rawHoldings * priceNum;
+
+      setStateHoldings(new Intl.NumberFormat("en-US").format(rawHoldings));
+      setTotalStateHoldsInUS(
+        holdingsInUSD === 0 ? "0.0" : holdingsInUSD.toFixed(4)
+      );
+
+      console.log(
+        "Holdings:",
+        rawHoldings,
+        "Price:",
+        priceNum,
+        "Holdings in USD:",
+        holdingsInUSD
+      );
     } catch (error) {
+      console.error("Error fetching state holdings:", error);
       setStateHoldings("0");
       setTotalStateHoldsInUS("0.0");
-      setLoadingState(false);
-      console.error("Error fetching state holdings:", error);
     } finally {
       setLoadingState(false);
     }
@@ -217,7 +219,7 @@ export const SwapContractProvider = ({ children }) => {
   const [isRenounced, setIsRenounced] = useState({}); // Empty object
 
   const checkOwnershipStatus = async () => {
-    const contractNames = ["state", "dav", "Fluxin", "FluxinRatio", "Xerion"];
+    const contractNames = ["state", "dav", "Fluxin", "FluxinRatio", "Xerion","XerionRatio"];
 
     try {
       const statusUpdates = {};
@@ -342,13 +344,11 @@ export const SwapContractProvider = ({ children }) => {
         {
           contract: AllContracts.RatioContract,
           name: "Fluxin",
-          ratioPrice: CurrentRatioPrice.Fluxin,
         },
-        // {
-        //   contract: AllContracts.XerionRatioContract,
-        //   name: "Xerion",
-        //   ratioPrice: XerionRatioPrice,
-        // },
+        {
+          contract: AllContracts.XerionRatioContract,
+          name: "Xerion",
+        },
       ];
 
       //   console.log("Xerion Ratio Price:", XerionRatioPrice);
@@ -421,14 +421,14 @@ export const SwapContractProvider = ({ children }) => {
           prev.Fluxin !== value.Fluxin.adjustedBalance
             ? value.Fluxin.adjustedBalance
             : prev.Fluxin,
-        // Xerion:
-        //   prev.Xerion !== value.Xerion.adjustedBalance
-        //     ? value.Xerion.adjustedBalance
-        //     : prev.Xerion,
+        Xerion:
+          prev.Xerion !== value.Xerion.adjustedBalance
+            ? value.Xerion.adjustedBalance
+            : prev.Xerion,
       }));
 
       console.log("from dt", value.Fluxin.adjustedBalance);
-      //   console.log("from dt1", value.Xerion.adjustedBalance);
+      console.log("from dt1", value.Xerion.adjustedBalance);
 
       return value.Fluxin.adjustedBalance;
     } catch (error) {
@@ -544,7 +544,7 @@ export const SwapContractProvider = ({ children }) => {
       // List of token contracts to handle
       const contracts = [
         { contract: AllContracts.RatioContract, name: "Fluxin" },
-        // { contract: AllContracts.XerionRatioContract, name: "Xerion" }, // Example for another token
+        { contract: AllContracts.XerionRatioContract, name: "Xerion" }, // Example for another token
       ];
 
       const ratioTargets = {};
@@ -589,7 +589,7 @@ export const SwapContractProvider = ({ children }) => {
 
       console.log(
         "Fetched and cached Ratio Targets:",
-        cachedRatioTargetsRef.current.Fluxin
+        cachedRatioTargetsRef.current.Xerion
       );
 
       setRatioTargetsOfTokens(ratioTargetValues);
@@ -604,7 +604,7 @@ export const SwapContractProvider = ({ children }) => {
     try {
       const contractDetails = [
         { name: "Fluxin", contract: AllContracts.RatioContract },
-        // { name: "Xerion", contract: AllContracts.XerionRatioContract },
+        { name: "Xerion", contract: AllContracts.XerionRatioContract },
       ];
 
       let totalBurnedAmount = 0;
@@ -851,8 +851,8 @@ export const SwapContractProvider = ({ children }) => {
       if (swapReceipt.status === 1) {
         console.log("Swap Complete!");
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap Complete!" }));
-         TotalTokensBurn();
-         StateBurnAmount();
+        TotalTokensBurn();
+        StateBurnAmount();
       } else {
         console.error("Swap transaction failed.");
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
@@ -910,13 +910,11 @@ export const SwapContractProvider = ({ children }) => {
         {
           name: "Fluxin",
           contract: AllContracts.RatioContract,
-          currentRatio: CurrentRatioPrice.Fluxin,
         },
-        // {
-        //   name: "Xerion",
-        //   contract: AllContracts.XerionRatioContract,
-        //   currentRatio: XerionRatioPrice,
-        // },
+        {
+          name: "Xerion",
+          contract: AllContracts.XerionRatioContract,
+        },
       ];
 
       const results = await Promise.all(
@@ -946,13 +944,11 @@ export const SwapContractProvider = ({ children }) => {
         {
           name: "Fluxin",
           contract: AllContracts.RatioContract,
-          currentRatio: CurrentRatioPrice.Fluxin,
         },
-        // {
-        //   name: "Xerion",
-        //   contract: AllContracts.XerionRatioContract,
-        //   currentRatio: XerionRatioPrice,
-        // },
+        {
+          name: "Xerion",
+          contract: AllContracts.XerionRatioContract,
+        },
       ];
 
       const results = await Promise.all(
@@ -984,13 +980,11 @@ export const SwapContractProvider = ({ children }) => {
         {
           name: "Fluxin",
           contract: AllContracts.RatioContract,
-          currentRatio: CurrentRatioPrice.Fluxin,
         },
-        // {
-        //   name: "Xerion",
-        //   contract: AllContracts.XerionRatioContract,
-        //   currentRatio: XerionRatioPrice,
-        // },
+        {
+          name: "Xerion",
+          contract: AllContracts.XerionRatioContract,
+        },
       ];
 
       const results = await Promise.all(
@@ -1300,8 +1294,8 @@ export const SwapContractProvider = ({ children }) => {
         loadingRatioPrice,
         setReverseEnable,
         RenounceFluxinSwap,
-		RenounceXerionSwap,
-		SetOnePercentageOfBalance,
+        RenounceXerionSwap,
+        SetOnePercentageOfBalance,
         ReverseForNextCycle,
         ReverseForCycle,
       }}

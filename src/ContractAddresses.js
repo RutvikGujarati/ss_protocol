@@ -22,4 +22,4 @@ export const Fluxin = "0xfe4EC02E6Fe069d90D4a721313f22d6461ec5A06";
 export const Xerion = "0xede25454E7F50a925BA00174164E0C6d818E4b25";
 
 export const Ratio_TOKEN_ADDRESS = "0xf0bb62b168E7aDBf313217EFdD448897aFCe8fD6";
-export const XerionRatioAddress = "0xF24141f2F47A4678d47948e09f4E3Aa0575858e3";
+export const XerionRatioAddress = "0xdb89A380171339c14ce316E2c7c32e8aCD8037fb";

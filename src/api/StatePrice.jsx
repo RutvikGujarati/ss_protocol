@@ -59,8 +59,8 @@ const PriceProvider = ({ children }) => {
 
   useEffect(() => {
     fetchPrice(
-      "https://api.geckoterminal.com/api/v2/simple/networks/pulsechain/token_price/0xb9664de2e15b24f5e934e66c72ad9329469e3642",
-      "0xb9664de2e15b24f5e934e66c72ad9329469e3642",
+      "https://api.geckoterminal.com/api/v2/simple/networks/pulsechain/token_price/0xede25454e7f50a925ba00174164e0c6d818e4b25",
+      "0xede25454e7f50a925ba00174164e0c6d818e4b25",
       setXerionUsdPrice
     );
   }, []);

@@ -6,6 +6,7 @@ import {
 	Ratio_TOKEN_ADDRESS,
 	STATE_TOKEN_ADDRESS,
 	Xerion,
+	XerionRatioAddress,
 
 } from "../ContractAddresses";
 import { PriceContext } from "../api/StatePrice";
@@ -20,9 +21,10 @@ const davShortened = shortenAddress(DAV_TOKEN_ADDRESS);
 const FluxinShortened = shortenAddress(Fluxin);
 const XerionShortened = shortenAddress(Xerion);
 const FluxinSwapShortened = shortenAddress(Ratio_TOKEN_ADDRESS);
+const XerionSwapShortened = shortenAddress(XerionRatioAddress);
 const stateShortened = shortenAddress(STATE_TOKEN_ADDRESS);
 export const TokensDetails = () => {
-	const { stateUsdPrice, FluxinUsdPrice } =
+	const { stateUsdPrice, FluxinUsdPrice,XerionUsdPrice } =
 		useContext(PriceContext);
 	const { simpleSupplies, mintAdditionalTOkens } = useGeneralTokens()
 	const { AuctionRunningLocalString, auctionDetails, TotalTokensBurned, auctionTimeLeft } = useGeneralAuctionFunctions()
@@ -71,7 +73,7 @@ export const TokensDetails = () => {
 			WillStartForNext: ReverseForNextCycle.Fluxin,
 			Balance: balances.fluxinBalance,
 			TotalTokensBurn: TotalTokensBurned.Fluxin,
-			RatioBalance: balances.ratioFluxinBalance,
+			RatioBalance: balances?.ratioFluxinBalance,
 			Duration: auctionDetails["Fluxin"],
 			interval: auctionDetails["Fluxin"],
 			AuctionRunning: AuctionRunningLocalString.Fluxin.toString(),
@@ -114,32 +116,28 @@ export const TokensDetails = () => {
 			Supply: simpleSupplies.XerionSupply,
 			percentage: PercentageXerion,
 			address: Xerion,
-			SwapContract: "null",
-			SwapShortContract: "null",
+			SwapContract: XerionRatioAddress,
+			SwapShortContract: XerionSwapShortened,
 			stateBalance: balances.StateXerion,
 			target: RatioTargetsofTokens["Xerion"],
-			// isReversing: isReversed.Fluxin.toString(),
-			isReversing:"false",
+			isReversing: isReversed.Xerion.toString(),
 			WillStart: ReverseForCycle.Xerion,
 			WillStartForNext: ReverseForNextCycle.Xerion,
 			Balance: balances.xerionBalance,
-			// TotalTokensBurn: TotalTokensBurned.Xerion,
-			TotalTokensBurn: "0",
-			RatioBalance: balances.ratioXerionBalance,
+			TotalTokensBurn: TotalTokensBurned.Xerion,
+			RatioBalance: balances?.ratioXerionBalance,
 			Duration: auctionDetails["Xerion"],
 			interval: auctionDetails["Xerion"],
-			// AuctionRunning: AuctionRunningLocalString.Xerion.toString(),
-			AuctionRunning: "false",
-			pair: "Fluxin/pSTATE",
+			AuctionRunning: AuctionRunningLocalString.Xerion.toString(),
+			pair: "Layti/pSTATE",
 			Ratio: CurrentRatioPrice.Xerion,
-			Price: "0.0",
+			Price: XerionUsdPrice,
 			SetDuration: () => SetAUctionDuration(),
 			AuctionTimeRunning: auctionTimeLeft.Xerion,
 			AuctionNextTime: auctionDetails["Xerion"],
 			mintAddTOkens: "125,000,000,000",
 			renounceSmartContract: isRenounced?.Xerion ?? "Unknown",
-			renounceSwapSmartContract:false,
-			// renounceSwapSmartContract: isRenounced?.XerionRatio ?? "Unknown",
+			renounceSwapSmartContract: isRenounced?.XerionRatio ?? "Unknown",
 			actions: {
 				ReanounceContract: ReanounceXerionContract,
 				ReanounceSwapContract: RenounceXerionSwap,
