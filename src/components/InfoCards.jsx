@@ -274,12 +274,8 @@ const InfoCards = () => {
                       <div className="carddetails2">
                         <p className="mb-1 detailText">State token holdings</p>
                         <h5 className="">
-                          {LoadingState ? <DotAnimation /> : StateHolds} / $
-                          {LoadingState ? (
-                            <DotAnimation />
-                          ) : (
-                            formatWithCommas(TotalStateHoldsInUS)
-                          )}
+                          {StateHolds} / $
+                          {formatWithCommas(TotalStateHoldsInUS)}
                         </h5>
                       </div>
                       <div className="mb-0 mx-1">
