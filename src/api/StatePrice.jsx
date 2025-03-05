@@ -9,6 +9,7 @@ const PriceProvider = ({ children }) => {
   const [priceLoading, setPriceLoading] = useState(true);
   const [FluxinUsdPrice, setFluxinUsdPrice] = useState(null);
   const [XerionUsdPrice, setXerionUsdPrice] = useState(null);
+  const [OneDollarUsdPrice, setOneDollarUsdPrice] = useState(null);
   const [error, setError] = useState(null);
 
   const fetchPrice = async (url, tokenId, setPrice, tokenName) => {
@@ -18,18 +19,11 @@ const PriceProvider = ({ children }) => {
       let tokenPrice;
       if (tokenName === "state") {
         tokenPrice = response.data?.data?.attributes[tokenId];
-      } else if (tokenName === "Fluxin" || tokenName === "Xerion") {
-        tokenPrice = response.data?.data?.attributes[tokenId];
       } else {
         tokenPrice = response.data?.data?.attributes.token_prices[tokenId];
       }
 
-      if (
-        (tokenPrice && tokenName === "Fluxin") ||
-        (tokenPrice && tokenName === "Xerion")
-      ) {
-        setPrice(parseFloat(tokenPrice).toFixed(0));
-      } else if (tokenPrice) {
+      if (tokenPrice) {
         setPrice(parseFloat(tokenPrice).toFixed(9));
       } else setError("Token price not found.");
     } catch (err) {
@@ -64,6 +58,13 @@ const PriceProvider = ({ children }) => {
       setXerionUsdPrice
     );
   }, []);
+  useEffect(() => {
+    fetchPrice(
+      "https://api.geckoterminal.com/api/v2/simple/networks/pulsechain/token_price/0x4f665ef2ef5336d26a6c06525dd812786e5614c6",
+      "0x4f665ef2ef5336d26a6c06525dd812786e5614c6",
+      setOneDollarUsdPrice
+    );
+  }, []);
 
   return (
     <PriceContext.Provider
@@ -71,6 +72,7 @@ const PriceProvider = ({ children }) => {
         stateUsdPrice,
         FluxinUsdPrice,
         XerionUsdPrice,
+        OneDollarUsdPrice,
         error,
         priceLoading,
       }}

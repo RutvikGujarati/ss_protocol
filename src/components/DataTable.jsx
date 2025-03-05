@@ -86,7 +86,7 @@ const DataTable = () => {
     }
 
     // General case: No significant leading zeros
-    return `$${parseFloat(price).toFixed(7)}`;
+    return `${parseFloat(price).toFixed(7)}`;
   };
   const db = parseFloat(DavBalance);
   console.log("db required for Auction", DavBalanceRequire);
@@ -176,6 +176,7 @@ const DataTable = () => {
                     onChart,
                     distributedAmount,
                     inputTokenAmount,
+					onlyInputAmount,
                     handleAddToken,
                     outputToken,
                   },
@@ -272,7 +273,7 @@ const DataTable = () => {
                             ) : (
                               <>
                                 <div className="tableClaim hover-container">
-                                  {inputTokenAmount <= "1" && (
+                                  {onlyInputAmount <= 0 && (
                                     <div className="hover-box">
                                       {`not enough ${name} available in your account`}
                                     </div>

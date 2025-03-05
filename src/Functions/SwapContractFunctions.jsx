@@ -8,6 +8,7 @@ import {
   $1,
   DAV_TOKEN_ADDRESS,
   Fluxin,
+  OneDollarRatioAddress,
   Ratio_TOKEN_ADDRESS,
   STATE_TOKEN_ADDRESS,
   Xerion,
@@ -38,14 +39,17 @@ export const SwapContractProvider = ({ children }) => {
   const [isReversed, setisReversed] = useState({
     Fluxin: false,
     Xerion: false,
+    OneDollar: false,
   });
   const [ReverseForCycle, setForCycle] = useState({
     Fluxin: false,
     Xerion: false,
+    OneDollar: false,
   });
   const [ReverseForNextCycle, setForNextCycle] = useState({
     Fluxin: false,
     Xerion: false,
+    OneDollar: false,
   });
   const [StateHolds, setStateHoldings] = useState("0.0");
   const [LoadingState, setLoadingState] = useState(true);
@@ -75,18 +79,21 @@ export const SwapContractProvider = ({ children }) => {
     dav: AllContracts.davContract,
     Fluxin: AllContracts.FluxinContract,
     oneD: AllContracts.oneDollar,
-    FluxinRatio: AllContracts.RatioContract,
     Xerion: AllContracts.XerionContract,
+    FluxinRatio: AllContracts.RatioContract,
+    OneDollar: AllContracts.OneDollarRatioContract,
     XerionRatio: AllContracts.XerionRatioContract,
   };
   const Swapcontracts = {
     Fluxin: AllContracts.RatioContract,
     Xerion: AllContracts.XerionRatioContract,
+    OneDollar: AllContracts.OneDollarRatioContract,
   };
 
   const contractMapping = {
     fluxinRatio: AllContracts.RatioContract,
     XerionRatio: AllContracts.XerionRatioContract,
+    OneDollarRatio: AllContracts.OneDollarRatioContract,
   };
   const handleContractCall = async (
     contract,
@@ -224,6 +231,7 @@ export const SwapContractProvider = ({ children }) => {
       "Xerion",
       "XerionRatio",
       "oneD",
+      "OneDollar",
     ];
 
     try {
@@ -285,6 +293,8 @@ export const SwapContractProvider = ({ children }) => {
     renounceOwnership(AllContracts.XerionContract, "Xerion");
   const ReanounceOneDollarContract = () =>
     renounceOwnership(AllContracts.oneDollar, "1$");
+  const ReanounceOneDollarSwapContract = () =>
+    renounceOwnership(AllContracts.OneDollarRatioContract, "1$");
   const RenounceState = () =>
     renounceOwnership(AllContracts.stateContract, "State");
   const RenounceFluxinSwap = () =>
@@ -311,6 +321,8 @@ export const SwapContractProvider = ({ children }) => {
     handleTokenWithdraw(AllContracts.FluxinContract, amount);
   const WithdrawXerion = (amount) =>
     handleTokenWithdraw(AllContracts.XerionContract, amount);
+  const WithdrawOneDollar = (amount) =>
+    handleTokenWithdraw(AllContracts.oneDollar, amount);
 
   useEffect(() => {
     setTimeout(() => {
@@ -355,6 +367,10 @@ export const SwapContractProvider = ({ children }) => {
         {
           contract: AllContracts.XerionRatioContract,
           name: "Xerion",
+        },
+        {
+          contract: AllContracts.OneDollarRatioContract,
+          name: "OneDollar",
         },
       ];
 
@@ -414,6 +430,7 @@ export const SwapContractProvider = ({ children }) => {
   const [outAmounts, setOutAmounts] = useState({
     Fluxin: "0",
     Xerion: "0",
+    OneDollar: "0",
   });
 
   const AmountOut = async () => {
@@ -432,6 +449,10 @@ export const SwapContractProvider = ({ children }) => {
           prev.Xerion !== value.Xerion.adjustedBalance
             ? value.Xerion.adjustedBalance
             : prev.Xerion,
+        OneDollar:
+          prev.OneDollar !== value.OneDollar.adjustedBalance
+            ? value.OneDollar.adjustedBalance
+            : prev.OneDollar,
       }));
 
       console.log("from dt", value.Fluxin.adjustedBalance);
@@ -454,6 +475,7 @@ export const SwapContractProvider = ({ children }) => {
       const contracts = [
         { name: "Fluxin", contract: AllContracts.RatioContract },
         { name: "Xerion", contract: AllContracts.XerionRatioContract },
+        { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
 
       // Fetch data for all contracts
@@ -488,6 +510,7 @@ export const SwapContractProvider = ({ children }) => {
       const contracts = [
         { name: "Fluxin", contract: AllContracts.RatioContract },
         { name: "Xerion", contract: AllContracts.XerionRatioContract },
+        { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
 
       // Fetch data for all contracts
@@ -552,6 +575,7 @@ export const SwapContractProvider = ({ children }) => {
       const contracts = [
         { contract: AllContracts.RatioContract, name: "Fluxin" },
         { contract: AllContracts.XerionRatioContract, name: "Xerion" }, // Example for another token
+        { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
 
       const ratioTargets = {};
@@ -612,6 +636,7 @@ export const SwapContractProvider = ({ children }) => {
       const contractDetails = [
         { name: "Fluxin", contract: AllContracts.RatioContract },
         { name: "Xerion", contract: AllContracts.XerionRatioContract },
+        { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
 
       let totalBurnedAmount = 0;
@@ -658,6 +683,11 @@ export const SwapContractProvider = ({ children }) => {
       key: "xerionBalance",
     },
     {
+      contract: AllContracts.oneDollar,
+      token: $1,
+      key: "OneDollarBalance",
+    },
+    {
       contract: AllContracts.stateContract,
       token: Ratio_TOKEN_ADDRESS,
       key: "StateFluxin",
@@ -668,6 +698,11 @@ export const SwapContractProvider = ({ children }) => {
       key: "StateXerion",
     },
     {
+      contract: AllContracts.stateContract,
+      token: OneDollarRatioAddress,
+      key: "StateOneDollar",
+    },
+    {
       contract: AllContracts.FluxinContract,
       token: Ratio_TOKEN_ADDRESS,
       key: "ratioFluxinBalance",
@@ -676,6 +711,11 @@ export const SwapContractProvider = ({ children }) => {
       contract: AllContracts.XerionContract,
       token: XerionRatioAddress,
       key: "ratioXerionBalance",
+    },
+    {
+      contract: AllContracts.oneDollar,
+      token: OneDollarRatioAddress,
+      key: "ratioOneDollarBalance",
     },
   ];
 
@@ -753,16 +793,19 @@ export const SwapContractProvider = ({ children }) => {
       const OutAmountsMapping = {
         Fluxin: outAmounts.Fluxin,
         Xerion: outAmounts.Xerion,
+        OneDollar: outAmounts.OneDollar,
       };
 
       const ContractAddressToUse = {
         Fluxin: Ratio_TOKEN_ADDRESS,
         Xerion: XerionRatioAddress,
+        OneDollar: OneDollarRatioAddress,
       };
       console.log("output amount:", OutAmountsMapping[ContractName]);
       const InAmountMapping = {
         Fluxin: OnePBalance.Fluxin,
         Xerion: OnePBalance.Xerion,
+        OneDollar: OnePBalance.OneDollar,
       };
       console.log("reverse from swap", isReversed);
       console.log("input amount:", InAmountMapping[ContractName]);
@@ -775,6 +818,7 @@ export const SwapContractProvider = ({ children }) => {
       let approvalAmount;
       let contractToUse = {
         Fluxin: AllContracts.FluxinContract,
+        OneDollar: AllContracts.oneDollar,
         Xerion: AllContracts.XerionContract,
         state: AllContracts.stateContract,
       };
@@ -784,7 +828,8 @@ export const SwapContractProvider = ({ children }) => {
       let selectedContract;
       if (
         (ContractName == "Fluxin" && isReversed.Fluxin == "true") ||
-        (ContractName == "Xerion" && isReversed.Xerion == "true")
+        (ContractName == "Xerion" && isReversed.Xerion == "true") ||
+        (ContractName == "OneDollar" && isReversed.OneDollar == "true")
       ) {
         selectedContract = contractToUse["state"];
         approvalAmount = ethers.parseUnits(
@@ -852,6 +897,7 @@ export const SwapContractProvider = ({ children }) => {
       const contracts = {
         Fluxin: AllContracts.RatioContract,
         Xerion: AllContracts.XerionRatioContract,
+        OneDollar: AllContracts.OneDollarRatioContract,
       };
       // Perform the token swap
       const swapTx = await contracts[ContractName].swapTokens(account);
@@ -924,6 +970,10 @@ export const SwapContractProvider = ({ children }) => {
           name: "Xerion",
           contract: AllContracts.XerionRatioContract,
         },
+        {
+          name: "OneDollar",
+          contract: AllContracts.OneDollarRatioContract,
+        },
       ];
 
       const results = await Promise.all(
@@ -957,6 +1007,10 @@ export const SwapContractProvider = ({ children }) => {
         {
           name: "Xerion",
           contract: AllContracts.XerionRatioContract,
+        },
+        {
+          name: "OneDollar",
+          contract: AllContracts.OneDollarRatioContract,
         },
       ];
 
@@ -993,6 +1047,10 @@ export const SwapContractProvider = ({ children }) => {
         {
           name: "Xerion",
           contract: AllContracts.XerionRatioContract,
+        },
+        {
+          name: "OneDollar",
+          contract: AllContracts.OneDollarRatioContract,
         },
       ];
 
@@ -1031,8 +1089,12 @@ export const SwapContractProvider = ({ children }) => {
           [],
           (s) => ethers.formatUnits(s, 18)
         );
-
-        let balance = Math.floor(parseFloat(rawBalance || "0"));
+        let balance;
+        if (tokenName == "OneDollar") {
+          balance = parseFloat(rawBalance || "0").toFixed(2); // Keeps 2 decimal places
+        } else {
+          balance = Math.floor(parseFloat(rawBalance || "0"));
+        }
 
         console.log(`SetOnePercentageOfBalance -> ${tokenName}:`, rawBalance);
         console.log(`Adjusted Balance for ${tokenName}:`, balance);
@@ -1052,14 +1114,14 @@ export const SwapContractProvider = ({ children }) => {
         ...prevState,
         ...balances,
       }));
-      console.log("SetOnePercentageOfBalance cache:", OnePBalance.Fluxin);
+      console.log("SetOnePercentageOfBalance cache:", OnePBalance.OneDollar);
       //   return balances;
     } catch (e) {
       console.error("Error in SetOnePercentageOfBalance:", e);
       return null;
     }
   };
-  console.log("SetOnePercentageOfBalance cache:", OnePBalance.Xerion);
+  console.log("SetOnePercentageOfBalance cache:", OnePBalance.OneDollar);
 
   const getDavRequiredAmount = async () => {
     try {
@@ -1090,6 +1152,7 @@ export const SwapContractProvider = ({ children }) => {
       const addressMapping = {
         fluxinRatio: Ratio_TOKEN_ADDRESS,
         XerionRatio: XerionRatioAddress,
+        OneDollarRatio: OneDollarRatioAddress,
       };
       const allowance = await contracts[name].allowance(
         account,
@@ -1302,6 +1365,8 @@ export const SwapContractProvider = ({ children }) => {
         DavRequiredAmount,
         LoadingState,
         loadingRatioPrice,
+        WithdrawOneDollar,
+        ReanounceOneDollarSwapContract,
         setReverseEnable,
         RenounceFluxinSwap,
         RenounceXerionSwap,
@@ -1309,7 +1374,7 @@ export const SwapContractProvider = ({ children }) => {
         SetOnePercentageOfBalance,
         ReverseForNextCycle,
         handleAddOneD,
-		PercentageOneD,
+        PercentageOneD,
         ReverseForCycle,
       }}
     >

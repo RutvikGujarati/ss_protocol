@@ -184,6 +184,7 @@ export const GeneralTokenProvider = ({ children }) => {
       const contracts = [
         { name: "Fluxin", contract: AllContracts.RatioContract },
         { name: "Xerion", contract: AllContracts.XerionRatioContract },
+        { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
 
       const currentRP = {};

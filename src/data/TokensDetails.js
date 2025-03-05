@@ -4,6 +4,7 @@ import {
 	$1,
 	DAV_TOKEN_ADDRESS,
 	Fluxin,
+	OneDollarRatioAddress,
 	Ratio_TOKEN_ADDRESS,
 	STATE_TOKEN_ADDRESS,
 	Xerion,
@@ -24,9 +25,10 @@ const XerionShortened = shortenAddress(Xerion);
 const OneDShortened = shortenAddress($1);
 const FluxinSwapShortened = shortenAddress(Ratio_TOKEN_ADDRESS);
 const XerionSwapShortened = shortenAddress(XerionRatioAddress);
+const OneDollarSwapShortened = shortenAddress(OneDollarRatioAddress);
 const stateShortened = shortenAddress(STATE_TOKEN_ADDRESS);
 export const TokensDetails = () => {
-	const { stateUsdPrice, FluxinUsdPrice,XerionUsdPrice } =
+	const { stateUsdPrice, FluxinUsdPrice,XerionUsdPrice,OneDollarUsdPrice } =
 		useContext(PriceContext);
 	const { simpleSupplies, mintAdditionalTOkens } = useGeneralTokens()
 	const { AuctionRunningLocalString, auctionDetails, TotalTokensBurned, auctionTimeLeft } = useGeneralAuctionFunctions()
@@ -35,8 +37,9 @@ export const TokensDetails = () => {
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, PercentageFluxin,PercentageXerion,PercentageOneD,RenounceXerionSwap, balances, isReversed, RatioTargetsofTokens, ReanounceContract, SetAUctionDuration, WithdrawFluxin,WithdrawXerion, ReanounceFluxinContract,ReanounceXerionContract,ReanounceOneDollarContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, PercentageOfState, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate } = useSwapContract();
+	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, PercentageFluxin,PercentageXerion,ReanounceOneDollarSwapContract,PercentageOneD,RenounceXerionSwap, balances, isReversed, RatioTargetsofTokens, ReanounceContract, SetAUctionDuration, WithdrawFluxin,WithdrawXerion, ReanounceFluxinContract,ReanounceXerionContract,ReanounceOneDollarContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, PercentageOfState, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate,WithdrawOneDollar } = useSwapContract();
 	console.log("isReversing", isReversed.Fluxin)
+	console.log("isReversing", balances.OneDollarBalance )
 	return [
 		{
 			tokenName: "DAV",
@@ -168,47 +171,47 @@ export const TokensDetails = () => {
 			Supply: simpleSupplies.oneDollarSupply,
 			percentage: PercentageOneD,
 			address: $1,
-			// SwapContract: XerionRatioAddress,
-			// SwapShortContract: XerionSwapShortened,
-			// stateBalance: balances.StateXerion,
-			// target: RatioTargetsofTokens["Xerion"],
-			// isReversing: isReversed.Xerion.toString(),
-			// WillStart: ReverseForCycle.Xerion,
-			// WillStartForNext: ReverseForNextCycle.Xerion,
-			// Balance: balances.xerionBalance,
-			// TotalTokensBurn: TotalTokensBurned.Xerion,
-			// RatioBalance: balances?.ratioXerionBalance,
-			// Duration: auctionDetails["Xerion"],
-			// interval: auctionDetails["Xerion"],
-			// AuctionRunning: AuctionRunningLocalString.Xerion.toString(),
-			// pair: "Layti/pSTATE",
-			// Ratio: CurrentRatioPrice.Xerion,
-			// Price: XerionUsdPrice,
+			SwapContract: OneDollarRatioAddress,
+			SwapShortContract: OneDollarSwapShortened,
+			stateBalance: balances.StateOneDollar,
+			target: RatioTargetsofTokens["OneDollar"],
+			isReversing: isReversed.OneDollar.toString(),
+			WillStart: ReverseForCycle.OneDollar,
+			WillStartForNext: ReverseForNextCycle.OneDollar,
+			Balance: balances.OneDollarBalance,
+			TotalTokensBurn: TotalTokensBurned.OneDollar,
+			RatioBalance: balances?.ratioOneDollarBalance ,
+			Duration: auctionDetails["OneDollar"],
+			interval: auctionDetails["OneDollar"],
+			AuctionRunning: AuctionRunningLocalString.OneDollar.toString(),
+			pair: "Layti/pSTATE",
+			Ratio: CurrentRatioPrice.OneDollar,
+			Price: OneDollarUsdPrice,
 			SetDuration: () => SetAUctionDuration(),
-			AuctionTimeRunning: auctionTimeLeft.Xerion,
-			AuctionNextTime: auctionDetails["Xerion"],
+			AuctionTimeRunning: auctionTimeLeft.OneDollar,
+			AuctionNextTime: auctionDetails["OneDollar"],
 			mintAddTOkens: "25,000,000",
 			renounceSmartContract: isRenounced?.oneD ?? "Unknown",
 			renounceSwapSmartContract: isRenounced?.oneD ?? "Unknown",
 			actions: {
 				ReanounceContract: ReanounceOneDollarContract,
-				ReanounceSwapContract: RenounceXerionSwap,
-				WithdrawState: WithdrawXerion,
+				ReanounceSwapContract: ReanounceOneDollarSwapContract,
+				WithdrawState: WithdrawOneDollar,
 				mintAdditionalTOkens: mintAdditionalTOkens,
-				SetDuration: (value) => SetAUctionDuration(value, "XerionRatio"),
-				SetInterval: (value) => SetAUctionInterval(value, "XerionRatio"),
+				SetDuration: (value) => SetAUctionDuration(value, "OneDollarRatio"),
+				SetInterval: (value) => SetAUctionInterval(value, "OneDollarRatio"),
 				AddTokenToContract: () =>
-					AddTokensToContract(Xerion, STATE_TOKEN_ADDRESS, CurrentRatioPrice.Xerion),
-				setRatio: (value) => setRatioTarget(value, "XerionRatio"),
-				setBurn: (value) => setBurnRate(value, "XerionRatio"),
-				setReverseEnabled: () => setReverseEnable("XerionRatio"),
+					AddTokensToContract($1, STATE_TOKEN_ADDRESS, CurrentRatioPrice.OneDollar),
+				setRatio: (value) => setRatioTarget(value, "OneDollarRatio"),
+				setBurn: (value) => setBurnRate(value, "OneDollarRatio"),
+				setReverseEnabled: () => setReverseEnable("OneDollarRatio"),
 				setReverse: (value, value2) => setReverseTime(value, value2),
 				setCurrentRatio: (value) => setCurrentRatioTarget(value),
 				DepositTokens: (value) =>
-					DepositToken("Xerion", Xerion, value, "XerionRatio"),
+					DepositToken("oneD", $1, value, "OneDollarRatio"),
 				DepositStateTokens: (value) =>
-					DepositToken("state", STATE_TOKEN_ADDRESS, value, "XerionRatio"),
-				StartingAuction: () => StartAuction("XerionRatio"),
+					DepositToken("state", STATE_TOKEN_ADDRESS, value, "OneDollarRatio"),
+				StartingAuction: () => StartAuction("OneDollarRatio"),
 			},
 		},
 		{
