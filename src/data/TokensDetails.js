@@ -189,7 +189,7 @@ export const TokensDetails = () => {
 			AuctionNextTime: auctionDetails["Xerion"],
 			mintAddTOkens: "25,000,000",
 			renounceSmartContract: isRenounced?.oneD ?? "Unknown",
-			renounceSwapSmartContract: isRenounced?.XerionRatio ?? "Unknown",
+			renounceSwapSmartContract: isRenounced?.oneD ?? "Unknown",
 			actions: {
 				ReanounceContract: ReanounceOneDollarContract,
 				ReanounceSwapContract: RenounceXerionSwap,
