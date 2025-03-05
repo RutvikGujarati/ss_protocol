@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import {
+	$1,
 	DAV_TOKEN_ADDRESS,
 	Fluxin,
 	Ratio_TOKEN_ADDRESS,
@@ -20,6 +21,7 @@ const shortenAddress = (address) => {
 const davShortened = shortenAddress(DAV_TOKEN_ADDRESS);
 const FluxinShortened = shortenAddress(Fluxin);
 const XerionShortened = shortenAddress(Xerion);
+const OneDShortened = shortenAddress($1);
 const FluxinSwapShortened = shortenAddress(Ratio_TOKEN_ADDRESS);
 const XerionSwapShortened = shortenAddress(XerionRatioAddress);
 const stateShortened = shortenAddress(STATE_TOKEN_ADDRESS);
@@ -33,7 +35,7 @@ export const TokensDetails = () => {
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, PercentageFluxin,PercentageXerion,RenounceXerionSwap, balances, isReversed, RatioTargetsofTokens, ReanounceContract, SetAUctionDuration, WithdrawFluxin,WithdrawXerion, ReanounceFluxinContract,ReanounceXerionContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, PercentageOfState, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate } = useSwapContract();
+	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, PercentageFluxin,PercentageXerion,PercentageOneD,RenounceXerionSwap, balances, isReversed, RatioTargetsofTokens, ReanounceContract, SetAUctionDuration, WithdrawFluxin,WithdrawXerion, ReanounceFluxinContract,ReanounceXerionContract,ReanounceOneDollarContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, PercentageOfState, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate } = useSwapContract();
 	console.log("isReversing", isReversed.Fluxin)
 	return [
 		{
@@ -140,6 +142,56 @@ export const TokensDetails = () => {
 			renounceSwapSmartContract: isRenounced?.XerionRatio ?? "Unknown",
 			actions: {
 				ReanounceContract: ReanounceXerionContract,
+				ReanounceSwapContract: RenounceXerionSwap,
+				WithdrawState: WithdrawXerion,
+				mintAdditionalTOkens: mintAdditionalTOkens,
+				SetDuration: (value) => SetAUctionDuration(value, "XerionRatio"),
+				SetInterval: (value) => SetAUctionInterval(value, "XerionRatio"),
+				AddTokenToContract: () =>
+					AddTokensToContract(Xerion, STATE_TOKEN_ADDRESS, CurrentRatioPrice.Xerion),
+				setRatio: (value) => setRatioTarget(value, "XerionRatio"),
+				setBurn: (value) => setBurnRate(value, "XerionRatio"),
+				setReverseEnabled: () => setReverseEnable("XerionRatio"),
+				setReverse: (value, value2) => setReverseTime(value, value2),
+				setCurrentRatio: (value) => setCurrentRatioTarget(value),
+				DepositTokens: (value) =>
+					DepositToken("Xerion", Xerion, value, "XerionRatio"),
+				DepositStateTokens: (value) =>
+					DepositToken("state", STATE_TOKEN_ADDRESS, value, "XerionRatio"),
+				StartingAuction: () => StartAuction("XerionRatio"),
+			},
+		},
+		{
+			tokenName: "1$",
+			key: OneDShortened,
+			name: "1$",
+			Supply: simpleSupplies.oneDollarSupply,
+			percentage: PercentageOneD,
+			address: $1,
+			// SwapContract: XerionRatioAddress,
+			// SwapShortContract: XerionSwapShortened,
+			// stateBalance: balances.StateXerion,
+			// target: RatioTargetsofTokens["Xerion"],
+			// isReversing: isReversed.Xerion.toString(),
+			// WillStart: ReverseForCycle.Xerion,
+			// WillStartForNext: ReverseForNextCycle.Xerion,
+			// Balance: balances.xerionBalance,
+			// TotalTokensBurn: TotalTokensBurned.Xerion,
+			// RatioBalance: balances?.ratioXerionBalance,
+			// Duration: auctionDetails["Xerion"],
+			// interval: auctionDetails["Xerion"],
+			// AuctionRunning: AuctionRunningLocalString.Xerion.toString(),
+			// pair: "Layti/pSTATE",
+			// Ratio: CurrentRatioPrice.Xerion,
+			// Price: XerionUsdPrice,
+			SetDuration: () => SetAUctionDuration(),
+			AuctionTimeRunning: auctionTimeLeft.Xerion,
+			AuctionNextTime: auctionDetails["Xerion"],
+			mintAddTOkens: "25,000,000",
+			renounceSmartContract: isRenounced?.oneD ?? "Unknown",
+			renounceSwapSmartContract: isRenounced?.XerionRatio ?? "Unknown",
+			actions: {
+				ReanounceContract: ReanounceOneDollarContract,
 				ReanounceSwapContract: RenounceXerionSwap,
 				WithdrawState: WithdrawXerion,
 				mintAdditionalTOkens: mintAdditionalTOkens,

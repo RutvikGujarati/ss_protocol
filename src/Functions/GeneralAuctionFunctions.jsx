@@ -21,7 +21,6 @@ export const GeneralAuctionProvider = ({ children }) => {
 
   const [auctionDetails, setAuctionDetails] = useState({});
   const [TotalTokensBurned, setTotalTokenBurned] = useState({});
-  const [TotalBounty, setTotalTokenBounty] = useState({});
 
   const contracts = [
     { name: "Fluxin", contract: AllContracts.RatioContract },
@@ -53,7 +52,7 @@ export const GeneralAuctionProvider = ({ children }) => {
 
       try {
         // Run token-related calls in parallel
-        const tokenPromises = [TotalTokensBurn(), TotalBountyAmount()];
+        const tokenPromises = [TotalTokensBurn()];
         await Promise.all(tokenPromises);
       } catch (error) {
         console.error("Error in total burn/bounty fetching:", error);
@@ -200,28 +199,7 @@ export const GeneralAuctionProvider = ({ children }) => {
       console.error("Error fetching burn status:", e);
     }
   };
-  const TotalBountyAmount = async () => {
-    try {
-      const results = await Promise.all(
-        contracts.map(async ({ name, contract }) => {
-          const TotalBounty = await contract.getTotalBountyCollected();
-          const totalBounty = ethers.formatUnits(TotalBounty, 18);
-
-          return { name, TotalBounty: Math.floor(totalBounty) };
-        })
-      );
-
-      const newStates = results.reduce((acc, { name, TotalBounty }) => {
-        acc[name] = TotalBounty;
-        return acc;
-      }, {});
-      console.log("state of burn", newStates);
-      setTotalTokenBounty(newStates); // Update state with the combined object
-      console.log("Updated burn occurrences:", newStates);
-    } catch (e) {
-      console.error("Error fetching burn status:", e);
-    }
-  };
+  
 
   GeneralAuctionProvider.propTypes = {
     children: PropTypes.node.isRequired,
@@ -232,7 +210,6 @@ export const GeneralAuctionProvider = ({ children }) => {
         AuctionRunningLocalString,
         AuctionRunning,
         auctionDetails,
-        TotalBounty,
         TotalTokensBurned,
         auctionTimeLeft,
         isAuctionRunning,

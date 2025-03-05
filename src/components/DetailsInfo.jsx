@@ -320,6 +320,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
             )}
             {(dataToShow.tokenName == "STATE" ||
               dataToShow.tokenName == "Orxa" ||
+              dataToShow.tokenName == "1$" ||
               dataToShow.tokenName == "Layti") && (
               <>
                 {dataToShow.tokenName !== "STATE" && (
@@ -373,6 +374,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           ? "STATE Balance (inside Contract)"
                           : dataToShow.tokenName === "Layti"
                           ? "Layti Balance (inside Contract)"
+                          : dataToShow.tokenName === "1$"
+                          ? "1$ Balance (inside Contract)"
                           : "Orxa Balance (inside Contract)"}
                       </td>
 
@@ -422,6 +425,12 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               dataToShow.actions.mintAdditionalTOkens(
                                 "Xerion",
                                 125000000000
+                              ); // Amount for State
+                            
+                            } else if (dataToShow.tokenName === "1$") {
+                              dataToShow.actions.mintAdditionalTOkens(
+                                "oneD",
+                                25000000
                               ); // Amount for State
                             }
                           }}

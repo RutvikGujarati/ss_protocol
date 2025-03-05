@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import FluxinLogo from "../assets/FluxinLogo.png";
 import XerionLogo from "../assets/layti.png";
+import oned from "../assets/oned.png";
 
 import { Fluxin, Xerion } from "../ContractAddresses";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
@@ -66,6 +67,32 @@ export const useAuctionTokens = () => {
 			ReverseName: "State - Layti",
 			ContractName: "Xerion",
 			image: XerionLogo,
+			ratio: `1:${RatioTargetsofTokens?.["Xerion"] || 0}`,
+			userHasSwapped: userHashSwapped.Xerion,
+			userHasReverse: userHasReverseSwapped.Xerion,
+			currentRatio: `1:${CurrentRatioPrice.Xerion || 0}`,
+			Price: XerionUsdPrice,
+			isReversing: isReversed?.Xerion.toString(),
+			currentTokenRatio: CurrentRatioPrice.Xerion,
+			ErrorName: "Xerion",
+			RatioTargetToken: RatioTargetsofTokens?.["Xerion"] || 0,
+			AuctionStatus:  AuctionRunning?.Xerion,
+			onChart: "https://www.geckoterminal.com/pulsechain/pools/0xc7d4d22af7a4ef1ffe25235c4d4cce9b7ab77edf",
+			distributedAmount: Distributed?.["Xerion"] || 0,
+			token: Xerion,
+			SwapT: () => SwapTokens("Layti", "Xerion"),
+			ratioPrice: CurrentRatioPrice.Xerion,
+			handleAddToken: handleAddXerion,
+			inputTokenAmount: `${OnePBalance.Xerion || 0} Layti`,
+			outputToken: `${outAmounts?.Xerion || 0} State`,
+		},
+		{
+			id: "1$",
+			name: "1$",
+			Pname: "1$ - State - 1$",
+			ReverseName: "State - 1$",
+			ContractName: "oneD",
+			image: oned,
 			ratio: `1:${RatioTargetsofTokens?.["Xerion"] || 0}`,
 			userHasSwapped: userHashSwapped.Xerion,
 			userHasReverse: userHasReverseSwapped.Xerion,

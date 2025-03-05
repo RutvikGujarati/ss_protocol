@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import { PriceContext } from "../api/StatePrice";
 import { ContractContext } from "./ContractInitialize";
 import {
+  $1,
   DAV_TOKEN_ADDRESS,
   Fluxin,
   Ratio_TOKEN_ADDRESS,
@@ -63,6 +64,7 @@ export const SwapContractProvider = ({ children }) => {
   const [PercentageOfState, setPercentage] = useState("0.0");
   const [PercentageFluxin, setFluxinPercentage] = useState("0.0");
   const [PercentageXerion, setXerionPercentage] = useState("0.0");
+  const [PercentageOneD, setOneDPercentage] = useState("0.0");
 
   const [userHashSwapped, setUserHashSwapped] = useState({});
   const [userHasReverseSwapped, setUserHasReverseSwapped] = useState({});
@@ -72,6 +74,7 @@ export const SwapContractProvider = ({ children }) => {
     state: AllContracts.stateContract,
     dav: AllContracts.davContract,
     Fluxin: AllContracts.FluxinContract,
+    oneD: AllContracts.oneDollar,
     FluxinRatio: AllContracts.RatioContract,
     Xerion: AllContracts.XerionContract,
     XerionRatio: AllContracts.XerionRatioContract,
@@ -175,6 +178,7 @@ export const SwapContractProvider = ({ children }) => {
           getDecayPercentage("state"),
           getDecayPercentage("Xerion"),
           getDecayPercentage("Fluxin"),
+          getDecayPercentage("oneD"),
           checkOwnershipStatus(),
           getCachedRatioTarget(),
           reverseSwapEnabled(),
@@ -212,7 +216,15 @@ export const SwapContractProvider = ({ children }) => {
   const [isRenounced, setIsRenounced] = useState({}); // Empty object
 
   const checkOwnershipStatus = async () => {
-    const contractNames = ["state", "dav", "Fluxin", "FluxinRatio", "Xerion","XerionRatio"];
+    const contractNames = [
+      "state",
+      "dav",
+      "Fluxin",
+      "FluxinRatio",
+      "Xerion",
+      "XerionRatio",
+      "oneD",
+    ];
 
     try {
       const statusUpdates = {};
@@ -271,6 +283,8 @@ export const SwapContractProvider = ({ children }) => {
     renounceOwnership(AllContracts.FluxinContract, "Fluxin");
   const ReanounceXerionContract = () =>
     renounceOwnership(AllContracts.XerionContract, "Xerion");
+  const ReanounceOneDollarContract = () =>
+    renounceOwnership(AllContracts.oneDollar, "1$");
   const RenounceState = () =>
     renounceOwnership(AllContracts.stateContract, "State");
   const RenounceFluxinSwap = () =>
@@ -716,6 +730,8 @@ export const SwapContractProvider = ({ children }) => {
         setFluxinPercentage(reversedPercentage);
       } else if (contractName === "Xerion") {
         setXerionPercentage(reversedPercentage);
+      } else if (contractName === "oneD") {
+        setOneDPercentage(reversedPercentage);
       }
     } catch (e) {
       console.error(
@@ -1211,6 +1227,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddTokenState = () =>
     handleAddToken(STATE_TOKEN_ADDRESS, "pState");
   const handleAddFluxin = () => handleAddToken(Fluxin, "Orxa");
+  const handleAddOneD = () => handleAddToken($1, "1$");
   const handleAddXerion = () => handleAddToken(Xerion, "Layti");
 
   return (
@@ -1288,8 +1305,11 @@ export const SwapContractProvider = ({ children }) => {
         setReverseEnable,
         RenounceFluxinSwap,
         RenounceXerionSwap,
+        ReanounceOneDollarContract,
         SetOnePercentageOfBalance,
         ReverseForNextCycle,
+        handleAddOneD,
+		PercentageOneD,
         ReverseForCycle,
       }}
     >

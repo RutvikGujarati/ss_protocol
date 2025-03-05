@@ -122,41 +122,41 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-              .filter(
-                ({
-                  userHasSwapped,
-                  name,
-                  userHasReverse,
-                  isReversing,
-                  AuctionStatus,
-                  distributedAmount,
-                }) => {
-                  console.log(`Filter Conditions:${name}`, {
-                    userHasSwapped,
-                    userHasReverse,
-                    isReversing,
-                    AuctionStatus,
-                    dbCheck: db >= DavRequiredAmount,
-                  });
+            //   .filter(
+            //     ({
+            //       userHasSwapped,
+            //       name,
+            //       userHasReverse,
+            //       isReversing,
+            //       AuctionStatus,
+            //       distributedAmount,
+            //     }) => {
+            //       console.log(`Filter Conditions:${name}`, {
+            //         userHasSwapped,
+            //         userHasReverse,
+            //         isReversing,
+            //         AuctionStatus,
+            //         dbCheck: db >= DavRequiredAmount,
+            //       });
 
-                  if (AuctionStatus == "false" && db >= DavRequiredAmount) {
-                    if (isReversing == "true" && !userHasReverse) {
-                      return true;
-                    } else if (distributedAmount > 1) {
-                      return true;
-                    } else if (userHasSwapped && isReversing == "false") {
-                      return false;
-                    }
-                  } else if (
-                    AuctionStatus == "true" &&
-                    db >= DavRequiredAmount
-                  ) {
-                    if (!userHasSwapped) {
-                      return true;
-                    }
-                  }
-                }
-              )
+            //       if (AuctionStatus == "false" && db >= DavRequiredAmount) {
+            //         if (isReversing == "true" && !userHasReverse) {
+            //           return true;
+            //         } else if (distributedAmount > 1) {
+            //           return true;
+            //         } else if (userHasSwapped && isReversing == "false") {
+            //           return false;
+            //         }
+            //       } else if (
+            //         AuctionStatus == "true" &&
+            //         db >= DavRequiredAmount
+            //       ) {
+            //         if (!userHasSwapped) {
+            //           return true;
+            //         }
+            //       }
+            //     }
+            //   )
               .map(
                 (
                   {

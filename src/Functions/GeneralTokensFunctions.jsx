@@ -14,12 +14,14 @@ export const GeneralTokenProvider = ({ children }) => {
   const [Distributed, setViewDistributed] = useState({
     state: "0.0",
     Fluxin: "0.0",
-    Xerion: "0.0"
+    Xerion: "0.0",
+    oneD: "0.0",
   });
   const contracts = {
     state: AllContracts.stateContract,
     dav: AllContracts.davContract,
     Fluxin: AllContracts.FluxinContract,
+    oneD: AllContracts.oneDollar,
     FluxinRatio: AllContracts.RatioContract,
     Xerion: AllContracts.XerionContract,
   };
@@ -43,7 +45,7 @@ export const GeneralTokenProvider = ({ children }) => {
             } catch (err) {
               console.warn(`Could not fetch name for ${key}:`, err);
             }
-
+            console.log("supplyValue", supplyValue);
             return {
               [key]: {
                 name: name,
@@ -161,6 +163,8 @@ export const GeneralTokenProvider = ({ children }) => {
         contract = AllContracts.stateContract;
       } else if (contractType === "Xerion") {
         contract = AllContracts.XerionContract;
+      } else if (contractType === "oneD") {
+        contract = AllContracts.oneDollar;
       }
 
       if (!contract) {
