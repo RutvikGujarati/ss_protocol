@@ -107,7 +107,7 @@ export const useAuctionTokens = () => {
 			ErrorName: "OneDollar",
 			RatioTargetToken: RatioTargetsofTokens?.["OneDollar"] || 0,
 			AuctionStatus:  AuctionRunning?.OneDollar,
-			onChart: "https://www.geckoterminal.com/pulsechain/pools/0xc7d4d22af7a4ef1ffe25235c4d4cce9b7ab77edf",
+			onChart: "https://www.geckoterminal.com/pulsechain/pools/0x6916be7b7a36d8bc1c09eae5487e92ff837626bb",
 			distributedAmount: Distributed?.["oneD"] || 0,
 			token: $1,
 			SwapT: () => SwapTokens("1$", "OneDollar"),
