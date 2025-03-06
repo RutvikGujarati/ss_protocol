@@ -342,7 +342,7 @@ const DataTable = () => {
                                   onClick={() => SwapT()}
                                   disabled={
                                     swappingStates[id] ||
-                                    inputTokenAmount <= "1" ||
+                                    onlyInputAmount <= 0 ||
                                     AuctionStatus == "false" ||
                                     distributedAmount > 0
                                   }
