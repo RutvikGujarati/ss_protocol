@@ -21,85 +21,71 @@ const BurnDataTable = () => {
         <div className="table-responsive">
           <div className="container mt-4">
             <div className="row g-4 d-flex align-items-stretch pb-1 justify-content-center">
-              <div className="col-md-4 p-0 m-2 cards d-flex flex-row gap-3">
+              {/* Contract Market Cap Box */}
+              <div className="col-12 col-sm-6 col-md-4 d-flex justify-content-center">
                 <div
-                  className="announcement text-center p-2 rounded bg-dark  flex-fill d-flex justify-content-center align-items-center"
-                  style={{ width: "150px", height: "100px" }}
+                  className="announcement rounded bg-dark text-light flex-fill d-flex flex-column text-center"
+                  style={{ minWidth: "180px", width: "100%", height: "120px" }}
                 >
-                  <div className="carddetails2">
-                    <div className="d-flex">
-                      <h1 className=" mx-3 mb-1  fs-4">51546545 PLS </h1>
-                    </div>
-                    <div className="d-flex">
-                      <p className="mb-1 mx-4" style={{ fontSize: "11px" }}>
-                        Contract Market Cap{" "}
+                  <div className="row w-100 h-100">
+                    {/* Text Column */}
+                    <div className="col-9 d-flex flex-column align-items-center justify-content-center">
+                      <h1 className="fs-5 mb-1">50.21213 PLS</h1>
+                      <p className="mb-1" style={{ fontSize: "10px" }}>
+                        Contract Market Cap
                       </p>
+                      <p className="mb-2 fs-6">Value: 45453 USD</p>
                     </div>
-                    <div className="d-flex">
-                      <p className="mb-1 mx-1 fs-5">Value : 45453 USD</p>
-                    </div>
-                  </div>
 
-                  <div className="mb-0 mx-3">
-                    <img
-                      src={XerionLogo}
-                      width={70}
-                      height={70}
-                      alt="Logo"
-                      style={{ cursor: "pointer", marginLeft: "5px" }}
-                    />
+                    {/* Image Column */}
+                    <div className="col-3 d-flex align-items-center justify-content-center">
+                      <img src={XerionLogo} width={40} height={40} alt="Logo" />
+                    </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Your Tokens Box */}
+              <div className="col-12 col-sm-6 col-md-4 d-flex justify-content-center">
                 <div
-                  className="announcement text-center p-2 rounded bg-dark text-light flex-fill d-flex justify-content-center align-items-center"
-                  style={{ width: "150px", height: "100px" }}
+                  className="announcement rounded bg-dark text-light flex-fill d-flex flex-column text-center"
+                  style={{ minWidth: "180px", width: "100%", height: "120px" }}
                 >
-                  <div className="carddetails2">
-                    <div className="d-flex">
-                      <h1 className=" mx-3 mb-1  fs-4">50.21213 PLS </h1>
-                    </div>
-                    <div className="d-flex">
-                      <p className="mb-1 mx-5" style={{ fontSize: "11px" }}>
+                  <div className="row w-100 h-100">
+                    {/* Text Column */}
+                    <div className="col-9 d-flex flex-column align-items-center justify-content-center">
+                      <h1 className="fs-5 mb-1">50.21213 PLS</h1>
+                      <p className="mb-1" style={{ fontSize: "12px" }}>
                         Your Tokens
                       </p>
+                      <p className="mb-2 fs-6">Value: 45453 USD</p>
                     </div>
-                    <div className="d-flex">
-                      <p className="mb-1 mx-1 fs-5">Value : 45453 USD</p>
-                    </div>
-                  </div>
 
-                  <div className="mb-0 mx-3">
-                    <img
-                      src={XerionLogo}
-                      width={70}
-                      height={70}
-                      alt="Logo"
-                      style={{ cursor: "pointer", marginLeft: "5px" }}
-                    />
+                    {/* Image Column */}
+                    <div className="col-3 d-flex align-items-center justify-content-center">
+                      <img src={XerionLogo} width={40} height={40} alt="Logo" />
+                    </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Your Dividends Earnings Box */}
+              <div className="col-12 col-sm-6 col-md-4 d-flex justify-content-center">
                 <div
-                  className="announcement text-center p-2 rounded bg-dark text-light flex-fill d-flex justify-content-center align-items-center"
-                  style={{ width: "150px", height: "100px" }}
+                  className="announcement rounded bg-dark text-light flex-fill d-flex flex-column align-items-center justify-content-center text-center"
+                  style={{ minWidth: "180px", width: "100%", height: "120px" }}
                 >
-                  <div className="carddetails2 d-flex flex-column align-items-center text-center">
-                    <div className="d-flex">
-                      <h1 className="mx-3 mb-1 fs-4">50.21213 PLS</h1>
-                    </div>
-                    <div className="d-flex">
-                      <p className="mb-1 mx-3" style={{ fontSize: "11px" }}>
-                        Your Dividends Earnings
-                      </p>
-                    </div>
-                    <div className="d-flex">
-                      <p className="mb-1 mx-1 fs-5">Value: 45453 USD</p>
-                    </div>
-                  </div>
+                  <h1 className="fs-5 mb-1">50.21213 PLS</h1>
+                  <p className="mb-1" style={{ fontSize: "12px" }}>
+                    Your Dividends Earnings
+                  </p>
+                  <p className="mb-2 fs-6">Value: 45453 USD</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
         <div className="container mt-4">
           <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
             <div className="col-md-4 p-0 m-2 cards">
