@@ -10,11 +10,13 @@ export const GeneralAuctionProvider = ({ children }) => {
   const [AuctionRunningLocalString, setIsAuctionRunningLocalString] = useState({
     Fluxin: false,
     Xerion: false,
+    OneDollar: false,
     state: true,
   });
   const [AuctionRunning, setIsAuctionRunning] = useState({
     Fluxin: false,
     Xerion: false,
+    OneDollar: false,
     state: true,
   });
   const [auctionTimeLeft, setAuctionTimeLeft] = useState({});
@@ -25,6 +27,7 @@ export const GeneralAuctionProvider = ({ children }) => {
   const contracts = [
     { name: "Fluxin", contract: AllContracts.RatioContract },
     { name: "Xerion", contract: AllContracts.XerionRatioContract },
+    { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
   ];
 
   useEffect(() => {
@@ -95,12 +98,16 @@ export const GeneralAuctionProvider = ({ children }) => {
       setIsAuctionRunning({
         Fluxin: false,
         Xerion: false,
+        OneDollar: false,
+
         state: true,
       });
 
       setIsAuctionRunningLocalString({
         Fluxin: false,
         Xerion: false,
+        OneDollar: false,
+
         state: true,
       });
     }
@@ -154,11 +161,6 @@ export const GeneralAuctionProvider = ({ children }) => {
   console.log("all contracts", AllContracts);
   const AuctionTimeLeft = async () => {
     try {
-      const contracts = [
-        { name: "Fluxin", contract: AllContracts.RatioContract },
-        { name: "Xerion", contract: AllContracts.XerionRatioContract },
-      ];
-
       const auctionTimes = {};
 
       for (const { name, contract } of contracts) {
@@ -199,7 +201,6 @@ export const GeneralAuctionProvider = ({ children }) => {
       console.error("Error fetching burn status:", e);
     }
   };
-  
 
   GeneralAuctionProvider.propTypes = {
     children: PropTypes.node.isRequired,
