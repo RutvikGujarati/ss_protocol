@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
+import XerionLogo from "../assets/layti.png";
 
 const BurnDataTable = () => {
   const { DavBalance } = useDAvContract();
@@ -22,22 +23,78 @@ const BurnDataTable = () => {
             <div className="row g-4 d-flex align-items-stretch pb-1 justify-content-center">
               <div className="col-md-4 p-0 m-2 cards d-flex flex-row gap-3">
                 <div
-                  className="announcement text-center p-2 rounded bg-dark text-light flex-fill d-flex justify-content-center align-items-center"
-                  style={{ width: "150px", height: "40px" }}
+                  className="announcement text-center p-2 rounded bg-dark  flex-fill d-flex justify-content-center align-items-center"
+                  style={{ width: "150px", height: "100px" }}
                 >
-                  Buy
+                  <div className="carddetails2">
+                    <div className="d-flex">
+                      <h1 className=" mx-3 mb-1  fs-4">51546545 PLS </h1>
+                    </div>
+                    <div className="d-flex">
+                      <p className="mb-1 mx-4" style={{ fontSize: "11px" }}>
+                        Contract Market Cap{" "}
+                      </p>
+                    </div>
+                    <div className="d-flex">
+                      <p className="mb-1 mx-1 fs-5">Value : 45453 USD</p>
+                    </div>
+                  </div>
+
+                  <div className="mb-0 mx-3">
+                    <img
+                      src={XerionLogo}
+                      width={70}
+                      height={70}
+                      alt="Logo"
+                      style={{ cursor: "pointer", marginLeft: "5px" }}
+                    />
+                  </div>
                 </div>
                 <div
                   className="announcement text-center p-2 rounded bg-dark text-light flex-fill d-flex justify-content-center align-items-center"
-                  style={{ width: "150px", height: "40px" }}
+                  style={{ width: "150px", height: "100px" }}
                 >
-                  Sell
+                  <div className="carddetails2">
+                    <div className="d-flex">
+                      <h1 className=" mx-3 mb-1  fs-4">50.21213 PLS </h1>
+                    </div>
+                    <div className="d-flex">
+                      <p className="mb-1 mx-5" style={{ fontSize: "11px" }}>
+                        Your Tokens
+                      </p>
+                    </div>
+                    <div className="d-flex">
+                      <p className="mb-1 mx-1 fs-5">Value : 45453 USD</p>
+                    </div>
+                  </div>
+
+                  <div className="mb-0 mx-3">
+                    <img
+                      src={XerionLogo}
+                      width={70}
+                      height={70}
+                      alt="Logo"
+                      style={{ cursor: "pointer", marginLeft: "5px" }}
+                    />
+                  </div>
                 </div>
                 <div
                   className="announcement text-center p-2 rounded bg-dark text-light flex-fill d-flex justify-content-center align-items-center"
-                  style={{ width: "150px", height: "40px" }}
+                  style={{ width: "150px", height: "100px" }}
                 >
-                  Withdraw
+                  <div className="carddetails2 d-flex flex-column align-items-center text-center">
+                    <div className="d-flex">
+                      <h1 className="mx-3 mb-1 fs-4">50.21213 PLS</h1>
+                    </div>
+                    <div className="d-flex">
+                      <p className="mb-1 mx-3" style={{ fontSize: "11px" }}>
+                        Your Dividends Earnings
+                      </p>
+                    </div>
+                    <div className="d-flex">
+                      <p className="mb-1 mx-1 fs-5">Value: 45453 USD</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
