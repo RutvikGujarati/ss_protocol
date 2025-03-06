@@ -192,7 +192,7 @@ export const TokensDetails = () => {
 			AuctionNextTime: auctionDetails["OneDollar"],
 			mintAddTOkens: "25,000,000",
 			renounceSmartContract: isRenounced?.oneD ?? "Unknown",
-			renounceSwapSmartContract: isRenounced?.oneD ?? "Unknown",
+			renounceSwapSmartContract: isRenounced?.OneDollar ?? "Unknown",
 			actions: {
 				ReanounceContract: ReanounceOneDollarContract,
 				ReanounceSwapContract: ReanounceOneDollarSwapContract,
