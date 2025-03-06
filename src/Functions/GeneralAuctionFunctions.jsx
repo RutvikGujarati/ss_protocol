@@ -182,10 +182,14 @@ export const GeneralAuctionProvider = ({ children }) => {
         contracts.map(async ({ name, contract }) => {
           const TotalTokensBurnedd = await contract.getTotalTokensBurned();
           const totalTokensBurned = ethers.formatUnits(TotalTokensBurnedd, 18);
+          console.log("token name", name);
 
           return {
             name,
-            TotalTokensBurned: Math.floor(totalTokensBurned),
+            TotalTokensBurned:
+              name === "OneDollar"
+                ? Number(totalTokensBurned)
+                : Math.floor(totalTokensBurned),
           };
         })
       );
@@ -194,6 +198,7 @@ export const GeneralAuctionProvider = ({ children }) => {
         acc[name] = TotalTokensBurned;
         return acc;
       }, {});
+
       console.log("state of burn", newStates);
       setTotalTokenBurned(newStates); // Update state with the combined object
       console.log("Updated burn occurrences:", newStates);
