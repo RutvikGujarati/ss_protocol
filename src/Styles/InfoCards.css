@@ -109,10 +109,10 @@
 }
 
 @keyframes marquee {
-  from {
+  0% {
     transform: translateX(100%);
   }
-  to {
+  100% {
     transform: translateX(-100%);
   }
 }
@@ -120,5 +120,8 @@
 .animate-marquee {
   display: inline-block;
   white-space: nowrap;
-  animation: marquee 20s linear infinite;
+  animation: marquee 30s linear infinite;
+}
+.marquee-content {
+  padding-right: 100px; /* Adjust for gap between repetitions */
 }
