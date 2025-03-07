@@ -5,7 +5,7 @@ import WalletConnector from "../WalletComps/WalletConnect";
 import { NavLink } from "react-router-dom";
 import pulsex from "../assets/pulsex.png";
 import { FaTelegramPlane } from "react-icons/fa";
-import { FaXTwitter } from "react-icons/fa6";
+import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 // import { Tooltip } from "bootstrap";
 // import { useDAVToken } from "../Context/DavTokenContext";
 
@@ -40,7 +40,7 @@ const Header = () => {
           <div className="d-flex align-items-center">
             {/* Navigation Links */}
             <ul className="navbar-nav d-flex flex-row align-items-center me-4">
-              <div className="px-2">
+              <div className="px-2 mx-1">
                 <a
                   href="https://t.me/pSystemstate"
                   target="_blank"
@@ -50,12 +50,22 @@ const Header = () => {
                   <FaTelegramPlane className="text-[#0088cc] text-3xl" />
                 </a>
               </div>
+              <div className="px-2 ">
+                <a
+                  href="https://www.youtube.com/@Statedex"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize: "1.5rem", color: "red" }}
+                >
+                  <FaYoutube className="text-[#0088cc] text-3xl" />
+                </a>
+              </div>
               <div className="px-3">
                 <a
                   href="https://twitter.com/thestate_x"
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontSize: "1.5rem",color: "white" }}
+                  style={{ fontSize: "1.2rem", color: "white" }}
                 >
                   <FaXTwitter className="text-white text-3xl" />
                 </a>
