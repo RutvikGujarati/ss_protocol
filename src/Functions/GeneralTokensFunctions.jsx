@@ -15,13 +15,13 @@ export const GeneralTokenProvider = ({ children }) => {
     state: "0.0",
     Fluxin: "0.0",
     Xerion: "0.0",
-    oneD: "0.0",
+    OneDollar: "0.0",
   });
   const contracts = {
     state: AllContracts.stateContract,
     dav: AllContracts.davContract,
     Fluxin: AllContracts.FluxinContract,
-    oneD: AllContracts.oneDollar,
+    OneDollar: AllContracts.oneDollar,
     FluxinRatio: AllContracts.RatioContract,
     Xerion: AllContracts.XerionContract,
   };
@@ -201,7 +201,7 @@ export const GeneralTokenProvider = ({ children }) => {
       }
 
       setCurrentRatio(currentRP);
-      console.log("Ratio of token in ETH:", currentRP.Fluxin);
+      console.log("Ratio of token in ETH:", currentRP.OneDollar);
     } catch (e) {
       console.error("Error fetching ratio:", e);
     }
@@ -226,6 +226,7 @@ export const GeneralTokenProvider = ({ children }) => {
         mintAdditionalTOkens,
         Distributed,
         CurrentRatioPrice,
+		contracts,
       }}
     >
       {children}

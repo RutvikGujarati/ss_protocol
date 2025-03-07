@@ -13,10 +13,10 @@ import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions
 
 const DataTable = () => {
   const { DavBalance } = useDAvContract();
-  const { ClaimTokens, CheckMintBalance, Distributed } = useGeneralTokens();
+  const { contracts, ClaimTokens, CheckMintBalance, Distributed } =
+    useGeneralTokens();
 
   const {
-    contracts,
     DavRequiredAmount,
     DavBalanceRequire,
     swappingStates,
@@ -122,41 +122,41 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-              .filter(
-                ({
-                  userHasSwapped,
-                  name,
-                  userHasReverse,
-                  isReversing,
-                  AuctionStatus,
-                  distributedAmount,
-                }) => {
-                  console.log(`Filter Conditions:${name}`, {
+                .filter(
+                  ({
                     userHasSwapped,
+                    name,
                     userHasReverse,
                     isReversing,
                     AuctionStatus,
-                    dbCheck: db >= DavRequiredAmount,
-                  });
+                    distributedAmount,
+                  }) => {
+                    console.log(`Filter Conditions:${name}`, {
+                      userHasSwapped,
+                      userHasReverse,
+                      isReversing,
+                      AuctionStatus,
+                      dbCheck: db >= DavRequiredAmount,
+                    });
 
-                  if (AuctionStatus == "false" && db >= DavRequiredAmount) {
-                    if (isReversing == "true" && !userHasReverse) {
-                      return true;
-                    } else if (distributedAmount > 1) {
-                      return true;
-                    } else if (userHasSwapped && isReversing == "false") {
-                      return false;
-                    }
-                  } else if (
-                    AuctionStatus == "true" &&
-                    db >= DavRequiredAmount
-                  ) {
-                    if (!userHasSwapped) {
-                      return true;
+                    if (AuctionStatus == "false" && db >= DavRequiredAmount) {
+                      if (isReversing == "true" && !userHasReverse) {
+                        return true;
+                      } else if (distributedAmount > 1) {
+                        return true;
+                      } else if (userHasSwapped && isReversing == "false") {
+                        return false;
+                      }
+                    } else if (
+                      AuctionStatus == "true" &&
+                      db >= DavRequiredAmount
+                    ) {
+                      if (!userHasSwapped) {
+                        return true;
+                      }
                     }
                   }
-                }
-              )
+                )
               .map(
                 (
                   {
@@ -176,7 +176,7 @@ const DataTable = () => {
                     onChart,
                     distributedAmount,
                     inputTokenAmount,
-					onlyInputAmount,
+                    onlyInputAmount,
                     handleAddToken,
                     outputToken,
                   },
