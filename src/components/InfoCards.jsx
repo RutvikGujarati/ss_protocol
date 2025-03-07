@@ -373,10 +373,11 @@ const InfoCards = () => {
                 </div>
               </div>
             </div>
-            <div className="announcement text-center">
-              <div className="">
+            <div className="announcement text-center overflow-hidden relative">
+              <div className="animate-marquee whitespace-nowrap">
                 {DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE
-                DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS
+                DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS. 1$ TOKEN DEPLOYED.
+                THIS IS A CURRENCY TOKEN FOR THE PROTOCOL
               </div>
             </div>
           </div>

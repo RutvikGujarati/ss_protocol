@@ -1,109 +1,124 @@
-.card{
-    border: 1px solid #FFFFFF26 !important;
-    min-height: 200px;
+.card {
+  border: 1px solid #ffffff26 !important;
+  min-height: 200px;
 }
 
-.cards{
-    flex: 1;
-    display: flex;
+.cards {
+  flex: 1;
+  display: flex;
 }
 
-.carddetails{
-    padding: 5px 15px;
-    width: 50%;
-    
-    /* border-right: 1px solid green;  */
+.carddetails {
+  padding: 5px 15px;
+  width: 50%;
+
+  /* border-right: 1px solid green;  */
 }
-.carddetails2{
-    padding: 5px 15px;
-    width: 100%;
+.carddetails2 {
+  padding: 5px 15px;
+  width: 100%;
 }
 /* .carddetails:first-child{
     border-right: 1px solid #fff; 
 } */
 
-.detailText{
-    font-size: small;
-    text-transform: uppercase;
-    font-weight: 700;
-    opacity: 0.5;
+.detailText {
+  font-size: small;
+  text-transform: uppercase;
+  font-weight: 700;
+  opacity: 0.5;
 }
 
-.detailAmount{
-    font-weight: 700;
-	font-size: 10px;
+.detailAmount {
+  font-weight: 700;
+  font-size: 10px;
 }
 
-.detailSmall{
-    font-size: 14px;
-    font-weight: 600;
-    color: green;
+.detailSmall {
+  font-size: 14px;
+  font-weight: 600;
+  color: green;
 }
 
-.cardInput{
-    height: 24px;
-    font-size: 14px;
+.cardInput {
+  height: 24px;
+  font-size: 14px;
 }
 
-.detailfooter{
-    padding: 10px 10px 0px 15px;
-    font-size: small;
+.detailfooter {
+  padding: 10px 10px 0px 15px;
+  font-size: small;
 }
 
-.greenText{
-    color: green;
+.greenText {
+  color: green;
 }
 
-.btn-primary{
-    background-color: #ff4081; /* Primary button color */
-    border: none;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
+.btn-primary {
+  background-color: #ff4081; /* Primary button color */
+  border: none;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
 }
 
 .btn-primary:hover {
-    background-color: #ff79a7; /* Lighter pink on hover */
-  }
-
-.uppercase{
-    text-transform: uppercase;
+  background-color: #ff79a7; /* Lighter pink on hover */
 }
 
-.border-bottom{
-    border-bottom: 1px solid #FFFFFF26 !important;
+.uppercase {
+  text-transform: uppercase;
+}
+
+.border-bottom {
+  border-bottom: 1px solid #ffffff26 !important;
 }
 
 .announcement {
-    background-color: #212529;
-    color: #fff;
-    border: 1px solid #FFFFFF26;
-    border-radius: 10px;
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    transition: background-color 0.3s ease;
+  background-color: #212529;
+  color: #fff;
+  border: 1px solid #ffffff26;
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease;
+}
+
+.announcement span {
+  color: #ff4081;
+}
+
+.announcement span:first-child {
+  margin-right: 50px;
+}
+
+.announcement:hover {
+  background-color: #1c1e22;
+}
+
+@media (max-width: 768px) {
+  .cards {
+    flex: 0 0 100%;
+    max-width: 95%;
   }
 
-  .announcement span{
-    color: #ff4081;
+  .announcement span:first-child {
+    margin-right: 0px;
   }
+}
 
-  .announcement span:first-child{
-    margin-right: 50px;
+@keyframes marquee {
+  from {
+    transform: translateX(100%);
   }
-
-  .announcement:hover{
-    background-color: #1C1E22;
+  to {
+    transform: translateX(-100%);
   }
+}
 
-  @media (max-width: 768px) {
-    .cards {
-      flex: 0 0 100%;
-      max-width: 95%;
-    }
-
-    .announcement span:first-child{
-        margin-right: 0px;
-    }
-  }
+.animate-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 20s linear infinite;
+}
