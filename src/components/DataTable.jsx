@@ -176,7 +176,7 @@ const DataTable = () => {
                     onChart,
                     distributedAmount,
                     inputTokenAmount,
-					onlyInputAmount,
+                    onlyInputAmount,
                     handleAddToken,
                     outputToken,
                   },
