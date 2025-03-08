@@ -4,6 +4,7 @@ import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
+import PLSLogo from "../assets/pls1.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { formatWithCommas } from "./DetailsInfo";
 import { PriceContext } from "../api/StatePrice";
@@ -210,6 +211,21 @@ const InfoCards = () => {
               </div>
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
+                  <img
+                    src={PLSLogo}
+                    alt="PLS Logo"
+                    style={{
+                      position: "absolute",
+                      width: "110px", // Adjust size
+                      height: "140px",
+                      opacity: 0.1, // Subtle shadow effect
+                      top: "40%",
+                      left: "70%",
+                      transform: "translate(-50%, -50%)",
+                      zIndex: 0, // Ensure it's behind
+                      pointerEvents: "none", // Prevent interference
+                    }}
+                  />
                   <div>
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
                       <div className="carddetails2">
@@ -375,12 +391,15 @@ const InfoCards = () => {
             </div>
             <div className="announcement text-center overflow-hidden relative">
               <div className="animate-marquee whitespace-nowrap">
-                <span className="marquee-content" style={{color:"white"}}>
+                <span className="marquee-content" style={{ color: "white" }}>
                   {DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE
                   DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS.
                 </span>
-                <span className="marquee-content" style={{color:"white"}}>
+                <span className="marquee-content" style={{ color: "white" }}>
                   1$ TOKEN DEPLOYED. THIS IS A CURRENCY TOKEN FOR THE PROTOCOL.
+                </span>
+                <span className="marquee-content" style={{ color: "green" }}>
+                  🟢LIVE ON PULSECHAIN.
                 </span>
               </div>
             </div>
