@@ -375,9 +375,13 @@ const InfoCards = () => {
             </div>
             <div className="announcement text-center overflow-hidden relative">
               <div className="animate-marquee whitespace-nowrap">
-                {DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE
-                DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS. 1$ TOKEN DEPLOYED.
-                THIS IS A CURRENCY TOKEN FOR THE PROTOCOL
+                <span className="marquee-content" style={{color:"white"}}>
+                  {DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE
+                  DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS.
+                </span>
+                <span className="marquee-content" style={{color:"white"}}>
+                  1$ TOKEN DEPLOYED. THIS IS A CURRENCY TOKEN FOR THE PROTOCOL.
+                </span>
               </div>
             </div>
           </div>
