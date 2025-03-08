@@ -11,6 +11,7 @@ import { ContractProvider } from "./Functions/ContractInitialize.jsx";
 import { DavProvider } from "./Functions/DavTokenFunctions.jsx";
 import { GeneralTokenProvider } from "./Functions/GeneralTokensFunctions.jsx";
 import { GeneralAuctionProvider } from "./Functions/GeneralAuctionFunctions.jsx";
+import { DeepStateProvider } from "./Functions/DeepStateContract.jsx";
 
 const queryClient = new QueryClient();
 export default function Providers({ children }) {
@@ -33,15 +34,17 @@ export default function Providers({ children }) {
             <PriceProvider>
               <ContractProvider>
                 <DavProvider>
-                  <GeneralTokenProvider>
-                    <GeneralAuctionProvider>
-                      <SwapContractProvider>
-                        <Suspense fallback={<div>Loading...</div>}>
-                          {children}
-                        </Suspense>
-                      </SwapContractProvider>
-                    </GeneralAuctionProvider>
-                  </GeneralTokenProvider>
+                  <DeepStateProvider>
+                    <GeneralTokenProvider>
+                      <GeneralAuctionProvider>
+                        <SwapContractProvider>
+                          <Suspense fallback={<div>Loading...</div>}>
+                            {children}
+                          </Suspense>
+                        </SwapContractProvider>
+                      </GeneralAuctionProvider>
+                    </GeneralTokenProvider>
+                  </DeepStateProvider>
                 </DavProvider>
               </ContractProvider>
             </PriceProvider>

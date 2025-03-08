@@ -27,7 +27,7 @@ const InfoCards = () => {
   const {
     handleAddTokenState,
     handleAddTokenDAV,
-    LoadingState,
+    // LoadingState,
     CalculationOfCost,
     TotalCost,
     TotalStateHoldsInUS,

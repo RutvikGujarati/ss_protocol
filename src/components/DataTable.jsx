@@ -5,7 +5,7 @@ import { useLocation } from "react-router-dom";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
-import BurnDataTable from "./BurnDataTable";
+import DeepStateTable from "./DeepStateTable";
 import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
@@ -378,7 +378,7 @@ const DataTable = () => {
     </div>
   ) : (
     <>
-      <BurnDataTable />
+      <DeepStateTable />
     </>
   );
 };

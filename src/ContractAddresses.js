@@ -25,3 +25,5 @@ export const $1 = "0x4f665Ef2EF5336D26a6c06525DD812786E5614c6";
 export const Ratio_TOKEN_ADDRESS = "0xf0bb62b168E7aDBf313217EFdD448897aFCe8fD6";
 export const XerionRatioAddress = "0xdb89A380171339c14ce316E2c7c32e8aCD8037fb";
 export const OneDollarRatioAddress = "0x7Be689784D523E963E6232aaFc7787920De695B2";
+
+export const DeepState = "0xF0918D6bd7d6BCc7C3d5e46fd298d57ea1eCA4c0";

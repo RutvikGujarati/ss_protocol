@@ -1,20 +1,34 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
-import { useSwapContract } from "../Functions/SwapContractFunctions";
-import { useDAvContract } from "../Functions/DavTokenFunctions";
 import XerionLogo from "../assets/layti.png";
+import { useDeepStateFunctions } from "../Functions/DeepStateContract";
+import { useState } from "react";
 
-const BurnDataTable = () => {
-  const { DavBalance } = useDAvContract();
-  const { DavBalanceRequireForBurn, DavBalanceRequire } = useSwapContract();
-  // Log for debugging
-  console.log("BurnOccuredForToken:", parseFloat(DavBalance));
-  const db = parseFloat(DavBalance);
-  console.log("db", db);
-  console.log("db required for burn", DavBalanceRequireForBurn);
-  console.log("db required for Auction", DavBalanceRequire);
+const DeepStateTable = () => {
+  const {
+    balanceOfContract,
+    PLSUSD,
+    BuyTokens,
+    loading,
+    UsersTokens,
+    UsersDividends,
+    DividendsUSD,
+    SellTokens,
+    Sellloading,
+    WithdrawDividends,
+    Withdrawloading,
+  } = useDeepStateFunctions();
+  const [amount, setAmount] = useState("");
+  const [Sellamount, setSellAmount] = useState("");
   // Get token data
-
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setAmount(value);
+  };
+  const handleSellInputChange = (e) => {
+    const value = e.target.value;
+    setSellAmount(value);
+  };
   return (
     <>
       <div className="container mt-4 datatablemarginbottom">
@@ -30,11 +44,11 @@ const BurnDataTable = () => {
                   <div className="row w-100 h-100">
                     {/* Text Column */}
                     <div className="col-9 d-flex flex-column align-items-center justify-content-center">
-                      <h1 className="fs-5 mb-1">50.21213 PLS</h1>
+                      <h1 className="fs-5 mb-1">{balanceOfContract} PLS</h1>
                       <p className="mb-1" style={{ fontSize: "10px" }}>
                         Contract Market Cap
                       </p>
-                      <p className="mb-2 fs-6">Value: 45453 USD</p>
+                      <p className="mb-2 fs-6">Value: {PLSUSD} USD</p>
                     </div>
 
                     {/* Image Column */}
@@ -54,11 +68,11 @@ const BurnDataTable = () => {
                   <div className="row w-100 h-100">
                     {/* Text Column */}
                     <div className="col-9 d-flex flex-column align-items-center justify-content-center">
-                      <h1 className="fs-5 mb-1">50.21213 PLS</h1>
+                      <h1 className="fs-6 mb-1">{UsersTokens} DeepState</h1>
                       <p className="mb-1" style={{ fontSize: "12px" }}>
                         Your Tokens
                       </p>
-                      <p className="mb-2 fs-6">Value: 45453 USD</p>
+                      <p className="mb-2 fs-6">Value: 0.0 USD</p>
                     </div>
 
                     {/* Image Column */}
@@ -75,11 +89,11 @@ const BurnDataTable = () => {
                   className="announcement rounded bg-dark text-light flex-fill d-flex flex-column align-items-center justify-content-center text-center"
                   style={{ minWidth: "180px", width: "100%", height: "120px" }}
                 >
-                  <h1 className="fs-5 mb-1">50.21213 PLS</h1>
+                  <h1 className="fs-5 mb-1">{UsersDividends} PLS</h1>
                   <p className="mb-1" style={{ fontSize: "12px" }}>
                     Your Dividends Earnings
                   </p>
-                  <p className="mb-2 fs-6">Value: 45453 USD</p>
+                  <p className="mb-2 fs-6">Value: {DividendsUSD} USD</p>
                 </div>
               </div>
             </div>
@@ -96,14 +110,14 @@ const BurnDataTable = () => {
                     type="text"
                     placeholder="Enter Value"
                     className="form-control text-center fw-bold mb-3"
-                    //   value={amount}
-                    //   onChange={handleInputChange}
+                    value={amount}
+                    onChange={handleInputChange}
                   />
                   <button
-                    //   onClick={handleMint}
+                    onClick={() => BuyTokens(amount)}
                     className="btn btn-primary btn-sm d-flex justify-content-center align-items-center mt-4 w-100 "
                   >
-                    Buy
+                    {loading ? "Buying..." : "Buy"}
                   </button>
                 </div>
               </div>
@@ -116,14 +130,14 @@ const BurnDataTable = () => {
                     type="text"
                     placeholder="Enter Value"
                     className="form-control text-center fw-bold mb-3"
-                    //   value={amount}
-                    //   onChange={handleInputChange}
+                    value={Sellamount}
+                    onChange={handleSellInputChange}
                   />
                   <button
-                    //   onClick={handleMint}
+                    onClick={() => SellTokens(Sellamount)}
                     className="btn btn-primary btn-sm d-flex justify-content-center align-items-center mt-4 w-100 "
                   >
-                    Sell
+                    {Sellloading ? "Selling..." : "Sell"}
                   </button>
                 </div>
               </div>
@@ -131,19 +145,13 @@ const BurnDataTable = () => {
             <div className="col-md-4 p-0 m-2 cards">
               <div className="card bg-dark text-light border-light p-0 d-flex justify-content-center align-items-center text-center w-100">
                 <div className="p-2">
-                  <p className="mb-2 detailText">Withdraw TOKENS</p>
-                  <input
-                    type="text"
-                    placeholder="Enter Value"
-                    className="form-control text-center fw-bold mb-3"
-                    //   value={amount}
-                    //   onChange={handleInputChange}
-                  />
+                  <p className="mb-2 detailText">Withdraw Dividends</p>
+                  <h1 className="fs-5 mb-1">{UsersDividends} PLS</h1>
                   <button
-                    //   onClick={handleMint}
+                    onClick={() => WithdrawDividends()}
                     className="btn btn-primary btn-sm d-flex justify-content-center align-items-center mt-4 w-100 "
                   >
-                    Withdraw
+                    {Withdrawloading ? "Processing..." : "Withdraw"}
                   </button>
                 </div>
               </div>
@@ -155,4 +163,4 @@ const BurnDataTable = () => {
   );
 };
 
-export default BurnDataTable;
+export default DeepStateTable;
