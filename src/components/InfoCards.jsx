@@ -398,7 +398,7 @@ const InfoCards = () => {
                 <span className="marquee-content" style={{ color: "white" }}>
                   1$ TOKEN DEPLOYED. THIS IS A CURRENCY TOKEN FOR THE PROTOCOL.
                 </span>
-                <span className="marquee-content" style={{ color: "green" }}>
+                <span className="marquee-content" >
                   🟢LIVE ON PULSECHAIN.
                 </span>
               </div>
