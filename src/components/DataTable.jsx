@@ -101,7 +101,7 @@ const DataTable = () => {
   const tokens = useAuctionTokens();
   console.log("obj tokens", tokens);
 
-  return isAuction ? (
+  return  (
     <div className="container mt-4 datatablemarginbottom">
       <div className="table-responsive">
         <table className="table table-dark">
@@ -376,11 +376,7 @@ const DataTable = () => {
         </table>
       </div>
     </div>
-  ) : (
-    <>
-      <DeepStateTable />
-    </>
-  );
+  ) 
 };
 
 export default DataTable;

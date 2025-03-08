@@ -16,6 +16,7 @@ import {
 } from "react-router-dom";
 import { useDAvContract } from "./Functions/DavTokenFunctions";
 import DotAnimation from "./Animations/Animation";
+import DeepStateTable from "./components/DeepStateTable";
 const App = () => {
   const { loadingRatioPrice } = useDAvContract();
   const [searchQuery, setSearchQuery] = useState("");
@@ -91,8 +92,8 @@ const App = () => {
           path="/StateLp"
           element={
             <>
-              <InfoCards />
-              <DataTable />
+              {/* <InfoCards /> */}
+              <DeepStateTable />
             </>
           }
         />
