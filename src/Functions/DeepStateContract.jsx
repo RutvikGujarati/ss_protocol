@@ -7,7 +7,7 @@ import { ethers } from "ethers";
 export const DeepStateFunctions = createContext();
 
 export const DeepStateProvider = ({ children }) => {
-  const { provider, AllContracts } = useContext(ContractContext);
+  const { AllContracts } = useContext(ContractContext);
   const [balanceOfContract, setbalanceOfContract] = useState("0");
   const [PLSPrice, setPLSPrice] = useState("0");
   const [PLSUSD, setPLSUSD] = useState("0");
@@ -22,9 +22,9 @@ export const DeepStateProvider = ({ children }) => {
     try {
       const userAmount =
         await AllContracts.DeepStateContract.getContractBalance();
-      const formattedBalance = ethers.formatEther(await userAmount);
+      const formattedBalance = ethers.formatEther(userAmount);
 
-      console.log("deepstate balance:", formattedBalance);
+      console.log("deepstate balance:", userAmount);
       setbalanceOfContract(formattedBalance);
     } catch (error) {
       console.log("error in fetching deepState Balance:", error);
@@ -65,7 +65,7 @@ export const DeepStateProvider = ({ children }) => {
         value: amountInWei,
       });
       await tx.wait();
-      setLoading(false);
+      await contractBalance(), CalculateBalanceInUSD(), setLoading(false);
     } catch (error) {
       console.log("Error in buying tokens:", error);
       setLoading(false);
@@ -79,7 +79,7 @@ export const DeepStateProvider = ({ children }) => {
       const amountInWei = ethers.parseUnits(amount.toString(), 18);
       const tx = await AllContracts.DeepStateContract.sell(amountInWei);
       await tx.wait();
-      setSellLoading(false);
+      await contractBalance(), CalculateBalanceInUSD(), setSellLoading(false);
     } catch (error) {
       console.log("Error in buying tokens:", error);
       setSellLoading(false);
@@ -113,15 +113,12 @@ export const DeepStateProvider = ({ children }) => {
   };
   const UsersTotalDividends = async () => {
     try {
-      const userAmount = await AllContracts.DeepStateContract.myDividends(); // Get amount in Wei
-      const formattedAmount = parseFloat(ethers.formatEther(userAmount)); // Convert to number
-      const fixedAmount = formattedAmount.toFixed(4); // Round to 4 decimal places
-
-      setUsersDividends(fixedAmount); // Store in state
-
-      console.log("User's total dividends in ETH:", fixedAmount);
+      if (!AllContracts?.DeepStateContract) return;
+      const userAmount = await AllContracts.DeepStateContract.myDividends();
+      setUsersDividends(parseFloat(ethers.formatEther(userAmount)).toFixed(4));
     } catch (error) {
-      console.log("Error fetching dividends amount:", error);
+      console.error("Error fetching dividends:", error);
+      setUsersDividends("0");
     }
   };
   const CalculateDividendsInUSD = async () => {
@@ -138,22 +135,19 @@ export const DeepStateProvider = ({ children }) => {
     }
   };
 
-  const fetchAllData = async () => {
-    const tasks = [
-      contractBalance(),
-      CalculateBalanceInUSD(),
-      fetchPLSPrice(),
-      UsersTotalTokens(),
-      UsersTotalDividends(),
-      CalculateDividendsInUSD(),
-    ];
-
-    await Promise.allSettled(tasks); // Runs all functions and ignores failures
-  };
-
   useEffect(() => {
-    fetchAllData();
-  }, [balanceOfContract]); // Re-runs when balance changes
+	const interval = setInterval(() => {
+	  fetchPLSPrice();
+	  contractBalance();
+	  CalculateBalanceInUSD();
+	  UsersTotalTokens();
+	  UsersTotalDividends();
+	  CalculateDividendsInUSD();
+	}, 10000); // Updates every 10 seconds
+  
+	return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
+  
 
   return (
     <DeepStateFunctions.Provider
