@@ -1,7 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/InfoCards.css";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import PLSLogo from "../assets/pls1.png";
@@ -391,16 +391,31 @@ const InfoCards = () => {
             </div>
             <div className="announcement text-center overflow-hidden relative">
               <div className="animate-marquee whitespace-nowrap">
-                <span className="marquee-content" style={{ color: "white" }}>
-                  {DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE
-                  DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS.
-                </span>
-                <span className="marquee-content" style={{ color: "white" }}>
-                  1$ TOKEN DEPLOYED. THIS IS A CURRENCY TOKEN FOR THE PROTOCOL.
-                </span>
-                <span className="marquee-content" >
-                  🟢LIVE ON PULSECHAIN.
-                </span>
+                <div className="marquee-inner">
+                  {[...Array(2)].map((_, i) => (
+                    <React.Fragment key={i}>
+                      {[
+                        { text: "🟢LIVE ON PULSECHAIN.", color: "" },
+                        {
+                          text: `${DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS.`,
+                          color: "white",
+                        },
+                        {
+                          text: "1$ TOKEN DEPLOYED. THIS IS A CURRENCY TOKEN FOR THE PROTOCOL.",
+                          color: "white",
+                        },
+                      ].map((item, j) => (
+                        <span
+                          key={`${i}-${j}`}
+                          className="marquee-content"
+                          style={{ color: item.color }}
+                        >
+                          {item.text}
+                        </span>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

@@ -109,19 +109,26 @@
 }
 
 @keyframes marquee {
-  0% {
-    transform: translateX(100%);
+	0% {
+	  transform: translateX(0);
+	}
+	100% {
+	  transform: translateX(-50%);
+	}
   }
-  100% {
-    transform: translateX(-100%);
+  
+  .animate-marquee {
+	display: flex;
+	white-space: nowrap;
+	overflow: hidden;
   }
-}
-
-.animate-marquee {
-  display: inline-block;
-  white-space: nowrap;
-  animation: marquee 30s linear infinite;
-}
-.marquee-content {
-  padding-right: 100px; /* Adjust for gap between repetitions */
-}
+  
+  .marquee-inner {
+	display: flex;
+	animation: marquee 30s linear infinite;
+  }
+  
+  .marquee-content {
+	padding-right: 100px; /* Adjust for spacing */
+  }
+  
