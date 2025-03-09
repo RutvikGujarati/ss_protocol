@@ -11,6 +11,8 @@ import { useGeneralTokens } from '../Functions/GeneralTokensFunctions';
 
 // Custom hook to get auction tokens data
 export const useAuctionTokens = () => {
+	// Get the chain id
+
 	const {
 		FluxinUsdPrice,
 		XerionUsdPrice,
