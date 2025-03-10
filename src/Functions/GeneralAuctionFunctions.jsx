@@ -11,12 +11,14 @@ export const GeneralAuctionProvider = ({ children }) => {
     Fluxin: false,
     Xerion: false,
     OneDollar: false,
+    Rieva: false,
     state: true,
   });
   const [AuctionRunning, setIsAuctionRunning] = useState({
     Fluxin: false,
     Xerion: false,
     OneDollar: false,
+    Rieva: false,
     state: true,
   });
   const [auctionTimeLeft, setAuctionTimeLeft] = useState({});
@@ -27,6 +29,7 @@ export const GeneralAuctionProvider = ({ children }) => {
   const contracts = [
     { name: "Fluxin", contract: AllContracts.RatioContract },
     { name: "Xerion", contract: AllContracts.XerionRatioContract },
+    { name: "Rieva", contract: AllContracts.RievaRatioContract },
     { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
   ];
 
@@ -99,7 +102,7 @@ export const GeneralAuctionProvider = ({ children }) => {
         Fluxin: false,
         Xerion: false,
         OneDollar: false,
-
+        Rieva: false,
         state: true,
       });
 
@@ -107,6 +110,7 @@ export const GeneralAuctionProvider = ({ children }) => {
         Fluxin: false,
         Xerion: false,
         OneDollar: false,
+        Rieva: false,
 
         state: true,
       });

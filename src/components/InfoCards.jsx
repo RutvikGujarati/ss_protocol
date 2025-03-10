@@ -429,7 +429,7 @@ const InfoCards = () => {
                           color: "white",
                         },
                         {
-                          text: "1$ TOKEN DEPLOYED. THIS IS A CURRENCY TOKEN FOR THE PROTOCOL.",
+                          text: "Rieva TOKEN DEPLOYED.",
                           color: "white",
                         },
                       ].map((item, j) => (

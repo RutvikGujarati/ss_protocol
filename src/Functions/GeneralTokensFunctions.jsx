@@ -15,12 +15,14 @@ export const GeneralTokenProvider = ({ children }) => {
     state: "0.0",
     Fluxin: "0.0",
     Xerion: "0.0",
+	Rieva:"0.0",
     oneD: "0.0",
   });
   const contracts = {
     state: AllContracts.stateContract,
     dav: AllContracts.davContract,
     Fluxin: AllContracts.FluxinContract,
+    Rieva: AllContracts.RievaContract,
     oneD: AllContracts.oneDollar,
     FluxinRatio: AllContracts.RatioContract,
     Xerion: AllContracts.XerionContract,
@@ -186,6 +188,7 @@ export const GeneralTokenProvider = ({ children }) => {
       const contracts = [
         { name: "Fluxin", contract: AllContracts.RatioContract },
         { name: "Xerion", contract: AllContracts.XerionRatioContract },
+        { name: "Rieva", contract: AllContracts.RievaRatioContract },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
 

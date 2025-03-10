@@ -1,9 +1,10 @@
 import { useContext } from 'react';
 import FluxinLogo from "../assets/FluxinLogo.png";
 import XerionLogo from "../assets/layti.png";
+import RievaLogo from "../assets/rieva.png";
 import oned from "../assets/oned.png";
 
-import { $1, Fluxin, Xerion } from "../ContractAddresses";
+import { $1, Fluxin, Rieva, Xerion } from "../ContractAddresses";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { PriceContext } from "../api/StatePrice";
 import { useGeneralAuctionFunctions } from '../Functions/GeneralAuctionFunctions';
@@ -16,7 +17,8 @@ export const useAuctionTokens = () => {
 	const {
 		FluxinUsdPrice,
 		XerionUsdPrice,
-		OneDollarUsdPrice
+		OneDollarUsdPrice,
+		RievaUsdPrice
 	} = useContext(PriceContext);
 	const { AuctionRunning } = useGeneralAuctionFunctions();
 	const { CurrentRatioPrice } = useGeneralTokens();
@@ -31,6 +33,7 @@ export const useAuctionTokens = () => {
 		userHasReverseSwapped,
 		handleAddFluxin,
 		handleAddXerion,
+		handleAddRieva,
 		handleAddOneD,
 		OnePBalance,
 	} = useSwapContract();
@@ -119,6 +122,33 @@ export const useAuctionTokens = () => {
 			onlyInputAmount: OnePBalance.OneDollar,
 			inputTokenAmount: `${OnePBalance.OneDollar || 0} 1$`,
 			outputToken: `${outAmounts?.OneDollar || 0} State`,
+		},
+		{
+			id: "Rieva",
+			name: "Rieva",
+			Pname: "Rieva - State - Rieva",
+			ReverseName: "State - Rieva",
+			ContractName: "Rieva",
+			image: RievaLogo,
+			ratio: `1:${RatioTargetsofTokens?.["Rieva"] || 0}`,
+			userHasSwapped: userHashSwapped.Rieva,
+			userHasReverse: userHasReverseSwapped.Rieva,
+			currentRatio: `1:${CurrentRatioPrice.Rieva || 0}`,
+			Price: RievaUsdPrice,
+			isReversing: isReversed?.Rieva.toString(),
+			currentTokenRatio: CurrentRatioPrice.Rieva,
+			ErrorName: "Rieva",
+			RatioTargetToken: RatioTargetsofTokens?.["Rieva"] || 0,
+			AuctionStatus: AuctionRunning?.Rieva,
+			onChart: "https://www.geckoterminal.com/pulsechain/pools/0xc7d4d22af7a4ef1ffe25235c4d4cce9b7ab77edf",
+			distributedAmount: Distributed?.["Rieva"] || 0,
+			token: Rieva,
+			SwapT: () => SwapTokens("Rieva", "Rieva"),
+			ratioPrice: CurrentRatioPrice.Rieva,
+			handleAddToken: handleAddRieva,
+			onlyInputAmount: OnePBalance.Rieva,
+			inputTokenAmount: `${OnePBalance.Rieva || 0} Rieva`,
+			outputToken: `${outAmounts?.Rieva || 0} State`,
 		},
 	];
 

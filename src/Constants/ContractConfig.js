@@ -1,4 +1,4 @@
-import { $1, DAV_TOKEN_ADDRESS, Fluxin, OneDollarRatioAddress, Ratio_TOKEN_ADDRESS, Rieva, STATE_TOKEN_ADDRESS, Xerion, XerionRatioAddress } from "../ContractAddresses";
+import { $1, DAV_TOKEN_ADDRESS, Fluxin, OneDollarRatioAddress, Ratio_TOKEN_ADDRESS, Rieva, RievaRatioAddress, STATE_TOKEN_ADDRESS, Xerion, XerionRatioAddress } from "../ContractAddresses";
 import DAVTokenABI from "../ABI/DavTokenABI.json";
 import StateABI from "../ABI/StateTokenABI.json";
 import RatioABI from "../ABI/RatioABI.json";
@@ -12,6 +12,7 @@ export const contractConfigs = {
 	oneDollar: { address: $1, abi: StateABI },
 	XerionContract: { address: Xerion, abi: StateABI },
 	RatioContract: { address: Ratio_TOKEN_ADDRESS, abi: RatioABI },
+	RievaRatioContract: { address: RievaRatioAddress, abi: RatioABI },
 	OneDollarRatioContract: { address: OneDollarRatioAddress, abi: RatioABI },
 	XerionRatioContract: { address: XerionRatioAddress, abi: RatioABI },
 };
