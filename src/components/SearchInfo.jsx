@@ -17,6 +17,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     handleAddOneD,
     handleAddFluxin,
     handleAddXerion,
+	handleAddRieva,
   } = useSwapContract();
   const [filteredData, setFilteredData] = useState([
     { id: "∈", name: "DAV", logo: DAVLogo, AddToken: handleAddTokenDAV },
@@ -24,7 +25,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     { id: 1, name: "Orxa", logo: FluxinLogo, AddToken: handleAddFluxin },
     { id: 2, name: "Layti", logo: XerionLogo, AddToken: handleAddXerion },
     { id: "∞", name: "1$", logo: oned, AddToken: handleAddOneD },
-    { id: 3, name: "Rieva", logo: Rieva, AddToken: handleAddXerion },
+    { id: 3, name: "Rieva", logo: Rieva, AddToken: handleAddRieva },
   ]);
   const searchInputRef = useRef(null);
 
@@ -62,7 +63,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
       { id: 1, name: "Orxa", logo: FluxinLogo },
       { id: 2, name: "Layti", logo: XerionLogo },
       { id: "∞", name: "1$", logo: oned, AddToken: handleAddOneD },
-      { id: 3, name: "Rieva", logo: Rieva, AddToken: handleAddXerion },
+      { id: 3, name: "Rieva", logo: Rieva, AddToken: handleAddRieva },
       //   { id: 4, name: "Polaris", logo: FluxinLogo },
     ];
     const filtered = originalData.filter((item) =>

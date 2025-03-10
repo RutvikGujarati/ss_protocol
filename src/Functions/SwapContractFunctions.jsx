@@ -10,6 +10,7 @@ import {
   Fluxin,
   OneDollarRatioAddress,
   Ratio_TOKEN_ADDRESS,
+  Rieva,
   STATE_TOKEN_ADDRESS,
   Xerion,
   XerionRatioAddress,
@@ -1284,6 +1285,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddFluxin = () => handleAddToken(Fluxin, "Orxa");
   const handleAddOneD = () => handleAddToken($1, "1$");
   const handleAddXerion = () => handleAddToken(Xerion, "Layti");
+  const handleAddRieva = () => handleAddToken(Rieva, "Rieva");
 
   return (
     <SwapContractContext.Provider
@@ -1327,6 +1329,7 @@ export const SwapContractProvider = ({ children }) => {
         handleAddTokenRatio,
         handleAddFluxin,
         handleAddXerion,
+		handleAddRieva,
         userHashSwapped,
         userHasReverseSwapped,
         // WithdrawLPTokens,
