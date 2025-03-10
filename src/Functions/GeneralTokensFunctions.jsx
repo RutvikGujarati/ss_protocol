@@ -165,6 +165,8 @@ export const GeneralTokenProvider = ({ children }) => {
         contract = AllContracts.XerionContract;
       } else if (contractType === "oneD") {
         contract = AllContracts.oneDollar;
+      } else if (contractType === "Rieva") {
+        contract = AllContracts.RievaContract;
       }
 
       if (!contract) {

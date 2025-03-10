@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "../Styles/SearchInfo.css";
 import XerionLogo from "../assets/layti.png";
 import FluxinLogo from "../assets/FluxinLogo.png";
+import Rieva from "../assets/rieva.png";
 import DAVLogo from "../assets/d_logo.png";
 import oned from "../assets/oned.png";
 import stateLogo from "../assets/state_logo.png";
@@ -13,7 +14,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
   const {
     handleAddTokenDAV,
     handleAddTokenState,
-	handleAddOneD,
+    handleAddOneD,
     handleAddFluxin,
     handleAddXerion,
   } = useSwapContract();
@@ -23,6 +24,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     { id: 1, name: "Orxa", logo: FluxinLogo, AddToken: handleAddFluxin },
     { id: 2, name: "Layti", logo: XerionLogo, AddToken: handleAddXerion },
     { id: "∞", name: "1$", logo: oned, AddToken: handleAddOneD },
+    { id: 3, name: "Rieva", logo: Rieva, AddToken: handleAddXerion },
   ]);
   const searchInputRef = useRef(null);
 
@@ -59,7 +61,8 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
       //   { id: 1, name: "AuctionRatioSwapping", logo: XerionLogo },
       { id: 1, name: "Orxa", logo: FluxinLogo },
       { id: 2, name: "Layti", logo: XerionLogo },
-	  { id: "∞", name: "1$", logo: oned, AddToken: handleAddOneD },
+      { id: "∞", name: "1$", logo: oned, AddToken: handleAddOneD },
+      { id: 3, name: "Rieva", logo: Rieva, AddToken: handleAddXerion },
       //   { id: 4, name: "Polaris", logo: FluxinLogo },
     ];
     const filtered = originalData.filter((item) =>

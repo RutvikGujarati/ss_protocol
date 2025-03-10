@@ -6,6 +6,7 @@ import {
 	Fluxin,
 	OneDollarRatioAddress,
 	Ratio_TOKEN_ADDRESS,
+	Rieva,
 	STATE_TOKEN_ADDRESS,
 	Xerion,
 	XerionRatioAddress,
@@ -19,31 +20,38 @@ const shortenAddress = (address) => {
 	if (!address) return "";
 	return `${address.slice(0, 6)}...${address.slice(-6)}`;
 };
-const davShortened = shortenAddress(DAV_TOKEN_ADDRESS);
-const FluxinShortened = shortenAddress(Fluxin);
-const XerionShortened = shortenAddress(Xerion);
-const OneDShortened = shortenAddress($1);
-const FluxinSwapShortened = shortenAddress(Ratio_TOKEN_ADDRESS);
-const XerionSwapShortened = shortenAddress(XerionRatioAddress);
-const OneDollarSwapShortened = shortenAddress(OneDollarRatioAddress);
-const stateShortened = shortenAddress(STATE_TOKEN_ADDRESS);
+const addresses = {
+	davShortened: DAV_TOKEN_ADDRESS,
+	FluxinShortened: Fluxin,
+	XerionShortened: Xerion,
+	OneDShortened: $1, // Ensure $1 is correctly defined
+	RievaShortened: Rieva,
+	FluxinSwapShortened: Ratio_TOKEN_ADDRESS,
+	XerionSwapShortened: XerionRatioAddress,
+	OneDollarSwapShortened: OneDollarRatioAddress,
+	stateShortened: STATE_TOKEN_ADDRESS,
+};
+const shortenedAddresses = Object.fromEntries(
+	Object.entries(addresses).map(([key, value]) => [key, shortenAddress(value)])
+);
+
 export const TokensDetails = () => {
-	const { stateUsdPrice, FluxinUsdPrice,XerionUsdPrice,OneDollarUsdPrice } =
+	const { stateUsdPrice, FluxinUsdPrice, XerionUsdPrice, OneDollarUsdPrice } =
 		useContext(PriceContext);
 	const { simpleSupplies, mintAdditionalTOkens } = useGeneralTokens()
 	const { AuctionRunningLocalString, auctionDetails, TotalTokensBurned, auctionTimeLeft } = useGeneralAuctionFunctions()
-	
+
 	const { CurrentRatioPrice } = useGeneralTokens();
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, PercentageFluxin,PercentageXerion,ReanounceOneDollarSwapContract,PercentageOneD,RenounceXerionSwap, balances, isReversed, RatioTargetsofTokens, ReanounceContract, SetAUctionDuration, WithdrawFluxin,WithdrawXerion, ReanounceFluxinContract,ReanounceXerionContract,ReanounceOneDollarContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, PercentageOfState, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate,WithdrawOneDollar } = useSwapContract();
+	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, decayPercentages, ReanounceOneDollarSwapContract, RenounceXerionSwap, balances, isReversed, RatioTargetsofTokens, ReanounceContract, SetAUctionDuration, WithdrawFluxin, WithdrawXerion, ReanounceFluxinContract, ReanounceXerionContract, ReanounceOneDollarContract,ReanounceRievaContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, PercentageOfState, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate, WithdrawOneDollar } = useSwapContract();
 	console.log("isReversing", isReversed.Fluxin)
-	console.log("isReversing", balances.OneDollarBalance )
+	console.log("isReversing", balances.OneDollarBalance)
 	return [
 		{
 			tokenName: "DAV",
-			key: davShortened,
+			key: shortenedAddresses.davShortened,
 			name: "pDAV",
 			supply: "5,000,000.00",
 			claimDAVToken: DAVTokensWithdraw,
@@ -62,15 +70,15 @@ export const TokensDetails = () => {
 		},
 		{
 			tokenName: "Orxa",
-			key: FluxinShortened,
+			key: shortenedAddresses.FluxinShortened,
 			name: "Orxa",
 			supply: "1,000,000,000,000.00",
 			Treasury: "1,000,000,000,000.00",
 			Supply: simpleSupplies.FluxinSupply,
-			percentage: PercentageFluxin,
+			percentage: decayPercentages["Fluxin"],
 			address: Fluxin,
 			SwapContract: Ratio_TOKEN_ADDRESS,
-			SwapShortContract: FluxinSwapShortened,
+			SwapShortContract: shortenedAddresses.FluxinSwapShortened,
 			stateBalance: balances.StateFluxin,
 			target: RatioTargetsofTokens["Fluxin"],
 			isReversing: isReversed.Fluxin.toString(),
@@ -114,15 +122,15 @@ export const TokensDetails = () => {
 		},
 		{
 			tokenName: "Layti",
-			key: XerionShortened,
+			key: shortenedAddresses.XerionShortened,
 			name: "Layti",
 			supply: "1,000,000,000,000.00",
 			Treasury: "1,000,000,000,000.00",
 			Supply: simpleSupplies.XerionSupply,
-			percentage: PercentageXerion,
+			percentage: decayPercentages["Xerion"],
 			address: Xerion,
 			SwapContract: XerionRatioAddress,
-			SwapShortContract: XerionSwapShortened,
+			SwapShortContract: shortenedAddresses.XerionSwapShortened,
 			stateBalance: balances.StateXerion,
 			target: RatioTargetsofTokens["Xerion"],
 			isReversing: isReversed.Xerion.toString(),
@@ -166,13 +174,13 @@ export const TokensDetails = () => {
 		},
 		{
 			tokenName: "1$",
-			key: OneDShortened,
+			key: shortenedAddresses.OneDShortened,
 			name: "1$",
 			Supply: simpleSupplies.oneDollarSupply,
-			percentage: PercentageOneD,
+			percentage: decayPercentages["oneD"],
 			address: $1,
 			SwapContract: OneDollarRatioAddress,
-			SwapShortContract: OneDollarSwapShortened,
+			SwapShortContract: shortenedAddresses.OneDollarSwapShortened,
 			stateBalance: balances.StateOneDollar,
 			target: RatioTargetsofTokens["OneDollar"],
 			isReversing: isReversed.OneDollar.toString(),
@@ -180,7 +188,7 @@ export const TokensDetails = () => {
 			WillStartForNext: ReverseForNextCycle.OneDollar,
 			Balance: balances.OneDollarBalance,
 			TotalTokensBurn: TotalTokensBurned.OneDollar,
-			RatioBalance: balances?.ratioOneDollarBalance ,
+			RatioBalance: balances?.ratioOneDollarBalance,
 			Duration: auctionDetails["OneDollar"],
 			interval: auctionDetails["OneDollar"],
 			AuctionRunning: AuctionRunningLocalString.OneDollar.toString(),
@@ -215,8 +223,58 @@ export const TokensDetails = () => {
 			},
 		},
 		{
+			tokenName: "Rieva",
+			key: shortenedAddresses.RievaShortened,
+			name: "Rieva",
+			Supply: simpleSupplies.RievaSupply,
+			percentage: decayPercentages["Rieva"],
+			address: Rieva,
+			// SwapContract: OneDollarRatioAddress,
+			// SwapShortContract: OneDollarSwapShortened,
+			// stateBalance: balances.StateOneDollar,
+			// target: RatioTargetsofTokens["OneDollar"],
+			// isReversing: isReversed.OneDollar.toString(),
+			// WillStart: ReverseForCycle.OneDollar,
+			// WillStartForNext: ReverseForNextCycle.OneDollar,
+			// Balance: balances.OneDollarBalance,
+			// TotalTokensBurn: TotalTokensBurned.OneDollar,
+			// RatioBalance: balances?.ratioOneDollarBalance ,
+			// Duration: auctionDetails["OneDollar"],
+			// interval: auctionDetails["OneDollar"],
+			// AuctionRunning: AuctionRunningLocalString.OneDollar.toString(),
+			// pair: "Layti/pSTATE",
+			// Ratio: CurrentRatioPrice.OneDollar,
+			// Price: OneDollarUsdPrice,
+			// SetDuration: () => SetAUctionDuration(),
+			// AuctionTimeRunning: auctionTimeLeft.OneDollar,
+			// AuctionNextTime: auctionDetails["OneDollar"],
+			mintAddTOkens: "62,500,000,000",
+			renounceSmartContract: isRenounced?.Rieva ?? "Unknown",
+			// renounceSwapSmartContract: isRenounced?.OneDollar ?? "Unknown",
+			actions: {
+				ReanounceContract: ReanounceRievaContract,
+				ReanounceSwapContract: ReanounceOneDollarSwapContract,
+				WithdrawState: WithdrawOneDollar,
+				mintAdditionalTOkens: mintAdditionalTOkens,
+				SetDuration: (value) => SetAUctionDuration(value, "OneDollarRatio"),
+				SetInterval: (value) => SetAUctionInterval(value, "OneDollarRatio"),
+				AddTokenToContract: () =>
+					AddTokensToContract($1, STATE_TOKEN_ADDRESS, CurrentRatioPrice.OneDollar),
+				setRatio: (value) => setRatioTarget(value, "OneDollarRatio"),
+				setBurn: (value) => setBurnRate(value, "OneDollarRatio"),
+				setReverseEnabled: () => setReverseEnable("OneDollarRatio"),
+				setReverse: (value, value2) => setReverseTime(value, value2),
+				setCurrentRatio: (value) => setCurrentRatioTarget(value),
+				DepositTokens: (value) =>
+					DepositToken("oneD", $1, value, "OneDollarRatio"),
+				DepositStateTokens: (value) =>
+					DepositToken("state", STATE_TOKEN_ADDRESS, value, "OneDollarRatio"),
+				StartingAuction: () => StartAuction("OneDollarRatio"),
+			},
+		},
+		{
 			tokenName: "STATE",
-			key: stateShortened,
+			key: shortenedAddresses.stateShortened,
 			name: "pSTATE",
 			supply: "999,000,000,000,000.00",
 			Treasury: "999,000,000,000,000.00",

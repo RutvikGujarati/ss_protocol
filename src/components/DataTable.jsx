@@ -10,10 +10,12 @@ import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
 import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions";
+import { useAddRecentTransaction } from '@rainbow-me/rainbowkit';
 
 const DataTable = () => {
   const { DavBalance } = useDAvContract();
   const { ClaimTokens, CheckMintBalance, Distributed } = useGeneralTokens();
+  const addRecentTransaction = useAddRecentTransaction();
 
   const {
     contracts,
@@ -339,7 +341,7 @@ const DataTable = () => {
                                   </div>
                                 )}
                                 <button
-                                  onClick={() => SwapT()}
+                                  onClick={() => SwapT() }
                                   disabled={
                                     swappingStates[id] ||
                                     onlyInputAmount <= 0 ||

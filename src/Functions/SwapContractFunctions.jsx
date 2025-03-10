@@ -65,10 +65,8 @@ export const SwapContractProvider = ({ children }) => {
   const [StateBurnBalance, setStateBurnBalance] = useState({});
   const [RatioTargetsofTokens, setRatioTargetsOfTokens] = useState({});
 
-  const [PercentageOfState, setPercentage] = useState("0.0");
-  const [PercentageFluxin, setFluxinPercentage] = useState("0.0");
-  const [PercentageXerion, setXerionPercentage] = useState("0.0");
-  const [PercentageOneD, setOneDPercentage] = useState("0.0");
+
+  const [decayPercentages, setDecayPercentages] = useState({});
 
   const [userHashSwapped, setUserHashSwapped] = useState({});
   const [userHasReverseSwapped, setUserHasReverseSwapped] = useState({});
@@ -78,6 +76,7 @@ export const SwapContractProvider = ({ children }) => {
     state: AllContracts.stateContract,
     dav: AllContracts.davContract,
     Fluxin: AllContracts.FluxinContract,
+    Rieva: AllContracts.RievaContract,
     oneD: AllContracts.oneDollar,
     Xerion: AllContracts.XerionContract,
     FluxinRatio: AllContracts.RatioContract,
@@ -182,10 +181,7 @@ export const SwapContractProvider = ({ children }) => {
         await Promise.all([
           fetchStateHoldingsAndCalculateUSD(),
           RatioTargetValues(),
-          getDecayPercentage("state"),
-          getDecayPercentage("Xerion"),
-          getDecayPercentage("Fluxin"),
-          getDecayPercentage("oneD"),
+		  fetchAllDecayPercentages(),
           checkOwnershipStatus(),
           getCachedRatioTarget(),
           reverseSwapEnabled(),
@@ -230,6 +226,7 @@ export const SwapContractProvider = ({ children }) => {
       "FluxinRatio",
       "Xerion",
       "XerionRatio",
+	  "Rieva",
       "oneD",
       "OneDollar",
     ];
@@ -293,6 +290,8 @@ export const SwapContractProvider = ({ children }) => {
     renounceOwnership(AllContracts.XerionContract, "Xerion");
   const ReanounceOneDollarContract = () =>
     renounceOwnership(AllContracts.oneDollar, "1$");
+  const ReanounceRievaContract = () =>
+    renounceOwnership(AllContracts.RievaContract, "Rieva");
   const ReanounceOneDollarSwapContract = () =>
     renounceOwnership(AllContracts.OneDollarRatioContract, "1$");
   const RenounceState = () =>
@@ -743,42 +742,35 @@ export const SwapContractProvider = ({ children }) => {
   };
 
   const getDecayPercentage = async (contractName) => {
-    try {
-      if (!contracts[contractName]) {
-        console.error(`Contract "${contractName}" not found.`);
-        return;
-      }
-
-      const currentTimestamp = Math.floor(Date.now() / 1000);
-      const transaction = await handleContractCall(
-        contracts[contractName], // Dynamically select the contract
-        "getDecayPercentageAtTime",
-        [currentTimestamp],
-        (s) => parseFloat(ethers.formatUnits(s, 0))
-      );
-
-      const reversedPercentage = 100 - transaction; // Reverse the percentage
-      console.log(
-        `${contractName} decay percentage (reversed):`,
-        reversedPercentage
-      );
-
-      // Set the percentage based on the contract
-      if (contractName === "state") {
-        setPercentage(reversedPercentage);
-      } else if (contractName === "Fluxin") {
-        setFluxinPercentage(reversedPercentage);
-      } else if (contractName === "Xerion") {
-        setXerionPercentage(reversedPercentage);
-      } else if (contractName === "oneD") {
-        setOneDPercentage(reversedPercentage);
-      }
-    } catch (e) {
-      console.error(
-        `Error fetching decay percentage for "${contractName}":`,
-        e
-      );
-    }
+	try {
+	  const contract = contracts[contractName];
+	  if (!contract) {
+		console.error(`Contract "${contractName}" not found.`);
+		return;
+	  }
+  
+	  const currentTimestamp = Math.floor(Date.now() / 1000);
+	  const transaction = await handleContractCall(
+		contract,
+		"getDecayPercentageAtTime",
+		[currentTimestamp],
+		(s) => parseFloat(ethers.formatUnits(s, 0))
+	  );
+  
+	  const reversedPercentage = 100 - transaction;
+	  console.log(`${contractName} decay percentage (reversed):`, reversedPercentage);
+  
+	  // Update state with the new percentage for the specific contract
+	  setDecayPercentages((prev) => ({
+		...prev,
+		[contractName]: reversedPercentage,
+	  }));
+	} catch (e) {
+	  console.error(`Error fetching decay percentage for "${contractName}":`, e);
+	}
+  };
+  const fetchAllDecayPercentages = async () => {
+	await Promise.all(Object.keys(contracts).map(getDecayPercentage));
   };
   console.log("Contract functions:", AllContracts.RatioContract);
 
@@ -1315,7 +1307,6 @@ export const SwapContractProvider = ({ children }) => {
         RenounceState,
         WithdrawState,
         handleAddTokenState,
-        PercentageOfState,
         TotalStateHoldsInUS,
 
         setClaiming,
@@ -1330,8 +1321,6 @@ export const SwapContractProvider = ({ children }) => {
 
         handleAddToken,
         setRatioTarget,
-        PercentageFluxin,
-        PercentageXerion,
         // setReverseEnable,
         WithdrawFluxin,
         WithdrawXerion,
@@ -1371,10 +1360,11 @@ export const SwapContractProvider = ({ children }) => {
         RenounceFluxinSwap,
         RenounceXerionSwap,
         ReanounceOneDollarContract,
+		ReanounceRievaContract,
         SetOnePercentageOfBalance,
         ReverseForNextCycle,
         handleAddOneD,
-        PercentageOneD,
+		decayPercentages,
         ReverseForCycle,
       }}
     >
