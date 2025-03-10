@@ -131,4 +131,15 @@
   .marquee-content {
 	padding-right: 100px; /* Adjust for spacing */
   }
-  
+  .rieva-token-image {
+    width: 25px;
+    height: 25px;
+    border-radius: 30%;
+    object-fit: cover;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .rieva-token-image:hover {
+    /* box-shadow: 0 0 8px rgba(255, 255, 255, 0.8); */
+    border: 2px solid rgba(255, 255, 255, 0.9);
+  }

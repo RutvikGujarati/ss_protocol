@@ -6,6 +6,7 @@ import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import PLSLogo from "../assets/pls1.png";
 import BNBLogo from "../assets/bnb.png";
+import RievaLogo from "../assets/rieva.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { formatWithCommas } from "./DetailsInfo";
 import { PriceContext } from "../api/StatePrice";
@@ -431,13 +432,27 @@ const InfoCards = () => {
                         {
                           text: "Rieva TOKEN DEPLOYED.",
                           color: "white",
+                          image: RievaLogo,
                         },
                       ].map((item, j) => (
                         <span
                           key={`${i}-${j}`}
                           className="marquee-content"
-                          style={{ color: item.color }}
+                          style={{
+                            color: item.color,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
                         >
+                          {item.image && (
+                            <img
+                              src={item.image}
+                              alt="Rieva Token"
+                              className="rieva-token-image"
+                              
+                            />
+                          )}
                           {item.text}
                         </span>
                       ))}
