@@ -279,7 +279,7 @@ export const TokensDetails = () => {
 			supply: "999,000,000,000,000.00",
 			Treasury: "999,000,000,000,000.00",
 			Supply: simpleSupplies.stateSupply,
-			percentage: PercentageOfState,
+			percentage: decayPercentages["state"],
 			Balance: balances.stateBalance,
 			address: STATE_TOKEN_ADDRESS,
 			claimLPToken: LPStateTransferred,
