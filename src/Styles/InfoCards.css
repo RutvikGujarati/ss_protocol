@@ -134,7 +134,6 @@
   .rieva-token-image {
     width: 25px;
     height: 25px;
-    border-radius: 30%;
     object-fit: cover;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
