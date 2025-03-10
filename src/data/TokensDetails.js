@@ -263,14 +263,14 @@ export const TokensDetails = () => {
 				SetDuration: (value) => SetAUctionDuration(value, "RievaRatio"),
 				SetInterval: (value) => SetAUctionInterval(value, "RievaRatio"),
 				AddTokenToContract: () =>
-					AddTokensToContract($1, STATE_TOKEN_ADDRESS, CurrentRatioPrice.Rieva),
+					AddTokensToContract(Rieva, STATE_TOKEN_ADDRESS, CurrentRatioPrice.Rieva),
 				setRatio: (value) => setRatioTarget(value, "RievaRatio"),
 				setBurn: (value) => setBurnRate(value, "RievaRatio"),
 				setReverseEnabled: () => setReverseEnable("RievaRatio"),
 				setReverse: (value, value2) => setReverseTime(value, value2),
 				setCurrentRatio: (value) => setCurrentRatioTarget(value),
 				DepositTokens: (value) =>
-					DepositToken("oneD", $1, value, "RievaRatio"),
+					DepositToken("Rieva", Rieva, value, "RievaRatio"),
 				DepositStateTokens: (value) =>
 					DepositToken("state", STATE_TOKEN_ADDRESS, value, "RievaRatio"),
 				StartingAuction: () => StartAuction("RievaRatio"),
