@@ -324,7 +324,7 @@ const InfoCards = () => {
                         </h5>
                         <h5 className="detailAmount">
                           1 TRILLION STATE TOKENS = {""}
-                          {stateUsdPrice * 1000000000000} USD
+                          {formatWithCommas(stateUsdPrice * 1000000000000)} USD
                         </h5>
                       </div>
                       <div className="mb-0 mx-1">
