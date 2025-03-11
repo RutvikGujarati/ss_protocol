@@ -324,7 +324,7 @@ const InfoCards = () => {
                         </h5>
                         <h5 className="detailAmount">
                           1 TRILLION STATE TOKENS = {""}
-                          $ {formatWithCommas(stateUsdPrice * 1000000000000)}
+                          $ {formatWithCommas((stateUsdPrice * 1000000000000).toFixed(0))}
                         </h5>
                       </div>
                       <div className="mb-0 mx-1">
@@ -436,7 +436,7 @@ const InfoCards = () => {
                         {
                           text: "Rieva TOKEN DEPLOYED.",
                           color: "white",
-                          image: RievaLogo,
+                        //   image: RievaLogo,
                         },
                       ].map((item, j) => (
                         <span
@@ -449,7 +449,7 @@ const InfoCards = () => {
                             gap: "8px",
                           }}
                         >
-                          {item.image && (
+                          {/* {item.image && (
                             <div className="">
                               <img
                                 src={item.image}
@@ -457,7 +457,7 @@ const InfoCards = () => {
                                 className="rieva-token-image"
                               />
                             </div>
-                          )}
+                          )} */}
                           {item.text}
                         </span>
                       ))}
