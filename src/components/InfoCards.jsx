@@ -322,6 +322,10 @@ const InfoCards = () => {
                           {StateHolds} / $
                           {formatWithCommas(TotalStateHoldsInUS)}
                         </h5>
+                        <h5 className="detailAmount">
+                          1 TRILLION STATE TOKENS = {""}
+                          {stateUsdPrice * 1000000000000} USD
+                        </h5>
                       </div>
                       <div className="mb-0 mx-1">
                         <img
@@ -437,7 +441,7 @@ const InfoCards = () => {
                       ].map((item, j) => (
                         <span
                           key={`${i}-${j}`}
-                          className="marquee-content"
+                          className="marquee-content  rieva-token-container"
                           style={{
                             color: item.color,
                             display: "flex",
@@ -446,12 +450,13 @@ const InfoCards = () => {
                           }}
                         >
                           {item.image && (
-                            <img
-                              src={item.image}
-                              alt="Rieva Token"
-                              className="rieva-token-image"
-                              
-                            />
+                            <div className="">
+                              <img
+                                src={item.image}
+                                alt="Rieva Token"
+                                className="rieva-token-image"
+                              />
+                            </div>
                           )}
                           {item.text}
                         </span>

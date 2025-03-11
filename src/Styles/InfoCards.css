@@ -109,36 +109,36 @@
 }
 
 @keyframes marquee {
-	0% {
-	  transform: translateX(0);
-	}
-	100% {
-	  transform: translateX(-50%);
-	}
+  0% {
+    transform: translateX(0);
   }
-  
-  .animate-marquee {
-	display: flex;
-	white-space: nowrap;
-	overflow: hidden;
+  100% {
+    transform: translateX(-50%);
   }
-  
-  .marquee-inner {
-	display: flex;
-	animation: marquee 30s linear infinite;
-  }
-  
-  .marquee-content {
-	padding-right: 100px; /* Adjust for spacing */
-  }
-  .rieva-token-image {
-    width: 25px;
-    height: 25px;
-    object-fit: cover;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
+}
 
-  .rieva-token-image:hover {
-    /* box-shadow: 0 0 8px rgba(255, 255, 255, 0.8); */
-    border: 2px solid rgba(255, 255, 255, 0.9);
-  }
+.animate-marquee {
+  display: flex;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.marquee-inner {
+  display: flex;
+  animation: marquee 30s linear infinite;
+}
+
+.marquee-content {
+  padding-right: 100px; /* Adjust for spacing */
+}
+
+.rieva-token-image {
+  width: 25px;
+  height: 25px;
+  transition: transform 0.3s ease, border 0.3s ease;
+}
+
+.rieva-token-image:hover {
+  transform: scale(2);
+  z-index: 999; /* Ensure it's above everything */
+}

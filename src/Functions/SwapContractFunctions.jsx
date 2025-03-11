@@ -148,9 +148,11 @@ export const SwapContractProvider = ({ children }) => {
 
       const holdingsInUSD = rawHoldings * priceNum;
 
-      setStateHoldings(new Intl.NumberFormat("en-US").format(rawHoldings));
+      setStateHoldings(
+        new Intl.NumberFormat("en-US").format(Math.floor(rawHoldings))
+      ); // Ensure no decimals
       setTotalStateHoldsInUS(
-        holdingsInUSD === 0 ? "0.0" : holdingsInUSD.toFixed(4)
+        holdingsInUSD === 0 ? "0.0" : holdingsInUSD.toFixed(0)
       );
 
       console.log(
