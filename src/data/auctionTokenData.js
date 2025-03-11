@@ -140,7 +140,7 @@ export const useAuctionTokens = () => {
 			ErrorName: "Rieva",
 			RatioTargetToken: RatioTargetsofTokens?.["Rieva"] || 0,
 			AuctionStatus: AuctionRunning?.Rieva,
-			onChart: "https://www.geckoterminal.com/pulsechain/pools/0xc7d4d22af7a4ef1ffe25235c4d4cce9b7ab77edf",
+			onChart: "https://www.geckoterminal.com/pulsechain/pools/0x3c504c7d2a99e212c186aa0bc47a9e94dd7ac827",
 			distributedAmount: Distributed?.["Rieva"] || 0,
 			token: Rieva,
 			SwapT: () => SwapTokens("Rieva", "Rieva"),
