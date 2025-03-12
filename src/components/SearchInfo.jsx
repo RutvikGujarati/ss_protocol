@@ -5,7 +5,7 @@ import FluxinLogo from "../assets/FluxinLogo.png";
 import Rieva from "../assets/rieva.png";
 import DAVLogo from "../assets/d_logo.png";
 import oned from "../assets/oned.png";
-import Domus from "../assets/Domus.png";
+import Domus from "../assets/domus.png";
 import stateLogo from "../assets/state_logo.png";
 import PropTypes from "prop-types";
 import MetaMaskIcon from "../assets/metamask-icon.png";
