@@ -6,7 +6,7 @@ import { ContractContext } from "../Functions/ContractInitialize";
 import { ethers } from "ethers";
 
 const DeepStateTable = () => {
-  const { AllContracts } = useContext(ContractContext);
+  const { AllContracts,signer,account } = useContext(ContractContext);
   const [balanceOfContract, setbalanceOfContract] = useState("0");
   const [PLSPrice, setPLSPrice] = useState("0");
   const [PLSUSD, setPLSUSD] = useState("0");
@@ -72,21 +72,23 @@ const DeepStateTable = () => {
   };
 
   const BuyTokens = async (amount) => {
-    try {
-      setLoading(true);
-      const amountInWei = ethers.parseUnits(amount.toString(), 18);
-      const tx = await AllContracts.DeepStateContract.buy({
-        value: amountInWei,
-      });
-      await tx.wait();
-      await contractBalance(), CalculateBalanceInUSD(), setLoading(false);
-    } catch (error) {
-      console.log("Error in buying tokens:", error);
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
+	try {
+	  setLoading(true);
+	  const amountInWei = ethers.parseUnits(amount.toString(), 18);
+	  const tx = await signer.sendTransaction({
+		to: AllContracts.DeepStateContract.target, // Contract address
+		value: amountInWei, // Sending ETH directly
+	  });
+	  await tx.wait();
+	  await contractBalance();
+	  await CalculateBalanceInUSD();
+	} catch (error) {
+	  console.log("Error in buying tokens:", error);
+	} finally {
+	  setLoading(false);
+	}
   };
+  
   const SellTokens = async (amount) => {
     try {
       setSellLoading(true);
@@ -104,7 +106,7 @@ const DeepStateTable = () => {
   const WithdrawDividends = async () => {
     try {
       setWithdrawLoading(true);
-      const tx = await AllContracts.DeepStateContract.withdraw();
+      const tx = await AllContracts.DeepStateContract.withdrawDividends();
       await tx.wait();
       setWithdrawLoading(false);
     } catch (error) {
@@ -117,7 +119,7 @@ const DeepStateTable = () => {
 
   const UsersTotalTokens = async () => {
     try {
-      const userAmount = await AllContracts.DeepStateContract.myTokens(); // Get amount in Wei
+      const userAmount = await AllContracts.DeepStateContract.balanceOf(account); // Get amount in Wei
       const formattedAmount = ethers.formatEther(userAmount); // Convert to ETH
       setUsersTokens(formattedAmount); // Store in state
       console.log("User's total tokens in ETH:", formattedAmount);
@@ -128,7 +130,7 @@ const DeepStateTable = () => {
   const UsersTotalDividends = async () => {
     try {
       if (!AllContracts?.DeepStateContract) return;
-      const userAmount = await AllContracts.DeepStateContract.myDividends();
+      const userAmount = await AllContracts.DeepStateContract.availableDividends(account);
       setUsersDividends(parseFloat(ethers.formatEther(userAmount)).toFixed(4));
     } catch (error) {
       console.error("Error fetching dividends:", error);

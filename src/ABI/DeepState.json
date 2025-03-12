@@ -11,11 +11,146 @@
 		"stateMutability": "nonpayable"
 	},
 	{
-		"type": "function",
-		"name": "buy",
-		"inputs": [],
-		"outputs": [],
+		"type": "receive",
 		"stateMutability": "payable"
+	},
+	{
+		"type": "function",
+		"name": "DIVIDEND_FEE",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "INITIAL_PRICE",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "PRICE_INCREMENT",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "allowance",
+		"inputs": [
+			{
+				"name": "owner",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "spender",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "approve",
+		"inputs": [
+			{
+				"name": "spender",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "value",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "availableDividends",
+		"inputs": [
+			{
+				"name": "account",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "balanceOf",
+		"inputs": [
+			{
+				"name": "account",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "decimals",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint8",
+				"internalType": "uint8"
+			}
+		],
+		"stateMutability": "view"
 	},
 	{
 		"type": "function",
@@ -26,6 +161,25 @@
 				"name": "",
 				"type": "bool",
 				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "ethToTokens",
+		"inputs": [
+			{
+				"name": "ethAmount",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
 			}
 		],
 		"stateMutability": "view"
@@ -45,20 +199,7 @@
 	},
 	{
 		"type": "function",
-		"name": "myDividends",
-		"inputs": [],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "myTokens",
+		"name": "lastVestingUpdate",
 		"inputs": [],
 		"outputs": [
 			{
@@ -87,7 +228,7 @@
 		"name": "sell",
 		"inputs": [
 			{
-				"name": "_tokens",
+				"name": "tokenAmount",
 				"type": "uint256",
 				"internalType": "uint256"
 			}
@@ -110,7 +251,26 @@
 	},
 	{
 		"type": "function",
-		"name": "treasuryLockedBalance",
+		"name": "tokensToEth",
+		"inputs": [
+			{
+				"name": "tokenAmount",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "totalDividends",
 		"inputs": [],
 		"outputs": [
 			{
@@ -123,7 +283,73 @@
 	},
 	{
 		"type": "function",
-		"name": "treasuryWallet",
+		"name": "totalSupply",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "transfer",
+		"inputs": [
+			{
+				"name": "to",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "value",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "transferFrom",
+		"inputs": [
+			{
+				"name": "from",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "to",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "value",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "treasury",
 		"inputs": [],
 		"outputs": [
 			{
@@ -136,29 +362,49 @@
 	},
 	{
 		"type": "function",
-		"name": "withdraw",
+		"name": "treasuryLocked",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "withdrawDividends",
 		"inputs": [],
 		"outputs": [],
 		"stateMutability": "nonpayable"
 	},
 	{
+		"type": "function",
+		"name": "withdrawStuckETH",
+		"inputs": [],
+		"outputs": [],
+		"stateMutability": "payable"
+	},
+	{
 		"type": "event",
-		"name": "TokenPurchase",
+		"name": "Approval",
 		"inputs": [
 			{
-				"name": "buyer",
+				"name": "owner",
 				"type": "address",
 				"indexed": true,
 				"internalType": "address"
 			},
 			{
-				"name": "ethInjected",
-				"type": "uint256",
-				"indexed": false,
-				"internalType": "uint256"
+				"name": "spender",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
 			},
 			{
-				"name": "tokensMinted",
+				"name": "value",
 				"type": "uint256",
 				"indexed": false,
 				"internalType": "uint256"
@@ -168,22 +414,22 @@
 	},
 	{
 		"type": "event",
-		"name": "TokenSale",
+		"name": "Transfer",
 		"inputs": [
 			{
-				"name": "seller",
+				"name": "from",
 				"type": "address",
 				"indexed": true,
 				"internalType": "address"
 			},
 			{
-				"name": "tokensBurned",
-				"type": "uint256",
-				"indexed": false,
-				"internalType": "uint256"
+				"name": "to",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
 			},
 			{
-				"name": "ethReceived",
+				"name": "value",
 				"type": "uint256",
 				"indexed": false,
 				"internalType": "uint256"
@@ -192,28 +438,89 @@
 		"anonymous": false
 	},
 	{
-		"type": "event",
-		"name": "TreasuryVesting",
+		"type": "error",
+		"name": "ERC20InsufficientAllowance",
 		"inputs": [
 			{
-				"name": "vestedTokens",
+				"name": "spender",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "allowance",
 				"type": "uint256",
-				"indexed": false,
 				"internalType": "uint256"
 			},
 			{
-				"name": "ethValue",
+				"name": "needed",
 				"type": "uint256",
-				"indexed": false,
-				"internalType": "uint256"
-			},
-			{
-				"name": "timestamp",
-				"type": "uint256",
-				"indexed": false,
 				"internalType": "uint256"
 			}
-		],
-		"anonymous": false
+		]
+	},
+	{
+		"type": "error",
+		"name": "ERC20InsufficientBalance",
+		"inputs": [
+			{
+				"name": "sender",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "balance",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "needed",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "ERC20InvalidApprover",
+		"inputs": [
+			{
+				"name": "approver",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "ERC20InvalidReceiver",
+		"inputs": [
+			{
+				"name": "receiver",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "ERC20InvalidSender",
+		"inputs": [
+			{
+				"name": "sender",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "ERC20InvalidSpender",
+		"inputs": [
+			{
+				"name": "spender",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
 	}
 ]

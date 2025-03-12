@@ -28,4 +28,4 @@ export const XerionRatioAddress = "0xdb89A380171339c14ce316E2c7c32e8aCD8037fb";
 export const OneDollarRatioAddress = "0x7Be689784D523E963E6232aaFc7787920De695B2";
 export const RievaRatioAddress = "0x6205253B9176129793Cde1aA576D65cAB01B5c55";
 
-export const DeepState = "0x11453688A3206Ab92daB0aE2Eef6c3B3a9b530cE";
+export const DeepState = "0x38da5Ce3699A796a2c49198dc0f7f35929BCCAA3";
