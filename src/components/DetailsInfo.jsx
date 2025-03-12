@@ -322,6 +322,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               dataToShow.tokenName == "Orxa" ||
               dataToShow.tokenName == "1$" ||
               dataToShow.tokenName == "Rieva" ||
+              dataToShow.tokenName == "Domus" ||
               dataToShow.tokenName == "Layti") && (
               <>
                 {dataToShow.tokenName !== "STATE" && (
@@ -440,6 +441,12 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               dataToShow.actions.mintAdditionalTOkens(
                                 "Rieva",
                                 62500000000
+                              ); // Amount for State
+                            
+                            } else if (dataToShow.tokenName === "Domus") {
+                              dataToShow.actions.mintAdditionalTOkens(
+                                "Domus",
+                                2500000000000
                               ); // Amount for State
                             }
                           }}

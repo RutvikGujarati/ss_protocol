@@ -3,6 +3,7 @@ import { useSwapContract } from "../Functions/SwapContractFunctions";
 import {
 	$1,
 	DAV_TOKEN_ADDRESS,
+	Domus,
 	Fluxin,
 	OneDollarRatioAddress,
 	Ratio_TOKEN_ADDRESS,
@@ -24,6 +25,7 @@ const shortenAddress = (address) => {
 const addresses = {
 	davShortened: DAV_TOKEN_ADDRESS,
 	FluxinShortened: Fluxin,
+	DomusShortened: Domus,
 	XerionShortened: Xerion,
 	OneDShortened: $1, // Ensure $1 is correctly defined
 	RievaShortened: Rieva,
@@ -49,7 +51,7 @@ export const TokensDetails = () => {
 		useDAvContract();
 	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, decayPercentages, ReanounceOneDollarSwapContract, RenounceXerionSwap, balances, isReversed,
 		RenounceRievaSwap, RatioTargetsofTokens, ReanounceContract, SetAUctionDuration, WithdrawFluxin, WithdrawXerion, ReanounceFluxinContract, ReanounceXerionContract,
-		WithdrawRieva, ReanounceOneDollarContract, ReanounceRievaContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate, WithdrawOneDollar } = useSwapContract();
+		WithdrawRieva, ReanounceOneDollarContract, ReanounceRievaContract,ReanounceDomusContract, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate, WithdrawOneDollar } = useSwapContract();
 	console.log("isReversing", isReversed.Fluxin)
 	console.log("isReversing", balances.OneDollarBalance)
 	return [
@@ -274,6 +276,56 @@ export const TokensDetails = () => {
 				DepositStateTokens: (value) =>
 					DepositToken("state", STATE_TOKEN_ADDRESS, value, "RievaRatio"),
 				StartingAuction: () => StartAuction("RievaRatio"),
+			},
+		},
+		{
+			tokenName: "Domus",
+			key: shortenedAddresses.DomusShortened,
+			name: "Domus",
+			Supply: simpleSupplies.DomusSupply,
+			percentage: decayPercentages["Domus"],
+			address: Domus,
+			// SwapContract: DomusRatioAddress,
+			// SwapShortContract: shortenedAddresses.DomusSwapShortened,
+			// stateBalance: balances.StateDomus,
+			// target: RatioTargetsofTokens["Domus"],
+			// isReversing: isReversed.Domus.toString(),
+			// WillStart: ReverseForCycle.Domus,
+			// WillStartForNext: ReverseForNextCycle.Domus,
+			// Balance: balances.DomusBalance,
+			// TotalTokensBurn: TotalTokensBurned.Domus,
+			// RatioBalance: balances?.ratioDomusBalance,
+			// Duration: auctionDetails["Domus"],
+			// interval: auctionDetails["Domus"],
+			// AuctionRunning: AuctionRunningLocalString.Domus.toString(),
+			// pair: "Layti/pSTATE",
+			// Ratio: CurrentRatioPrice.Domus,
+			// Price: DomusUsdPrice,
+			// SetDuration: () => SetAUctionDuration(),
+			// AuctionTimeRunning: auctionTimeLeft.Domus,
+			// AuctionNextTime: auctionDetails["Domus"],
+			mintAddTOkens: "2,500,000,000,000",
+			renounceSmartContract: isRenounced?.Domus ?? "Unknown",
+			// renounceSwapSmartContract: isRenounced?.DomusRatio ?? "Unknown",
+			actions: {
+				ReanounceContract: ReanounceDomusContract,
+				// ReanounceSwapContract: RenounceDomusSwap,
+				// WithdrawState: WithdrawDomus,
+				mintAdditionalTOkens: mintAdditionalTOkens,
+				SetDuration: (value) => SetAUctionDuration(value, "DomusRatio"),
+				SetInterval: (value) => SetAUctionInterval(value, "DomusRatio"),
+				AddTokenToContract: () =>
+					AddTokensToContract(Domus, STATE_TOKEN_ADDRESS, CurrentRatioPrice.Domus),
+				setRatio: (value) => setRatioTarget(value, "DomusRatio"),
+				setBurn: (value) => setBurnRate(value, "DomusRatio"),
+				setReverseEnabled: () => setReverseEnable("DomusRatio"),
+				setReverse: (value, value2) => setReverseTime(value, value2),
+				setCurrentRatio: (value) => setCurrentRatioTarget(value),
+				DepositTokens: (value) =>
+					DepositToken("Domus", Domus, value, "DomusRatio"),
+				DepositStateTokens: (value) =>
+					DepositToken("state", STATE_TOKEN_ADDRESS, value, "DomusRatio"),
+				StartingAuction: () => StartAuction("DomusRatio"),
 			},
 		},
 		{

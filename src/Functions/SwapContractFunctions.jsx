@@ -7,6 +7,7 @@ import { ContractContext } from "./ContractInitialize";
 import {
   $1,
   DAV_TOKEN_ADDRESS,
+  Domus,
   Fluxin,
   OneDollarRatioAddress,
   Ratio_TOKEN_ADDRESS,
@@ -81,6 +82,7 @@ export const SwapContractProvider = ({ children }) => {
     dav: AllContracts.davContract,
     Fluxin: AllContracts.FluxinContract,
     Rieva: AllContracts.RievaContract,
+    Domus: AllContracts.DomusContract,
     oneD: AllContracts.oneDollar,
     Xerion: AllContracts.XerionContract,
     FluxinRatio: AllContracts.RatioContract,
@@ -237,6 +239,7 @@ export const SwapContractProvider = ({ children }) => {
       "Xerion",
       "XerionRatio",
       "Rieva",
+	  "Domus",
       "oneD",
       "OneDollar",
     ];
@@ -302,6 +305,8 @@ export const SwapContractProvider = ({ children }) => {
     renounceOwnership(AllContracts.oneDollar, "1$");
   const ReanounceRievaContract = () =>
     renounceOwnership(AllContracts.RievaContract, "Rieva");
+  const ReanounceDomusContract = () =>
+    renounceOwnership(AllContracts.DomusContract, "Domus");
   const ReanounceOneDollarSwapContract = () =>
     renounceOwnership(AllContracts.OneDollarRatioContract, "1$");
   const RenounceState = () =>
@@ -1363,6 +1368,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddOneD = () => handleAddToken($1, "1$");
   const handleAddXerion = () => handleAddToken(Xerion, "Layti");
   const handleAddRieva = () => handleAddToken(Rieva, "Rieva");
+  const handleAddDomus = () => handleAddToken(Domus, "Domus");
 
   return (
     <SwapContractContext.Provider
@@ -1407,6 +1413,7 @@ export const SwapContractProvider = ({ children }) => {
         handleAddFluxin,
         handleAddXerion,
         handleAddRieva,
+		handleAddDomus,
         userHashSwapped,
         userHasReverseSwapped,
         // WithdrawLPTokens,
@@ -1441,6 +1448,7 @@ export const SwapContractProvider = ({ children }) => {
         RenounceXerionSwap,
         ReanounceOneDollarContract,
         ReanounceRievaContract,
+		ReanounceDomusContract,
         SetOnePercentageOfBalance,
         ReverseForNextCycle,
         handleAddOneD,
