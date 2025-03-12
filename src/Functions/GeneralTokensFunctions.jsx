@@ -192,6 +192,7 @@ export const GeneralTokenProvider = ({ children }) => {
         { name: "Fluxin", contract: AllContracts.RatioContract },
         { name: "Xerion", contract: AllContracts.XerionRatioContract },
         { name: "Rieva", contract: AllContracts.RievaRatioContract },
+        { name: "Domus", contract: AllContracts.DomusRatioContract },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
 

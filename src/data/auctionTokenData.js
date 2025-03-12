@@ -2,9 +2,10 @@ import { useContext } from 'react';
 import FluxinLogo from "../assets/FluxinLogo.png";
 import XerionLogo from "../assets/layti.png";
 import RievaLogo from "../assets/rieva.png";
+import DomusLogo from "../assets/domus.png";
 import oned from "../assets/oned.png";
 
-import { $1, Fluxin, Rieva, Xerion } from "../ContractAddresses";
+import { $1, Domus, Fluxin, Rieva, Xerion } from "../ContractAddresses";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { PriceContext } from "../api/StatePrice";
 import { useGeneralAuctionFunctions } from '../Functions/GeneralAuctionFunctions';
@@ -18,7 +19,8 @@ export const useAuctionTokens = () => {
 		FluxinUsdPrice,
 		XerionUsdPrice,
 		OneDollarUsdPrice,
-		RievaUsdPrice
+		RievaUsdPrice,
+		DomusUsdPrice
 	} = useContext(PriceContext);
 	const { AuctionRunning } = useGeneralAuctionFunctions();
 	const { CurrentRatioPrice } = useGeneralTokens();
@@ -34,6 +36,7 @@ export const useAuctionTokens = () => {
 		handleAddFluxin,
 		handleAddXerion,
 		handleAddRieva,
+		handleAddDomus,
 		handleAddOneD,
 		OnePBalance,
 	} = useSwapContract();
@@ -149,6 +152,33 @@ export const useAuctionTokens = () => {
 			onlyInputAmount: OnePBalance.Rieva,
 			inputTokenAmount: `${OnePBalance.Rieva || 0} Rieva`,
 			outputToken: `${outAmounts?.Rieva || 0} State`,
+		},
+		{
+			id: "Domus",
+			name: "Domus",
+			Pname: "Domus - State - Domus",
+			ReverseName: "State - Domus",
+			ContractName: "Domus",
+			image: DomusLogo,
+			ratio: `1:${RatioTargetsofTokens?.["Domus"] || 0}`,
+			userHasSwapped: userHashSwapped.Domus,
+			userHasReverse: userHasReverseSwapped.Domus,
+			currentRatio: `1:${CurrentRatioPrice.Domus || 0}`,
+			Price: DomusUsdPrice,
+			isReversing: isReversed?.Domus.toString(),
+			currentTokenRatio: CurrentRatioPrice.Domus,
+			ErrorName: "Domus",
+			RatioTargetToken: RatioTargetsofTokens?.["Domus"] || 0,
+			AuctionStatus: AuctionRunning?.Domus,
+			onChart: "https://www.geckoterminal.com/pulsechain/pools/0x7019ee4173420ee652edc9a26bffc91469c753db",
+			distributedAmount: Distributed?.["Domus"] || 0,
+			token: Domus,
+			SwapT: () => SwapTokens("Domus", "Domus"),
+			ratioPrice: CurrentRatioPrice.Domus,
+			handleAddToken: handleAddDomus,
+			onlyInputAmount: OnePBalance.Domus,
+			inputTokenAmount: `${OnePBalance.Domus || 0} Domus`,
+			outputToken: `${outAmounts?.Domus || 0} State`,
 		},
 	];
 

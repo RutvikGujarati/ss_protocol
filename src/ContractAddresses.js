@@ -28,3 +28,4 @@ export const Ratio_TOKEN_ADDRESS = "0xf0bb62b168E7aDBf313217EFdD448897aFCe8fD6";
 export const XerionRatioAddress = "0xdb89A380171339c14ce316E2c7c32e8aCD8037fb";
 export const OneDollarRatioAddress = "0x7Be689784D523E963E6232aaFc7787920De695B2";
 export const RievaRatioAddress = "0x6205253B9176129793Cde1aA576D65cAB01B5c55";
+export const DomusRatioAddress = "0x874F9cd4E3Bb33A4e1B022033dc80c2E86EaF04a";

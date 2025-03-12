@@ -380,6 +380,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           ? "1$ Balance (inside Contract)"
                           : dataToShow.tokenName === "Rieva"
                           ? "Rieva Balance (inside Contract)"
+                          : dataToShow.tokenName === "Domus"
+                          ? "Domus Balance (inside Contract)"
                           : "Orxa Balance (inside Contract)"}
                       </td>
 
