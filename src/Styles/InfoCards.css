@@ -110,18 +110,35 @@
 
 @keyframes marquee {
   0% {
-    transform: translateX(100%);
+    transform: translateX(0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translateX(-50%);
   }
 }
 
 .animate-marquee {
-  display: inline-block;
+  display: flex;
   white-space: nowrap;
+  overflow: hidden;
+}
+
+.marquee-inner {
+  display: flex;
   animation: marquee 30s linear infinite;
 }
+
 .marquee-content {
-  padding-right: 100px; /* Adjust for gap between repetitions */
+  padding-right: 100px; /* Adjust for spacing */
+}
+
+.rieva-token-image {
+  width: 25px;
+  height: 25px;
+  transition: transform 0.3s ease, border 0.3s ease;
+}
+
+.rieva-token-image:hover {
+  transform: scale(2);
+  z-index: 999; /* Ensure it's above everything */
 }

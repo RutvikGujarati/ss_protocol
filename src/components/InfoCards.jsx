@@ -1,17 +1,21 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/InfoCards.css";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import PLSLogo from "../assets/pls1.png";
+import BNBLogo from "../assets/bnb.png";
+import RievaLogo from "../assets/rieva.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { formatWithCommas } from "./DetailsInfo";
 import { PriceContext } from "../api/StatePrice";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import DotAnimation from "../Animations/Animation";
 import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
+import { useChainId } from "wagmi";
 const InfoCards = () => {
+  const chainId = useChainId();
   const { stateUsdPrice, priceLoading } = useContext(PriceContext);
   const [setBurnRatio] = useState("0.0");
   const {
@@ -24,6 +28,32 @@ const InfoCards = () => {
     claimAmount,
   } = useDAvContract();
   const { ClaimTokens, CheckMintBalance, Distributed } = useGeneralTokens();
+  console.log("Connected Chain ID:", chainId);
+  const setBackLogo = () => {
+    if (chainId === 369) {
+      return PLSLogo; // PulseChain
+    } else if (chainId === 56) {
+      return BNBLogo; // BNB Chain
+    } else {
+      return PLSLogo; // Optional fallback logo
+    }
+  };
+  const getLogoSize = () => {
+    return chainId === 56
+      ? { width: "170px", height: "140px" } // Bigger size for BNB
+      : { width: "110px", height: "140px" }; // Default size
+  };
+  const getLiveText = () => {
+    if (chainId === 369) {
+      return { text: "🟢 LIVE ON PULSECHAIN.", color: "" };
+    } else if (chainId === 56) {
+      return { text: "🟢 LIVE ON BINANCE SMART CHAIN.", color: "" };
+    } else {
+      return { text: "🟢 LIVE ON UNKNOWN CHAIN.", color: "" }; // Fallback
+    }
+  };
+
+  const liveText = getLiveText();
 
   const {
     handleAddTokenState,
@@ -212,12 +242,11 @@ const InfoCards = () => {
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <img
-                    src={PLSLogo}
+                    src={setBackLogo()}
                     alt="PLS Logo"
                     style={{
                       position: "absolute",
-                      width: "110px", // Adjust size
-                      height: "140px",
+                      ...getLogoSize(),
                       opacity: 0.1, // Subtle shadow effect
                       top: "40%",
                       left: "70%",
@@ -292,6 +321,10 @@ const InfoCards = () => {
                         <h5 className="">
                           {StateHolds} / $
                           {formatWithCommas(TotalStateHoldsInUS)}
+                        </h5>
+                        <h5 className="detailAmount">
+                          1 TRILLION STATE TOKENS = {""}
+                          $ {formatWithCommas((stateUsdPrice * 1000000000000).toFixed(0))}
                         </h5>
                       </div>
                       <div className="mb-0 mx-1">
@@ -391,16 +424,46 @@ const InfoCards = () => {
             </div>
             <div className="announcement text-center overflow-hidden relative">
               <div className="animate-marquee whitespace-nowrap">
-                <span className="marquee-content" style={{ color: "white" }}>
-                  {DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE
-                  DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS.
-                </span>
-                <span className="marquee-content" style={{ color: "white" }}>
-                  1$ TOKEN DEPLOYED. THIS IS A CURRENCY TOKEN FOR THE PROTOCOL.
-                </span>
-                <span className="marquee-content" style={{ color: "green" }}>
-                  🟢LIVE ON PULSECHAIN.
-                </span>
+                <div className="marquee-inner">
+                  {[...Array(2)].map((_, i) => (
+                    <React.Fragment key={i}>
+                      {[
+                        { text: `${liveText.text}`, color: "" },
+                        {
+                          text: `${DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS.`,
+                          color: "white",
+                        },
+                        {
+                          text: "Rieva TOKEN DEPLOYED.",
+                          color: "white",
+                        //   image: RievaLogo,
+                        },
+                      ].map((item, j) => (
+                        <span
+                          key={`${i}-${j}`}
+                          className="marquee-content  rieva-token-container"
+                          style={{
+                            color: item.color,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          {/* {item.image && (
+                            <div className="">
+                              <img
+                                src={item.image}
+                                alt="Rieva Token"
+                                className="rieva-token-image"
+                              />
+                            </div>
+                          )} */}
+                          {item.text}
+                        </span>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
