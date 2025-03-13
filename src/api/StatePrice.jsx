@@ -11,6 +11,7 @@ const PriceProvider = ({ children }) => {
   const [XerionUsdPrice, setXerionUsdPrice] = useState(null);
   const [OneDollarUsdPrice, setOneDollarUsdPrice] = useState(null);
   const [RievaUsdPrice, setRievaUsdPrice] = useState(null);
+  const [DomusUsdPrice, setDomusUsdPrice] = useState(null);
   const [error, setError] = useState(null);
 
   const fetchPrice = async (url, tokenId, setPrice, tokenName) => {
@@ -73,6 +74,13 @@ const PriceProvider = ({ children }) => {
       setRievaUsdPrice
     );
   }, []);
+  useEffect(() => {
+    fetchPrice(
+      "https://api.geckoterminal.com/api/v2/simple/networks/pulsechain/token_price/0x82627374e1fe45a6918f21e52b4776e3b8c6420b",
+      "0x82627374e1fe45a6918f21e52b4776e3b8c6420b",
+      setDomusUsdPrice
+    );
+  }, []);
 
   return (
     <PriceContext.Provider
@@ -83,7 +91,8 @@ const PriceProvider = ({ children }) => {
         OneDollarUsdPrice,
         error,
         priceLoading,
-		RievaUsdPrice,
+        DomusUsdPrice,
+        RievaUsdPrice,
       }}
     >
       {children}

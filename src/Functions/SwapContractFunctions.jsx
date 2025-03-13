@@ -7,6 +7,8 @@ import { ContractContext } from "./ContractInitialize";
 import {
   $1,
   DAV_TOKEN_ADDRESS,
+  Domus,
+  DomusRatioAddress,
   Fluxin,
   OneDollarRatioAddress,
   Ratio_TOKEN_ADDRESS,
@@ -42,18 +44,21 @@ export const SwapContractProvider = ({ children }) => {
     Fluxin: false,
     Xerion: false,
     Rieva: false,
+    Domus: false,
     OneDollar: false,
   });
   const [ReverseForCycle, setForCycle] = useState({
     Fluxin: false,
     Xerion: false,
     Rieva: false,
+    Domus: false,
     OneDollar: false,
   });
   const [ReverseForNextCycle, setForNextCycle] = useState({
     Fluxin: false,
     Xerion: false,
     Rieva: false,
+    Domus: false,
     OneDollar: false,
   });
   const [StateHolds, setStateHoldings] = useState("0.0");
@@ -81,10 +86,12 @@ export const SwapContractProvider = ({ children }) => {
     dav: AllContracts.davContract,
     Fluxin: AllContracts.FluxinContract,
     Rieva: AllContracts.RievaContract,
+    Domus: AllContracts.DomusContract,
     oneD: AllContracts.oneDollar,
     Xerion: AllContracts.XerionContract,
     FluxinRatio: AllContracts.RatioContract,
     RievaRatio: AllContracts.RievaRatioContract,
+    DomusRatio: AllContracts.DomusRatioContract,
     OneDollar: AllContracts.OneDollarRatioContract,
     XerionRatio: AllContracts.XerionRatioContract,
   };
@@ -92,6 +99,7 @@ export const SwapContractProvider = ({ children }) => {
     Fluxin: AllContracts.RatioContract,
     Xerion: AllContracts.XerionRatioContract,
     Rieva: AllContracts.RievaRatioContract,
+    Domus: AllContracts.DomusRatioContract,
     OneDollar: AllContracts.OneDollarRatioContract,
   };
 
@@ -99,6 +107,7 @@ export const SwapContractProvider = ({ children }) => {
     fluxinRatio: AllContracts.RatioContract,
     XerionRatio: AllContracts.XerionRatioContract,
     RievaRatio: AllContracts.RievaRatioContract,
+    DomusRatio: AllContracts.DomusRatioContract,
     OneDollarRatio: AllContracts.OneDollarRatioContract,
   };
   const handleContractCall = async (
@@ -237,6 +246,8 @@ export const SwapContractProvider = ({ children }) => {
       "Xerion",
       "XerionRatio",
       "Rieva",
+      "Domus",
+      "DomusRatio",
       "oneD",
       "OneDollar",
     ];
@@ -302,6 +313,8 @@ export const SwapContractProvider = ({ children }) => {
     renounceOwnership(AllContracts.oneDollar, "1$");
   const ReanounceRievaContract = () =>
     renounceOwnership(AllContracts.RievaContract, "Rieva");
+  const ReanounceDomusContract = () =>
+    renounceOwnership(AllContracts.DomusContract, "Domus");
   const ReanounceOneDollarSwapContract = () =>
     renounceOwnership(AllContracts.OneDollarRatioContract, "1$");
   const RenounceState = () =>
@@ -312,6 +325,8 @@ export const SwapContractProvider = ({ children }) => {
     renounceOwnership(AllContracts.XerionRatioContract, "XerionRatio");
   const RenounceRievaSwap = () =>
     renounceOwnership(AllContracts.RievaRatioContract, "RievaRatio");
+  const RenounceDomusSwap = () =>
+    renounceOwnership(AllContracts.DomusRatioContract, "DomusRatio");
 
   const handleTokenWithdraw = async (contract, amount) => {
     try {
@@ -336,6 +351,8 @@ export const SwapContractProvider = ({ children }) => {
     handleTokenWithdraw(AllContracts.oneDollar, amount);
   const WithdrawRieva = (amount) =>
     handleTokenWithdraw(AllContracts.RievaContract, amount);
+  const WithdrawDomus = (amount) =>
+    handleTokenWithdraw(AllContracts.DomusContract, amount);
 
   useEffect(() => {
     setTimeout(() => {
@@ -384,6 +401,10 @@ export const SwapContractProvider = ({ children }) => {
         {
           contract: AllContracts.RievaRatioContract,
           name: "Rieva",
+        },
+        {
+          contract: AllContracts.DomusRatioContract,
+          name: "Domus",
         },
         {
           contract: AllContracts.OneDollarRatioContract,
@@ -474,6 +495,10 @@ export const SwapContractProvider = ({ children }) => {
           prev.Rieva !== value.Rieva.adjustedBalance
             ? value.Rieva.adjustedBalance
             : prev.Rieva,
+        Domus:
+          prev.Domus !== value.Domus.adjustedBalance
+            ? value.Domus.adjustedBalance
+            : prev.Domus,
       }));
 
       console.log("from dt", value.Fluxin.adjustedBalance);
@@ -499,6 +524,10 @@ export const SwapContractProvider = ({ children }) => {
         {
           contract: AllContracts.RievaRatioContract,
           name: "Rieva",
+        },
+        {
+          contract: AllContracts.DomusRatioContract,
+          name: "Domus",
         },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
@@ -538,6 +567,10 @@ export const SwapContractProvider = ({ children }) => {
         {
           contract: AllContracts.RievaRatioContract,
           name: "Rieva",
+        },
+        {
+          contract: AllContracts.DomusRatioContract,
+          name: "Domus",
         },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
@@ -608,6 +641,10 @@ export const SwapContractProvider = ({ children }) => {
           contract: AllContracts.RievaRatioContract,
           name: "Rieva",
         },
+        {
+          contract: AllContracts.DomusRatioContract,
+          name: "Domus",
+        },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
 
@@ -673,6 +710,10 @@ export const SwapContractProvider = ({ children }) => {
           contract: AllContracts.RievaRatioContract,
           name: "Rieva",
         },
+        {
+          contract: AllContracts.DomusRatioContract,
+          name: "Domus",
+        },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
 
@@ -720,6 +761,11 @@ export const SwapContractProvider = ({ children }) => {
       key: "RievaBalance",
     },
     {
+      contract: AllContracts.DomusContract,
+      token: Domus,
+      key: "DomusBalance",
+    },
+    {
       contract: AllContracts.XerionContract,
       token: Xerion,
       key: "xerionBalance",
@@ -736,8 +782,18 @@ export const SwapContractProvider = ({ children }) => {
     },
     {
       contract: AllContracts.stateContract,
+      token: DomusRatioAddress,
+      key: "StateDomus",
+    },
+    {
+      contract: AllContracts.stateContract,
       token: RievaRatioAddress,
       key: "StateRieva",
+    },
+    {
+      contract: AllContracts.stateContract,
+      token: DomusRatioAddress,
+      key: "StateDomusRieva",
     },
     {
       contract: AllContracts.stateContract,
@@ -758,6 +814,11 @@ export const SwapContractProvider = ({ children }) => {
       contract: AllContracts.RievaContract,
       token: RievaRatioAddress,
       key: "ratioRievaBalance",
+    },
+    {
+      contract: AllContracts.DomusContract,
+      token: DomusRatioAddress,
+      key: "ratioDomusBalance",
     },
     {
       contract: AllContracts.XerionContract,
@@ -845,12 +906,14 @@ export const SwapContractProvider = ({ children }) => {
         Fluxin: outAmounts.Fluxin,
         Xerion: outAmounts.Xerion,
         Rieva: outAmounts.Rieva,
+        Domus: outAmounts.Domus,
         OneDollar: outAmounts.OneDollar,
       };
 
       const ContractAddressToUse = {
         Fluxin: Ratio_TOKEN_ADDRESS,
         Rieva: RievaRatioAddress,
+        Domus: DomusRatioAddress,
         Xerion: XerionRatioAddress,
         OneDollar: OneDollarRatioAddress,
       };
@@ -858,6 +921,7 @@ export const SwapContractProvider = ({ children }) => {
       const InAmountMapping = {
         Fluxin: OnePBalance.Fluxin,
         Rieva: OnePBalance.Rieva,
+        Domus: OnePBalance.Domus,
         Xerion: OnePBalance.Xerion,
         OneDollar: OnePBalance.OneDollar,
       };
@@ -873,6 +937,7 @@ export const SwapContractProvider = ({ children }) => {
       let contractToUse = {
         Fluxin: AllContracts.FluxinContract,
         Rieva: AllContracts.RievaContract,
+        Domus: AllContracts.DomusContract,
         OneDollar: AllContracts.oneDollar,
         Xerion: AllContracts.XerionContract,
         state: AllContracts.stateContract,
@@ -884,6 +949,7 @@ export const SwapContractProvider = ({ children }) => {
       if (
         (ContractName == "Fluxin" && isReversed.Fluxin == "true") ||
         (ContractName == "Rieva" && isReversed.Rieva == "true") ||
+        (ContractName == "Domus" && isReversed.Domus == "true") ||
         (ContractName == "Xerion" && isReversed.Xerion == "true") ||
         (ContractName == "OneDollar" && isReversed.OneDollar == "true")
       ) {
@@ -954,6 +1020,7 @@ export const SwapContractProvider = ({ children }) => {
         Fluxin: AllContracts.RatioContract,
         Xerion: AllContracts.XerionRatioContract,
         Rieva: AllContracts.RievaRatioContract,
+        Domus: AllContracts.DomusRatioContract,
         OneDollar: AllContracts.OneDollarRatioContract,
       };
       // Perform the token swap
@@ -1032,6 +1099,10 @@ export const SwapContractProvider = ({ children }) => {
           contract: AllContracts.RievaRatioContract,
         },
         {
+          name: "Domus",
+          contract: AllContracts.DomusRatioContract,
+        },
+        {
           name: "OneDollar",
           contract: AllContracts.OneDollarRatioContract,
         },
@@ -1073,6 +1144,11 @@ export const SwapContractProvider = ({ children }) => {
           name: "Rieva",
           contract: AllContracts.RievaRatioContract,
         },
+        {
+          name: "Domus",
+          contract: AllContracts.DomusRatioContract,
+        },
+
         {
           name: "OneDollar",
           contract: AllContracts.OneDollarRatioContract,
@@ -1116,6 +1192,10 @@ export const SwapContractProvider = ({ children }) => {
         {
           name: "Rieva",
           contract: AllContracts.RievaRatioContract,
+        },
+        {
+          name: "Domus",
+          contract: AllContracts.DomusRatioContract,
         },
         {
           name: "OneDollar",
@@ -1222,6 +1302,7 @@ export const SwapContractProvider = ({ children }) => {
         fluxinRatio: Ratio_TOKEN_ADDRESS,
         XerionRatio: XerionRatioAddress,
         RievaRatio: RievaRatioAddress,
+        DomusRatio: DomusRatioAddress,
         OneDollarRatio: OneDollarRatioAddress,
       };
       const allowance = await contracts[name].allowance(
@@ -1363,6 +1444,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddOneD = () => handleAddToken($1, "1$");
   const handleAddXerion = () => handleAddToken(Xerion, "Layti");
   const handleAddRieva = () => handleAddToken(Rieva, "Rieva");
+  const handleAddDomus = () => handleAddToken(Domus, "Domus");
 
   return (
     <SwapContractContext.Provider
@@ -1407,6 +1489,7 @@ export const SwapContractProvider = ({ children }) => {
         handleAddFluxin,
         handleAddXerion,
         handleAddRieva,
+        handleAddDomus,
         userHashSwapped,
         userHasReverseSwapped,
         // WithdrawLPTokens,
@@ -1441,13 +1524,16 @@ export const SwapContractProvider = ({ children }) => {
         RenounceXerionSwap,
         ReanounceOneDollarContract,
         ReanounceRievaContract,
+        ReanounceDomusContract,
         SetOnePercentageOfBalance,
         ReverseForNextCycle,
         handleAddOneD,
         decayPercentages,
         ReverseForCycle,
         RenounceRievaSwap,
+        RenounceDomusSwap,
         WithdrawRieva,
+        WithdrawDomus,
       }}
     >
       {children}

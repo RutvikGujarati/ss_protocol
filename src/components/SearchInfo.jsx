@@ -5,6 +5,7 @@ import FluxinLogo from "../assets/FluxinLogo.png";
 import Rieva from "../assets/rieva.png";
 import DAVLogo from "../assets/d_logo.png";
 import oned from "../assets/oned.png";
+import Domus from "../assets/domus.png";
 import stateLogo from "../assets/state_logo.png";
 import PropTypes from "prop-types";
 import MetaMaskIcon from "../assets/metamask-icon.png";
@@ -17,7 +18,8 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     handleAddOneD,
     handleAddFluxin,
     handleAddXerion,
-	handleAddRieva,
+    handleAddRieva,
+    handleAddDomus,
   } = useSwapContract();
   const [filteredData, setFilteredData] = useState([
     { id: "∈", name: "DAV", logo: DAVLogo, AddToken: handleAddTokenDAV },
@@ -26,6 +28,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     { id: 2, name: "Layti", logo: XerionLogo, AddToken: handleAddXerion },
     { id: "∞", name: "1$", logo: oned, AddToken: handleAddOneD },
     { id: 3, name: "Rieva", logo: Rieva, AddToken: handleAddRieva },
+    { id: "~", name: "Domus", logo: Domus, AddToken: handleAddDomus },
   ]);
   const searchInputRef = useRef(null);
 
@@ -64,6 +67,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
       { id: 2, name: "Layti", logo: XerionLogo },
       { id: "∞", name: "1$", logo: oned, AddToken: handleAddOneD },
       { id: 3, name: "Rieva", logo: Rieva, AddToken: handleAddRieva },
+      { id: "~", name: "Domus", logo: Domus, AddToken: handleAddDomus },
       //   { id: 4, name: "Polaris", logo: FluxinLogo },
     ];
     const filtered = originalData.filter((item) =>
