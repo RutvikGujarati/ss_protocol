@@ -6,7 +6,7 @@ import { ContractContext } from "../Functions/ContractInitialize";
 import { ethers } from "ethers";
 
 const DeepStateTable = () => {
-  const { AllContracts,signer,account } = useContext(ContractContext);
+  const { AllContracts, signer, account } = useContext(ContractContext);
   const [balanceOfContract, setbalanceOfContract] = useState("0");
   const [PLSPrice, setPLSPrice] = useState("0");
   const [PLSUSD, setPLSUSD] = useState("0");
@@ -28,7 +28,7 @@ const DeepStateTable = () => {
     const value = e.target.value;
     setSellAmount(value);
   };
-  console.log("DeepStateContract",AllContracts.DeepStateContract);
+  console.log("DeepStateContract", AllContracts.DeepStateContract);
 
   const contractBalance = async () => {
     try {
@@ -72,23 +72,23 @@ const DeepStateTable = () => {
   };
 
   const BuyTokens = async (amount) => {
-	try {
-	  setLoading(true);
-	  const amountInWei = ethers.parseUnits(amount.toString(), 18);
-	  const tx = await signer.sendTransaction({
-		to: AllContracts.DeepStateContract.target, // Contract address
-		value: amountInWei, // Sending ETH directly
-	  });
-	  await tx.wait();
-	  await contractBalance();
-	  await CalculateBalanceInUSD();
-	} catch (error) {
-	  console.log("Error in buying tokens:", error);
-	} finally {
-	  setLoading(false);
-	}
+    try {
+      setLoading(true);
+      const amountInWei = ethers.parseUnits(amount.toString(), 18);
+      const tx = await signer.sendTransaction({
+        to: AllContracts.DeepStateContract.target, // Contract address
+        value: amountInWei, // Sending ETH directly
+      });
+      await tx.wait();
+      await contractBalance();
+      await CalculateBalanceInUSD();
+    } catch (error) {
+      console.log("Error in buying tokens:", error);
+    } finally {
+      setLoading(false);
+    }
   };
-  
+
   const SellTokens = async (amount) => {
     try {
       setSellLoading(true);
@@ -152,11 +152,11 @@ const DeepStateTable = () => {
   };
   useEffect(() => {
     contractBalance();
-	CalculateBalanceInUSD();
-	fetchPLSPrice()
-	UsersTotalTokens();
-	UsersTotalDividends()
-	CalculateDividendsInUSD();
+    CalculateBalanceInUSD();
+    fetchPLSPrice();
+    UsersTotalTokens();
+    UsersTotalDividends();
+    CalculateDividendsInUSD();
   });
   return (
     <>
@@ -173,10 +173,10 @@ const DeepStateTable = () => {
                   <div className="row w-100 h-100">
                     {/* Text Column */}
                     <div className="col-9 d-flex flex-column align-items-center justify-content-center">
-                      <h1 className="fs-5 mb-1">{balanceOfContract} PLS</h1>
                       <p className="mb-1" style={{ fontSize: "10px" }}>
-                        Contract Market Cap
+                        TREASURY
                       </p>
+                      <h1 className="fs-5 mb-1">{balanceOfContract} PLS</h1>
                       <p className="mb-2 fs-6">Value: {PLSUSD} USD</p>
                     </div>
 
