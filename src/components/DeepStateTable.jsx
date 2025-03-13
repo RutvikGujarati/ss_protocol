@@ -176,8 +176,7 @@ const DeepStateTable = () => {
                       <p className="mb-1" style={{ fontSize: "10px" }}>
                         TREASURY
                       </p>
-                      <h1 className="fs-5 mb-1">{balanceOfContract} PLS</h1>
-                      <p className="mb-2 fs-6">Value: {PLSUSD} USD</p>
+                      <p className="mb-2 fs-6">Value: {balanceOfContract} PLS / {PLSUSD} USD</p>
                     </div>
 
                     {/* Image Column */}
