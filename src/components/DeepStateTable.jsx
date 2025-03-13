@@ -38,7 +38,7 @@ const DeepStateTable = () => {
       }
 
       const userAmount =
-        await AllContracts.DeepStateContract.getContractBalance();
+        await AllContracts.DeepStateContract.totalEthereumBalance();
       const formattedBalance = ethers.formatEther(userAmount);
 
       console.log("deepstate balance:", userAmount);
@@ -106,7 +106,7 @@ const DeepStateTable = () => {
   const WithdrawDividends = async () => {
     try {
       setWithdrawLoading(true);
-      const tx = await AllContracts.DeepStateContract.withdrawDividends();
+      const tx = await AllContracts.DeepStateContract.withdraw();
       await tx.wait();
       setWithdrawLoading(false);
     } catch (error) {
@@ -119,7 +119,7 @@ const DeepStateTable = () => {
 
   const UsersTotalTokens = async () => {
     try {
-      const userAmount = await AllContracts.DeepStateContract.balanceOf(account); // Get amount in Wei
+      const userAmount = await AllContracts.DeepStateContract.myTokens(); // Get amount in Wei
       const formattedAmount = ethers.formatEther(userAmount); // Convert to ETH
       setUsersTokens(formattedAmount); // Store in state
       console.log("User's total tokens in ETH:", formattedAmount);
@@ -130,8 +130,8 @@ const DeepStateTable = () => {
   const UsersTotalDividends = async () => {
     try {
       if (!AllContracts?.DeepStateContract) return;
-      const userAmount = await AllContracts.DeepStateContract.availableDividends(account);
-      setUsersDividends(parseFloat(ethers.formatEther(userAmount)).toFixed(4));
+      const userAmount = await AllContracts.DeepStateContract.myDividends();
+      setUsersDividends(parseFloat(ethers.formatEther(userAmount)).toFixed(18));
     } catch (error) {
       console.error("Error fetching dividends:", error);
       setUsersDividends("0");
