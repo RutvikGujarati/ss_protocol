@@ -6,7 +6,6 @@ import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import PLSLogo from "../assets/pls1.png";
 import BNBLogo from "../assets/bnb.png";
-import RievaLogo from "../assets/rieva.png";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { formatWithCommas } from "./DetailsInfo";
 import { PriceContext } from "../api/StatePrice";
@@ -14,9 +13,21 @@ import { useDAvContract } from "../Functions/DavTokenFunctions";
 import DotAnimation from "../Animations/Animation";
 import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
 import { useChainId } from "wagmi";
+import { useDeepStateFunctions } from "../Functions/DeepStateContract";
+import { ContractContext } from "../Functions/ContractInitialize";
 const InfoCards = () => {
   const chainId = useChainId();
+  const { AllContracts, signer } = useContext(ContractContext);
   const { stateUsdPrice, priceLoading } = useContext(PriceContext);
+  const {
+    PLSUSD,
+    BuyTokens,
+    CalculateBalanceInUSD,
+    UsersTokens,
+    UsersTotalTokens,
+  } = useDeepStateFunctions();
+  const [balanceOfContract, setbalanceOfContract] = useState("0");
+
   const [setBurnRatio] = useState("0.0");
   const {
     mintDAV,
@@ -38,6 +49,19 @@ const InfoCards = () => {
       return PLSLogo; // Optional fallback logo
     }
   };
+  const [isTyping, setIsTyping] = useState(false);
+  const [Denominator, setDenominator] = useState("");
+
+  const handleInputChangeofToken = (e) => {
+    const rawValue = e.target.value.replace(/,/g, "");
+    if (!isNaN(rawValue) && rawValue !== "") {
+      setDenominator(rawValue);
+      setIsTyping(e.target.value.length > 0);
+    } else if (rawValue === "") {
+      setDenominator("");
+    }
+  };
+  CalculateBalanceInUSD();
   const getLogoSize = () => {
     return chainId === 56
       ? { width: "170px", height: "140px" } // Bigger size for BNB
@@ -52,9 +76,26 @@ const InfoCards = () => {
       return { text: "🟢 LIVE ON UNKNOWN CHAIN.", color: "" }; // Fallback
     }
   };
+  const contractBalance = async () => {
+    try {
+      if (!AllContracts || !AllContracts.DeepStateContract) {
+        console.log("DeepStateContract is not initialized.");
+        return;
+      }
 
+      const userAmount =
+        await AllContracts.DeepStateContract.totalEthereumBalance();
+      const formattedBalance = ethers.formatEther(userAmount);
+
+      console.log("deepstate balance from:", userAmount);
+      setbalanceOfContract(formattedBalance);
+    } catch (error) {
+      console.log("error in fetching deepState Balance:", error);
+    }
+  };
   const liveText = getLiveText();
-
+  contractBalance();
+  UsersTotalTokens()
   const {
     handleAddTokenState,
     handleAddTokenDAV,
@@ -184,13 +225,14 @@ const InfoCards = () => {
   }
 
   useEffect(() => {
+    contractBalance();
     CalculationOfCost(amount);
     calculateBurnRatio();
     // GetCurrentStateReward();
   }, [amount]);
 
   const location = useLocation();
-  const isBurn = location.pathname === "/burn";
+  const isBurn = location.pathname === "/StateLp";
   const isAuction = location.pathname === "/auction";
 
   return (
@@ -323,8 +365,10 @@ const InfoCards = () => {
                           {formatWithCommas(TotalStateHoldsInUS)}
                         </h5>
                         <h5 className="detailAmount">
-                          1 TRILLION STATE TOKENS = {""}
-                          $ {formatWithCommas((stateUsdPrice * 1000000000000).toFixed(0))}
+                          1 TRILLION STATE TOKENS = {""}${" "}
+                          {formatWithCommas(
+                            (stateUsdPrice * 1000000000000).toFixed(0)
+                          )}
                         </h5>
                       </div>
                       <div className="mb-0 mx-1">
@@ -436,7 +480,7 @@ const InfoCards = () => {
                         {
                           text: "Domus TOKEN DEPLOYED.",
                           color: "white",
-                        //   image: RievaLogo,
+                          //   image: RievaLogo,
                         },
                       ].map((item, j) => (
                         <span
@@ -470,15 +514,31 @@ const InfoCards = () => {
         </>
       ) : isBurn ? (
         <>
-          {/* <div className="container mt-4">
-            <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom">
+          <div className="container mt-4 ">
+            <div className="table-responsive">
+              <div className="announcement text-center">
+                <div className="">
+                  PROFIT HARVESTING FOR LIQUIDITY POOLS - PULSECHAIN
+                </div>
+              </div>
+            </div>
+            <div className="row g-4 d-flex align-items-stretch pb-1  mt-1">
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">State token supply</p>
-                      <h5 className="mb-0"> {formatWithCommas(StateSupply)}</h5>
-                     
+                      <p className="mb-1 detailText">Treasury</p>
+                      <p className="mb-0"> Total ETH Invested : 17 ETH</p>
+                      <p className="mb-0"> LPT Held : {UsersTokens}</p>
+                      <p className="mb-0">
+                        {" "}
+                        Contract ETH Balance : {balanceOfContract} ETH
+                      </p>
+                    </div>
+                    <div className="carddetails2">
+                      <p className="mb-1 detailText">Price Information</p>
+                      <p className="mb-0">Current Buy Price: 0.00000021 ETH</p>
+                      <p className="mb-0">Current Sell Price: 0.00000041 ETH</p>
                     </div>
                   </div>
                 </div>
@@ -487,8 +547,17 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">State tokens burn</p>
-                      <h5 className="">{formatWithCommas(StateBurnBalance)}</h5>
+                      <p className="mb-1 detailText">Price Summary</p>
+                      <p className="mb-0"> Total ETH Profit : 5.6 ETH</p>
+                      <p className="mb-0"> USD Value : $ 11,000 Profit</p>
+                      <p className="mb-0"> LPT Value : $ 4000 </p>
+                    </div>
+                    <div className="carddetails2">
+                      <p className="mb-1 detailText">Withdraw</p>
+                      <p className="mb-0"> Dividends : 0.16 ETH</p>
+                      <button className="swap-btn py-1 mx-3 mt-1 btn btn-primary ">
+                        Withdraw
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -497,14 +566,35 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">State tokens % burn</p>
-                      <h5 className="">{BurnRatio} %</h5>
+                      <p className="mb-1 detailText">Buy</p>
+                      <div style={{ width: "200px" }}>
+                        <input
+                          type="text"
+                          className={`form-control text-center mh-30 `}
+                          placeholder="Enter amount"
+                          value={
+                            Denominator
+                              ? Number(Denominator).toLocaleString()
+                              : ""
+                          }
+                          onChange={(e) => handleInputChangeofToken(e)}
+                        />
+                      </div>
+                      <p className="mb-0 mx-3 mt-2"> Est. LPT: 4,761</p>
+                      <p className="mb-0  mt-1"> (@ 0.00000021 ETH)</p>
+                      <button
+                        onClick={() => BuyTokens(Denominator)}
+                        className="swap-btn py-1 mt-2 btn btn-primary "
+                        style={{ width: "150px" }}
+                      >
+                        Buy
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div> */}
+          </div>
         </>
       ) : (
         <></>

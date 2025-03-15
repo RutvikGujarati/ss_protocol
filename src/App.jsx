@@ -26,13 +26,10 @@ const App = () => {
   // Function to check actual network status
   const checkOnlineStatus = async () => {
     try {
-      // Try fetching a known online resource (Google's favicon)
-      const response = await fetch("https://www.google.com/favicon.ico", {
-        mode: "no-cors",
-      });
       setIsOnline(true);
     } catch (error) {
       setIsOnline(false);
+      console.log(error);
     }
   };
 
@@ -60,18 +57,18 @@ const App = () => {
   return (
     <Router>
       <Header />
-	  <div>
-      {!isOnline && (
-        <div
-          className="alert alert-danger text-center w-100 position-fixed top-0 start-0"
-          style={{ zIndex: 1050, padding: "15px", fontSize: "18px" }}
-          role="alert"
-        >
-          ⚠️ You are offline. Some features may not work properly.
-        </div>
-      )}
-      {/* Rest of your App */}
-    </div>
+      <div>
+        {!isOnline && (
+          <div
+            className="alert alert-danger text-center w-100 position-fixed top-0 start-0"
+            style={{ zIndex: 1050, padding: "15px", fontSize: "18px" }}
+            role="alert"
+          >
+            ⚠️ You are offline. Some features may not work properly.
+          </div>
+        )}
+        {/* Rest of your App */}
+      </div>
       <Routes>
         <Route path="/" element={<Navigate to="/auction" />} />
         {/* Auction Page (Default page when accessed directly) */}
@@ -92,7 +89,7 @@ const App = () => {
           path="/StateLp"
           element={
             <>
-              {/* <InfoCards /> */}
+              <InfoCards />
               <DeepStateTable />
             </>
           }

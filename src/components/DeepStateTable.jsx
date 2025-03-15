@@ -4,15 +4,18 @@ import XerionLogo from "../assets/layti.png";
 import { useContext, useEffect, useState } from "react";
 import { ContractContext } from "../Functions/ContractInitialize";
 import { ethers } from "ethers";
+import { useTokens } from "../data/BurntokenData";
 
 const DeepStateTable = () => {
   const { AllContracts, signer, account } = useContext(ContractContext);
+  
   const [balanceOfContract, setbalanceOfContract] = useState("0");
   const [PLSPrice, setPLSPrice] = useState("0");
   const [PLSUSD, setPLSUSD] = useState("0");
   const [DividendsUSD, setDividendsUSD] = useState("0");
   const [UsersTokens, setUsersTokens] = useState("0");
   const [UsersDividends, setUsersDividends] = useState("0");
+  const [UsersInvested, setUsersInvested] = useState("0");
   const [loading, setLoading] = useState(false);
   const [Sellloading, setSellLoading] = useState(false);
   const [Withdrawloading, setWithdrawLoading] = useState(false);
@@ -62,9 +65,9 @@ const DeepStateTable = () => {
   };
   const CalculateBalanceInUSD = async () => {
     try {
-      const balanceInUSD = parseFloat(balanceOfContract) * PLSPrice; // Convert to USD
-      console.log("DeepState Contract Balance in USD:", balanceOfContract);
-      setPLSUSD(balanceInUSD.toFixed(8));
+    //   const balanceInUSD = parseFloat(balanceOfContract) * PLSPrice; // Convert to USD
+    //   console.log("DeepState Contract Balance in USD:", balanceOfContract);
+    //   setPLSUSD(balanceInUSD.toFixed(8));
     } catch (error) {
       console.log("Error calculating balance in USD:", error);
       return "0.00";
@@ -137,6 +140,18 @@ const DeepStateTable = () => {
       setUsersDividends("0");
     }
   };
+  const UsersTotalInvested = async () => {
+    try {
+      if (!AllContracts?.DeepStateContract) return;
+      const userAmount = await AllContracts.DeepStateContract.Invested(account);
+      setUsersInvested(parseFloat(ethers.formatEther(userAmount)).toFixed(18));
+    } catch (error) {
+      console.error("Error fetching dividends:", error);
+      setUsersInvested("0");
+    }
+  };
+  const tokens = useTokens();
+
   const CalculateDividendsInUSD = async () => {
     try {
       const balanceInUSD = parseFloat(UsersDividends) * PLSPrice; // Convert to USD
@@ -156,135 +171,73 @@ const DeepStateTable = () => {
     fetchPLSPrice();
     UsersTotalTokens();
     UsersTotalDividends();
+    UsersTotalInvested();
     CalculateDividendsInUSD();
   });
   return (
     <>
-      <div className="container mt-4 datatablemarginbottom">
+      <div className="container  ">
         <div className="table-responsive">
-          <div className="container mt-4">
-            <div className="row g-4 d-flex align-items-stretch pb-1 justify-content-center">
-              {/* Contract Market Cap Box */}
-              <div className="col-12 col-sm-6 col-md-4 d-flex justify-content-center">
-                <div
-                  className="announcement rounded bg-dark text-light flex-fill d-flex flex-column text-center"
-                  style={{ minWidth: "180px", width: "100%", height: "120px" }}
-                >
-                  <div className="row w-100 h-100">
-                    {/* Text Column */}
-                    <div className="col-9 d-flex flex-column align-items-center justify-content-center">
-                      <p className="mb-1" style={{ fontSize: "10px" }}>
-                        TREASURY
-                      </p>
-                      <p className="mb-2 fs-6">Value: {balanceOfContract} PLS / {PLSUSD} USD</p>
-                    </div>
+          <table className="table table-dark">
+            <thead>
+              <tr className="align-item-center">
+                <th>Buys</th>
+                <th></th>
+                <th>LPT Amount</th>
+                <th>ETH Cost</th>
+                <th>Buy Price</th>
+                <th>Current Value</th>
+                <th>Profit/Loss</th>
+                <th>Action</th>
+                <th></th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {tokens.map(
+                ({
+                  id,
+                  LPTAmount,
+                  EthCost,
+                  BuyCost,
+                  CurrentValue,
+                  Action,
+                  ProfitLoss,
+                }) => (
+                  <tr key={id}>
+                    <td>{id}</td>
+                    <td></td>
+                    <td>{LPTAmount}</td>
+                    <td>{EthCost}</td>
+                    <td>{BuyCost}</td>
+                    <td>{CurrentValue}</td>
 
-                    {/* Image Column */}
-                    <div className="col-3 d-flex align-items-center justify-content-center">
-                      <img src={XerionLogo} width={40} height={40} alt="Logo" />
-                    </div>
-                  </div>
-                </div>
-              </div>
+                    <td>{ProfitLoss}</td>
+                    <td>{Action}</td>
+                    <td>{/* {formatWithCommas(burnAmount)} {name} */}</td>
 
-              {/* Your Tokens Box */}
-              <div className="col-12 col-sm-6 col-md-4 d-flex justify-content-center">
-                <div
-                  className="announcement rounded bg-dark text-light flex-fill d-flex flex-column text-center"
-                  style={{ minWidth: "180px", width: "100%", height: "120px" }}
-                >
-                  <div className="row w-100 h-100">
-                    {/* Text Column */}
-                    <div className="col-9 d-flex flex-column align-items-center justify-content-center">
-                      <h1 className="fs-6 mb-1">{UsersTokens} DeepState</h1>
-                      <p className="mb-1" style={{ fontSize: "12px" }}>
-                        Your Tokens
-                      </p>
-                      <p className="mb-2 fs-6">Value: 0.0 USD</p>
-                    </div>
-
-                    {/* Image Column */}
-                    <div className="col-3 d-flex align-items-center justify-content-center">
-                      <img src={XerionLogo} width={40} height={40} alt="Logo" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Your Dividends Earnings Box */}
-              <div className="col-12 col-sm-6 col-md-4 d-flex justify-content-center">
-                <div
-                  className="announcement rounded bg-dark text-light flex-fill d-flex flex-column align-items-center justify-content-center text-center"
-                  style={{ minWidth: "180px", width: "100%", height: "120px" }}
-                >
-                  <h1 className="fs-5 mb-1">{UsersDividends} PLS</h1>
-                  <p className="mb-1" style={{ fontSize: "12px" }}>
-                    Your Dividends Earnings
-                  </p>
-                  <p className="mb-2 fs-6">Value: {DividendsUSD} USD</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="container mt-4">
-          <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
-            <div className="col-md-4 p-0 m-2 cards">
-              <div className="card bg-dark text-light border-light p-0 d-flex justify-content-center align-items-center text-center w-100">
-                <div className="p-2">
-                  <p className="mb-2 detailText">Buy TOKENS</p>
-                  <input
-                    type="text"
-                    placeholder="Enter Value"
-                    className="form-control text-center fw-bold mb-3"
-                    value={amount}
-                    onChange={handleInputChange}
-                  />
-                  <button
-                    onClick={() => BuyTokens(amount)}
-                    className="btn btn-primary btn-sm d-flex justify-content-center align-items-center mt-4 w-100 "
-                  >
-                    {loading ? "Buying..." : "Buy"}
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4 p-0 m-2 cards">
-              <div className="card bg-dark text-light border-light p-0 d-flex justify-content-center align-items-center text-center w-100">
-                <div className="p-2">
-                  <p className="mb-2 detailText">Sell TOKENS</p>
-                  <input
-                    type="text"
-                    placeholder="Enter Value"
-                    className="form-control text-center fw-bold mb-3"
-                    value={Sellamount}
-                    onChange={handleSellInputChange}
-                  />
-                  <button
-                    onClick={() => SellTokens(Sellamount)}
-                    className="btn btn-primary btn-sm d-flex justify-content-center align-items-center mt-4 w-100 "
-                  >
-                    {Sellloading ? "Selling..." : "Sell"}
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4 p-0 m-2 cards">
-              <div className="card bg-dark text-light border-light p-0 d-flex justify-content-center align-items-center text-center w-100">
-                <div className="p-2">
-                  <p className="mb-2 detailText">Withdraw Dividends</p>
-                  <h1 className="fs-5 mb-1">{UsersDividends} PLS</h1>
-                  <button
-                    onClick={() => WithdrawDividends()}
-                    className="btn btn-primary btn-sm d-flex justify-content-center align-items-center mt-4 w-100 "
-                  >
-                    {Withdrawloading ? "Processing..." : "Withdraw"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+                    <td>
+                      <div className="d-flex align-items-center justify-content-center">
+                        <button className="btn btn-primary btn-sm swap-btn">
+                          {/* {isProcessing[id] ? "Processing..." : "Burn"} */}
+                          Hold
+                        </button>
+                      </div>
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center justify-content-center">
+                        <button className="btn btn-primary btn-sm swap-btn">
+                          {/* {isProcessing[id] ? "Processing..." : "Burn"} */}
+                          Sell
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </>

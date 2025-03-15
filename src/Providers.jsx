@@ -11,6 +11,7 @@ import { ContractProvider } from "./Functions/ContractInitialize.jsx";
 import { DavProvider } from "./Functions/DavTokenFunctions.jsx";
 import { GeneralTokenProvider } from "./Functions/GeneralTokensFunctions.jsx";
 import { GeneralAuctionProvider } from "./Functions/GeneralAuctionFunctions.jsx";
+import { DeepStateProvider } from "./Functions/DeepStateContract.jsx";
 // import { DeepStateProvider } from "./Functions/DeepStateContract.jsx";
 
 const queryClient = new QueryClient();
@@ -34,7 +35,7 @@ export default function Providers({ children }) {
           >
             <PriceProvider>
               <ContractProvider>
-                {/* <DeepStateProvider> */}
+                <DeepStateProvider>
                   <DavProvider>
                     <GeneralTokenProvider>
                       <GeneralAuctionProvider>
@@ -46,7 +47,7 @@ export default function Providers({ children }) {
                       </GeneralAuctionProvider>
                     </GeneralTokenProvider>
                   </DavProvider>
-                {/* </DeepStateProvider> */}
+                </DeepStateProvider>
               </ContractProvider>
             </PriceProvider>
           </RainbowKitProvider>
