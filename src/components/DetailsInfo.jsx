@@ -322,6 +322,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               dataToShow.tokenName == "Orxa" ||
               dataToShow.tokenName == "1$" ||
               dataToShow.tokenName == "Rieva" ||
+              dataToShow.tokenName == "10$" ||
               dataToShow.tokenName == "Domus" ||
               dataToShow.tokenName == "Layti") && (
               <>
@@ -380,6 +381,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           ? "1$ Balance (inside Contract)"
                           : dataToShow.tokenName === "Rieva"
                           ? "Rieva Balance (inside Contract)"
+                          : dataToShow.tokenName === "10$"
+                          ? "10$ Balance (inside Contract)"
                           : dataToShow.tokenName === "Domus"
                           ? "Domus Balance (inside Contract)"
                           : "Orxa Balance (inside Contract)"}
@@ -432,23 +435,25 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                                 "Xerion",
                                 125000000000
                               ); // Amount for State
-                            
                             } else if (dataToShow.tokenName === "1$") {
                               dataToShow.actions.mintAdditionalTOkens(
                                 "oneD",
                                 25000000
                               ); // Amount for State
-                            
                             } else if (dataToShow.tokenName === "Rieva") {
                               dataToShow.actions.mintAdditionalTOkens(
                                 "Rieva",
                                 62500000000
                               ); // Amount for State
-                            
                             } else if (dataToShow.tokenName === "Domus") {
                               dataToShow.actions.mintAdditionalTOkens(
                                 "Domus",
                                 2500000000000
+                              ); // Amount for State
+                            } else if (dataToShow.tokenName === "10$") {
+                              dataToShow.actions.mintAdditionalTOkens(
+                                "TenDollar",
+                                25000000
                               ); // Amount for State
                             }
                           }}

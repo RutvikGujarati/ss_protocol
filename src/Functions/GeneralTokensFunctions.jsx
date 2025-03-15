@@ -16,6 +16,7 @@ export const GeneralTokenProvider = ({ children }) => {
     Fluxin: "0.0",
     Xerion: "0.0",
     Rieva: "0.0",
+    TenDollar: "0.0",
     oneD: "0.0",
   });
   const contracts = {
@@ -23,6 +24,7 @@ export const GeneralTokenProvider = ({ children }) => {
     dav: AllContracts.davContract,
     Fluxin: AllContracts.FluxinContract,
     Rieva: AllContracts.RievaContract,
+    TenDollar: AllContracts.TenDollarContract,
     Domus: AllContracts.DomusContract,
     oneD: AllContracts.oneDollar,
     FluxinRatio: AllContracts.RatioContract,
@@ -172,6 +174,8 @@ export const GeneralTokenProvider = ({ children }) => {
         contract = AllContracts.RievaContract;
       } else if (contractType === "Domus") {
         contract = AllContracts.DomusContract;
+      } else if (contractType === "TenDollar") {
+        contract = AllContracts.TenDollarContract;
       }
 
       if (!contract) {
@@ -192,6 +196,7 @@ export const GeneralTokenProvider = ({ children }) => {
         { name: "Fluxin", contract: AllContracts.RatioContract },
         { name: "Xerion", contract: AllContracts.XerionRatioContract },
         { name: "Rieva", contract: AllContracts.RievaRatioContract },
+        { name: "TenDollar", contract: AllContracts.TenDollarRatioContract },
         { name: "Domus", contract: AllContracts.DomusRatioContract },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];

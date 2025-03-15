@@ -6,6 +6,7 @@ import { PriceContext } from "../api/StatePrice";
 import { ContractContext } from "./ContractInitialize";
 import {
   $1,
+  $10,
   DAV_TOKEN_ADDRESS,
   Domus,
   DomusRatioAddress,
@@ -87,6 +88,7 @@ export const SwapContractProvider = ({ children }) => {
     Fluxin: AllContracts.FluxinContract,
     Rieva: AllContracts.RievaContract,
     Domus: AllContracts.DomusContract,
+    TenDollar: AllContracts.TenDollarContract,
     oneD: AllContracts.oneDollar,
     Xerion: AllContracts.XerionContract,
     FluxinRatio: AllContracts.RatioContract,
@@ -247,6 +249,7 @@ export const SwapContractProvider = ({ children }) => {
       "XerionRatio",
       "Rieva",
       "Domus",
+      "TenDollar",
       "DomusRatio",
       "oneD",
       "OneDollar",
@@ -311,6 +314,8 @@ export const SwapContractProvider = ({ children }) => {
     renounceOwnership(AllContracts.XerionContract, "Xerion");
   const ReanounceOneDollarContract = () =>
     renounceOwnership(AllContracts.oneDollar, "1$");
+  const ReanounceTenDollarContract = () =>
+    renounceOwnership(AllContracts.TenDollarContract, "10$");
   const ReanounceRievaContract = () =>
     renounceOwnership(AllContracts.RievaContract, "Rieva");
   const ReanounceDomusContract = () =>
@@ -1445,6 +1450,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddXerion = () => handleAddToken(Xerion, "Layti");
   const handleAddRieva = () => handleAddToken(Rieva, "Rieva");
   const handleAddDomus = () => handleAddToken(Domus, "Domus");
+  const handleAddTenDollar = () => handleAddToken($10, "TenDollar");
 
   return (
     <SwapContractContext.Provider
@@ -1525,9 +1531,11 @@ export const SwapContractProvider = ({ children }) => {
         ReanounceOneDollarContract,
         ReanounceRievaContract,
         ReanounceDomusContract,
+		ReanounceTenDollarContract,
         SetOnePercentageOfBalance,
         ReverseForNextCycle,
         handleAddOneD,
+		handleAddTenDollar,
         decayPercentages,
         ReverseForCycle,
         RenounceRievaSwap,

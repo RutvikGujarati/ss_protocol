@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import {
 	$1,
+	$10,
 	DAV_TOKEN_ADDRESS,
 	Domus,
 	DomusRatioAddress,
@@ -30,6 +31,7 @@ const addresses = {
 	XerionShortened: Xerion,
 	OneDShortened: $1, // Ensure $1 is correctly defined
 	RievaShortened: Rieva,
+	TenDollarShortened: $10,
 	FluxinSwapShortened: Ratio_TOKEN_ADDRESS,
 	RievaSwapShortened: RievaRatioAddress,
 	DomusSwapShortened: DomusRatioAddress,
@@ -51,7 +53,7 @@ export const TokensDetails = () => {
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, isRenounced, LastLiquidity, decayPercentages, ReanounceOneDollarSwapContract, RenounceXerionSwap, balances, isReversed,
+	const { LastDevShare, ReverseForCycle, ReverseForNextCycle,ReanounceTenDollarContract, isRenounced, LastLiquidity, decayPercentages, ReanounceOneDollarSwapContract, RenounceXerionSwap, balances, isReversed,
 		RenounceRievaSwap, RatioTargetsofTokens, ReanounceContract, SetAUctionDuration, WithdrawFluxin, WithdrawXerion, ReanounceFluxinContract, ReanounceXerionContract,
 		WithdrawRieva,WithdrawDomus, ReanounceOneDollarContract, ReanounceRievaContract,ReanounceDomusContract, RenounceDomusSwap,setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate, WithdrawOneDollar } = useSwapContract();
 	console.log("isReversing", isReversed.Fluxin)
@@ -328,6 +330,56 @@ export const TokensDetails = () => {
 				DepositStateTokens: (value) =>
 					DepositToken("state", STATE_TOKEN_ADDRESS, value, "DomusRatio"),
 				StartingAuction: () => StartAuction("DomusRatio"),
+			},
+		},
+		{
+			tokenName: "10$",
+			key: shortenedAddresses.TenDollarShortened,
+			name: "10$",
+			Supply: simpleSupplies.TenDollarSupply,
+			percentage: decayPercentages["TenDollar"],
+			address: $10,
+			// SwapContract: TenDollarRatioAddress,
+			// SwapShortContract: shortenedAddresses.TenDollarSwapShortened,
+			// stateBalance: balances.StateTenDollar,
+			// target: RatioTargetsofTokens["TenDollar"],
+			// isReversing: isReversed.TenDollar.toString(),
+			// WillStart: ReverseForCycle.TenDollar,
+			// WillStartForNext: ReverseForNextCycle.TenDollar,
+			// Balance: balances.TenDollarBalance,
+			// TotalTokensBurn: TotalTokensBurned.TenDollar,
+			// RatioBalance: balances?.ratioTenDollarBalance,
+			// Duration: auctionDetails["TenDollar"],
+			// interval: auctionDetails["TenDollar"],
+			// AuctionRunning: AuctionRunningLocalString.TenDollar.toString(),
+			// pair: "TenDollar/pSTATE",
+			// Ratio: CurrentRatioPrice.TenDollar,
+			// Price: TenDollarUsdPrice,
+			SetDuration: () => SetAUctionDuration(),
+			// AuctionTimeRunning: auctionTimeLeft.TenDollar,
+			// AuctionNextTime: auctionDetails["TenDollar"],
+			mintAddTOkens: "6,250,000",
+			renounceSmartContract: isRenounced?.TenDollar ?? "Unknown",
+			// renounceSwapSmartContract: isRenounced?.TenDollarRatio ?? "Unknown",
+			actions: {
+				ReanounceContract: ReanounceTenDollarContract,
+				// ReanounceSwapContract: RenounceTenDollarSwap,
+				// WithdrawState: WithdrawTenDollar,
+				mintAdditionalTOkens: mintAdditionalTOkens,
+				SetDuration: (value) => SetAUctionDuration(value, "TenDollarRatio"),
+				SetInterval: (value) => SetAUctionInterval(value, "TenDollarRatio"),
+				AddTokenToContract: () =>
+					AddTokensToContract($10, STATE_TOKEN_ADDRESS, CurrentRatioPrice.TenDollar),
+				setRatio: (value) => setRatioTarget(value, "TenDollarRatio"),
+				setBurn: (value) => setBurnRate(value, "TenDollarRatio"),
+				setReverseEnabled: () => setReverseEnable("TenDollarRatio"),
+				setReverse: (value, value2) => setReverseTime(value, value2),
+				setCurrentRatio: (value) => setCurrentRatioTarget(value),
+				DepositTokens: (value) =>
+					DepositToken("TenDollar", $10, value, "TenDollarRatio"),
+				DepositStateTokens: (value) =>
+					DepositToken("state", STATE_TOKEN_ADDRESS, value, "TenDollarRatio"),
+				StartingAuction: () => StartAuction("TenDollarRatio"),
 			},
 		},
 		{
