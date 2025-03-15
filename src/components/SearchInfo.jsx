@@ -32,7 +32,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     { id: 3, name: "Rieva", logo: Rieva, AddToken: handleAddRieva },
     { id: "~", name: "Domus", logo: Domus, AddToken: handleAddDomus },
     {
-      id: "4",
+      id: "∞",
       name: "10$",
       logo: TenDollar,
       AddToken: handleAddTenDollar,
@@ -77,7 +77,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
       { id: 3, name: "Rieva", logo: Rieva, AddToken: handleAddRieva },
       { id: "~", name: "Domus", logo: Domus, AddToken: handleAddDomus },
       {
-        id: "4",
+        id: "∞",
         name: "10$",
         logo: TenDollar,
         AddToken: handleAddTenDollar,
