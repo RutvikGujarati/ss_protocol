@@ -453,7 +453,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                             } else if (dataToShow.tokenName === "10$") {
                               dataToShow.actions.mintAdditionalTOkens(
                                 "TenDollar",
-                                25000000
+                                6250000
                               ); // Amount for State
                             }
                           }}
