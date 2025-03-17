@@ -528,17 +528,17 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
                       <p className="mb-1 detailText">Treasury</p>
-                      <p className="mb-0"> Total ETH Invested : 17 ETH</p>
-                      <p className="mb-0"> LPT Held : {UsersTokens}</p>
-                      <p className="mb-0">
+                      <p className="mb-0 detailAmount"> Total ETH Invested : 17 ETH</p>
+                      <p className="mb-0 detailAmount"> LPT Held : {UsersTokens}</p>
+                      <p className="mb-0 detailAmount">
                         {" "}
                         Contract ETH Balance : {balanceOfContract} ETH
                       </p>
                     </div>
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">Price Information</p>
-                      <p className="mb-0">Current Buy Price: 0.00000021 ETH</p>
-                      <p className="mb-0">Current Sell Price: 0.00000041 ETH</p>
+                      <p className="mb-1 detailText detailAmount">Price Information</p>
+                      <p className="mb-0 detailAmount">Current Buy Price: 0.00000021 ETH</p>
+                      <p className="mb-0 detailAmount">Current Sell Price: 0.00000041 ETH</p>
                     </div>
                   </div>
                 </div>
@@ -547,14 +547,14 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">Price Summary</p>
-                      <p className="mb-0"> Total ETH Profit : 5.6 ETH</p>
-                      <p className="mb-0"> USD Value : $ 11,000 Profit</p>
-                      <p className="mb-0"> LPT Value : $ 4000 </p>
+                      <p className="mb-1 detailText detailAmount">Price Summary</p>
+                      <p className="mb-0 detailAmount"> Total ETH Profit : 5.6 ETH</p>
+                      <p className="mb-0 detailAmount"> USD Value : $ 11,000 Profit</p>
+                      <p className="mb-0 detailAmount"> LPT Value : $ 4000 </p>
                     </div>
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">Withdraw</p>
-                      <p className="mb-0"> Dividends : 0.16 ETH</p>
+                      <p className="mb-1 detailText detailAmount">Withdraw</p>
+                      <p className="mb-0 detailAmount"> Dividends : 0.16 ETH</p>
                       <button className="swap-btn py-1 mx-3 mt-1 btn btn-primary ">
                         Withdraw
                       </button>
@@ -580,8 +580,8 @@ const InfoCards = () => {
                           onChange={(e) => handleInputChangeofToken(e)}
                         />
                       </div>
-                      <p className="mb-0 mx-3 mt-2"> Est. LPT: 4,761</p>
-                      <p className="mb-0  mt-1"> (@ 0.00000021 ETH)</p>
+                      <p className="mb-0 mx-3 mt-2 detailAmount"> Est. LPT: 4,761</p>
+                      <p className="mb-0  mt-1 detailAmount"> (@ 0.00000021 ETH)</p>
                       <button
                         onClick={() => BuyTokens(Denominator)}
                         className="swap-btn py-1 mt-2 btn btn-primary "
