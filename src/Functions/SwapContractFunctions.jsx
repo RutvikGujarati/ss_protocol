@@ -1304,6 +1304,8 @@ export const SwapContractProvider = ({ children }) => {
         let balance;
         if (tokenName == "OneDollar") {
           balance = parseFloat(rawBalance || "0").toFixed(2); // Keeps 2 decimal places
+        } else if (tokenName == "TenDollar") {
+          balance = parseFloat(rawBalance || "0").toFixed(2);
         } else {
           balance = Math.floor(parseFloat(rawBalance || "0"));
         }
