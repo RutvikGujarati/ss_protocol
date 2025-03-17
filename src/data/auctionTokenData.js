@@ -176,7 +176,7 @@ export const useAuctionTokens = () => {
 			onChart: "https://www.geckoterminal.com/pulsechain/pools/0x86e8330efe0dfc20ab8f63dcf95a6a8d66f60c1d",
 			distributedAmount: Distributed?.["TenDollar"] || 0,
 			token: $10,
-			SwapT: () => SwapTokens("TenDollar", "TenDollar"),
+			SwapT: () => SwapTokens("10$", "TenDollar"),
 			ratioPrice: CurrentRatioPrice.TenDollar,
 			handleAddToken: handleAddTenDollar,
 			onlyInputAmount: OnePBalance.TenDollar,

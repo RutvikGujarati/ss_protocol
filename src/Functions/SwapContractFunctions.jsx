@@ -92,13 +92,13 @@ export const SwapContractProvider = ({ children }) => {
     Fluxin: AllContracts.FluxinContract,
     Rieva: AllContracts.RievaContract,
     Domus: AllContracts.DomusContract,
-    TenDollar: AllContracts.TenDollarContract,
     oneD: AllContracts.oneDollar,
     Xerion: AllContracts.XerionContract,
     FluxinRatio: AllContracts.RatioContract,
     RievaRatio: AllContracts.RievaRatioContract,
     DomusRatio: AllContracts.DomusRatioContract,
     OneDollar: AllContracts.OneDollarRatioContract,
+    TenDollar: AllContracts.TenDollarContract,
     TenDollarRatio: AllContracts.TenDollarRatioContract,
     XerionRatio: AllContracts.XerionRatioContract,
   };
@@ -987,7 +987,7 @@ export const SwapContractProvider = ({ children }) => {
         Rieva: AllContracts.RievaContract,
         Domus: AllContracts.DomusContract,
         OneDollar: AllContracts.oneDollar,
-        TenDollar: AllContracts.TenDollar,
+        TenDollar: AllContracts.TenDollarContract,
         Xerion: AllContracts.XerionContract,
         state: AllContracts.stateContract,
       };
