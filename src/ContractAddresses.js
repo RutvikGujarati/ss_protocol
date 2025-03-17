@@ -21,12 +21,14 @@ export const STATE_TOKEN_ADDRESS = "0xc359f56c63A8117C83AbE84F4BB78d9eF124b567";
 export const Fluxin = "0xfe4EC02E6Fe069d90D4a721313f22d6461ec5A06";
 export const Xerion = "0xede25454E7F50a925BA00174164E0C6d818E4b25";
 export const $1 = "0x4f665Ef2EF5336D26a6c06525DD812786E5614c6";
+export const $10 = "0x916ed6d34d2d26b2173237BB44e0c91bdbBD7222";
 export const Rieva = "0xc6d64985E00BB43d93582866bB7eAfc75692f0d8";
 export const Domus = "0x82627374E1fe45A6918f21e52B4776E3B8c6420b";
 
 export const Ratio_TOKEN_ADDRESS = "0xf0bb62b168E7aDBf313217EFdD448897aFCe8fD6";
 export const XerionRatioAddress = "0xdb89A380171339c14ce316E2c7c32e8aCD8037fb";
 export const OneDollarRatioAddress = "0x7Be689784D523E963E6232aaFc7787920De695B2";
+export const TenDollarRatioAddress = "0x95725c216dAA09E04890C4C186d9DDb0664B297b";
 export const RievaRatioAddress = "0x6205253B9176129793Cde1aA576D65cAB01B5c55";
 export const DomusRatioAddress = "0x874F9cd4E3Bb33A4e1B022033dc80c2E86EaF04a";
 

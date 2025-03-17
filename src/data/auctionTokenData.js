@@ -2,10 +2,11 @@ import { useContext } from 'react';
 import FluxinLogo from "../assets/FluxinLogo.png";
 import XerionLogo from "../assets/layti.png";
 import RievaLogo from "../assets/rieva.png";
+import TenDollarLogo from "../assets/TenDollar.png";
 import DomusLogo from "../assets/domus.png";
 import oned from "../assets/oned.png";
 
-import { $1, Domus, Fluxin, Rieva, Xerion } from "../ContractAddresses";
+import { $1, $10, Domus, Fluxin, Rieva, Xerion } from "../ContractAddresses";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { PriceContext } from "../api/StatePrice";
 import { useGeneralAuctionFunctions } from '../Functions/GeneralAuctionFunctions';
@@ -20,7 +21,8 @@ export const useAuctionTokens = () => {
 		XerionUsdPrice,
 		OneDollarUsdPrice,
 		RievaUsdPrice,
-		DomusUsdPrice
+		DomusUsdPrice,
+		TenDollarUsdPrice
 	} = useContext(PriceContext);
 	const { AuctionRunning } = useGeneralAuctionFunctions();
 	const { CurrentRatioPrice } = useGeneralTokens();
@@ -39,6 +41,7 @@ export const useAuctionTokens = () => {
 		handleAddDomus,
 		handleAddOneD,
 		OnePBalance,
+		handleAddTenDollar,
 	} = useSwapContract();
 	console.log("is running from obj", isReversed.Fluxin)
 	console.log("is running from obj", OneDollarUsdPrice)
@@ -152,6 +155,33 @@ export const useAuctionTokens = () => {
 			onlyInputAmount: OnePBalance.Rieva,
 			inputTokenAmount: `${OnePBalance.Rieva || 0} Rieva`,
 			outputToken: `${outAmounts?.Rieva || 0} State`,
+		},
+		{
+			id: "10$",
+			name: "10$",
+			Pname: "10$ - State - 10$",
+			ReverseName: "State - 10$",
+			ContractName: "TenDollar",
+			image: TenDollarLogo,
+			ratio: `1:${RatioTargetsofTokens?.["TenDollar"] || 0}`,
+			userHasSwapped: userHashSwapped.TenDollar,
+			userHasReverse: userHasReverseSwapped.TenDollar,
+			currentRatio: `1:${CurrentRatioPrice.TenDollar || 0}`,
+			Price: TenDollarUsdPrice,
+			isReversing: isReversed?.TenDollar.toString(),
+			currentTokenRatio: CurrentRatioPrice.TenDollar,
+			ErrorName: "TenDollar",
+			RatioTargetToken: RatioTargetsofTokens?.["TenDollar"] || 0,
+			AuctionStatus: AuctionRunning?.TenDollar,
+			onChart: "https://www.geckoterminal.com/pulsechain/pools/0x86e8330efe0dfc20ab8f63dcf95a6a8d66f60c1d",
+			distributedAmount: Distributed?.["TenDollar"] || 0,
+			token: $10,
+			SwapT: () => SwapTokens("TenDollar", "TenDollar"),
+			ratioPrice: CurrentRatioPrice.TenDollar,
+			handleAddToken: handleAddTenDollar,
+			onlyInputAmount: OnePBalance.TenDollar,
+			inputTokenAmount: `${OnePBalance.TenDollar || 0} 10$`,
+			outputToken: `${outAmounts?.TenDollar || 0} State`,
 		},
 		{
 			id: "Domus",

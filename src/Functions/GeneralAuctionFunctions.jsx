@@ -11,6 +11,7 @@ export const GeneralAuctionProvider = ({ children }) => {
     Fluxin: false,
     Xerion: false,
     OneDollar: false,
+    TenDollar: false,
     Rieva: false,
     Domus: false,
     state: true,
@@ -20,6 +21,7 @@ export const GeneralAuctionProvider = ({ children }) => {
     Xerion: false,
     OneDollar: false,
     Rieva: false,
+	TenDollar: false,
     Domus: false,
     state: true,
   });
@@ -33,6 +35,7 @@ export const GeneralAuctionProvider = ({ children }) => {
     { name: "Xerion", contract: AllContracts.XerionRatioContract },
     { name: "Rieva", contract: AllContracts.RievaRatioContract },
     { name: "Domus", contract: AllContracts.DomusRatioContract },
+    { name: "TenDollar", contract: AllContracts.TenDollarRatioContract },
     { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
   ];
 
@@ -105,6 +108,7 @@ export const GeneralAuctionProvider = ({ children }) => {
         Fluxin: false,
         Xerion: false,
         OneDollar: false,
+		TenDollar: false,
         Rieva: false,
         Domus: false,
         state: true,
@@ -116,7 +120,7 @@ export const GeneralAuctionProvider = ({ children }) => {
         OneDollar: false,
         Rieva: false,
         Domus: false,
-
+		TenDollar: false,
         state: true,
       });
     }
@@ -196,7 +200,7 @@ export const GeneralAuctionProvider = ({ children }) => {
           return {
             name,
             TotalTokensBurned:
-              name === "OneDollar"
+              name === "OneDollar" || name === "TenDollar"
                 ? Number(totalTokensBurned)
                 : Math.floor(totalTokensBurned),
           };

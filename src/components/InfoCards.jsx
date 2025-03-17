@@ -478,7 +478,7 @@ const InfoCards = () => {
                           color: "white",
                         },
                         {
-                          text: "Domus TOKEN DEPLOYED.",
+                          text: "10$ TOKEN DEPLOYED.",
                           color: "white",
                           //   image: RievaLogo,
                         },

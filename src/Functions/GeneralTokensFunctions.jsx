@@ -16,15 +16,18 @@ export const GeneralTokenProvider = ({ children }) => {
     Fluxin: "0.0",
     Xerion: "0.0",
     Rieva: "0.0",
+    TenDollar: "0.0",
     OneDollar: "0.0",
   });
   const contracts = {
     state: AllContracts.stateContract,
     dav: AllContracts.davContract,
     Fluxin: AllContracts.FluxinContract,
+    TenDollar: AllContracts.TenDollarContract,
     Domus: AllContracts.DomusContract,
     oneD: AllContracts.oneDollar,
     FluxinRatio: AllContracts.RatioContract,
+    TenDollarRatio: AllContracts.TenDollarRatioContract,
     Xerion: AllContracts.XerionContract,
   };
   const fetchTotalSupplies = async () => {
@@ -171,6 +174,8 @@ export const GeneralTokenProvider = ({ children }) => {
         contract = AllContracts.RievaContract;
       } else if (contractType === "Domus") {
         contract = AllContracts.DomusContract;
+      } else if (contractType === "TenDollar") {
+        contract = AllContracts.TenDollarContract;
       }
 
       if (!contract) {
@@ -191,6 +196,7 @@ export const GeneralTokenProvider = ({ children }) => {
         { name: "Fluxin", contract: AllContracts.RatioContract },
         { name: "Xerion", contract: AllContracts.XerionRatioContract },
         { name: "Rieva", contract: AllContracts.RievaRatioContract },
+        { name: "TenDollar", contract: AllContracts.TenDollarRatioContract },
         { name: "Domus", contract: AllContracts.DomusRatioContract },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
