@@ -163,7 +163,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
 	item.tokenName.toLowerCase().includes((searchQuery ?? "").toLowerCase())
   );
   
-  // Ensure unique token names by using a Set
+  // Ensure uniqueness based on tokenName
   const uniqueFilteredTokens = Array.from(
 	new Map(filteredTokens.map((token) => [token.tokenName, token])).values()
   );
@@ -448,7 +448,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               ); // Amount for State
                             } else if (dataToShow.tokenName === "Rieva") {
                               dataToShow.actions.mintAdditionalTOkens(
-							"Rieva",
+                                "Rieva",
                                 62500000000
                               ); // Amount for State
                             } else if (dataToShow.tokenName === "Domus") {

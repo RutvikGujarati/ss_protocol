@@ -65,7 +65,13 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
 	setSearchQuery(query);
   
 	if (query === "") {
-	  setFilteredData([...originalData]); // Ensure it's a fresh copy
+	  const uniqueTokens = originalData.reduce((acc, item) => {
+		if (!acc.some(t => t.name === item.name)) {
+		  acc.push({ ...item }); // Deep clone each item
+		}
+		return acc;
+	  }, []);
+	  setFilteredData(uniqueTokens);
 	} else {
 	  const filtered = originalData.filter((item) =>
 		item.name.toLowerCase().includes(query)
@@ -73,7 +79,6 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
 	  setFilteredData(filtered);
 	}
   };
-  
 
   const handleRowClick = (token) => {
     setSelectedToken(token);
