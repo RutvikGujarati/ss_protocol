@@ -816,7 +816,7 @@ export const SwapContractProvider = ({ children }) => {
     },
     {
       contract: AllContracts.stateContract,
-      token: $10,
+      token: TenDollarRatioAddress,
       key: "StateTenDollar",
     },
     {
@@ -844,6 +844,7 @@ export const SwapContractProvider = ({ children }) => {
       token: OneDollarRatioAddress,
       key: "StateOneDollar",
     },
+
     {
       contract: AllContracts.FluxinContract,
       token: Ratio_TOKEN_ADDRESS,
@@ -1543,7 +1544,7 @@ export const SwapContractProvider = ({ children }) => {
         ReanounceContract,
         ReanounceFluxinContract,
         ReanounceXerionContract,
-		ReanounceTenDollarSwapContract,
+        ReanounceTenDollarSwapContract,
         handleAddToken,
         setRatioTarget,
         // setReverseEnable,
@@ -1594,7 +1595,7 @@ export const SwapContractProvider = ({ children }) => {
         ReverseForNextCycle,
         handleAddOneD,
         handleAddTenDollar,
-		WithdrawTenDollar,
+        WithdrawTenDollar,
         decayPercentages,
         ReverseForCycle,
         RenounceRievaSwap,

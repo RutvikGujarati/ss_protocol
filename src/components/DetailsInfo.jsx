@@ -160,12 +160,18 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   };
 
   const filteredTokens = tokens.filter((item) =>
-    item.tokenName.toLowerCase().includes((searchQuery ?? "").toLowerCase())
+	item.tokenName.toLowerCase().includes((searchQuery ?? "").toLowerCase())
   );
-
+  
+  // Ensure unique token names by using a Set
+  const uniqueFilteredTokens = Array.from(
+	new Map(filteredTokens.map((token) => [token.tokenName, token])).values()
+  );
+  
   const dataToShow = selectedToken
-    ? tokens.find((token) => token.tokenName === selectedToken.name)
-    : filteredTokens[0] || tokens[0];
+	? tokens.find((token) => token.tokenName === selectedToken.name)
+	: uniqueFilteredTokens[0] || tokens[0];
+  
   return (
     <div className="container mt-3 p-0">
       {dataToShow ? (
@@ -442,7 +448,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                               ); // Amount for State
                             } else if (dataToShow.tokenName === "Rieva") {
                               dataToShow.actions.mintAdditionalTOkens(
-                                "Rieva",
+							"Rieva",
                                 62500000000
                               ); // Amount for State
                             } else if (dataToShow.tokenName === "Domus") {

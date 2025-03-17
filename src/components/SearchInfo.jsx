@@ -61,18 +61,19 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
   }, [filteredData]);
 
   const handleSearch = (e) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
-
-    if (query === "") {
-      setFilteredData(originalData); // Reset to original when search is cleared
-    } else {
-      const filtered = originalData.filter((item) =>
-        item.name.toLowerCase().includes(query)
-      );
-      setFilteredData(filtered);
-    }
+	const query = e.target.value.toLowerCase();
+	setSearchQuery(query);
+  
+	if (query === "") {
+	  setFilteredData([...originalData]); // Ensure it's a fresh copy
+	} else {
+	  const filtered = originalData.filter((item) =>
+		item.name.toLowerCase().includes(query)
+	  );
+	  setFilteredData(filtered);
+	}
   };
+  
 
   const handleRowClick = (token) => {
     setSelectedToken(token);
