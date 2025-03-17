@@ -12,6 +12,7 @@ import {
 	Rieva,
 	RievaRatioAddress,
 	STATE_TOKEN_ADDRESS,
+	TenDollarRatioAddress,
 	Xerion,
 	XerionRatioAddress,
 
@@ -37,6 +38,7 @@ const addresses = {
 	DomusSwapShortened: DomusRatioAddress,
 	XerionSwapShortened: XerionRatioAddress,
 	OneDollarSwapShortened: OneDollarRatioAddress,
+	TenDollarSwapShortened: TenDollarRatioAddress,
 	stateShortened: STATE_TOKEN_ADDRESS,
 };
 const shortenedAddresses = Object.fromEntries(
@@ -44,7 +46,7 @@ const shortenedAddresses = Object.fromEntries(
 );
 
 export const TokensDetails = () => {
-	const { stateUsdPrice, FluxinUsdPrice, XerionUsdPrice,DomusUsdPrice, OneDollarUsdPrice, RievaUsdPrice } =
+	const { stateUsdPrice, FluxinUsdPrice, XerionUsdPrice,DomusUsdPrice,TenDollarUsdPrice, OneDollarUsdPrice, RievaUsdPrice } =
 		useContext(PriceContext);
 	const { simpleSupplies, mintAdditionalTOkens } = useGeneralTokens()
 	const { AuctionRunningLocalString, auctionDetails, TotalTokensBurned, auctionTimeLeft } = useGeneralAuctionFunctions()
@@ -54,7 +56,7 @@ export const TokensDetails = () => {
 		withdraw_95, } =
 		useDAvContract();
 	const { LastDevShare, ReverseForCycle, ReverseForNextCycle,ReanounceTenDollarContract, isRenounced, LastLiquidity, decayPercentages, ReanounceOneDollarSwapContract, RenounceXerionSwap, balances, isReversed,
-		RenounceRievaSwap, RatioTargetsofTokens, ReanounceContract, SetAUctionDuration, WithdrawFluxin, WithdrawXerion, ReanounceFluxinContract, ReanounceXerionContract,
+		RenounceRievaSwap, RatioTargetsofTokens, ReanounceContract,WithdrawTenDollar, SetAUctionDuration, WithdrawFluxin, WithdrawXerion, RenounceTenDollarSwap,ReanounceFluxinContract, ReanounceXerionContract,
 		WithdrawRieva,WithdrawDomus, ReanounceOneDollarContract, ReanounceRievaContract,ReanounceDomusContract, RenounceDomusSwap,setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate, WithdrawOneDollar } = useSwapContract();
 	console.log("isReversing", isReversed.Fluxin)
 	console.log("isReversing", balances.OneDollarBalance)
@@ -339,32 +341,32 @@ export const TokensDetails = () => {
 			Supply: simpleSupplies.TenDollarSupply,
 			percentage: decayPercentages["TenDollar"],
 			address: $10,
-			// SwapContract: TenDollarRatioAddress,
-			// SwapShortContract: shortenedAddresses.TenDollarSwapShortened,
-			// stateBalance: balances.StateTenDollar,
-			// target: RatioTargetsofTokens["TenDollar"],
-			// isReversing: isReversed.TenDollar.toString(),
-			// WillStart: ReverseForCycle.TenDollar,
-			// WillStartForNext: ReverseForNextCycle.TenDollar,
-			// Balance: balances.TenDollarBalance,
-			// TotalTokensBurn: TotalTokensBurned.TenDollar,
-			// RatioBalance: balances?.ratioTenDollarBalance,
-			// Duration: auctionDetails["TenDollar"],
-			// interval: auctionDetails["TenDollar"],
-			// AuctionRunning: AuctionRunningLocalString.TenDollar.toString(),
-			// pair: "TenDollar/pSTATE",
-			// Ratio: CurrentRatioPrice.TenDollar,
-			// Price: TenDollarUsdPrice,
+			SwapContract: TenDollarRatioAddress,
+			SwapShortContract: shortenedAddresses.TenDollarSwapShortened,
+			stateBalance: balances.StateTenDollar,
+			target: RatioTargetsofTokens["TenDollar"],
+			isReversing: isReversed.TenDollar.toString(),
+			WillStart: ReverseForCycle.TenDollar,
+			WillStartForNext: ReverseForNextCycle.TenDollar,
+			Balance: balances.TenDollarBalance,
+			TotalTokensBurn: TotalTokensBurned.TenDollar,
+			RatioBalance: balances?.ratioTenDollarBalance,
+			Duration: auctionDetails["TenDollar"],
+			interval: auctionDetails["TenDollar"],
+			AuctionRunning: AuctionRunningLocalString.TenDollar.toString(),
+			pair: "TenDollar/pSTATE",
+			Ratio: CurrentRatioPrice.TenDollar,
+			Price: TenDollarUsdPrice,
 			SetDuration: () => SetAUctionDuration(),
-			// AuctionTimeRunning: auctionTimeLeft.TenDollar,
-			// AuctionNextTime: auctionDetails["TenDollar"],
+			AuctionTimeRunning: auctionTimeLeft.TenDollar,
+			AuctionNextTime: auctionDetails["TenDollar"],
 			mintAddTOkens: "6,250,000",
 			renounceSmartContract: isRenounced?.TenDollar ?? "Unknown",
-			// renounceSwapSmartContract: isRenounced?.TenDollarRatio ?? "Unknown",
+			renounceSwapSmartContract: isRenounced?.TenDollarRatio ?? "Unknown",
 			actions: {
 				ReanounceContract: ReanounceTenDollarContract,
-				// ReanounceSwapContract: RenounceTenDollarSwap,
-				// WithdrawState: WithdrawTenDollar,
+				ReanounceSwapContract: RenounceTenDollarSwap,
+				WithdrawState: WithdrawTenDollar,
 				mintAdditionalTOkens: mintAdditionalTOkens,
 				SetDuration: (value) => SetAUctionDuration(value, "TenDollarRatio"),
 				SetInterval: (value) => SetAUctionInterval(value, "TenDollarRatio"),

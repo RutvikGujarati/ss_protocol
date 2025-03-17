@@ -28,6 +28,7 @@ export const GeneralTokenProvider = ({ children }) => {
     Domus: AllContracts.DomusContract,
     oneD: AllContracts.oneDollar,
     FluxinRatio: AllContracts.RatioContract,
+    TenDollarRatio: AllContracts.TenDollarRatioContract,
     Xerion: AllContracts.XerionContract,
   };
   const fetchTotalSupplies = async () => {

@@ -23,7 +23,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     handleAddDomus,
     handleAddTenDollar,
   } = useSwapContract();
-  const [filteredData, setFilteredData] = useState([
+  const originalData = [
     { id: "∈", name: "DAV", logo: DAVLogo, AddToken: handleAddTokenDAV },
     { id: "±", name: "STATE", logo: stateLogo, AddToken: handleAddTokenState },
     { id: 1, name: "Orxa", logo: FluxinLogo, AddToken: handleAddFluxin },
@@ -31,13 +31,9 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     { id: "∞", name: "1$", logo: oned, AddToken: handleAddOneD },
     { id: 3, name: "Rieva", logo: Rieva, AddToken: handleAddRieva },
     { id: "~", name: "Domus", logo: Domus, AddToken: handleAddDomus },
-    {
-      id: "∞",
-      name: "10$",
-      logo: TenDollar,
-      AddToken: handleAddTenDollar,
-    },
-  ]);
+    { id: "∞", name: "10$", logo: TenDollar, AddToken: handleAddTenDollar },
+  ];
+  const [filteredData, setFilteredData] = useState(originalData);
   const searchInputRef = useRef(null);
 
   useEffect(() => {
@@ -67,28 +63,15 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
   const handleSearch = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-    const originalData = [
-      { id: "∈", name: "DAV", logo: DAVLogo },
-      { id: "±", name: "STATE", logo: stateLogo },
-      //   { id: 1, name: "AuctionRatioSwapping", logo: XerionLogo },
-      { id: 1, name: "Orxa", logo: FluxinLogo },
-      { id: 2, name: "Layti", logo: XerionLogo },
-      { id: "∞", name: "1$", logo: oned, AddToken: handleAddOneD },
-      { id: 3, name: "Rieva", logo: Rieva, AddToken: handleAddRieva },
-      { id: "~", name: "Domus", logo: Domus, AddToken: handleAddDomus },
-      {
-        id: "∞",
-        name: "10$",
-        logo: TenDollar,
-        AddToken: handleAddTenDollar,
-      },
 
-      //   { id: 4, name: "Polaris", logo: FluxinLogo },
-    ];
-    const filtered = originalData.filter((item) =>
-      item.name.toLowerCase().includes(query)
-    );
-    setFilteredData(filtered);
+    if (query === "") {
+      setFilteredData(originalData); // Reset to original when search is cleared
+    } else {
+      const filtered = originalData.filter((item) =>
+        item.name.toLowerCase().includes(query)
+      );
+      setFilteredData(filtered);
+    }
   };
 
   const handleRowClick = (token) => {
