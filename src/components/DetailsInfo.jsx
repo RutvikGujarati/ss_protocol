@@ -160,18 +160,12 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   };
 
   const filteredTokens = tokens.filter((item) =>
-	item.tokenName.toLowerCase().includes((searchQuery ?? "").toLowerCase())
+    item.tokenName.toLowerCase().includes((searchQuery ?? "").toLowerCase())
   );
-  
-  // Ensure uniqueness based on tokenName
-  const uniqueFilteredTokens = Array.from(
-	new Map(filteredTokens.map((token) => [token.tokenName, token])).values()
-  );
-  
+
   const dataToShow = selectedToken
-	? tokens.find((token) => token.tokenName === selectedToken.name)
-	: uniqueFilteredTokens[0] || tokens[0];
-  
+    ? tokens.find((token) => token.tokenName === selectedToken.name)
+    : filteredTokens[0] || tokens[0];
   return (
     <div className="container mt-3 p-0">
       {dataToShow ? (

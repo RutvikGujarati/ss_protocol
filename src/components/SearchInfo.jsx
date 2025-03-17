@@ -23,16 +23,18 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     handleAddDomus,
     handleAddTenDollar,
   } = useSwapContract();
+
   const originalData = [
     { id: "∈", name: "DAV", logo: DAVLogo, AddToken: handleAddTokenDAV },
     { id: "±", name: "STATE", logo: stateLogo, AddToken: handleAddTokenState },
-    { id: 1, name: "Orxa", logo: FluxinLogo, AddToken: handleAddFluxin },
-    { id: 2, name: "Layti", logo: XerionLogo, AddToken: handleAddXerion },
+    { id: "1", name: "Orxa", logo: FluxinLogo, AddToken: handleAddFluxin },
+    { id: "2", name: "Layti", logo: XerionLogo, AddToken: handleAddXerion },
     { id: "∞", name: "1$", logo: oned, AddToken: handleAddOneD },
-    { id: 3, name: "Rieva", logo: Rieva, AddToken: handleAddRieva },
+    { id: "3", name: "Rieva", logo: Rieva, AddToken: handleAddRieva },
     { id: "~", name: "Domus", logo: Domus, AddToken: handleAddDomus },
     { id: "∞", name: "10$", logo: TenDollar, AddToken: handleAddTenDollar },
   ];
+
   const [filteredData, setFilteredData] = useState(originalData);
   const searchInputRef = useRef(null);
 
@@ -53,7 +55,6 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
   }, []);
 
   useEffect(() => {
-    // Add cursor pointer dynamically to specific td
     const nameCells = document.querySelectorAll(".name-cell");
     nameCells.forEach((cell) => {
       cell.style.cursor = "pointer";
@@ -61,23 +62,23 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
   }, [filteredData]);
 
   const handleSearch = (e) => {
-	const query = e.target.value.toLowerCase();
-	setSearchQuery(query);
-  
-	if (query === "") {
-	  const uniqueTokens = originalData.reduce((acc, item) => {
-		if (!acc.some(t => t.name === item.name)) {
-		  acc.push({ ...item }); // Deep clone each item
-		}
-		return acc;
-	  }, []);
-	  setFilteredData(uniqueTokens);
-	} else {
-	  const filtered = originalData.filter((item) =>
-		item.name.toLowerCase().includes(query)
-	  );
-	  setFilteredData(filtered);
-	}
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    if (query === "") {
+      // Deduplicate by name when resetting to originalData
+      const uniqueData = Array.from(
+        new Map(originalData.map((item) => [item.name, item])).values()
+      );
+      setFilteredData(uniqueData);
+      console.log("After clear search, filteredData:", uniqueData); // Debug log
+    } else {
+      const filtered = originalData.filter((item) =>
+        item.name.toLowerCase().includes(query)
+      );
+      setFilteredData(filtered);
+      console.log("After search, filteredData:", filtered); // Debug log
+    }
   };
 
   const handleRowClick = (token) => {
@@ -101,21 +102,22 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
             <th>#</th>
             <th></th>
             <th className="">Name</th>
-            {/* <th></th> */}
             <th>Add</th>
           </tr>
         </thead>
         <tbody>
-          {filteredData.map((item) => (
-            <tr key={item.id} onClick={() => handleRowClick(item)}>
+          {filteredData.map((item, index) => (
+            <tr
+              key={`${item.name}-${index}`}
+              onClick={() => handleRowClick(item)}
+            >
               <td>{item.id}</td>
               <td>
                 <div className="nameImage">
                   <img src={item.logo} width={40} height={40} alt="Logo" />
                 </div>
               </td>
-              <td className=" justify-content-center  ">{item.name}</td>
-              {/* <td></td> */}
+              <td className="justify-content-center">{item.name}</td>
               <td>
                 <div className="mb-0 mx-1">
                   <img
