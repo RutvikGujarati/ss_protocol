@@ -1508,7 +1508,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddXerion = () => handleAddToken(Xerion, "Layti");
   const handleAddRieva = () => handleAddToken(Rieva, "Rieva");
   const handleAddDomus = () => handleAddToken(Domus, "Domus");
-  const handleAddTenDollar = () => handleAddToken($10, "TenDollar");
+  const handleAddTenDollar = () => handleAddToken($10, "10$");
 
   return (
     <SwapContractContext.Provider
