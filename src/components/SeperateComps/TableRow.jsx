@@ -21,24 +21,25 @@ export const TableRowWithClick = ({ label, value, action, buttonText }) => (
   </tr>
 );
 export const TableRowDataShow = ({ label, address, value }) => {
-  return (
-    <tr>
-      <td className="d-flex align-items-center">{label}</td>
-      <td className="d-flex align-items-center justify-content-center">
-        <a
-          href={`https://otter.pulsechain.com/address/${address}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ fontSize: "12px" }}
-        >
-          {value || "contract details"}
-        </a>
-      </td>
-      <td></td>
-    </tr>
-  );
-};
-
+	return (
+	  <tr>
+		<td className="d-flex align-items-center">{label}</td>
+		<td className="d-flex align-items-center justify-content-center">
+		  <a
+			href={`https://repo.sourcify.dev/369/${address}`}
+			target="_blank"
+			rel="noopener noreferrer"
+			className="d-flex align-items-center gap-1"
+			style={{ fontSize: "12px" }}
+		  >
+			{value || "contract details"}
+			<i className="bi bi-box-arrow-up-right"></i>
+		  </a>
+		</td>
+		<td></td>
+	  </tr>
+	);
+  };
 export const TableRowForTokens = ({
   label,
   label2,
@@ -94,7 +95,6 @@ export const TableRowForSwapTokens = ({
   tokenName,
   TokenAddress,
   value,
-
 }) => {
   return (
     <>
