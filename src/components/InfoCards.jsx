@@ -634,14 +634,14 @@ const InfoCards = () => {
                         Total ETH Profit : {UserProfit} ETH
                       </p>
                       <p className="mb-0 detailAmount">
-                        USD Value : $
+                        USD Value : $ {''}
                         {(Number(PLSPrice) * Number(UserProfit) || 0).toFixed(
                           2
                         )}
                         Profit
                       </p>
                       <p className="mb-0 detailAmount">
-                        LPT Value : $
+                        LPT Value : $ {" "}
                         {(Number(PLSPrice) * Number(UsersTokens) || 0).toFixed(
                           2
                         )}
