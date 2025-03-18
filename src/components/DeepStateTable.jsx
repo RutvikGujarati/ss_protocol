@@ -14,6 +14,7 @@ const DeepStateTable = () => {
   const [PLSUSD, setPLSUSD] = useState("0");
   const [DividendsUSD, setDividendsUSD] = useState("0");
   const [UsersTokens, setUsersTokens] = useState("0");
+  const [UsersETH, setUsersETH] = useState("0");
   const [UsersDividends, setUsersDividends] = useState("0");
   const [UsersInvested, setUsersInvested] = useState("0");
   const [loading, setLoading] = useState(false);
@@ -130,6 +131,7 @@ const DeepStateTable = () => {
       console.log("Error fetching tokens amount:", error);
     }
   };
+
   const UsersTotalDividends = async () => {
     try {
       if (!AllContracts?.DeepStateContract) return;
@@ -140,16 +142,7 @@ const DeepStateTable = () => {
       setUsersDividends("0");
     }
   };
-  const UsersTotalInvested = async () => {
-    try {
-      if (!AllContracts?.DeepStateContract) return;
-      const userAmount = await AllContracts.DeepStateContract.Invested(account);
-      setUsersInvested(parseFloat(ethers.formatEther(userAmount)).toFixed(18));
-    } catch (error) {
-      console.error("Error fetching dividends:", error);
-      setUsersInvested("0");
-    }
-  };
+
   const tokens = useTokens();
 
   const CalculateDividendsInUSD = async () => {
@@ -171,7 +164,6 @@ const DeepStateTable = () => {
     fetchPLSPrice();
     UsersTotalTokens();
     UsersTotalDividends();
-    UsersTotalInvested();
     CalculateDividendsInUSD();
   });
   return (

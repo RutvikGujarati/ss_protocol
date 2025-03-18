@@ -17,7 +17,7 @@ import { useDeepStateFunctions } from "../Functions/DeepStateContract";
 import { ContractContext } from "../Functions/ContractInitialize";
 const InfoCards = () => {
   const chainId = useChainId();
-  const { AllContracts, signer } = useContext(ContractContext);
+  const { AllContracts, signer,account } = useContext(ContractContext);
   const { stateUsdPrice, priceLoading } = useContext(PriceContext);
   const {
     PLSUSD,
@@ -27,6 +27,7 @@ const InfoCards = () => {
     UsersTotalTokens,
   } = useDeepStateFunctions();
   const [balanceOfContract, setbalanceOfContract] = useState("0");
+  const [UsersETH, setUsersETH] = useState("0");
 
   const [setBurnRatio] = useState("0.0");
   const {
@@ -93,9 +94,20 @@ const InfoCards = () => {
       console.log("error in fetching deepState Balance:", error);
     }
   };
+  const UsersTotalETHIvested = async () => {
+    try {
+      const userAmount = await AllContracts.DeepStateContract.Invested(account); // Get amount in Wei
+      const formattedAmount = ethers.formatEther(userAmount); // Convert to ETH
+      setUsersETH(formattedAmount); // Store in state
+      console.log("User's total tokens in ETH:", formattedAmount);
+    } catch (error) {
+      console.log("Error fetching tokens amount:", error);
+    }
+  };
   const liveText = getLiveText();
   contractBalance();
   UsersTotalTokens()
+  UsersTotalETHIvested();
   const {
     handleAddTokenState,
     handleAddTokenDAV,
@@ -528,7 +540,7 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
                       <p className="mb-1 detailText">Treasury</p>
-                      <p className="mb-0 detailAmount"> Total ETH Invested : 17 ETH</p>
+                      <p className="mb-0 detailAmount"> Total ETH Invested : {UsersETH} ETH</p>
                       <p className="mb-0 detailAmount"> LPT Held : {UsersTokens}</p>
                       <p className="mb-0 detailAmount">
                         {" "}
