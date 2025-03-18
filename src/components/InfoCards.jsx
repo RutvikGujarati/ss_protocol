@@ -17,17 +17,26 @@ import { useDeepStateFunctions } from "../Functions/DeepStateContract";
 import { ContractContext } from "../Functions/ContractInitialize";
 const InfoCards = () => {
   const chainId = useChainId();
-  const { AllContracts, signer,account } = useContext(ContractContext);
+  const { AllContracts, signer, account } = useContext(ContractContext);
   const { stateUsdPrice, priceLoading } = useContext(PriceContext);
   const {
-    PLSUSD,
+    PLSPrice,
     BuyTokens,
     CalculateBalanceInUSD,
     UsersTokens,
     UsersTotalTokens,
+    UsersDividends,
+    TotalInvested,
+    WithdrawDividends,
+    CalculateEstimateTokenAmount,
+    EstimatedAmount,
+    CurrentSellprice,
+    CurrentBuyprice,
   } = useDeepStateFunctions();
   const [balanceOfContract, setbalanceOfContract] = useState("0");
   const [UsersETH, setUsersETH] = useState("0");
+  const [CurrentBuyPrice, setCurrentBuyPrice] = useState("0");
+  const [UserProfit, TotalUserProfit] = useState("0");
 
   const [setBurnRatio] = useState("0.0");
   const {
@@ -77,6 +86,31 @@ const InfoCards = () => {
       return { text: "🟢 LIVE ON UNKNOWN CHAIN.", color: "" }; // Fallback
     }
   };
+  const [estimatedLPT, setEstimatedLPT] = useState("0.00");
+
+  useEffect(() => {
+    const fetchEstimate = async () => {
+      if (!Denominator || isNaN(Denominator)) {
+        setEstimatedLPT("0.00");
+        return;
+      }
+
+      try {
+        const amountInWei = ethers.parseUnits(Denominator.toString(), 18);
+        const userAmount =
+          await AllContracts.DeepStateContract.estimateTokensToBuy(amountInWei);
+
+        // Convert BigInt -> String -> Number -> Fixed 2 decimals
+        setEstimatedLPT(Number(ethers.formatUnits(userAmount, 18)).toFixed(2));
+      } catch (error) {
+        console.error("Error calculating estimated LPT:", error);
+        setEstimatedLPT("0.00");
+      }
+    };
+
+    fetchEstimate();
+  }, [Denominator]);
+
   const contractBalance = async () => {
     try {
       if (!AllContracts || !AllContracts.DeepStateContract) {
@@ -104,10 +138,33 @@ const InfoCards = () => {
       console.log("Error fetching tokens amount:", error);
     }
   };
+  const CalculateProfit = async () => {
+    try {
+      if (!AllContracts?.DeepStateContract) return;
+      const userAmount =
+        await AllContracts.DeepStateContract.calculateMyProfit();
+      TotalUserProfit(parseFloat(ethers.formatEther(userAmount)).toFixed(2));
+      console.log("users profit", userAmount);
+    } catch (error) {
+      console.error("Error fetching dividends:", error);
+    }
+  };
+  const CurrentBuy = async () => {
+    try {
+      const userAmount = await AllContracts.DeepStateContract.buyPrice(); // Get amount in Wei
+      const formattedAmount = ethers.formatEther(userAmount); // Convert to ETH
+      setCurrentBuyPrice(formattedAmount); // Store in state
+      console.log("User's total tokens in ETH:", formattedAmount);
+    } catch (error) {
+      console.log("Error fetching tokens amount:", error);
+    }
+  };
   const liveText = getLiveText();
   contractBalance();
-  UsersTotalTokens()
+  UsersTotalTokens();
   UsersTotalETHIvested();
+  CurrentBuy();
+  CalculateProfit();
   const {
     handleAddTokenState,
     handleAddTokenDAV,
@@ -240,7 +297,6 @@ const InfoCards = () => {
     contractBalance();
     CalculationOfCost(amount);
     calculateBurnRatio();
-    // GetCurrentStateReward();
   }, [amount]);
 
   const location = useLocation();
@@ -540,17 +596,29 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
                       <p className="mb-1 detailText">Treasury</p>
-                      <p className="mb-0 detailAmount"> Total ETH Invested : {UsersETH} ETH</p>
-                      <p className="mb-0 detailAmount"> LPT Held : {UsersTokens}</p>
+                      <p className="mb-0 detailAmount">
+                        {" "}
+                        Total ETH Invested : {TotalInvested} ETH
+                      </p>
+                      <p className="mb-0 detailAmount">
+                        {" "}
+                        LPT Held : {(Number(UsersTokens) || 0).toFixed(2)}
+                      </p>
                       <p className="mb-0 detailAmount">
                         {" "}
                         Contract ETH Balance : {balanceOfContract} ETH
                       </p>
                     </div>
                     <div className="carddetails2">
-                      <p className="mb-1 detailText detailAmount">Price Information</p>
-                      <p className="mb-0 detailAmount">Current Buy Price: 0.00000021 ETH</p>
-                      <p className="mb-0 detailAmount">Current Sell Price: 0.00000041 ETH</p>
+                      <p className="mb-1 detailText detailAmount">
+                        Price Information
+                      </p>
+                      <p className="mb-0 detailAmount">
+                        Current Buy Price: {CurrentBuyprice} ETH
+                      </p>
+                      <p className="mb-0 detailAmount">
+                        Current Sell Price: {CurrentSellprice} ETH
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -559,15 +627,35 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
-                      <p className="mb-1 detailText detailAmount">Price Summary</p>
-                      <p className="mb-0 detailAmount"> Total ETH Profit : 5.6 ETH</p>
-                      <p className="mb-0 detailAmount"> USD Value : $ 11,000 Profit</p>
-                      <p className="mb-0 detailAmount"> LPT Value : $ 4000 </p>
+                      <p className="mb-1 detailText detailAmount">
+                        Price Summary
+                      </p>
+                      <p className="mb-0 detailAmount">
+                        Total ETH Profit : {UserProfit} ETH
+                      </p>
+                      <p className="mb-0 detailAmount">
+                        USD Value : $
+                        {(Number(PLSPrice) * Number(UserProfit) || 0).toFixed(
+                          2
+                        )}
+                        Profit
+                      </p>
+                      <p className="mb-0 detailAmount">
+                        LPT Value : $
+                        {(Number(PLSPrice) * Number(UsersTokens) || 0).toFixed(
+                          2
+                        )}
+                      </p>
                     </div>
                     <div className="carddetails2">
                       <p className="mb-1 detailText detailAmount">Withdraw</p>
-                      <p className="mb-0 detailAmount"> Dividends : 0.16 ETH</p>
-                      <button className="swap-btn py-1 mx-3 mt-1 btn btn-primary ">
+                      <p className="mb-0 detailAmount">
+                        Dividends :{UsersDividends} ETH
+                      </p>
+                      <button
+                        onClick={() => WithdrawDividends()}
+                        className="swap-btn py-1 mx-3 mt-1 btn btn-primary "
+                      >
                         Withdraw
                       </button>
                     </div>
@@ -592,8 +680,12 @@ const InfoCards = () => {
                           onChange={(e) => handleInputChangeofToken(e)}
                         />
                       </div>
-                      <p className="mb-0 mx-3 mt-2 detailAmount"> Est. LPT: 4,761</p>
-                      <p className="mb-0  mt-1 detailAmount"> (@ 0.00000021 ETH)</p>
+                      <p className="mb-0 mx-3 mt-2 detailAmount">
+                        Est. LPT:{estimatedLPT}
+                      </p>
+                      <p className="mb-0  mt-1 detailAmount">
+                        (@ {CurrentBuyPrice} ETH)
+                      </p>
                       <button
                         onClick={() => BuyTokens(Denominator)}
                         className="swap-btn py-1 mt-2 btn btn-primary "

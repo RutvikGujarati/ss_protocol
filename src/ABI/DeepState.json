@@ -1,7 +1,13 @@
 [
 	{
 		"type": "constructor",
-		"inputs": [],
+		"inputs": [
+			{
+				"name": "_treasuryWallet",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"stateMutability": "nonpayable"
 	},
 	{
@@ -10,14 +16,34 @@
 	},
 	{
 		"type": "function",
-		"name": "Invested",
-		"inputs": [
+		"name": "DISTRIBUTION_RATE",
+		"inputs": [],
+		"outputs": [
 			{
 				"name": "",
-				"type": "address",
-				"internalType": "address"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
 		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "SECONDS_PER_DAY",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "SECONDS_PER_YEAR",
+		"inputs": [],
 		"outputs": [
 			{
 				"name": "",
@@ -141,6 +167,19 @@
 	},
 	{
 		"type": "function",
+		"name": "calculateMyProfit",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "int256",
+				"internalType": "int256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "calculateTokensReceived",
 		"inputs": [
 			{
@@ -160,6 +199,25 @@
 	},
 	{
 		"type": "function",
+		"name": "calculateUserProfit",
+		"inputs": [
+			{
+				"name": "_user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "int256",
+				"internalType": "int256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "decimals",
 		"inputs": [],
 		"outputs": [
@@ -173,7 +231,104 @@
 	},
 	{
 		"type": "function",
+		"name": "distributeTreasuryTokens",
+		"inputs": [],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
 		"name": "dividendFee",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "dividendsOf",
+		"inputs": [
+			{
+				"name": "_customer",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "estimateTokensToBuy",
+		"inputs": [
+			{
+				"name": "_eth",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "exit",
+		"inputs": [],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "getMyInvestedETH",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getUserInvestedETH",
+		"inputs": [
+			{
+				"name": "_user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "lastDistributionTimestamp",
 		"inputs": [],
 		"outputs": [
 			{
@@ -238,6 +393,39 @@
 	},
 	{
 		"type": "function",
+		"name": "owner",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "paused",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "renounceOwnership",
+		"inputs": [],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
 		"name": "sell",
 		"inputs": [
 			{
@@ -261,6 +449,32 @@
 			}
 		],
 		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "setPaused",
+		"inputs": [
+			{
+				"name": "_paused",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "setTreasuryWallet",
+		"inputs": [
+			{
+				"name": "_newTreasury",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
 	},
 	{
 		"type": "function",
@@ -303,19 +517,6 @@
 	},
 	{
 		"type": "function",
-		"name": "totalEthInvested",
-		"inputs": [],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
 		"name": "totalEthereumBalance",
 		"inputs": [],
 		"outputs": [
@@ -329,8 +530,46 @@
 	},
 	{
 		"type": "function",
+		"name": "totalInvestedETH",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "totalSupply",
 		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "totalWithdrawnETH",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
 				"name": "",
@@ -395,14 +634,72 @@
 	},
 	{
 		"type": "function",
-		"name": "withdraw",
-		"inputs": [],
+		"name": "transferOwnership",
+		"inputs": [
+			{
+				"name": "newOwner",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [],
 		"stateMutability": "nonpayable"
 	},
 	{
 		"type": "function",
-		"name": "withdrawStuckETH",
+		"name": "treasuryAccumulatedQuota",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "treasuryPhaseEnd",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "treasuryTokenBalance",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "treasuryWallet",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "withdraw",
 		"inputs": [],
 		"outputs": [],
 		"stateMutability": "nonpayable"
@@ -434,10 +731,29 @@
 	},
 	{
 		"type": "event",
+		"name": "OwnershipTransferred",
+		"inputs": [
+			{
+				"name": "previousOwner",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "newOwner",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
 		"name": "TokenPurchase",
 		"inputs": [
 			{
-				"name": "buyer",
+				"name": "customer",
 				"type": "address",
 				"indexed": true,
 				"internalType": "address"
@@ -459,10 +775,10 @@
 	},
 	{
 		"type": "event",
-		"name": "TokenSale",
+		"name": "TokenSell",
 		"inputs": [
 			{
-				"name": "seller",
+				"name": "customer",
 				"type": "address",
 				"indexed": true,
 				"internalType": "address"
@@ -509,10 +825,29 @@
 	},
 	{
 		"type": "event",
+		"name": "TreasuryDistribution",
+		"inputs": [
+			{
+				"name": "recipient",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "tokensDistributed",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
 		"name": "Withdraw",
 		"inputs": [
 			{
-				"name": "user",
+				"name": "customer",
 				"type": "address",
 				"indexed": true,
 				"internalType": "address"
@@ -607,6 +942,28 @@
 		"inputs": [
 			{
 				"name": "spender",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "OwnableInvalidOwner",
+		"inputs": [
+			{
+				"name": "owner",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "OwnableUnauthorizedAccount",
+		"inputs": [
+			{
+				"name": "account",
 				"type": "address",
 				"internalType": "address"
 			}

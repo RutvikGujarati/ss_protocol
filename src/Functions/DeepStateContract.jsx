@@ -6,14 +6,17 @@ import { ethers } from "ethers";
 export const DeepStateFunctions = createContext();
 
 export const DeepStateProvider = ({ children }) => {
-  const { AllContracts ,signer} = useContext(ContractContext);
+  const { AllContracts, signer } = useContext(ContractContext);
   const [PLSPrice, setPLSPrice] = useState("0");
   const [balanceOfContract, setbalanceOfContract] = useState("0");
-
   const [PLSUSD, setPLSUSD] = useState("0");
   const [DividendsUSD, setDividendsUSD] = useState("0");
+  const [EstimatedAmount, setEstimatedAMount] = useState("0");
   const [UsersTokens, setUsersTokens] = useState("0");
+  const [CurrentBuyprice, setCurrentBuyPrice] = useState("0");
+  const [CurrentSellprice, setCurrentesellPrice] = useState("0");
   const [UsersDividends, setUsersDividends] = useState("0");
+  const [TotalInvested, setTotalInvested] = useState("0");
   const [Sellloading, setSellLoading] = useState(false);
   const [Withdrawloading, setWithdrawLoading] = useState(false);
   console.log("AllContracts from deepstate", AllContracts.DeepStateContract);
@@ -97,10 +100,25 @@ export const DeepStateProvider = ({ children }) => {
       console.log("Error fetching tokens amount:", error);
     }
   };
+  const CurrentBuySellPrice = async () => {
+    try {
+      const userAmount = await AllContracts.DeepStateContract.buyPrice(); // Get amount in Wei
+      const formattedAmount = ethers.formatEther(userAmount); // Convert to ETH
+      setCurrentBuyPrice(formattedAmount); // Store in state
+
+      const SellAMount = await AllContracts.DeepStateContract.sellPrice(); // Get amount in Wei
+      const formattedSellAmount = ethers.formatEther(SellAMount); // Convert to ETH
+      setCurrentesellPrice(formattedSellAmount); // Store in state
+      console.log("User's total tokens in ETH:", formattedAmount);
+    } catch (error) {
+      console.log("Error fetching tokens amount:", error);
+    }
+  };
   const UsersTotalDividends = async () => {
     try {
       if (!AllContracts?.DeepStateContract) return;
       const userAmount = await AllContracts.DeepStateContract.myDividends();
+      console.log("my dividends", userAmount);
       setUsersDividends(parseFloat(ethers.formatEther(userAmount)).toFixed(4));
     } catch (error) {
       console.error("Error fetching dividends:", error);
@@ -110,13 +128,15 @@ export const DeepStateProvider = ({ children }) => {
   const userTotalInvested = async () => {
     try {
       if (!AllContracts?.DeepStateContract) return;
-      const userAmount = await AllContracts.DeepStateContract.myDividends();
-      setUsersDividends(parseFloat(ethers.formatEther(userAmount)).toFixed(4));
+      const userAmount =
+        await AllContracts.DeepStateContract.getMyInvestedETH();
+      setTotalInvested(parseFloat(ethers.formatEther(userAmount)).toFixed(4));
     } catch (error) {
       console.error("Error fetching dividends:", error);
-      setUsersDividends("0");
+      setTotalInvested("0");
     }
   };
+
   const CalculateDividendsInUSD = async () => {
     try {
       const balanceInUSD = parseFloat(UsersDividends) * PLSPrice; // Convert to USD
@@ -130,10 +150,21 @@ export const DeepStateProvider = ({ children }) => {
       return "0.00";
     }
   };
+  const CalculateEstimateTokenAmount = async (amount) => {
+    try {
+      const amountInWei = ethers.parseUnits(amount.toString(), 18);
+      const userAmount =
+        await AllContracts.DeepStateContract.estimateTokensToBuy(amountInWei);
+      setEstimatedAMount(userAmount)
+    } catch (error) {
+      console.log("Error calculating balance in USD:", error);
+      return "0.00";
+    }
+  };
 
   const BuyTokens = async (amount) => {
     try {
-    //   setLoading(true);
+      //   setLoading(true);
       const amountInWei = ethers.parseUnits(amount.toString(), 18);
       const tx = await signer.sendTransaction({
         to: AllContracts.DeepStateContract.target, // Contract address
@@ -145,10 +176,12 @@ export const DeepStateProvider = ({ children }) => {
     } catch (error) {
       console.log("Error in buying tokens:", error);
     } finally {
-    //   setLoading(false);
+      //   setLoading(false);
     }
   };
-
+  UsersTotalDividends();
+  userTotalInvested();
+  CurrentBuySellPrice();
   useEffect(() => {
     const fetchData = async () => {
       await fetchPLSPrice();
@@ -167,15 +200,21 @@ export const DeepStateProvider = ({ children }) => {
         balanceOfContract,
         PLSUSD,
         UsersTokens,
-		UsersTotalTokens,
+        UsersTotalTokens,
         UsersDividends,
         DividendsUSD,
-		CalculateBalanceInUSD,
+        CalculateBalanceInUSD,
         SellTokens,
-		BuyTokens,
+        PLSPrice,
+        BuyTokens,
         Sellloading,
         WithdrawDividends,
+        TotalInvested,
+        CurrentSellprice,
+        CurrentBuyprice,
         Withdrawloading,
+		CalculateEstimateTokenAmount,
+		EstimatedAmount,
       }}
     >
       {children}

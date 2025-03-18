@@ -1,22 +1,30 @@
 import { useMemo } from "react";
 import FluxinLogo from "../assets/FluxinLogo.png";
+import { useDeepStateFunctions } from "../Functions/DeepStateContract";
 
 export const useTokens = () => {
+	const {
+		PLSPrice,
+		UsersTokens,
+		CurrentBuyprice,
+		TotalInvested,
+		CurrentSellprice,
+	} = useDeepStateFunctions();
+
 	const tokens = useMemo(() => [
 		{
 			id: 1,
-			EthCost:"0.001",
-			BuyCost:"0.01",
-			LPTAmount: "100", logo: FluxinLogo,
-			CurrentValue: "1000",
-			Action: "5000",
+			EthCost: (Number(PLSPrice) * Number(UsersTokens) || 0).toFixed(2), // Ensure valid number
+			BuyCost: (Number(CurrentBuyprice) || 0).toFixed(2), // Convert before using .toFixed()
+			LPTAmount: (Number(UsersTokens) || 0).toFixed(2),
+			logo: FluxinLogo,
+			CurrentValue: (Number(CurrentSellprice) * Number(UsersTokens) || 0).toFixed(2),
+
 			BurnOccured: "0",
-			ProfitLoss: "1000",
-			// bounty: bountyBalances.fluxinBounty,
-			burnAmount: 0,
+			ProfitLoss: (Number(CurrentSellprice) * Number(UsersTokens) - TotalInvested || 0).toFixed(2),
+			burnAmount: (0).toFixed(2),
 		},
-	], []);
+	], [PLSPrice, UsersTokens, CurrentBuyprice]); // Add dependencies
 
 	return tokens;
 };
-

@@ -1,11 +1,9 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import MetaMaskIcon from "../assets/metamask-icon.png";
-import { useLocation } from "react-router-dom";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
-import DeepStateTable from "./DeepStateTable";
 import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
@@ -20,11 +18,10 @@ const DataTable = () => {
     DavBalanceRequire,
     swappingStates,
     buttonTextStates,
+	contracts,
   } = useSwapContract();
   const { AuctionRunning, auctionDetails } = useGeneralAuctionFunctions();
 
-  const location = useLocation();
-  const isAuction = location.pathname === "/auction";
   const [errorPopup, setErrorPopup] = useState({});
   const [checkingStates, setCheckingStates] = useState({});
   const [claimingStates, setClaimingStates] = useState({});

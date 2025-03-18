@@ -8,7 +8,7 @@ import { useTokens } from "../data/BurntokenData";
 
 const DeepStateTable = () => {
   const { AllContracts, signer, account } = useContext(ContractContext);
-  
+
   const [balanceOfContract, setbalanceOfContract] = useState("0");
   const [PLSPrice, setPLSPrice] = useState("0");
   const [PLSUSD, setPLSUSD] = useState("0");
@@ -64,34 +64,6 @@ const DeepStateTable = () => {
       return 0; // Return 0 in case of an error
     }
   };
-  const CalculateBalanceInUSD = async () => {
-    try {
-    //   const balanceInUSD = parseFloat(balanceOfContract) * PLSPrice; // Convert to USD
-    //   console.log("DeepState Contract Balance in USD:", balanceOfContract);
-    //   setPLSUSD(balanceInUSD.toFixed(8));
-    } catch (error) {
-      console.log("Error calculating balance in USD:", error);
-      return "0.00";
-    }
-  };
-
-  const BuyTokens = async (amount) => {
-    try {
-      setLoading(true);
-      const amountInWei = ethers.parseUnits(amount.toString(), 18);
-      const tx = await signer.sendTransaction({
-        to: AllContracts.DeepStateContract.target, // Contract address
-        value: amountInWei, // Sending ETH directly
-      });
-      await tx.wait();
-      await contractBalance();
-      await CalculateBalanceInUSD();
-    } catch (error) {
-      console.log("Error in buying tokens:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const SellTokens = async (amount) => {
     try {
@@ -99,25 +71,12 @@ const DeepStateTable = () => {
       const amountInWei = ethers.parseUnits(amount.toString(), 18);
       const tx = await AllContracts.DeepStateContract.sell(amountInWei);
       await tx.wait();
-      await contractBalance(), CalculateBalanceInUSD(), setSellLoading(false);
+      await contractBalance(), setSellLoading(false);
     } catch (error) {
       console.log("Error in buying tokens:", error);
       setSellLoading(false);
     } finally {
       setSellLoading(false);
-    }
-  };
-  const WithdrawDividends = async () => {
-    try {
-      setWithdrawLoading(true);
-      const tx = await AllContracts.DeepStateContract.withdraw();
-      await tx.wait();
-      setWithdrawLoading(false);
-    } catch (error) {
-      console.log("Error in buying tokens:", error);
-      setWithdrawLoading(false);
-    } finally {
-      setWithdrawLoading(false);
     }
   };
 
@@ -160,7 +119,6 @@ const DeepStateTable = () => {
   };
   useEffect(() => {
     contractBalance();
-    CalculateBalanceInUSD();
     fetchPLSPrice();
     UsersTotalTokens();
     UsersTotalDividends();
@@ -180,9 +138,10 @@ const DeepStateTable = () => {
                 <th>Buy Price</th>
                 <th>Current Value</th>
                 <th>Profit/Loss</th>
+                <th></th>
+                <th></th>
+                <th></th>
                 <th>Action</th>
-                <th></th>
-                <th></th>
                 <th></th>
               </tr>
             </thead>
@@ -217,9 +176,14 @@ const DeepStateTable = () => {
                         </button>
                       </div>
                     </td>
+					<td>{/* {formatWithCommas(burnAmount)} {name} */}</td>
+
                     <td>
                       <div className="d-flex align-items-center justify-content-center">
-                        <button className="btn btn-primary btn-sm swap-btn">
+                        <button
+                          className="btn btn-primary btn-sm swap-btn"
+                          onClick={() => SellTokens(LPTAmount)}
+                        >
                           {/* {isProcessing[id] ? "Processing..." : "Burn"} */}
                           Sell
                         </button>
