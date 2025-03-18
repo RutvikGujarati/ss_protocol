@@ -55,8 +55,8 @@ export const TokensDetails = () => {
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, ReverseForCycle, ReverseForNextCycle,ReanounceTenDollarContract, isRenounced, LastLiquidity, decayPercentages, ReanounceOneDollarSwapContract, RenounceXerionSwap, balances, isReversed,
-		RenounceRievaSwap, RatioTargetsofTokens, ReanounceContract,WithdrawTenDollar, SetAUctionDuration, WithdrawFluxin, WithdrawXerion, RenounceTenDollarSwap,ReanounceFluxinContract, ReanounceXerionContract,
+	const { LastDevShare, ReverseForCycle, ReverseForNextCycle,ReanounceTenDollarContract, ReanounceTenDollarSwapContract,isRenounced, LastLiquidity, decayPercentages, ReanounceOneDollarSwapContract, RenounceXerionSwap, balances, isReversed,
+		RenounceRievaSwap, RatioTargetsofTokens, ReanounceContract,WithdrawTenDollar, SetAUctionDuration, WithdrawFluxin, WithdrawXerion, ReanounceFluxinContract, ReanounceXerionContract,
 		WithdrawRieva,WithdrawDomus, ReanounceOneDollarContract, ReanounceRievaContract,ReanounceDomusContract, RenounceDomusSwap,setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate, WithdrawOneDollar } = useSwapContract();
 	console.log("isReversing", isReversed.Fluxin)
 	console.log("isReversing", balances.OneDollarBalance)
@@ -365,7 +365,7 @@ export const TokensDetails = () => {
 			renounceSwapSmartContract: isRenounced?.TenDollarRatio ?? "Unknown",
 			actions: {
 				ReanounceContract: ReanounceTenDollarContract,
-				ReanounceSwapContract: RenounceTenDollarSwap,
+				ReanounceSwapContract: ReanounceTenDollarSwapContract,
 				WithdrawState: WithdrawTenDollar,
 				mintAdditionalTOkens: mintAdditionalTOkens,
 				SetDuration: (value) => SetAUctionDuration(value, "TenDollarRatio"),
