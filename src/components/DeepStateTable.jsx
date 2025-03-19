@@ -1,37 +1,20 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
-import XerionLogo from "../assets/layti.png";
 import { useContext, useEffect, useState } from "react";
 import { ContractContext } from "../Functions/ContractInitialize";
 import { ethers } from "ethers";
 import { useTokens } from "../data/BurntokenData";
 
 const DeepStateTable = () => {
-  const { AllContracts, signer, account } = useContext(ContractContext);
+  const { AllContracts } = useContext(ContractContext);
 
   const [balanceOfContract, setbalanceOfContract] = useState("0");
   const [PLSPrice, setPLSPrice] = useState("0");
-  const [PLSUSD, setPLSUSD] = useState("0");
   const [DividendsUSD, setDividendsUSD] = useState("0");
   const [UsersTokens, setUsersTokens] = useState("0");
-  const [UsersETH, setUsersETH] = useState("0");
   const [UsersDividends, setUsersDividends] = useState("0");
-  const [UsersInvested, setUsersInvested] = useState("0");
-  const [loading, setLoading] = useState(false);
   const [Sellloading, setSellLoading] = useState(false);
-  const [Withdrawloading, setWithdrawLoading] = useState(false);
 
-  const [amount, setAmount] = useState("");
-  const [Sellamount, setSellAmount] = useState("");
-  // Get token data
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setAmount(value);
-  };
-  const handleSellInputChange = (e) => {
-    const value = e.target.value;
-    setSellAmount(value);
-  };
   console.log("DeepStateContract", AllContracts.DeepStateContract);
 
   const contractBalance = async () => {
@@ -176,7 +159,7 @@ const DeepStateTable = () => {
                         </button>
                       </div>
                     </td>
-					<td>{/* {formatWithCommas(burnAmount)} {name} */}</td>
+                    <td>{/* {formatWithCommas(burnAmount)} {name} */}</td>
 
                     <td>
                       <div className="d-flex align-items-center justify-content-center">

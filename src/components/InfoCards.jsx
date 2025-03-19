@@ -17,7 +17,7 @@ import { useDeepStateFunctions } from "../Functions/DeepStateContract";
 import { ContractContext } from "../Functions/ContractInitialize";
 const InfoCards = () => {
   const chainId = useChainId();
-  const { AllContracts, signer, account } = useContext(ContractContext);
+  const { AllContracts, account } = useContext(ContractContext);
   const { stateUsdPrice, priceLoading } = useContext(PriceContext);
   const {
     PLSPrice,
@@ -28,13 +28,11 @@ const InfoCards = () => {
     UsersDividends,
     TotalInvested,
     WithdrawDividends,
-    CalculateEstimateTokenAmount,
-    EstimatedAmount,
+
     CurrentSellprice,
     CurrentBuyprice,
   } = useDeepStateFunctions();
   const [balanceOfContract, setbalanceOfContract] = useState("0");
-  const [UsersETH, setUsersETH] = useState("0");
   const [CurrentBuyPrice, setCurrentBuyPrice] = useState("0");
   const [UserProfit, TotalUserProfit] = useState("0");
 
@@ -59,14 +57,12 @@ const InfoCards = () => {
       return PLSLogo; // Optional fallback logo
     }
   };
-  const [isTyping, setIsTyping] = useState(false);
   const [Denominator, setDenominator] = useState("");
 
   const handleInputChangeofToken = (e) => {
     const rawValue = e.target.value.replace(/,/g, "");
     if (!isNaN(rawValue) && rawValue !== "") {
       setDenominator(rawValue);
-      setIsTyping(e.target.value.length > 0);
     } else if (rawValue === "") {
       setDenominator("");
     }
@@ -98,7 +94,7 @@ const InfoCards = () => {
       try {
         const amountInWei = ethers.parseUnits(Denominator.toString(), 18);
         const userAmount =
-          await AllContracts.DeepStateContract.estimateTokensToBuy(amountInWei);
+          await AllContracts.DeepStateContract.calculateTokensForEth(amountInWei);
 
         // Convert BigInt -> String -> Number -> Fixed 2 decimals
         setEstimatedLPT(Number(ethers.formatUnits(userAmount, 18)).toFixed(2));
@@ -119,7 +115,7 @@ const InfoCards = () => {
       }
 
       const userAmount =
-        await AllContracts.DeepStateContract.totalEthereumBalance();
+        await AllContracts.DeepStateContract.getContractBalance();
       const formattedBalance = ethers.formatEther(userAmount);
 
       console.log("deepstate balance from:", userAmount);
@@ -128,23 +124,16 @@ const InfoCards = () => {
       console.log("error in fetching deepState Balance:", error);
     }
   };
-  const UsersTotalETHIvested = async () => {
-    try {
-      const userAmount = await AllContracts.DeepStateContract.Invested(account); // Get amount in Wei
-      const formattedAmount = ethers.formatEther(userAmount); // Convert to ETH
-      setUsersETH(formattedAmount); // Store in state
-      console.log("User's total tokens in ETH:", formattedAmount);
-    } catch (error) {
-      console.log("Error fetching tokens amount:", error);
-    }
-  };
+
   const CalculateProfit = async () => {
     try {
       if (!AllContracts?.DeepStateContract) return;
-      const userAmount =
-        await AllContracts.DeepStateContract.calculateMyProfit();
-      TotalUserProfit(parseFloat(ethers.formatEther(userAmount)).toFixed(2));
-      console.log("users profit", userAmount);
+      const [isProfit, profitAmount] =
+        await AllContracts.DeepStateContract.isUserInProfit(account);
+
+      //   TotalUserProfit(parseFloat(ethers.formatEther(profitAmount)).toFixed(5));
+      TotalUserProfit(0);
+      console.log("User's profit:", profitAmount);
     } catch (error) {
       console.error("Error fetching dividends:", error);
     }
@@ -162,7 +151,6 @@ const InfoCards = () => {
   const liveText = getLiveText();
   contractBalance();
   UsersTotalTokens();
-  UsersTotalETHIvested();
   CurrentBuy();
   CalculateProfit();
   const {
@@ -634,14 +622,12 @@ const InfoCards = () => {
                         Total ETH Profit : {UserProfit} ETH
                       </p>
                       <p className="mb-0 detailAmount">
-                        USD Value : $ {''}
-                        {(Number(PLSPrice) * Number(UserProfit) || 0).toFixed(
-                          2
-                        )}
+                        USD Value : $ {""}
+                        {(Number(PLSPrice) || 0).toFixed(6)} {""}
                         Profit
                       </p>
                       <p className="mb-0 detailAmount">
-                        LPT Value : $ {" "}
+                        LPT Value : ${" "}
                         {(Number(PLSPrice) * Number(UsersTokens) || 0).toFixed(
                           2
                         )}

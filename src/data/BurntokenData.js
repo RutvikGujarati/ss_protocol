@@ -15,13 +15,13 @@ export const useTokens = () => {
 		{
 			id: 1,
 			EthCost: (Number(PLSPrice) * Number(UsersTokens) || 0).toFixed(2), // Ensure valid number
-			BuyCost: (Number(CurrentBuyprice) || 0).toFixed(2), // Convert before using .toFixed()
+			BuyCost: (Number(CurrentBuyprice) || 0).toFixed(8), // Convert before using .toFixed()
 			LPTAmount: (Number(UsersTokens) || 0).toFixed(2),
 			logo: FluxinLogo,
-			CurrentValue: (Number(CurrentSellprice) * Number(UsersTokens) || 0).toFixed(2),
+			CurrentValue: (Number(CurrentSellprice) * Number(UsersTokens) || 0).toFixed(6),
 
 			BurnOccured: "0",
-			ProfitLoss: (Number(CurrentSellprice) * Number(UsersTokens) - TotalInvested || 0).toFixed(2),
+			ProfitLoss: (Number(CurrentSellprice) * Number(UsersTokens) - TotalInvested || 0).toFixed(6),
 			burnAmount: (0).toFixed(2),
 		},
 	], [PLSPrice, UsersTokens, CurrentBuyprice]); // Add dependencies
