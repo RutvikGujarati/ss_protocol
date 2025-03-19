@@ -6,7 +6,7 @@ import { ethers } from "ethers";
 export const DeepStateFunctions = createContext();
 
 export const DeepStateProvider = ({ children }) => {
-  const { AllContracts, signer ,account} = useContext(ContractContext);
+  const { AllContracts, signer, account } = useContext(ContractContext);
   const [PLSPrice, setPLSPrice] = useState("0");
   const [balanceOfContract, setbalanceOfContract] = useState("0");
   const [PLSUSD, setPLSUSD] = useState("0");
@@ -92,7 +92,9 @@ export const DeepStateProvider = ({ children }) => {
 
   const UsersTotalTokens = async () => {
     try {
-      const userAmount = await AllContracts.DeepStateContract.balanceOf(account); // Get amount in Wei
+      const userAmount = await AllContracts.DeepStateContract.balanceOf(
+        account
+      ); // Get amount in Wei
       const formattedAmount = ethers.formatEther(userAmount); // Convert to ETH
       setUsersTokens(formattedAmount); // Store in state
       console.log("User's total tokens in ETH:", formattedAmount);
@@ -128,7 +130,9 @@ export const DeepStateProvider = ({ children }) => {
   const userTotalInvested = async () => {
     try {
       if (!AllContracts?.DeepStateContract) return;
-      const userAmount = await AllContracts.DeepStateContract.getInvestedEth(account);
+      const userAmount = await AllContracts.DeepStateContract.getInvestedEth(
+        account
+      );
       setTotalInvested(parseFloat(ethers.formatEther(userAmount)).toFixed(4));
     } catch (error) {
       console.error("Error fetching dividends:", error);
@@ -178,10 +182,10 @@ export const DeepStateProvider = ({ children }) => {
       //   setLoading(false);
     }
   };
-  userTotalInvested();
-  contractBalance();
   useEffect(() => {
     const fetchData = async () => {
+      userTotalInvested();
+      contractBalance();
       await fetchPLSPrice();
       await contractBalance();
       CalculateBalanceInUSD();

@@ -32,4 +32,4 @@ export const TenDollarRatioAddress = "0x95725c216dAA09E04890C4C186d9DDb0664B297b
 export const RievaRatioAddress = "0x6205253B9176129793Cde1aA576D65cAB01B5c55";
 export const DomusRatioAddress = "0x874F9cd4E3Bb33A4e1B022033dc80c2E86EaF04a";
 
-export const DeepState = "0x09B7B4dBAc0D9034fCfe4C263109ea34030E6a20";
+export const DeepState = "0xF3dEf3f4393C6C68856ba7616794758E4899e852";

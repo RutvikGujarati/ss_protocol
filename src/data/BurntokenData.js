@@ -1,30 +1,50 @@
-import { useMemo } from "react";
+import { useEffect, useState, useContext } from "react";
 import FluxinLogo from "../assets/FluxinLogo.png";
 import { useDeepStateFunctions } from "../Functions/DeepStateContract";
+import { ContractContext } from "../Functions/ContractInitialize";
+import { ethers } from "ethers"; // Import ethers for conversion
 
-export const useTokens = () => {
-	const {
-		PLSPrice,
-		UsersTokens,
-		CurrentBuyprice,
-		TotalInvested,
-		CurrentSellprice,
-	} = useDeepStateFunctions();
+export const useTokens = (userTotalBuyCounts) => {
+	const { AllContracts, account } = useContext(ContractContext);
+	const { CurrentSellprice } = useDeepStateFunctions();
+	const [buyRecords, setBuyRecords] = useState([]);
 
-	const tokens = useMemo(() => [
-		{
-			id: 1,
-			EthCost: (Number(PLSPrice) * Number(UsersTokens) || 0).toFixed(2), // Ensure valid number
-			BuyCost: (Number(CurrentBuyprice) || 0).toFixed(8), // Convert before using .toFixed()
-			LPTAmount: (Number(UsersTokens) || 0).toFixed(2),
-			logo: FluxinLogo,
-			CurrentValue: (Number(CurrentSellprice) * Number(UsersTokens) || 0).toFixed(6),
+	useEffect(() => {
+		const fetchBuyRecords = async () => {
+			if (!AllContracts?.DeepStateContract || !account) return;
 
-			BurnOccured: "0",
-			ProfitLoss: (Number(CurrentSellprice) * Number(UsersTokens) - TotalInvested || 0).toFixed(6),
-			burnAmount: (0).toFixed(2),
-		},
-	], [PLSPrice, UsersTokens, CurrentBuyprice]); // Add dependencies
+			let records = [];
+			for (let i = 1; i <= userTotalBuyCounts; i++) {
+				try {
+					const record = await AllContracts.DeepStateContract.getBuyRecord(account, i);
+					const [BuyPrice, ethCost, tokenAmount, profitOrLoss] = record;
 
-	return tokens;
+					// Convert wei to ETH
+					const buyPriceETH = ethers.formatUnits(BuyPrice, 18);
+					const ethCostETH = ethers.formatUnits(ethCost, 18);
+					const tokenAmountETH = ethers.formatUnits(tokenAmount, 18);
+					const profitOrLossETH = ethers.formatUnits(profitOrLoss, 18);
+
+					records.push({
+						id: i,
+						BuyCost: Number(buyPriceETH).toFixed(9),
+						EthCost: Number(ethCostETH).toFixed(2),
+						LPTAmount: Number(tokenAmountETH).toFixed(0),
+						CurrentValue: (Number(CurrentSellprice) * Number(tokenAmountETH) || 0).toFixed(6),
+						ProfitLoss: profitOrLossETH,
+						logo: FluxinLogo,
+					});
+				} catch (error) {
+					console.error(`Error fetching buy record ${i}:`, error);
+				}
+			}
+			setBuyRecords(records);
+		};
+
+		if (userTotalBuyCounts > 0) {
+			fetchBuyRecords();
+		}
+	}, [AllContracts, account, userTotalBuyCounts, CurrentSellprice]);
+
+	return buyRecords;
 };
