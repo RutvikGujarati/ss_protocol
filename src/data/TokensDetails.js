@@ -3,6 +3,7 @@ import { useSwapContract } from "../Functions/SwapContractFunctions";
 import {
 	$1,
 	$10,
+	Currus,
 	DAV_TOKEN_ADDRESS,
 	Domus,
 	DomusRatioAddress,
@@ -29,6 +30,7 @@ const addresses = {
 	davShortened: DAV_TOKEN_ADDRESS,
 	FluxinShortened: Fluxin,
 	DomusShortened: Domus,
+	CurrusShortened: Currus,
 	XerionShortened: Xerion,
 	OneDShortened: $1, // Ensure $1 is correctly defined
 	RievaShortened: Rieva,
@@ -46,7 +48,7 @@ const shortenedAddresses = Object.fromEntries(
 );
 
 export const TokensDetails = () => {
-	const { stateUsdPrice, FluxinUsdPrice, XerionUsdPrice,DomusUsdPrice,TenDollarUsdPrice, OneDollarUsdPrice, RievaUsdPrice } =
+	const { stateUsdPrice, FluxinUsdPrice, XerionUsdPrice, DomusUsdPrice, TenDollarUsdPrice, OneDollarUsdPrice, RievaUsdPrice } =
 		useContext(PriceContext);
 	const { simpleSupplies, mintAdditionalTOkens } = useGeneralTokens()
 	const { AuctionRunningLocalString, auctionDetails, TotalTokensBurned, auctionTimeLeft } = useGeneralAuctionFunctions()
@@ -55,9 +57,9 @@ export const TokensDetails = () => {
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, ReverseForCycle, ReverseForNextCycle,ReanounceTenDollarContract, ReanounceTenDollarSwapContract,isRenounced, LastLiquidity, decayPercentages, ReanounceOneDollarSwapContract, RenounceXerionSwap, balances, isReversed,
-		RenounceRievaSwap, RatioTargetsofTokens, ReanounceContract,WithdrawTenDollar, SetAUctionDuration, WithdrawFluxin, WithdrawXerion, ReanounceFluxinContract, ReanounceXerionContract,
-		WithdrawRieva,WithdrawDomus, ReanounceOneDollarContract, ReanounceRievaContract,ReanounceDomusContract, RenounceDomusSwap,setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate, WithdrawOneDollar } = useSwapContract();
+	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, ReanounceTenDollarContract, ReanounceTenDollarSwapContract, isRenounced, LastLiquidity, decayPercentages, ReanounceOneDollarSwapContract, RenounceXerionSwap, balances, isReversed,
+		RenounceRievaSwap, RatioTargetsofTokens, ReanounceContract, WithdrawTenDollar, SetAUctionDuration, WithdrawFluxin, WithdrawXerion, ReanounceFluxinContract, ReanounceXerionContract,
+		WithdrawRieva, WithdrawDomus, ReanounceOneDollarContract, ReanounceRievaContract, ReanounceDomusContract, RenounceDomusSwap, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate, WithdrawOneDollar } = useSwapContract();
 	console.log("isReversing", isReversed.Fluxin)
 	console.log("isReversing", balances.OneDollarBalance)
 	return [
@@ -115,7 +117,10 @@ export const TokensDetails = () => {
 				ReanounceContract: ReanounceFluxinContract,
 				ReanounceSwapContract: RenounceFluxinSwap,
 				WithdrawState: WithdrawFluxin,
-				mintAdditionalTOkens: mintAdditionalTOkens,
+				mintAdditionalTOkens: () => mintAdditionalTOkens(
+					"Fluxin",
+					250000000000
+				),
 				SetDuration: (value) => SetAUctionDuration(value, "fluxinRatio"),
 				SetInterval: (value) => SetAUctionInterval(value, "fluxinRatio"),
 				AddTokenToContract: () =>
@@ -167,7 +172,10 @@ export const TokensDetails = () => {
 				ReanounceContract: ReanounceXerionContract,
 				ReanounceSwapContract: RenounceXerionSwap,
 				WithdrawState: WithdrawXerion,
-				mintAdditionalTOkens: mintAdditionalTOkens,
+				mintAdditionalTOkens: () => mintAdditionalTOkens(
+					"Xerion",
+					125000000000
+				),
 				SetDuration: (value) => SetAUctionDuration(value, "XerionRatio"),
 				SetInterval: (value) => SetAUctionInterval(value, "XerionRatio"),
 				AddTokenToContract: () =>
@@ -217,7 +225,10 @@ export const TokensDetails = () => {
 				ReanounceContract: ReanounceOneDollarContract,
 				ReanounceSwapContract: ReanounceOneDollarSwapContract,
 				WithdrawState: WithdrawOneDollar,
-				mintAdditionalTOkens: mintAdditionalTOkens,
+				mintAdditionalTOkens: () => mintAdditionalTOkens(
+					"oneD",
+					25000000
+				),
 				SetDuration: (value) => SetAUctionDuration(value, "OneDollarRatio"),
 				SetInterval: (value) => SetAUctionInterval(value, "OneDollarRatio"),
 				AddTokenToContract: () =>
@@ -267,7 +278,10 @@ export const TokensDetails = () => {
 				ReanounceContract: ReanounceRievaContract,
 				ReanounceSwapContract: RenounceRievaSwap,
 				WithdrawState: WithdrawRieva,
-				mintAdditionalTOkens: mintAdditionalTOkens,
+				mintAdditionalTOkens: () => mintAdditionalTOkens(
+					"Rieva",
+					62500000000
+				),
 				SetDuration: (value) => SetAUctionDuration(value, "RievaRatio"),
 				SetInterval: (value) => SetAUctionInterval(value, "RievaRatio"),
 				AddTokenToContract: () =>
@@ -317,7 +331,10 @@ export const TokensDetails = () => {
 				ReanounceContract: ReanounceDomusContract,
 				ReanounceSwapContract: RenounceDomusSwap,
 				WithdrawState: WithdrawDomus,
-				mintAdditionalTOkens: mintAdditionalTOkens,
+				mintAdditionalTOkens: () => mintAdditionalTOkens(
+					"Domus",
+					2500000000000
+				),
 				SetDuration: (value) => SetAUctionDuration(value, "DomusRatio"),
 				SetInterval: (value) => SetAUctionInterval(value, "DomusRatio"),
 				AddTokenToContract: () =>
@@ -332,6 +349,59 @@ export const TokensDetails = () => {
 				DepositStateTokens: (value) =>
 					DepositToken("state", STATE_TOKEN_ADDRESS, value, "DomusRatio"),
 				StartingAuction: () => StartAuction("DomusRatio"),
+			},
+		},
+		{
+			tokenName: "Currus",
+			key: shortenedAddresses.CurrusShortened,
+			name: "Currus",
+			Supply: simpleSupplies.CurrusSupply,
+			percentage: decayPercentages["Currus"],
+			address: Currus,
+			// SwapContract: CurrusRatioAddress,
+			// SwapShortContract: shortenedAddresses.CurrusSwapShortened,
+			// stateBalance: balances.StateCurrus,
+			// target: RatioTargetsofTokens["Currus"],
+			// isReversing: isReversed.Currus.toString(),
+			// WillStart: ReverseForCycle.Currus,
+			// WillStartForNext: ReverseForNextCycle.Currus,
+			// Balance: balances.CurrusBalance,
+			// TotalTokensBurn: TotalTokensBurned.Currus,
+			// RatioBalance: balances?.ratioCurrusBalance,
+			// Duration: auctionDetails["Currus"],
+			// interval: auctionDetails["Currus"],
+			// AuctionRunning: AuctionRunningLocalString.Currus.toString(),
+			// pair: "Currus/pSTATE",
+			// Ratio: CurrentRatioPrice.Currus,
+			// Price: CurrusUsdPrice,
+			// SetDuration: () => SetAUctionDuration(),
+			// AuctionTimeRunning: auctionTimeLeft.Currus,
+			// AuctionNextTime: auctionDetails["Currus"],
+			mintAddTOkens: "1,250,000,000,000",
+			renounceSmartContract: isRenounced?.Currus ?? "Unknown",
+			// renounceSwapSmartContract: isRenounced?.CurrusRatio ?? "Unknown",
+			actions: {
+				// ReanounceContract: ReanounceCurrusContract,
+				// ReanounceSwapContract: RenounceCurrusSwap,
+				// WithdrawState: WithdrawCurrus,
+				mintAdditionalTOkens: () => mintAdditionalTOkens(
+					"Currus",
+					1250000000000
+				),
+				SetDuration: (value) => SetAUctionDuration(value, "CurrusRatio"),
+				SetInterval: (value) => SetAUctionInterval(value, "CurrusRatio"),
+				AddTokenToContract: () =>
+					AddTokensToContract(Currus, STATE_TOKEN_ADDRESS, CurrentRatioPrice.Currus),
+				setRatio: (value) => setRatioTarget(value, "CurrusRatio"),
+				setBurn: (value) => setBurnRate(value, "CurrusRatio"),
+				setReverseEnabled: () => setReverseEnable("CurrusRatio"),
+				setReverse: (value, value2) => setReverseTime(value, value2),
+				setCurrentRatio: (value) => setCurrentRatioTarget(value),
+				DepositTokens: (value) =>
+					DepositToken("Currus", Currus, value, "CurrusRatio"),
+				DepositStateTokens: (value) =>
+					DepositToken("state", STATE_TOKEN_ADDRESS, value, "CurrusRatio"),
+				StartingAuction: () => StartAuction("CurrusRatio"),
 			},
 		},
 		{
@@ -367,7 +437,10 @@ export const TokensDetails = () => {
 				ReanounceContract: ReanounceTenDollarContract,
 				ReanounceSwapContract: ReanounceTenDollarSwapContract,
 				WithdrawState: WithdrawTenDollar,
-				mintAdditionalTOkens: mintAdditionalTOkens,
+				mintAdditionalTOkens: () => mintAdditionalTOkens(
+					"TenDollar",
+					6250000
+				),
 				SetDuration: (value) => SetAUctionDuration(value, "TenDollarRatio"),
 				SetInterval: (value) => SetAUctionInterval(value, "TenDollarRatio"),
 				AddTokenToContract: () =>
@@ -402,7 +475,10 @@ export const TokensDetails = () => {
 			actions: {
 				ReanounceContract: RenounceState,
 				WithdrawState: WithdrawState,
-				mintAdditionalTOkens: mintAdditionalTOkens,
+				mintAdditionalTOkens: () => mintAdditionalTOkens(
+					"state",
+					1000000000000
+				),
 				AddTokenToContract: () => AddTokens(),
 				DepositTokens: (value) =>
 					DepositToken("state", STATE_TOKEN_ADDRESS, value),

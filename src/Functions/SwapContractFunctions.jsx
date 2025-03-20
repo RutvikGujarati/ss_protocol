@@ -7,6 +7,7 @@ import { ContractContext } from "./ContractInitialize";
 import {
   $1,
   $10,
+  Currus,
   DAV_TOKEN_ADDRESS,
   Domus,
   DomusRatioAddress,
@@ -92,6 +93,7 @@ export const SwapContractProvider = ({ children }) => {
     Fluxin: AllContracts.FluxinContract,
     Rieva: AllContracts.RievaContract,
     Domus: AllContracts.DomusContract,
+    Currus: AllContracts.CurrusContract,
     oneD: AllContracts.oneDollar,
     Xerion: AllContracts.XerionContract,
     FluxinRatio: AllContracts.RatioContract,
@@ -256,6 +258,7 @@ export const SwapContractProvider = ({ children }) => {
       "XerionRatio",
       "Rieva",
       "Domus",
+      "Currus",
       "TenDollar",
       "TenDollarRatio",
       "DomusRatio",
@@ -1512,6 +1515,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddRieva = () => handleAddToken(Rieva, "Rieva");
   const handleAddDomus = () => handleAddToken(Domus, "Domus");
   const handleAddTenDollar = () => handleAddToken($10, "10$");
+  const handleAddCurrus = () => handleAddToken(Currus, "Currus");
 
   return (
     <SwapContractContext.Provider
@@ -1577,6 +1581,7 @@ export const SwapContractProvider = ({ children }) => {
         swappingStates,
         transactionStatus,
         setBurnRate,
+		handleAddCurrus,
         // userHasReverseSwapped,
         isReversed,
         StateBurnBalance,

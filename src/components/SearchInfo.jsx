@@ -5,6 +5,7 @@ import FluxinLogo from "../assets/FluxinLogo.png";
 import Rieva from "../assets/rieva.png";
 import DAVLogo from "../assets/d_logo.png";
 import TenDollar from "../assets/TenDollar.png";
+import Currus from "../assets/Currus.png";
 import oned from "../assets/oned.png";
 import Domus from "../assets/domus.png";
 import stateLogo from "../assets/state_logo.png";
@@ -22,6 +23,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     handleAddRieva,
     handleAddDomus,
     handleAddTenDollar,
+	handleAddCurrus
   } = useSwapContract();
 
   const originalData = [
@@ -33,6 +35,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     { id: "3", name: "Rieva", logo: Rieva, AddToken: handleAddRieva },
     { id: "~", name: "Domus", logo: Domus, AddToken: handleAddDomus },
     { id: "∞", name: "10$", logo: TenDollar, AddToken: handleAddTenDollar },
+    { id: "~", name: "Currus", logo: Currus, AddToken: handleAddCurrus },
   ];
 
   const [filteredData, setFilteredData] = useState(originalData);

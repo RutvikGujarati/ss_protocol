@@ -26,7 +26,7 @@ export const useAuctionTokens = () => {
 	const tokenConfigs = [
 		["Orxa", "Fluxin", FluxinLogo, Fluxin, handleAddFluxin],
 		["Layti", "Xerion", XerionLogo, Xerion, handleAddXerion],
-		["1$", "OneDollar", oned, $1, handleAddOneD, "oneD"],  // Special case: distributedAmount uses "oneD"
+		["1$", "OneDollar", oned, $1, handleAddOneD, "oneD"],
 		["Rieva", "Rieva", RievaLogo, Rieva, handleAddRieva],
 		["10$", "TenDollar", TenDollarLogo, $10, handleAddTenDollar],
 		["Domus", "Domus", DomusLogo, Domus, handleAddDomus]

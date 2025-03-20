@@ -15,6 +15,7 @@ export const GeneralTokenProvider = ({ children }) => {
     state: "0.0",
     Fluxin: "0.0",
     Xerion: "0.0",
+    Currus: "0.0",
     Rieva: "0.0",
     TenDollar: "0.0",
     oneD: "0.0",
@@ -26,6 +27,7 @@ export const GeneralTokenProvider = ({ children }) => {
     Rieva: AllContracts.RievaContract,
     TenDollar: AllContracts.TenDollarContract,
     Domus: AllContracts.DomusContract,
+    Currus: AllContracts.CurrusContract,
     oneD: AllContracts.oneDollar,
     FluxinRatio: AllContracts.RatioContract,
     TenDollarRatio: AllContracts.TenDollarRatioContract,
@@ -159,35 +161,16 @@ export const GeneralTokenProvider = ({ children }) => {
   };
   const mintAdditionalTOkens = async (contractType, amount) => {
     try {
-      const amountInWei = ethers.parseUnits(amount.toString(), 18);
-      let contract;
+      const contract = contracts[contractType];
+      if (!contract) throw new Error("Invalid contract type");
 
-      // Select the correct contract based on contractType
-      if (contractType === "fluxin") {
-        contract = AllContracts.FluxinContract;
-      } else if (contractType === "state") {
-        contract = AllContracts.stateContract;
-      } else if (contractType === "Xerion") {
-        contract = AllContracts.XerionContract;
-      } else if (contractType === "oneD") {
-        contract = AllContracts.oneDollar;
-      } else if (contractType === "Rieva") {
-        contract = AllContracts.RievaContract;
-      } else if (contractType === "Domus") {
-        contract = AllContracts.DomusContract;
-      } else if (contractType === "TenDollar") {
-        contract = AllContracts.TenDollarContract;
-      }
-
-      if (!contract) {
-        throw new Error("Invalid contract type");
-      }
-
-      const tx = await contract.mintAdditionalTOkens(amountInWei);
+      const tx = await contract.mintAdditionalTOkens(
+        ethers.parseUnits(amount.toString(), 18)
+      );
       await tx.wait();
       await fetchTotalSupplies();
     } catch (e) {
-      console.error(`Error minting with method mintAdditionalTOkens:`, e);
+      console.error("Error minting tokens:", e);
     }
   };
 
