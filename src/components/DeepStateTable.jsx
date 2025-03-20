@@ -1,38 +1,23 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { ContractContext } from "../Functions/ContractInitialize";
-import { ethers } from "ethers";
 import { useTokens } from "../data/BurntokenData";
+import { useDeepStateFunctions } from "../Functions/DeepStateContract";
 
 const DeepStateTable = () => {
   const { AllContracts, account } = useContext(ContractContext);
-  const [totalBuyCounts, setTotalBuyCounts] = useState(0);
-
-  const userTotalBuyCounts = async () => {
-    try {
-      if (!AllContracts?.DeepStateContract || !account) return;
-      const userAmount = await AllContracts.DeepStateContract.getUserBuyCount(
-        account
-      );
-      console.log("user buy counts", parseFloat(userAmount));
-      setTotalBuyCounts(parseFloat(userAmount));
-    } catch (error) {
-      console.error("Error fetching buy counts:", error);
-      setTotalBuyCounts(0);
-    }
-  };
+  const { totalBuyCounts, userTotalBuyCounts } = useDeepStateFunctions();
 
   useEffect(() => {
     userTotalBuyCounts();
-  }, [account, AllContracts]); // Fetch user buy counts when account/contract changes
+  }, [account, AllContracts]);
 
   const tokens = useTokens(totalBuyCounts);
 
-  const SellTokens = async (amount) => {
+  const SellTokens = async (id) => {
     try {
-      const amountInWei = ethers.parseUnits(amount.toString(), 18);
-      const tx = await AllContracts.DeepStateContract.sell(amountInWei);
+      const tx = await AllContracts.DeepStateContract.sell(id);
       await tx.wait();
     } catch (error) {
       console.log("Error in selling tokens:", error);
@@ -62,6 +47,7 @@ const DeepStateTable = () => {
                 LPTAmount,
                 EthCost,
                 BuyCost,
+                isSold,
                 CurrentValue,
                 ProfitLoss,
               }) => (
@@ -74,14 +60,21 @@ const DeepStateTable = () => {
                   <td>{CurrentValue}</td>
                   <td>{ProfitLoss}</td>
                   <td>
-                    <button
-                      className="btn btn-primary btn-sm "
-                      onClick={() => SellTokens(LPTAmount)}
-					  style={{ height: "40px" }}
-
-                    >
-                      Sell
-                    </button>
+                    {ProfitLoss > 1 ? (
+                      <button className=" custom-red-button" disabled>
+                        Hold
+                      </button>
+                    ) : (
+                      <button
+                        className={`custom-green-button ${
+                          isSold ? "disabled-button" : ""
+                        }`}
+                        onClick={() => SellTokens(id)}
+                        disabled={isSold}
+                      >
+                        {isSold ? "Sold" : "Sell"}
+                      </button>
+                    )}
                   </td>
                 </tr>
               )

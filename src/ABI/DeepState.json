@@ -163,6 +163,11 @@
 				"name": "tokenAmount",
 				"type": "uint256",
 				"internalType": "uint256"
+			},
+			{
+				"name": "sold",
+				"type": "bool",
+				"internalType": "bool"
 			}
 		],
 		"stateMutability": "view"
@@ -261,6 +266,11 @@
 				"name": "tokenAmount",
 				"type": "uint256",
 				"internalType": "uint256"
+			},
+			{
+				"name": "sold",
+				"type": "bool",
+				"internalType": "bool"
 			},
 			{
 				"name": "profitOrLoss",
@@ -453,7 +463,7 @@
 		"name": "sell",
 		"inputs": [
 			{
-				"name": "_amountOfTokens",
+				"name": "_buyId",
 				"type": "uint256",
 				"internalType": "uint256"
 			}
@@ -714,6 +724,37 @@
 				"type": "address",
 				"indexed": true,
 				"internalType": "address"
+			},
+			{
+				"name": "tokenAmount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "ethAmount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "TokensSold",
+		"inputs": [
+			{
+				"name": "seller",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "buyId",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
 			},
 			{
 				"name": "tokenAmount",

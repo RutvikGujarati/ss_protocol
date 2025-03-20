@@ -28,7 +28,6 @@ const InfoCards = () => {
     UsersDividends,
     TotalInvested,
     WithdrawDividends,
-
     CurrentSellprice,
     CurrentBuyprice,
   } = useDeepStateFunctions();
@@ -151,10 +150,7 @@ const InfoCards = () => {
     }
   };
   const liveText = getLiveText();
-  contractBalance();
-  UsersTotalTokens();
-  CurrentBuy();
-  CalculateProfit();
+
   const {
     handleAddTokenState,
     handleAddTokenDAV,
@@ -283,7 +279,11 @@ const InfoCards = () => {
     }).format(number);
   }
 
+  contractBalance();
+  UsersTotalTokens();
+  CurrentBuy();
   useEffect(() => {
+	CalculateProfit();
     contractBalance();
     CalculationOfCost(amount);
     calculateBurnRatio();

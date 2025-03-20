@@ -121,7 +121,9 @@ export const DeepStateProvider = ({ children }) => {
   const UsersTotalDividends = async () => {
     try {
       if (!AllContracts?.DeepStateContract) return;
-      const userAmount = await AllContracts.DeepStateContract.dividendsOf(account);
+      const userAmount = await AllContracts.DeepStateContract.dividendsOf(
+        account
+      );
       console.log("my dividends", userAmount);
       setUsersDividends(parseFloat(ethers.formatEther(userAmount)).toFixed(4));
     } catch (error) {
@@ -166,6 +168,21 @@ export const DeepStateProvider = ({ children }) => {
       return "0.00";
     }
   };
+  const [totalBuyCounts, setTotalBuyCounts] = useState(0);
+
+  const userTotalBuyCounts = async () => {
+    try {
+      if (!AllContracts?.DeepStateContract || !account) return;
+      const userAmount = await AllContracts.DeepStateContract.getUserBuyCount(
+        account
+      );
+      console.log("user buy counts", parseFloat(userAmount));
+      setTotalBuyCounts(parseFloat(userAmount));
+    } catch (error) {
+      console.error("Error fetching buy counts:", error);
+      setTotalBuyCounts(0);
+    }
+  };
 
   const BuyTokens = async (amount) => {
     try {
@@ -178,6 +195,7 @@ export const DeepStateProvider = ({ children }) => {
       await tx.wait();
       await contractBalance();
       await CalculateBalanceInUSD();
+      await userTotalBuyCounts();
     } catch (error) {
       console.log("Error in buying tokens:", error);
     } finally {
@@ -186,6 +204,7 @@ export const DeepStateProvider = ({ children }) => {
   };
   useEffect(() => {
     const fetchData = async () => {
+      userTotalBuyCounts();
       userTotalInvested();
       contractBalance();
       await fetchPLSPrice();
@@ -214,6 +233,8 @@ export const DeepStateProvider = ({ children }) => {
         SellTokens,
         PLSPrice,
         BuyTokens,
+        totalBuyCounts,
+		userTotalBuyCounts,
         Sellloading,
         WithdrawDividends,
         TotalInvested,
