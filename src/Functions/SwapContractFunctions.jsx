@@ -321,6 +321,8 @@ export const SwapContractProvider = ({ children }) => {
     renounceOwnership(AllContracts.davContract, "DAV");
   const ReanounceFluxinContract = () =>
     renounceOwnership(AllContracts.FluxinContract, "Fluxin");
+  const ReanounceCurrusContract = () =>
+    renounceOwnership(AllContracts.CurrusContract, "Currus");
   const ReanounceXerionContract = () =>
     renounceOwnership(AllContracts.XerionContract, "Xerion");
   const ReanounceOneDollarContract = () =>
@@ -1598,6 +1600,7 @@ export const SwapContractProvider = ({ children }) => {
         ReanounceRievaContract,
         ReanounceDomusContract,
         ReanounceTenDollarContract,
+		ReanounceCurrusContract,
         SetOnePercentageOfBalance,
         ReverseForNextCycle,
         handleAddOneD,
