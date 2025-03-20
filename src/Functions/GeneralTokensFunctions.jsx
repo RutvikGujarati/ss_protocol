@@ -31,6 +31,7 @@ export const GeneralTokenProvider = ({ children }) => {
     oneD: AllContracts.oneDollar,
     FluxinRatio: AllContracts.RatioContract,
     TenDollarRatio: AllContracts.TenDollarRatioContract,
+    CurrusRatio: AllContracts.CurrusRatioContract,
     Xerion: AllContracts.XerionContract,
   };
   const fetchTotalSupplies = async () => {
@@ -181,6 +182,7 @@ export const GeneralTokenProvider = ({ children }) => {
         { name: "Xerion", contract: AllContracts.XerionRatioContract },
         { name: "Rieva", contract: AllContracts.RievaRatioContract },
         { name: "TenDollar", contract: AllContracts.TenDollarRatioContract },
+        { name: "Currus", contract: AllContracts.CurrusRatioContract },
         { name: "Domus", contract: AllContracts.DomusRatioContract },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];

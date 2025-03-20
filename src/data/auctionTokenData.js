@@ -4,9 +4,10 @@ import XerionLogo from "../assets/layti.png";
 import RievaLogo from "../assets/rieva.png";
 import TenDollarLogo from "../assets/TenDollar.png";
 import DomusLogo from "../assets/domus.png";
+import CurrusLogo from "../assets/Currus.png";
 import oned from "../assets/oned.png";
 
-import { $1, $10, Domus, Fluxin, Rieva, Xerion } from "../ContractAddresses";
+import { $1, $10, Currus, Domus, Fluxin, Rieva, Xerion } from "../ContractAddresses";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { PriceContext } from "../api/StatePrice";
 import { useGeneralAuctionFunctions } from '../Functions/GeneralAuctionFunctions';
@@ -20,7 +21,7 @@ export const useAuctionTokens = () => {
 		SwapTokens, isReversed, RatioTargetsofTokens, outAmounts,
 		userHashSwapped, userHasReverseSwapped, OnePBalance,
 		handleAddFluxin, handleAddXerion, handleAddRieva, handleAddDomus,
-		handleAddOneD, handleAddTenDollar
+		handleAddOneD, handleAddTenDollar, handleAddCurrus
 	} = useSwapContract();
 
 	const tokenConfigs = [
@@ -29,7 +30,8 @@ export const useAuctionTokens = () => {
 		["1$", "OneDollar", oned, $1, handleAddOneD, "oneD"],
 		["Rieva", "Rieva", RievaLogo, Rieva, handleAddRieva],
 		["10$", "TenDollar", TenDollarLogo, $10, handleAddTenDollar],
-		["Domus", "Domus", DomusLogo, Domus, handleAddDomus]
+		["Domus", "Domus", DomusLogo, Domus, handleAddDomus],
+		["Currus", "Currus", CurrusLogo, Currus, handleAddCurrus]
 	];
 
 	return tokenConfigs.map(([id, contract, image, token, handleAddToken]) => ({
@@ -60,7 +62,8 @@ export const useAuctionTokens = () => {
 			OneDollar: "0x6916be7b7a36d8bc1c09eae5487e92ff837626bb",  // Keeps "OneDollar" for all other references
 			Rieva: "0x3c504c7d2a99e212c186aa0bc47a9e94dd7ac827",
 			TenDollar: "0x86e8330efe0dfc20ab8f63dcf95a6a8d66f60c1d",
-			Domus: "0x7019ee4173420ee652edc9a26bffc91469c753db"
+			Domus: "0x7019ee4173420ee652edc9a26bffc91469c753db",
+			Currus: "0xe4a02db896cee9dbf32d730dc9874eb058f0ca3f"
 		};
 		return chartIds[contract] || "";
 	}

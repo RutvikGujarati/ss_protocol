@@ -4,6 +4,7 @@ import {
 	$1,
 	$10,
 	Currus,
+	CurrusRatioAddress,
 	DAV_TOKEN_ADDRESS,
 	Domus,
 	DomusRatioAddress,
@@ -39,6 +40,7 @@ const addresses = {
 	RievaSwapShortened: RievaRatioAddress,
 	DomusSwapShortened: DomusRatioAddress,
 	XerionSwapShortened: XerionRatioAddress,
+	CurrusSwapShortened: CurrusRatioAddress,
 	OneDollarSwapShortened: OneDollarRatioAddress,
 	TenDollarSwapShortened: TenDollarRatioAddress,
 	stateShortened: STATE_TOKEN_ADDRESS,
@@ -48,7 +50,7 @@ const shortenedAddresses = Object.fromEntries(
 );
 
 export const TokensDetails = () => {
-	const { stateUsdPrice, FluxinUsdPrice, XerionUsdPrice, DomusUsdPrice, TenDollarUsdPrice, OneDollarUsdPrice, RievaUsdPrice } =
+	const { stateUsdPrice, FluxinUsdPrice, XerionUsdPrice, DomusUsdPrice, TenDollarUsdPrice, OneDollarUsdPrice, RievaUsdPrice, CurrusUsdPrice } =
 		useContext(PriceContext);
 	const { simpleSupplies, mintAdditionalTOkens } = useGeneralTokens()
 	const { AuctionRunningLocalString, auctionDetails, TotalTokensBurned, auctionTimeLeft } = useGeneralAuctionFunctions()
@@ -57,7 +59,7 @@ export const TokensDetails = () => {
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, ReanounceTenDollarContract, ReanounceTenDollarSwapContract, isRenounced, LastLiquidity, decayPercentages, ReanounceOneDollarSwapContract,ReanounceCurrusContract, RenounceXerionSwap, balances, isReversed,
+	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, ReanounceTenDollarContract, ReanounceTenDollarSwapContract, isRenounced, WithdrawCurrus, RenounceCurrusSwap, LastLiquidity, decayPercentages, ReanounceOneDollarSwapContract, ReanounceCurrusContract, RenounceXerionSwap, balances, isReversed,
 		RenounceRievaSwap, RatioTargetsofTokens, ReanounceContract, WithdrawTenDollar, SetAUctionDuration, WithdrawFluxin, WithdrawXerion, ReanounceFluxinContract, ReanounceXerionContract,
 		WithdrawRieva, WithdrawDomus, ReanounceOneDollarContract, ReanounceRievaContract, ReanounceDomusContract, RenounceDomusSwap, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate, WithdrawOneDollar } = useSwapContract();
 	console.log("isReversing", isReversed.Fluxin)
@@ -358,32 +360,32 @@ export const TokensDetails = () => {
 			Supply: simpleSupplies.CurrusSupply,
 			percentage: decayPercentages["Currus"],
 			address: Currus,
-			// SwapContract: CurrusRatioAddress,
-			// SwapShortContract: shortenedAddresses.CurrusSwapShortened,
-			// stateBalance: balances.StateCurrus,
-			// target: RatioTargetsofTokens["Currus"],
-			// isReversing: isReversed.Currus.toString(),
-			// WillStart: ReverseForCycle.Currus,
-			// WillStartForNext: ReverseForNextCycle.Currus,
-			// Balance: balances.CurrusBalance,
-			// TotalTokensBurn: TotalTokensBurned.Currus,
-			// RatioBalance: balances?.ratioCurrusBalance,
-			// Duration: auctionDetails["Currus"],
-			// interval: auctionDetails["Currus"],
-			// AuctionRunning: AuctionRunningLocalString.Currus.toString(),
-			// pair: "Currus/pSTATE",
-			// Ratio: CurrentRatioPrice.Currus,
-			// Price: CurrusUsdPrice,
-			// SetDuration: () => SetAUctionDuration(),
-			// AuctionTimeRunning: auctionTimeLeft.Currus,
-			// AuctionNextTime: auctionDetails["Currus"],
+			SwapContract: CurrusRatioAddress,
+			SwapShortContract: shortenedAddresses.CurrusSwapShortened,
+			stateBalance: balances.StateCurrus,
+			target: RatioTargetsofTokens["Currus"],
+			isReversing: isReversed.Currus.toString(),
+			WillStart: ReverseForCycle.Currus,
+			WillStartForNext: ReverseForNextCycle.Currus,
+			Balance: balances.CurrusBalance,
+			TotalTokensBurn: TotalTokensBurned.Currus,
+			RatioBalance: balances?.ratioCurrusBalance,
+			Duration: auctionDetails["Currus"],
+			interval: auctionDetails["Currus"],
+			AuctionRunning: AuctionRunningLocalString.Currus.toString(),
+			pair: "Currus/pSTATE",
+			Ratio: CurrentRatioPrice.Currus,
+			Price: CurrusUsdPrice,
+			SetDuration: () => SetAUctionDuration(),
+			AuctionTimeRunning: auctionTimeLeft.Currus,
+			AuctionNextTime: auctionDetails["Currus"],
 			mintAddTOkens: "1,250,000,000,000",
 			renounceSmartContract: isRenounced?.Currus ?? "Unknown",
-			// renounceSwapSmartContract: isRenounced?.CurrusRatio ?? "Unknown",
+			renounceSwapSmartContract: isRenounced?.CurrusRatio ?? "Unknown",
 			actions: {
 				ReanounceContract: ReanounceCurrusContract,
-				// ReanounceSwapContract: RenounceCurrusSwap,
-				// WithdrawState: WithdrawCurrus,
+				ReanounceSwapContract: RenounceCurrusSwap,
+				WithdrawState: WithdrawCurrus,
 				mintAdditionalTOkens: () => mintAdditionalTOkens(
 					"Currus",
 					1250000000000

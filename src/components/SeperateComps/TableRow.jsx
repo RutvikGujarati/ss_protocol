@@ -34,7 +34,7 @@ export const TableRowDataShow = ({ label, address, value }) => {
         >
           {value || "contract details"}
         </a>
-        <a
+        {/* <a
           href={`https://repo.sourcify.dev/369/${address}`}
           target="_blank"
           rel="noopener noreferrer"
@@ -42,7 +42,7 @@ export const TableRowDataShow = ({ label, address, value }) => {
           style={{ fontSize: "12px" }}
         >
           <i className="bi bi-box-arrow-up-right"></i>
-        </a>
+        </a> */}
       </td>
       <td></td>
     </tr>
@@ -126,7 +126,7 @@ export const TableRowForSwapTokens = ({
           >
             {value || ""}
           </a>
-          <a
+          {/* <a
             href={`https://repo.sourcify.dev/369/${TokenAddress}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -134,7 +134,7 @@ export const TableRowForSwapTokens = ({
             style={{ fontSize: "12px" }}
           >
             <i className="bi bi-box-arrow-up-right"></i>
-          </a>
+          </a> */}
         </td>
       </tr>
     </>
