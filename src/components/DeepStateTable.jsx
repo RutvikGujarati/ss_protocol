@@ -2,12 +2,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import { useContext, useEffect } from "react";
 import { ContractContext } from "../Functions/ContractInitialize";
+import { ethers } from "ethers";
 import { useTokens } from "../data/BurntokenData";
 import { useDeepStateFunctions } from "../Functions/DeepStateContract";
 
 const DeepStateTable = () => {
   const { AllContracts, account } = useContext(ContractContext);
-  const { totalBuyCounts, userTotalBuyCounts } = useDeepStateFunctions();
+  const { totalBuyCounts, userTotalBuyCounts,SellTokens } = useDeepStateFunctions();
 
   useEffect(() => {
     userTotalBuyCounts();
@@ -15,14 +16,7 @@ const DeepStateTable = () => {
 
   const tokens = useTokens(totalBuyCounts);
 
-  const SellTokens = async (id) => {
-    try {
-      const tx = await AllContracts.DeepStateContract.sell(id);
-      await tx.wait();
-    } catch (error) {
-      console.log("Error in selling tokens:", error);
-    }
-  };
+
 
   return (
     <div className="container">
@@ -60,7 +54,7 @@ const DeepStateTable = () => {
                   <td>{CurrentValue}</td>
                   <td>{ProfitLoss}</td>
                   <td>
-                    {ProfitLoss > 1 ? (
+                    {ProfitLoss <0 ? (
                       <button className=" custom-red-button" disabled>
                         Hold
                       </button>

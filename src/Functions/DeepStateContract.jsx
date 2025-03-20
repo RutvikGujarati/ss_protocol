@@ -52,10 +52,10 @@ export const DeepStateProvider = ({ children }) => {
   const SellTokens = async (amount) => {
     try {
       setSellLoading(true);
-      const amountInWei = ethers.parseUnits(amount.toString(), 18);
-      const tx = await AllContracts.DeepStateContract.sell(amountInWei);
+      const tx = await AllContracts.DeepStateContract.sell(amount);
       await tx.wait();
       await contractBalance(), CalculateBalanceInUSD(), setSellLoading(false);
+      userTotalBuyCounts();
     } catch (error) {
       console.log("Error in buying tokens:", error);
       setSellLoading(false);
@@ -234,7 +234,7 @@ export const DeepStateProvider = ({ children }) => {
         PLSPrice,
         BuyTokens,
         totalBuyCounts,
-		userTotalBuyCounts,
+        userTotalBuyCounts,
         Sellloading,
         WithdrawDividends,
         TotalInvested,
