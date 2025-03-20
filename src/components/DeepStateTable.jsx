@@ -75,8 +75,10 @@ const DeepStateTable = () => {
                   <td>{ProfitLoss}</td>
                   <td>
                     <button
-                      className="btn btn-primary btn-sm"
+                      className="btn btn-primary btn-sm "
                       onClick={() => SellTokens(LPTAmount)}
+					  style={{ height: "40px" }}
+
                     >
                       Sell
                     </button>

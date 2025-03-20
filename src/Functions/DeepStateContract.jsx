@@ -95,7 +95,9 @@ export const DeepStateProvider = ({ children }) => {
       const userAmount = await AllContracts.DeepStateContract.balanceOf(
         account
       ); // Get amount in Wei
-      const formattedAmount = ethers.formatEther(userAmount); // Convert to ETH
+      const formattedAmount = Math.trunc(
+        Number(ethers.formatEther(userAmount))
+      ); // Convert to ETH and remove decimals
       setUsersTokens(formattedAmount); // Store in state
       console.log("User's total tokens in ETH:", formattedAmount);
     } catch (error) {
@@ -119,7 +121,7 @@ export const DeepStateProvider = ({ children }) => {
   const UsersTotalDividends = async () => {
     try {
       if (!AllContracts?.DeepStateContract) return;
-      const userAmount = await AllContracts.DeepStateContract.myDividends();
+      const userAmount = await AllContracts.DeepStateContract.dividendsOf(account);
       console.log("my dividends", userAmount);
       setUsersDividends(parseFloat(ethers.formatEther(userAmount)).toFixed(4));
     } catch (error) {
@@ -133,7 +135,7 @@ export const DeepStateProvider = ({ children }) => {
       const userAmount = await AllContracts.DeepStateContract.getInvestedEth(
         account
       );
-      setTotalInvested(parseFloat(ethers.formatEther(userAmount)).toFixed(4));
+      setTotalInvested(parseFloat(ethers.formatEther(userAmount)).toFixed(1));
     } catch (error) {
       console.error("Error fetching dividends:", error);
       setTotalInvested("0");

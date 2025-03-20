@@ -94,7 +94,9 @@ const InfoCards = () => {
       try {
         const amountInWei = ethers.parseUnits(Denominator.toString(), 18);
         const userAmount =
-          await AllContracts.DeepStateContract.calculateTokensForEth(amountInWei);
+          await AllContracts.DeepStateContract.calculateTokensForEth(
+            amountInWei
+          );
 
         // Convert BigInt -> String -> Number -> Fixed 2 decimals
         setEstimatedLPT(Number(ethers.formatUnits(userAmount, 18)).toFixed(2));
@@ -119,7 +121,7 @@ const InfoCards = () => {
       const formattedBalance = ethers.formatEther(userAmount);
 
       console.log("deepstate balance from:", userAmount);
-      setbalanceOfContract(formattedBalance);
+      setbalanceOfContract((Number(formattedBalance)).toFixed(1));
     } catch (error) {
       console.log("error in fetching deepState Balance:", error);
     }
@@ -590,7 +592,7 @@ const InfoCards = () => {
                       </p>
                       <p className="mb-0 detailAmount">
                         {" "}
-                        LPT Held : {(Number(UsersTokens) || 0).toFixed(2)}
+                        LPT Held : {(Number(UsersTokens) || 0).toFixed(0)}
                       </p>
                       <p className="mb-0 detailAmount">
                         {" "}
@@ -636,11 +638,12 @@ const InfoCards = () => {
                     <div className="carddetails2">
                       <p className="mb-1 detailText detailAmount">Withdraw</p>
                       <p className="mb-0 detailAmount">
-                        Dividends :{UsersDividends} ETH
+                        Dividends : {UsersDividends} ETH
                       </p>
                       <button
                         onClick={() => WithdrawDividends()}
-                        className="swap-btn py-1 mx-3 mt-1 btn btn-primary "
+                        className="swap-btn py-1  mt-1 btn btn-primary "
+						style={{ width: "150px" }}
                       >
                         Withdraw
                       </button>
@@ -666,8 +669,8 @@ const InfoCards = () => {
                           onChange={(e) => handleInputChangeofToken(e)}
                         />
                       </div>
-                      <p className="mb-0 mx-3 mt-2 detailAmount">
-                        Est. LPT:{estimatedLPT}
+                      <p className="mb-0  mt-2 detailAmount">
+                        Est. LPT: {estimatedLPT}
                       </p>
                       <p className="mb-0  mt-1 detailAmount">
                         (@ {CurrentBuyPrice} ETH)
