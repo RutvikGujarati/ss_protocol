@@ -244,6 +244,25 @@
 	},
 	{
 		"type": "function",
+		"name": "getActiveBuyCount",
+		"inputs": [
+			{
+				"name": "_user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "getActiveBuyIds",
 		"inputs": [
 			{
@@ -339,20 +358,7 @@
 	},
 	{
 		"type": "function",
-		"name": "getProfitPerShare",
-		"inputs": [],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "getUserBuyCount",
+		"name": "getStuckEth",
 		"inputs": [
 			{
 				"name": "_user",
@@ -371,7 +377,7 @@
 	},
 	{
 		"type": "function",
-		"name": "getUserTotalBuyCount",
+		"name": "getUserBuyCount",
 		"inputs": [
 			{
 				"name": "_user",
@@ -478,7 +484,7 @@
 	},
 	{
 		"type": "function",
-		"name": "profitPerShare",
+		"name": "reinvest",
 		"inputs": [],
 		"outputs": [
 			{
@@ -487,7 +493,7 @@
 				"internalType": "uint256"
 			}
 		],
-		"stateMutability": "view"
+		"stateMutability": "nonpayable"
 	},
 	{
 		"type": "function",
@@ -512,6 +518,25 @@
 		"type": "function",
 		"name": "sellPrice",
 		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "sellProceeds",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
 				"name": "",
@@ -551,25 +576,6 @@
 		"type": "function",
 		"name": "tokenPriceInitial",
 		"inputs": [],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "totalBuyCount",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
 		"outputs": [
 			{
 				"name": "",
@@ -721,6 +727,37 @@
 			},
 			{
 				"name": "ethAmount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "Reinvested",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "ethAmount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "tokenAmount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "buyNumber",
 				"type": "uint256",
 				"indexed": false,
 				"internalType": "uint256"

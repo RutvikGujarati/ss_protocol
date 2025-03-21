@@ -22,7 +22,9 @@ const InfoCards = () => {
   const {
     PLSPrice,
     BuyTokens,
+    Reinvest,
     CalculateBalanceInUSD,
+	balanceOfContract,
     UsersTokens,
     UsersTotalTokens,
     UsersDividends,
@@ -30,8 +32,8 @@ const InfoCards = () => {
     WithdrawDividends,
     CurrentSellprice,
     CurrentBuyprice,
+    totalBStuckEth,
   } = useDeepStateFunctions();
-  const [balanceOfContract, setbalanceOfContract] = useState("0");
   const [CurrentBuyPrice, setCurrentBuyPrice] = useState("0");
   const [UserProfit, TotalUserProfit] = useState("0");
 
@@ -108,23 +110,7 @@ const InfoCards = () => {
     fetchEstimate();
   }, [Denominator]);
 
-  const contractBalance = async () => {
-    try {
-      if (!AllContracts || !AllContracts.DeepStateContract) {
-        console.log("DeepStateContract is not initialized.");
-        return;
-      }
-
-      const userAmount =
-        await AllContracts.DeepStateContract.getContractBalance();
-      const formattedBalance = ethers.formatEther(userAmount);
-
-      console.log("deepstate balance from:", userAmount);
-      setbalanceOfContract((Number(formattedBalance)).toFixed(1));
-    } catch (error) {
-      console.log("error in fetching deepState Balance:", error);
-    }
-  };
+  
 
   const CalculateProfit = async () => {
     try {
@@ -279,12 +265,10 @@ const InfoCards = () => {
     }).format(number);
   }
 
-  contractBalance();
-  UsersTotalTokens();
-  CurrentBuy();
   useEffect(() => {
-	CalculateProfit();
-    contractBalance();
+    UsersTotalTokens();
+    CurrentBuy();
+    CalculateProfit();
     CalculationOfCost(amount);
     calculateBurnRatio();
   }, [amount]);
@@ -596,7 +580,7 @@ const InfoCards = () => {
                       </p>
                       <p className="mb-0 detailAmount">
                         {" "}
-                        Contract ETH Balance : {balanceOfContract} ETH
+                        Contract ETH Balance : {Number(balanceOfContract).toFixed(2)} ETH
                       </p>
                     </div>
                     <div className="carddetails2">
@@ -626,7 +610,7 @@ const InfoCards = () => {
                       <p className="mb-0 detailAmount">
                         USD Value : $ {""}
                         {(Number(PLSPrice) || 0).toFixed(6)} {""}
-                        Profit
+                        
                       </p>
                       <p className="mb-0 detailAmount">
                         LPT Value : ${" "}
@@ -643,7 +627,7 @@ const InfoCards = () => {
                       <button
                         onClick={() => WithdrawDividends()}
                         className="swap-btn py-1  mt-1 btn btn-primary "
-						style={{ width: "150px" }}
+                        style={{ width: "150px" }}
                       >
                         Withdraw
                       </button>
@@ -655,33 +639,65 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">Buy</p>
-                      <div style={{ width: "200px" }}>
+                      {/* Buy Section */}
+                      <p className="mb-1 detailText">BUY</p>
+                      <div className="d-flex align-items-center justify-content-between">
                         <input
                           type="text"
-                          className={`form-control text-center mh-30 `}
-                          placeholder="Enter amount"
+                          className="form-control text-center mh-30"
+                          placeholder="Enter ETH amount"
                           value={
                             Denominator
                               ? Number(Denominator).toLocaleString()
                               : ""
                           }
                           onChange={(e) => handleInputChangeofToken(e)}
+                          style={{ width: "60%" }}
                         />
+                        <button
+                          onClick={() => BuyTokens(Denominator)}
+                          className="swap-btn py-1 btn btn-primary"
+                          style={{ width: "35%" }}
+                        >
+                          Buy
+                        </button>
                       </div>
-                      <p className="mb-0  mt-2 detailAmount">
+                      <p className="mb-0 mt-2 detailAmount">
                         Est. LPT: {estimatedLPT}
                       </p>
-                      <p className="mb-0  mt-1 detailAmount">
+                      <p className="mb-0 mt-1 detailAmount">
                         (@ {CurrentBuyPrice} ETH)
                       </p>
-                      <button
-                        onClick={() => BuyTokens(Denominator)}
-                        className="swap-btn py-1 mt-2 btn btn-primary "
-                        style={{ width: "150px" }}
-                      >
-                        Buy
-                      </button>
+
+                      {/* Withdraw Section */}
+                      <div className="d-flex align-items-center justify-content-between">
+                        <p className="mb-0 detailText">WITHDRAW</p>
+                        <p className="mb-0 detailAmount">
+                          {UsersDividends} ETH
+                        </p>
+                        <button
+                          className="swap-btn py-1 btn btn-primary"
+                          style={{ width: "35%" }}
+                          onClick={() => WithdrawDividends()}
+                        >
+                          Withdraw
+                        </button>
+                      </div>
+
+                      {/* Re-Invest Section */}
+                      <div className="d-flex  align-items-center justify-content-between">
+                        <p className="mb-0 detailText">RE-INVEST</p>
+                        <p className="mb-0 detailAmount">
+                          {totalBStuckEth} ETH
+                        </p>
+                        <button
+                          className="swap-btn py-1 btn btn-primary mt-2"
+                          style={{ width: "35%" }}
+                          onClick={() => Reinvest()}
+                        >
+                          ReInvest
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

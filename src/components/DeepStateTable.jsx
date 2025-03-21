@@ -2,21 +2,19 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import { useContext, useEffect } from "react";
 import { ContractContext } from "../Functions/ContractInitialize";
-import { ethers } from "ethers";
 import { useTokens } from "../data/BurntokenData";
 import { useDeepStateFunctions } from "../Functions/DeepStateContract";
 
 const DeepStateTable = () => {
   const { AllContracts, account } = useContext(ContractContext);
-  const { totalBuyCounts, userTotalBuyCounts,SellTokens } = useDeepStateFunctions();
+  const { totalBuyCounts, userTotalBuyCounts, SellTokens } =
+    useDeepStateFunctions();
 
   useEffect(() => {
     userTotalBuyCounts();
   }, [account, AllContracts]);
 
   const tokens = useTokens(totalBuyCounts);
-
-
 
   return (
     <div className="container">
@@ -54,7 +52,7 @@ const DeepStateTable = () => {
                   <td>{CurrentValue}</td>
                   <td>{ProfitLoss}</td>
                   <td>
-                    {ProfitLoss <0 ? (
+                    {ProfitLoss < 0 ? (
                       <button className=" custom-red-button" disabled>
                         Hold
                       </button>

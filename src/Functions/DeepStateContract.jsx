@@ -54,7 +54,7 @@ export const DeepStateProvider = ({ children }) => {
       setSellLoading(true);
       const tx = await AllContracts.DeepStateContract.sell(amount);
       await tx.wait();
-      await contractBalance(), CalculateBalanceInUSD(), setSellLoading(false);
+      await contractBalance(), CalculateBalanceInUSD(),StuckEthOfUser(), setSellLoading(false);
       userTotalBuyCounts();
     } catch (error) {
       console.log("Error in buying tokens:", error);
@@ -81,6 +81,7 @@ export const DeepStateProvider = ({ children }) => {
       setWithdrawLoading(true);
       const tx = await AllContracts.DeepStateContract.withdraw();
       await tx.wait();
+      await UsersTotalDividends();
       setWithdrawLoading(false);
     } catch (error) {
       console.log("Error in buying tokens:", error);
@@ -169,6 +170,7 @@ export const DeepStateProvider = ({ children }) => {
     }
   };
   const [totalBuyCounts, setTotalBuyCounts] = useState(0);
+  const [totalBStuckEth, setTotalStuckETH] = useState(0);
 
   const userTotalBuyCounts = async () => {
     try {
@@ -181,6 +183,19 @@ export const DeepStateProvider = ({ children }) => {
     } catch (error) {
       console.error("Error fetching buy counts:", error);
       setTotalBuyCounts(0);
+    }
+  };
+  const StuckEthOfUser = async () => {
+    try {
+      if (!AllContracts?.DeepStateContract || !account) return;
+      const userAmount = await AllContracts.DeepStateContract.sellProceeds(
+        account
+      );
+      console.log("user stuck ETh", parseFloat(userAmount));
+      setTotalStuckETH(parseFloat(ethers.formatEther(userAmount)).toFixed(2));
+    } catch (error) {
+      console.error("Error fetching buy counts:", error);
+      setTotalStuckETH(0);
     }
   };
 
@@ -202,9 +217,25 @@ export const DeepStateProvider = ({ children }) => {
       //   setLoading(false);
     }
   };
+  const Reinvest = async () => {
+    try {
+      //   setLoading(true);
+	  const tx = await AllContracts.DeepStateContract.reinvest();
+      await tx.wait();
+      await contractBalance();
+      await userTotalBuyCounts();
+      await CalculateBalanceInUSD();
+      await StuckEthOfUser();
+    } catch (error) {
+      console.log("Error in buying tokens:", error);
+    } finally {
+      //   setLoading(false);
+    }
+  };
   useEffect(() => {
     const fetchData = async () => {
       userTotalBuyCounts();
+	  StuckEthOfUser()
       userTotalInvested();
       contractBalance();
       await fetchPLSPrice();
@@ -238,8 +269,10 @@ export const DeepStateProvider = ({ children }) => {
         Sellloading,
         WithdrawDividends,
         TotalInvested,
+		totalBStuckEth,
         CurrentSellprice,
         CurrentBuyprice,
+		Reinvest,
         Withdrawloading,
         CalculateEstimateTokenAmount,
         EstimatedAmount,
