@@ -24,7 +24,7 @@ const InfoCards = () => {
     BuyTokens,
     Reinvest,
     CalculateBalanceInUSD,
-	balanceOfContract,
+    balanceOfContract,
     UsersTokens,
     UsersTotalTokens,
     UsersDividends,
@@ -32,10 +32,10 @@ const InfoCards = () => {
     WithdrawDividends,
     CurrentSellprice,
     CurrentBuyprice,
+    TotalUserProfit,
     totalBStuckEth,
   } = useDeepStateFunctions();
   const [CurrentBuyPrice, setCurrentBuyPrice] = useState("0");
-  const [UserProfit, TotalUserProfit] = useState("0");
 
   const [setBurnRatio] = useState("0.0");
   const {
@@ -59,6 +59,8 @@ const InfoCards = () => {
     }
   };
   const [Denominator, setDenominator] = useState("");
+  const [WithdrawAmount, setWithdrawAMount] = useState("");
+  const [ReinvestAmount, setReinvestAmount] = useState("");
 
   const handleInputChangeofToken = (e) => {
     const rawValue = e.target.value.replace(/,/g, "");
@@ -66,6 +68,22 @@ const InfoCards = () => {
       setDenominator(rawValue);
     } else if (rawValue === "") {
       setDenominator("");
+    }
+  };
+  const handleInputChangeofWithdraw = (e) => {
+    const rawValue = e.target.value.replace(/,/g, "");
+    if (!isNaN(rawValue) && rawValue !== "") {
+      setWithdrawAMount(rawValue);
+    } else if (rawValue === "") {
+      setWithdrawAMount("");
+    }
+  };
+  const handleInputChangeofReinvest = (e) => {
+    const rawValue = e.target.value.replace(/,/g, "");
+    if (!isNaN(rawValue) && rawValue !== "") {
+      setReinvestAmount(rawValue);
+    } else if (rawValue === "") {
+      setReinvestAmount("");
     }
   };
   CalculateBalanceInUSD();
@@ -80,7 +98,7 @@ const InfoCards = () => {
     } else if (chainId === 56) {
       return { text: "🟢 LIVE ON BINANCE SMART CHAIN.", color: "" };
     } else {
-      return { text: "🟢 LIVE ON UNKNOWN CHAIN.", color: "" }; // Fallback
+      return { text: "🟢 LIVE ON PULSECHAIN.", color: "" }; // Fallback
     }
   };
   const [estimatedLPT, setEstimatedLPT] = useState("0.00");
@@ -110,21 +128,6 @@ const InfoCards = () => {
     fetchEstimate();
   }, [Denominator]);
 
-  
-
-  const CalculateProfit = async () => {
-    try {
-      if (!AllContracts?.DeepStateContract) return;
-      const [isProfit, profitAmount] =
-        await AllContracts.DeepStateContract.isUserInProfit(account);
-
-      //   TotalUserProfit(parseFloat(ethers.formatEther(profitAmount)).toFixed(5));
-      TotalUserProfit(0);
-      console.log("User's profit:", profitAmount);
-    } catch (error) {
-      console.error("Error fetching dividends:", error);
-    }
-  };
   const CurrentBuy = async () => {
     try {
       const userAmount = await AllContracts.DeepStateContract.buyPrice(); // Get amount in Wei
@@ -268,7 +271,6 @@ const InfoCards = () => {
   useEffect(() => {
     UsersTotalTokens();
     CurrentBuy();
-    CalculateProfit();
     CalculationOfCost(amount);
     calculateBurnRatio();
   }, [amount]);
@@ -580,7 +582,8 @@ const InfoCards = () => {
                       </p>
                       <p className="mb-0 detailAmount">
                         {" "}
-                        Contract ETH Balance : {Number(balanceOfContract).toFixed(2)} ETH
+                        Contract ETH Balance :{" "}
+                        {Number(balanceOfContract).toFixed(2)} ETH
                       </p>
                     </div>
                     <div className="carddetails2">
@@ -599,18 +602,17 @@ const InfoCards = () => {
               </div>
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
-                  <div className="carddetaildiv uppercase">
+                  <div className="carddetaildiv uppercase mt-5">
                     <div className="carddetails2">
                       <p className="mb-1 detailText detailAmount">
                         Price Summary
                       </p>
                       <p className="mb-0 detailAmount">
-                        Total ETH Profit : {UserProfit} ETH
+                        Total ETH Profit : {TotalUserProfit} ETH
                       </p>
                       <p className="mb-0 detailAmount">
-                        USD Value : $ {""}
+                        PLS Price : $ {""}
                         {(Number(PLSPrice) || 0).toFixed(6)} {""}
-                        
                       </p>
                       <p className="mb-0 detailAmount">
                         LPT Value : ${" "}
@@ -618,19 +620,6 @@ const InfoCards = () => {
                           2
                         )}
                       </p>
-                    </div>
-                    <div className="carddetails2">
-                      <p className="mb-1 detailText detailAmount">Withdraw</p>
-                      <p className="mb-0 detailAmount">
-                        Dividends : {UsersDividends} ETH
-                      </p>
-                      <button
-                        onClick={() => WithdrawDividends()}
-                        className="swap-btn py-1  mt-1 btn btn-primary "
-                        style={{ width: "150px" }}
-                      >
-                        Withdraw
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -640,62 +629,84 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
                       {/* Buy Section */}
-                      <p className="mb-1 detailText">BUY</p>
-                      <div className="d-flex align-items-center justify-content-between">
+                      <p className="mb-0 detailText">BUY</p>
+                      <div className="d-flex align-items-center justify-content-between ">
+                        <p className="mb-0 detailAmount">
+                          Est. LPT: {estimatedLPT}
+                        </p>
+
                         <input
                           type="text"
                           className="form-control text-center mh-30"
-                          placeholder="Enter ETH amount"
+                          placeholder="Enter ETH "
                           value={
                             Denominator
                               ? Number(Denominator).toLocaleString()
                               : ""
                           }
                           onChange={(e) => handleInputChangeofToken(e)}
-                          style={{ width: "60%" }}
+                          style={{ width: "30%" }}
                         />
                         <button
                           onClick={() => BuyTokens(Denominator)}
                           className="swap-btn py-1 btn btn-primary"
-                          style={{ width: "35%" }}
+                          style={{ width: "30%" }}
                         >
                           Buy
                         </button>
                       </div>
-                      <p className="mb-0 mt-2 detailAmount">
-                        Est. LPT: {estimatedLPT}
-                      </p>
                       <p className="mb-0 mt-1 detailAmount">
                         (@ {CurrentBuyPrice} ETH)
                       </p>
-
                       {/* Withdraw Section */}
+                      <p className="mt-1 mb-1 detailText">WITHDRAW</p>
                       <div className="d-flex align-items-center justify-content-between">
-                        <p className="mb-0 detailText">WITHDRAW</p>
                         <p className="mb-0 detailAmount">
                           {UsersDividends} ETH
                         </p>
+                        <input
+                          type="text"
+                          className="form-control text-center mh-30"
+                          placeholder="Enter ETH"
+                          style={{ width: "30%", marginLeft: "20px" }}
+                          value={WithdrawAmount}
+                          onChange={(e) => handleInputChangeofWithdraw(e)}
+                        />
                         <button
                           className="swap-btn py-1 btn btn-primary"
-                          style={{ width: "35%" }}
-                          onClick={() => WithdrawDividends()}
+                          style={{ width: "32%" }}
+                          onClick={() => {
+                            WithdrawDividends(WithdrawAmount);
+                          }}
                         >
                           Withdraw
                         </button>
                       </div>
 
                       {/* Re-Invest Section */}
-                      <div className="d-flex  align-items-center justify-content-between">
-                        <p className="mb-0 detailText">RE-INVEST</p>
+                      <p className="mt-1 mb-1 detailText">RE-INVEST</p>
+                      <div className="d-flex align-items-center justify-content-between">
                         <p className="mb-0 detailAmount">
                           {totalBStuckEth} ETH
                         </p>
+                        <input
+                          type="text"
+                          className="form-control text-center mh-30"
+                          placeholder="Enter ETH"
+                          style={{ width: "30%", marginLeft: "15px" }}
+                          value={ReinvestAmount}
+                          onChange={(e) => {
+                            handleInputChangeofReinvest(e);
+                          }}
+                        />
                         <button
-                          className="swap-btn py-1 btn btn-primary mt-2"
-                          style={{ width: "35%" }}
-                          onClick={() => Reinvest()}
+                          className="swap-btn py-1 btn btn-primary"
+                          style={{ width: "30%" }}
+                          onClick={() => {
+                            Reinvest(ReinvestAmount);
+                          }}
                         >
-                          ReInvest
+                          Re-Invest
                         </button>
                       </div>
                     </div>

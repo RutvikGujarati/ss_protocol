@@ -54,7 +54,10 @@ export const DeepStateProvider = ({ children }) => {
       setSellLoading(true);
       const tx = await AllContracts.DeepStateContract.sell(amount);
       await tx.wait();
-      await contractBalance(), CalculateBalanceInUSD(),StuckEthOfUser(), setSellLoading(false);
+      await contractBalance(),
+        CalculateBalanceInUSD(),
+        StuckEthOfUser(),
+        setSellLoading(false);
       userTotalBuyCounts();
     } catch (error) {
       console.log("Error in buying tokens:", error);
@@ -76,10 +79,11 @@ export const DeepStateProvider = ({ children }) => {
       return 0; // Return 0 in case of an error
     }
   };
-  const WithdrawDividends = async () => {
+  const WithdrawDividends = async (amount) => {
     try {
       setWithdrawLoading(true);
-      const tx = await AllContracts.DeepStateContract.withdraw();
+      const amountInWei = ethers.parseUnits(amount.toString(), 18);
+      const tx = await AllContracts.DeepStateContract.withdraw(amountInWei);
       await tx.wait();
       await UsersTotalDividends();
       setWithdrawLoading(false);
@@ -171,6 +175,7 @@ export const DeepStateProvider = ({ children }) => {
   };
   const [totalBuyCounts, setTotalBuyCounts] = useState(0);
   const [totalBStuckEth, setTotalStuckETH] = useState(0);
+  const [TotalUserProfit, setUserProfit] = useState(0);
 
   const userTotalBuyCounts = async () => {
     try {
@@ -198,6 +203,19 @@ export const DeepStateProvider = ({ children }) => {
       setTotalStuckETH(0);
     }
   };
+  const UsersProfit = async () => {
+    try {
+      if (!AllContracts?.DeepStateContract || !account) return;
+      const userAmount = await AllContracts.DeepStateContract.getUserProfit(
+        account
+      );
+      console.log("user stuck ETh", parseFloat(userAmount));
+      setUserProfit(parseFloat(ethers.formatEther(userAmount)).toFixed(2));
+    } catch (error) {
+      console.error("Error fetching buy counts:", error);
+      setUserProfit(0);
+    }
+  };
 
   const BuyTokens = async (amount) => {
     try {
@@ -217,10 +235,12 @@ export const DeepStateProvider = ({ children }) => {
       //   setLoading(false);
     }
   };
-  const Reinvest = async () => {
+  const Reinvest = async (amount) => {
     try {
       //   setLoading(true);
-	  const tx = await AllContracts.DeepStateContract.reinvest();
+      const amountInWei = ethers.parseUnits(amount.toString(), 18);
+
+      const tx = await AllContracts.DeepStateContract.reinvest(amountInWei);
       await tx.wait();
       await contractBalance();
       await userTotalBuyCounts();
@@ -235,8 +255,9 @@ export const DeepStateProvider = ({ children }) => {
   useEffect(() => {
     const fetchData = async () => {
       userTotalBuyCounts();
-	  StuckEthOfUser()
+      StuckEthOfUser();
       userTotalInvested();
+      UsersProfit();
       contractBalance();
       await fetchPLSPrice();
       await contractBalance();
@@ -268,11 +289,12 @@ export const DeepStateProvider = ({ children }) => {
         userTotalBuyCounts,
         Sellloading,
         WithdrawDividends,
+        TotalUserProfit,
         TotalInvested,
-		totalBStuckEth,
+        totalBStuckEth,
         CurrentSellprice,
         CurrentBuyprice,
-		Reinvest,
+        Reinvest,
         Withdrawloading,
         CalculateEstimateTokenAmount,
         EstimatedAmount,

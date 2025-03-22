@@ -358,6 +358,19 @@
 	},
 	{
 		"type": "function",
+		"name": "getProfitPerShare",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "getStuckEth",
 		"inputs": [
 			{
@@ -390,6 +403,25 @@
 				"name": "",
 				"type": "uint256",
 				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getUserProfit",
+		"inputs": [
+			{
+				"name": "_user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "int256",
+				"internalType": "int256"
 			}
 		],
 		"stateMutability": "view"
@@ -484,7 +516,7 @@
 	},
 	{
 		"type": "function",
-		"name": "reinvest",
+		"name": "profitPerShare",
 		"inputs": [],
 		"outputs": [
 			{
@@ -493,7 +525,45 @@
 				"internalType": "uint256"
 			}
 		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "reinvest",
+		"inputs": [
+			{
+				"name": "stuckEth",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
 		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "reinvestedEth",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
 	},
 	{
 		"type": "function",
@@ -686,7 +756,13 @@
 	{
 		"type": "function",
 		"name": "withdraw",
-		"inputs": [],
+		"inputs": [
+			{
+				"name": "amount",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
 		"outputs": [],
 		"stateMutability": "nonpayable"
 	},
