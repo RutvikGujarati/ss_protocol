@@ -602,7 +602,7 @@ const InfoCards = () => {
               </div>
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
-                  <div className="carddetaildiv uppercase mt-5">
+                  <div className="carddetaildiv uppercase ">
                     <div className="carddetails2">
                       <p className="mb-1 detailText detailAmount">
                         Price Summary
@@ -629,12 +629,16 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
                       {/* Buy Section */}
-                      <p className="mb-0 detailText">BUY</p>
-                      <div className="d-flex align-items-center justify-content-between ">
+                      <div className="d-flex align-items-center justify-content-between">
+                        <p className="mb-0 detailText">BUY </p>
                         <p className="mb-0 detailAmount">
                           Est. LPT: {estimatedLPT}
                         </p>
-
+                        <p className="mb-0 mt-1 mx-1 detailAmount">
+                          (@ {CurrentBuyPrice} ETH)
+                        </p>
+                      </div>
+                      <div className="d-flex align-items-center justify-content-between mt-1">
                         <input
                           type="text"
                           className="form-control text-center mh-30"
@@ -645,30 +649,30 @@ const InfoCards = () => {
                               : ""
                           }
                           onChange={(e) => handleInputChangeofToken(e)}
-                          style={{ width: "30%" }}
+                          style={{ width: "50%" }}
                         />
                         <button
                           onClick={() => BuyTokens(Denominator)}
-                          className="swap-btn py-1 btn btn-primary"
+                          className="swap-btn py-1 mx-1 btn btn-primary"
                           style={{ width: "30%" }}
                         >
                           Buy
                         </button>
                       </div>
-                      <p className="mb-0 mt-1 detailAmount">
-                        (@ {CurrentBuyPrice} ETH)
-                      </p>
+
                       {/* Withdraw Section */}
-                      <p className="mt-1 mb-1 detailText">WITHDRAW</p>
-                      <div className="d-flex align-items-center justify-content-between">
-                        <p className="mb-0 detailAmount">
+                      <div className="d-flex align-items-center justify-content-start">
+                        <p className="mt-1 mb-1 detailText">WITHDRAW</p>
+                        <p className="mb-0 detailAmount mx-5">
                           {UsersDividends} ETH
                         </p>
+                      </div>
+                      <div className="d-flex align-items-center justify-content-between mt-1">
                         <input
                           type="text"
                           className="form-control text-center mh-30"
                           placeholder="Enter ETH"
-                          style={{ width: "30%", marginLeft: "20px" }}
+                          style={{ width: "50%" }}
                           value={WithdrawAmount}
                           onChange={(e) => handleInputChangeofWithdraw(e)}
                         />
@@ -684,23 +688,25 @@ const InfoCards = () => {
                       </div>
 
                       {/* Re-Invest Section */}
-                      <p className="mt-1 mb-1 detailText">RE-INVEST</p>
-                      <div className="d-flex align-items-center justify-content-between">
-                        <p className="mb-0 detailAmount">
+                      <div className="d-flex align-items-center justify-content-start">
+                        <p className="mt-1 mb-1 detailText">RE-INVEST</p>
+                        <p className="mb-0 detailAmount mx-5">
                           {totalBStuckEth} ETH
                         </p>
+                      </div>
+                      <div className="d-flex align-items-center justify-content-between mt-1">
                         <input
                           type="text"
                           className="form-control text-center mh-30"
                           placeholder="Enter ETH"
-                          style={{ width: "30%", marginLeft: "15px" }}
+                          style={{ width: "50%" }}
                           value={ReinvestAmount}
                           onChange={(e) => {
                             handleInputChangeofReinvest(e);
                           }}
                         />
                         <button
-                          className="swap-btn py-1 btn btn-primary"
+                          className="swap-btn py-1 btn btn-primary mx-1"
                           style={{ width: "30%" }}
                           onClick={() => {
                             Reinvest(ReinvestAmount);
