@@ -56,9 +56,14 @@ const InfoCards = () => {
     }
   };
   const [Denominator, setDenominator] = useState("");
-  const [WithdrawAmount, setWithdrawAMount] = useState("");
-  const [ReinvestAmount, setReinvestAmount] = useState("");
-
+  const [WithdrawAmount, setWithdrawAMount] = useState(UsersDividends);
+  const [ReinvestAmount, setReinvestAmount] = useState(totalStuckEth);
+  useEffect(() => {
+    if (UsersDividends !== undefined && UsersDividends !== null) {
+      setWithdrawAMount(UsersDividends);
+	  setReinvestAmount(totalStuckEth)
+    }
+  }, [UsersDividends]);
   const handleInputChangeofToken = (e) => {
     const rawValue = e.target.value.replace(/,/g, "");
     if (!isNaN(rawValue) && rawValue !== "") {
@@ -605,7 +610,7 @@ const InfoCards = () => {
                         style={{ fontSize: "12px" }}
                       >
                         PLS Price : $ {""}
-                        {(Number(PLSPrice) || 0).toFixed(6)} {""}
+                        {(Number(PLSPrice) || 0).toFixed(10)} {""}
                       </p>
                       <p
                         className="mb-0 detailAmount"
@@ -661,11 +666,14 @@ const InfoCards = () => {
                       {/* Buy Section */}
                       <div className="d-flex align-items-center justify-content-between">
                         <p className="mb-0 detailText">BUY </p>
-                        <p className="mb-0 detailAmount px-3">
+                        <p
+                          className="mb-0 detailAmount "
+                          style={{ marginLeft: "25px" }}
+                        >
                           Est. LPT: {estimatedLPT}
                         </p>
 
-                        <p className="mb-0 mt-1 mx-1 detailAmount">
+                        <p className="mb-0 mt-1 mx-1  detailAmount">
                           (@ {CurrentBuyPrice} PLS)
                         </p>
                       </div>
@@ -684,8 +692,8 @@ const InfoCards = () => {
                         />
                         <button
                           onClick={() => handleBuyTokens()}
-                          className="swap-btn py-1 mx-1 btn btn-primary"
-                          style={{ width: "30%" }}
+                          className="swap-btn py-1  btn btn-primary"
+                          style={{ width: "32%" }}
                         >
                           Buy
                         </button>
@@ -737,8 +745,8 @@ const InfoCards = () => {
                           }}
                         />
                         <button
-                          className="swap-btn py-1 btn btn-primary mx-1"
-                          style={{ width: "30%" }}
+                          className="swap-btn py-1 btn btn-primary "
+                          style={{ width: "32%" }}
                           onClick={() => {
                             handleReinvest();
                           }}
