@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { ethers } from "ethers";
 import { ContractContext } from "./ContractInitialize";
 import PropTypes from "prop-types";
@@ -7,6 +13,7 @@ export const DAVContext = createContext();
 
 export const DavProvider = ({ children }) => {
   const { AllContracts, account } = useContext(ContractContext);
+
   const [davHolds, setDavHoldings] = useState("0.0");
   const [isLoading, setIsLoading] = useState(true);
   const [DavBalance, setDavBalance] = useState(null);
@@ -17,120 +24,111 @@ export const DavProvider = ({ children }) => {
   const [DAVTokensFiveWithdraw, setFiveAvTokens] = useState("0.0");
   const [claiming, setClaiming] = useState(false);
 
-  const DavHoldings = async () => {
+  /*** Fetch User's Holdings ***/
+  const DavHoldings = useCallback(async () => {
+    if (!AllContracts?.davContract || !account) return;
     try {
-      if (!AllContracts?.davContract || !account) {
-        setDavHoldings("0.0");
-        return;
-      }
-
       const holdings = await AllContracts.davContract.balanceOf(account);
-      const holds = ethers.formatUnits(holdings, 18);
-      console.log("DavHoldings: ", holds);
-      setDavHoldings(holds);
+      setDavHoldings(ethers.formatUnits(holdings, 18));
     } catch (error) {
       console.error("Error fetching DAV holdings:", error);
-      setDavHoldings("0.0");
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [AllContracts, account]);
 
-  const mintDAV = async (amount) => {
+  /*** Fetch Holding Percentage ***/
+  const DavHoldingsPercentage = useCallback(async () => {
+    if (!AllContracts?.davContract || !account) return;
     try {
-      if (!AllContracts?.davContract) {
-        throw new Error("Contract is not initialized.");
-      }
+      const balance = await AllContracts.davContract.balanceOf(account);
+      const bal = ethers.formatUnits(balance, 18);
+      setDavBalance(bal);
+      setDavPercentage(parseFloat(bal / 5000000).toFixed(8));
+    } catch (error) {
+      console.error("Error fetching DAV holdings percentage:", error);
+    }
+  }, [AllContracts, account]);
 
+  /*** Fetch Total Supply ***/
+  const DavSupply = useCallback(async () => {
+    if (!AllContracts?.davContract) return;
+    try {
+      const supply = await AllContracts.davContract.totalSupply();
+      setSupply(ethers.formatUnits(supply, 18));
+    } catch (error) {
+      console.error("Error fetching total supply:", error);
+    }
+  }, [AllContracts]);
+
+  /*** Fetch Claimable Amount ***/
+  const ClaimableAmount = useCallback(async () => {
+    if (!AllContracts?.davContract || !account) return;
+    try {
+      const supply = await AllContracts.davContract.earned(account);
+      setClaimableAmount(parseFloat(ethers.formatUnits(supply, 18)).toFixed(2));
+    } catch (error) {
+      console.error("Error fetching claimable amount:", error);
+    }
+  }, [AllContracts, account]);
+
+  /*** Fetch Development and Liquidity Funds ***/
+  const DAVTokenAmount = useCallback(async () => {
+    if (!AllContracts?.davContract) return;
+    try {
+      const balance = await AllContracts.davContract.liquidityFunds();
+      setDAvTokens(ethers.formatUnits(balance, 18));
+    } catch (error) {
+      console.error("Error fetching LP tokens:", error);
+    }
+  }, [AllContracts]);
+
+  const DAVTokenfive_Amount = useCallback(async () => {
+    if (!AllContracts?.davContract) return;
+    try {
+      const balance = await AllContracts.davContract.developmentFunds();
+      setFiveAvTokens(ethers.formatUnits(balance, 18));
+    } catch (error) {
+      console.error("Error fetching development funds:", error);
+    }
+  }, [AllContracts]);
+
+  /*** Mint DAV Tokens ***/
+  const mintDAV = async (amount) => {
+    if (!AllContracts?.davContract) return;
+    try {
       const value = ethers.parseEther(amount.toString());
       const cost = ethers.parseEther((amount * 500000).toString());
-
-      console.log("Minting with:", value.toString(), "cost:", cost.toString());
-
       const transaction = await AllContracts.davContract.mintDAV(value, {
         value: cost,
       });
-
       await transaction.wait();
-      console.log("Minting successful!");
-      await DavHoldings();
-      await DavHoldingsPercentage();
+      await fetchData();
       return transaction;
     } catch (error) {
       console.error("Minting error:", error);
       throw error;
     }
   };
-  const DavHoldingsPercentage = async () => {
-    try {
-      const balance = await AllContracts.davContract.balanceOf(account);
-      const bal = ethers.formatUnits(balance, 18);
 
-      console.log("dav balance.......", bal);
-      setDavBalance(bal);
-
-      const totalSupply = 5000000;
-
-      if (bal) {
-        const rank = bal / totalSupply;
-
-        setDavPercentage(parseFloat(rank).toFixed(8));
-      } else {
-        console.error("Failed to fetch holding percentage.");
-      }
-    } catch (error) {
-      console.error("Error fetching DAV holdings percentage:", error);
-    }
-  };
-  const DavSupply = async () => {
-    const supply = await AllContracts.davContract.totalSupply();
-    const sup = ethers.formatUnits(supply, 18);
-    setSupply(sup);
-  };
+  /*** Claim Rewards ***/
   const claimAmount = async () => {
+    if (!AllContracts?.davContract) return;
     try {
-      if (!AllContracts?.davContract) {
-        throw new Error("Contract is not initialized.");
-      }
       const transaction = await AllContracts.davContract.claimRewards();
       await transaction.wait();
       await ClaimableAmount();
-    } catch (e) {
-      console.error("Error claiming rewards:", e);
-    }
-  };
-  const ClaimableAmount = async () => {
-	const supply = await AllContracts.davContract.earned(account);
-	const sup = parseFloat(ethers.formatUnits(supply, 18)); // Convert to number
-	console.log("user claimable balance", supply);
-	setClaimableAmount(sup.toFixed(2)); // Now it will work
-  };
-  
-  const DAVTokenAmount = async () => {
-    try {
-      const balance = await AllContracts.davContract.liquidityFunds();
-      const bal = ethers.formatUnits(balance, 18);
-      setDAvTokens(bal);
-    } catch (e) {
-      console.error("Error fetching LP tokens:", e);
-    }
-  };
-  const DAVTokenfive_Amount = async () => {
-    try {
-      const balance = await AllContracts.davContract.developmentFunds();
-      const bal = ethers.formatUnits(balance, 18);
-      setFiveAvTokens(bal);
-    } catch (e) {
-      console.error("Error fetching LP tokens:", e);
+    } catch (error) {
+      console.error("Error claiming rewards:", error);
     }
   };
 
+  /*** Handle Withdraws ***/
   const handleWithdraw = async (methodName) => {
+    if (!AllContracts?.davContract) return;
     try {
       setClaiming(true);
       await AllContracts.davContract[methodName]();
-    } catch (e) {
-      console.error(`Error withdrawing with method ${methodName}:`, e);
+    } catch (error) {
+      console.error(`Error withdrawing with method ${methodName}:`, error);
     } finally {
       setClaiming(false);
     }
@@ -139,30 +137,38 @@ export const DavProvider = ({ children }) => {
   const withdraw_5 = () => handleWithdraw("withdrawDevelopmentFunds");
   const withdraw_95 = () => handleWithdraw("withdrawLiquidityFunds");
 
-  useEffect(() => {
-    if (AllContracts?.davContract && account) {
-      const functions = [
-        DavSupply,
-        ClaimableAmount,
-        DAVTokenAmount,
-        DavHoldingsPercentage,
-        DavHoldings,
-        DAVTokenfive_Amount,
-      ];
-
-      const loadData = async () => {
-        for (const func of functions) {
-          try {
-            await func();
-          } catch (error) {
-            console.error(`Error in ${func.name}:`, error);
-          }
-        }
-      };
-
-      loadData();
+  /*** Fetch All Data in Parallel ***/
+  const fetchData = useCallback(async () => {
+    if (!AllContracts?.davContract || !account) return;
+    setIsLoading(true);
+    try {
+      await Promise.all([
+        DavSupply(),
+        ClaimableAmount(),
+        DAVTokenAmount(),
+        DavHoldingsPercentage(),
+        DavHoldings(),
+        DAVTokenfive_Amount(),
+      ]);
+    } catch (error) {
+      console.error("Error fetching contract data:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [AllContracts, account]);
+  }, [
+    AllContracts,
+    account,
+    DavSupply,
+    ClaimableAmount,
+    DAVTokenAmount,
+    DavHoldingsPercentage,
+    DavHoldings,
+    DAVTokenfive_Amount,
+  ]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   DavProvider.propTypes = {
     children: PropTypes.node.isRequired,

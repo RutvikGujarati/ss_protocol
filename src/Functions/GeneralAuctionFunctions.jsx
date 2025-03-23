@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { ContractContext } from "./ContractInitialize";
 import PropTypes from "prop-types";
 import { ethers } from "ethers";
@@ -7,136 +13,53 @@ export const GeneralAuctionFunctions = createContext();
 
 export const GeneralAuctionProvider = ({ children }) => {
   const { AllContracts } = useContext(ContractContext);
-  const [AuctionRunningLocalString, setIsAuctionRunningLocalString] = useState({
-    Fluxin: false,
-    Xerion: false,
-    OneDollar: false,
-    TenDollar: false,
-    Rieva: false,
-    Domus: false,
-    Currus: false,
-    state: true,
-  });
-  const [AuctionRunning, setIsAuctionRunning] = useState({
-    Fluxin: false,
-    Xerion: false,
-    OneDollar: false,
-    Rieva: false,
-	TenDollar: false,
-	Currus: false,
-    Domus: false,
-    state: true,
-  });
-  const [auctionTimeLeft, setAuctionTimeLeft] = useState({});
 
+  const [AuctionRunningLocalString, setIsAuctionRunningLocalString] = useState(
+    {}
+  );
+  const [AuctionRunning, setIsAuctionRunning] = useState({});
+  const [auctionTimeLeft, setAuctionTimeLeft] = useState({});
   const [auctionDetails, setAuctionDetails] = useState({});
   const [TotalTokensBurned, setTotalTokenBurned] = useState({});
 
   const contracts = [
-    { name: "Fluxin", contract: AllContracts.RatioContract },
-    { name: "Xerion", contract: AllContracts.XerionRatioContract },
-    { name: "Rieva", contract: AllContracts.RievaRatioContract },
-    { name: "Domus", contract: AllContracts.DomusRatioContract },
-    { name: "Currus", contract: AllContracts.CurrusRatioContract },
-    { name: "TenDollar", contract: AllContracts.TenDollarRatioContract },
-    { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
-  ];
+    { name: "Fluxin", contract: AllContracts?.RatioContract },
+    { name: "Xerion", contract: AllContracts?.XerionRatioContract },
+    { name: "Rieva", contract: AllContracts?.RievaRatioContract },
+    { name: "Domus", contract: AllContracts?.DomusRatioContract },
+    { name: "Currus", contract: AllContracts?.CurrusRatioContract },
+    { name: "TenDollar", contract: AllContracts?.TenDollarRatioContract },
+    { name: "OneDollar", contract: AllContracts?.OneDollarRatioContract },
+  ].filter(({ contract }) => contract); // Remove undefined contracts
 
-  useEffect(() => {
-    AuctionTimeLeft();
-    const interval = setInterval(() => {
-      AuctionTimeLeft();
-    }, 2000);
+  /* ----------------------------------- Auction Functions ----------------------------------- */
 
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    const safeExecution = async () => {
-      try {
-        // Run auction-related calls in parallel
-        const auctionPromises = [
-          isAuctionRunning(),
-          AuctionTimeInterval(),
-          AuctionTimeLeft(),
-        ];
-        await Promise.all(auctionPromises);
-      } catch (error) {
-        console.error("Error in auction functions:", error);
-      }
-
-      try {
-        // Run token-related calls in parallel
-        const tokenPromises = [TotalTokensBurn()];
-        await Promise.all(tokenPromises);
-      } catch (error) {
-        console.error("Error in total burn/bounty fetching:", error);
-      }
-    };
-
-    if (AllContracts) {
-      // Prevent execution on initial render if `AllContracts` is undefined
-      safeExecution();
-    }
-  }, [AllContracts]); // Only run when `AllContracts` changes
-
-  /*----------------------------------- Auction Functions------------------------------------- */
-
-  const isAuctionRunning = async () => {
+  const isAuctionRunning = useCallback(async () => {
     try {
-      const auctionStatus = {};
+      const auctionStatus = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          const isRunning = await contract.isAuctionActive();
+          return { [name]: isRunning.toString() };
+        })
+      );
 
-      for (const { contract, name } of contracts) {
-        const isRunning = await contract.isAuctionActive();
-        auctionStatus[name] = isRunning.toString();
-        console.log(
-          `isAuctionRunning from g context-> ${name}:`,
-          isRunning.toString()
-        );
-      }
+      const updatedStatus = auctionStatus.reduce(
+        (acc, curr) => ({ ...acc, ...curr }),
+        {}
+      );
+      setIsAuctionRunning({ ...updatedStatus, state: true });
+      setIsAuctionRunningLocalString({ ...updatedStatus, state: true });
 
-      setIsAuctionRunning({
-        ...auctionStatus,
-        state: true,
-      });
-
-      setIsAuctionRunningLocalString({
-        ...auctionStatus,
-        state: true,
-      });
+      console.log("Auction Running Status:", updatedStatus);
     } catch (error) {
       console.error("Error fetching auction status:", error);
-
-      setIsAuctionRunning({
-        Fluxin: false,
-        Xerion: false,
-        OneDollar: false,
-		TenDollar: false,
-        Rieva: false,
-		Currus: false,
-        Domus: false,
-        state: true,
-      });
-
-      setIsAuctionRunningLocalString({
-        Fluxin: false,
-        Xerion: false,
-        OneDollar: false,
-        Rieva: false,
-		Currus: false,
-        Domus: false,
-		TenDollar: false,
-        state: true,
-      });
     }
-  };
-  const AuctionTimeInterval = async () => {
+  }, [contracts]);
+
+  const AuctionTimeInterval = useCallback(async () => {
     try {
       const formatTimestamp = (timestamp) => {
-        const timestampSeconds = parseFloat(timestamp);
-        const date = new Date(timestampSeconds * 1000);
-
-        return date.toLocaleString("en-US", {
+        return new Date(parseFloat(timestamp) * 1000).toLocaleString("en-US", {
           weekday: "long",
           year: "numeric",
           month: "long",
@@ -144,90 +67,116 @@ export const GeneralAuctionProvider = ({ children }) => {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
-          hour12: false, // Use 24-hour format
+          hour12: false,
         });
       };
 
-      const auctionData = {};
-
-      for (const { contract, name } of contracts) {
-        const auctionInterval = await contract.auctionInterval();
-        const auctionDuration = await contract.auctionDuration();
-        const nextAuctionStart = await contract.getNextAuctionStart();
-
-        let formattedNextTime = "0";
-        if (nextAuctionStart !== 0 && nextAuctionStart !== undefined) {
-          formattedNextTime = formatTimestamp(nextAuctionStart);
-        }
-
-        auctionData[name] = {
-          auctionInterval,
-          auctionDuration,
-          nextAuctionStart: formattedNextTime,
-        };
-      }
-
-      setAuctionDetails(auctionData);
-
-      console.log("Auction Data:", auctionData);
-    } catch (e) {
-      console.error("Error fetching auction interval:", e);
-    }
-  };
-
-  console.log("Auction Data in c156", auctionDetails);
-  console.log("all contracts", AllContracts);
-  const AuctionTimeLeft = async () => {
-    try {
-      const auctionTimes = {};
-
-      for (const { name, contract } of contracts) {
-        auctionTimes[name] = Number(await contract.getTimeLeftInAuction());
-      }
-
-      setAuctionTimeLeft(auctionTimes);
-      console.log("Auction Times Left:", auctionTimes);
-    } catch (e) {
-      console.error("Error fetching auction time:", e);
-    }
-  };
-
-  /*----------------------------------- Burn Functions------------------------------------- */
-
-  const TotalTokensBurn = async () => {
-    try {
-      const results = await Promise.all(
+      const auctionData = await Promise.all(
         contracts.map(async ({ name, contract }) => {
-          const TotalTokensBurnedd = await contract.getTotalTokensBurned();
-          const totalTokensBurned = ethers.formatUnits(TotalTokensBurnedd, 18);
-          console.log("token name", name);
+          const [auctionInterval, auctionDuration, nextAuctionStart] =
+            await Promise.all([
+              contract.auctionInterval(),
+              contract.auctionDuration(),
+              contract.getNextAuctionStart(),
+            ]);
 
           return {
-            name,
-            TotalTokensBurned:
-              name === "OneDollar" || name === "TenDollar"
-                ? Number(totalTokensBurned)
-                : Math.floor(totalTokensBurned),
+            [name]: {
+              auctionInterval,
+              auctionDuration,
+              nextAuctionStart:
+                nextAuctionStart !== 0
+                  ? formatTimestamp(nextAuctionStart)
+                  : "0",
+            },
           };
         })
       );
 
-      const newStates = results.reduce((acc, { name, TotalTokensBurned }) => {
-        acc[name] = TotalTokensBurned;
-        return acc;
-      }, {});
+      const formattedData = auctionData.reduce(
+        (acc, curr) => ({ ...acc, ...curr }),
+        {}
+      );
+      setAuctionDetails(formattedData);
+      console.log("Auction Details:", formattedData);
+    } catch (e) {
+      console.error("Error fetching auction interval:", e);
+    }
+  }, [contracts]);
 
-      console.log("state of burn", newStates);
-      setTotalTokenBurned(newStates); // Update state with the combined object
-      console.log("Updated burn occurrences:", newStates);
+  const AuctionTimeLeft = useCallback(async () => {
+    try {
+      const auctionTimes = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          return { [name]: Number(await contract.getTimeLeftInAuction()) };
+        })
+      );
+
+      const formattedTimes = auctionTimes.reduce(
+        (acc, curr) => ({ ...acc, ...curr }),
+        {}
+      );
+      setAuctionTimeLeft(formattedTimes);
+      console.log("Auction Times Left:", formattedTimes);
+    } catch (e) {
+      console.error("Error fetching auction time:", e);
+    }
+  }, [contracts]);
+
+  /* ----------------------------------- Burn Functions ----------------------------------- */
+
+  const TotalTokensBurn = useCallback(async () => {
+    try {
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          const totalBurned = await contract.getTotalTokensBurned();
+          const formattedBurned = ethers.formatUnits(totalBurned, 18);
+          return {
+            [name]:
+              name === "OneDollar" || name === "TenDollar"
+                ? Number(formattedBurned)
+                : Math.floor(formattedBurned),
+          };
+        })
+      );
+
+      const newState = results.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+      setTotalTokenBurned(newState);
+      console.log("Updated Burned Tokens:", newState);
     } catch (e) {
       console.error("Error fetching burn status:", e);
     }
-  };
+  }, [contracts]);
+
+  /* ----------------------------------- Auto Updates ----------------------------------- */
+
+  const fetchData = useCallback(async () => {
+    try {
+      await Promise.all([
+        isAuctionRunning(),
+        AuctionTimeInterval(),
+        AuctionTimeLeft(),
+        TotalTokensBurn(),
+      ]);
+    } catch (error) {
+      console.error("Error fetching auction and burn data:", error);
+    }
+  }, [isAuctionRunning, AuctionTimeInterval, AuctionTimeLeft, TotalTokensBurn]);
+
+  useEffect(() => {
+    if (contracts.length > 0) {
+      fetchData();
+      const interval = setInterval(fetchData, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [fetchData]);
+
+  /* ----------------------------------- Provider Return ----------------------------------- */
 
   GeneralAuctionProvider.propTypes = {
     children: PropTypes.node.isRequired,
   };
+
   return (
     <GeneralAuctionFunctions.Provider
       value={{
@@ -243,5 +192,6 @@ export const GeneralAuctionProvider = ({ children }) => {
     </GeneralAuctionFunctions.Provider>
   );
 };
+
 export const useGeneralAuctionFunctions = () =>
   useContext(GeneralAuctionFunctions);

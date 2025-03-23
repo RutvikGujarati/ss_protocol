@@ -15,23 +15,19 @@ export const GeneralTokenProvider = ({ children }) => {
     state: "0.0",
     Fluxin: "0.0",
     Xerion: "0.0",
-    Currus: "0.0",
     Rieva: "0.0",
     TenDollar: "0.0",
-    oneD: "0.0",
+    OneDollar: "0.0",
   });
   const contracts = {
     state: AllContracts.stateContract,
     dav: AllContracts.davContract,
     Fluxin: AllContracts.FluxinContract,
-    Rieva: AllContracts.RievaContract,
     TenDollar: AllContracts.TenDollarContract,
     Domus: AllContracts.DomusContract,
-    Currus: AllContracts.CurrusContract,
     oneD: AllContracts.oneDollar,
     FluxinRatio: AllContracts.RatioContract,
     TenDollarRatio: AllContracts.TenDollarRatioContract,
-    CurrusRatio: AllContracts.CurrusRatioContract,
     Xerion: AllContracts.XerionContract,
   };
   const fetchTotalSupplies = async () => {
@@ -162,16 +158,35 @@ export const GeneralTokenProvider = ({ children }) => {
   };
   const mintAdditionalTOkens = async (contractType, amount) => {
     try {
-      const contract = contracts[contractType];
-      if (!contract) throw new Error("Invalid contract type");
+      const amountInWei = ethers.parseUnits(amount.toString(), 18);
+      let contract;
 
-      const tx = await contract.mintAdditionalTOkens(
-        ethers.parseUnits(amount.toString(), 18)
-      );
+      // Select the correct contract based on contractType
+      if (contractType === "fluxin") {
+        contract = AllContracts.FluxinContract;
+      } else if (contractType === "state") {
+        contract = AllContracts.stateContract;
+      } else if (contractType === "Xerion") {
+        contract = AllContracts.XerionContract;
+      } else if (contractType === "oneD") {
+        contract = AllContracts.oneDollar;
+      } else if (contractType === "Rieva") {
+        contract = AllContracts.RievaContract;
+      } else if (contractType === "Domus") {
+        contract = AllContracts.DomusContract;
+      } else if (contractType === "TenDollar") {
+        contract = AllContracts.TenDollarContract;
+      }
+
+      if (!contract) {
+        throw new Error("Invalid contract type");
+      }
+
+      const tx = await contract.mintAdditionalTOkens(amountInWei);
       await tx.wait();
       await fetchTotalSupplies();
     } catch (e) {
-      console.error("Error minting tokens:", e);
+      console.error(`Error minting with method mintAdditionalTOkens:`, e);
     }
   };
 
@@ -182,7 +197,6 @@ export const GeneralTokenProvider = ({ children }) => {
         { name: "Xerion", contract: AllContracts.XerionRatioContract },
         { name: "Rieva", contract: AllContracts.RievaRatioContract },
         { name: "TenDollar", contract: AllContracts.TenDollarRatioContract },
-        { name: "Currus", contract: AllContracts.CurrusRatioContract },
         { name: "Domus", contract: AllContracts.DomusRatioContract },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
@@ -201,7 +215,7 @@ export const GeneralTokenProvider = ({ children }) => {
       }
 
       setCurrentRatio(currentRP);
-      console.log("Ratio of token in ETH:", currentRP.Fluxin);
+      console.log("Ratio of token in ETH:", currentRP.OneDollar);
     } catch (e) {
       console.error("Error fetching ratio:", e);
     }
@@ -226,6 +240,7 @@ export const GeneralTokenProvider = ({ children }) => {
         mintAdditionalTOkens,
         Distributed,
         CurrentRatioPrice,
+		contracts,
       }}
     >
       {children}
