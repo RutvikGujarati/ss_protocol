@@ -21,10 +21,10 @@ const DeepStateTable = () => {
               <th>Buys</th>
               <th></th>
               <th>LPT Amount</th>
-              <th>ETH Cost</th>
+              <th>PLS Cost</th>
               <th>Buy Price</th>
-              <th>Current Value(PLS)</th>
-              <th>Profit/Loss</th>
+              <th>Current Value (PLS)</th>
+              <th>Profit/Loss (PLS)</th>
               <th>Action</th>
             </tr>
           </thead>
