@@ -22,8 +22,7 @@ const InfoCards = () => {
   const {
     PLSPrice,
     BuyTokens,
-    Reinvest,
-
+    ReinvestETH,
     balanceOfContract,
     UsersTokens,
     UsersDividends,
@@ -150,7 +149,7 @@ const InfoCards = () => {
     setWithdrawAMount("");
   };
   const handleReinvest = async () => {
-    await Reinvest(ReinvestAmount);
+    await ReinvestETH(ReinvestAmount);
     setReinvestAmount("");
   };
   const {

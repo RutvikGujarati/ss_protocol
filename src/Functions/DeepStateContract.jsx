@@ -126,6 +126,20 @@ export const DeepStateProvider = ({ children }) => {
       setSellLoading(false);
     }
   };
+  const ReinvestETH = async (amount) => {
+    try {
+      setSellLoading(true);
+      const amountInWei = ethers.parseUnits(amount.toString(), 18);
+      const tx = await AllContracts.DeepStateContract.reinvest(amountInWei);
+      await tx.wait();
+      await fetchContractBalance();
+      await fetchUserData();
+    } catch (error) {
+      console.error("Error selling tokens:", error);
+    } finally {
+      setSellLoading(false);
+    }
+  };
 
   // Buy tokens
   const BuyTokens = async (amount) => {
@@ -182,6 +196,7 @@ export const DeepStateProvider = ({ children }) => {
         PLSPrice,
         BuyTokens,
         totalBuyCounts,
+		ReinvestETH,
         SellLoading,
         WithdrawDividends,
         TotalUserProfit,
