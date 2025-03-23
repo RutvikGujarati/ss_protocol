@@ -6,7 +6,7 @@ import { ethers } from "ethers"; // Import ethers for conversion
 
 export const useTokens = (userTotalBuyCounts) => {
 	const { AllContracts, account } = useContext(ContractContext);
-	const { CurrentSellprice } = useDeepStateFunctions();
+	const { CurrentSellPrice } = useDeepStateFunctions();
 	const [buyRecords, setBuyRecords] = useState([]);
 
 	// Define a function to fetch buy records
@@ -31,7 +31,7 @@ export const useTokens = (userTotalBuyCounts) => {
 					EthCost: Number(ethCostETH).toFixed(2),
 					LPTAmount: Number(tokenAmountETH).toFixed(0),
 					isSold:sold,
-					CurrentValue: (Number(CurrentSellprice) * Number(tokenAmountETH)).toFixed(8),
+					CurrentValue: (Number(CurrentSellPrice) * Number(tokenAmountETH)).toFixed(8),
 					ProfitLoss: Number(profitOrLossETH).toFixed(5),
 					logo: FluxinLogo,
 				});
@@ -40,7 +40,7 @@ export const useTokens = (userTotalBuyCounts) => {
 			}
 		}
 		setBuyRecords(records);
-	}, [AllContracts, account, userTotalBuyCounts, CurrentSellprice]); // Add dependencies
+	}, [AllContracts, account, userTotalBuyCounts, CurrentSellPrice]); // Add dependencies
 
 	// Run the effect whenever `userTotalBuyCounts` changes
 	useEffect(() => {

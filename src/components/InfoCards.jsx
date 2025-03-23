@@ -17,25 +17,23 @@ import { useDeepStateFunctions } from "../Functions/DeepStateContract";
 import { ContractContext } from "../Functions/ContractInitialize";
 const InfoCards = () => {
   const chainId = useChainId();
-  const { AllContracts, account } = useContext(ContractContext);
+  const { AllContracts } = useContext(ContractContext);
   const { stateUsdPrice, priceLoading } = useContext(PriceContext);
   const {
     PLSPrice,
     BuyTokens,
     Reinvest,
-    CalculateBalanceInUSD,
+
     balanceOfContract,
     UsersTokens,
-    UsersTotalTokens,
     UsersDividends,
     TotalInvested,
     WithdrawDividends,
-    CurrentSellprice,
-    CurrentBuyprice,
+    CurrentSellPrice,
+    CurrentBuyPrice,
     TotalUserProfit,
-    totalBStuckEth,
+    totalStuckEth,
   } = useDeepStateFunctions();
-  const [CurrentBuyPrice, setCurrentBuyPrice] = useState("0");
 
   const [setBurnRatio] = useState("0.0");
   const {
@@ -86,7 +84,6 @@ const InfoCards = () => {
       setReinvestAmount("");
     }
   };
-  CalculateBalanceInUSD();
   const getLogoSize = () => {
     return chainId === 56
       ? { width: "170px", height: "140px" } // Bigger size for BNB
@@ -102,6 +99,21 @@ const InfoCards = () => {
     }
   };
   const [estimatedLPT, setEstimatedLPT] = useState("0.00");
+  const calculateNetPLSGains = (
+    TotalUserProfit,
+    CurrentSellPrice,
+    UsersTokens,
+    TotalInvested
+  ) => {
+    // Ensure all values are numbers, defaulting to 0 if undefined/null
+    const profit = Number(TotalUserProfit) || 0;
+    const sellPrice = Number(CurrentSellPrice) || 0;
+    const tokens = Number(UsersTokens) || 0;
+    const invested = Number(TotalInvested) || 0;
+
+    const tokenValue = sellPrice * tokens;
+    return (profit + tokenValue - invested).toFixed(2);
+  };
 
   useEffect(() => {
     const fetchEstimate = async () => {
@@ -128,18 +140,19 @@ const InfoCards = () => {
     fetchEstimate();
   }, [Denominator]);
 
-  const CurrentBuy = async () => {
-    try {
-      const userAmount = await AllContracts.DeepStateContract.buyPrice(); // Get amount in Wei
-      const formattedAmount = ethers.formatEther(userAmount); // Convert to ETH
-      setCurrentBuyPrice(formattedAmount); // Store in state
-      console.log("User's total tokens in ETH:", formattedAmount);
-    } catch (error) {
-      console.log("Error fetching tokens amount:", error);
-    }
-  };
   const liveText = getLiveText();
-
+  const handleBuyTokens = async () => {
+    await BuyTokens(Denominator);
+    setDenominator("");
+  };
+  const handleWithDraw = async () => {
+    await WithdrawDividends(WithdrawAmount);
+    setWithdrawAMount("");
+  };
+  const handleReinvest = async () => {
+    await Reinvest(ReinvestAmount);
+    setReinvestAmount("");
+  };
   const {
     handleAddTokenState,
     handleAddTokenDAV,
@@ -269,8 +282,6 @@ const InfoCards = () => {
   }
 
   useEffect(() => {
-    UsersTotalTokens();
-    CurrentBuy();
     CalculationOfCost(amount);
     calculateBurnRatio();
   }, [amount]);
@@ -574,7 +585,7 @@ const InfoCards = () => {
                       <p className="mb-1 detailText">Treasury</p>
                       <p className="mb-0 detailAmount">
                         {" "}
-                        Total ETH Invested : {TotalInvested} ETH
+                        Total PLS Invested : {TotalInvested} PLS
                       </p>
                       <p className="mb-0 detailAmount">
                         {" "}
@@ -582,19 +593,32 @@ const InfoCards = () => {
                       </p>
                       <p className="mb-0 detailAmount">
                         {" "}
-                        Contract ETH Balance :{" "}
-                        {Number(balanceOfContract).toFixed(2)} ETH
+                        Contract PLS Balance :{" "}
+                        {Number(balanceOfContract).toFixed(1)} PLS
                       </p>
                     </div>
                     <div className="carddetails2">
                       <p className="mb-1 detailText detailAmount">
                         Price Information
                       </p>
-                      <p className="mb-0 detailAmount">
-                        Current Buy Price: {CurrentBuyprice} ETH
+                      <p
+                        className="mb-0 detailAmount"
+                        style={{ fontSize: "12px" }}
+                      >
+                        PLS Price : $ {""}
+                        {(Number(PLSPrice) || 0).toFixed(6)} {""}
                       </p>
-                      <p className="mb-0 detailAmount">
-                        Current Sell Price: {CurrentSellprice} ETH
+                      <p
+                        className="mb-0 detailAmount"
+                        style={{ fontSize: "12px" }}
+                      >
+                        Current Buy Price: {CurrentBuyPrice} PLS
+                      </p>
+                      <p
+                        className="mb-0 detailAmount"
+                        style={{ fontSize: "12px" }}
+                      >
+                        Current Sell Price: {CurrentSellPrice} PLS
                       </p>
                     </div>
                   </div>
@@ -607,18 +631,25 @@ const InfoCards = () => {
                       <p className="mb-1 detailText detailAmount">
                         Price Summary
                       </p>
-                      <p className="mb-0 detailAmount">
-                        Total ETH Profit : {TotalUserProfit} ETH
+                      <p className="mb-0 detailAmount ">
+                        Total PLS Profit : {TotalUserProfit} PLS
                       </p>
                       <p className="mb-0 detailAmount">
-                        PLS Price : $ {""}
-                        {(Number(PLSPrice) || 0).toFixed(6)} {""}
+                        NET PLS GAINS : {""}
+                        {calculateNetPLSGains(
+                          TotalUserProfit,
+                          CurrentSellPrice,
+                          UsersTokens,
+                          TotalInvested
+                        )}{" "}
+                        PLS
                       </p>
+
                       <p className="mb-0 detailAmount">
                         LPT Value : ${" "}
-                        {(Number(PLSPrice) * Number(UsersTokens) || 0).toFixed(
-                          2
-                        )}
+                        {(
+                          Number(CurrentSellPrice) * Number(UsersTokens) || 0
+                        ).toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -631,18 +662,19 @@ const InfoCards = () => {
                       {/* Buy Section */}
                       <div className="d-flex align-items-center justify-content-between">
                         <p className="mb-0 detailText">BUY </p>
-                        <p className="mb-0 detailAmount">
+                        <p className="mb-0 detailAmount px-3">
                           Est. LPT: {estimatedLPT}
                         </p>
+
                         <p className="mb-0 mt-1 mx-1 detailAmount">
-                          (@ {CurrentBuyPrice} ETH)
+                          (@ {CurrentBuyPrice} PLS)
                         </p>
                       </div>
                       <div className="d-flex align-items-center justify-content-between mt-1">
                         <input
                           type="text"
                           className="form-control text-center mh-30"
-                          placeholder="Enter ETH "
+                          placeholder="Enter PLS "
                           value={
                             Denominator
                               ? Number(Denominator).toLocaleString()
@@ -652,7 +684,7 @@ const InfoCards = () => {
                           style={{ width: "50%" }}
                         />
                         <button
-                          onClick={() => BuyTokens(Denominator)}
+                          onClick={() => handleBuyTokens()}
                           className="swap-btn py-1 mx-1 btn btn-primary"
                           style={{ width: "30%" }}
                         >
@@ -663,15 +695,15 @@ const InfoCards = () => {
                       {/* Withdraw Section */}
                       <div className="d-flex align-items-center justify-content-start">
                         <p className="mt-1 mb-1 detailText">WITHDRAW</p>
-                        <p className="mb-0 detailAmount mx-5">
-                          {UsersDividends} ETH
+                        <p className="mb-0 detailAmount mx-5 px-1">
+                          {UsersDividends} PLS
                         </p>
                       </div>
                       <div className="d-flex align-items-center justify-content-between mt-1">
                         <input
                           type="text"
                           className="form-control text-center mh-30"
-                          placeholder="Enter ETH"
+                          placeholder="Enter PLS"
                           style={{ width: "50%" }}
                           value={WithdrawAmount}
                           onChange={(e) => handleInputChangeofWithdraw(e)}
@@ -680,7 +712,7 @@ const InfoCards = () => {
                           className="swap-btn py-1 btn btn-primary"
                           style={{ width: "32%" }}
                           onClick={() => {
-                            WithdrawDividends(WithdrawAmount);
+                            handleWithDraw();
                           }}
                         >
                           Withdraw
@@ -690,15 +722,15 @@ const InfoCards = () => {
                       {/* Re-Invest Section */}
                       <div className="d-flex align-items-center justify-content-start">
                         <p className="mt-1 mb-1 detailText">RE-INVEST</p>
-                        <p className="mb-0 detailAmount mx-5">
-                          {totalBStuckEth} ETH
+                        <p className="mb-0 detailAmount mx-5 px-2">
+                          {totalStuckEth} PLS
                         </p>
                       </div>
                       <div className="d-flex align-items-center justify-content-between mt-1">
                         <input
                           type="text"
                           className="form-control text-center mh-30"
-                          placeholder="Enter ETH"
+                          placeholder="Enter PLS"
                           style={{ width: "50%" }}
                           value={ReinvestAmount}
                           onChange={(e) => {
@@ -709,7 +741,7 @@ const InfoCards = () => {
                           className="swap-btn py-1 btn btn-primary mx-1"
                           style={{ width: "30%" }}
                           onClick={() => {
-                            Reinvest(ReinvestAmount);
+                            handleReinvest();
                           }}
                         >
                           Re-Invest

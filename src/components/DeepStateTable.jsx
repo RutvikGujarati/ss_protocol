@@ -1,18 +1,14 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
-import { useContext, useEffect } from "react";
-import { ContractContext } from "../Functions/ContractInitialize";
+
 import { useTokens } from "../data/BurntokenData";
 import { useDeepStateFunctions } from "../Functions/DeepStateContract";
 
 const DeepStateTable = () => {
-  const { AllContracts, account } = useContext(ContractContext);
-  const { totalBuyCounts, userTotalBuyCounts, SellTokens } =
+  const { totalBuyCounts, SellTokens } =
     useDeepStateFunctions();
 
-  useEffect(() => {
-    userTotalBuyCounts();
-  }, [account, AllContracts]);
+
 
   const tokens = useTokens(totalBuyCounts);
 
@@ -27,7 +23,7 @@ const DeepStateTable = () => {
               <th>LPT Amount</th>
               <th>ETH Cost</th>
               <th>Buy Price</th>
-              <th>Current Value</th>
+              <th>Current Value(PLS)</th>
               <th>Profit/Loss</th>
               <th>Action</th>
             </tr>

@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import PropTypes from "prop-types";
 import { ContractContext } from "./ContractInitialize";
 import { ethers } from "ethers";
@@ -7,270 +13,162 @@ export const DeepStateFunctions = createContext();
 
 export const DeepStateProvider = ({ children }) => {
   const { AllContracts, signer, account } = useContext(ContractContext);
+
   const [PLSPrice, setPLSPrice] = useState("0");
-  const [balanceOfContract, setbalanceOfContract] = useState("0");
+  const [balanceOfContract, setBalanceOfContract] = useState("0");
   const [PLSUSD, setPLSUSD] = useState("0");
   const [DividendsUSD, setDividendsUSD] = useState("0");
-  const [EstimatedAmount, setEstimatedAMount] = useState("0");
+  const [EstimatedAmount, setEstimatedAmount] = useState("0");
   const [UsersTokens, setUsersTokens] = useState("0");
-  const [CurrentBuyprice, setCurrentBuyPrice] = useState("0");
-  const [CurrentSellprice, setCurrentesellPrice] = useState("0");
+  const [CurrentBuyPrice, setCurrentBuyPrice] = useState("0");
+  const [CurrentSellPrice, setCurrentSellPrice] = useState("0");
   const [UsersDividends, setUsersDividends] = useState("0");
   const [TotalInvested, setTotalInvested] = useState("0");
-  const [Sellloading, setSellLoading] = useState(false);
-  const [Withdrawloading, setWithdrawLoading] = useState(false);
-  console.log("AllContracts from deepstate", AllContracts.DeepStateContract);
+  const [SellLoading, setSellLoading] = useState(false);
+  const [WithdrawLoading, setWithdrawLoading] = useState(false);
+  const [totalBuyCounts, setTotalBuyCounts] = useState(0);
+  const [totalStuckEth, setTotalStuckETH] = useState(0);
+  const [TotalUserProfit, setUserProfit] = useState(0);
 
-  const contractBalance = async () => {
-    try {
-      if (!AllContracts || !AllContracts.DeepStateContract) {
-        console.log("DeepStateContract is not initialized.");
-        return;
-      }
-
-      const userAmount =
-        await AllContracts.DeepStateContract.getContractBalance();
-      const formattedBalance = ethers.formatEther(userAmount);
-
-      console.log("deepstate balance:", userAmount);
-      setbalanceOfContract(formattedBalance);
-    } catch (error) {
-      console.log("error in fetching deepState Balance:", error);
-    }
-  };
-  const CalculateBalanceInUSD = async () => {
-    try {
-      const balanceInUSD = parseFloat(balanceOfContract) * PLSPrice; // Convert to USD
-      console.log("DeepState Contract Balance in USD:", balanceOfContract);
-      setPLSUSD(balanceInUSD.toFixed(8));
-    } catch (error) {
-      console.log("Error calculating balance in USD:", error);
-      return "0.00";
-    }
-  };
-
-  const SellTokens = async (amount) => {
-    try {
-      setSellLoading(true);
-      const tx = await AllContracts.DeepStateContract.sell(amount);
-      await tx.wait();
-      await contractBalance(),
-        CalculateBalanceInUSD(),
-        StuckEthOfUser(),
-        setSellLoading(false);
-      userTotalBuyCounts();
-    } catch (error) {
-      console.log("Error in buying tokens:", error);
-      setSellLoading(false);
-    } finally {
-      setSellLoading(false);
-    }
-  };
-  const fetchPLSPrice = async () => {
+  // Fetch PLS price from API
+  const fetchPLSPrice = useCallback(async () => {
     try {
       const response = await fetch(
         "https://api.coingecko.com/api/v3/simple/price?ids=pulsechain&vs_currencies=usd"
       );
       const data = await response.json();
-      console.log("PLS price :", data.pulsechain.usd);
       setPLSPrice(data.pulsechain.usd);
     } catch (error) {
-      console.log("Error fetching PLS price:", error);
-      return 0; // Return 0 in case of an error
+      console.error("Error fetching PLS price:", error);
+    }
+  }, []);
+
+  // Fetch contract balance
+  const fetchContractBalance = useCallback(async () => {
+    if (!AllContracts?.DeepStateContract) return;
+    try {
+      const balance = await AllContracts.DeepStateContract.getContractBalance();
+      setBalanceOfContract(ethers.formatEther(balance));
+    } catch (error) {
+      console.error("Error fetching contract balance:", error);
+    }
+  }, [AllContracts]);
+
+  // Fetch user-specific data (tokens, dividends, invested, etc.)
+  const fetchUserData = useCallback(async () => {
+    if (!AllContracts?.DeepStateContract || !account) return;
+    try {
+      const [tokens, dividends, invested, buyCounts, stuckEth, profit] =
+        await Promise.all([
+          AllContracts.DeepStateContract.balanceOf(account),
+          AllContracts.DeepStateContract.dividendsOf(account),
+          AllContracts.DeepStateContract.getInvestedEth(account),
+          AllContracts.DeepStateContract.getUserBuyCount(account),
+          AllContracts.DeepStateContract.sellProceeds(account),
+          AllContracts.DeepStateContract.getUserProfit(account),
+        ]);
+      setUsersTokens(Math.trunc(Number(ethers.formatEther(tokens))));
+      setUsersDividends(parseFloat(ethers.formatEther(dividends)).toFixed(4));
+      setTotalInvested(parseFloat(ethers.formatEther(invested)).toFixed(1));
+      setTotalBuyCounts(parseFloat(buyCounts));
+      setTotalStuckETH(parseFloat(ethers.formatEther(stuckEth)).toFixed(4));
+      setUserProfit(parseFloat(ethers.formatEther(profit)).toFixed(2));
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  }, [AllContracts, account]);
+
+  // Fetch buy/sell price
+  const fetchBuySellPrice = useCallback(async () => {
+    if (!AllContracts?.DeepStateContract) return;
+    try {
+      const [buyPrice, sellPrice] = await Promise.all([
+        AllContracts.DeepStateContract.buyPrice(),
+        AllContracts.DeepStateContract.sellPrice(),
+      ]);
+      console.log("all set values", ethers.formatEther(buyPrice));
+
+      setCurrentBuyPrice(ethers.formatEther(buyPrice));
+      setCurrentSellPrice(ethers.formatEther(sellPrice));
+    } catch (error) {
+      console.error("Error fetching buy/sell price:", error);
+    }
+  }, [AllContracts]);
+
+  // Calculate USD values
+  const calculateUSDValues = useCallback(() => {
+    setPLSUSD((parseFloat(balanceOfContract) * PLSPrice).toFixed(8));
+    setDividendsUSD((parseFloat(UsersDividends) * PLSPrice).toFixed(8));
+  }, [balanceOfContract, PLSPrice, UsersDividends]);
+
+  useEffect(() => {
+    fetchPLSPrice();
+    fetchContractBalance();
+    fetchUserData();
+    fetchBuySellPrice();
+  }, [fetchPLSPrice, fetchContractBalance, fetchUserData, fetchBuySellPrice]);
+
+  useEffect(() => {
+    calculateUSDValues();
+  }, [balanceOfContract, PLSPrice, UsersDividends, calculateUSDValues]);
+
+  // Sell tokens
+  const SellTokens = async (amount) => {
+    try {
+      setSellLoading(true);
+      const tx = await AllContracts.DeepStateContract.sell(amount);
+      await tx.wait();
+      await fetchContractBalance();
+      await fetchUserData();
+    } catch (error) {
+      console.error("Error selling tokens:", error);
+    } finally {
+      setSellLoading(false);
     }
   };
+
+  // Buy tokens
+  const BuyTokens = async (amount) => {
+    try {
+      const amountInWei = ethers.parseUnits(amount.toString(), 18);
+      const tx = await signer.sendTransaction({
+        to: AllContracts.DeepStateContract.target,
+        value: amountInWei,
+      });
+      await tx.wait();
+      await fetchContractBalance();
+      await fetchUserData();
+    } catch (error) {
+      console.error("Error buying tokens:", error);
+    }
+  };
+
+  // Withdraw dividends
   const WithdrawDividends = async (amount) => {
     try {
       setWithdrawLoading(true);
       const amountInWei = ethers.parseUnits(amount.toString(), 18);
       const tx = await AllContracts.DeepStateContract.withdraw(amountInWei);
       await tx.wait();
-      await UsersTotalDividends();
-      setWithdrawLoading(false);
+      await fetchUserData();
     } catch (error) {
-      console.log("Error in buying tokens:", error);
-      setWithdrawLoading(false);
+      console.error("Error withdrawing dividends:", error);
     } finally {
       setWithdrawLoading(false);
     }
   };
 
-  const UsersTotalTokens = async () => {
-    try {
-      const userAmount = await AllContracts.DeepStateContract.balanceOf(
-        account
-      ); // Get amount in Wei
-      const formattedAmount = Math.trunc(
-        Number(ethers.formatEther(userAmount))
-      ); // Convert to ETH and remove decimals
-      setUsersTokens(formattedAmount); // Store in state
-      console.log("User's total tokens in ETH:", formattedAmount);
-    } catch (error) {
-      console.log("Error fetching tokens amount:", error);
-    }
-  };
-  const CurrentBuySellPrice = async () => {
-    try {
-      const userAmount = await AllContracts.DeepStateContract.buyPrice(); // Get amount in Wei
-      const formattedAmount = ethers.formatEther(userAmount); // Convert to ETH
-      setCurrentBuyPrice(formattedAmount); // Store in state
-
-      const SellAMount = await AllContracts.DeepStateContract.sellPrice(); // Get amount in Wei
-      const formattedSellAmount = ethers.formatEther(SellAMount); // Convert to ETH
-      setCurrentesellPrice(formattedSellAmount); // Store in state
-      console.log("User's total tokens in ETH:", formattedAmount);
-    } catch (error) {
-      console.log("Error fetching tokens amount:", error);
-    }
-  };
-  const UsersTotalDividends = async () => {
-    try {
-      if (!AllContracts?.DeepStateContract) return;
-      const userAmount = await AllContracts.DeepStateContract.dividendsOf(
-        account
-      );
-      console.log("my dividends", userAmount);
-      setUsersDividends(parseFloat(ethers.formatEther(userAmount)).toFixed(4));
-    } catch (error) {
-      console.error("Error fetching dividends:", error);
-      setUsersDividends("0");
-    }
-  };
-  const userTotalInvested = async () => {
-    try {
-      if (!AllContracts?.DeepStateContract) return;
-      const userAmount = await AllContracts.DeepStateContract.getInvestedEth(
-        account
-      );
-      setTotalInvested(parseFloat(ethers.formatEther(userAmount)).toFixed(1));
-    } catch (error) {
-      console.error("Error fetching dividends:", error);
-      setTotalInvested("0");
-    }
-  };
-
-  const CalculateDividendsInUSD = async () => {
-    try {
-      const balanceInUSD = parseFloat(UsersDividends) * PLSPrice; // Convert to USD
-      console.log(
-        "DeepState Contract Balance in USD:",
-        balanceInUSD.toFixed(4)
-      );
-      setDividendsUSD(balanceInUSD.toFixed(8));
-    } catch (error) {
-      console.log("Error calculating balance in USD:", error);
-      return "0.00";
-    }
-  };
+  // Estimate token amount
   const CalculateEstimateTokenAmount = async (amount) => {
     try {
       const amountInWei = ethers.parseUnits(amount.toString(), 18);
-      const userAmount =
+      const estimatedTokens =
         await AllContracts.DeepStateContract.estimateTokensToBuy(amountInWei);
-      setEstimatedAMount(userAmount);
+      setEstimatedAmount(estimatedTokens);
     } catch (error) {
-      console.log("Error calculating balance in USD:", error);
-      return "0.00";
+      console.error("Error estimating token amount:", error);
     }
   };
-  const [totalBuyCounts, setTotalBuyCounts] = useState(0);
-  const [totalBStuckEth, setTotalStuckETH] = useState(0);
-  const [TotalUserProfit, setUserProfit] = useState(0);
-
-  const userTotalBuyCounts = async () => {
-    try {
-      if (!AllContracts?.DeepStateContract || !account) return;
-      const userAmount = await AllContracts.DeepStateContract.getUserBuyCount(
-        account
-      );
-      console.log("user buy counts", parseFloat(userAmount));
-      setTotalBuyCounts(parseFloat(userAmount));
-    } catch (error) {
-      console.error("Error fetching buy counts:", error);
-      setTotalBuyCounts(0);
-    }
-  };
-  const StuckEthOfUser = async () => {
-    try {
-      if (!AllContracts?.DeepStateContract || !account) return;
-      const userAmount = await AllContracts.DeepStateContract.sellProceeds(
-        account
-      );
-      console.log("user stuck ETh", parseFloat(userAmount));
-      setTotalStuckETH(parseFloat(ethers.formatEther(userAmount)).toFixed(2));
-    } catch (error) {
-      console.error("Error fetching buy counts:", error);
-      setTotalStuckETH(0);
-    }
-  };
-  const UsersProfit = async () => {
-    try {
-      if (!AllContracts?.DeepStateContract || !account) return;
-      const userAmount = await AllContracts.DeepStateContract.getUserProfit(
-        account
-      );
-      console.log("user stuck ETh", parseFloat(userAmount));
-      setUserProfit(parseFloat(ethers.formatEther(userAmount)).toFixed(2));
-    } catch (error) {
-      console.error("Error fetching buy counts:", error);
-      setUserProfit(0);
-    }
-  };
-
-  const BuyTokens = async (amount) => {
-    try {
-      //   setLoading(true);
-      const amountInWei = ethers.parseUnits(amount.toString(), 18);
-      const tx = await signer.sendTransaction({
-        to: AllContracts.DeepStateContract.target, // Contract address
-        value: amountInWei, // Sending ETH directly
-      });
-      await tx.wait();
-      await contractBalance();
-      await CalculateBalanceInUSD();
-      await userTotalBuyCounts();
-    } catch (error) {
-      console.log("Error in buying tokens:", error);
-    } finally {
-      //   setLoading(false);
-    }
-  };
-  const Reinvest = async (amount) => {
-    try {
-      //   setLoading(true);
-      const amountInWei = ethers.parseUnits(amount.toString(), 18);
-
-      const tx = await AllContracts.DeepStateContract.reinvest(amountInWei);
-      await tx.wait();
-      await contractBalance();
-      await userTotalBuyCounts();
-      await CalculateBalanceInUSD();
-      await StuckEthOfUser();
-    } catch (error) {
-      console.log("Error in buying tokens:", error);
-    } finally {
-      //   setLoading(false);
-    }
-  };
-  useEffect(() => {
-    const fetchData = async () => {
-      userTotalBuyCounts();
-      StuckEthOfUser();
-      userTotalInvested();
-      UsersProfit();
-      contractBalance();
-      await fetchPLSPrice();
-      await contractBalance();
-      CalculateBalanceInUSD();
-      await UsersTotalTokens();
-      await UsersTotalDividends();
-      CalculateDividendsInUSD();
-      UsersTotalDividends();
-      userTotalInvested();
-      CurrentBuySellPrice();
-    };
-    fetchData();
-  }, [balanceOfContract, PLSPrice, UsersDividends]);
 
   return (
     <DeepStateFunctions.Provider
@@ -278,24 +176,20 @@ export const DeepStateProvider = ({ children }) => {
         balanceOfContract,
         PLSUSD,
         UsersTokens,
-        UsersTotalTokens,
         UsersDividends,
         DividendsUSD,
-        CalculateBalanceInUSD,
         SellTokens,
         PLSPrice,
         BuyTokens,
         totalBuyCounts,
-        userTotalBuyCounts,
-        Sellloading,
+        SellLoading,
         WithdrawDividends,
         TotalUserProfit,
         TotalInvested,
-        totalBStuckEth,
-        CurrentSellprice,
-        CurrentBuyprice,
-        Reinvest,
-        Withdrawloading,
+        totalStuckEth,
+        CurrentSellPrice,
+        CurrentBuyPrice,
+        WithdrawLoading,
         CalculateEstimateTokenAmount,
         EstimatedAmount,
       }}

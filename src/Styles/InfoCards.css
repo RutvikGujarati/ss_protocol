@@ -142,3 +142,7 @@
   transform: scale(2);
   z-index: 999; /* Ensure it's above everything */
 }
+
+.fontSize {
+  font-size: 12px;
+}
