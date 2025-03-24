@@ -6,6 +6,7 @@ import { NavLink } from "react-router-dom";
 import pulsex from "../assets/pulsex.png";
 import { FaTelegramPlane } from "react-icons/fa";
 import { FaXTwitter, FaYoutube } from "react-icons/fa6";
+import { useState } from "react";
 // import { Tooltip } from "bootstrap";
 // import { useDAVToken } from "../Context/DavTokenContext";
 
@@ -21,6 +22,7 @@ const Header = () => {
   //       });
   //     });
   //   }, []);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
     <>
@@ -88,19 +90,32 @@ const Header = () => {
                   {/* <span className="active-dot"></span> */}
                 </NavLink>
               </li>
+			  <li
+      className="nav-item mx-2 dropdown position-relative"
+      onMouseEnter={() => setIsDropdownOpen(true)}
+      onMouseLeave={() => setIsDropdownOpen(false)}
+    >
+      <NavLink
+        className={({ isActive }) =>
+          isActive ? "nav-link active-link text-light d-flex align-items-center" : "nav-link text-light d-flex align-items-center"
+        }
+        to="/StateLp"
+      >
+        State LP
+        <span className={`dropdown-arrow ${isDropdownOpen ? "rotate-up" : "rotate-down"}`}>
+          ▼
+        </span>
+      </NavLink>
 
-              <li className="nav-item mx-2">
-                <NavLink
-                  className={({ isActive }) =>
-                    isActive
-                      ? "nav-link active-link text-light"
-                      : "nav-link text-light"
-                  }
-                  to="/StateLp"
-                >
-                  State LP
-                </NavLink>
-              </li>
+      <ul className={`dropdown-menu ${isDropdownOpen ? "show" : ""}`}>
+        <li>
+          <NavLink className="dropdown-item" to="/Harvesting">
+            Harvesting
+          </NavLink>
+        </li>
+      </ul>
+    </li>
+
               <li className="nav-item mx-2">
                 <NavLink
                   className={({ isActive }) =>
