@@ -19,6 +19,7 @@ import {
   RievaRatioAddress,
   STATE_TOKEN_ADDRESS,
   TenDollarRatioAddress,
+  Valir,
   Xerion,
   XerionRatioAddress,
 } from "../ContractAddresses";
@@ -97,6 +98,7 @@ export const SwapContractProvider = ({ children }) => {
     Fluxin: AllContracts.FluxinContract,
     Rieva: AllContracts.RievaContract,
     Domus: AllContracts.DomusContract,
+    Valir: AllContracts.ValirContract,
     Currus: AllContracts.CurrusContract,
     oneD: AllContracts.oneDollar,
     Xerion: AllContracts.XerionContract,
@@ -1588,6 +1590,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddDomus = () => handleAddToken(Domus, "Domus");
   const handleAddTenDollar = () => handleAddToken($10, "10$");
   const handleAddCurrus = () => handleAddToken(Currus, "Currus");
+  const handleAddValir = () => handleAddToken(Valir, "Valir");
 
   return (
     <SwapContractContext.Provider
@@ -1654,6 +1657,7 @@ export const SwapContractProvider = ({ children }) => {
         transactionStatus,
         setBurnRate,
         handleAddCurrus,
+		handleAddValir,
         // userHasReverseSwapped,
         isReversed,
         StateBurnBalance,

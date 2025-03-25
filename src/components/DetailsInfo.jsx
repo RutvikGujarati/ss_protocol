@@ -325,6 +325,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               dataToShow.tokenName == "10$" ||
               dataToShow.tokenName == "Domus" ||
               dataToShow.tokenName == "Currus" ||
+              dataToShow.tokenName == "Valir" ||
               dataToShow.tokenName == "Layti") && (
               <>
                 {dataToShow.tokenName !== "STATE" && (
@@ -388,6 +389,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           ? "Domus Balance (inside Contract)"
                           : dataToShow.tokenName === "Currus"
                           ? "Currus Balance (inside Contract)"
+                          : dataToShow.tokenName === "Valir"
+                          ? "Valir Balance (inside Contract)"
                           : "Orxa Balance (inside Contract)"}
                       </td>
 

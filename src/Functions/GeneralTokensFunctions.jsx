@@ -23,6 +23,7 @@ export const GeneralTokenProvider = ({ children }) => {
     state: AllContracts.stateContract,
     dav: AllContracts.davContract,
     Fluxin: AllContracts.FluxinContract,
+    Valir: AllContracts.ValirContract,
     TenDollar: AllContracts.TenDollarContract,
     Domus: AllContracts.DomusContract,
     oneD: AllContracts.oneDollar,
@@ -176,6 +177,8 @@ export const GeneralTokenProvider = ({ children }) => {
         contract = AllContracts.DomusContract;
       } else if (contractType === "TenDollar") {
         contract = AllContracts.TenDollarContract;
+      } else if (contractType === "Valir") {
+        contract = AllContracts.ValirContract;
       }
 
       if (!contract) {
@@ -240,7 +243,7 @@ export const GeneralTokenProvider = ({ children }) => {
         mintAdditionalTOkens,
         Distributed,
         CurrentRatioPrice,
-		contracts,
+        contracts,
       }}
     >
       {children}
