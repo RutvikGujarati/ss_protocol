@@ -633,7 +633,7 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase ">
                     <div className="carddetails2">
                       <p className="mb-1 detailText detailAmount">
-                        Price Summary
+					  PROFIT HARVESTING SUMMARY - PULSECHAIN
                       </p>
                       <p className="mb-0 detailAmount ">
                         Total PLS Profit : {TotalUserProfit} PLS

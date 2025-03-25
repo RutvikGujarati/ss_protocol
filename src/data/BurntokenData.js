@@ -31,7 +31,7 @@ export const useTokens = (userTotalBuyCounts) => {
 					EthCost: Number(ethCostETH).toFixed(2),
 					LPTAmount: Number(tokenAmountETH).toFixed(0),
 					isSold:sold,
-					CurrentValue: (Number(CurrentSellPrice) * Number(tokenAmountETH)).toFixed(8),
+					CurrentValue: (Number(CurrentSellPrice) * Number(tokenAmountETH)).toFixed(4),
 					ProfitLoss: Number(profitOrLossETH).toFixed(5),
 					logo: FluxinLogo,
 				});
