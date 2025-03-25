@@ -434,7 +434,7 @@ const InfoCards = () => {
                           color: "white",
                         },
                         {
-                          text: "Currus TOKEN DEPLOYED.",
+                          text: "Valir TOKEN DEPLOYED.",
                           color: "white",
                         //   image: RievaLogo,
                         },
