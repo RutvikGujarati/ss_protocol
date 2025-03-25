@@ -20,6 +20,7 @@ import {
   STATE_TOKEN_ADDRESS,
   TenDollarRatioAddress,
   Valir,
+  ValirRatioAddress,
   Xerion,
   XerionRatioAddress,
 } from "../ContractAddresses";
@@ -50,6 +51,7 @@ export const SwapContractProvider = ({ children }) => {
     Xerion: false,
     Rieva: false,
     Domus: false,
+    Valir: false,
     Currus: false,
     TenDollar: false,
     OneDollar: false,
@@ -59,6 +61,7 @@ export const SwapContractProvider = ({ children }) => {
     Xerion: false,
     Rieva: false,
     Currus: false,
+    Valir: false,
     Domus: false,
     TenDollar: false,
     OneDollar: false,
@@ -67,6 +70,7 @@ export const SwapContractProvider = ({ children }) => {
     Fluxin: false,
     Xerion: false,
     Rieva: false,
+    Valir: false,
     Currus: false,
     Domus: false,
     TenDollar: false,
@@ -101,13 +105,15 @@ export const SwapContractProvider = ({ children }) => {
     Valir: AllContracts.ValirContract,
     Currus: AllContracts.CurrusContract,
     oneD: AllContracts.oneDollar,
+    TenDollar: AllContracts.TenDollarContract,
     Xerion: AllContracts.XerionContract,
+
     FluxinRatio: AllContracts.RatioContract,
     RievaRatio: AllContracts.RievaRatioContract,
     DomusRatio: AllContracts.DomusRatioContract,
     CurrusRatio: AllContracts.CurrusRatioContract,
+    ValirRatio: AllContracts.ValirRatioContract,
     OneDollar: AllContracts.OneDollarRatioContract,
-    TenDollar: AllContracts.TenDollarContract,
     TenDollarRatio: AllContracts.TenDollarRatioContract,
     XerionRatio: AllContracts.XerionRatioContract,
   };
@@ -117,6 +123,7 @@ export const SwapContractProvider = ({ children }) => {
     Rieva: AllContracts.RievaRatioContract,
     Currus: AllContracts.CurrusRatioContract,
     Domus: AllContracts.DomusRatioContract,
+    ValirRatio: AllContracts.ValirRatioContract,
     OneDollar: AllContracts.OneDollarRatioContract,
     TenDollar: AllContracts.TenDollarRatioContract,
   };
@@ -127,6 +134,7 @@ export const SwapContractProvider = ({ children }) => {
     RievaRatio: AllContracts.RievaRatioContract,
     CurrusRatio: AllContracts.CurrusRatioContract,
     DomusRatio: AllContracts.DomusRatioContract,
+    ValirRatio: AllContracts.ValirRatioContract,
     OneDollarRatio: AllContracts.OneDollarRatioContract,
     TenDollarRatio: AllContracts.TenDollarRatioContract,
   };
@@ -263,14 +271,16 @@ export const SwapContractProvider = ({ children }) => {
       "Fluxin",
       "oneD",
       "Xerion",
+      "TenDollar",
       "Rieva",
       "Domus",
       "Currus",
+      "Valir",
       "FluxinRatio",
       "XerionRatio",
       "RievaRatio",
-      "TenDollar",
       "CurrusRatio",
+      "ValirRatio",
       "TenDollarRatio",
       "DomusRatio",
       "OneDollar",
@@ -343,6 +353,8 @@ export const SwapContractProvider = ({ children }) => {
     renounceOwnership(AllContracts.RievaContract, "Rieva");
   const ReanounceDomusContract = () =>
     renounceOwnership(AllContracts.DomusContract, "Domus");
+  const ReanounceValirContract = () =>
+    renounceOwnership(AllContracts.ValirContract, "Valir");
 
   const ReanounceOneDollarSwapContract = () =>
     renounceOwnership(AllContracts.OneDollarRatioContract, "1$");
@@ -360,6 +372,8 @@ export const SwapContractProvider = ({ children }) => {
     renounceOwnership(AllContracts.DomusRatioContract, "DomusRatio");
   const RenounceCurrusSwap = () =>
     renounceOwnership(AllContracts.CurrusRatioContract, "CurrusRatio");
+  const RenounceValirSwap = () =>
+    renounceOwnership(AllContracts.ValirRatioContract, "ValirRatio");
 
   const handleTokenWithdraw = async (contract, amount) => {
     try {
@@ -390,6 +404,8 @@ export const SwapContractProvider = ({ children }) => {
     handleTokenWithdraw(AllContracts.DomusContract, amount);
   const WithdrawCurrus = (amount) =>
     handleTokenWithdraw(AllContracts.CurrusContract, amount);
+  const WithdrawValir = (amount) =>
+    handleTokenWithdraw(AllContracts.ValirContract, amount);
 
   useEffect(() => {
     setTimeout(() => {
@@ -446,6 +462,10 @@ export const SwapContractProvider = ({ children }) => {
         {
           contract: AllContracts.CurrusRatioContract,
           name: "Currus",
+        },
+        {
+          contract: AllContracts.ValirRatioContract,
+          name: "Valir",
         },
         {
           contract: AllContracts.OneDollarRatioContract,
@@ -552,6 +572,10 @@ export const SwapContractProvider = ({ children }) => {
           prev.Currus !== value.Currus.adjustedBalance
             ? value.Currus.adjustedBalance
             : prev.Currus,
+        Valir:
+          prev.Valir !== value.Valir.adjustedBalance
+            ? value.Valir.adjustedBalance
+            : prev.Valir,
       }));
 
       console.log("from dt", value.Fluxin.adjustedBalance);
@@ -585,6 +609,10 @@ export const SwapContractProvider = ({ children }) => {
         {
           contract: AllContracts.CurrusRatioContract,
           name: "Currus",
+        },
+        {
+          contract: AllContracts.ValirRatioContract,
+          name: "Valir",
         },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
         { name: "TenDollar", contract: AllContracts.TenDollarRatioContract },
@@ -633,6 +661,10 @@ export const SwapContractProvider = ({ children }) => {
         {
           contract: AllContracts.CurrusRatioContract,
           name: "Currus",
+        },
+        {
+          contract: AllContracts.ValirRatioContract,
+          name: "Valir",
         },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
         { name: "TenDollar", contract: AllContracts.TenDollarRatioContract },
@@ -712,6 +744,10 @@ export const SwapContractProvider = ({ children }) => {
           contract: AllContracts.CurrusRatioContract,
           name: "Currus",
         },
+        {
+          contract: AllContracts.ValirRatioContract,
+          name: "Valir",
+        },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
         { name: "TenDollar", contract: AllContracts.TenDollarRatioContract },
       ];
@@ -786,6 +822,10 @@ export const SwapContractProvider = ({ children }) => {
           contract: AllContracts.CurrusRatioContract,
           name: "Currus",
         },
+        {
+          contract: AllContracts.ValirRatioContract,
+          name: "Valir",
+        },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
         { name: "TenDollar", contract: AllContracts.TenDollarRatioContract },
       ];
@@ -834,6 +874,11 @@ export const SwapContractProvider = ({ children }) => {
       key: "CurrusBalance",
     },
     {
+      contract: AllContracts.ValirContract,
+      token: Valir,
+      key: "ValirBalance",
+    },
+    {
       contract: AllContracts.TenDollarContract,
       token: $10,
       key: "TenDollarBalance",
@@ -880,6 +925,11 @@ export const SwapContractProvider = ({ children }) => {
     },
     {
       contract: AllContracts.stateContract,
+      token: ValirRatioAddress,
+      key: "StateValir",
+    },
+    {
+      contract: AllContracts.stateContract,
       token: RievaRatioAddress,
       key: "StateRieva",
     },
@@ -908,6 +958,11 @@ export const SwapContractProvider = ({ children }) => {
       contract: AllContracts.CurrusContract,
       token: CurrusRatioAddress,
       key: "ratioCurrusBalance",
+    },
+    {
+      contract: AllContracts.ValirContract,
+      token: ValirRatioAddress,
+      key: "ratioValirBalance",
     },
     {
       contract: AllContracts.RievaContract,
@@ -1010,6 +1065,7 @@ export const SwapContractProvider = ({ children }) => {
         Fluxin: outAmounts.Fluxin,
         Xerion: outAmounts.Xerion,
         Rieva: outAmounts.Rieva,
+        Valir: outAmounts.Valir,
         Domus: outAmounts.Domus,
         Currus: outAmounts.Currus,
         OneDollar: outAmounts.OneDollar,
@@ -1021,6 +1077,7 @@ export const SwapContractProvider = ({ children }) => {
         Rieva: RievaRatioAddress,
         Domus: DomusRatioAddress,
         Currus: CurrusRatioAddress,
+        Valir: ValirRatioAddress,
         Xerion: XerionRatioAddress,
         OneDollar: OneDollarRatioAddress,
         TenDollar: TenDollarRatioAddress,
@@ -1031,6 +1088,7 @@ export const SwapContractProvider = ({ children }) => {
         Rieva: OnePBalance.Rieva,
         Domus: OnePBalance.Domus,
         Currus: OnePBalance.Currus,
+        Valir: OnePBalance.Valir,
         Xerion: OnePBalance.Xerion,
         OneDollar: OnePBalance.OneDollar,
         TenDollar: OnePBalance.TenDollar,
@@ -1049,6 +1107,7 @@ export const SwapContractProvider = ({ children }) => {
         Rieva: AllContracts.RievaContract,
         Domus: AllContracts.DomusContract,
         Currus: AllContracts.CurrusContract,
+        Valir: AllContracts.ValirContract,
         OneDollar: AllContracts.oneDollar,
         TenDollar: AllContracts.TenDollarContract,
         Xerion: AllContracts.XerionContract,
@@ -1063,6 +1122,7 @@ export const SwapContractProvider = ({ children }) => {
         (ContractName == "Rieva" && isReversed.Rieva == "true") ||
         (ContractName == "Domus" && isReversed.Domus == "true") ||
         (ContractName == "Xerion" && isReversed.Xerion == "true") ||
+        (ContractName == "Valir" && isReversed.Valir == "true") ||
         (ContractName == "Currus" && isReversed.Currus == "true") ||
         (ContractName == "TenDollar" && isReversed.TenDollar == "true") ||
         (ContractName == "OneDollar" && isReversed.OneDollar == "true")
@@ -1135,6 +1195,7 @@ export const SwapContractProvider = ({ children }) => {
         Xerion: AllContracts.XerionRatioContract,
         Rieva: AllContracts.RievaRatioContract,
         Domus: AllContracts.DomusRatioContract,
+        Valir: AllContracts.ValirRatioContract,
         Currus: AllContracts.CurrusRatioContract,
         OneDollar: AllContracts.OneDollarRatioContract,
         TenDollar: AllContracts.TenDollarRatioContract,
@@ -1227,6 +1288,10 @@ export const SwapContractProvider = ({ children }) => {
           contract: AllContracts.OneDollarRatioContract,
         },
         {
+          contract: AllContracts.ValirRatioContract,
+          name: "Valir",
+        },
+        {
           name: "TenDollar",
           contract: AllContracts.TenDollarRatioContract,
         },
@@ -1271,6 +1336,10 @@ export const SwapContractProvider = ({ children }) => {
         {
           name: "Domus",
           contract: AllContracts.DomusRatioContract,
+        },
+        {
+          contract: AllContracts.ValirRatioContract,
+          name: "Valir",
         },
         {
           name: "Currus",
@@ -1331,6 +1400,10 @@ export const SwapContractProvider = ({ children }) => {
         {
           name: "Currus",
           contract: AllContracts.CurrusRatioContract,
+        },
+        {
+          contract: AllContracts.ValirRatioContract,
+          name: "Valir",
         },
         {
           name: "OneDollar",
@@ -1444,6 +1517,7 @@ export const SwapContractProvider = ({ children }) => {
         XerionRatio: XerionRatioAddress,
         RievaRatio: RievaRatioAddress,
         DomusRatio: DomusRatioAddress,
+        ValirRatio: ValirRatioAddress,
         CurrusRatio: CurrusRatioAddress,
         OneDollarRatio: OneDollarRatioAddress,
         TenDollarRatio: TenDollarRatioAddress,
@@ -1657,7 +1731,7 @@ export const SwapContractProvider = ({ children }) => {
         transactionStatus,
         setBurnRate,
         handleAddCurrus,
-		handleAddValir,
+        handleAddValir,
         // userHasReverseSwapped,
         isReversed,
         StateBurnBalance,
@@ -1673,9 +1747,11 @@ export const SwapContractProvider = ({ children }) => {
         ReanounceOneDollarContract,
         ReanounceRievaContract,
         ReanounceDomusContract,
+		ReanounceValirContract,
         ReanounceTenDollarContract,
         ReanounceCurrusContract,
-		RenounceCurrusSwap,
+        RenounceCurrusSwap,
+		RenounceValirSwap,
         SetOnePercentageOfBalance,
         ReverseForNextCycle,
         handleAddOneD,
@@ -1687,7 +1763,8 @@ export const SwapContractProvider = ({ children }) => {
         RenounceDomusSwap,
         WithdrawRieva,
         WithdrawDomus,
-		WithdrawCurrus,
+        WithdrawCurrus,
+		WithdrawValir,
       }}
     >
       {children}

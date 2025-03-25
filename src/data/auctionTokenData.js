@@ -5,9 +5,10 @@ import RievaLogo from "../assets/rieva.png";
 import TenDollarLogo from "../assets/TenDollar.png";
 import DomusLogo from "../assets/domus.png";
 import CurrusLogo from "../assets/Currus.png";
+import ValirLogo from "../assets/Valir.png";
 import oned from "../assets/oned.png";
 
-import { $1, $10, Currus, Domus, Fluxin, Rieva, Xerion } from "../ContractAddresses";
+import { $1, $10, Currus, Domus, Fluxin, Rieva, Valir, Xerion } from "../ContractAddresses";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { PriceContext } from "../api/StatePrice";
 import { useGeneralAuctionFunctions } from '../Functions/GeneralAuctionFunctions';
@@ -20,7 +21,7 @@ export const useAuctionTokens = () => {
 	const {
 		SwapTokens, isReversed, RatioTargetsofTokens, outAmounts,
 		userHashSwapped, userHasReverseSwapped, OnePBalance,
-		handleAddFluxin, handleAddXerion, handleAddRieva, handleAddDomus,
+		handleAddFluxin, handleAddValir,handleAddXerion, handleAddRieva, handleAddDomus,
 		handleAddOneD, handleAddTenDollar, handleAddCurrus
 	} = useSwapContract();
 
@@ -31,7 +32,8 @@ export const useAuctionTokens = () => {
 		["Rieva", "Rieva", RievaLogo, Rieva, handleAddRieva],
 		["10$", "TenDollar", TenDollarLogo, $10, handleAddTenDollar],
 		["Domus", "Domus", DomusLogo, Domus, handleAddDomus],
-		["Currus", "Currus", CurrusLogo, Currus, handleAddCurrus]
+		["Currus", "Currus", CurrusLogo, Currus, handleAddCurrus],
+		["Valir", "Valir", ValirLogo, Valir, handleAddValir],
 	];
 
 	return tokenConfigs.map(([id, contract, image, token, handleAddToken]) => ({

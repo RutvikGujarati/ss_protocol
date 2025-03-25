@@ -7,7 +7,7 @@ import { PriceContext } from "../api/StatePrice";
 import {
 	$1, $10, Currus, CurrusRatioAddress, DAV_TOKEN_ADDRESS, Domus, DomusRatioAddress,
 	Fluxin, OneDollarRatioAddress, Ratio_TOKEN_ADDRESS, Rieva, RievaRatioAddress,
-	STATE_TOKEN_ADDRESS, TenDollarRatioAddress, Xerion, XerionRatioAddress
+	STATE_TOKEN_ADDRESS, TenDollarRatioAddress, Valir, ValirRatioAddress, Xerion, XerionRatioAddress
 } from "../ContractAddresses";
 
 const shortenAddress = (address) => address ? `${address.slice(0, 6)}...${address.slice(-6)}` : "";
@@ -95,4 +95,86 @@ export const TokensDetailsData = () => {
 			...(token.actions && token.actions),
 		},
 	}));
+};
+
+
+
+
+const addrMap = {
+	dav: DAV_TOKEN_ADDRESS, Fluxin, Domus, Currus, Xerion, OneD: $1, Rieva, Valir, TenDollar: $10,
+	FluxinSwap: Ratio_TOKEN_ADDRESS, RievaSwap: RievaRatioAddress, DomusSwap: DomusRatioAddress,
+	XerionSwap: XerionRatioAddress, ValirSwap: ValirRatioAddress, CurrusSwap: CurrusRatioAddress,
+	OneDollarSwap: OneDollarRatioAddress, TenDollarSwap: TenDollarRatioAddress, state: STATE_TOKEN_ADDRESS
+};
+const shortAddrs = Object.fromEntries(Object.entries(addrMap).map(([k, v]) => [k, shortenAddress(v)]));
+
+export const TokensDetails = () => {
+	const prices = useContext(PriceContext);
+	const { simpleSupplies, mintAdditionalTOkens } = useGeneralTokens();
+	const { AuctionRunningLocalString, auctionDetails, TotalTokensBurned, auctionTimeLeft } = useGeneralAuctionFunctions();
+	const { CurrentRatioPrice } = useGeneralTokens();
+	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5, withdraw_95 } = useDAvContract();
+	const swap = useSwapContract();
+
+	const tokenConfigs = [
+		["DAV", "pDAV", shortAddrs.dav, DAV_TOKEN_ADDRESS, "5,000,000.00", 0, { claimLiquidityDAVToken: withdraw_95, claimFiveDAVToken: withdraw_5, ReanounceContract: swap.ReanounceContract }],
+		["Orxa", "Orxa", shortAddrs.Fluxin, Fluxin, "1,000,000,000,000.00", prices.FluxinUsdPrice, { mint: "250,000,000,000" }],
+		["Layti", "Layti", shortAddrs.Xerion, Xerion, "1,000,000,000,000.00", prices.XerionUsdPrice, { mint: "125,000,000,000" }],
+		["1$", "1$", shortAddrs.OneD, $1, null, prices.OneDollarUsdPrice, { mint: "25,000,000" }],
+		["Rieva", "Rieva", shortAddrs.Rieva, Rieva, null, prices.RievaUsdPrice, { mint: "62,500,000,000" }],
+		["Domus", "Domus", shortAddrs.Domus, Domus, null, prices.DomusUsdPrice, { mint: "2,500,000,000,000" }],
+		["Currus", "Currus", shortAddrs.Currus, Currus, null, prices.CurrusUsdPrice, { mint: "1,250,000,000,000" }],
+		["Valir", "Valir", shortAddrs.Valir, Valir, null, prices.ValirUsdPrice, { mint: "31,250,000,000" }],
+		["10$", "10$", shortAddrs.TenDollar, $10, null, prices.TenDollarUsdPrice, { mint: "6,250,000" }],
+		["STATE", "pSTATE", shortAddrs.state, STATE_TOKEN_ADDRESS, "999,000,000,000,000.00", prices.stateUsdPrice, { mint: "1,000,000,000,000" }],
+	];
+
+	const swapContracts = {
+		Fluxin: Ratio_TOKEN_ADDRESS, Xerion: XerionRatioAddress, OneD: OneDollarRatioAddress,
+		Rieva: RievaRatioAddress, Domus: DomusRatioAddress, Currus: CurrusRatioAddress, Valir: ValirRatioAddress,
+		TenDollar: TenDollarRatioAddress
+	};
+
+	return tokenConfigs.map(([name, displayName, key, addr, supply, price, extra]) => {
+		const contract = name === "1$" ? "OneD" : name === "10$" ? "TenDollar" : name;
+		const swapKey = `${contract}Swap`;
+		const isDAV = name === "DAV";
+		const isState = name === "STATE";
+		return {
+			tokenName: name, key, name: displayName, supply: supply || simpleSupplies[`${contract}Supply`],
+			Supply: isDAV ? Supply : simpleSupplies[`${contract}Supply`], Price: price,
+			address: addr, SwapContract: swapContracts[contract], SwapShortContract: shortAddrs[swapKey],
+			claimDAVToken: isDAV ? DAVTokensWithdraw : undefined, claimFiveDAVTokenValue: isDAV ? DAVTokensFiveWithdraw : undefined,
+			renounceSmartContract: swap.isRenounced?.[contract.toLowerCase()] ?? "Unknown",
+			renounceSwapSmartContract: swapContracts[contract] ? swap.isRenounced?.[`${contract}Ratio`] ?? "Unknown" : undefined,
+			percentage: swap.decayPercentages[contract], stateBalance: swap.balances[`State${contract}`],
+			target: swap.RatioTargetsofTokens[contract], isReversing: swap.isReversed[contract]?.toString(),
+			WillStart: swap.ReverseForCycle[contract], WillStartForNext: swap.ReverseForNextCycle[contract],
+			Balance: swap.balances[`${contract}Balance`], TotalTokensBurn: TotalTokensBurned[contract],
+			RatioBalance: swap.balances?.[`ratio${contract}Balance`], Duration: auctionDetails[contract],
+			interval: auctionDetails[contract], AuctionRunning: AuctionRunningLocalString?.[contract]?.toString(),
+			pair: isState ? undefined : `${name}/pSTATE`, Ratio: CurrentRatioPrice[contract],
+			AuctionTimeRunning: auctionTimeLeft[contract], AuctionNextTime: auctionDetails[contract],
+			mintAddTOkens: extra?.mint, LastDevShare: isDAV ? swap.LastDevShare : undefined,
+			LastLiquidity: isDAV ? swap.LastLiquidity : undefined, claimLPToken: isState ? swap.LPStateTransferred : undefined,
+			actions: {
+				...(extra || {}),
+				ReanounceContract: swap[`Reanounce${contract}Contract`],
+				ReanounceSwapContract: swapContracts[contract] ? swap[`Renounce${contract}Swap`] : undefined,
+				WithdrawState: swap[`Withdraw${isState ? 'State' : contract}`],
+				mintAdditionalTOkens: extra?.mint ? () => mintAdditionalTOkens(contract, parseInt(extra.mint.replace(/,/g, ''))) : undefined,
+				SetDuration: swapContracts[contract] ? (v) => swap.SetAUctionDuration(v, `${contract}Ratio`) : undefined,
+				SetInterval: swapContracts[contract] ? (v) => swap.SetAUctionInterval(v, `${contract}Ratio`) : undefined,
+				AddTokenToContract: swapContracts[contract] ? () => swap.AddTokensToContract(addr, STATE_TOKEN_ADDRESS, CurrentRatioPrice[contract]) : isState ? swap.AddTokens : undefined,
+				setRatio: swapContracts[contract] ? (v) => swap.setRatioTarget(v, `${contract}Ratio`) : undefined,
+				setBurn: swapContracts[contract] ? (v) => swap.setBurnRate(v, `${contract}Ratio`) : undefined,
+				setReverseEnabled: swapContracts[contract] ? () => swap.setReverseEnable(`${contract}Ratio`) : undefined,
+				setReverse: swapContracts[contract] ? (v, v2) => swap.setReverseTime(v, v2) : undefined,
+				setCurrentRatio: swapContracts[contract] ? (v) => swap.setCurrentRatioTarget(v) : undefined,
+				DepositTokens: swapContracts[contract] ? (v) => swap.DepositToken(contract.toLowerCase(), addr, v, `${contract}Ratio`) : isState ? (v) => swap.DepositToken("state", addr, v) : undefined,
+				DepositStateTokens: swapContracts[contract] ? (v) => swap.DepositToken("state", STATE_TOKEN_ADDRESS, v, `${contract}Ratio`) : undefined,
+				StartingAuction: swapContracts[contract] ? () => swap.StartAuction(`${contract}Ratio`) : undefined,
+			}
+		};
+	});
 };

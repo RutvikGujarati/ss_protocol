@@ -16,6 +16,7 @@ import {
 	STATE_TOKEN_ADDRESS,
 	TenDollarRatioAddress,
 	Valir,
+	ValirRatioAddress,
 	Xerion,
 	XerionRatioAddress,
 
@@ -42,6 +43,7 @@ const addresses = {
 	RievaSwapShortened: RievaRatioAddress,
 	DomusSwapShortened: DomusRatioAddress,
 	XerionSwapShortened: XerionRatioAddress,
+	ValirSwapShortened:ValirRatioAddress,
 	CurrusSwapShortened: CurrusRatioAddress,
 	OneDollarSwapShortened: OneDollarRatioAddress,
 	TenDollarSwapShortened: TenDollarRatioAddress,
@@ -52,7 +54,7 @@ const shortenedAddresses = Object.fromEntries(
 );
 
 export const TokensDetails = () => {
-	const { stateUsdPrice, FluxinUsdPrice, XerionUsdPrice, DomusUsdPrice, TenDollarUsdPrice, OneDollarUsdPrice, RievaUsdPrice, CurrusUsdPrice } =
+	const { stateUsdPrice, FluxinUsdPrice, XerionUsdPrice, DomusUsdPrice, TenDollarUsdPrice, OneDollarUsdPrice, RievaUsdPrice, CurrusUsdPrice,ValirUsdPrice } =
 		useContext(PriceContext);
 	const { simpleSupplies, mintAdditionalTOkens } = useGeneralTokens()
 	const { AuctionRunningLocalString, auctionDetails, TotalTokensBurned, auctionTimeLeft } = useGeneralAuctionFunctions()
@@ -61,7 +63,7 @@ export const TokensDetails = () => {
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5,
 		withdraw_95, } =
 		useDAvContract();
-	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, ReanounceTenDollarContract, ReanounceTenDollarSwapContract, isRenounced, WithdrawCurrus, RenounceCurrusSwap, LastLiquidity, decayPercentages, ReanounceOneDollarSwapContract, ReanounceCurrusContract, RenounceXerionSwap, balances, isReversed,
+	const { LastDevShare, ReverseForCycle, ReverseForNextCycle, ReanounceTenDollarContract, ReanounceTenDollarSwapContract, isRenounced,WithdrawValir, WithdrawCurrus, RenounceCurrusSwap, LastLiquidity, decayPercentages,ReanounceValirContract,RenounceValirSwap, ReanounceOneDollarSwapContract, ReanounceCurrusContract, RenounceXerionSwap, balances, isReversed,
 		RenounceRievaSwap, RatioTargetsofTokens, ReanounceContract, WithdrawTenDollar, SetAUctionDuration, WithdrawFluxin, WithdrawXerion, ReanounceFluxinContract, ReanounceXerionContract,
 		WithdrawRieva, WithdrawDomus, ReanounceOneDollarContract, ReanounceRievaContract, ReanounceDomusContract, RenounceDomusSwap, setRatioTarget, setReverseEnable, AddTokensToContract, SetAUctionInterval, setReverseTime, setCurrentRatioTarget, DepositToken, StartAuction, LPStateTransferred, RenounceState, RenounceFluxinSwap, WithdrawState, AddTokens, setBurnRate, WithdrawOneDollar } = useSwapContract();
 	console.log("isReversing", isReversed.Fluxin)
@@ -415,32 +417,32 @@ export const TokensDetails = () => {
 			Supply: simpleSupplies.ValirSupply,
 			percentage: decayPercentages["Valir"],
 			address: Valir,
-			// SwapContract: ValirRatioAddress,
-			// SwapShortContract: shortenedAddresses.ValirSwapShortened,
-			// stateBalance: balances.StateValir,
-			// target: RatioTargetsofTokens["Valir"],
-			// isReversing: isReversed.Valir.toString(),
-			// WillStart: ReverseForCycle.Valir,
-			// WillStartForNext: ReverseForNextCycle.Valir,
-			// Balance: balances.ValirBalance,
-			// TotalTokensBurn: TotalTokensBurned.Valir,
-			// RatioBalance: balances?.ratioValirBalance,
-			// Duration: auctionDetails["Valir"],
-			// interval: auctionDetails["Valir"],
-			// AuctionRunning: AuctionRunningLocalString.Valir.toString(),
-			// pair: "Valir/pSTATE",
-			// Ratio: CurrentRatioPrice.Valir,
-			// Price: ValirUsdPrice,
-			// SetDuration: () => SetAUctionDuration(),
-			// AuctionTimeRunning: auctionTimeLeft.Valir,
-			// AuctionNextTime: auctionDetails["Valir"],
+			SwapContract: ValirRatioAddress,
+			SwapShortContract: shortenedAddresses.ValirSwapShortened,
+			stateBalance: balances.StateValir,
+			target: RatioTargetsofTokens["Valir"],
+			isReversing: isReversed.Valir.toString(),
+			WillStart: ReverseForCycle.Valir,
+			WillStartForNext: ReverseForNextCycle.Valir,
+			Balance: balances.ValirBalance,
+			TotalTokensBurn: TotalTokensBurned.Valir,
+			RatioBalance: balances?.ratioValirBalance,
+			Duration: auctionDetails["Valir"],
+			interval: auctionDetails["Valir"],
+			AuctionRunning: AuctionRunningLocalString?.Valir?.toString(),
+			pair: "Valir/pSTATE",
+			Ratio: CurrentRatioPrice.Valir,
+			Price: ValirUsdPrice,
+			SetDuration: () => SetAUctionDuration(),
+			AuctionTimeRunning: auctionTimeLeft.Valir,
+			AuctionNextTime: auctionDetails["Valir"],
 			mintAddTOkens: "31,250,000,000",
-			// renounceSmartContract: isRenounced?.Valir ?? "Unknown",
-			// renounceSwapSmartContract: isRenounced?.ValirRatio ?? "Unknown",
+			renounceSmartContract: isRenounced?.Valir ?? "Unknown",
+			renounceSwapSmartContract: isRenounced?.ValirRatio ?? "Unknown",
 			actions: {
-				// ReanounceContract: ReanounceValirContract,
-				// ReanounceSwapContract: RenounceValirSwap,
-				// WithdrawState: WithdrawValir,
+				ReanounceContract: ReanounceValirContract,
+				ReanounceSwapContract: RenounceValirSwap,
+				WithdrawState: WithdrawValir,
 				mintAdditionalTOkens: () => mintAdditionalTOkens(
 					"Valir",
 					31250000000
