@@ -65,7 +65,8 @@ export const useAuctionTokens = () => {
 			Rieva: "0x3c504c7d2a99e212c186aa0bc47a9e94dd7ac827",
 			TenDollar: "0x86e8330efe0dfc20ab8f63dcf95a6a8d66f60c1d",
 			Domus: "0x7019ee4173420ee652edc9a26bffc91469c753db",
-			Currus: "0xe4a02db896cee9dbf32d730dc9874eb058f0ca3f"
+			Currus: "0xe4a02db896cee9dbf32d730dc9874eb058f0ca3f",
+			Valir: "0x1d3796d78ffdca93b501ff442aba4123bb334cd1"
 		};
 		return chartIds[contract] || "";
 	}
