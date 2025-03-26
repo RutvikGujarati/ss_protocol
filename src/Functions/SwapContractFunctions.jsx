@@ -123,7 +123,7 @@ export const SwapContractProvider = ({ children }) => {
     Rieva: AllContracts.RievaRatioContract,
     Currus: AllContracts.CurrusRatioContract,
     Domus: AllContracts.DomusRatioContract,
-    ValirRatio: AllContracts.ValirRatioContract,
+    Valir: AllContracts.ValirRatioContract,
     OneDollar: AllContracts.OneDollarRatioContract,
     TenDollar: AllContracts.TenDollarRatioContract,
   };
