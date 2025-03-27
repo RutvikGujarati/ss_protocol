@@ -117,85 +117,77 @@ export const TokensDetails = () => {
 		const key = token.key; // Use key if provided, else fallback to name
 		const rn = token.RatioName;
 		const isDAV = token.name === "DAV";
-		const isState = token.name === "state";
-		const hasSwap = !!token.swapAddress;
+		const isState = token.name === "STATE";
 
 		return {
 			tokenName: token.name,
 			key: shortenAddress(token.address),
 			name: token.displayName || token.name,
-			supply: token.supply || simpleSupplies[`${key}Supply`],
-			Supply: isDAV ? Supply : simpleSupplies[`${key}Supply`],
+			Supply: isDAV ? Supply : key == "OneDollar" ? simpleSupplies.oneDollarSupply : simpleSupplies[`${key}Supply`],
 			Price: token.price,
 			address: token.address,
 			SwapContract: token.swapAddress,
 			SwapShortContract: token.swapAddress ? shortenAddress(token.swapAddress) : undefined,
 			claimDAVToken: isDAV ? DAVTokensWithdraw : undefined,
 			claimFiveDAVTokenValue: isDAV ? DAVTokensFiveWithdraw : undefined,
-
+			mintAddTOkens: token.mintAmount,
 			claimLPToken: isState ? swap.LPStateTransferred : undefined,
 			renounceSmartContract: key == "OneDollar" ? swap.isRenounced["oneD"] : swap.isRenounced?.[key] ?? "Unknown",
 
-			...(hasSwap && {
-				percentage: key == "OneDollar" ? swap.decayPercentages["oneD"] : swap.decayPercentages[key],
-				stateBalance: swap.balances[`State${key}`],
-				target: swap.RatioTargetsofTokens[key],
-				isReversing: swap.isReversed[key]?.toString(),
-				WillStart: swap.ReverseForCycle[key],
-				WillStartForNext: swap.ReverseForNextCycle[key],
-				Balance: (key === "Fluxin" || key === "Xerion")
-					? swap.balances[`${rn}Balance`]
-					: swap.balances[`${key}Balance`],
-				TotalTokensBurn: TotalTokensBurned[key],
-				RatioBalance: swap.balances[`ratio${key}Balance`],
-				Duration: auctionDetails[key],
-				interval: auctionDetails[key],
-				AuctionRunning: AuctionRunningLocalString?.[key]?.toString(),
-				pair: `${token.name}/pSTATE`,
-				Ratio: CurrentRatioPrice[key],
-				AuctionTimeRunning: auctionTimeLeft[key],
-				AuctionNextTime: auctionDetails[key],
-				mintAddTOkens: token.mintAmount,
-				renounceSwapSmartContract: swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
-			}),
+			percentage: key == "OneDollar" ? swap.decayPercentages["oneD"] : swap.decayPercentages[key],
+			stateBalance: swap.balances[`State${key}`],
+			target: swap.RatioTargetsofTokens[key],
+			isReversing: swap.isReversed[key]?.toString(),
+			WillStart: swap.ReverseForCycle[key],
+			WillStartForNext: swap.ReverseForNextCycle[key],
+			Balance: (key === "Fluxin" || key === "Xerion")
+				? swap.balances[`${rn}Balance`]
+				: swap.balances[`${key}Balance`],
+			TotalTokensBurn: TotalTokensBurned[key],
+			RatioBalance: swap.balances[`ratio${key}Balance`],
+			Duration: auctionDetails[key],
+			interval: auctionDetails[key],
+			AuctionRunning: AuctionRunningLocalString?.[key]?.toString(),
+			pair: `${token.name}/pSTATE`,
+			Ratio: CurrentRatioPrice[key],
+			AuctionTimeRunning: auctionTimeLeft[key],
+			AuctionNextTime: auctionDetails[key],
+			renounceSwapSmartContract: swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
+
 			actions: {
 				...(token.actions || {}), // Include any custom actions (e.g., for DAV)
 				ReanounceContract: swap[`Reanounce${key}Contract`] || swap.ReanounceContract,
-				...(hasSwap && {
-					ReanounceSwapContract: swap[`Renounce${key}Swap`],
-					WithdrawState: swap[`Withdraw${key}`],
-					mintAdditionalTokens: token.mintAmount
-						? () => mintAdditionalTOkens(
-							key === "OneDollar"
-								? "oneD"
-								: key === "Fluxin"
-									? "fluxin"
-									: key,
-							parseInt(token.mintAmount.replace(/,/g, ""), 10)
-						)
-						: undefined,
+				ReanounceSwapContract: swap[`Renounce${key}Swap`],
+				WithdrawState: swap[`Withdraw${key}`],
+				mintAdditionalTOkens: token.mintAmount
+					? () => mintAdditionalTOkens(
+						key === "OneDollar"
+							? "oneD"
+							: key === "Fluxin"
+								? "fluxin"
+								: key,
+						parseInt(token.mintAmount.replace(/,/g, ""), 10)
+					)
+					: undefined,
 
-					SetDuration: (value) => swap.SetAUctionDuration(value, `${key == "Fluxin" ? rn : key}Ratio`),
+				SetDuration: (value) => swap.SetAUctionDuration(value, `${key == "Fluxin" ? rn : key}Ratio`),
 
-					SetInterval: (value) => swap.SetAUctionInterval(value, `${key == "Fluxin" ? rn : key}Ratio`),
-					AddTokenToContract: () => swap.AddTokensToContract(token.address, STATE_TOKEN_ADDRESS, CurrentRatioPrice[key]),
-					setRatio: (value) => swap.setRatioTarget(value, `${key == "Fluxin" ? rn : key}Ratio`),
-					setBurn: (value) => swap.setBurnRate(value, `${key == "Fluxin" ? rn : key}Ratio`),
-					setReverseEnabled: () => swap.setReverseEnable(`${key == "Fluxin" ? rn : key}Ratio`),
-					setReverse: (value, value2) => swap.setReverseTime(value, value2),
-					setCurrentRatio: (value) => swap.setCurrentRatioTarget(value),
-					DepositTokens: (value) => swap.DepositToken(`${key == "OneDollar" ? "oneD" : key}`, token.address, value, `${key == "Fluxin" ? rn : key}Ratio`),
+				SetInterval: (value) => swap.SetAUctionInterval(value, `${key == "Fluxin" ? rn : key}Ratio`),
+				AddTokenToContract: () => swap.AddTokensToContract(token.address, STATE_TOKEN_ADDRESS, CurrentRatioPrice[key]),
+				setRatio: (value) => swap.setRatioTarget(value, `${key == "Fluxin" ? rn : key}Ratio`),
+				setBurn: (value) => swap.setBurnRate(value, `${key == "Fluxin" ? rn : key}Ratio`),
+				setReverseEnabled: () => swap.setReverseEnable(`${key == "Fluxin" ? rn : key}Ratio`),
+				setReverse: (value, value2) => swap.setReverseTime(value, value2),
+				setCurrentRatio: (value) => swap.setCurrentRatioTarget(value),
+				DepositTokens: (value) => swap.DepositToken(`${key == "OneDollar" ? "oneD" : key}`, token.address, value, `${key == "Fluxin" ? rn : key}Ratio`),
 
-					DepositStateTokens: (value) => swap.DepositToken("state", STATE_TOKEN_ADDRESS, value, `${key == "Fluxin" ? rn : key}Ratio`),
-					StartingAuction: () => swap.StartAuction(`${key == "Fluxin" ? rn : key}Ratio`),
-				}),
+				DepositStateTokens: (value) => swap.DepositToken("state", STATE_TOKEN_ADDRESS, value, `${key == "Fluxin" ? rn : key}Ratio`),
+				StartingAuction: () => swap.StartAuction(`${key == "Fluxin" ? rn : key}Ratio`),
+
 				...(isState && {
-					Balance: swap.balances[`stateBalance`],
-					percentage: swap.decayPercentages[key],
+
 					WithdrawState: swap.WithdrawState,
-					mintAdditionalTOkens: token.mintAmount
-						? () => mintAdditionalTOkens("STATE", parseInt(token.mintAmount.replace(/,/g, "")))
-						: undefined,
+
 					AddTokenToContract: swap.AddTokens,
 					DepositTokens: (value) => swap.DepositToken("state", token.address, value),
 				}),
