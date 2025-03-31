@@ -38,7 +38,6 @@ export const TokensDetails = () => {
 			key: "Fluxin",
 			address: Fluxin,
 			RatioName: "fluxin",
-			supply: "1,000,000,000,000.00",
 			price: prices.FluxinUsdPrice,
 			swapAddress: Ratio_TOKEN_ADDRESS,
 			mintAmount: "250,000,000,000",
@@ -48,7 +47,6 @@ export const TokensDetails = () => {
 			key: "Xerion",
 			RatioName: "xerion",
 			address: Xerion,
-			supply: "1,000,000,000,000.00",
 			price: prices.XerionUsdPrice,
 			swapAddress: XerionRatioAddress,
 			mintAmount: "125,000,000,000",
@@ -105,16 +103,13 @@ export const TokensDetails = () => {
 			name: "STATE",
 			key: "state",
 			address: STATE_TOKEN_ADDRESS,
-			supply: "999,000,000,000,000.00",
-			treasury: "999,000,000,000,000.00", // Added Treasury
 			price: prices.stateUsdPrice,
 			mintAmount: "1,000,000,000,000",
-			approveAmount: "10,000,000,000",   // Added ApproveAmount
 		},
 	];
 
 	return tokens.map((token) => {
-		const key = token.key; 
+		const key = token.key;
 		const rn = token.RatioName;
 		const isDAV = token.name === "DAV";
 		const isState = token.name === "STATE";
@@ -152,7 +147,7 @@ export const TokensDetails = () => {
 			Ratio: CurrentRatioPrice[key],
 			AuctionTimeRunning: auctionTimeLeft[key],
 			AuctionNextTime: auctionDetails[key],
-			renounceSwapSmartContract: swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
+			renounceSwapSmartContract: key == "OneDollar" ? swap.isRenounced["OneDollar"] : swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
 
 			actions: {
 				...(token.actions || {}), // Include any custom actions (e.g., for DAV)
