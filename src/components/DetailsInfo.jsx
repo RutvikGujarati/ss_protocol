@@ -324,6 +324,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               dataToShow.tokenName == "Rieva" ||
               dataToShow.tokenName == "10$" ||
               dataToShow.tokenName == "Domus" ||
+              dataToShow.tokenName == "Currus" ||
+              dataToShow.tokenName == "Valir" ||
               dataToShow.tokenName == "Layti") && (
               <>
                 {dataToShow.tokenName !== "STATE" && (
@@ -385,6 +387,10 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           ? "10$ Balance (inside Contract)"
                           : dataToShow.tokenName === "Domus"
                           ? "Domus Balance (inside Contract)"
+                          : dataToShow.tokenName === "Currus"
+                          ? "Currus Balance (inside Contract)"
+                          : dataToShow.tokenName === "Valir"
+                          ? "Valir Balance (inside Contract)"
                           : "Orxa Balance (inside Contract)"}
                       </td>
 
@@ -420,42 +426,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                       <td className="d-flex justify-content-end">
                         <button
                           onClick={() => {
-                            if (dataToShow.tokenName === "Orxa") {
-                              dataToShow.actions.mintAdditionalTOkens(
-                                "fluxin",
-                                250000000000
-                              ); // Amount for Orxa
-                            } else if (dataToShow.tokenName === "STATE") {
-                              dataToShow.actions.mintAdditionalTOkens(
-                                "state",
-                                1000000000000
-                              ); // Amount for State
-                            } else if (dataToShow.tokenName === "Layti") {
-                              dataToShow.actions.mintAdditionalTOkens(
-                                "Xerion",
-                                125000000000
-                              ); // Amount for State
-                            } else if (dataToShow.tokenName === "1$") {
-                              dataToShow.actions.mintAdditionalTOkens(
-                                "oneD",
-                                25000000
-                              ); // Amount for State
-                            } else if (dataToShow.tokenName === "Rieva") {
-                              dataToShow.actions.mintAdditionalTOkens(
-                                "Rieva",
-                                62500000000
-                              ); // Amount for State
-                            } else if (dataToShow.tokenName === "Domus") {
-                              dataToShow.actions.mintAdditionalTOkens(
-                                "Domus",
-                                2500000000000
-                              ); // Amount for State
-                            } else if (dataToShow.tokenName === "10$") {
-                              dataToShow.actions.mintAdditionalTOkens(
-                                "TenDollar",
-                                6250000
-                              ); // Amount for State
-                            }
+                            dataToShow.actions.mintAdditionalTOkens(); // Amount for Orxa
                           }}
                           className="btn btn-primary btn-sm swap-btn info-icon mx-5"
                         >

@@ -5,6 +5,8 @@ import FluxinLogo from "../assets/FluxinLogo.png";
 import Rieva from "../assets/rieva.png";
 import DAVLogo from "../assets/d_logo.png";
 import TenDollar from "../assets/TenDollar.png";
+import Currus from "../assets/Currus.png";
+import ValirLogo from "../assets/Valir.png";
 import oned from "../assets/oned.png";
 import Domus from "../assets/domus.png";
 import stateLogo from "../assets/state_logo.png";
@@ -22,6 +24,8 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     handleAddRieva,
     handleAddDomus,
     handleAddTenDollar,
+    handleAddCurrus,
+    handleAddValir,
   } = useSwapContract();
 
   const originalData = [
@@ -33,6 +37,8 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     { id: "3", name: "Rieva", logo: Rieva, AddToken: handleAddRieva },
     { id: "~", name: "Domus", logo: Domus, AddToken: handleAddDomus },
     { id: "∞", name: "10$", logo: TenDollar, AddToken: handleAddTenDollar },
+    { id: "~", name: "Currus", logo: Currus, AddToken: handleAddCurrus },
+    { id: "4", name: "Valir", logo: ValirLogo, AddToken: handleAddValir },
   ];
 
   const [filteredData, setFilteredData] = useState(originalData);
@@ -85,8 +91,11 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     setSelectedToken(token);
   };
 
+  const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS.toLowerCase();
+
+
   return (
-    <div className="card w-100">
+	<div className="card w-100" style={{ maxHeight: AuthAddress ? "550px" : "550px" }}>
       <div className="mb-3">
         <input
           type="text"

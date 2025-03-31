@@ -29,16 +29,25 @@ export const TableRowDataShow = ({ label, address, value }) => {
           href={`https://otter.pulsechain.com/address/${address}`}
           target="_blank"
           rel="noopener noreferrer"
+          className="d-flex align-items-center gap-1 mx-2"
           style={{ fontSize: "12px" }}
         >
           {value || "contract details"}
         </a>
+        {/* <a
+          href={`https://repo.sourcify.dev/369/${address}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="d-flex align-items-center gap-1 "
+          style={{ fontSize: "12px" }}
+        >
+          <i className="bi bi-box-arrow-up-right"></i>
+        </a> */}
       </td>
       <td></td>
     </tr>
   );
 };
-
 export const TableRowForTokens = ({
   label,
   label2,
@@ -94,7 +103,6 @@ export const TableRowForSwapTokens = ({
   tokenName,
   TokenAddress,
   value,
-
 }) => {
   return (
     <>
@@ -112,11 +120,21 @@ export const TableRowForSwapTokens = ({
           <a
             href={`https://otter.pulsechain.com/address/${TokenAddress}`}
             target="_blank"
+            className="mx-2"
             rel="noopener noreferrer"
             style={{ fontSize: "12px" }}
           >
             {value || ""}
           </a>
+          {/* <a
+            href={`https://repo.sourcify.dev/369/${TokenAddress}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="d-flex align-items-center gap-1 "
+            style={{ fontSize: "12px" }}
+          >
+            <i className="bi bi-box-arrow-up-right"></i>
+          </a> */}
         </td>
       </tr>
     </>

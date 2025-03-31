@@ -12,6 +12,8 @@ const PriceProvider = ({ children }) => {
   const [OneDollarUsdPrice, setOneDollarUsdPrice] = useState(null);
   const [RievaUsdPrice, setRievaUsdPrice] = useState(null);
   const [DomusUsdPrice, setDomusUsdPrice] = useState(null);
+  const [CurrusUsdPrice, setCurrusUsdPrice] = useState(null);
+  const [ValirUsdPrice, setValirUsdPrice] = useState(null);
   const [TenDollarUsdPrice, setTenDollarUsdPrice] = useState(null);
   const [error, setError] = useState(null);
 
@@ -89,18 +91,34 @@ const PriceProvider = ({ children }) => {
       setTenDollarUsdPrice
     );
   }, []);
+  useEffect(() => {
+    fetchPrice(
+      "https://api.geckoterminal.com/api/v2/simple/networks/pulsechain/token_price/0x2c83101586072e2da8490aed0d49fb192f9e897e",
+      "0x2c83101586072e2da8490aed0d49fb192f9e897e",
+      setCurrusUsdPrice
+    );
+  }, []);
+  useEffect(() => {
+    fetchPrice(
+      "https://api.geckoterminal.com/api/v2/simple/networks/pulsechain/token_price/0x61fb10ac14b5fe7499a6858a9cf0d80cc1d2fd75",
+      "0x61fb10ac14b5fe7499a6858a9cf0d80cc1d2fd75",
+      setValirUsdPrice
+    );
+  }, []);
 
   return (
     <PriceContext.Provider
       value={{
         stateUsdPrice,
         FluxinUsdPrice,
+		ValirUsdPrice,
         XerionUsdPrice,
         OneDollarUsdPrice,
-		TenDollarUsdPrice,
+        TenDollarUsdPrice,
         error,
         priceLoading,
         DomusUsdPrice,
+		CurrusUsdPrice,
         RievaUsdPrice,
       }}
     >
