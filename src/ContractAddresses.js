@@ -37,4 +37,4 @@ export const CurrusRatioAddress = "0x0e84998b4790C3523232D07F91985296F5be5829";
 export const ValirRatioAddress = "0xA9108Ec32131123A47FEA514e02cE36Dd1F98E8E";
 
 // export const DeepState = "0xcD089033FB7d7E40AF400C51A149946cBb727b96";
-export const DeepState = "0x4203c35dc1B2283682F9829913D06b9E2E870a4c";
+export const DeepState = "0x2d3907367F3a6f00C0eee2b4f91E12343eaF5419";

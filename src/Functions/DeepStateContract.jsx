@@ -152,6 +152,7 @@ export const DeepStateProvider = ({ children }) => {
       await tx.wait();
       await fetchContractBalance();
       await fetchUserData();
+      await fetchBuySellPrice();
     } catch (error) {
       console.error("Error buying tokens:", error);
     }
