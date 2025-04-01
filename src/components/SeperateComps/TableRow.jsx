@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { useDAvContract } from "../../Functions/DavTokenFunctions";
 import DotAnimation from "../../Animations/Animation";
-
+import { useChainId } from "wagmi";
 export const TableRowWithClick = ({ label, value, action, buttonText }) => (
   <tr>
     <td className="d-flex align-items-center">{label}</td>
@@ -21,12 +21,20 @@ export const TableRowWithClick = ({ label, value, action, buttonText }) => (
   </tr>
 );
 export const TableRowDataShow = ({ label, address, value }) => {
+  const chainId = useChainId();
+
+  // Determine the correct block explorer link based on chainId
+  const explorerUrl =
+    chainId === 146
+      ? `https://sonicscan.org/address/${address}`
+      : `https://otter.pulsechain.com/address/${address}`;
+
   return (
     <tr>
       <td className="d-flex align-items-center">{label}</td>
       <td className="d-flex align-items-center justify-content-center">
         <a
-          href={`https://otter.pulsechain.com/address/${address}`}
+          href={explorerUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="d-flex align-items-center gap-1 mx-2"
@@ -34,20 +42,12 @@ export const TableRowDataShow = ({ label, address, value }) => {
         >
           {value || "contract details"}
         </a>
-        {/* <a
-          href={`https://repo.sourcify.dev/369/${address}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="d-flex align-items-center gap-1 "
-          style={{ fontSize: "12px" }}
-        >
-          <i className="bi bi-box-arrow-up-right"></i>
-        </a> */}
       </td>
       <td></td>
     </tr>
   );
 };
+
 export const TableRowForTokens = ({
   label,
   label2,

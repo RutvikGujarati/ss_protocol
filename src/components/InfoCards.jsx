@@ -6,7 +6,7 @@ import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import PLSLogo from "../assets/pls1.png";
 import BNBLogo from "../assets/bnb.png";
-import RievaLogo from "../assets/rieva.png";
+import sonic from "../assets/S_token.svg";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { formatWithCommas } from "./DetailsInfo";
 import { PriceContext } from "../api/StatePrice";
@@ -34,6 +34,8 @@ const InfoCards = () => {
       return PLSLogo; // PulseChain
     } else if (chainId === 56) {
       return BNBLogo; // BNB Chain
+    } else if (chainId === 146) {
+      return sonic; // BNB Chain
     } else {
       return PLSLogo; // Optional fallback logo
     }
@@ -48,6 +50,8 @@ const InfoCards = () => {
       return { text: "🟢 LIVE ON PULSECHAIN.", color: "" };
     } else if (chainId === 56) {
       return { text: "🟢 LIVE ON BINANCE SMART CHAIN.", color: "" };
+    } else if (chainId === 146) {
+      return { text: "🟢 LIVE ON SONIC CHAIN.", color: "" };
     } else {
       return { text: "🟢 LIVE ON UNKNOWN CHAIN.", color: "" }; // Fallback
     }
@@ -58,7 +62,7 @@ const InfoCards = () => {
   const {
     handleAddTokenState,
     handleAddTokenDAV,
-    LoadingState,
+
     CalculationOfCost,
     TotalCost,
     TotalStateHoldsInUS,
@@ -210,12 +214,16 @@ const InfoCards = () => {
                       value={amount}
                       onChange={handleInputChange}
                     />
-                    <h5 className="detailAmount">1 DAV TOKEN = 500000 PLS</h5>
+                    <h5 className="detailAmount">
+                      {chainId == 369
+                        ? "1 DAV TOKEN = 500000 PLS"
+                        : "1 DAV TOKEN = 100 SONIC"}
+                    </h5>
                     <h5 className="detailAmount mb-4">
                       {TotalCost
                         ? formatNumber(ethers.formatUnits(TotalCost, 18))
                         : "0"}{" "}
-                      PLS
+                      {chainId == 369 ? "PLS" : "SONIC"}
                     </h5>
 
                     <button
@@ -323,8 +331,10 @@ const InfoCards = () => {
                           {formatWithCommas(TotalStateHoldsInUS)}
                         </h5>
                         <h5 className="detailAmount">
-                          1 TRILLION STATE TOKENS = {""}
-                          $ {formatWithCommas((stateUsdPrice * 1000000000000).toFixed(0))}
+                          1 TRILLION STATE TOKENS = {""}${" "}
+                          {formatWithCommas(
+                            (stateUsdPrice * 1000000000000).toFixed(0)
+                          )}
                         </h5>
                       </div>
                       <div className="mb-0 mx-1">
@@ -436,7 +446,7 @@ const InfoCards = () => {
                         {
                           text: "Valir TOKEN DEPLOYED.",
                           color: "white",
-                        //   image: RievaLogo,
+                          //   image: RievaLogo,
                         },
                       ].map((item, j) => (
                         <span

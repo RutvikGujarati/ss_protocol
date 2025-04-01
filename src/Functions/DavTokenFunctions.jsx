@@ -8,11 +8,13 @@ import {
 import { ethers } from "ethers";
 import { ContractContext } from "./ContractInitialize";
 import PropTypes from "prop-types";
+import { useChainId } from "wagmi";
 
 export const DAVContext = createContext();
 
 export const DavProvider = ({ children }) => {
   const { AllContracts, account } = useContext(ContractContext);
+  const chainId = useChainId();
 
   const [davHolds, setDavHoldings] = useState("0.0");
   const [isLoading, setIsLoading] = useState(true);
@@ -96,7 +98,12 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract) return;
     try {
       const value = ethers.parseEther(amount.toString());
-      const cost = ethers.parseEther((amount * 500000).toString());
+      let cost;
+      if (chainId == 146) {
+        cost = ethers.parseEther((amount * 100).toString());
+      } else {
+        cost = ethers.parseEther((amount * 500000).toString());
+      }
       const transaction = await AllContracts.davContract.mintDAV(value, {
         value: cost,
       });

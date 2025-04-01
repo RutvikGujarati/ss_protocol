@@ -26,6 +26,7 @@ export const GeneralTokenProvider = ({ children }) => {
     Rieva: AllContracts.RievaContract,
     Currus: AllContracts.CurrusContract,
     Valir: AllContracts.ValirContract,
+    Sanitas: AllContracts.SanitasContract,
     TenDollar: AllContracts.TenDollarContract,
     Domus: AllContracts.DomusContract,
     oneD: AllContracts.oneDollar,
@@ -181,6 +182,8 @@ export const GeneralTokenProvider = ({ children }) => {
         contract = AllContracts.TenDollarContract;
       } else if (contractType === "Valir") {
         contract = AllContracts.ValirContract;
+      } else if (contractType === "Sanitas") {
+        contract = AllContracts.SanitasContract;
       }
 
       if (!contract) {
@@ -205,6 +208,7 @@ export const GeneralTokenProvider = ({ children }) => {
         { name: "Domus", contract: AllContracts.DomusRatioContract },
         { name: "Currus", contract: AllContracts.CurrusRatioContract },
         { name: "Valir", contract: AllContracts.ValirRatioContract },
+        { name: "Sanitas", contract: AllContracts.SanitasRatioContract },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ];
 

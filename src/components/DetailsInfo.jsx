@@ -253,16 +253,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                   </td>
                   <td className="d-flex justify-content-end">
                     {dataToShow.renounceSmartContract ? (
-                      <button
-                        // onClick={() =>
-                        //   window.open(
-                        //     `https://otter.pulsechain.com/tx/${dataToShow.transactionHash}`,
-                        //     "_blank",
-                        //     "noopener,noreferrer"
-                        //   )
-                        // }
-                        className="btn btn-primary btn-sm swap-btn info-icon"
-                      >
+                      <button className="btn btn-primary btn-sm swap-btn info-icon">
                         Renounced
                       </button>
                     ) : (
@@ -325,6 +316,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
               dataToShow.tokenName == "10$" ||
               dataToShow.tokenName == "Domus" ||
               dataToShow.tokenName == "Currus" ||
+              dataToShow.tokenName == "Sanitas" ||
               dataToShow.tokenName == "Valir" ||
               dataToShow.tokenName == "Layti") && (
               <>
@@ -391,6 +383,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                           ? "Currus Balance (inside Contract)"
                           : dataToShow.tokenName === "Valir"
                           ? "Valir Balance (inside Contract)"
+                          : dataToShow.tokenName === "Sanitas"
+                          ? "Sanitas Balance (inside Contract)"
                           : "Orxa Balance (inside Contract)"}
                       </td>
 

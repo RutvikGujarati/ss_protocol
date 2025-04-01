@@ -10,6 +10,7 @@ import {
   Currus,
   CurrusRatioAddress,
   DAV_TOKEN_ADDRESS,
+  DAV_TOKEN_SONIC_ADDRESS,
   Domus,
   DomusRatioAddress,
   Fluxin,
@@ -17,7 +18,9 @@ import {
   Ratio_TOKEN_ADDRESS,
   Rieva,
   RievaRatioAddress,
+  Sanitas,
   STATE_TOKEN_ADDRESS,
+  STATE_TOKEN_SONIC_ADDRESS,
   TenDollarRatioAddress,
   Valir,
   ValirRatioAddress,
@@ -26,6 +29,7 @@ import {
 } from "../ContractAddresses";
 import { useGeneralTokens } from "./GeneralTokensFunctions";
 import { useGeneralAuctionFunctions } from "./GeneralAuctionFunctions";
+import { useChainId } from "wagmi";
 
 const SwapContractContext = createContext();
 
@@ -33,6 +37,7 @@ export const useSwapContract = () => useContext(SwapContractContext);
 
 export const SwapContractProvider = ({ children }) => {
   const { stateUsdPrice } = useContext(PriceContext);
+  const chainId = useChainId();
   const { CurrentRatioPrice } = useGeneralTokens();
   const { isAuctionRunning, TotalTokensBurn } = useGeneralAuctionFunctions();
   const { loading, provider, signer, account, AllContracts } =
@@ -103,6 +108,7 @@ export const SwapContractProvider = ({ children }) => {
     Rieva: AllContracts.RievaContract,
     Domus: AllContracts.DomusContract,
     Valir: AllContracts.ValirContract,
+    Sanitas: AllContracts.SanitasContract,
     Currus: AllContracts.CurrusContract,
     oneD: AllContracts.oneDollar,
     TenDollar: AllContracts.TenDollarContract,
@@ -182,7 +188,11 @@ export const SwapContractProvider = ({ children }) => {
   };
 
   const CalculationOfCost = async (amount) => {
-    setTotalCost(ethers.parseEther((amount * 500000).toString()));
+    if (chainId == 146) {
+      setTotalCost(ethers.parseEther((amount * 100).toString()));
+    } else {
+      setTotalCost(ethers.parseEther((amount * 500000).toString()));
+    }
   };
 
   const fetchStateHoldingsAndCalculateUSD = async () => {
@@ -300,6 +310,8 @@ export const SwapContractProvider = ({ children }) => {
       "Domus",
       "Currus",
       "Valir",
+      "Sanitas",
+      "SanitasRatio",
       "FluxinRatio",
       "XerionRatio",
       "RievaRatio",
@@ -792,6 +804,7 @@ export const SwapContractProvider = ({ children }) => {
     fluxin: AllContracts.FluxinContract,
     currus: AllContracts.CurrusContract,
     valir: AllContracts.ValirContract,
+    sanitas: AllContracts.SanitasContract,
     tenDollar: AllContracts.TenDollarContract,
     rieva: AllContracts.RievaContract,
     domus: AllContracts.DomusContract,
@@ -803,6 +816,7 @@ export const SwapContractProvider = ({ children }) => {
     { key: "fluxinBalance", contract: "fluxin", token: Fluxin },
     { key: "CurrusBalance", contract: "currus", token: Currus },
     { key: "ValirBalance", contract: "valir", token: Valir },
+    { key: "SanitasBalance", contract: "sanitas", token: Sanitas },
     { key: "TenDollarBalance", contract: "tenDollar", token: $10 },
     { key: "RievaBalance", contract: "rieva", token: Rieva },
     { key: "DomusBalance", contract: "domus", token: Domus },
@@ -830,14 +844,26 @@ export const SwapContractProvider = ({ children }) => {
     {
       keyPrefix: "ratio",
       tokens: [
-        { contract: "fluxin",key: "FluxinBalance",token: Ratio_TOKEN_ADDRESS,},
+        {
+          contract: "fluxin",
+          key: "FluxinBalance",
+          token: Ratio_TOKEN_ADDRESS,
+        },
         { contract: "currus", key: "CurrusBalance", token: CurrusRatioAddress },
         { contract: "valir", key: "ValirBalance", token: ValirRatioAddress },
         { contract: "rieva", key: "RievaBalance", token: RievaRatioAddress },
-        { contract: "tenDollar",key: "TenDollarBalance",token: TenDollarRatioAddress,},
+        {
+          contract: "tenDollar",
+          key: "TenDollarBalance",
+          token: TenDollarRatioAddress,
+        },
         { contract: "domus", key: "DomusBalance", token: DomusRatioAddress },
         { contract: "xerion", key: "XerionBalance", token: XerionRatioAddress },
-        { contract: "oneDollar", key: "OneDollarBalance", token: OneDollarRatioAddress,},
+        {
+          contract: "oneDollar",
+          key: "OneDollarBalance",
+          token: OneDollarRatioAddress,
+        },
       ],
     },
   ];
@@ -1419,8 +1445,11 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddTokenRatio = () =>
     handleAddToken(Ratio_TOKEN_ADDRESS, "Fluxin");
   const handleAddTokenDAV = () => handleAddToken(DAV_TOKEN_ADDRESS, "pDAV");
+  const handleAddTokensDAV = () => handleAddToken(DAV_TOKEN_SONIC_ADDRESS, "sDAV");
   const handleAddTokenState = () =>
     handleAddToken(STATE_TOKEN_ADDRESS, "pState");
+  const handleAddTokensState = () =>
+    handleAddToken(STATE_TOKEN_SONIC_ADDRESS, "sState");
   const handleAddFluxin = () => handleAddToken(Fluxin, "Orxa");
   const handleAddOneD = () => handleAddToken($1, "1$");
   const handleAddXerion = () => handleAddToken(Xerion, "Layti");
@@ -1429,6 +1458,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddTenDollar = () => handleAddToken($10, "10$");
   const handleAddCurrus = () => handleAddToken(Currus, "Currus");
   const handleAddValir = () => handleAddToken(Valir, "Valir");
+  const handleAddSanitas = () => handleAddToken(Sanitas, "Sanitas");
 
   return (
     <SwapContractContext.Provider
@@ -1445,13 +1475,14 @@ export const SwapContractProvider = ({ children }) => {
         TotalCost,
 
         handleAddTokenDAV,
-
+		handleAddTokensDAV,
         //STATE Token
         StateHolds,
         balances,
         RenounceState,
         WithdrawState,
         handleAddTokenState,
+		handleAddTokensState,
         TotalStateHoldsInUS,
 
         setClaiming,
@@ -1473,6 +1504,7 @@ export const SwapContractProvider = ({ children }) => {
         handleAddFluxin,
         handleAddXerion,
         handleAddRieva,
+		handleAddSanitas,
         handleAddDomus,
         userHashSwapped,
         userHasReverseSwapped,
@@ -1516,7 +1548,7 @@ export const SwapContractProvider = ({ children }) => {
         ReanounceCurrusContract,
         RenounceCurrusSwap,
         RenounceValirSwap,
-		renounceOwnership,
+        renounceOwnership,
         SetOnePercentageOfBalance,
         ReverseForNextCycle,
         handleAddOneD,

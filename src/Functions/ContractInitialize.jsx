@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
 import { createContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { contractConfigs } from "../Constants/ContractConfig";
+import { getContractConfigs } from "../Constants/ContractConfig";
+import { useChainId } from "wagmi";
 
 export const ContractContext = createContext(null);
 
@@ -14,7 +15,9 @@ export const ContractProvider = ({ children }) => {
   const [signer, setSigner] = useState(null);
   const [account, setAccount] = useState(null);
   const [AllContracts, setContracts] = useState({});
+  const chainId = useChainId();
 
+  console.log("current chain id", chainId);
   const initializeContracts = async () => {
     if (typeof window.ethereum !== "undefined") {
       try {
@@ -28,10 +31,12 @@ export const ContractProvider = ({ children }) => {
 
         // Dynamically create contract instances
         const contractInstances = Object.fromEntries(
-          Object.entries(contractConfigs).map(([key, { address, abi }]) => [
-            key,
-            new ethers.Contract(address, abi, newSigner),
-          ])
+          Object.entries(getContractConfigs(chainId)).map(
+            ([key, { address, abi }]) => [
+              key,
+              new ethers.Contract(address, abi, newSigner),
+            ]
+          )
         );
 
         setContracts(contractInstances);

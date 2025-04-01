@@ -4,20 +4,27 @@ import XerionLogo from "../assets/layti.png";
 import FluxinLogo from "../assets/FluxinLogo.png";
 import Rieva from "../assets/rieva.png";
 import DAVLogo from "../assets/d_logo.png";
+import sDAV from "../assets/sDAV.png";
 import TenDollar from "../assets/TenDollar.png";
 import Currus from "../assets/Currus.png";
 import ValirLogo from "../assets/Valir.png";
+import SanitasLogo from "../assets/Sanitas.png";
 import oned from "../assets/oned.png";
 import Domus from "../assets/domus.png";
 import stateLogo from "../assets/state_logo.png";
+import sState from "../assets/state.png";
 import PropTypes from "prop-types";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
+import { useChainId } from "wagmi";
+import { Sanitas } from "../ContractAddresses";
 
 const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
   const {
     handleAddTokenDAV,
+    handleAddTokensDAV,
     handleAddTokenState,
+    handleAddTokensState,
     handleAddOneD,
     handleAddFluxin,
     handleAddXerion,
@@ -26,7 +33,10 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     handleAddTenDollar,
     handleAddCurrus,
     handleAddValir,
+    handleAddSanitas,
   } = useSwapContract();
+  const chainId = useChainId();
+  const [filteredData, setFilteredData] = useState([]);
 
   const originalData = [
     { id: "∈", name: "DAV", logo: DAVLogo, AddToken: handleAddTokenDAV },
@@ -39,9 +49,20 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     { id: "∞", name: "10$", logo: TenDollar, AddToken: handleAddTenDollar },
     { id: "~", name: "Currus", logo: Currus, AddToken: handleAddCurrus },
     { id: "4", name: "Valir", logo: ValirLogo, AddToken: handleAddValir },
+    { id: "~", name: "Sanitas", logo: SanitasLogo, AddToken: handleAddSanitas },
   ];
 
-  const [filteredData, setFilteredData] = useState(originalData);
+  const SonicData = [
+    { id: "∈", name: "DAV", logo: sDAV, AddToken: handleAddTokensDAV },
+    { id: "±", name: "STATE", logo: sState, AddToken: handleAddTokensState },
+  ];
+
+  useEffect(() => {
+    const data = chainId === 146 ? SonicData : originalData;
+    setFilteredData(data);
+  }, [chainId]);
+  const data = chainId === 146 ? SonicData : originalData;
+
   const searchInputRef = useRef(null);
 
   useEffect(() => {
@@ -72,14 +93,14 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     setSearchQuery(query);
 
     if (query === "") {
-      // Deduplicate by name when resetting to originalData
+      // Deduplicate by name when resetting to data
       const uniqueData = Array.from(
-        new Map(originalData.map((item) => [item.name, item])).values()
+        new Map(data.map((item) => [item.name, item])).values()
       );
       setFilteredData(uniqueData);
       console.log("After clear search, filteredData:", uniqueData); // Debug log
     } else {
-      const filtered = originalData.filter((item) =>
+      const filtered = data.filter((item) =>
         item.name.toLowerCase().includes(query)
       );
       setFilteredData(filtered);
@@ -93,9 +114,11 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
 
   const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS.toLowerCase();
 
-
   return (
-	<div className="card w-100" style={{ maxHeight: AuthAddress ? "550px" : "550px" }}>
+    <div
+      className="card w-100"
+      style={{ maxHeight: AuthAddress ? "550px" : "550px" }}
+    >
       <div className="mb-3">
         <input
           type="text"

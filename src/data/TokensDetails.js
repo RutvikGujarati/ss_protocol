@@ -1,14 +1,16 @@
 import { useContext } from "react";
 import {
-	$1, $10, Currus, CurrusRatioAddress, DAV_TOKEN_ADDRESS, Domus, DomusRatioAddress,
+	$1, $10, Currus, CurrusRatioAddress, DAV_TOKEN_ADDRESS, DAV_TOKEN_SONIC_ADDRESS, Domus, DomusRatioAddress,
 	Fluxin, OneDollarRatioAddress, Ratio_TOKEN_ADDRESS, Rieva, RievaRatioAddress,
-	STATE_TOKEN_ADDRESS, TenDollarRatioAddress, Valir, ValirRatioAddress, Xerion, XerionRatioAddress,
+	Sanitas,
+	STATE_TOKEN_ADDRESS, STATE_TOKEN_SONIC_ADDRESS, TenDollarRatioAddress, Valir, ValirRatioAddress, Xerion, XerionRatioAddress,
 } from "../ContractAddresses";
 import { PriceContext } from "../api/StatePrice";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
 import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions";
+import { useChainId } from "wagmi";
 
 const shortenAddress = (addr) => addr ? `${addr.slice(0, 6)}...${addr.slice(-6)}` : "";
 
@@ -19,7 +21,7 @@ export const TokensDetails = () => {
 	const { CurrentRatioPrice } = useGeneralTokens();
 	const { Supply, DAVTokensWithdraw, DAVTokensFiveWithdraw, withdraw_5, withdraw_95 } = useDAvContract();
 	const swap = useSwapContract();
-
+	const chainId = useChainId()
 	const tokens = [
 		{
 			name: "DAV",
@@ -84,6 +86,14 @@ export const TokensDetails = () => {
 			mintAmount: "1,250,000,000,000",
 		},
 		{
+			name: "Sanitas",
+			key: "Sanitas",
+			address: Sanitas,
+			price: prices.SanitasUsdPrice,
+			// swapAddress: SanitasRatioAddress,
+			mintAmount: "625,000,000,000",
+		},
+		{
 			name: "Valir",
 			key: "Valir",
 			address: Valir,
@@ -108,7 +118,30 @@ export const TokensDetails = () => {
 		},
 	];
 
-	return tokens.map((token) => {
+	const SonicTokens = [
+		{
+			name: "DAV",
+			key:"dav",
+			displayName: "sDAV",
+			address: DAV_TOKEN_SONIC_ADDRESS,
+			supply: "5,000,000.00",
+			price: 0,
+			actions: {
+				claimLiquidityDAVToken: withdraw_95,
+				ReanounceContract: swap.ReanounceContract,
+			},
+		},
+		{
+			name: "STATE",
+			key: "state",
+			address: STATE_TOKEN_SONIC_ADDRESS,
+			price: "0.0000",
+			mintAmount: "1,000,000,000,000",
+		},
+	]
+	const data = chainId === 146 ? SonicTokens : tokens;
+
+	return data.map((token) => {
 		const key = token.key;
 		const rn = token.RatioName;
 		const isDAV = token.name === "DAV";
@@ -147,12 +180,13 @@ export const TokensDetails = () => {
 			Ratio: CurrentRatioPrice[key],
 			AuctionTimeRunning: auctionTimeLeft[key],
 			AuctionNextTime: auctionDetails[key],
-			renounceSwapSmartContract: key == "OneDollar" ? swap.isRenounced["OneDollar"] : swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
+			renounceSwapSmartContract: key == "OneDollar" ? swap.isRenounced["OneDollar"]:key == "Sanitas" ? swap.isRenounced["Sanitas"]  : swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
 
 			actions: {
 				...(token.actions || {}), // Include any custom actions (e.g., for DAV)
 				ReanounceContract: swap[`Reanounce${key}Contract`] || swap.ReanounceContract,
 				ReanounceSwapContract: swap[`Renounce${key}Swap`],
+				claimFiveDAVToken:withdraw_5,
 				WithdrawState: swap[`Withdraw${key}`],
 				mintAdditionalTOkens: token.mintAmount
 					? () => mintAdditionalTOkens(
