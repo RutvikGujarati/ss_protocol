@@ -92,7 +92,7 @@ export const SwapContractProvider = ({ children }) => {
   const [buttonTextStates, setButtonTextStates] = useState({});
   const [swappingStates, setSwappingStates] = useState({});
 
-  const [StateBurnBalance, setStateBurnBalance] = useState({});
+  const [StateBurnBalance, setStateBurnBalance] = useState(0);
   const [RatioTargetsofTokens, setRatioTargetsOfTokens] = useState({});
 
   const [decayPercentages, setDecayPercentages] = useState({});

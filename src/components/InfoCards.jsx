@@ -303,7 +303,9 @@ const InfoCards = () => {
                           textTransform: "capitalize",
                         }}
                       >
-                        PLS - SWAP LEVY{" "}
+                        {chainId == 146
+                          ? "SONIC - SWAP LEVY"
+                          : "PLS - SWAP LEVY"}
                       </h6>
                       <h5 className="">{formatWithCommas(claimableAmount)}</h5>
                       <div className="d-flex justify-content-center ">
@@ -331,10 +333,12 @@ const InfoCards = () => {
                           {formatWithCommas(TotalStateHoldsInUS)}
                         </h5>
                         <h5 className="detailAmount">
-                          1 TRILLION STATE TOKENS = {""}${" "}
-                          {formatWithCommas(
-                            (stateUsdPrice * 1000000000000).toFixed(0)
-                          )}
+                          1 TRILLION STATE TOKENS = ${" "}
+                          {chainId === 146
+                            ? "0.00"
+                            : formatWithCommas(
+                                (stateUsdPrice * 1000000000000).toFixed(0)
+                              )}
                         </h5>
                       </div>
                       <div className="mb-0 mx-1">
@@ -378,6 +382,8 @@ const InfoCards = () => {
                         ${" "}
                         {priceLoading ? (
                           <DotAnimation />
+                        ) : chainId === 146 ? (
+                          "0.000"
                         ) : (
                           formatPrice(stateUsdPrice)
                         )}

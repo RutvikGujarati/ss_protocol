@@ -3,18 +3,26 @@ import {
 	Domus, DomusRatioAddress, Fluxin, OneDollarRatioAddress, Ratio_TOKEN_ADDRESS,
 	Rieva, RievaRatioAddress, Sanitas, STATE_TOKEN_ADDRESS, STATE_TOKEN_SONIC_ADDRESS, TenDollarRatioAddress,
 	Valir, ValirRatioAddress, Xerion, XerionRatioAddress
-} from "../ContractAddresses";
-
-import DAVTokenABI from "../ABI/DavTokenABI.json";
-import StateABI from "../ABI/StateTokenABI.json";
-import RatioABI from "../ABI/RatioABI.json";
-
-const getDAVAddress = (chainId) => (chainId == 146 ? DAV_TOKEN_SONIC_ADDRESS : DAV_TOKEN_ADDRESS);
-const StateAddress = (chainId) => (chainId == 146 ? STATE_TOKEN_SONIC_ADDRESS : STATE_TOKEN_ADDRESS);
-
-export const getContractConfigs = (chainId) => ({
-	davContract: { address: getDAVAddress(chainId), abi: DAVTokenABI },
-	stateContract: { address: StateAddress(chainId), abi: StateABI },
+  } from "../ContractAddresses";
+  
+  import DAVTokenABI from "../ABI/DavTokenABI.json";
+  import sDAVABI from "../ABI/sDAVToken.json";
+  import StateABI from "../ABI/StateTokenABI.json";
+  import RatioABI from "../ABI/RatioABI.json";
+  
+  let currentChainId = 1; // Default chainId
+  
+  export const setChainId = (chainId) => {
+	currentChainId = chainId;
+  };
+  
+  const getDAVAddress = () => (currentChainId == 146 ? DAV_TOKEN_SONIC_ADDRESS : DAV_TOKEN_ADDRESS);
+  const getStateAddress = () => (currentChainId == 146 ? STATE_TOKEN_SONIC_ADDRESS : STATE_TOKEN_ADDRESS);
+  const getDavABI = () => (currentChainId == 146 ? sDAVABI : DAVTokenABI);
+  
+  export const getContractConfigs = () => ({
+	davContract: { address: getDAVAddress(), abi: getDavABI() },
+	stateContract: { address: getStateAddress(), abi: StateABI },
 	FluxinContract: { address: Fluxin, abi: StateABI },
 	RievaContract: { address: Rieva, abi: StateABI },
 	DomusContract: { address: Domus, abi: StateABI },
@@ -32,4 +40,5 @@ export const getContractConfigs = (chainId) => ({
 	OneDollarRatioContract: { address: OneDollarRatioAddress, abi: RatioABI },
 	TenDollarRatioContract: { address: TenDollarRatioAddress, abi: RatioABI },
 	XerionRatioContract: { address: XerionRatioAddress, abi: RatioABI },
-});
+  });
+  
