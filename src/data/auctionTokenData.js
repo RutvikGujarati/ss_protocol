@@ -6,9 +6,10 @@ import TenDollarLogo from "../assets/TenDollar.png";
 import DomusLogo from "../assets/domus.png";
 import CurrusLogo from "../assets/Currus.png";
 import ValirLogo from "../assets/Valir.png";
+import SanitasLogo from "../assets/Sanitas.png";
 import oned from "../assets/oned.png";
 
-import { $1, $10, Currus, Domus, Fluxin, Rieva, Valir, Xerion } from "../ContractAddresses";
+import { $1, $10, Currus, Domus, Fluxin, Rieva, Sanitas, Valir, Xerion } from "../ContractAddresses";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { PriceContext } from "../api/StatePrice";
 import { useGeneralAuctionFunctions } from '../Functions/GeneralAuctionFunctions';
@@ -22,7 +23,7 @@ export const useAuctionTokens = () => {
 		SwapTokens, isReversed, RatioTargetsofTokens, outAmounts,
 		userHashSwapped, userHasReverseSwapped, OnePBalance,
 		handleAddFluxin, handleAddValir,handleAddXerion, handleAddRieva, handleAddDomus,
-		handleAddOneD, handleAddTenDollar, handleAddCurrus
+		handleAddOneD, handleAddTenDollar, handleAddCurrus,handleAddSanitas
 	} = useSwapContract();
 
 	const tokenConfigs = [
@@ -34,6 +35,7 @@ export const useAuctionTokens = () => {
 		["Domus", "Domus", DomusLogo, Domus, handleAddDomus],
 		["Currus", "Currus", CurrusLogo, Currus, handleAddCurrus],
 		["Valir", "Valir", ValirLogo, Valir, handleAddValir],
+		["Sanitas", "Sanitas", SanitasLogo, Sanitas, handleAddSanitas],
 	];
 
 	return tokenConfigs.map(([id, contract, image, token, handleAddToken]) => ({
@@ -66,7 +68,8 @@ export const useAuctionTokens = () => {
 			TenDollar: "0x86e8330efe0dfc20ab8f63dcf95a6a8d66f60c1d",
 			Domus: "0x7019ee4173420ee652edc9a26bffc91469c753db",
 			Currus: "0xe4a02db896cee9dbf32d730dc9874eb058f0ca3f",
-			Valir: "0x1d3796d78ffdca93b501ff442aba4123bb334cd1"
+			Valir: "0x1d3796d78ffdca93b501ff442aba4123bb334cd1",
+			Sanitas: "0xbab8540dee05ba25cec588ce5124aa50b1d7d425"
 		};
 		return chartIds[contract] || "";
 	}

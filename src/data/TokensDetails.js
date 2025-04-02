@@ -3,6 +3,7 @@ import {
 	$1, $10, Currus, CurrusRatioAddress, DAV_TOKEN_ADDRESS, DAV_TOKEN_SONIC_ADDRESS, Domus, DomusRatioAddress,
 	Fluxin, OneDollarRatioAddress, Ratio_TOKEN_ADDRESS, Rieva, RievaRatioAddress,
 	Sanitas,
+	SanitasRatioAddress,
 	STATE_TOKEN_ADDRESS, STATE_TOKEN_SONIC_ADDRESS, TenDollarRatioAddress, Valir, ValirRatioAddress, Xerion, XerionRatioAddress,
 } from "../ContractAddresses";
 import { PriceContext } from "../api/StatePrice";
@@ -90,7 +91,7 @@ export const TokensDetails = () => {
 			key: "Sanitas",
 			address: Sanitas,
 			price: prices.SanitasUsdPrice,
-			// swapAddress: SanitasRatioAddress,
+			swapAddress: SanitasRatioAddress,
 			mintAmount: "625,000,000,000",
 		},
 		{
