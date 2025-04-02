@@ -64,7 +64,7 @@ export const DeepStateProvider = ({ children }) => {
           AllContracts.DeepStateContract.dividendsOf(account),
           AllContracts.DeepStateContract.getInvestedEth(account),
           AllContracts.DeepStateContract.getUserBuyCount(account),
-          AllContracts.DeepStateContract.sellProceeds(account),
+          AllContracts.DeepStateContract.getReinvestableFunds(account),
           AllContracts.DeepStateContract.getUserProfit(account),
         ]);
       setUsersTokens(Math.trunc(Number(ethers.formatEther(tokens))));
@@ -73,6 +73,7 @@ export const DeepStateProvider = ({ children }) => {
       setTotalBuyCounts(parseFloat(buyCounts));
       setTotalStuckETH(parseFloat(ethers.formatEther(stuckEth)).toFixed(4));
       setUserProfit(parseFloat(ethers.formatEther(profit)).toFixed(2));
+	  console.log("all data",tokens, dividends, invested, buyCounts, stuckEth, profit)
     } catch (error) {
       console.error("Error fetching user data:", error);
     }

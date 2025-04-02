@@ -371,7 +371,7 @@
 	},
 	{
 		"type": "function",
-		"name": "getStuckEth",
+		"name": "getReinvestableFunds",
 		"inputs": [
 			{
 				"name": "_user",
@@ -532,7 +532,7 @@
 		"name": "reinvest",
 		"inputs": [
 			{
-				"name": "stuckEth",
+				"name": "amount",
 				"type": "uint256",
 				"internalType": "uint256"
 			}
@@ -548,6 +548,44 @@
 	},
 	{
 		"type": "function",
+		"name": "reinvestableFunds",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "reinvestableOf",
+		"inputs": [
+			{
+				"name": "_user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "reinvestedEth",
 		"inputs": [
 			{
@@ -556,6 +594,19 @@
 				"internalType": "address"
 			}
 		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "scalingFactor",
+		"inputs": [],
 		"outputs": [
 			{
 				"name": "",
@@ -599,25 +650,6 @@
 	},
 	{
 		"type": "function",
-		"name": "sellProceeds",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
 		"name": "symbol",
 		"inputs": [],
 		"outputs": [
@@ -645,6 +677,19 @@
 	{
 		"type": "function",
 		"name": "tokenPriceInitial",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "totalBuyFeesHeld",
 		"inputs": [],
 		"outputs": [
 			{
