@@ -339,7 +339,7 @@ const DataTable = () => {
                                   </div>
                                 )}
                                 <button
-                                  onClick={() => SwapT() }
+                                  onClick={() => SwapT()}
                                   disabled={
                                     swappingStates[id] ||
                                     onlyInputAmount <= 0 ||

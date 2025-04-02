@@ -68,7 +68,7 @@ export const SwapContractProvider = ({ children }) => {
     Xerion: false,
     Rieva: false,
     Currus: false,
-	Sanitas: false,
+    Sanitas: false,
     Valir: false,
     Domus: false,
     TenDollar: false,
@@ -80,7 +80,7 @@ export const SwapContractProvider = ({ children }) => {
     Rieva: false,
     Valir: false,
     Currus: false,
-	Sanitas: false,
+    Sanitas: false,
     Domus: false,
     TenDollar: false,
     OneDollar: false,
@@ -147,7 +147,7 @@ export const SwapContractProvider = ({ children }) => {
     CurrusRatio: AllContracts.CurrusRatioContract,
     DomusRatio: AllContracts.DomusRatioContract,
     ValirRatio: AllContracts.ValirRatioContract,
-	SanitasRatio: AllContracts.SanitasRatioContract,
+    SanitasRatio: AllContracts.SanitasRatioContract,
     OneDollarRatio: AllContracts.OneDollarRatioContract,
     TenDollarRatio: AllContracts.TenDollarRatioContract,
   };
@@ -824,93 +824,154 @@ export const SwapContractProvider = ({ children }) => {
   };
 
   const [balances, setBalances] = useState({});
-  const contractMappings = {
-    state: AllContracts.stateContract,
-    fluxin: AllContracts.FluxinContract,
-    currus: AllContracts.CurrusContract,
-    valir: AllContracts.ValirContract,
-    sanitas: AllContracts.SanitasContract,
-    tenDollar: AllContracts.TenDollarContract,
-    rieva: AllContracts.RievaContract,
-    domus: AllContracts.DomusContract,
-    xerion: AllContracts.XerionContract,
-    oneDollar: AllContracts.oneDollar,
-  };
-  const tokens = [
-    { key: "stateBalance", contract: "state", token: STATE_TOKEN_ADDRESS },
-    { key: "fluxinBalance", contract: "fluxin", token: Fluxin },
-    { key: "CurrusBalance", contract: "currus", token: Currus },
-    { key: "ValirBalance", contract: "valir", token: Valir },
-    { key: "SanitasBalance", contract: "sanitas", token: Sanitas },
-    { key: "TenDollarBalance", contract: "tenDollar", token: $10 },
-    { key: "RievaBalance", contract: "rieva", token: Rieva },
-    { key: "DomusBalance", contract: "domus", token: Domus },
-    { key: "xerionBalance", contract: "xerion", token: Xerion },
-    { key: "OneDollarBalance", contract: "oneDollar", token: $1 },
-  ];
 
-  // Define ratio tokens
-  const ratioTokens = [
-    {
-      keyPrefix: "State",
-      contract: "state",
-      tokens: [
-        { key: "Fluxin", token: Ratio_TOKEN_ADDRESS },
-        { key: "Currus", token: CurrusRatioAddress },
-        { key: "TenDollar", token: TenDollarRatioAddress },
-        { key: "Domus", token: DomusRatioAddress },
-        { key: "Valir", token: ValirRatioAddress },
-        { key: "Sanitas", token: SanitasRatioAddress },
-        { key: "Rieva", token: RievaRatioAddress },
-        { key: "DomusRieva", token: DomusRatioAddress },
-        { key: "Xerion", token: XerionRatioAddress },
-        { key: "OneDollar", token: OneDollarRatioAddress },
-      ],
-    },
-    {
-      keyPrefix: "ratio",
-      tokens: [
-        {
-          contract: "fluxin",
-          key: "FluxinBalance",
-          token: Ratio_TOKEN_ADDRESS,
-        },
-        { contract: "currus", key: "CurrusBalance", token: CurrusRatioAddress },
-        { contract: "valir", key: "ValirBalance", token: ValirRatioAddress },
-        { contract: "sanitas", key: "SanitasBalance", token: SanitasRatioAddress },
-        { contract: "rieva", key: "RievaBalance", token: RievaRatioAddress },
-        {
-          contract: "tenDollar",
-          key: "TenDollarBalance",
-          token: TenDollarRatioAddress,
-        },
-        { contract: "domus", key: "DomusBalance", token: DomusRatioAddress },
-        { contract: "xerion", key: "XerionBalance", token: XerionRatioAddress },
-        {
-          contract: "oneDollar",
-          key: "OneDollarBalance",
-          token: OneDollarRatioAddress,
-        },
-      ],
-    },
-  ];
-
-  // Generate balanceConfigs dynamically
   const balanceConfigs = [
-    ...tokens.map(({ key, contract, token }) => ({
-      contract: contractMappings[contract],
-      token,
-      key,
-    })),
-    ...ratioTokens.flatMap(({ keyPrefix, contract, tokens }) =>
-      tokens.map(({ key, token }) => ({
-        contract: contract
-          ? contractMappings[contract]
-          : contractMappings.state,
-        token,
-        key: `${keyPrefix}${key}`,
-      }))
-    ),
+    {
+      contract: AllContracts.stateContract,
+      token: STATE_TOKEN_ADDRESS,
+      key: "stateBalance",
+    },
+    {
+      contract: AllContracts.FluxinContract,
+      token: Fluxin,
+      key: "fluxinBalance",
+    },
+    {
+      contract: AllContracts.ValirContract,
+      token: Valir,
+      key: "ValirBalance",
+    },
+    {
+      contract: AllContracts.CurrusContract,
+      token: Currus,
+      key: "CurrusBalance",
+    },
+    {
+      contract: AllContracts.SanitasContract,
+      token: Sanitas,
+      key: "SanitasBalance",
+    },
+    {
+      contract: AllContracts.TenDollarContract,
+      token: $10,
+      key: "TenDollarBalance",
+    },
+    {
+      contract: AllContracts.RievaContract,
+      token: Rieva,
+      key: "RievaBalance",
+    },
+    {
+      contract: AllContracts.DomusContract,
+      token: Domus,
+      key: "DomusBalance",
+    },
+    {
+      contract: AllContracts.XerionContract,
+      token: Xerion,
+      key: "xerionBalance",
+    },
+    {
+      contract: AllContracts.oneDollar,
+      token: $1,
+      key: "OneDollarBalance",
+    },
+    {
+      contract: AllContracts.stateContract,
+      token: Ratio_TOKEN_ADDRESS,
+      key: "StateFluxin",
+    },
+    {
+      contract: AllContracts.stateContract,
+      token: TenDollarRatioAddress,
+      key: "StateTenDollar",
+    },
+    {
+      contract: AllContracts.stateContract,
+      token: DomusRatioAddress,
+      key: "StateDomus",
+    },
+    {
+      contract: AllContracts.stateContract,
+      token: ValirRatioAddress,
+      key: "StateValir",
+    },
+    {
+      contract: AllContracts.stateContract,
+      token: SanitasRatioAddress,
+      key: "StateSanitas",
+    },
+    {
+      contract: AllContracts.stateContract,
+      token: CurrusRatioAddress,
+      key: "StateCurrus",
+    },
+    {
+      contract: AllContracts.stateContract,
+      token: RievaRatioAddress,
+      key: "StateRieva",
+    },
+    {
+      contract: AllContracts.stateContract,
+      token: DomusRatioAddress,
+      key: "StateDomusRieva",
+    },
+    {
+      contract: AllContracts.stateContract,
+      token: XerionRatioAddress,
+      key: "StateXerion",
+    },
+    {
+      contract: AllContracts.stateContract,
+      token: OneDollarRatioAddress,
+      key: "StateOneDollar",
+    },
+
+    {
+      contract: AllContracts.FluxinContract,
+      token: Ratio_TOKEN_ADDRESS,
+      key: "ratioFluxinBalance",
+    },
+    {
+      contract: AllContracts.RievaContract,
+      token: RievaRatioAddress,
+      key: "ratioRievaBalance",
+    },
+    {
+      contract: AllContracts.ValirContract,
+      token: ValirRatioAddress,
+      key: "ratioValirBalance",
+    },
+    {
+      contract: AllContracts.CurrusContract,
+      token: CurrusRatioAddress,
+      key: "ratioCurrusBalance",
+    },
+    {
+      contract: AllContracts.SanitasContract,
+      token: SanitasRatioAddress,
+      key: "ratioSanitasBalance",
+    },
+    {
+      contract: AllContracts.TenDollarContract,
+      token: TenDollarRatioAddress,
+      key: "ratioTenDollarBalance",
+    },
+    {
+      contract: AllContracts.DomusContract,
+      token: DomusRatioAddress,
+      key: "ratioDomusBalance",
+    },
+    {
+      contract: AllContracts.XerionContract,
+      token: XerionRatioAddress,
+      key: "ratioXerionBalance",
+    },
+    {
+      contract: AllContracts.oneDollar,
+      token: OneDollarRatioAddress,
+      key: "ratioOneDollarBalance",
+    },
   ];
 
   const fetchAllBalances = async () => {
@@ -1479,7 +1540,8 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddTokenRatio = () =>
     handleAddToken(Ratio_TOKEN_ADDRESS, "Fluxin");
   const handleAddTokenDAV = () => handleAddToken(DAV_TOKEN_ADDRESS, "pDAV");
-  const handleAddTokensDAV = () => handleAddToken(DAV_TOKEN_SONIC_ADDRESS, "sDAV");
+  const handleAddTokensDAV = () =>
+    handleAddToken(DAV_TOKEN_SONIC_ADDRESS, "sDAV");
   const handleAddTokenState = () =>
     handleAddToken(STATE_TOKEN_ADDRESS, "pState");
   const handleAddTokensState = () =>
@@ -1509,14 +1571,14 @@ export const SwapContractProvider = ({ children }) => {
         TotalCost,
 
         handleAddTokenDAV,
-		handleAddTokensDAV,
+        handleAddTokensDAV,
         //STATE Token
         StateHolds,
         balances,
         RenounceState,
         WithdrawState,
         handleAddTokenState,
-		handleAddTokensState,
+        handleAddTokensState,
         TotalStateHoldsInUS,
 
         setClaiming,
@@ -1538,7 +1600,7 @@ export const SwapContractProvider = ({ children }) => {
         handleAddFluxin,
         handleAddXerion,
         handleAddRieva,
-		handleAddSanitas,
+        handleAddSanitas,
         handleAddDomus,
         userHashSwapped,
         userHasReverseSwapped,
@@ -1561,7 +1623,7 @@ export const SwapContractProvider = ({ children }) => {
         transactionStatus,
         setBurnRate,
         handleAddCurrus,
-		RenounceSanitasSwap,
+        RenounceSanitasSwap,
         handleAddValir,
         // userHasReverseSwapped,
         isReversed,
@@ -1578,7 +1640,7 @@ export const SwapContractProvider = ({ children }) => {
         ReanounceOneDollarContract,
         ReanounceRievaContract,
         ReanounceDomusContract,
-		ReanounceSanitasContract,
+        ReanounceSanitasContract,
         ReanounceValirContract,
         ReanounceTenDollarContract,
         ReanounceCurrusContract,
@@ -1590,7 +1652,7 @@ export const SwapContractProvider = ({ children }) => {
         handleAddOneD,
         handleAddTenDollar,
         WithdrawTenDollar,
-		WithdrawSanitas,
+        WithdrawSanitas,
         decayPercentages,
         ReverseForCycle,
         RenounceRievaSwap,
