@@ -452,7 +452,7 @@ const InfoCards = () => {
                         ...(chainId !== 146
                           ? [
                               {
-                                text: "Valir TOKEN DEPLOYED.",
+                                text: "Sanitas TOKEN DEPLOYED.",
                                 color: "white",
                               },
                             ]
