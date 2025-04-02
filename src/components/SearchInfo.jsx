@@ -12,12 +12,11 @@ import SanitasLogo from "../assets/Sanitas.png";
 import oned from "../assets/oned.png";
 import Domus from "../assets/domus.png";
 import stateLogo from "../assets/state_logo.png";
-import sState from "../assets/sSTATE.png";
+import sState from "../assets/sonicstate.png";
 import PropTypes from "prop-types";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useChainId } from "wagmi";
-import { Sanitas } from "../ContractAddresses";
 
 const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
   const {
