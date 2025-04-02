@@ -449,15 +449,18 @@ const InfoCards = () => {
                           text: `${DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS.`,
                           color: "white",
                         },
-                        {
-                          text: "Valir TOKEN DEPLOYED.",
-                          color: "white",
-                          //   image: RievaLogo,
-                        },
+                        ...(chainId !== 146
+                          ? [
+                              {
+                                text: "Valir TOKEN DEPLOYED.",
+                                color: "white",
+                              },
+                            ]
+                          : []),
                       ].map((item, j) => (
                         <span
                           key={`${i}-${j}`}
-                          className="marquee-content  rieva-token-container"
+                          className="marquee-content rieva-token-container"
                           style={{
                             color: item.color,
                             display: "flex",
@@ -465,15 +468,6 @@ const InfoCards = () => {
                             gap: "8px",
                           }}
                         >
-                          {/* {item.image && (
-                            <div className="">
-                              <img
-                                src={item.image}
-                                alt="Rieva Token"
-                                className="rieva-token-image"
-                              />
-                            </div>
-                          )} */}
                           {item.text}
                         </span>
                       ))}

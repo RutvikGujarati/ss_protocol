@@ -4,8 +4,10 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import WalletConnector from "../WalletComps/WalletConnect";
 import { NavLink } from "react-router-dom";
 import pulsex from "../assets/pulsex.png";
+import shadow from "../assets/shadow.jpeg";
 import { FaTelegramPlane } from "react-icons/fa";
 import { FaXTwitter, FaYoutube } from "react-icons/fa6";
+import { useChainId } from "wagmi";
 // import { Tooltip } from "bootstrap";
 // import { useDAVToken } from "../Context/DavTokenContext";
 
@@ -21,6 +23,7 @@ const Header = () => {
   //       });
   //     });
   //   }, []);
+  const chainId = useChainId();
 
   return (
     <>
@@ -138,12 +141,16 @@ const Header = () => {
                     ? "nav-link active-link text-light"
                     : "nav-link text-light"
                 }
-                to="https://pulsex.mypinata.cloud/ipfs/bafybeibzu7nje2o2tufb3ifitjrto3n3xcwon7fghq2igtcupulfubnrim/"
+                to={
+                  chainId === 146
+                    ? "https://www.shadow.so/trade"
+                    : "https://pulsex.mypinata.cloud/ipfs/bafybeibzu7nje2o2tufb3ifitjrto3n3xcwon7fghq2igtcupulfubnrim/"
+                }
                 target="_blank"
               >
                 <img
-                  src={pulsex}
-                  alt="PulseX"
+                  src={chainId === 146 ? shadow : pulsex}
+                  alt={chainId === 146 ? "Sonic" : "PulseX"}
                   width="30"
                   height="30"
                   style={{ borderRadius: "50%", background: "transparent" }}
