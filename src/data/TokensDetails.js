@@ -122,7 +122,7 @@ export const TokensDetails = () => {
 	const SonicTokens = [
 		{
 			name: "DAV",
-			key:"dav",
+			key: "dav",
 			displayName: "sDAV",
 			address: DAV_TOKEN_SONIC_ADDRESS,
 			supply: "5,000,000.00",
@@ -181,13 +181,13 @@ export const TokensDetails = () => {
 			Ratio: CurrentRatioPrice[key],
 			AuctionTimeRunning: auctionTimeLeft[key],
 			AuctionNextTime: auctionDetails[key],
-			renounceSwapSmartContract: key == "OneDollar" ? swap.isRenounced["OneDollar"]:key == "Sanitas" ? swap.isRenounced["Sanitas"]  : swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
+			renounceSwapSmartContract: key == "OneDollar" ? swap.isRenounced["OneDollar"] : swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
 
 			actions: {
 				...(token.actions || {}), // Include any custom actions (e.g., for DAV)
 				ReanounceContract: swap[`Reanounce${key}Contract`] || swap.ReanounceContract,
 				ReanounceSwapContract: swap[`Renounce${key}Swap`],
-				claimFiveDAVToken:withdraw_5,
+				claimFiveDAVToken: withdraw_5,
 				WithdrawState: swap[`Withdraw${key}`],
 				mintAdditionalTOkens: token.mintAmount
 					? () => mintAdditionalTOkens(
