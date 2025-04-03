@@ -38,14 +38,20 @@ export const ContractProvider = ({ children }) => {
     try {
       setLoading(true);
       const newProvider = new ethers.BrowserProvider(window.ethereum, "any");
-      const accounts = await newProvider.send("eth_requestAccounts", []);
-      const newSigner = await newProvider.getSigner();
 
+      // Check if the user is already connected
+      const accounts = await newProvider.send("eth_accounts", []);
+      if (accounts.length === 0) {
+        console.log("No connected accounts found.");
+        setLoading(false);
+        return;
+      }
+
+      const newSigner = await newProvider.getSigner();
       setProvider(newProvider);
       setSigner(newSigner);
       setAccount(accounts[0]);
 
-      // Dynamically create contract instances **only after chainId is set**
       const contractInstances = Object.fromEntries(
         Object.entries(getContractConfigs()).map(([key, { address, abi }]) => [
           key,
