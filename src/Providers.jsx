@@ -12,14 +12,23 @@ import { DavProvider } from "./Functions/DavTokenFunctions.jsx";
 import { GeneralTokenProvider } from "./Functions/GeneralTokensFunctions.jsx";
 import { GeneralAuctionProvider } from "./Functions/GeneralAuctionFunctions.jsx";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity, // ✅ Prevents frequent refetches
+      cacheTime: 1000 * 60 * 60 * 24, // 24 hours
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 export default function Providers({ children }) {
   Providers.propTypes = {
     children: PropTypes.node.isRequired,
   };
   return (
     <StrictMode>
-      <WagmiProvider config={config}>
+      <WagmiProvider config={config} reconnectOnMount={true}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider
             // coolMode

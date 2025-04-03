@@ -161,7 +161,7 @@ export const DoubleValues = ({ label1, firstData, label2, SecondData }) => {
     <tr>
       <td className="d-flex align-items-center">{label1}</td>
       <td className="d-flex align-items-center justify-content-center position-relative px-3 small py-0">
-        {firstData}
+        {firstData == `1:${undefined}` ? "Loading..." : firstData}
         <span
           className="border-end h-75 position-absolute"
           style={{ right: 0, opacity: 0.3 }}
@@ -169,7 +169,7 @@ export const DoubleValues = ({ label1, firstData, label2, SecondData }) => {
       </td>
       <td className="d-flex align-items-center">{label2}</td>
       <td className="d-flex align-items-center justify-content-center px-3">
-        {SecondData}
+        {SecondData == `1:${undefined}` ? "Loading..." : SecondData}
       </td>
     </tr>
   );

@@ -209,33 +209,32 @@ export const SwapContractProvider = ({ children }) => {
   const fetchStateHoldingsAndCalculateUSD = async () => {
     setLoadingState(true);
     try {
-      const holdingsRaw = await handleContractCall(
-        AllContracts.stateContract,
-        "balanceOf",
-        [account],
-        (h) => ethers.formatUnits(h, 18)
-      );
+      const [holdingsRaw] = await Promise.all([
+        handleContractCall(
+          AllContracts.stateContract,
+          "balanceOf",
+          [account],
+          (h) => ethers.formatUnits(h, 18)
+        ),
+      ]);
 
-      const rawHoldings = parseFloat(holdingsRaw);
-      const priceNum = Number(stateUsdPrice);
-
-      if (isNaN(rawHoldings) || isNaN(priceNum)) {
+      if (!holdingsRaw || !stateUsdPrice) {
         console.error("Invalid values for calculation:", {
-          rawHoldings,
-          priceNum,
+          holdingsRaw,
+          stateUsdPrice,
         });
+        setStateHoldings("0");
         setTotalStateHoldsInUS("0.0");
         return;
       }
 
+      const rawHoldings = parseFloat(holdingsRaw);
+      const priceNum = parseFloat(stateUsdPrice); // Convert once, avoid unnecessary `Number()`
+
       const holdingsInUSD = rawHoldings * priceNum;
 
-      setStateHoldings(
-        new Intl.NumberFormat("en-US").format(Math.floor(rawHoldings))
-      ); // Ensure no decimals
-      setTotalStateHoldsInUS(
-        holdingsInUSD === 0 ? "0.0" : holdingsInUSD.toFixed(0)
-      );
+      setStateHoldings(Math.floor(rawHoldings).toLocaleString("en-US")); // Format once
+      setTotalStateHoldsInUS(holdingsInUSD ? holdingsInUSD.toFixed(0) : "0.0");
 
       console.log(
         "Holdings:",
@@ -743,19 +742,27 @@ export const SwapContractProvider = ({ children }) => {
 
   const RatioTargetValues = async () => {
     try {
-      const ratioTargets = {};
+      const results = await Promise.all(
+        contractDetails.map(async ({ contract, name }) => {
+          try {
+            const ratioTarget = await handleContractCall(
+              contract,
+              "getRatioTarget",
+              [],
+              (s) => ethers.formatUnits(s, 18)
+            );
+            return { name, value: Number(ratioTarget) };
+          } catch (error) {
+            console.error(`Error fetching Ratio Target for ${name}:`, error);
+            return null;
+          }
+        })
+      );
 
-      for (const { contract, name } of contractDetails) {
-        const RatioTarget = await handleContractCall(
-          contract,
-          "getRatioTarget",
-          [],
-          (s) => ethers.formatUnits(s, 18)
-        );
-        console.log(`${name} Ratio Target:`, Number(RatioTarget));
-
-        ratioTargets[name] = Number(RatioTarget);
-      }
+      const ratioTargets = results.reduce((acc, entry) => {
+        if (entry) acc[entry.name] = entry.value;
+        return acc;
+      }, {});
 
       SetRatioTargets(ratioTargets);
       console.log("Ratio Targets:", ratioTargets);
@@ -764,11 +771,11 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching ratio targets:", e);
     }
   };
+
   const cachedRatioTargetsRef = useRef({});
 
   const getCachedRatioTarget = async () => {
     try {
-      // If cached value exists, return it
       if (Object.keys(cachedRatioTargetsRef.current).length > 0) {
         console.log(
           "Using cached Ratio Targets:",
@@ -777,18 +784,13 @@ export const SwapContractProvider = ({ children }) => {
         return cachedRatioTargetsRef.current;
       }
 
-      // Fetch the ratio target values
       const ratioTargetValues = await RatioTargetValues();
+      if (ratioTargetValues) {
+        cachedRatioTargetsRef.current = ratioTargetValues;
+        setRatioTargetsOfTokens(ratioTargetValues);
+        console.log("Fetched and cached Ratio Targets:", ratioTargetValues);
+      }
 
-      // Cache the fetched values
-      cachedRatioTargetsRef.current = ratioTargetValues;
-
-      console.log(
-        "Fetched and cached Ratio Targets:",
-        cachedRatioTargetsRef.current.Rieva
-      );
-
-      setRatioTargetsOfTokens(ratioTargetValues);
       return ratioTargetValues;
     } catch (e) {
       console.error("Error fetching ratio targets:", e);
@@ -976,22 +978,32 @@ export const SwapContractProvider = ({ children }) => {
 
   const fetchAllBalances = async () => {
     try {
-      for (const { contract, token, key } of balanceConfigs) {
-        const transaction = await handleContractCall(
-          contract,
-          "balanceOf",
-          [token],
-          (s) => ethers.formatUnits(s, 18)
-        );
+      const results = await Promise.all(
+        balanceConfigs.map(async ({ contract, token, key }) => {
+          try {
+            const transaction = await handleContractCall(
+              contract,
+              "balanceOf",
+              [token],
+              (s) => ethers.formatUnits(s, 18)
+            );
 
-        const balanceValue = Math.floor(parseFloat(transaction).toFixed(2));
+            const balanceValue = Math.floor(parseFloat(transaction).toFixed(2));
+            return { key, balance: balanceValue };
+          } catch (error) {
+            console.error(`Error fetching balance for ${key}:`, error);
+            return null;
+          }
+        })
+      );
 
-        setBalances((prevBalances) => {
-          const updatedBalances = { ...prevBalances, [key]: balanceValue };
-          console.log(`${key} balance inside contract:`, updatedBalances[key]); // Now logs updated value
-          return updatedBalances;
-        });
-      }
+      const updatedBalances = results.reduce((acc, entry) => {
+        if (entry) acc[entry.key] = entry.balance;
+        return acc;
+      }, {});
+
+      setBalances(updatedBalances);
+      console.log("Updated balances:", updatedBalances);
     } catch (e) {
       console.error("Error fetching balances:", e);
     }

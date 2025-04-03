@@ -36,53 +36,42 @@ export const GeneralTokenProvider = ({ children }) => {
   };
   const fetchTotalSupplies = async () => {
     try {
-      const contractEntries = Object.entries(AllContracts);
-
       const results = await Promise.all(
-        contractEntries.map(async ([key, contract]) => {
+        Object.entries(AllContracts).map(async ([key, contract]) => {
           if (!contract || !contract.totalSupply)
-            return { [key]: { name: key, supply: "N/A" } };
-          try {
-            const supply = await contract.totalSupply();
-            const supplyValue = ethers.formatUnits(supply, 18);
+            return { key, name: key, supply: "N/A" };
 
-            let name = key;
-            try {
-              if (contract.name) {
-                name = await contract.name();
-              }
-            } catch (err) {
-              console.warn(`Could not fetch name for ${key}:`, err);
-            }
-            console.log("supplyValue", supplyValue);
-            return {
-              [key]: {
-                name: name,
-                supply:
-                  supplyValue === "0"
-                    ? "0.0"
-                    : parseFloat(supplyValue).toFixed(1),
-              },
-            };
+          try {
+            // Fetch totalSupply and name in parallel
+            const [supplyRaw, nameRaw] = await Promise.all([
+              contract.totalSupply(),
+              contract.name ? contract.name().catch(() => key) : key,
+            ]);
+
+            const supply = ethers.formatUnits(supplyRaw, 18);
+            const formattedSupply =
+              supply === "0" ? "0.0" : parseFloat(supply).toFixed(1);
+
+            return { key, name: nameRaw, supply: formattedSupply };
           } catch (err) {
             console.error(`Error fetching ${key} total supply:`, err);
-            return { [key]: { name: key, supply: "Error" } };
+            return { key, name: key, supply: "Error" };
           }
         })
       );
 
-      const suppliesData = results.reduce(
-        (acc, obj) => ({ ...acc, ...obj }),
-        {}
-      );
+      const suppliesData = results.reduce((acc, { key, name, supply }) => {
+        acc[key] = { name, supply };
+        return acc;
+      }, {});
 
-      // Create simplified version with Supply suffix
-      const simplified = {};
-      Object.entries(suppliesData).forEach(([key, value]) => {
-        // Remove 'Contract' and add 'Supply' to the key name
-        const simplifiedKey = key.replace("Contract", "") + "Supply";
-        simplified[simplifiedKey] = Math.floor(value.supply);
-      });
+      // Simplify keys by removing "Contract" and appending "Supply"
+      const simplified = Object.fromEntries(
+        Object.entries(suppliesData).map(([key, value]) => [
+          key.replace(/Contract$/, "") + "Supply",
+          Math.floor(value.supply),
+        ])
+      );
 
       setSupplies(suppliesData);
       setSimpleSupplies(simplified);
@@ -96,6 +85,7 @@ export const GeneralTokenProvider = ({ children }) => {
       setInitialized(false);
     }
   };
+
   const ClaimTokens = async (contract) => {
     try {
       //   setClaiming(true);
@@ -210,20 +200,29 @@ export const GeneralTokenProvider = ({ children }) => {
         { name: "Valir", contract: AllContracts.ValirRatioContract },
         { name: "Sanitas", contract: AllContracts.SanitasRatioContract },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
-      ];
+      ].filter(({ contract }) => contract); // Remove undefined contracts early
 
-      const currentRP = {};
-
-      for (const { name, contract } of contracts) {
-        if (!contract) {
-          console.error(`Contract for ${name} is undefined`);
-          continue;
-        }
-
-        const rawValue = await contract.getRatioPrice();
-        const ethValue = Number(rawValue) / 1e18; // Convert wei to ETH
-        currentRP[name] = ethValue.toFixed(0); // Apply toFixed(0) correctly
+      if (contracts.length === 0) {
+        console.error("No valid contracts found");
+        return;
       }
+
+      const results = await Promise.all(
+        contracts.map(async ({ name, contract }) => {
+          try {
+            const rawValue = await contract.getRatioPrice();
+            return { name, value: (Number(rawValue) / 1e18).toFixed(0) };
+          } catch (error) {
+            console.error(`Error fetching ratio for ${name}:`, error);
+            return null;
+          }
+        })
+      );
+
+      const currentRP = results.reduce((acc, entry) => {
+        if (entry) acc[entry.name] = entry.value;
+        return acc;
+      }, {});
 
       setCurrentRatio(currentRP);
       console.log("Ratio of token in ETH:", currentRP.OneDollar);

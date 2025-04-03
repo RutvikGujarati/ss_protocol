@@ -331,7 +331,6 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
                     <DoubleValues
                       label1={`Current Ratio`}
                       firstData={`1:${dataToShow.Ratio}`}
-                      //   firstData={`1:0`}
                       label2={"Target Ratio"}
                       SecondData={`1:${dataToShow.target}`}
                     />
