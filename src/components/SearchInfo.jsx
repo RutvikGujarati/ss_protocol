@@ -11,6 +11,7 @@ import ValirLogo from "../assets/Valir.png";
 import SanitasLogo from "../assets/Sanitas.png";
 import oned from "../assets/oned.png";
 import Domus from "../assets/domus.png";
+import teech from "../assets/teech.png";
 import stateLogo from "../assets/state_logo.png";
 import sState from "../assets/sonicstate.png";
 import PropTypes from "prop-types";
@@ -32,6 +33,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     handleAddTenDollar,
     handleAddCurrus,
     handleAddValir,
+	handleAddTeech,
     handleAddSanitas,
   } = useSwapContract();
   const chainId = useChainId();
@@ -49,6 +51,7 @@ const SearchInfo = ({ setSearchQuery, setSelectedToken }) => {
     { id: "~", name: "Currus", logo: Currus, AddToken: handleAddCurrus },
     { id: "4", name: "Valir", logo: ValirLogo, AddToken: handleAddValir },
     { id: "~", name: "Sanitas", logo: SanitasLogo, AddToken: handleAddSanitas },
+    { id: "±", name: "Teech", logo: teech, AddToken: handleAddTeech },
   ];
 
   const SonicData = [

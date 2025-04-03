@@ -4,7 +4,7 @@ import {
 	Fluxin, OneDollarRatioAddress, Ratio_TOKEN_ADDRESS, Rieva, RievaRatioAddress,
 	Sanitas,
 	SanitasRatioAddress,
-	STATE_TOKEN_ADDRESS, STATE_TOKEN_SONIC_ADDRESS, TenDollarRatioAddress, Valir, ValirRatioAddress, Xerion, XerionRatioAddress,
+	STATE_TOKEN_ADDRESS, STATE_TOKEN_SONIC_ADDRESS, Teech, TenDollarRatioAddress, Valir, ValirRatioAddress, Xerion, XerionRatioAddress,
 } from "../ContractAddresses";
 import { PriceContext } from "../api/StatePrice";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
@@ -93,6 +93,14 @@ export const TokensDetails = () => {
 			price: prices.SanitasUsdPrice,
 			swapAddress: SanitasRatioAddress,
 			mintAmount: "625,000,000,000",
+		},
+		{
+			name: "Teech",
+			key: "Teech",
+			address: Teech,
+			price: prices.TeechUsdPrice,
+			// swapAddress: TeechRatioAddress,
+			mintAmount: "125,000,000,000",
 		},
 		{
 			name: "Valir",

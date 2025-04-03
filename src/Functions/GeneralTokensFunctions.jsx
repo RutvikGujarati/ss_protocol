@@ -27,6 +27,7 @@ export const GeneralTokenProvider = ({ children }) => {
     Currus: AllContracts.CurrusContract,
     Valir: AllContracts.ValirContract,
     Sanitas: AllContracts.SanitasContract,
+    Teech: AllContracts.TeechContract,
     TenDollar: AllContracts.TenDollarContract,
     Domus: AllContracts.DomusContract,
     oneD: AllContracts.oneDollar,
@@ -174,6 +175,8 @@ export const GeneralTokenProvider = ({ children }) => {
         contract = AllContracts.ValirContract;
       } else if (contractType === "Sanitas") {
         contract = AllContracts.SanitasContract;
+      } else if (contractType === "Teech") {
+        contract = AllContracts.TeechContract;
       }
 
       if (!contract) {
@@ -198,6 +201,7 @@ export const GeneralTokenProvider = ({ children }) => {
         { name: "Domus", contract: AllContracts.DomusRatioContract },
         { name: "Currus", contract: AllContracts.CurrusRatioContract },
         { name: "Valir", contract: AllContracts.ValirRatioContract },
+        { name: "Teech", contract: AllContracts.TeechRatioContract },
         { name: "Sanitas", contract: AllContracts.SanitasRatioContract },
         { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
       ].filter(({ contract }) => contract); // Remove undefined contracts early
