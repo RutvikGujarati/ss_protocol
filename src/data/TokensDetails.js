@@ -178,8 +178,10 @@ export const TokensDetails = () => {
 			WillStart: swap.ReverseForCycle[key],
 			WillStartForNext: swap.ReverseForNextCycle[key],
 			Balance: (key === "Fluxin" || key === "Xerion")
-				? swap.balances[`${rn}Balance`]
-				: swap.balances[`${key}Balance`],
+				? swap.balances[`${rn}Balance`] :
+				key == "Teech" ?
+					"0"
+					: swap.balances[`${key}Balance`],
 			TotalTokensBurn: TotalTokensBurned[key],
 			RatioBalance: swap.balances[`ratio${key}Balance`],
 			Duration: auctionDetails[key],
@@ -189,7 +191,7 @@ export const TokensDetails = () => {
 			Ratio: CurrentRatioPrice[key],
 			AuctionTimeRunning: auctionTimeLeft[key],
 			AuctionNextTime: auctionDetails[key],
-			renounceSwapSmartContract: key == "OneDollar" ? swap.isRenounced["OneDollar"] : swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
+			renounceSwapSmartContract: key == "OneDollar" ? swap.isRenounced["OneDollar"] : key == "Teech" ? swap.isRenounced["Teech"] : swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
 
 			actions: {
 				...(token.actions || {}), // Include any custom actions (e.g., for DAV)
