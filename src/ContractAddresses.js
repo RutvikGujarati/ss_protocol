@@ -28,7 +28,7 @@ export const Rieva = "0xc6d64985E00BB43d93582866bB7eAfc75692f0d8";
 export const Domus = "0x82627374E1fe45A6918f21e52B4776E3B8c6420b";
 export const Currus = "0x2c83101586072e2da8490Aed0d49FB192f9e897e";
 export const Valir = "0x61fB10Ac14b5fe7499A6858A9cF0d80cc1d2fD75";
-export const Teech = "0x960C14A9B00a4b55554b108488b641E7aa472282";
+export const Teech = "0x3288DCdcc0c8Fea3Cc84D463352d1DB7B22FCf1c";
 export const Sanitas = "0xbaB8540DeE05ba25CEc588CE5124aa50b1D7d425";
 
 export const Ratio_TOKEN_ADDRESS = "0xf0bb62b168E7aDBf313217EFdD448897aFCe8fD6";
