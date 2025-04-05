@@ -22,7 +22,7 @@ import {
   SanitasRatioAddress,
   STATE_TOKEN_ADDRESS,
   STATE_TOKEN_SONIC_ADDRESS,
-  Teech,
+  Teeah,
   TenDollarRatioAddress,
   Valir,
   ValirRatioAddress,
@@ -114,7 +114,7 @@ export const SwapContractProvider = ({ children }) => {
     Domus: AllContracts.DomusContract,
     Valir: AllContracts.ValirContract,
     Sanitas: AllContracts.SanitasContract,
-    Teech: AllContracts.TeechContract,
+    Teeah: AllContracts.TeeahContract,
     Currus: AllContracts.CurrusContract,
     oneD: AllContracts.oneDollar,
     TenDollar: AllContracts.TenDollarContract,
@@ -320,7 +320,7 @@ export const SwapContractProvider = ({ children }) => {
       "TenDollar",
       "Rieva",
       "Domus",
-	  "Teech",
+	  "Teeah",
       "Currus",
       "Valir",
       "Sanitas",
@@ -328,7 +328,7 @@ export const SwapContractProvider = ({ children }) => {
       "SanitasRatio",
       "XerionRatio",
       "RievaRatio",
-	  "TeechRatio",
+	  "TeeahRatio",
       "CurrusRatio",
       "ValirRatio",
       "TenDollarRatio",
@@ -1571,7 +1571,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddCurrus = () => handleAddToken(Currus, "Currus");
   const handleAddValir = () => handleAddToken(Valir, "Valir");
   const handleAddSanitas = () => handleAddToken(Sanitas, "Sanitas");
-  const handleAddTeech = () => handleAddToken(Teech, "Teech");
+  const handleAddTeeah = () => handleAddToken(Teeah, "Teeah");
 
   return (
     <SwapContractContext.Provider
@@ -1669,7 +1669,7 @@ export const SwapContractProvider = ({ children }) => {
         handleAddOneD,
         handleAddTenDollar,
         WithdrawTenDollar,
-		handleAddTeech,
+		handleAddTeeah,
         WithdrawSanitas,
         decayPercentages,
         ReverseForCycle,

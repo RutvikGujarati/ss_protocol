@@ -4,7 +4,7 @@ import {
 	Fluxin, OneDollarRatioAddress, Ratio_TOKEN_ADDRESS, Rieva, RievaRatioAddress,
 	Sanitas,
 	SanitasRatioAddress,
-	STATE_TOKEN_ADDRESS, STATE_TOKEN_SONIC_ADDRESS, Teech, TenDollarRatioAddress, Valir, ValirRatioAddress, Xerion, XerionRatioAddress,
+	STATE_TOKEN_ADDRESS, STATE_TOKEN_SONIC_ADDRESS, Teeah, TenDollarRatioAddress, Valir, ValirRatioAddress, Xerion, XerionRatioAddress,
 } from "../ContractAddresses";
 import { PriceContext } from "../api/StatePrice";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
@@ -95,11 +95,11 @@ export const TokensDetails = () => {
 			mintAmount: "625,000,000,000",
 		},
 		{
-			name: "Teech",
-			key: "Teech",
-			address: Teech,
-			price: prices.TeechUsdPrice,
-			// swapAddress: TeechRatioAddress,
+			name: "Teeah",
+			key: "Teeah",
+			address: Teeah,
+			price: prices.TeeahUsdPrice,
+			// swapAddress: TeeahRatioAddress,
 			mintAmount: "125,000,000,000",
 		},
 		{
@@ -179,7 +179,7 @@ export const TokensDetails = () => {
 			WillStartForNext: swap.ReverseForNextCycle[key],
 			Balance: (key === "Fluxin" || key === "Xerion")
 				? swap.balances[`${rn}Balance`] :
-				key == "Teech" ?
+				key == "Teeah" ?
 					"0"
 					: swap.balances[`${key}Balance`],
 			TotalTokensBurn: TotalTokensBurned[key],
@@ -191,7 +191,7 @@ export const TokensDetails = () => {
 			Ratio: CurrentRatioPrice[key],
 			AuctionTimeRunning: auctionTimeLeft[key],
 			AuctionNextTime: auctionDetails[key],
-			renounceSwapSmartContract: key == "OneDollar" ? swap.isRenounced["OneDollar"] : key == "Teech" ? swap.isRenounced["Teech"] : swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
+			renounceSwapSmartContract: key == "OneDollar" ? swap.isRenounced["OneDollar"] : key == "Teeah" ? swap.isRenounced["Teeah"] : swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
 
 			actions: {
 				...(token.actions || {}), // Include any custom actions (e.g., for DAV)
