@@ -61,7 +61,7 @@ const InfoCards = () => {
   useEffect(() => {
     if (UsersDividends !== undefined && UsersDividends !== null) {
       setWithdrawAMount(UsersDividends);
-	  setReinvestAmount(totalStuckEth)
+      setReinvestAmount(totalStuckEth);
     }
   }, [UsersDividends]);
   const handleInputChangeofToken = (e) => {
@@ -587,15 +587,15 @@ const InfoCards = () => {
                   <div className="carddetaildiv uppercase">
                     <div className="carddetails2">
                       <p className="mb-1 detailText">Treasury</p>
-                      <p className="mb-0 detailAmount">
+                      <p className="mb-0 detailAmount" style={{ fontSize: "12px" }}>
                         {" "}
                         Total PLS Invested : {TotalInvested} PLS
                       </p>
-                      <p className="mb-0 detailAmount">
+                      <p className="mb-0 detailAmount" style={{ fontSize: "12px" }}>
                         {" "}
                         LPT Held : {(Number(UsersTokens) || 0).toFixed(0)}
                       </p>
-                      <p className="mb-0 detailAmount">
+                      <p className="mb-0 detailAmount" style={{ fontSize: "12px" }}>
                         {" "}
                         Contract PLS Balance :{" "}
                         {Number(balanceOfContract).toFixed(1)} PLS
@@ -632,13 +632,13 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div className="carddetaildiv uppercase ">
                     <div className="carddetails2">
-                      <p className="mb-1 detailText detailAmount">
-					  PROFIT HARVESTING SUMMARY - PULSECHAIN
+                      <p className="mb-1 detailText detailAmount" style={{ fontSize: "12px" }}>
+                        PROFIT HARVESTING SUMMARY - PULSECHAIN
                       </p>
-                      <p className="mb-0 detailAmount ">
+                      <p className="mb-0 detailAmount " style={{ fontSize: "12px" }}>
                         Total PLS Profit : {TotalUserProfit} PLS
                       </p>
-                      <p className="mb-0 detailAmount">
+                      <p className="mb-0 detailAmount" style={{ fontSize: "12px" }}>
                         NET PLS GAINS : {""}
                         {calculateNetPLSGains(
                           TotalUserProfit,
@@ -649,7 +649,7 @@ const InfoCards = () => {
                         PLS
                       </p>
 
-                      <p className="mb-0 detailAmount">
+                      <p className="mb-0 detailAmount" style={{ fontSize: "12px" }}>
                         LPT Value : ${" "}
                         {(
                           Number(CurrentSellPrice) * Number(UsersTokens) || 0
@@ -665,15 +665,23 @@ const InfoCards = () => {
                     <div className="carddetails2">
                       {/* Buy Section */}
                       <div className="d-flex align-items-center justify-content-between">
-                        <p className="mb-0 detailText">BUY </p>
+                        <p
+                          className="mb-1 detailText"
+                          style={{ fontSize: "14px" }}
+                        >
+                          BUY{" "}
+                        </p>
                         <p
                           className="mb-0 detailAmount "
-                          style={{ marginLeft: "25px" }}
+                          style={{ marginLeft: "25px", fontSize: "12px" }}
                         >
                           Est. LPT: {estimatedLPT}
                         </p>
 
-                        <p className="mb-0 mt-1 mx-1  detailAmount">
+                        <p
+                          className="mb-0 mt-1 mx-1  detailAmount"
+                          style={{ fontSize: "12px" }}
+                        >
                           (@ {CurrentBuyPrice} PLS)
                         </p>
                       </div>
@@ -702,7 +710,10 @@ const InfoCards = () => {
                       {/* Withdraw Section */}
                       <div className="d-flex align-items-center justify-content-start">
                         <p className="mt-1 mb-1 detailText">WITHDRAW</p>
-                        <p className="mb-0 detailAmount mx-5 px-1">
+                        <p
+                          className="mb-0 detailAmount mx-5 px-1"
+                          style={{ fontSize: "12px" }}
+                        >
                           {UsersDividends} PLS
                         </p>
                       </div>
@@ -729,7 +740,10 @@ const InfoCards = () => {
                       {/* Re-Invest Section */}
                       <div className="d-flex align-items-center justify-content-start">
                         <p className="mt-1 mb-1 detailText">RE-INVEST</p>
-                        <p className="mb-0 detailAmount mx-5 px-2">
+                        <p
+                          className="mb-0 detailAmount mx-5 px-2"
+                          style={{ fontSize: "12px" }}
+                        >
                           {totalStuckEth} PLS
                         </p>
                       </div>

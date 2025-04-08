@@ -14,6 +14,10 @@
 
   /* border-right: 1px solid green;  */
 }
+.smallText {
+  font-size: 12px;
+}
+
 .carddetails2 {
   padding: 5px 15px;
   width: 100%;
