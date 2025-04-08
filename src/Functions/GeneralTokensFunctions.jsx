@@ -2,11 +2,13 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { ContractContext } from "./ContractInitialize";
 import PropTypes from "prop-types";
+import { useAccount } from "wagmi";
 
 export const GeneralTokens = createContext();
 
 export const GeneralTokenProvider = ({ children }) => {
-  const { AllContracts, account } = useContext(ContractContext);
+  const { AllContracts } = useContext(ContractContext);
+  const { address } = useAccount();
   const [supplies, setSupplies] = useState({});
   const [simpleSupplies, setSimpleSupplies] = useState({});
   const [initialized, setInitialized] = useState(false);
@@ -101,7 +103,7 @@ export const GeneralTokenProvider = ({ children }) => {
   };
   const CheckMintBalance = async (contract) => {
     try {
-      const tx = await contract.distributeReward(account);
+      const tx = await contract.distributeReward(address);
       await tx.wait();
       ViewDistributedTokens();
     } catch (e) {
@@ -127,7 +129,7 @@ export const GeneralTokenProvider = ({ children }) => {
           console.log("Contract instance:", contract);
 
           // Make the contract call
-          const rawAmount = await contract.userRewardAmount(account);
+          const rawAmount = await contract.userRewardAmount(address);
           const formattedAmount = ethers.formatUnits(rawAmount, 18);
 
           // Log the raw and formatted amounts

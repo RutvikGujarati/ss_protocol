@@ -29,44 +29,35 @@ export const ContractProvider = ({ children }) => {
   }, [chainId]);
 
   const initializeContracts = async () => {
-    if (typeof window.ethereum === "undefined") {
-      console.error("Ethereum wallet is not installed");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const newProvider = new ethers.BrowserProvider(window.ethereum, "any");
-
-      // Check if the user is already connected
-      const accounts = await newProvider.send("eth_accounts", []);
-      if (accounts.length === 0) {
-        console.log("No connected accounts found.");
-        setLoading(false);
-        return;
-      }
-
-      const newSigner = await newProvider.getSigner();
-      setProvider(newProvider);
-      setSigner(newSigner);
-      setAccount(accounts[0]);
-
-      const contractInstances = Object.fromEntries(
-        Object.entries(getContractConfigs()).map(([key, { address, abi }]) => [
-          key,
-          new ethers.Contract(address, abi, newSigner),
-        ])
-      );
-
-      setContracts(contractInstances);
-      console.log("Contracts Initialized:", contractInstances);
-    } catch (error) {
-      console.error("Error initializing contracts:", error);
-    } finally {
-      setLoading(false);
-    }
+	if (!window.ethereum) {
+	  console.error("Ethereum wallet not found");
+	  return;
+	}
+  
+	try {
+	  setLoading(true);
+  
+	  const browserProvider = new ethers.BrowserProvider(window.ethereum);
+	  const signer = await browserProvider.getSigner();
+  
+	  const contractInstances = Object.fromEntries(
+		Object.entries(getContractConfigs()).map(([key, { address, abi }]) => [
+		  key,
+		  new ethers.Contract(address, abi, signer),
+		])
+	  );
+  
+	  setProvider(browserProvider);
+	  setSigner(signer);
+	  setContracts(contractInstances);
+	  console.log("Contracts Initialized:", contractInstances);
+	} catch (err) {
+	  console.error("Failed to initialize contracts:", err);
+	} finally {
+	  setLoading(false);
+	}
   };
+  
 
   useEffect(() => {
     if (!window.ethereum) return;

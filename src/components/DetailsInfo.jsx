@@ -16,6 +16,7 @@ import {
   TableRowWithClick,
 } from "./SeperateComps/TableRow";
 import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions";
+import { useAccount } from "wagmi";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -26,13 +27,13 @@ export const formatWithCommas = (value) => {
 };
 const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const {
-    account,
     stateTransactionHash,
     setDBRequired,
     // AuctionRunning,
     setDBForBurnRequired,
     StateBurnBalance,
   } = useSwapContract();
+  const { address } = useAccount();
   const { AuctionRunning } = useGeneralAuctionFunctions();
 
   const [numerator, setNumerator] = useState("");
@@ -52,8 +53,8 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS.toLowerCase();
 
   const handleSetAddress = () => {
-    setAuthorized(AuthAddress === account);
-    console.log(account);
+    setAuthorized(AuthAddress === address.toLocaleLowerCase());
+    console.log(address);
   };
   const formatPrice = (price) => {
     if (!price || isNaN(price)) {
@@ -89,7 +90,7 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   };
   useEffect(() => {
     handleSetAddress();
-  }, [account, AuthAddress]);
+  }, [address, AuthAddress]);
 
   const tokens = TokensDetails();
   console.log("auction running from detailInfo", AuctionRunning.Fluxin);

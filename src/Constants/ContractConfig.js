@@ -10,7 +10,7 @@ import sDAVABI from "../ABI/sDAVToken.json";
 import StateABI from "../ABI/StateTokenABI.json";
 import RatioABI from "../ABI/RatioABI.json";
 
-let currentChainId = 1; // Default chainId
+let currentChainId = 369; // Default chainId
 
 export const setChainId = (chainId) => {
 	currentChainId = chainId;

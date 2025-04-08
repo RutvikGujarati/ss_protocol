@@ -8,12 +8,13 @@ import {
 import { ethers } from "ethers";
 import { ContractContext } from "./ContractInitialize";
 import PropTypes from "prop-types";
-import { useChainId } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 
 export const DAVContext = createContext();
 
 export const DavProvider = ({ children }) => {
-  const { AllContracts, account } = useContext(ContractContext);
+  const { AllContracts } = useContext(ContractContext);
+  const {  address } = useAccount();
   const chainId = useChainId();
 
   const [davHolds, setDavHoldings] = useState("0.0");
@@ -28,27 +29,30 @@ export const DavProvider = ({ children }) => {
 
   /*** Fetch User's Holdings ***/
   const DavHoldings = useCallback(async () => {
-    if (!AllContracts?.davContract || !account) return;
+    if (!AllContracts?.davContract) {
+      console.log("DAV contract or address not initialized...");
+      return;
+    }
     try {
-      const holdings = await AllContracts.davContract.balanceOf(account);
+      const holdings = await AllContracts.davContract.balanceOf(address);
       setDavHoldings(ethers.formatUnits(holdings, 18));
     } catch (error) {
       console.error("Error fetching DAV holdings:", error);
     }
-  }, [AllContracts, account]);
+  }, [AllContracts, address]);
 
   /*** Fetch Holding Percentage ***/
   const DavHoldingsPercentage = useCallback(async () => {
-    if (!AllContracts?.davContract || !account) return;
+    if (!AllContracts?.davContract || !address) return;
     try {
-      const balance = await AllContracts.davContract.balanceOf(account);
+      const balance = await AllContracts.davContract.balanceOf(address);
       const bal = ethers.formatUnits(balance, 18);
       setDavBalance(bal);
       setDavPercentage(parseFloat(bal / 5000000).toFixed(8));
     } catch (error) {
       console.error("Error fetching DAV holdings percentage:", error);
     }
-  }, [AllContracts, account]);
+  }, [AllContracts, address]);
 
   /*** Fetch Total Supply ***/
   const DavSupply = useCallback(async () => {
@@ -63,14 +67,14 @@ export const DavProvider = ({ children }) => {
 
   /*** Fetch Claimable Amount ***/
   const ClaimableAmount = useCallback(async () => {
-    if (!AllContracts?.davContract || !account) return;
+    if (!AllContracts?.davContract || !address) return;
     try {
-      const supply = await AllContracts.davContract.earned(account);
+      const supply = await AllContracts.davContract.earned(address);
       setClaimableAmount(parseFloat(ethers.formatUnits(supply, 18)).toFixed(2));
     } catch (error) {
       console.error("Error fetching claimable amount:", error);
     }
-  }, [AllContracts, account]);
+  }, [AllContracts, address]);
 
   /*** Fetch Development and Liquidity Funds ***/
   const DAVTokenAmount = useCallback(async () => {
@@ -99,7 +103,7 @@ export const DavProvider = ({ children }) => {
     try {
       const value = ethers.parseEther(amount.toString());
       let cost;
-      if (chainId == 146) {
+      if (chainId === 146) {
         cost = ethers.parseEther((amount * 100).toString());
       } else {
         cost = ethers.parseEther((amount * 500000).toString());
@@ -146,7 +150,10 @@ export const DavProvider = ({ children }) => {
 
   /*** Fetch All Data in Parallel ***/
   const fetchData = useCallback(async () => {
-    if (!AllContracts?.davContract || !account) return;
+    if (!AllContracts?.davContract || !address) {
+      console.log("Cannot fetch data: Contract or address not initialized");
+      return;
+    }
     setIsLoading(true);
     try {
       await Promise.all([
@@ -164,7 +171,7 @@ export const DavProvider = ({ children }) => {
     }
   }, [
     AllContracts,
-    account,
+    address,
     DavSupply,
     ClaimableAmount,
     DAVTokenAmount,
@@ -173,9 +180,21 @@ export const DavProvider = ({ children }) => {
     DAVTokenfive_Amount,
   ]);
 
+  // New useEffect to check wallet and contract initialization
   useEffect(() => {
+    if (!address) {
+      console.log("Wallet not connected");
+      setIsLoading(false);
+      return;
+    }
+    if (!AllContracts?.davContract) {
+      console.log("DAV contract not initialized yet");
+      setIsLoading(true);
+      return;
+    }
+    console.log("Wallet and contract initialized, fetching data...");
     fetchData();
-  }, [fetchData]);
+  }, [address, AllContracts, fetchData]);
 
   DavProvider.propTypes = {
     children: PropTypes.node.isRequired,

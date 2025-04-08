@@ -23,8 +23,8 @@
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.0.2",
     "s-s-protocol": "file:",
-    "viem": "^2.21.55",
-    "wagmi": "^2.14.6"
+    "viem": "^2.25.0",
+    "wagmi": "^2.14.16"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

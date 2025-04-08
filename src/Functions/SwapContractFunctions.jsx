@@ -31,7 +31,7 @@ import {
 } from "../ContractAddresses";
 import { useGeneralTokens } from "./GeneralTokensFunctions";
 import { useGeneralAuctionFunctions } from "./GeneralAuctionFunctions";
-import { useChainId } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 
 const SwapContractContext = createContext();
 
@@ -42,8 +42,9 @@ export const SwapContractProvider = ({ children }) => {
   const chainId = useChainId();
   const { CurrentRatioPrice } = useGeneralTokens();
   const { isAuctionRunning, TotalTokensBurn } = useGeneralAuctionFunctions();
-  const { loading, provider, signer, account, AllContracts } =
+  const { loading, provider, signer, AllContracts } =
     useContext(ContractContext);
+  const { address } = useAccount();
 
   const [claiming, setClaiming] = useState(false);
   const [transactionStatus, setTransactionStatus] = useState(null); // 'pending', 'success', or
@@ -215,7 +216,7 @@ export const SwapContractProvider = ({ children }) => {
         handleContractCall(
           AllContracts.stateContract,
           "balanceOf",
-          [account],
+          [address],
           (h) => ethers.formatUnits(h, 18)
         ),
       ]);
@@ -302,7 +303,7 @@ export const SwapContractProvider = ({ children }) => {
     AllContracts.stateContract,
     AllContracts.RatioContract,
     AllContracts.XerionRatioContract,
-    account,
+    address,
   ]);
 
   // Ratio Token Contracts
@@ -320,7 +321,7 @@ export const SwapContractProvider = ({ children }) => {
       "TenDollar",
       "Rieva",
       "Domus",
-	  "Teeah",
+      "Teeah",
       "Currus",
       "Valir",
       "Sanitas",
@@ -328,7 +329,7 @@ export const SwapContractProvider = ({ children }) => {
       "SanitasRatio",
       "XerionRatio",
       "RievaRatio",
-	  "TeeahRatio",
+      "TeeahRatio",
       "CurrusRatio",
       "ValirRatio",
       "TenDollarRatio",
@@ -476,11 +477,11 @@ export const SwapContractProvider = ({ children }) => {
         return;
       }
 
-      if (!account) {
+      if (!address) {
         console.error("Account is undefined or null");
         return;
       }
-      const userBalance = await contracts[contractName].balanceOf(account);
+      const userBalance = await contracts[contractName].balanceOf(address);
       const userBalanceInWei = ethers.formatEther(userBalance);
       console.log("user balance...", userBalanceInWei);
       return userBalanceInWei;
@@ -666,7 +667,7 @@ export const SwapContractProvider = ({ children }) => {
           const hasSwapped = await handleContractCall(
             contract,
             "getUserHasSwapped",
-            [account]
+            [address]
           );
           console.log(`Updated swap states for ${name}:`, hasSwapped);
 
@@ -694,7 +695,7 @@ export const SwapContractProvider = ({ children }) => {
           const hasReverseSwapped = await handleContractCall(
             contract,
             "getUserHasReverseSwapped",
-            [account]
+            [address]
           );
           console.log(
             `Updated swap state for reverse: ${name}`,
@@ -1161,7 +1162,7 @@ export const SwapContractProvider = ({ children }) => {
 
       // Check current allowance
       const allowance = await selectedContract.allowance(
-        account,
+        address,
         ContractAddressToUse[ContractName]
       );
       console.log("Current allowance:", ethers.formatUnits(allowance, 18));
@@ -1206,7 +1207,7 @@ export const SwapContractProvider = ({ children }) => {
         TenDollar: AllContracts.TenDollarRatioContract,
       };
       // Perform the token swap
-      const swapTx = await contracts[ContractName].swapTokens(account);
+      const swapTx = await contracts[ContractName].swapTokens(address);
       const swapReceipt = await swapTx.wait();
 
       if (swapReceipt.status === 1) {
@@ -1424,7 +1425,7 @@ export const SwapContractProvider = ({ children }) => {
         TenDollarRatio: TenDollarRatioAddress,
       };
       const allowance = await contracts[name].allowance(
-        account,
+        address,
         addressMapping[contractName]
       );
       const formattedAllowance = ethers.formatUnits(allowance, 18);
@@ -1495,7 +1496,7 @@ export const SwapContractProvider = ({ children }) => {
       const currentAllowance = await handleContractCall(
         contracts[contractName],
         "allowance",
-        [account, Ratio_TOKEN_ADDRESS],
+        [address, Ratio_TOKEN_ADDRESS],
         (s) => ethers.formatUnits(s, 18)
       );
 
@@ -1580,7 +1581,7 @@ export const SwapContractProvider = ({ children }) => {
         provider,
         signer,
         loading,
-        account,
+        address,
 
         //DAV Contract
         // davContract,
@@ -1669,7 +1670,7 @@ export const SwapContractProvider = ({ children }) => {
         handleAddOneD,
         handleAddTenDollar,
         WithdrawTenDollar,
-		handleAddTeeah,
+        handleAddTeeah,
         WithdrawSanitas,
         decayPercentages,
         ReverseForCycle,
