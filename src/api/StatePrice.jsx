@@ -18,14 +18,24 @@ const tokens = [
   { id: "0xfe4ec02e6fe069d90d4a721313f22d6461ec5a06", key: "FluxinUsdPrice" },
   { id: "0xede25454e7f50a925ba00174164e0c6d818e4b25", key: "XerionUsdPrice" },
   {
-    id: "0x4f665ef2ef5336d26a6c06525dd812786e5614c6",
+    id: "0x6916be7b7a36d8bc1c09eae5487e92ff837626bb",
     key: "OneDollarUsdPrice",
+    isPool: true,
   },
-  { id: "0xc6d64985e00bb43d93582866bb7eafc75692f0d8", key: "RievaUsdPrice" },
-  { id: "0x82627374e1fe45a6918f21e52b4776e3b8c6420b", key: "DomusUsdPrice" },
   {
-    id: "0x916ed6d34d2d26b2173237bb44e0c91bdbbd7222",
+    id: "0x3c504c7d2a99e212c186aa0bc47a9e94dd7ac827",
+    key: "RievaUsdPrice",
+    isPool: true,
+  },
+  {
+    id: "0x7019ee4173420ee652edc9a26bffc91469c753db",
+    key: "DomusUsdPrice",
+    isPool: true,
+  },
+  {
+    id: "0x86e8330efe0dfc20ab8f63dcf95a6a8d66f60c1d",
     key: "TenDollarUsdPrice",
+    isPool: true,
   },
   { id: "0x61fb10ac14b5fe7499a6858a9cf0d80cc1d2fd75", key: "ValirUsdPrice" },
   { id: "0xbab8540dee05ba25cec588ce5124aa50b1d7d425", key: "SanitasUsdPrice" },
