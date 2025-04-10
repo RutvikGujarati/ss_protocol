@@ -90,7 +90,15 @@ const App = () => {
           element={
             <>
               <InfoCards />
-              <DeepStateTable />
+              {/* <DeepStateTable /> */}
+            </>
+          }
+        />
+        <Route
+          path="/Harvesting"
+          element={
+            <>
+              <InfoCards />
             </>
           }
         />
