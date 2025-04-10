@@ -25,10 +25,10 @@
   letter-spacing: 1.2px;
 }
 /* 
-.navbar-brand:hover{
-  color: #ff4081 !important;
-  transition: color 0.5s ease;
-} */
+  .navbar-brand:hover{
+	color: #ff4081 !important;
+	transition: color 0.5s ease;
+  } */
 
 .navbar-nav .nav-link {
   color: #ffffff; /* Light link color */
@@ -45,7 +45,7 @@
   color: #ff4081 !important; /* Pink accent color */
 }
 
-.active-link{
+.active-link {
   border-bottom: 1px solid #fff;
   color: #ff4081 !important;
 }
@@ -86,27 +86,26 @@
 
 .small-text {
   font-size: 0.9rem;
- /* Adjust size to your preference */
+  /* Adjust size to your preference */
 }
 
 .small-text-logo {
   font-size: 18px;
-
 }
-.uppercase{
+.uppercase {
   text-transform: uppercase;
 }
 .green-dot {
-	position: absolute;
-	top: 5px;
-	left: 50%;
-	transform: translateX(-50%);
-	width: 10px;
-	height: 10px;
-	background-color: green;
-	border-radius: 50%;
-  }
-  
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background-color: green;
+  border-radius: 50%;
+}
+
 .tooltip {
   border-radius: 8px !important;
   font-size: 12px !important;
@@ -151,3 +150,66 @@
   margin-left: 10px;
 }
 
+/* Arrow wrapper */
+.dropdown-arrow-wrapper {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  transition: transform 0.3s ease;
+}
+
+/* Arrow icon itself */
+.dropdown-arrow-icon {
+  transition: transform 0.3s ease;
+  color: #f8f9fa;
+}
+
+/* Rotate up/down */
+.rotate-up .dropdown-arrow-icon {
+  transform: rotate(180deg);
+}
+
+.rotate-down .dropdown-arrow-icon {
+  transform: rotate(0deg);
+}
+
+/* Improve dropdown animation & styling */
+.dropdown-menu {
+  display: block;
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  top: 110%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background-color: #212529;
+  border-radius: 10px;
+  padding: 10px 0;
+  min-width: 200px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+  z-index: 1000;
+}
+
+/* Active dropdown */
+.dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Dropdown item styles */
+.dropdown-menu .dropdown-item {
+  padding: 12px 20px;
+  color: #f8f9fa;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.2s ease-in-out, color 0.2s;
+  border-radius: 4px;
+}
+
+/* Hover effect */
+.dropdown-menu .dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
