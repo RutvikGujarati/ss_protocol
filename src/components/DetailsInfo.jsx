@@ -51,11 +51,17 @@ const DetailsInfo = ({ searchQuery, selectedToken }) => {
   const [authorized, setAuthorized] = useState(false);
 
   const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS.toLowerCase();
-
   const handleSetAddress = () => {
-    setAuthorized(AuthAddress === address.toLocaleLowerCase());
+    if (!address) {
+      setAuthorized(false);
+      console.warn("Wallet address not available");
+      return;
+    }
+
+    setAuthorized(AuthAddress === address.toLowerCase());
     console.log(address);
   };
+
   const formatPrice = (price) => {
     if (!price || isNaN(price)) {
       return "0.0000";

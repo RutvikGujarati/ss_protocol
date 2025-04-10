@@ -29,35 +29,32 @@ export const ContractProvider = ({ children }) => {
   }, [chainId]);
 
   const initializeContracts = async () => {
-	if (!window.ethereum) {
-	  console.error("Ethereum wallet not found");
-	  return;
-	}
-  
-	try {
-	  setLoading(true);
-  
-	  const browserProvider = new ethers.BrowserProvider(window.ethereum);
-	  const signer = await browserProvider.getSigner();
-  
-	  const contractInstances = Object.fromEntries(
-		Object.entries(getContractConfigs()).map(([key, { address, abi }]) => [
-		  key,
-		  new ethers.Contract(address, abi, signer),
-		])
-	  );
-  
-	  setProvider(browserProvider);
-	  setSigner(signer);
-	  setContracts(contractInstances);
-	  console.log("Contracts Initialized:", contractInstances);
-	} catch (err) {
-	  console.error("Failed to initialize contracts:", err);
-	} finally {
-	  setLoading(false);
-	}
+    if (!window.ethereum) {
+      console.error("Ethereum wallet not found");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const browserProvider = new ethers.BrowserProvider(window.ethereum);
+
+      const contractInstances = Object.fromEntries(
+        Object.entries(getContractConfigs()).map(([key, { address, abi }]) => [
+          key,
+          new ethers.Contract(address, abi, browserProvider), // Use provider, not signer
+        ])
+      );
+
+      setProvider(browserProvider);
+      setContracts(contractInstances);
+      console.log("Contracts Initialized (read-only):", contractInstances);
+    } catch (err) {
+      console.error("Failed to initialize contracts:", err);
+    } finally {
+      setLoading(false);
+    }
   };
-  
 
   useEffect(() => {
     if (!window.ethereum) return;
