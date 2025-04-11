@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { ethers } from "ethers";
 import PropTypes from "prop-types";
+import toast from "react-hot-toast";
 import { PriceContext } from "../api/StatePrice";
 import { ContractContext } from "./ContractInitialize";
 import {
@@ -1567,36 +1568,39 @@ export const SwapContractProvider = ({ children }) => {
     tokenDecimals = 18
   ) => {
     if (!window.ethereum) {
-      alert(
-        "MetaMask is not installed. Please install it to use this feature."
-      );
+      toast.error("MetaMask is not installed.");
       return;
     }
 
-    try {
-      const tokenDetails = {
-        type: "ERC20",
-        options: {
-          address: tokenAddress,
-          symbol: tokenSymbol,
-          decimals: tokenDecimals,
-        },
-      };
+    const tokenDetails = {
+      type: "ERC20",
+      options: {
+        address: tokenAddress,
+        symbol: tokenSymbol,
+        decimals: tokenDecimals,
+      },
+    };
 
+    // 👇 store toast ID so we can dismiss it later
+    const toastId = toast.loading(`Adding ${tokenSymbol} to wallet...`);
+
+    try {
       const wasAdded = await window.ethereum.request({
         method: "wallet_watchAsset",
         params: tokenDetails,
       });
 
-      // Adjust the success condition to be less strict for non-MetaMask wallets
-      if (wasAdded === true || wasAdded === undefined || wasAdded) {
-        alert(`${tokenSymbol} token successfully added to your wallet!`);
+      toast.dismiss(toastId); // ✅ always dismiss loading toast
+
+      if (wasAdded) {
+        toast.success(`${tokenSymbol} added to wallet!`);
       } else {
-        alert(`${tokenSymbol} token addition was canceled.`);
+        toast("Token addition cancelled.");
       }
-    } catch (error) {
-      console.error(`Error adding ${tokenSymbol} token:`, error);
-      alert(`An error occurred while adding the ${tokenSymbol} token.`);
+    } catch (err) {
+      console.error(err);
+      toast.dismiss(toastId); // ✅ dismiss loading toast on error
+      toast.error(`Failed to add ${tokenSymbol}.`);
     }
   };
 

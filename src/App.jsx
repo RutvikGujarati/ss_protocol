@@ -16,6 +16,7 @@ import {
 } from "react-router-dom";
 import { useDAvContract } from "./Functions/DavTokenFunctions";
 import DotAnimation from "./Animations/Animation";
+import { Toaster } from "react-hot-toast";
 const App = () => {
   const { loadingRatioPrice } = useDAvContract();
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,6 +60,7 @@ const App = () => {
   return (
     <Router>
       <Header />
+	  <Toaster position="bottom-left" reverseOrder={false} />
 	  <div>
       {!isOnline && (
         <div
