@@ -40,3 +40,4 @@ export const DomusRatioAddress = "0x874F9cd4E3Bb33A4e1B022033dc80c2E86EaF04a";
 export const CurrusRatioAddress = "0x0e84998b4790C3523232D07F91985296F5be5829";
 export const ValirRatioAddress = "0xA9108Ec32131123A47FEA514e02cE36Dd1F98E8E";
 export const SanitasRatioAddress = "0x81Ba4f0F429545Fb7f94237EcBc903ae97A71DE8";
+export const TeeahRatioAddress = "0x143aD20E54e2557b549f6484b99fF876E7F27a00";

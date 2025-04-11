@@ -33,12 +33,21 @@ const tokens = [
     isPool: true,
   },
   {
+    id: "0xebee32fae4fcb913fa25ae16d741ba197510a575",
+    key: "TeeahUsdPrice",
+    isPool: true,
+  },
+  {
     id: "0x86e8330efe0dfc20ab8f63dcf95a6a8d66f60c1d",
     key: "TenDollarUsdPrice",
     isPool: true,
   },
   { id: "0x61fb10ac14b5fe7499a6858a9cf0d80cc1d2fd75", key: "ValirUsdPrice" },
-  { id: "0xbab8540dee05ba25cec588ce5124aa50b1d7d425", key: "SanitasUsdPrice" },
+  {
+    id: "0x1a60e1ca8732634392eb89e68a6c50ea457872c6",
+    key: "SanitasUsdPrice",
+    isPool: true,
+  },
 ];
 
 const PriceProvider = ({ children }) => {

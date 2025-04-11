@@ -38,17 +38,21 @@ export const ContractProvider = ({ children }) => {
       setLoading(true);
 
       const browserProvider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await browserProvider.getSigner();
+      const userAddress = await signer.getAddress();
 
       const contractInstances = Object.fromEntries(
         Object.entries(getContractConfigs()).map(([key, { address, abi }]) => [
           key,
-          new ethers.Contract(address, abi, browserProvider), // Use provider, not signer
+          new ethers.Contract(address, abi, signer), // ✅ use signer instead of provider
         ])
       );
 
       setProvider(browserProvider);
+      setSigner(signer);
+      setAccount(userAddress);
       setContracts(contractInstances);
-      console.log("Contracts Initialized (read-only):", contractInstances);
+      console.log("Contracts Initialized with signer:", contractInstances);
     } catch (err) {
       console.error("Failed to initialize contracts:", err);
     } finally {
@@ -59,7 +63,7 @@ export const ContractProvider = ({ children }) => {
   useEffect(() => {
     if (!window.ethereum) return;
 
-    window.ethereum.on("accountsChanged", (accounts) => {
+    const handleAccountsChanged = (accounts) => {
       if (accounts.length > 0) {
         setAccount(accounts[0]);
         initializeContracts();
@@ -67,11 +71,14 @@ export const ContractProvider = ({ children }) => {
         setAccount(null);
         setSigner(null);
         setProvider(null);
+        setContracts({});
       }
-    });
+    };
+
+    window.ethereum.on("accountsChanged", handleAccountsChanged);
 
     return () => {
-      window.ethereum.removeAllListeners("accountsChanged");
+      window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
     };
   }, []);
 

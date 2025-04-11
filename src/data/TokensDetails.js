@@ -4,7 +4,7 @@ import {
 	Fluxin, OneDollarRatioAddress, Ratio_TOKEN_ADDRESS, Rieva, RievaRatioAddress,
 	Sanitas,
 	SanitasRatioAddress,
-	STATE_TOKEN_ADDRESS, STATE_TOKEN_SONIC_ADDRESS, Teeah, TenDollarRatioAddress, Valir, ValirRatioAddress, Xerion, XerionRatioAddress,
+	STATE_TOKEN_ADDRESS, STATE_TOKEN_SONIC_ADDRESS, Teeah, TeeahRatioAddress, TenDollarRatioAddress, Valir, ValirRatioAddress, Xerion, XerionRatioAddress,
 } from "../ContractAddresses";
 import { PriceContext } from "../api/StatePrice";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
@@ -99,7 +99,7 @@ export const TokensDetails = () => {
 			key: "Teeah",
 			address: Teeah,
 			price: prices.TeeahUsdPrice,
-			// swapAddress: TeeahRatioAddress,
+			swapAddress: TeeahRatioAddress,
 			mintAmount: "125,000,000,000",
 		},
 		{
@@ -191,7 +191,7 @@ export const TokensDetails = () => {
 			Ratio: CurrentRatioPrice[key],
 			AuctionTimeRunning: auctionTimeLeft[key],
 			AuctionNextTime: auctionDetails[key],
-			renounceSwapSmartContract: key == "OneDollar" ? swap.isRenounced["OneDollar"] : key == "Teeah" ? swap.isRenounced["Teeah"] : swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
+			renounceSwapSmartContract: key == "OneDollar" ? swap.isRenounced["OneDollar"] : swap.isRenounced?.[`${key}Ratio`] ?? "Unknown",
 
 			actions: {
 				...(token.actions || {}), // Include any custom actions (e.g., for DAV)

@@ -30,6 +30,7 @@ export const GeneralAuctionProvider = ({ children }) => {
     { name: "Currus", contract: AllContracts?.CurrusRatioContract },
     { name: "Valir", contract: AllContracts?.ValirRatioContract },
     { name: "Sanitas", contract: AllContracts?.SanitasRatioContract },
+    { name: "Teeah", contract: AllContracts?.TeeahRatioContract },
     { name: "TenDollar", contract: AllContracts?.TenDollarRatioContract },
     { name: "OneDollar", contract: AllContracts?.OneDollarRatioContract },
   ].filter(({ contract }) => contract); // Remove undefined contracts

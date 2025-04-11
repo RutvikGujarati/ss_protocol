@@ -23,6 +23,7 @@ import {
   STATE_TOKEN_ADDRESS,
   STATE_TOKEN_SONIC_ADDRESS,
   Teeah,
+  TeeahRatioAddress,
   TenDollarRatioAddress,
   Valir,
   ValirRatioAddress,
@@ -59,6 +60,7 @@ export const SwapContractProvider = ({ children }) => {
     Xerion: false,
     Rieva: false,
     Domus: false,
+    Teeah: false,
     Valir: false,
     Sanitas: false,
     Currus: false,
@@ -70,6 +72,7 @@ export const SwapContractProvider = ({ children }) => {
     Xerion: false,
     Rieva: false,
     Currus: false,
+    Teeah: false,
     Sanitas: false,
     Valir: false,
     Domus: false,
@@ -81,6 +84,7 @@ export const SwapContractProvider = ({ children }) => {
     Xerion: false,
     Rieva: false,
     Valir: false,
+    Teeah: false,
     Currus: false,
     Sanitas: false,
     Domus: false,
@@ -127,6 +131,7 @@ export const SwapContractProvider = ({ children }) => {
     CurrusRatio: AllContracts.CurrusRatioContract,
     ValirRatio: AllContracts.ValirRatioContract,
     SanitasRatio: AllContracts.SanitasRatioContract,
+    TeeahRatio: AllContracts.TeeahRatioContract,
     OneDollar: AllContracts.OneDollarRatioContract,
     TenDollarRatio: AllContracts.TenDollarRatioContract,
     XerionRatio: AllContracts.XerionRatioContract,
@@ -137,6 +142,7 @@ export const SwapContractProvider = ({ children }) => {
     Rieva: AllContracts.RievaRatioContract,
     Currus: AllContracts.CurrusRatioContract,
     Domus: AllContracts.DomusRatioContract,
+    Teeah: AllContracts.TeeahRatioContract,
     Valir: AllContracts.ValirRatioContract,
     Sanitas: AllContracts.SanitasRatioContract,
     OneDollar: AllContracts.OneDollarRatioContract,
@@ -149,6 +155,7 @@ export const SwapContractProvider = ({ children }) => {
     RievaRatio: AllContracts.RievaRatioContract,
     CurrusRatio: AllContracts.CurrusRatioContract,
     DomusRatio: AllContracts.DomusRatioContract,
+    TeeahRatio: AllContracts.TeeahRatioContract,
     ValirRatio: AllContracts.ValirRatioContract,
     SanitasRatio: AllContracts.SanitasRatioContract,
     OneDollarRatio: AllContracts.OneDollarRatioContract,
@@ -173,6 +180,10 @@ export const SwapContractProvider = ({ children }) => {
     {
       contract: AllContracts.ValirRatioContract,
       name: "Valir",
+    },
+    {
+      contract: AllContracts.TeeahRatioContract,
+      name: "Teeah",
     },
     {
       contract: AllContracts.SanitasRatioContract,
@@ -408,6 +419,8 @@ export const SwapContractProvider = ({ children }) => {
     renounceOwnership(AllContracts.ValirContract, "Valir");
   const ReanounceSanitasContract = () =>
     renounceOwnership(AllContracts.SanitasContract, "Sanitas");
+  const ReanounceTeeahContract = () =>
+    renounceOwnership(AllContracts.TeeahContract, "Teeah");
 
   const ReanounceOneDollarSwapContract = () =>
     renounceOwnership(AllContracts.OneDollarRatioContract, "1$");
@@ -429,6 +442,8 @@ export const SwapContractProvider = ({ children }) => {
     renounceOwnership(AllContracts.ValirRatioContract, "ValirRatio");
   const RenounceSanitasSwap = () =>
     renounceOwnership(AllContracts.SanitasRatioContract, "SanitasRatio");
+  const RenounceTeeahSwap = () =>
+    renounceOwnership(AllContracts.TeeahRatioContract, "TeeahRatio");
 
   const handleTokenWithdraw = async (contract, amount) => {
     try {
@@ -463,6 +478,8 @@ export const SwapContractProvider = ({ children }) => {
     handleTokenWithdraw(AllContracts.ValirContract, amount);
   const WithdrawSanitas = (amount) =>
     handleTokenWithdraw(AllContracts.SanitasContract, amount);
+  const WithdrawTeeah = (amount) =>
+    handleTokenWithdraw(AllContracts.TeeahContract, amount);
 
   useEffect(() => {
     setTimeout(() => {
@@ -519,6 +536,10 @@ export const SwapContractProvider = ({ children }) => {
         {
           contract: AllContracts.CurrusRatioContract,
           name: "Currus",
+        },
+        {
+          contract: AllContracts.TeeahRatioContract,
+          name: "Teeah",
         },
         {
           contract: AllContracts.ValirRatioContract,
@@ -641,6 +662,10 @@ export const SwapContractProvider = ({ children }) => {
           prev.Sanitas !== value.Sanitas.adjustedBalance
             ? value.Sanitas.adjustedBalance
             : prev.Sanitas,
+        Teeah:
+          prev.Teeah !== value.Teeah.adjustedBalance
+            ? value.Teeah.adjustedBalance
+            : prev.Teeah,
       }));
 
       console.log("from dt", value.Fluxin.adjustedBalance);
@@ -849,6 +874,11 @@ export const SwapContractProvider = ({ children }) => {
       key: "ValirBalance",
     },
     {
+      contract: AllContracts.TeeahContract,
+      token: Teeah,
+      key: "TeeahBalance",
+    },
+    {
       contract: AllContracts.CurrusContract,
       token: Currus,
       key: "CurrusBalance",
@@ -887,6 +917,11 @@ export const SwapContractProvider = ({ children }) => {
       contract: AllContracts.stateContract,
       token: Ratio_TOKEN_ADDRESS,
       key: "StateFluxin",
+    },
+    {
+      contract: AllContracts.stateContract,
+      token: TeeahRatioAddress,
+      key: "StateTeeah",
     },
     {
       contract: AllContracts.stateContract,
@@ -938,6 +973,11 @@ export const SwapContractProvider = ({ children }) => {
       contract: AllContracts.FluxinContract,
       token: Ratio_TOKEN_ADDRESS,
       key: "ratioFluxinBalance",
+    },
+    {
+      contract: AllContracts.TeeahContract,
+      token: TeeahRatioAddress,
+      key: "ratioTeeahBalance",
     },
     {
       contract: AllContracts.RievaContract,
@@ -1068,6 +1108,7 @@ export const SwapContractProvider = ({ children }) => {
         Valir: outAmounts.Valir,
         Sanitas: outAmounts.Sanitas,
         Domus: outAmounts.Domus,
+        Teeah: outAmounts.Teeah,
         Currus: outAmounts.Currus,
         OneDollar: outAmounts.OneDollar,
         TenDollar: outAmounts.TenDollar,
@@ -1077,6 +1118,7 @@ export const SwapContractProvider = ({ children }) => {
         Fluxin: Ratio_TOKEN_ADDRESS,
         Rieva: RievaRatioAddress,
         Domus: DomusRatioAddress,
+        Teeah: TeeahRatioAddress,
         Currus: CurrusRatioAddress,
         Valir: ValirRatioAddress,
         Sanitas: SanitasRatioAddress,
@@ -1089,6 +1131,7 @@ export const SwapContractProvider = ({ children }) => {
         Fluxin: OnePBalance.Fluxin,
         Rieva: OnePBalance.Rieva,
         Domus: OnePBalance.Domus,
+        Teeah: OnePBalance.Teeah,
         Currus: OnePBalance.Currus,
         Valir: OnePBalance.Valir,
         Sanitas: OnePBalance.Sanitas,
@@ -1111,6 +1154,7 @@ export const SwapContractProvider = ({ children }) => {
         Domus: AllContracts.DomusContract,
         Currus: AllContracts.CurrusContract,
         Valir: AllContracts.ValirContract,
+        Teeah: AllContracts.TeeahContract,
         Sanitas: AllContracts.SanitasContract,
         OneDollar: AllContracts.oneDollar,
         TenDollar: AllContracts.TenDollarContract,
@@ -1128,6 +1172,7 @@ export const SwapContractProvider = ({ children }) => {
         (ContractName == "Xerion" && isReversed.Xerion == "true") ||
         (ContractName == "Valir" && isReversed.Valir == "true") ||
         (ContractName == "Sanitas" && isReversed.Sanitas == "true") ||
+        (ContractName == "Teeah" && isReversed.Teeah == "true") ||
         (ContractName == "Currus" && isReversed.Currus == "true") ||
         (ContractName == "TenDollar" && isReversed.TenDollar == "true") ||
         (ContractName == "OneDollar" && isReversed.OneDollar == "true")
@@ -1202,6 +1247,7 @@ export const SwapContractProvider = ({ children }) => {
         Domus: AllContracts.DomusRatioContract,
         Valir: AllContracts.ValirRatioContract,
         Sanitas: AllContracts.SanitasRatioContract,
+        Teeah: AllContracts.TeeahRatioContract,
         Currus: AllContracts.CurrusRatioContract,
         OneDollar: AllContracts.OneDollarRatioContract,
         TenDollar: AllContracts.TenDollarRatioContract,
@@ -1418,6 +1464,7 @@ export const SwapContractProvider = ({ children }) => {
         XerionRatio: XerionRatioAddress,
         RievaRatio: RievaRatioAddress,
         DomusRatio: DomusRatioAddress,
+        TeeahRatio: TeeahRatioAddress,
         ValirRatio: ValirRatioAddress,
         SanitasRatio: SanitasRatioAddress,
         CurrusRatio: CurrusRatioAddress,
@@ -1587,7 +1634,7 @@ export const SwapContractProvider = ({ children }) => {
         // davContract,
         CalculationOfCost,
         TotalCost,
-
+        WithdrawTeeah,
         handleAddTokenDAV,
         handleAddTokensDAV,
         //STATE Token
@@ -1598,9 +1645,9 @@ export const SwapContractProvider = ({ children }) => {
         handleAddTokenState,
         handleAddTokensState,
         TotalStateHoldsInUS,
-
+        ReanounceTeeahContract,
         setClaiming,
-
+        RenounceTeeahSwap,
         contracts,
         claiming,
         SwapTokens,
