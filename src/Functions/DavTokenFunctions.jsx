@@ -14,7 +14,7 @@ export const DAVContext = createContext();
 
 export const DavProvider = ({ children }) => {
   const { AllContracts } = useContext(ContractContext);
-  const {  address } = useAccount();
+  const { address } = useAccount();
   const chainId = useChainId();
 
   const [davHolds, setDavHoldings] = useState("0.0");
@@ -179,6 +179,10 @@ export const DavProvider = ({ children }) => {
     DavHoldings,
     DAVTokenfive_Amount,
   ]);
+  useEffect(() => {
+    if (!address || !AllContracts?.davContract) return;
+    fetchData();
+  }, [address, AllContracts?.davContract]); // ✅ only run when this is ready
 
   // New useEffect to check wallet and contract initialization
   useEffect(() => {
@@ -195,6 +199,13 @@ export const DavProvider = ({ children }) => {
     console.log("Wallet and contract initialized, fetching data...");
     fetchData();
   }, [address, AllContracts, fetchData]);
+  const { isConnected } = useAccount();
+
+  useEffect(() => {
+    if (!isConnected) return;
+    if (!AllContracts?.davContract) return;
+    fetchData();
+  }, [isConnected, AllContracts, address]);
 
   DavProvider.propTypes = {
     children: PropTypes.node.isRequired,

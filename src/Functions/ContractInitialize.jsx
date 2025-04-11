@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import { createContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { getContractConfigs, setChainId } from "../Constants/ContractConfig";
-import { useChainId } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 
 export const ContractContext = createContext(null);
 
@@ -17,16 +17,16 @@ export const ContractProvider = ({ children }) => {
   const [account, setAccount] = useState(null);
   const [AllContracts, setContracts] = useState({});
   const chainId = useChainId(); // Get chainId from Wagmi
+  const { isConnected, address } = useAccount(); // ✅ this is the key
 
   console.log("Current Chain ID:", chainId);
 
   useEffect(() => {
-    if (!chainId) return; // Don't initialize contracts until chainId is available
+    if (!isConnected || !address || !chainId) return;
 
-    setChainId(chainId); // Update the global chainId in ContractConfig.js
-
+    setChainId(chainId);
     initializeContracts();
-  }, [chainId]);
+  }, [isConnected, address, chainId]);
 
   const initializeContracts = async () => {
     if (!window.ethereum) {
@@ -38,13 +38,23 @@ export const ContractProvider = ({ children }) => {
       setLoading(true);
 
       const browserProvider = new ethers.BrowserProvider(window.ethereum);
+      const accounts = await window.ethereum.request({
+        method: "eth_accounts",
+      });
+
+      if (accounts.length === 0) {
+        // No connected accounts, do not proceed
+        setLoading(false);
+        return;
+      }
+
       const signer = await browserProvider.getSigner();
       const userAddress = await signer.getAddress();
 
       const contractInstances = Object.fromEntries(
         Object.entries(getContractConfigs()).map(([key, { address, abi }]) => [
           key,
-          new ethers.Contract(address, abi, signer), // ✅ use signer instead of provider
+          new ethers.Contract(address, abi, signer),
         ])
       );
 
