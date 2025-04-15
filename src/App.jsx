@@ -60,19 +60,19 @@ const App = () => {
   return (
     <Router>
       <Header />
-	  <Toaster position="bottom-left" reverseOrder={false} />
-	  <div>
-      {!isOnline && (
-        <div
-          className="alert alert-danger text-center w-100 position-fixed top-0 start-0"
-          style={{ zIndex: 1050, padding: "15px", fontSize: "18px" }}
-          role="alert"
-        >
-          ⚠️ You are offline. Some features may not work properly.
-        </div>
-      )}
-      {/* Rest of your App */}
-    </div>
+      <Toaster position="bottom-left" reverseOrder={false} />
+      <div>
+        {!isOnline && (
+          <div
+            className="alert alert-danger text-center w-100 position-fixed top-0 start-0"
+            style={{ zIndex: 1050, padding: "15px", fontSize: "18px" }}
+            role="alert"
+          >
+            ⚠️ You are offline. Some features may not work properly.
+          </div>
+        )}
+        {/* Rest of your App */}
+      </div>
       <Routes>
         <Route path="/" element={<Navigate to="/auction" />} />
         {/* Auction Page (Default page when accessed directly) */}
