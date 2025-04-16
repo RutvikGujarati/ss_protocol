@@ -1,994 +1,1115 @@
 [
 	{
+		"type": "constructor",
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "state",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "davToken",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_orxa",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
 				"name": "_gov",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_pairState",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_pairOrxa",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_pairAddress",
-				"type": "address"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			}
-		],
-		"type": "error",
-		"name": "OwnableInvalidOwner"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "account",
-				"type": "address"
-			}
-		],
-		"type": "error",
-		"name": "OwnableUnauthorizedAccount"
-	},
-	{
-		"inputs": [],
-		"type": "error",
-		"name": "ReentrancyGuardReentrantCall"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			}
-		],
-		"type": "error",
-		"name": "SafeERC20FailedOperation"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "newAuctionDuration",
-				"type": "uint256",
-				"indexed": false
-			}
-		],
-		"type": "event",
-		"name": "AuctionDurationUpdated",
-		"anonymous": false
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "newInterval",
-				"type": "uint256",
-				"indexed": false
-			}
-		],
-		"type": "event",
-		"name": "AuctionIntervalUpdated",
-		"anonymous": false
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "startTime",
-				"type": "uint256",
-				"indexed": false
-			},
-			{
-				"internalType": "uint256",
-				"name": "endTime",
-				"type": "uint256",
-				"indexed": false
-			},
-			{
-				"internalType": "address",
-				"name": "orxaAddress",
 				"type": "address",
-				"indexed": false
-			},
-			{
-				"internalType": "address",
-				"name": "stateToken",
-				"type": "address",
-				"indexed": false
+				"internalType": "address"
 			}
 		],
-		"type": "event",
-		"name": "AuctionStarted",
-		"anonymous": false
+		"stateMutability": "nonpayable"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "previousOwner",
-				"type": "address",
-				"indexed": true
-			},
-			{
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address",
-				"indexed": true
-			}
-		],
-		"type": "event",
-		"name": "OwnershipTransferred",
-		"anonymous": false
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "token",
-				"type": "address",
-				"indexed": true
-			},
-			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256",
-				"indexed": false
-			}
-		],
-		"type": "event",
-		"name": "TokensDeposited",
-		"anonymous": false
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address",
-				"indexed": true
-			},
-			{
-				"internalType": "address",
-				"name": "orxaAddress",
-				"type": "address",
-				"indexed": true
-			},
-			{
-				"internalType": "address",
-				"name": "stateToken",
-				"type": "address",
-				"indexed": true
-			},
-			{
-				"internalType": "uint256",
-				"name": "amountIn",
-				"type": "uint256",
-				"indexed": false
-			},
-			{
-				"internalType": "uint256",
-				"name": "amountOut",
-				"type": "uint256",
-				"indexed": false
-			}
-		],
-		"type": "event",
-		"name": "TokensSwapped",
-		"anonymous": false
-	},
-	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
-		"name": "RatioTarget",
+		"name": "AUCTION_DURATION",
+		"inputs": [],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
+		"type": "function",
+		"name": "AUCTION_INTERVAL",
 		"inputs": [],
-		"stateMutability": "view",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "MAX_AUCTIONS",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "REVERSE_AUCTION_INTERVAL",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "REVERSE_DURATION",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "TIMEZONE_OFFSET",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
 		"type": "function",
 		"name": "TotalBurnedStates",
+		"inputs": [],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
-			}
-		]
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
 		],
-		"stateMutability": "view",
+		"stateMutability": "view"
+	},
+	{
 		"type": "function",
 		"name": "TotalStateBurnedByUser",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "TotalTokensBurned",
+		"inputs": [],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
-			}
-		]
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
 		],
-		"stateMutability": "view",
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "addToken",
+		"inputs": [
+			{
+				"name": "token",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "maxSupply",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "pairAddress",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
 		"type": "function",
 		"name": "approvals",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		]
-	},
-	{
 		"inputs": [
 			{
-				"internalType": "address",
 				"name": "",
-				"type": "address"
+				"type": "address",
+				"internalType": "address"
 			},
 			{
-				"internalType": "address",
 				"name": "",
-				"type": "address"
+				"type": "address",
+				"internalType": "address"
 			}
 		],
-		"stateMutability": "view",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
 		"type": "function",
 		"name": "auctionCycles",
-		"outputs": [
+		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "firstAuctionStart",
-				"type": "uint256"
+				"name": "",
+				"type": "address",
+				"internalType": "address"
 			},
 			{
-				"internalType": "bool",
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "firstAuctionStart",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
 				"name": "isInitialized",
-				"type": "bool"
-			}
-		]
-	},
-	{
-		"inputs": [],
-		"stateMutability": "view",
-		"type": "function",
-		"name": "auctionDuration",
-		"outputs": [
+				"type": "bool",
+				"internalType": "bool"
+			},
 			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
+				"name": "auctionCount",
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
-		"type": "function",
-		"name": "auctionInterval",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		]
-	},
-	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "calculateAuctionEligibleAmount",
+		"inputs": [
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
 		"type": "function",
-		"name": "checkAndActivateReverseForNextCycle"
+		"name": "calculateBaseReward",
+		"inputs": [
+			{
+				"name": "davAmount",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
+		"type": "function",
+		"name": "cumulativeDavHoldings",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "cumulativeMintableHoldings",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
 		"type": "function",
 		"name": "dav",
+		"inputs": [],
 		"outputs": [
 			{
-				"internalType": "contract Decentralized_Autonomous_Vaults_DAV_V1_1",
 				"name": "",
-				"type": "address"
-			}
-		]
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "token",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
+				"type": "address",
+				"internalType": "contract IERC20"
 			}
 		],
-		"stateMutability": "nonpayable",
-		"type": "function",
-		"name": "depositTokens"
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
+		"type": "function",
+		"name": "distributeReward",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
 		"type": "function",
 		"name": "getCurrentAuctionCycle",
+		"inputs": [
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
-		"name": "getNextAuctionStart",
+		"name": "getNextAuctionStartTime",
+		"inputs": [
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "getOutPutAmount",
+		"inputs": [
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "getRatioPrice",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		]
-	},
-	{
-		"inputs": [],
-		"stateMutability": "view",
-		"type": "function",
-		"name": "getRatioTarget",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		]
-	},
-	{
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "_amountIn",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_amountOut",
-				"type": "uint256"
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
 			}
 		],
-		"stateMutability": "pure",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
 		"type": "function",
 		"name": "getSwapAmounts",
-		"outputs": [
+		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "newAmountIn",
-				"type": "uint256"
+				"name": "_amountIn",
+				"type": "uint256",
+				"internalType": "uint256"
 			},
 			{
-				"internalType": "uint256",
-				"name": "newAmountOut",
-				"type": "uint256"
+				"name": "_amountOut",
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"outputs": [
+			{
+				"name": "newAmountIn",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "newAmountOut",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "pure"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "getTimeLeftInAuction",
+		"inputs": [
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "getTotalBountyCollected",
+		"inputs": [],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "getTotalStateBurned",
+		"inputs": [],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
-			}
-		]
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
 		],
-		"stateMutability": "view",
+		"stateMutability": "view"
+	},
+	{
 		"type": "function",
 		"name": "getTotalStateBurnedByUser",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "getTotalTokensBurned",
+		"inputs": [],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
-			}
-		]
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
 		],
-		"stateMutability": "view",
+		"stateMutability": "view"
+	},
+	{
 		"type": "function",
 		"name": "getUserHasReverseSwapped",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		]
-	},
-	{
 		"inputs": [
 			{
-				"internalType": "address",
 				"name": "user",
-				"type": "address"
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
 			}
 		],
-		"stateMutability": "view",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
 		"type": "function",
 		"name": "getUserHasSwapped",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "bool",
 				"name": "",
-				"type": "bool"
+				"type": "bool",
+				"internalType": "bool"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "governanceAddress",
+		"inputs": [],
 		"outputs": [
 			{
-				"internalType": "address",
 				"name": "",
-				"type": "address"
+				"type": "address",
+				"internalType": "address"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "isAuctionActive",
+		"inputs": [
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "bool",
 				"name": "",
-				"type": "bool"
+				"type": "bool",
+				"internalType": "bool"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "isReverseAuctionActive",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		]
-	},
-	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
 			}
 		],
-		"stateMutability": "view",
-		"type": "function",
-		"name": "maxSupply",
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
+				"type": "bool",
+				"internalType": "bool"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
-		"name": "orxa",
+		"name": "lastDavHolding",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "contract Orxa",
 				"name": "",
-				"type": "address"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
-		"name": "orxaAddress",
+		"name": "lastDavMintTime",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "address",
 				"name": "",
-				"type": "address"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
-		"name": "orxaToken",
+		"name": "maxSupplies",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "address",
 				"name": "",
-				"type": "address"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
+		"type": "function",
+		"name": "mintReward",
+		"inputs": [
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
 		"type": "function",
 		"name": "owner",
+		"inputs": [],
 		"outputs": [
 			{
-				"internalType": "address",
 				"name": "",
-				"type": "address"
+				"type": "address",
+				"internalType": "address"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
-		"name": "pairAddress",
+		"name": "pairAddresses",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "address",
 				"name": "",
-				"type": "address"
+				"type": "address",
+				"internalType": "address"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "percentage",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		]
-	},
-	{
 		"inputs": [],
-		"stateMutability": "view",
-		"type": "function",
-		"name": "pstateToken",
 		"outputs": [
 			{
-				"internalType": "address",
 				"name": "",
-				"type": "address"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
+		"type": "function",
+		"name": "renounceOwnership",
 		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function",
-		"name": "renounceOwnership"
+		"outputs": [],
+		"stateMutability": "nonpayable"
 	},
 	{
+		"type": "function",
+		"name": "setInAmountPercentage",
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function",
-		"name": "reverseAuctionActive",
-		"outputs": [
-			{
-				"internalType": "bool",
-				"name": "",
-				"type": "bool"
-			}
-		]
-	},
-	{
-		"inputs": [],
-		"stateMutability": "view",
-		"type": "function",
-		"name": "reverseDuration",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		]
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_pairState",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_pairOrxa",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "_pairAddress",
-				"type": "address"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function",
-		"name": "setAddressOfPair"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_auctionDuration",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function",
-		"name": "setAuctionDuration"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_newInterval",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "function",
-		"name": "setAuctionInterval"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
 				"name": "amount",
-				"type": "uint256"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
 		],
-		"stateMutability": "nonpayable",
-		"type": "function",
-		"name": "setInAmountPercentage"
+		"outputs": [],
+		"stateMutability": "nonpayable"
 	},
 	{
+		"type": "function",
+		"name": "setTokenAddress",
 		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "ratioTarget",
-				"type": "uint256"
+				"name": "state",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "_dav",
+				"type": "address",
+				"internalType": "address"
 			}
 		],
-		"stateMutability": "nonpayable",
-		"type": "function",
-		"name": "setRatioTarget"
+		"outputs": [],
+		"stateMutability": "nonpayable"
 	},
 	{
-		"inputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function",
-		"name": "startAuction"
-	},
-	{
-		"inputs": [],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "stateToken",
+		"inputs": [],
 		"outputs": [
 			{
-				"internalType": "address",
 				"name": "",
-				"type": "address"
-			}
-		]
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
+				"type": "address",
+				"internalType": "address"
 			}
 		],
-		"stateMutability": "nonpayable",
-		"type": "function",
-		"name": "swapTokens"
+		"stateMutability": "view"
 	},
 	{
+		"type": "function",
+		"name": "supportedTokens",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "swapTokens",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "totalAirdropMinted",
 		"inputs": [],
-		"stateMutability": "view",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
 		"type": "function",
 		"name": "totalBounty",
+		"inputs": [],
 		"outputs": [
 			{
-				"internalType": "uint256",
 				"name": "",
-				"type": "uint256"
+				"type": "uint256",
+				"internalType": "uint256"
 			}
-		]
+		],
+		"stateMutability": "view"
 	},
 	{
+		"type": "function",
+		"name": "totalRewardDistributed",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "transferOwnership",
 		"inputs": [
 			{
-				"internalType": "address",
 				"name": "newOwner",
-				"type": "address"
+				"type": "address",
+				"internalType": "address"
 			}
 		],
-		"stateMutability": "nonpayable",
-		"type": "function",
-		"name": "transferOwnership"
+		"outputs": [],
+		"stateMutability": "nonpayable"
 	},
 	{
+		"type": "function",
+		"name": "userBaseReward",
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "newGov",
-				"type": "address"
+				"name": "",
+				"type": "address",
+				"internalType": "address"
 			}
 		],
-		"stateMutability": "nonpayable",
-		"type": "function",
-		"name": "updateGovernance"
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
 		"type": "function",
 		"name": "userSwapTotalInfo",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
 		"outputs": [
 			{
-				"internalType": "bool",
 				"name": "hasSwapped",
-				"type": "bool"
+				"type": "bool",
+				"internalType": "bool"
 			},
 			{
-				"internalType": "bool",
 				"name": "hasReverseSwap",
-				"type": "bool"
+				"type": "bool",
+				"internalType": "bool"
 			},
 			{
-				"internalType": "uint256",
 				"name": "cycle",
-				"type": "uint256"
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "event",
+		"name": "AuctionStarted",
+		"inputs": [
+			{
+				"name": "startTime",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "endTime",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "inputToken",
+				"type": "address",
+				"indexed": false,
+				"internalType": "address"
+			},
+			{
+				"name": "stateToken",
+				"type": "address",
+				"indexed": false,
+				"internalType": "address"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "OwnershipTransferred",
+		"inputs": [
+			{
+				"name": "previousOwner",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "newOwner",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "RewardDistributed",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "TokenAdded",
+		"inputs": [
+			{
+				"name": "token",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "maxSupply",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "pairAddress",
+				"type": "address",
+				"indexed": false,
+				"internalType": "address"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "TokensDeposited",
+		"inputs": [
+			{
+				"name": "token",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "TokensSwapped",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "inputToken",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "stateToken",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "amountIn",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "amountOut",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "error",
+		"name": "OwnableInvalidOwner",
+		"inputs": [
+			{
+				"name": "owner",
+				"type": "address",
+				"internalType": "address"
 			}
 		]
 	},
 	{
+		"type": "error",
+		"name": "OwnableUnauthorizedAccount",
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
+				"name": "account",
+				"type": "address",
+				"internalType": "address"
 			}
-		],
-		"stateMutability": "view",
-		"type": "function",
-		"name": "vaults",
-		"outputs": [
+		]
+	},
+	{
+		"type": "error",
+		"name": "ReentrancyGuardReentrantCall",
+		"inputs": []
+	},
+	{
+		"type": "error",
+		"name": "SafeERC20FailedOperation",
+		"inputs": [
 			{
-				"internalType": "uint256",
-				"name": "totalDeposited",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "totalAuctioned",
-				"type": "uint256"
+				"name": "token",
+				"type": "address",
+				"internalType": "address"
 			}
 		]
 	}

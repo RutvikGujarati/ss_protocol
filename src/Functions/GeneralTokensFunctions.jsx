@@ -153,45 +153,7 @@ export const GeneralTokenProvider = ({ children }) => {
       console.error("Error viewing distributed tokens:", e);
     }
   };
-  const mintAdditionalTOkens = async (contractType, amount) => {
-    try {
-      const amountInWei = ethers.parseUnits(amount.toString(), 18);
-      let contract;
-
-      // Select the correct contract based on contractType
-      if (contractType === "fluxin") {
-        contract = AllContracts.FluxinContract;
-      } else if (contractType === "state") {
-        contract = AllContracts.stateContract;
-      } else if (contractType === "Xerion") {
-        contract = AllContracts.XerionContract;
-      } else if (contractType === "oneD") {
-        contract = AllContracts.oneDollar;
-      } else if (contractType === "Rieva") {
-        contract = AllContracts.RievaContract;
-      } else if (contractType === "Domus") {
-        contract = AllContracts.DomusContract;
-      } else if (contractType === "TenDollar") {
-        contract = AllContracts.TenDollarContract;
-      } else if (contractType === "Valir") {
-        contract = AllContracts.ValirContract;
-      } else if (contractType === "Sanitas") {
-        contract = AllContracts.SanitasContract;
-      } else if (contractType === "Teeah") {
-        contract = AllContracts.TeeahContract;
-      }
-
-      if (!contract) {
-        throw new Error("Invalid contract type");
-      }
-
-      const tx = await contract.mintAdditionalTOkens(amountInWei);
-      await tx.wait();
-      await fetchTotalSupplies();
-    } catch (e) {
-      console.error(`Error minting with method mintAdditionalTOkens:`, e);
-    }
-  };
+ 
 
   const CurrentRatioPriceGetting = async () => {
     try {
@@ -253,7 +215,6 @@ export const GeneralTokenProvider = ({ children }) => {
         simpleSupplies,
         ClaimTokens,
         CheckMintBalance,
-        mintAdditionalTOkens,
         Distributed,
         CurrentRatioPrice,
         contracts,

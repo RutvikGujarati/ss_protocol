@@ -1,7 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/InfoCards.css";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import PLSLogo from "../assets/pls1.png";
@@ -9,25 +9,92 @@ import BNBLogo from "../assets/bnb.png";
 import sonic from "../assets/S_token.svg";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { formatWithCommas } from "./DetailsInfo";
-import { PriceContext } from "../api/StatePrice";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import DotAnimation from "../Animations/Animation";
-import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
-import { useChainId } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
+import { ContractContext } from "../Functions/ContractInitialize";
+import { PriceContext } from "../api/StatePrice";
 const InfoCards = () => {
   const chainId = useChainId();
-  const { stateUsdPrice, priceLoading } = useContext(PriceContext);
-  const [setBurnRatio] = useState("0.0");
+  const { AllContracts } = useContext(ContractContext);
+  const { stateUsdPrice } = useContext(PriceContext);
+  const formatPrice = (price) => {
+    if (!price || isNaN(price)) {
+      return "$0.0000";
+    }
+
+    const formattedPrice = parseFloat(price).toFixed(10);
+    const [integerPart, decimalPart] = formattedPrice.split(".");
+
+    const leadingZerosMatch = decimalPart.match(/^0+(.)/);
+    if (leadingZerosMatch) {
+      const leadingZeros = leadingZerosMatch[0].slice(0, -1);
+      const firstSignificantDigit = leadingZerosMatch[1];
+      const zeroCount = leadingZeros.length;
+      if (zeroCount < 4) {
+        return `${integerPart}.${"0".repeat(
+          zeroCount
+        )}${firstSignificantDigit}${decimalPart
+          .slice(zeroCount + 1)
+          .slice(0, 3)}`;
+      } else {
+        return (
+          <>
+            {integerPart}.<span>0</span>
+            <sub>{zeroCount}</sub>
+            {firstSignificantDigit}
+            {decimalPart.slice(zeroCount + 1).slice(0, 3)}
+          </>
+        );
+      }
+    }
+
+    // General case: No significant leading zeros
+    return `${parseFloat(price).toFixed(7)}`;
+  };
+  const [copied, setCopied] = useState(false);
+  const [copiedCode, setCopiedCode] = useState("");
+
   const {
     mintDAV,
     claimableAmount,
-    davHolds,
     isLoading,
-    DavBalance,
-    davPercentage,
     claimAmount,
+    ReferralAMount,
+    ReferralCodeOfUser,
   } = useDAvContract();
-  const { ClaimTokens, CheckMintBalance, Distributed } = useGeneralTokens();
+  const { address } = useAccount();
+  const [davHolds, setDavHoldings] = useState("0.0");
+  const [davPercentage, setDavPercentage] = useState("0.0");
+
+  const DavHoldings = useCallback(async () => {
+    if (!AllContracts?.davContract) {
+      console.log("DAV contract or address not initialized...");
+      return;
+    }
+    try {
+      const holdings = await AllContracts.davContract.balanceOf(address);
+      setDavHoldings(ethers.formatUnits(holdings, 18));
+    } catch (error) {
+      console.error("Error fetching DAV holdings:", error);
+    }
+  }, [AllContracts, address]);
+
+  const DavHoldingsPercentage = useCallback(async () => {
+    if (!AllContracts?.davContract || !address) return;
+    try {
+      const balance = await AllContracts.davContract.balanceOf(address);
+      const bal = ethers.formatUnits(balance, 18);
+      setDavPercentage(parseFloat(bal / 5000000).toFixed(8));
+    } catch (error) {
+      console.error("Error fetching DAV holdings percentage:", error);
+    }
+  }, [AllContracts, address]);
+
+  useEffect(() => {
+    DavHoldings();
+    DavHoldingsPercentage();
+  });
   console.log("Connected Chain ID:", chainId);
   const setBackLogo = () => {
     if (chainId === 369) {
@@ -60,27 +127,21 @@ const InfoCards = () => {
   const liveText = getLiveText();
 
   const {
-    handleAddTokenState,
     handleAddTokenDAV,
-
     CalculationOfCost,
     TotalCost,
-    TotalStateHoldsInUS,
-    contracts,
-    StateBurnBalance,
-    StateHolds,
+
     DavRequiredAmount,
   } = useSwapContract();
   const [amount, setAmount] = useState("");
+  const [Refferalamount, setReferralAmount] = useState("");
   const [load, setLoad] = useState(false);
   const [loadClaim, setLoadClaim] = useState(false);
-  const [errorPopup, setErrorPopup] = useState({});
-  const [checkingStates, setCheckingStates] = useState({});
-  const [claimingStates, setClaimingStates] = useState({});
+
   const handleMint = async () => {
     setLoad(true);
     try {
-      await mintDAV(amount);
+      await mintDAV(amount, Refferalamount);
       setAmount("");
     } catch (error) {
       console.error("Error minting:", error);
@@ -101,83 +162,14 @@ const InfoCards = () => {
     }
   };
 
-  const handleClaimTokens = async (id, ContractName) => {
-    setClaimingStates((prev) => ({ ...prev, [id]: true }));
-    const contract = contracts[ContractName];
-    await ClaimTokens(contract);
-    setClaimingStates((prev) => ({ ...prev, [id]: false })); // Reset claiming state
-  };
-
-  const formatPrice = (price) => {
-    if (!price || isNaN(price)) {
-      return "$0.0000"; // Default display for invalid or null prices
-    }
-
-    const formattedPrice = parseFloat(price).toFixed(10); // Format to 9 decimals for processing
-    const [integerPart, decimalPart] = formattedPrice.split(".");
-
-    // Check for leading zeros in the decimal part
-    const leadingZerosMatch = decimalPart.match(/^0+(.)/); // Match leading zeros and capture the first non-zero digit
-    if (leadingZerosMatch) {
-      const leadingZeros = leadingZerosMatch[0].slice(0, -1); // Extract all leading zeros except the last digit
-      const firstSignificantDigit = leadingZerosMatch[1]; // Capture the first significant digit
-      const zeroCount = leadingZeros.length;
-      if (zeroCount < 4) {
-        return `${integerPart}.${"0".repeat(
-          zeroCount
-        )}${firstSignificantDigit}${decimalPart
-          .slice(zeroCount + 1)
-          .slice(0, 3)}`;
-      } else {
-        return (
-          <>
-            {integerPart}.<span>0</span>
-            <sub>{zeroCount}</sub>
-            {firstSignificantDigit}
-            {decimalPart.slice(zeroCount + 1).slice(0, 3)}
-          </>
-        );
-      }
-    }
-
-    // General case: No significant leading zeros
-    return `$${parseFloat(price).toFixed(7)}`;
-  };
-  const Checking = async (id, ContractName) => {
-    setCheckingStates((prev) => ({ ...prev, [id]: true })); // Set checking state for specific button
-    try {
-      const contract = contracts[ContractName]; // Get the dynamic contract based on the ContractName
-      await CheckMintBalance(contract);
-    } catch (e) {
-      if (
-        e.reason === "StateToken: No new DAV minted" ||
-        (e.revert &&
-          e.revert.args &&
-          e.revert.args[0] === "StateToken: No new DAV minted")
-      ) {
-        console.error("StateToken: No new DAV minted:", e);
-        setErrorPopup((prev) => ({ ...prev, [id]: true }));
-      } else {
-        console.error("Error calling CheckMintBalance:", e);
-      }
-    }
-    setCheckingStates((prev) => ({ ...prev, [id]: false })); // Reset checking state
-  };
-  const calculateBurnRatio = async () => {
-    try {
-      const maxSupply = 999000000000000;
-      const calculate = StateBurnBalance.toString() / maxSupply || 0;
-      console.log("burn ratio calculation", calculate);
-      setBurnRatio(calculate.toFixed(17));
-    } catch (error) {
-      console.error("Error calculating burn ratio:", error);
-    }
-  };
   const handleInputChange = (e) => {
     if (/^\d*$/.test(e.target.value)) {
       setAmount(e.target.value);
     }
     CalculationOfCost(e.target.value);
+  };
+  const handleOptionalInputChange = (e) => {
+    setReferralAmount(e.target.value);
   };
 
   function formatNumber(number) {
@@ -189,7 +181,6 @@ const InfoCards = () => {
 
   useEffect(() => {
     CalculationOfCost(amount);
-    calculateBurnRatio();
     // GetCurrentStateReward();
   }, [amount]);
 
@@ -204,31 +195,51 @@ const InfoCards = () => {
           <div className="container mt-4">
             <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
               <div className="col-md-4 p-0 m-2 cards">
-                <div className="card bg-dark text-light border-light p-0 d-flex justify-content-center align-items-center text-center w-100">
-                  <div className="p-2">
-                    <p className="mb-2 detailText">MINT DAV TOKENS</p>
+                <div className="card bg-dark text-light border-light p-3 text-center w-100">
+                  <div className="mb-3 d-flex justify-content-center align-items-center gap-2">
+                    <label className="mb-0 detailText mx-2">
+                      affiliate link{" "}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Optional"
+                      list="referralSuggestions"
+                      className="form-control text-center fw-bold w-auto mx-1"
+                      value={Refferalamount}
+                      onChange={handleOptionalInputChange}
+                    />
+                    <datalist id="referralSuggestions">
+                      {copiedCode && <option value={copiedCode} />}
+                    </datalist>
+                  </div>
+
+                  <div className="mb-2 d-flex justify-content-center align-items-center gap-2">
+                    <label className="mb-0 detailText">Mint DAV Token</label>
                     <input
                       type="text"
                       placeholder="Enter Value"
-                      className="form-control text-center fw-bold mb-3"
+                      className="form-control text-center fw-bold w-auto"
                       value={amount}
                       onChange={handleInputChange}
+                      required
                     />
-                    <h5 className="detailAmount">
-                      {chainId == 369
-                        ? "1 DAV TOKEN = 500000 PLS"
-                        : "1 DAV TOKEN = 100 SONIC"}
-                    </h5>
-                    <h5 className="detailAmount mb-4">
-                      {TotalCost
-                        ? formatNumber(ethers.formatUnits(TotalCost, 18))
-                        : "0"}{" "}
-                      {chainId == 369 ? "PLS" : "SONIC"}
-                    </h5>
+                  </div>
 
+                  <h6 className="detailAmount ">
+                    1 DAV = {chainId == 943 ? "500000 PLS" : "100 SONIC"}
+                  </h6>
+
+                  <h6 className="detailAmount mb-3">
+                    {TotalCost
+                      ? formatNumber(ethers.formatUnits(TotalCost, 18))
+                      : "0"}{" "}
+                    {chainId == 943 ? "PLS" : "SONIC"}
+                  </h6>
+                  <div className="d-flex justify-content-center">
                     <button
                       onClick={handleMint}
-                      className="btn btn-primary btn-sm d-flex justify-content-center align-items-center mt-4 w-100 "
+                      className="btn btn-primary btn-sm mb-0"
+                      style={{ width: "200px" }}
                       disabled={load}
                     >
                       {load ? "Minting..." : "Mint"}
@@ -326,113 +337,60 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div>
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
-                      <div className="carddetails2">
-                        <p className="mb-1 detailText">State token holdings</p>
-                        <h5 className="">
-                          {StateHolds} / $
-                          {formatWithCommas(TotalStateHoldsInUS)}
-                        </h5>
-                        <h5 className="detailAmount">
-                          1 TRILLION STATE TOKENS = ${" "}
-                          {chainId === 146
-                            ? "0.00"
-                            : formatWithCommas(
-                                (stateUsdPrice * 1000000000000).toFixed(0)
-                              )}
-                        </h5>
-                      </div>
-                      <div className="mb-0 mx-1">
-                        <img
-                          src={MetaMaskIcon}
-                          width={20}
-                          height={20}
-                          alt="Logo"
-                          style={{ cursor: "pointer" }}
-                          onClick={handleAddTokenState}
-                        />
-                      </div>
-                    </div>
-                    {errorPopup["state"] && (
-                      <div className="popup-overlay">
-                        <div className="popup-content">
-                          <h4 className="popup-header">
-                            Mint Additional DAV Tokens
-                          </h4>
-                          <p className="popup-para">
-                            You need to mint additional DAV tokens to claim
-                            extra rewards
-                          </p>
+                      <div className="carddetails2 ">
+                        <h6 className="detailText">INFO</h6>
+                        <p className="mb-1">
+                          <span className="detailText">
+                            State Token Holding -{" "}
+                          </span>
+                          <span>0.0</span>
+                        </p>
+                        <p className="mb-1">
+                          <span className="detailText">
+                            State Token Price -{" "}
+                          </span>
+                          <span>{formatPrice(stateUsdPrice)}</span>
+                        </p>
+                        <p className="mb-1">
+                          <span className="detailText">
+                            Affiliate com received -{" "}
+                          </span>
+                          <span>{ReferralAMount}</span>
+                        </p>
+                        <p className="mb-1 d-flex align-items-center gap-2 flex-wrap">
+                          <span className="detailText">
+                            Your Affiliate Link -{" "}
+                          </span>
+                          <span style={{ textTransform: "none" }}>
+                            {ReferralCodeOfUser}
+                          </span>
                           <button
-                            onClick={() =>
-                              setErrorPopup((prev) => ({
-                                ...prev,
-                                ["state"]: false,
-                              }))
-                            }
-                            className="btn btn-secondary popup-button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(ReferralCodeOfUser);
+                              setCopied(true);
+                              navigator.clipboard.writeText(ReferralCodeOfUser);
+                              setCopiedCode(ReferralCodeOfUser);
+                              setTimeout(() => setCopied(false), 2000); // hide after 2 sec
+                            }}
+                            className="btn btn-outline-light btn-sm py-0 px-2"
+                            style={{ fontSize: "12px" }}
                           >
-                            Close
+                            {copied ? "Copied!" : "Copy"}
                           </button>
-                        </div>
+                        </p>
                       </div>
-                    )}
-                    <div className="carddetails2">
-                      <p className="mb-1 detailText">State token price</p>
-                      <h5 className="">
-                        ${" "}
-                        {priceLoading ? (
-                          <DotAnimation />
-                        ) : chainId === 146 ? (
-                          "0.000"
-                        ) : (
-                          formatPrice(stateUsdPrice)
-                        )}
-                      </h5>
                     </div>
-                    <div className="d-flex justify-content-between w-100">
-                      <div className="carddetails2 text-center w-50">
-                        <p className="mb-1 detailText">Check</p>
-                        <button
-                          onClick={() => Checking("state", "state")}
-                          className="btn btn-primary btn-sm swap-btn"
-                          disabled={
-                            checkingStates["state"] ||
-                            Distributed["state"] > 0 ||
-                            DavBalance == 0
-                          }
-                        >
-                          {checkingStates["state"]
-                            ? "AIRDROPPING..."
-                            : "AIRDROP"}
-                        </button>
-                      </div>
-                      <div className="carddetails2 text-center w-50">
-                        <p className="mb-1 detailText">Mint</p>
-                        <div
-                          onClick={
-                            Distributed !== "0.0" && !claimingStates["state"]
-                              ? () => handleClaimTokens("state", "state")
-                              : null
-                          }
-                          className={` btn btn-primary btn-sm swap-btn ${
-                            claimingStates["state"] ||
-                            Distributed["state"] === "0.0"
-                              ? "disabled"
-                              : ""
-                          }`}
-                          style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          {claimingStates["state"]
-                            ? "minting..."
-                            : `${
-                                formatWithCommas(Distributed["state"]) ?? "0.0"
-                              }`}
-                        </div>
-                      </div>
+                    <div className="carddetails3">
+                      <h6
+                        className="detailText mt-5"
+                        style={{
+                          fontSize: "14px",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        Referrers receive their commission directly in their
+                        wallet
+                      </h6>
                     </div>
                   </div>
                 </div>

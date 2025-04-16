@@ -22,10 +22,9 @@ export const DavProvider = ({ children }) => {
   const [DavBalance, setDavBalance] = useState(null);
   const [davPercentage, setDavPercentage] = useState("0.0");
   const [Supply, setSupply] = useState("0.0");
+  const [ReferralCodeOfUser, setReferralCode] = useState("0.0");
+  const [ReferralAMount, setReferralAmount] = useState("0.0");
   const [claimableAmount, setClaimableAmount] = useState("0.0");
-  const [DAVTokensWithdraw, setDAvTokens] = useState("0.0");
-  const [DAVTokensFiveWithdraw, setFiveAvTokens] = useState("0.0");
-  const [claiming, setClaiming] = useState(false);
 
   /*** Fetch User's Holdings ***/
   const DavHoldings = useCallback(async () => {
@@ -76,29 +75,8 @@ export const DavProvider = ({ children }) => {
     }
   }, [AllContracts, address]);
 
-  /*** Fetch Development and Liquidity Funds ***/
-  const DAVTokenAmount = useCallback(async () => {
-    if (!AllContracts?.davContract) return;
-    try {
-      const balance = await AllContracts.davContract.liquidityFunds();
-      setDAvTokens(ethers.formatUnits(balance, 18));
-    } catch (error) {
-      console.error("Error fetching LP tokens:", error);
-    }
-  }, [AllContracts]);
-
-  const DAVTokenfive_Amount = useCallback(async () => {
-    if (!AllContracts?.davContract) return;
-    try {
-      const balance = await AllContracts.davContract.developmentFunds();
-      setFiveAvTokens(ethers.formatUnits(balance, 18));
-    } catch (error) {
-      console.error("Error fetching development funds:", error);
-    }
-  }, [AllContracts]);
-
   /*** Mint DAV Tokens ***/
-  const mintDAV = async (amount) => {
+  const mintDAV = async (amount, amount2) => {
     if (!AllContracts?.davContract) return;
     try {
       const value = ethers.parseEther(amount.toString());
@@ -108,9 +86,18 @@ export const DavProvider = ({ children }) => {
       } else {
         cost = ethers.parseEther((amount * 500000).toString());
       }
-      const transaction = await AllContracts.davContract.mintDAV(value, {
-        value: cost,
-      });
+
+      if (!amount2 || amount2.trim() === "") {
+        amount2 = "0x0000000000000000000000000000000000000000";
+      }
+
+      const transaction = await AllContracts.davContract.mintDAV(
+        value,
+        amount2,
+        {
+          value: cost,
+        }
+      );
       await transaction.wait();
       await fetchData();
       return transaction;
@@ -124,7 +111,7 @@ export const DavProvider = ({ children }) => {
   const claimAmount = async () => {
     if (!AllContracts?.davContract) return;
     try {
-      const transaction = await AllContracts.davContract.claimRewards();
+      const transaction = await AllContracts.davContract.claimReward();
       await transaction.wait();
       await ClaimableAmount();
     } catch (error) {
@@ -132,21 +119,30 @@ export const DavProvider = ({ children }) => {
     }
   };
 
-  /*** Handle Withdraws ***/
-  const handleWithdraw = async (methodName) => {
+  const ReferralCode = async () => {
     if (!AllContracts?.davContract) return;
     try {
-      setClaiming(true);
-      await AllContracts.davContract[methodName]();
+      const transaction = await AllContracts.davContract.getUserReferralCode(
+        address
+      );
+      setReferralCode(transaction);
     } catch (error) {
-      console.error(`Error withdrawing with method ${methodName}:`, error);
-    } finally {
-      setClaiming(false);
+      console.log("referral fetching error", error);
     }
   };
-
-  const withdraw_5 = () => handleWithdraw("withdrawDevelopmentFunds");
-  const withdraw_95 = () => handleWithdraw("withdrawLiquidityFunds");
+  const ReferralAmountReceived = async () => {
+    if (!AllContracts?.davContract) return;
+    try {
+      const transaction = await AllContracts.davContract.referralRewards(
+        address
+      );
+      const amountInEth = ethers.formatEther(transaction); // convert wei to eth
+      console.log("referral rewards:", amountInEth);
+      setReferralAmount(amountInEth);
+    } catch (error) {
+      console.log("referral fetching error", error);
+    }
+  };
 
   /*** Fetch All Data in Parallel ***/
   const fetchData = useCallback(async () => {
@@ -159,10 +155,10 @@ export const DavProvider = ({ children }) => {
       await Promise.all([
         DavSupply(),
         ClaimableAmount(),
-        DAVTokenAmount(),
         DavHoldingsPercentage(),
         DavHoldings(),
-        DAVTokenfive_Amount(),
+        ReferralCode(),
+        ReferralAmountReceived(),
       ]);
     } catch (error) {
       console.error("Error fetching contract data:", error);
@@ -174,10 +170,8 @@ export const DavProvider = ({ children }) => {
     address,
     DavSupply,
     ClaimableAmount,
-    DAVTokenAmount,
     DavHoldingsPercentage,
     DavHoldings,
-    DAVTokenfive_Amount,
   ]);
   useEffect(() => {
     if (!address || !AllContracts?.davContract) return;
@@ -214,17 +208,14 @@ export const DavProvider = ({ children }) => {
   return (
     <DAVContext.Provider
       value={{
-        claiming,
         mintDAV,
         davHolds,
         isLoading,
-        withdraw_5,
-        withdraw_95,
+        ReferralAMount,
         DavBalance,
         davPercentage,
         Supply,
-        DAVTokensWithdraw,
-        DAVTokensFiveWithdraw,
+        ReferralCodeOfUser,
         claimableAmount,
         claimAmount,
       }}
