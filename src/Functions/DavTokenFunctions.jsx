@@ -67,7 +67,7 @@ export const DavProvider = ({ children }) => {
 
     try {
       const burnInfo = await AllContracts.StateLP.userBurns(address);
-      const amountInEth = ethers.formatUnits(burnInfo.amount, 18);
+      const amountInEth = ethers.formatUnits(burnInfo.totalBurned, 18);
       setClaimableAmountForBurn(parseFloat(amountInEth).toFixed(2));
     } catch (error) {
       console.error("Error fetching claimable amount:", error);
