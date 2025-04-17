@@ -473,7 +473,7 @@ export const SwapContractProvider = ({ children }) => {
 
     try {
       // Replace these params if needed based on your contract's addToken function
-      const tx = await AllContracts.AuctionContract.addToken(address, address);
+      const tx = await AllContracts.AuctionContract.addToken(Yees_testnet, Yees_testnet);
       await tx.wait();
       console.log("Token added successfully!");
     } catch (error) {
