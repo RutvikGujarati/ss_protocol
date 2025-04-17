@@ -8,11 +8,9 @@ import { ContractContext } from "./ContractInitialize";
 import {
   Auction_TESTNET,
   DAV_TESTNET,
-  DAV_TOKEN_ADDRESS,
   DAV_TOKEN_SONIC_ADDRESS,
   Ratio_TOKEN_ADDRESS,
   STATE_TESTNET,
-  STATE_TOKEN_ADDRESS,
   STATE_TOKEN_SONIC_ADDRESS,
   Yees_testnet,
 } from "../ContractAddresses";
