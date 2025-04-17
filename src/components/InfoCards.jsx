@@ -61,6 +61,7 @@ const InfoCards = () => {
     isLoading,
     claimAmount,
     ReferralAMount,
+    stateHolding,
     ReferralCodeOfUser,
   } = useDAvContract();
   const { address } = useAccount();
@@ -126,13 +127,7 @@ const InfoCards = () => {
 
   const liveText = getLiveText();
 
-  const {
-    handleAddTokenDAV,
-    CalculationOfCost,
-    TotalCost,
-
-    DavRequiredAmount,
-  } = useSwapContract();
+  const { handleAddTokenDAV, CalculationOfCost, TotalCost } = useSwapContract();
   const [amount, setAmount] = useState("");
   const [Refferalamount, setReferralAmount] = useState("");
   const [load, setLoad] = useState(false);
@@ -343,7 +338,7 @@ const InfoCards = () => {
                           <span className="detailText">
                             State Token Holding -{" "}
                           </span>
-                          <span>0.0</span>
+                          <span>{formatWithCommas(stateHolding)}</span>
                         </p>
                         <p className="mb-1">
                           <span className="detailText">
@@ -404,13 +399,13 @@ const InfoCards = () => {
                       {[
                         { text: `${liveText.text}`, color: "" },
                         {
-                          text: `${DavRequiredAmount} DAV TOKEN REQUIRED TO PARTICIPATE IN THE DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS.`,
+                          text: `1 DAV TOKEN REQUIRED TO PARTICIPATE IN THE DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS.`,
                           color: "white",
                         },
                         ...(chainId !== 146
                           ? [
                               {
-                                text: "Sanitas TOKEN DEPLOYED.",
+                                text: "Yees TOKEN DEPLOYED.",
                                 color: "white",
                               },
                             ]

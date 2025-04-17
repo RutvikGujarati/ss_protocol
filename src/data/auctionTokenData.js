@@ -1,61 +1,43 @@
 import { useContext } from 'react';
 import FluxinLogo from "../assets/FluxinLogo.png";
-import XerionLogo from "../assets/layti.png";
-import RievaLogo from "../assets/rieva.png";
-import TenDollarLogo from "../assets/TenDollar.png";
-import DomusLogo from "../assets/domus.png";
-import CurrusLogo from "../assets/Currus.png";
-import ValirLogo from "../assets/Valir.png";
-import SanitasLogo from "../assets/Sanitas.png";
-import oned from "../assets/oned.png";
 
-import { $1, $10, Currus, Domus, Fluxin, Rieva, Sanitas, Valir, Xerion } from "../ContractAddresses";
+import {  Yees_testnet } from "../ContractAddresses";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { PriceContext } from "../api/StatePrice";
-import { useGeneralAuctionFunctions } from '../Functions/GeneralAuctionFunctions';
 import { useGeneralTokens } from '../Functions/GeneralTokensFunctions';
 
 export const useAuctionTokens = () => {
 	const prices = useContext(PriceContext);
-	const { AuctionRunning } = useGeneralAuctionFunctions();
-	const { CurrentRatioPrice, Distributed } = useGeneralTokens();
+	const { CurrentRatioPrice } = useGeneralTokens();
 	const {
-		SwapTokens, isReversed, RatioTargetsofTokens, outAmounts,
-		userHashSwapped, userHasReverseSwapped, OnePBalance,
-		handleAddFluxin, handleAddValir,handleAddXerion, handleAddRieva, handleAddDomus,
-		handleAddOneD, handleAddTenDollar, handleAddCurrus,handleAddSanitas
+		SwapTokens, isReversed, RatioTargetsofTokens, IsAuctionActive,
+		userHashSwapped, userHasReverseSwapped, InputAmount,OutPutAmount,
+		handleAddYees,
 	} = useSwapContract();
 
 	const tokenConfigs = [
-		["Orxa", "Fluxin", FluxinLogo, Fluxin, handleAddFluxin],
-		["Layti", "Xerion", XerionLogo, Xerion, handleAddXerion],
-		["1$", "OneDollar", oned, $1, handleAddOneD, "oneD"],
-		["Rieva", "Rieva", RievaLogo, Rieva, handleAddRieva],
-		["10$", "TenDollar", TenDollarLogo, $10, handleAddTenDollar],
-		["Domus", "Domus", DomusLogo, Domus, handleAddDomus],
-		["Currus", "Currus", CurrusLogo, Currus, handleAddCurrus],
-		["Valir", "Valir", ValirLogo, Valir, handleAddValir],
-		["Sanitas", "Sanitas", SanitasLogo, Sanitas, handleAddSanitas],
-	];
+		["Yees", "Yees", FluxinLogo, Yees_testnet, handleAddYees],
 
+	];
 	return tokenConfigs.map(([id, contract, image, token, handleAddToken]) => ({
 		id, name: id, Pname: `${id} - State - ${id}`, ReverseName: `State - ${id}`,
 		ContractName: contract === "OneDollar" ? "oneD" : contract, image, token, handleAddToken,
 		ratio: `1:${RatioTargetsofTokens?.[contract] || 0}`,
-		currentRatio: `1:${CurrentRatioPrice[contract] || 0}`,
+		currentRatio: `1:1000`,
+		isReversing: isReversed?.[contract],
 		currentTokenRatio: CurrentRatioPrice[contract],
 		RatioTargetToken: RatioTargetsofTokens?.[contract] || 0,
 		Price: prices?.[`${contract}UsdPrice`],
-		isReversing: isReversed?.[contract]?.toString(),
-		AuctionStatus: AuctionRunning?.[contract],
+		// isReversing: isReversed?.[contract],
+		address: Yees_testnet,
+		// AuctionStatus: "true",
+		AuctionStatus: IsAuctionActive?.[contract],
 		userHasSwapped: userHashSwapped?.[contract],
 		userHasReverse: userHasReverseSwapped?.[contract],
-		distributedAmount: contract === "OneDollar" ? Distributed?.["oneD"] || 0 : Distributed?.[contract] || 0, // Fix: Special case for "OneDollar"
 		SwapT: () => SwapTokens(id, contract),
-		ratioPrice: CurrentRatioPrice[contract],
-		onlyInputAmount: OnePBalance[contract],
-		inputTokenAmount: `${OnePBalance[contract] || 0} ${id}`,
-		outputToken: `${outAmounts?.[contract] || 0} State`,
+		onlyInputAmount: InputAmount[contract],
+		inputTokenAmount: `${InputAmount[contract] || 0} ${id}`,
+		outputToken: `${OutPutAmount?.[contract] || 0} State`,
 		onChart: `https://www.geckoterminal.com/pulsechain/pools/${getChartId(contract)}`,
 	}));
 

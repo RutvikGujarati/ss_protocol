@@ -2,69 +2,22 @@ import { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import { useTokens } from "../data/BurntokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
-import { formatWithCommas } from "./DetailsInfo";
-import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions";
 
 const BurnDataTable = () => {
-  const [isProcessing, setIsProcessing] = useState({});
   const [errorPopup, setErrorPopup] = useState({
     state: false,
     message: "",
   });
   const { DavBalance } = useDAvContract();
-  const {
-    balances,
-    bountyBalances,
-    ClickBurn,
-    DavBalanceRequireForBurn,
-    DavBalanceRequire,
-  } = useSwapContract();
-  const { BurnOccuredForToken, BurnCycleACtive } = useGeneralAuctionFunctions();
+  const { DavBalanceRequireForBurn, DavBalanceRequire } = useSwapContract();
   // Log for debugging
-  console.log("BurnOccuredForToken:", BurnCycleACtive);
   console.log("BurnOccuredForToken:", parseFloat(DavBalance));
   const db = parseFloat(DavBalance);
   console.log("db", db);
   console.log("db required for burn", DavBalanceRequireForBurn);
   console.log("db required for Auction", DavBalanceRequire);
   // Get token data
-  const tokens = useTokens(
-    balances,
-    bountyBalances,
-    BurnCycleACtive,
-    BurnOccuredForToken,
-    ClickBurn
-  );
-
-  const handleBurn = async (id, clickBurnFn) => {
-    setIsProcessing((prev) => ({ ...prev, [id]: true }));
-    try {
-      await clickBurnFn();
-    } catch (err) {
-      console.error("Error processing burn:", err);
-
-      if (
-        err.reason === "Burn already occurred for this cycle" ||
-        (err.revert &&
-          err.revert.args &&
-          err.revert.args[0] === "Burn already occurred for this cycle")
-      ) {
-        setErrorPopup({
-          state: true,
-          message: "Burn already occurred for this cycle",
-        });
-      } else {
-        setErrorPopup({
-          state: true,
-          message: "An error occurred while processing the burn",
-        });
-      }
-    } finally {
-      setIsProcessing((prev) => ({ ...prev, [id]: false }));
-    }
-  };
 
   return (
     <>

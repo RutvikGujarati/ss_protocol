@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import { ContractContext } from "./ContractInitialize";
 import PropTypes from "prop-types";
 import { useAccount } from "wagmi";
+import { Yees_testnet } from "../ContractAddresses";
 
 export const GeneralTokens = createContext();
 
@@ -101,9 +102,9 @@ export const GeneralTokenProvider = ({ children }) => {
       //   setClaiming(false);
     }
   };
-  const CheckMintBalance = async (contract) => {
+  const CheckMintBalance = async (TokenAddress) => {
     try {
-      const tx = await contract.distributeReward(address);
+      const tx = await AllContracts.AuctionContract.distributeReward(address,TokenAddress);
       await tx.wait();
       ViewDistributedTokens();
     } catch (e) {

@@ -17,41 +17,12 @@ export const DavProvider = ({ children }) => {
   const { address } = useAccount();
   const chainId = useChainId();
 
-  const [davHolds, setDavHoldings] = useState("0.0");
   const [isLoading, setIsLoading] = useState(true);
-  const [DavBalance, setDavBalance] = useState(null);
-  const [davPercentage, setDavPercentage] = useState("0.0");
   const [Supply, setSupply] = useState("0.0");
+  const [stateHolding, setStateHolding] = useState("0.0");
   const [ReferralCodeOfUser, setReferralCode] = useState("0.0");
   const [ReferralAMount, setReferralAmount] = useState("0.0");
   const [claimableAmount, setClaimableAmount] = useState("0.0");
-
-  /*** Fetch User's Holdings ***/
-  const DavHoldings = useCallback(async () => {
-    if (!AllContracts?.davContract) {
-      console.log("DAV contract or address not initialized...");
-      return;
-    }
-    try {
-      const holdings = await AllContracts.davContract.balanceOf(address);
-      setDavHoldings(ethers.formatUnits(holdings, 18));
-    } catch (error) {
-      console.error("Error fetching DAV holdings:", error);
-    }
-  }, [AllContracts, address]);
-
-  /*** Fetch Holding Percentage ***/
-  const DavHoldingsPercentage = useCallback(async () => {
-    if (!AllContracts?.davContract || !address) return;
-    try {
-      const balance = await AllContracts.davContract.balanceOf(address);
-      const bal = ethers.formatUnits(balance, 18);
-      setDavBalance(bal);
-      setDavPercentage(parseFloat(bal / 5000000).toFixed(8));
-    } catch (error) {
-      console.error("Error fetching DAV holdings percentage:", error);
-    }
-  }, [AllContracts, address]);
 
   /*** Fetch Total Supply ***/
   const DavSupply = useCallback(async () => {
@@ -64,6 +35,19 @@ export const DavProvider = ({ children }) => {
     }
   }, [AllContracts]);
 
+
+  const StateHoldings = useCallback(async () => {
+    if (!AllContracts?.davContract) {
+      console.log("DAV contract or address not initialized...");
+      return;
+    }
+    try {
+      const holdings = await AllContracts.stateContract.balanceOf(address);
+      setStateHolding(ethers.formatUnits(holdings, 18));
+    } catch (error) {
+      console.error("Error fetching DAV holdings:", error);
+    }
+  }, [AllContracts, address]);
   /*** Fetch Claimable Amount ***/
   const ClaimableAmount = useCallback(async () => {
     if (!AllContracts?.davContract || !address) return;
@@ -155,8 +139,7 @@ export const DavProvider = ({ children }) => {
       await Promise.all([
         DavSupply(),
         ClaimableAmount(),
-        DavHoldingsPercentage(),
-        DavHoldings(),
+		StateHoldings(),
         ReferralCode(),
         ReferralAmountReceived(),
       ]);
@@ -165,14 +148,7 @@ export const DavProvider = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [
-    AllContracts,
-    address,
-    DavSupply,
-    ClaimableAmount,
-    DavHoldingsPercentage,
-    DavHoldings,
-  ]);
+  }, [AllContracts, address, DavSupply, ClaimableAmount]);
   useEffect(() => {
     if (!address || !AllContracts?.davContract) return;
     fetchData();
@@ -209,12 +185,10 @@ export const DavProvider = ({ children }) => {
     <DAVContext.Provider
       value={{
         mintDAV,
-        davHolds,
         isLoading,
         ReferralAMount,
-        DavBalance,
-        davPercentage,
         Supply,
+		stateHolding,
         ReferralCodeOfUser,
         claimableAmount,
         claimAmount,

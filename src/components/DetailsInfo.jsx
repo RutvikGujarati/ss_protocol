@@ -1,22 +1,25 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DetailsInfo.css";
 import "../Styles/SearchInfo.css";
-
+import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { TokensDetails } from "../data/TokensDetails";
-
-import {
-  ReanounceContractsComponent,
-  SmallTokenDetails,
-  TableRowDataShow,
-} from "./SeperateComps/TableRow";
+import pulsex from "../assets/pulsex.png";
 import { useAccount, useChainId } from "wagmi";
-
+import XerionLogo from "../assets/layti.png";
 import FluxinLogo from "../assets/FluxinLogo.png";
+import Rieva from "../assets/rieva.png";
 import DAVLogo from "../assets/d_logo.png";
 import sDAV from "../assets/sDAV.png";
+import TenDollar from "../assets/TenDollar.png";
+import Currus from "../assets/Currus.png";
+import ValirLogo from "../assets/Valir.png";
+import SanitasLogo from "../assets/Sanitas.png";
+import oned from "../assets/oned.png";
+import Domus from "../assets/domus.png";
+import Teeah from "../assets/teech.png";
 import stateLogo from "../assets/state_logo.png";
 import sState from "../assets/sonicstate.png";
 
@@ -32,19 +35,25 @@ const DetailsInfo = ({ selectedToken }) => {
   const {
     setDBRequired,
     setDBForBurnRequired,
-    StateBurnBalance,
     handleAddTokenDAV,
     handleAddTokensDAV,
     handleAddTokenState,
     handleAddTokensState,
+    handleAddOneD,
     handleAddFluxin,
+    handleAddXerion,
+    handleAddRieva,
+    handleAddDomus,
+    handleAddTenDollar,
+    handleAddCurrus,
+    handleAddValir,
+    handleAddTeeah,
+    handleAddSanitas,
   } = useSwapContract();
 
   const { address } = useAccount();
   const chainId = useChainId();
 
-  const [isTyping, setIsTyping] = useState(false);
-  const [Denominator, setDenominator] = useState("");
   const [authorized, setAuthorized] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
   const [localSearchQuery, setLocalSearchQuery] = useState("");
@@ -56,7 +65,6 @@ const DetailsInfo = ({ selectedToken }) => {
   const originalData = [
     { id: "∈", name: "DAV", logo: DAVLogo, AddToken: handleAddTokenDAV },
     { id: "±", name: "STATE", logo: stateLogo, AddToken: handleAddTokenState },
-    { id: "1", name: "Orxa", logo: FluxinLogo, AddToken: handleAddFluxin },
   ];
 
   const SonicData = [
@@ -142,16 +150,6 @@ const DetailsInfo = ({ selectedToken }) => {
     setLocalSearchQuery(query);
   };
 
-  const handleInputChangeofToken = (e) => {
-    const rawValue = e.target.value.replace(/,/g, "");
-    if (!isNaN(rawValue) && rawValue !== "") {
-      setDenominator(rawValue);
-      setIsTyping(e.target.value.length > 0);
-    } else if (rawValue === "") {
-      setDenominator("");
-    }
-  };
-
   const filteredTokens = tokens.filter((item) =>
     item.tokenName.toLowerCase().includes(localSearchQuery.toLowerCase())
   );
@@ -192,6 +190,19 @@ const DetailsInfo = ({ selectedToken }) => {
               <th className="fw-bold text-uppercase text-center col py-3">
                 Info
               </th>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th>
+                <a
+                  href={`https://otter.pulsechain.com/address/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ fontSize: "15px" }}
+                >
+                  <i className="bi bi-box-arrow-up-right"></i>
+                </a>
+              </th>
               {dataToShow.tokenName !== "DAV" ? (
                 <th className="fw-bold text-uppercase text-end col-auto">
                   <button className="swap-btn py-1 mx-3 btn btn-primary btn-sm">
@@ -216,36 +227,53 @@ const DetailsInfo = ({ selectedToken }) => {
                   />
                 </td>
                 <td>{token.tokenName}</td>
-                <td>{token.percentage ? `${token.percentage}%` : "0:0"}</td>
-                <td>{token.tokenName === "Orxa" ? "1/56" : "N/A"}</td>
                 <td>
-                  <div className="d-flex justify-content-center mt-3 flex-wrap">
+                  {token.tokenName === "DAV" || token.tokenName === "STATE"
+                    ? "-"
+                    : "1:1000"}
+                </td>
+
+                <td>
+                  {token.tokenName === "DAV" || token.tokenName === "STATE"
+                    ? "-"
+                    : `${token.Cycle}/56`}
+                </td>
+
+                <td>
+                  <div className="d-flex justify-content-center align-items-center gap-2">
+                    <a
+                      href={`https://scan.v4.testnet.pulsechain.com/#/address/${token.address}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: "15px" }}
+                    >
+                      <i className="bi bi-box-arrow-up-right"></i>
+                    </a>
+
                     <img
-                      src={FluxinLogo}
-                      alt="Fluxin Logo"
-                      className="mx-1 mb-1"
-                      style={{ width: "30px", height: "30px" }}
-                    />
-                    <img
-                      src={DAVLogo}
-                      alt="DAV Logo"
-                      className="mx-1 mb-1"
-                      style={{ width: "30px", height: "30px" }}
-                    />
-                    <img
-                      src={stateLogo}
+                      src={MetaMaskIcon}
+					  onClick={token.handleAddTokens}
                       alt="State Logo"
-                      className="mx-1 mb-1"
-                      style={{ width: "30px", height: "30px" }}
+                      style={{ width: "20px", height: "20px",cursor:"pointer" }}
                     />
-                    <img
-                      src={sDAV}
-                      alt="sDAV Logo"
-                      className="mx-1 mb-1"
-                      style={{ width: "30px", height: "30px" }}
-                    />
+                    <a
+                      href="https://pulsex.mypinata.cloud/ipfs/bafybeibzu7nje2o2tufb3ifitjrto3n3xcwon7fghq2igtcupulfubnrim/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src={pulsex}
+                        alt="sDAV Logo"
+                        style={{
+                          borderRadius: "50%",
+                          background: "transparent",
+                          width: "30px",
+                          height: "30px",
+                          cursor: "pointer",
+                        }}
+                      />
+                    </a>
                   </div>
-                  <td></td>
                 </td>
               </tr>
             ))}

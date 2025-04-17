@@ -1,3 +1,3 @@
-export const Addresses = [
-	{ name: "Yees", address: "0xe2aA3548782C52f7c76FbCC1bbCE62aa886e1579" },
-]
+export const Addresses = {
+	Yees: "0xEEc2dD0d2d50b3A361A7B63bcff58EBca9793005",
+};

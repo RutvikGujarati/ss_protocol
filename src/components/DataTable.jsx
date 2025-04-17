@@ -9,35 +9,32 @@ import BurnDataTable from "./BurnDataTable";
 import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
-import { useGeneralAuctionFunctions } from "../Functions/GeneralAuctionFunctions";
+import { Addresses } from "../data/AddressMapping";
 
 const DataTable = () => {
   const { DavBalance } = useDAvContract();
-  const { ClaimTokens, CheckMintBalance, Distributed } = useGeneralTokens();
+  const { CheckMintBalance } = useGeneralTokens();
 
   const {
-    contracts,
     DavRequiredAmount,
     DavBalanceRequire,
     swappingStates,
     buttonTextStates,
   } = useSwapContract();
-  const { AuctionRunning, auctionDetails } = useGeneralAuctionFunctions();
 
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
   const [errorPopup, setErrorPopup] = useState({});
   const [checkingStates, setCheckingStates] = useState({});
-  const [claimingStates, setClaimingStates] = useState({});
 
-  console.log("is auction running", auctionDetails["Fluxin"]);
-  console.log("use has swappeddddd", AuctionRunning.Xerion);
   console.log("required dav amount", DavRequiredAmount);
+
   const Checking = async (id, ContractName) => {
     setCheckingStates((prev) => ({ ...prev, [id]: true }));
     try {
-      const contract = contracts[ContractName];
-      await CheckMintBalance(contract);
+      const AddressMapping = Addresses[ContractName];
+      console.log("address get from mapping", AddressMapping);
+      await CheckMintBalance(AddressMapping);
     } catch (e) {
       if (
         e.reason === `${id}: No new DAV minted` ||
@@ -88,15 +85,7 @@ const DataTable = () => {
     // General case: No significant leading zeros
     return `${parseFloat(price).toFixed(7)}`;
   };
-  const db = parseFloat(DavBalance);
   console.log("db required for Auction", DavBalanceRequire);
-
-  const handleClaimTokens = async (id, ContractName) => {
-    setClaimingStates((prev) => ({ ...prev, [id]: true }));
-    const contract = contracts[ContractName];
-    await ClaimTokens(contract);
-    setClaimingStates((prev) => ({ ...prev, [id]: false })); // Reset claiming state
-  };
 
   const tokens = useAuctionTokens();
   console.log("obj tokens", tokens);
@@ -110,12 +99,10 @@ const DataTable = () => {
               <th>#</th>
               <th>Name</th>
               <th>Check</th>
-              <th>Mint</th>
               <th>Price</th>
               {/* <th>Liquidity</th> */}
               <th></th>
               <th>Current Ratio</th>
-              <th>Ratio Target</th>
               <th>Ratio Swap</th>
               <th></th>
             </tr>
@@ -136,22 +123,19 @@ const DataTable = () => {
                     userHasReverse,
                     isReversing,
                     AuctionStatus,
-                    dbCheck: db >= DavRequiredAmount,
+                    // dbCheck: db >= DavRequiredAmount,
                   });
 
-                  if (AuctionStatus == "false" && db >= DavRequiredAmount) {
-                    if (isReversing == "true" && !userHasReverse) {
+                  if (AuctionStatus == "false" && isReversing == "true") {
+                    if (!userHasReverse) {
                       return true;
                     } else if (distributedAmount > 1) {
                       return true;
                     } else if (userHasSwapped && isReversing == "false") {
                       return false;
                     }
-                  } else if (
-                    AuctionStatus == "true" &&
-                    db >= DavRequiredAmount
-                  ) {
-                    if (!userHasSwapped) {
+                  } else if (AuctionStatus == "true") {
+                    if (userHasSwapped == "false") {
                       return true;
                     }
                   }
@@ -164,7 +148,6 @@ const DataTable = () => {
                     name,
                     Pname,
                     image,
-                    ratio,
                     currentRatio,
                     SwapT,
                     ContractName,
@@ -174,7 +157,6 @@ const DataTable = () => {
                     AuctionStatus,
                     ReverseName,
                     onChart,
-                    distributedAmount,
                     inputTokenAmount,
                     onlyInputAmount,
                     handleAddToken,
@@ -185,14 +167,14 @@ const DataTable = () => {
                   <tr key={index}>
                     <td></td>
                     <td>
-                      <div className="tableName d-flex gap-4 align-items-center">
+                      <div className="tableName d-flex gap-5 align-items-center">
                         <div className="nameImage">
                           <img src={image} width={40} height={40} alt="Logo" />
                         </div>
                         <div className="nameDetails">
                           <h5 className="nameBig">{name}</h5>
                           {isReversing == "true" ? (
-                            <p className="nameSmall mb-1 uppercase px-2 mx-4">
+                            <p className="nameSmall mb-1 uppercase px-2 mx-5">
                               {ReverseName}
                             </p>
                           ) : (
@@ -201,41 +183,15 @@ const DataTable = () => {
                         </div>
                       </div>
                     </td>
+
                     <td>
                       <button
                         onClick={() => Checking(id, ContractName)}
                         className="btn btn-primary btn-sm swap-btn"
-                        disabled={
-                          checkingStates[id] ||
-                          distributedAmount > 0 ||
-                          DavBalance == 0
-                        }
+                        disabled={checkingStates[id] || DavBalance == 0}
                       >
                         {checkingStates[id] ? "AIRDROPPING..." : "AIRDROP"}
                       </button>
-                    </td>
-                    <td>
-                      <div
-                        onClick={
-                          Distributed !== "0.0" && !claimingStates[id]
-                            ? () => handleClaimTokens(id, ContractName)
-                            : null
-                        }
-                        className={` btn btn-primary btn-sm swap-btn ${
-                          claimingStates[id] || distributedAmount === "0.0"
-                            ? "disabled"
-                            : ""
-                        }`}
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        {claimingStates[id]
-                          ? "minting..."
-                          : `${formatWithCommas(distributedAmount) ?? "0.0"}`}
-                      </div>
                     </td>
 
                     <td>
@@ -251,7 +207,6 @@ const DataTable = () => {
                     <td className="text-success">{Liquidity}</td>
                     <td>{currentRatio}</td>
 
-                    <td>{ratio}</td>
                     <td>
                       <div className="d-flex justify-content-center gap-3 w-100">
                         {id !== "state" && (
@@ -316,57 +271,44 @@ const DataTable = () => {
                     )}
                     <td>
                       <div className="d-flex align-items-center gap-2">
-                        {id !== "state" && (
-                          <>
-                            {isReversing == "true" && (
-                              <button
-                                onClick={() => SwapT()}
-                                disabled={
-                                  swappingStates[id] || outputToken <= "1"
-                                }
-                                className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
-                              >
-                                {swappingStates[id]
-                                  ? "Swapping..."
-                                  : "Reverse Swap"}
-                              </button>
-                            )}
-                            {isReversing == "false" && (
-                              <div className="position-relative d-inline-block">
-                                {distributedAmount > 0 && (
-                                  <div className="popup-message font-size ">
-                                    Claim airdrop before swapping!
-                                  </div>
-                                )}
-                                <button
-                                  onClick={() => SwapT()}
-                                  disabled={
-                                    swappingStates[id] ||
-                                    onlyInputAmount <= 0 ||
-                                    AuctionStatus == "false" ||
-                                    distributedAmount > 0
-                                  }
-                                  className={`btn btn-sm swap-btn  btn-primary btn-sm swap-btn gap-0 mx-4 px-4`}
-                                >
-                                  {swappingStates[id]
-                                    ? "Swapping..."
-                                    : buttonTextStates[id] || "Swap"}
-                                </button>
-                              </div>
-                            )}
-                          </>
-                        )}
+                        <>
+                          {isReversing == "true" && (
+                            <button
+                              onClick={() => SwapT()}
+                              disabled={
+                                swappingStates[id] || outputToken <= "1"
+                              }
+                              className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
+                            >
+                              {swappingStates[id]
+                                ? "Swapping..."
+                                : "Reverse Swap"}
+                            </button>
+                          )}
 
-                        {id !== "state" && (
-                          <img
-                            src={MetaMaskIcon}
-                            width={20}
-                            height={20}
-                            onClick={handleAddToken}
-                            alt="Logo"
-                            style={{ cursor: "pointer" }}
-                          />
-                        )}
+                          {isReversing == "false" && (
+                            <button
+                              onClick={() => SwapT()}
+                              disabled={
+                                swappingStates[id] || AuctionStatus == "false"
+                              }
+                              className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
+                            >
+                              {swappingStates[id]
+                                ? "Swapping..."
+                                : buttonTextStates[id] || "Swap"}
+                            </button>
+                          )}
+                        </>
+
+                        <img
+                          src={MetaMaskIcon}
+                          width={20}
+                          height={20}
+                          onClick={handleAddToken}
+                          alt="Logo"
+                          style={{ cursor: "pointer" }}
+                        />
                       </div>
                     </td>
                   </tr>
