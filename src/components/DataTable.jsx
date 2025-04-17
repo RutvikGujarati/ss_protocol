@@ -12,7 +12,7 @@ import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
 import { Addresses } from "../data/AddressMapping";
 
 const DataTable = () => {
-  const { DavBalance } = useDAvContract();
+  const { DavBalance ,davHolds} = useDAvContract();
   const { CheckMintBalance } = useGeneralTokens();
 
   const {
@@ -64,7 +64,7 @@ const DataTable = () => {
             <tr>
               <th>#</th>
               <th>Name</th>
-              <th>Check</th>
+              <th>Claim</th>
               {/* <th>Liquidity</th> */}
               <th></th>
               <th>Current Ratio</th>
@@ -154,7 +154,7 @@ const DataTable = () => {
                         className="btn btn-primary btn-sm swap-btn"
                         disabled={checkingStates[id] || DavBalance == 0}
                       >
-                        {checkingStates[id] ? "AIRDROPPING..." : "AIRDROP"}
+                        {checkingStates[id] ? `${davHolds * 10000} AIRDROPPING...` : "AIRDROPPING"}
                       </button>
                     </td>
 

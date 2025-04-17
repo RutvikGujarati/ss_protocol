@@ -14,6 +14,7 @@ import sDAV from "../assets/sDAV.png";
 import stateLogo from "../assets/state_logo.png";
 import sState from "../assets/sonicstate.png";
 import { Auction_TESTNET } from "../ContractAddresses";
+import { useDAvContract } from "../Functions/DavTokenFunctions";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -34,6 +35,7 @@ const DetailsInfo = ({ selectedToken }) => {
     setDavAndStateIntoSwap,
     AddTokenIntoSwapContract,
   } = useSwapContract();
+  const { AddDavintoLP } = useDAvContract();
 
   const chainId = useChainId();
 
@@ -129,11 +131,11 @@ const DetailsInfo = ({ selectedToken }) => {
       <div className="mb-3 d-flex justify-content-center">
         <input
           type="text"
-          className="form-control text-center w-50"
+          className="form-control text-center "
           placeholder="SEARCH"
           value={localSearchQuery}
           onChange={handleSearch}
-          style={{ maxWidth: "300px" }}
+          style={{ maxWidth: "300%" }}
         />
       </div>
 
@@ -144,7 +146,7 @@ const DetailsInfo = ({ selectedToken }) => {
               <th className="fw-bold text-uppercase text-center col-1 py-3">
                 Logo
               </th>
-              <th className="fw-bold text-uppercase text-center col-3 py-3">
+              <th className="fw-bold text-uppercase text-center col-3 py-3 ">
                 Token Name
               </th>
               <th className="fw-bold text-uppercase text-center col-2 py-3">
@@ -164,7 +166,7 @@ const DetailsInfo = ({ selectedToken }) => {
                   href={`https://scan.v4.testnet.pulsechain.com/#/address/${Auction_TESTNET}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontSize: "15px" }}
+                  style={{ fontSize: "15px", color: "white" }}
                 >
                   <i className="bi bi-box-arrow-up-right"></i>
                 </a>
@@ -188,6 +190,7 @@ const DetailsInfo = ({ selectedToken }) => {
                     src={
                       filteredData.find((d) => d.name === token.tokenName)?.logo
                     }
+                    className="mx-4"
                     alt={`${token.tokenName} logo`}
                     style={{ width: "40px", height: "40px" }}
                   />
@@ -195,23 +198,25 @@ const DetailsInfo = ({ selectedToken }) => {
                 <td>{token.tokenName}</td>
                 <td>
                   {token.tokenName === "DAV" || token.tokenName === "STATE"
-                    ? "-"
+                    ? "------"
                     : "1:1000"}
                 </td>
 
                 <td>
-                  {token.tokenName === "DAV" || token.tokenName === "STATE"
-                    ? "-"
-                    : `${token.Cycle}/56`}
+                  <div className="mx-2">
+                    {token.tokenName === "DAV" || token.tokenName === "STATE"
+                      ? "-----"
+                      : `${token.Cycle + 1}/56`}
+                  </div>
                 </td>
 
                 <td>
-                  <div className="d-flex justify-content-center align-items-center gap-2">
+                  <div className="d-flex justify-content-center align-items-center gap-4">
                     <a
                       href={`https://scan.v4.testnet.pulsechain.com/#/address/${token.address}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontSize: "15px" }}
+                      style={{ fontSize: "15px", color: "white" }}
                     >
                       <i className="bi bi-box-arrow-up-right"></i>
                     </a>
@@ -234,29 +239,29 @@ const DetailsInfo = ({ selectedToken }) => {
                       <img
                         src={pulsex}
                         alt="sDAV Logo"
+                        className="mb-1"
                         style={{
-                          borderRadius: "50%",
+                          //   borderRadius: "50%",
                           background: "transparent",
-                          width: "30px",
-                          height: "30px",
+                          width: "20px",
+                          height: "20px",
                           cursor: "pointer",
                         }}
                       />
                     </a>
-                    {token.tokenName === "DAV" ? (
-                      "-"
-                    ) : (
-                      <button
-                        className="btn btn-sm swap-btn btn-primary"
-                        onClick={
-                          token.tokenName === "STATE"
-                            ? () => setDavAndStateIntoSwap()
-                            : () => AddTokenIntoSwapContract()
-                        }
-                      >
-                        Add
-                      </button>
-                    )}
+
+                    <button
+                      className="btn btn-sm swap-btn btn-primary"
+                      onClick={
+                        token.tokenName === "STATE"
+                          ? () => setDavAndStateIntoSwap()
+                          : token.tokenName == "DAV"
+                          ? () => AddDavintoLP()
+                          : () => AddTokenIntoSwapContract()
+                      }
+                    >
+                      Add
+                    </button>
                   </div>
                 </td>
               </tr>

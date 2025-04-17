@@ -27,6 +27,7 @@ export const DavProvider = ({ children }) => {
   const [ReferralAMount, setReferralAmount] = useState("0.0");
   const [claimableAmount, setClaimableAmount] = useState("0.0");
   const [claimableAmountForBurn, setClaimableAmountForBurn] = useState("0.0");
+  const [davHolds, setDavHoldings] = useState("0.0");
 
   /*** Fetch Total Supply ***/
   const DavSupply = useCallback(async () => {
@@ -39,6 +40,18 @@ export const DavProvider = ({ children }) => {
     }
   }, [AllContracts]);
 
+  const DavHoldings = useCallback(async () => {
+    if (!AllContracts?.davContract) {
+      console.log("DAV contract or address not initialized...");
+      return;
+    }
+    try {
+      const holdings = await AllContracts.davContract.balanceOf(address);
+      setDavHoldings(ethers.formatUnits(holdings, 18));
+    } catch (error) {
+      console.error("Error fetching DAV holdings:", error);
+    }
+  }, [AllContracts, address]);
   const StateHoldings = useCallback(async () => {
     if (!AllContracts?.davContract) {
       console.log("DAV contract or address not initialized...");
@@ -211,6 +224,7 @@ export const DavProvider = ({ children }) => {
 		ClaimableAmountInBurn(),
         StateHoldings(),
         ReferralCode(),
+		DavHoldings(),
         ReferralAmountReceived(),
       ]);
     } catch (error) {
@@ -266,6 +280,7 @@ export const DavProvider = ({ children }) => {
 		claimableAmountForBurn,
         BurnClicked,
 		claimBurnAmount,
+		davHolds,
         claimAmount,
       }}
     >

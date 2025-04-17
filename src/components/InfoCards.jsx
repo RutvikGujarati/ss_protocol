@@ -3,13 +3,7 @@ import "../Styles/InfoCards.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import PLSLogo from "../assets/pls1.png";
@@ -128,19 +122,6 @@ const InfoCards = () => {
       ? { width: "170px", height: "140px" } // Bigger size for BNB
       : { width: "110px", height: "140px" }; // Default size
   };
-  const getLiveText = () => {
-    if (chainId === 369) {
-      return { text: "🟢 LIVE ON PULSECHAIN.", color: "" };
-    } else if (chainId === 56) {
-      return { text: "🟢 LIVE ON BINANCE SMART CHAIN.", color: "" };
-    } else if (chainId === 146) {
-      return { text: "🟢 LIVE ON SONIC CHAIN.", color: "" };
-    } else {
-      return { text: "🟢 LIVE ON UNKNOWN CHAIN.", color: "" }; // Fallback
-    }
-  };
-
-  const liveText = getLiveText();
 
   const { handleAddTokenDAV, CalculationOfCost, TotalCost } = useSwapContract();
   const [amount, setAmount] = useState("");
@@ -276,7 +257,7 @@ const InfoCards = () => {
                   </div>
 
                   <h6 className="detailAmount ">
-                    1 DAV = {chainId == 943 ? "100000 PLS" : "100 SONIC"}
+                    1 DAV = {chainId == 943 ? "1000000 PLS" : "100 SONIC"}
                   </h6>
 
                   <h6 className="detailAmount mb-3">
@@ -446,44 +427,6 @@ const InfoCards = () => {
                 </div>
               </div>
             </div>
-            <div className="announcement text-center overflow-hidden relative">
-              <div className="animate-marquee whitespace-nowrap">
-                <div className="marquee-inner">
-                  {[...Array(2)].map((_, i) => (
-                    <React.Fragment key={i}>
-                      {[
-                        { text: `${liveText.text}`, color: "" },
-                        {
-                          text: `1 DAV TOKEN REQUIRED TO PARTICIPATE IN THE DAILY AUCTION AND RECEIVE ±100% ROI ON SWAPS.`,
-                          color: "white",
-                        },
-                        ...(chainId !== 146
-                          ? [
-                              {
-                                text: "Yees TOKEN DEPLOYED.",
-                                color: "white",
-                              },
-                            ]
-                          : []),
-                      ].map((item, j) => (
-                        <span
-                          key={`${i}-${j}`}
-                          className="marquee-content rieva-token-container"
-                          style={{
-                            color: item.color,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                          }}
-                        >
-                          {item.text}
-                        </span>
-                      ))}
-                    </React.Fragment>
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
         </>
       ) : isBurn ? (
@@ -508,14 +451,7 @@ const InfoCards = () => {
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => AddDavintoLP()}
-                      style={{ width: "50%%" }}
-                      className="btn btn-primary mt-4 btn-sm d-flex justify-content-center align-items-center"
-                      disabled={load}
-                    >
-                      {load ? "Adding..." : "Add"}
-                    </button>
+
                     <div className="carddetails2 mt-1">
                       <h6
                         className="detailText mt-5  d-flex justify-content-center"
