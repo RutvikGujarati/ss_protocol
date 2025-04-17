@@ -180,7 +180,7 @@ const InfoCards = () => {
   }, [amount]);
 
   const location = useLocation();
-  const isBurn = location.pathname === "/burn";
+  const isBurn = location.pathname === "/StateLp";
   const isAuction = location.pathname === "/auction";
 
   return (
@@ -433,41 +433,106 @@ const InfoCards = () => {
         </>
       ) : isBurn ? (
         <>
-          {/* <div className="container mt-4">
-            <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom">
+          <div className="container mt-4">
+            <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
               <div className="col-md-4 p-0 m-2 cards">
-                <div className="card bg-dark text-light border-light p-3 d-flex w-100">
-                  <div className="carddetaildiv uppercase">
-                    <div className="carddetails2">
-                      <p className="mb-1 detailText">State token supply</p>
-                      <h5 className="mb-0"> {formatWithCommas(StateSupply)}</h5>
-                     
+                <div
+                  className="card bg-dark text-light border-light p-3 d-flex w-100"
+                  style={{ minHeight: "250px" }}
+                >
+                  <div>
+                    <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
+                      <div className="carddetails2">
+                        <div className="d-flex">
+                          <p className="mb-1 detailText">Dav Token holdings </p>
+                        </div>
+                        <div className="d-flex mx-5">
+                          <h5 className="">{davHolds}</h5>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="carddetails2 mt-1">
+                      <h6
+                        className="detailText d-flex "
+                        style={{
+                          fontSize: "14px",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        MINIMUM REQUIREMENTS - 50 DAV TOKENS
+                      </h6>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
-                  <div className="carddetaildiv uppercase">
+                  <div>
+                    <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
+                      <div className="carddetails2">
+                        <div className="d-flex">
+                          <p className="mb-1 detailText">State Tokens Burn</p>
+                        </div>
+                        <div className="d-flex" style={{ width: "150px" }}>
+                          <input
+                            type="text"
+                            placeholder="1 BILLION"
+                            className="form-control text-center fw-bold "
+                            value={amount}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="carddetails2 mt-1">
+                      <button
+                        // onClick={handleClaim}
+                        className="btn btn-primary d-flex btn-sm justify-content-center align-items-center mt-1"
+                        style={{ width: "130px" }}
+                        disabled={loadClaim}
+                      >
+                        {loadClaim ? "Burning..." : "Burn"}
+                      </button>
+                    </div>
                     <div className="carddetails2">
-                      <p className="mb-1 detailText">State tokens burn</p>
-                      <h5 className="">{formatWithCommas(StateBurnBalance)}</h5>
+                      <h6
+                        className="detailText "
+                        style={{
+                          fontSize: "14px",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        DOUBLE YOUR INCOME IF YOU BURN VIA STATE LP
+                      </h6>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 d-flex w-100">
-                  <div className="carddetaildiv uppercase">
-                    <div className="carddetails2">
-                      <p className="mb-1 detailText">State tokens % burn</p>
-                      <h5 className="">{BurnRatio} %</h5>
+                  <div>
+                    <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
+                      <div className="carddetails2">
+                        <p className="mb-1 detailText">Claim PLS</p>
+                        <h5 className="">50,000,000 PLS</h5>
+                      </div>
+                    </div>
+
+                    <div className="carddetails2 mt-1">
+                      <button
+                        // onClick={handleClaim}
+                        className="btn btn-primary d-flex btn-sm justify-content-center align-items-center mt-1"
+                        style={{ width: "130px" }}
+                        disabled={loadClaim}
+                      >
+                        {loadClaim ? "Claiming..." : "Claim"}
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div> */}
+          </div>
         </>
       ) : (
         <></>
