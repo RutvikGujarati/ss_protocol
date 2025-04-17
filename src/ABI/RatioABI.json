@@ -51,7 +51,7 @@
 	},
 	{
 		"type": "function",
-		"name": "REVERSE_AUCTION_INTERVAL",
+		"name": "MAX_SUPPLY",
 		"inputs": [],
 		"outputs": [
 			{
@@ -143,11 +143,6 @@
 				"internalType": "address"
 			},
 			{
-				"name": "maxSupply",
-				"type": "uint256",
-				"internalType": "uint256"
-			},
-			{
 				"name": "pairAddress",
 				"type": "address",
 				"internalType": "address"
@@ -218,30 +213,6 @@
 		"type": "function",
 		"name": "calculateAuctionEligibleAmount",
 		"inputs": [
-			{
-				"name": "inputToken",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "calculateBaseReward",
-		"inputs": [
-			{
-				"name": "davAmount",
-				"type": "uint256",
-				"internalType": "uint256"
-			},
 			{
 				"name": "inputToken",
 				"type": "address",
@@ -347,25 +318,6 @@
 	},
 	{
 		"type": "function",
-		"name": "getNextAuctionStartTime",
-		"inputs": [
-			{
-				"name": "inputToken",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
 		"name": "getOutPutAmount",
 		"inputs": [
 			{
@@ -386,54 +338,6 @@
 	{
 		"type": "function",
 		"name": "getRatioPrice",
-		"inputs": [
-			{
-				"name": "inputToken",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "getSwapAmounts",
-		"inputs": [
-			{
-				"name": "_amountIn",
-				"type": "uint256",
-				"internalType": "uint256"
-			},
-			{
-				"name": "_amountOut",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"outputs": [
-			{
-				"name": "newAmountIn",
-				"type": "uint256",
-				"internalType": "uint256"
-			},
-			{
-				"name": "newAmountOut",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "pure"
-	},
-	{
-		"type": "function",
-		"name": "getTimeLeftInAuction",
 		"inputs": [
 			{
 				"name": "inputToken",
@@ -647,38 +551,6 @@
 	},
 	{
 		"type": "function",
-		"name": "maxSupplies",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "mintReward",
-		"inputs": [
-			{
-				"name": "inputToken",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [],
-		"stateMutability": "nonpayable"
-	},
-	{
-		"type": "function",
 		"name": "owner",
 		"inputs": [],
 		"outputs": [
@@ -726,19 +598,6 @@
 		"type": "function",
 		"name": "renounceOwnership",
 		"inputs": [],
-		"outputs": [],
-		"stateMutability": "nonpayable"
-	},
-	{
-		"type": "function",
-		"name": "setInAmountPercentage",
-		"inputs": [
-			{
-				"name": "amount",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
 		"outputs": [],
 		"stateMutability": "nonpayable"
 	},
@@ -1003,12 +862,6 @@
 				"type": "address",
 				"indexed": true,
 				"internalType": "address"
-			},
-			{
-				"name": "maxSupply",
-				"type": "uint256",
-				"indexed": false,
-				"internalType": "uint256"
 			},
 			{
 				"name": "pairAddress",

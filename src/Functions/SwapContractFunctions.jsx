@@ -53,32 +53,6 @@ export const SwapContractProvider = ({ children }) => {
   const [userHasReverseSwapped, setUserHasReverseSwapped] = useState({});
   const [RatioValues, SetRatioTargets] = useState("1000");
 
-  const contracts = {
-    state: AllContracts.stateContract,
-    dav: AllContracts.davContract,
-    Fluxin: AllContracts.FluxinContract,
-    Rieva: AllContracts.RievaContract,
-    Domus: AllContracts.DomusContract,
-    Valir: AllContracts.ValirContract,
-    Sanitas: AllContracts.SanitasContract,
-    Teeah: AllContracts.TeeahContract,
-    Currus: AllContracts.CurrusContract,
-    oneD: AllContracts.oneDollar,
-    TenDollar: AllContracts.TenDollarContract,
-    Xerion: AllContracts.XerionContract,
-
-    FluxinRatio: AllContracts.RatioContract,
-    RievaRatio: AllContracts.RievaRatioContract,
-    DomusRatio: AllContracts.DomusRatioContract,
-    CurrusRatio: AllContracts.CurrusRatioContract,
-    ValirRatio: AllContracts.ValirRatioContract,
-    SanitasRatio: AllContracts.SanitasRatioContract,
-    TeeahRatio: AllContracts.TeeahRatioContract,
-    OneDollar: AllContracts.OneDollarRatioContract,
-    TenDollarRatio: AllContracts.TenDollarRatioContract,
-    XerionRatio: AllContracts.XerionRatioContract,
-  };
-
   const contractDetails = [
     { name: "Fluxin", contract: AllContracts.RatioContract },
     { name: "Xerion", contract: AllContracts.XerionRatioContract },
@@ -133,7 +107,7 @@ export const SwapContractProvider = ({ children }) => {
     if (chainId == 146) {
       setTotalCost(ethers.parseEther((amount * 100).toString()));
     } else {
-      setTotalCost(ethers.parseEther((amount * 500000).toString()));
+      setTotalCost(ethers.parseEther((amount * 100000).toString()));
     }
   };
 
@@ -481,6 +455,31 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching reverse:", e);
     }
   };
+  const setDavAndStateIntoSwap = async () => {
+    if (!AllContracts?.AuctionContract || !address) return;
+
+    try {
+      const tx = await AllContracts.AuctionContract.setTokenAddress(
+        STATE_TESTNET,
+        DAV_TESTNET
+      );
+      await tx.wait();
+    } catch (error) {
+      console.error("Error fetching claimable amount:", error);
+    }
+  };
+  const AddTokenIntoSwapContract = async () => {
+    if (!AllContracts?.AuctionContract || !address) return;
+
+    try {
+      // Replace these params if needed based on your contract's addToken function
+      const tx = await AllContracts.AuctionContract.addToken(address, address);
+      await tx.wait();
+      console.log("Token added successfully!");
+    } catch (error) {
+      console.error("AddTokenIntoSwapContract failed:", error?.reason || error);
+    }
+  };
 
   useEffect(() => {
     getInputAmount();
@@ -489,7 +488,7 @@ export const SwapContractProvider = ({ children }) => {
     CheckIsReverse();
     HasSwappedAucton();
     HasReverseSwappedAucton();
-	getCurrentAuctionCycle();
+    getCurrentAuctionCycle();
   });
 
   const ERC20_ABI = [
@@ -607,30 +606,6 @@ export const SwapContractProvider = ({ children }) => {
     }
   };
 
-  const Approve = async (contractName, value) => {
-    try {
-      const amountInWei = ethers.parseUnits(value, 18);
-      const currentAllowance = await handleContractCall(
-        contracts[contractName],
-        "allowance",
-        [address, Ratio_TOKEN_ADDRESS],
-        (s) => ethers.formatUnits(s, 18)
-      );
-
-      if (parseFloat(currentAllowance) < parseFloat(value)) {
-        await handleContractCall(
-          contracts[contractName],
-          "approve",
-          [Ratio_TOKEN_ADDRESS, amountInWei],
-          (s) => ethers.formatUnits(s, 18)
-        );
-      }
-    } catch (error) {
-      console.error("Error Approving :", error);
-      throw error; // Re-throw the error to propagate it
-    }
-  };
-
   const handleAddToken = async (
     tokenAddress,
     tokenSymbol,
@@ -679,8 +654,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddDAV = () => handleAddToken(DAV_TESTNET, "pDAV");
   const handleAddTokensDAV = () =>
     handleAddToken(DAV_TOKEN_SONIC_ADDRESS, "sDAV");
-  const handleAddstate = () =>
-    handleAddToken(STATE_TESTNET, "State");
+  const handleAddstate = () => handleAddToken(STATE_TESTNET, "State");
   const handleAddTokensState = () =>
     handleAddToken(STATE_TOKEN_SONIC_ADDRESS, "sState");
   const handleAddYees = () => handleAddToken(Yees_testnet, "Yees");
@@ -708,10 +682,9 @@ export const SwapContractProvider = ({ children }) => {
         TotalStateHoldsInUS,
         setClaiming,
 
-        contracts,
         claiming,
         SwapTokens,
-
+        setDavAndStateIntoSwap,
         handleAddToken,
         // setReverseEnable,
         handleAddTokenRatio,
@@ -719,8 +692,7 @@ export const SwapContractProvider = ({ children }) => {
         userHashSwapped,
         userHasReverseSwapped,
         // WithdrawLPTokens,
-
-        Approve,
+        AddTokenIntoSwapContract,
         RatioValues,
         // setReverseTime,
         getCachedRatioTarget,
@@ -729,7 +701,7 @@ export const SwapContractProvider = ({ children }) => {
         isReversed,
         InputAmount,
         OutPutAmount,
-		CurrentCycleCount,
+        CurrentCycleCount,
         // userHasReverseSwapped,
         RatioTargetsofTokens,
         LoadingState,

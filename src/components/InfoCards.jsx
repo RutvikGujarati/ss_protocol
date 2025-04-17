@@ -1,7 +1,15 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/InfoCards.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import PLSLogo from "../assets/pls1.png";
@@ -14,6 +22,8 @@ import DotAnimation from "../Animations/Animation";
 import { useAccount, useChainId } from "wagmi";
 import { ContractContext } from "../Functions/ContractInitialize";
 import { PriceContext } from "../api/StatePrice";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { faCopy } from "@fortawesome/free-regular-svg-icons";
 const InfoCards = () => {
   const chainId = useChainId();
   const { AllContracts } = useContext(ContractContext);
@@ -59,8 +69,13 @@ const InfoCards = () => {
     mintDAV,
     claimableAmount,
     isLoading,
+    BurnStateTokens,
     claimAmount,
     ReferralAMount,
+    claimableAmountForBurn,
+    BurnClicked,
+    claimBurnAmount,
+    AddDavintoLP,
     stateHolding,
     ReferralCodeOfUser,
   } = useDAvContract();
@@ -182,6 +197,46 @@ const InfoCards = () => {
   const location = useLocation();
   const isBurn = location.pathname === "/StateLp";
   const isAuction = location.pathname === "/auction";
+  const [amountOfInput, setAmountOfInput] = useState(1);
+  const intervalRef = useRef(null);
+  const timeoutRef = useRef(null);
+
+  // Function to start changing the amount
+  const startChanging = (step) => {
+    // Immediate change on first press
+    setAmountOfInput((prev) => {
+      const next = prev + step;
+      return next >= 1 ? next : 1; // Prevent going below 1
+    });
+
+    // Start interval after a short delay for smoother hold
+    timeoutRef.current = setTimeout(() => {
+      intervalRef.current = setInterval(() => {
+        setAmountOfInput((prev) => {
+          const next = prev + step;
+          return next >= 1 ? next : 1; // Prevent going below 1
+        });
+      }, 100); // Adjust interval speed (100ms)
+    }, 300); // Initial delay before continuous change
+  };
+
+  // Function to stop changing the amount
+  const stopChanging = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+  };
+
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      stopChanging();
+    };
+  }, []);
+  const customWidth = "180px";
 
   return (
     <>
@@ -221,7 +276,7 @@ const InfoCards = () => {
                   </div>
 
                   <h6 className="detailAmount ">
-                    1 DAV = {chainId == 943 ? "500000 PLS" : "100 SONIC"}
+                    1 DAV = {chainId == 943 ? "100000 PLS" : "100 SONIC"}
                   </h6>
 
                   <h6 className="detailAmount mb-3">
@@ -363,14 +418,14 @@ const InfoCards = () => {
                             onClick={() => {
                               navigator.clipboard.writeText(ReferralCodeOfUser);
                               setCopied(true);
-                              navigator.clipboard.writeText(ReferralCodeOfUser);
                               setCopiedCode(ReferralCodeOfUser);
-                              setTimeout(() => setCopied(false), 2000); // hide after 2 sec
+                              setTimeout(() => setCopied(false), 2000); // Reset after 2 sec
                             }}
                             className="btn btn-outline-light btn-sm py-0 px-2"
-                            style={{ fontSize: "12px" }}
+                            style={{ fontSize: "14px" }}
+                            title={copied ? "Copied!" : "Copy"}
                           >
-                            {copied ? "Copied!" : "Copy"}
+                            <FontAwesomeIcon icon={copied ? faCheck : faCopy} />
                           </button>
                         </p>
                       </div>
@@ -442,18 +497,28 @@ const InfoCards = () => {
                 >
                   <div>
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
-                      <div className="carddetails2">
-                        <div className="d-flex">
+                      <div className="carddetails2 mb-4">
+                        <div className="d-flex justify-content-center ">
                           <p className="mb-1 detailText">Dav Token holdings </p>
                         </div>
-                        <div className="d-flex mx-5">
-                          <h5 className="">{davHolds}</h5>
+                        <div className="d-flex  justify-content-center">
+                          <h5 className="">
+                            {isLoading ? <DotAnimation /> : davHolds}
+                          </h5>
                         </div>
                       </div>
                     </div>
+                    <button
+                      onClick={() => AddDavintoLP()}
+                      style={{ width: "50%%" }}
+                      className="btn btn-primary mt-4 btn-sm d-flex justify-content-center align-items-center"
+                      disabled={load}
+                    >
+                      {load ? "Adding..." : "Add"}
+                    </button>
                     <div className="carddetails2 mt-1">
                       <h6
-                        className="detailText d-flex "
+                        className="detailText mt-5  d-flex justify-content-center"
                         style={{
                           fontSize: "14px",
                           textTransform: "capitalize",
@@ -466,68 +531,83 @@ const InfoCards = () => {
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
-                <div className="card bg-dark text-light border-light p-3 d-flex w-100">
-                  <div>
-                    <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
-                      <div className="carddetails2">
-                        <div className="d-flex">
-                          <p className="mb-1 detailText">State Tokens Burn</p>
-                        </div>
-                        <div className="d-flex" style={{ width: "150px" }}>
-                          <input
-                            type="text"
-                            placeholder="1 BILLION"
-                            className="form-control text-center fw-bold "
-                            value={amount}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="carddetails2 mt-1">
+                <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
+                  <div className="p-2 pt-3 pb-2">
+                    {" "}
+                    <p className="mb-2 detailText ">STATE TOKENS BURN</p>
+                    <div className="d-flex align-items-center gap-2">
                       <button
-                        // onClick={handleClaim}
-                        className="btn btn-primary d-flex btn-sm justify-content-center align-items-center mt-1"
-                        style={{ width: "130px" }}
-                        disabled={loadClaim}
+                        className="btn btn-outline-light fw-bold"
+                        onMouseDown={() => startChanging(-1)}
+                        onMouseUp={stopChanging}
+                        onMouseLeave={stopChanging}
+                        onTouchStart={() => startChanging(-1)}
+                        onTouchEnd={stopChanging}
+                        disabled={amountOfInput <= 1}
                       >
-                        {loadClaim ? "Burning..." : "Burn"}
+                        -
+                      </button>
+
+                      <input
+                        type="text"
+                        className="form-control text-center fw-bold"
+                        value={`${amountOfInput} BILLION`}
+                        readOnly
+                      />
+
+                      <button
+                        className="btn btn-outline-light fw-bold"
+                        onMouseDown={() => startChanging(1)}
+                        onMouseUp={stopChanging}
+                        onMouseLeave={stopChanging}
+                        onTouchStart={() => startChanging(1)}
+                        onTouchEnd={stopChanging}
+                      >
+                        +
                       </button>
                     </div>
-                    <div className="carddetails2">
-                      <h6
-                        className="detailText "
-                        style={{
-                          fontSize: "14px",
-                          textTransform: "capitalize",
-                        }}
-                      >
-                        DOUBLE YOUR INCOME IF YOU BURN VIA STATE LP
-                      </h6>
-                    </div>
+                    <button
+                      onClick={() => BurnStateTokens(amountOfInput)}
+                      style={{ width: customWidth }}
+                      className="btn btn-primary mx-5 mt-4 btn-sm d-flex justify-content-center align-items-center"
+                      disabled={load}
+                    >
+                      {BurnClicked ? "Burning..." : "Burn"}
+                    </button>
+                  </div>
+                  <div className="carddetails2 ">
+                    <h6
+                      className="detailText mb-0"
+                      style={{
+                        fontSize: "14px",
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      DOUBLE YOUR INCOME IF YOU BURN VIA STATE LP
+                    </h6>
                   </div>
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
-                <div className="card bg-dark text-light border-light p-3 d-flex w-100">
-                  <div>
-                    <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
-                      <div className="carddetails2">
-                        <p className="mb-1 detailText">Claim PLS</p>
-                        <h5 className="">50,000,000 PLS</h5>
-                      </div>
+                <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
+                  <div className="p-2 pt-3 pb-2">
+                    {" "}
+                    <p className="mb-2 detailText ">CLAIM PLS</p>
+                    <div className="d-flex  justify-content-center">
+                      <h5 className="mt-2">
+                        {(claimableAmountForBurn * stateUsdPrice * 2).toFixed(
+                          2
+                        )}
+                      </h5>
                     </div>
-
-                    <div className="carddetails2 mt-1">
-                      <button
-                        // onClick={handleClaim}
-                        className="btn btn-primary d-flex btn-sm justify-content-center align-items-center mt-1"
-                        style={{ width: "130px" }}
-                        disabled={loadClaim}
-                      >
-                        {loadClaim ? "Claiming..." : "Claim"}
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => claimBurnAmount(stateUsdPrice)}
+                      style={{ width: customWidth || "100%" }}
+                      className="btn btn-primary mt-4 btn-sm d-flex justify-content-center align-items-center"
+                      disabled={load}
+                    >
+                      {load ? "Claiming..." : "Claim"}
+                    </button>
                   </div>
                 </div>
               </div>

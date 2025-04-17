@@ -8,8 +8,9 @@
 import DAVTokenABI from "../ABI/DavTokenABI.json";
 import sDAVABI from "../ABI/sDAVToken.json";
 import StateABI from "../ABI/StateTokenABI.json";
+import stateLpAbi from "../ABI/StateLp.json";
 import RatioABI from "../ABI/RatioABI.json";
-import { Auction_TESTNET, DAV_TESTNET, STATE_TESTNET } from "../ContractAddresses";
+import { Auction_TESTNET, DAV_TESTNET, STATE_TESTNET, StateLP } from "../ContractAddresses";
 
 let currentChainId = 369; // Default chainId
 
@@ -24,24 +25,5 @@ export const getContractConfigs = () => ({
 	davContract: { address: DAV_TESTNET, abi: getDavABI() },
 	AuctionContract: { address: Auction_TESTNET, abi: RatioABI },
 	stateContract: { address: STATE_TESTNET, abi: StateABI },
-	// FluxinContract: { address: Fluxin, abi: StateABI },
-	// RievaContract: { address: Rieva, abi: StateABI },
-	// DomusContract: { address: Domus, abi: StateABI },
-	// TeeahContract: { address: Teeah, abi: StateABI },
-	// CurrusContract: { address: Currus, abi: StateABI },
-	// ValirContract: { address: Valir, abi: StateABI },
-	// SanitasContract: { address: Sanitas, abi: StateABI },
-	// oneDollar: { address: $1, abi: StateABI },
-	// TenDollarContract: { address: $10, abi: StateABI },
-	// XerionContract: { address: Xerion, abi: StateABI },
-	// RatioContract: { address: Ratio_TOKEN_ADDRESS, abi: RatioABI },
-	// RievaRatioContract: { address: RievaRatioAddress, abi: RatioABI },
-	// DomusRatioContract: { address: DomusRatioAddress, abi: RatioABI },
-	// CurrusRatioContract: { address: CurrusRatioAddress, abi: RatioABI },
-	// ValirRatioContract: { address: ValirRatioAddress, abi: RatioABI },
-	// SanitasRatioContract: { address: SanitasRatioAddress, abi: RatioABI },
-	// TeeahRatioContract: { address: TeeahRatioAddress, abi: RatioABI },
-	// OneDollarRatioContract: { address: OneDollarRatioAddress, abi: RatioABI },
-	// TenDollarRatioContract: { address: TenDollarRatioAddress, abi: RatioABI },
-	// XerionRatioContract: { address: XerionRatioAddress, abi: RatioABI },
+	StateLP: { address: StateLP, abi: stateLpAbi },
 });

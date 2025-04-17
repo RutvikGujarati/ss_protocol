@@ -51,40 +51,6 @@ const DataTable = () => {
     setCheckingStates((prev) => ({ ...prev, [id]: false }));
   };
 
-  const formatPrice = (price) => {
-    if (!price || isNaN(price)) {
-      return "$0.0000";
-    }
-
-    const formattedPrice = parseFloat(price).toFixed(10);
-    const [integerPart, decimalPart] = formattedPrice.split(".");
-
-    const leadingZerosMatch = decimalPart.match(/^0+(.)/);
-    if (leadingZerosMatch) {
-      const leadingZeros = leadingZerosMatch[0].slice(0, -1);
-      const firstSignificantDigit = leadingZerosMatch[1];
-      const zeroCount = leadingZeros.length;
-      if (zeroCount < 4) {
-        return `${integerPart}.${"0".repeat(
-          zeroCount
-        )}${firstSignificantDigit}${decimalPart
-          .slice(zeroCount + 1)
-          .slice(0, 3)}`;
-      } else {
-        return (
-          <>
-            {integerPart}.<span>0</span>
-            <sub>{zeroCount}</sub>
-            {firstSignificantDigit}
-            {decimalPart.slice(zeroCount + 1).slice(0, 3)}
-          </>
-        );
-      }
-    }
-
-    // General case: No significant leading zeros
-    return `${parseFloat(price).toFixed(7)}`;
-  };
   console.log("db required for Auction", DavBalanceRequire);
 
   const tokens = useAuctionTokens();
@@ -99,7 +65,6 @@ const DataTable = () => {
               <th>#</th>
               <th>Name</th>
               <th>Check</th>
-              <th>Price</th>
               {/* <th>Liquidity</th> */}
               <th></th>
               <th>Current Ratio</th>
@@ -152,11 +117,10 @@ const DataTable = () => {
                     SwapT,
                     ContractName,
                     Liquidity,
-                    Price,
                     isReversing,
                     AuctionStatus,
                     ReverseName,
-                    onChart,
+
                     inputTokenAmount,
                     onlyInputAmount,
                     handleAddToken,
@@ -194,16 +158,6 @@ const DataTable = () => {
                       </button>
                     </td>
 
-                    <td>
-                      <a
-                        href={onChart}
-                        target="_blank"
-                        style={{ fontSize: "13px" }}
-                        className="font-color"
-                      >
-                        $ {formatPrice(Price)}
-                      </a>
-                    </td>
                     <td className="text-success">{Liquidity}</td>
                     <td>{currentRatio}</td>
 

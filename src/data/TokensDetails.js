@@ -21,7 +21,7 @@ export const TokensDetails = () => {
 	const tokens = [
 		{
 			name: "DAV",
-			key:"DAV",
+			key: "DAV",
 			displayName: "pDAV",
 			address: DAV_TOKEN_ADDRESS,
 			supply: "5,000,000.00",
@@ -80,6 +80,7 @@ export const TokensDetails = () => {
 			key: shortenAddress(token.address),
 			name: token.displayName || token.name,
 			Price: token.price,
+
 			address: token.address,
 			Cycle: swap.CurrentCycleCount[key],
 			handleAddTokens: () => swap[`handleAdd${key}`](),
@@ -89,6 +90,7 @@ export const TokensDetails = () => {
 				...(token.actions || {}), // Include any custom actions (e.g., for DAV)
 				ReanounceContract: swap[`Reanounce${key}Contract`] || swap.ReanounceContract,
 				ReanounceSwapContract: swap[`Renounce${key}Swap`],
+				
 				AddTokenToContract: () => swap.AddTokensToContract(token.address, STATE_TOKEN_ADDRESS, CurrentRatioPrice[key]),
 				...(isState && {
 					AddTokenToContract: swap.AddTokens,

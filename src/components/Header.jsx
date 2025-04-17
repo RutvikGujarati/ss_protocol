@@ -3,7 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import WalletConnector from "../WalletComps/WalletConnect";
 import { NavLink } from "react-router-dom";
-import pulsex from "../assets/pulsex.png";
+import pulsex from "../assets/ninemm.png";
 import shadow from "../assets/shadow.jpeg";
 import { FaTelegramPlane } from "react-icons/fa";
 import { FaXTwitter, FaYoutube } from "react-icons/fa6";
@@ -183,7 +183,7 @@ const Header = () => {
                 to={
                   chainId === 146
                     ? "https://www.shadow.so/trade"
-                    : "https://pulsex.mypinata.cloud/ipfs/bafybeibzu7nje2o2tufb3ifitjrto3n3xcwon7fghq2igtcupulfubnrim/"
+                    : "https://dex.9mm.pro/swap?chain=pulsechain"
                 }
                 target="_blank"
               >

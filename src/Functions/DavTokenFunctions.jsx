@@ -9,6 +9,7 @@ import { ethers } from "ethers";
 import { ContractContext } from "./ContractInitialize";
 import PropTypes from "prop-types";
 import { useAccount, useChainId } from "wagmi";
+import { DAV_TESTNET, STATE_TESTNET, StateLP } from "../ContractAddresses";
 
 export const DAVContext = createContext();
 
@@ -16,13 +17,16 @@ export const DavProvider = ({ children }) => {
   const { AllContracts } = useContext(ContractContext);
   const { address } = useAccount();
   const chainId = useChainId();
+  const { signer } = useContext(ContractContext);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [BurnClicked, setIsClicked] = useState(false);
   const [Supply, setSupply] = useState("0.0");
   const [stateHolding, setStateHolding] = useState("0.0");
   const [ReferralCodeOfUser, setReferralCode] = useState("0.0");
   const [ReferralAMount, setReferralAmount] = useState("0.0");
   const [claimableAmount, setClaimableAmount] = useState("0.0");
+  const [claimableAmountForBurn, setClaimableAmountForBurn] = useState("0.0");
 
   /*** Fetch Total Supply ***/
   const DavSupply = useCallback(async () => {
@@ -34,7 +38,6 @@ export const DavProvider = ({ children }) => {
       console.error("Error fetching total supply:", error);
     }
   }, [AllContracts]);
-
 
   const StateHoldings = useCallback(async () => {
     if (!AllContracts?.davContract) {
@@ -59,6 +62,18 @@ export const DavProvider = ({ children }) => {
     }
   }, [AllContracts, address]);
 
+  const ClaimableAmountInBurn = useCallback(async () => {
+    if (!AllContracts?.StateLP || !address) return;
+
+    try {
+      const burnInfo = await AllContracts.StateLP.userBurns(address);
+      const amountInEth = ethers.formatUnits(burnInfo.amount, 18);
+      setClaimableAmountForBurn(parseFloat(amountInEth).toFixed(2));
+    } catch (error) {
+      console.error("Error fetching claimable amount:", error);
+    }
+  }, [AllContracts, address]);
+
   /*** Mint DAV Tokens ***/
   const mintDAV = async (amount, amount2) => {
     if (!AllContracts?.davContract) return;
@@ -68,7 +83,7 @@ export const DavProvider = ({ children }) => {
       if (chainId === 146) {
         cost = ethers.parseEther((amount * 100).toString());
       } else {
-        cost = ethers.parseEther((amount * 500000).toString());
+        cost = ethers.parseEther((amount * 1000000).toString());
       }
 
       if (!amount2 || amount2.trim() === "") {
@@ -100,6 +115,60 @@ export const DavProvider = ({ children }) => {
       await ClaimableAmount();
     } catch (error) {
       console.error("Error claiming rewards:", error);
+    }
+  };
+  const claimBurnAmount = async (price) => {
+	if (!AllContracts?.davContract) return;
+  
+	try {
+	  const priceInWei = ethers.parseUnits(price.toString(), 18); // 👈 convert to wei
+  
+	  const transaction = await AllContracts.StateLP.claimPLS(priceInWei);
+	  await transaction.wait();
+  
+	} catch (error) {
+	  console.error("Error claiming rewards:", error);
+	}
+  };
+  const AddDavintoLP = async () => {
+	if (!AllContracts?.davContract) return;
+  
+	try {
+  
+	  const transaction = await AllContracts.StateLP.addDavToken(DAV_TESTNET);
+	  await transaction.wait();
+  
+	} catch (error) {
+	  console.error("Error claiming rewards:", error);
+	}
+  };
+  
+  const ERC20_ABI = [
+    "function approve(address spender, uint256 amount) external returns (bool)",
+    "function allowance(address owner, address spender) external view returns (uint256)",
+  ];
+  const BurnStateTokens = async (amount) => {
+    if (!AllContracts?.StateLP) return;
+    try {
+      setIsClicked(true);
+      const amountIn1Billion = amount * 1000000000;
+      const amountInWei = ethers.parseUnits(amountIn1Billion.toString(), 18);
+      const tokenContract = new ethers.Contract(
+        STATE_TESTNET,
+        ERC20_ABI,
+        signer
+      );
+      const approveTx = await tokenContract.approve(StateLP, amountInWei);
+      await approveTx.wait();
+      console.log("Approval successful");
+      const transaction = await AllContracts.StateLP.burnState(amountInWei);
+      await transaction.wait();
+      setIsClicked(false);
+    } catch (error) {
+      console.error("Error burning state tokens:", error);
+      setIsClicked(false);
+    } finally {
+      setIsClicked(false);
     }
   };
 
@@ -139,7 +208,8 @@ export const DavProvider = ({ children }) => {
       await Promise.all([
         DavSupply(),
         ClaimableAmount(),
-		StateHoldings(),
+		ClaimableAmountInBurn(),
+        StateHoldings(),
         ReferralCode(),
         ReferralAmountReceived(),
       ]);
@@ -188,9 +258,14 @@ export const DavProvider = ({ children }) => {
         isLoading,
         ReferralAMount,
         Supply,
-		stateHolding,
+        stateHolding,
         ReferralCodeOfUser,
         claimableAmount,
+        BurnStateTokens,
+		AddDavintoLP,
+		claimableAmountForBurn,
+        BurnClicked,
+		claimBurnAmount,
         claimAmount,
       }}
     >

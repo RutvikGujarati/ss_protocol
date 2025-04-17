@@ -6,22 +6,14 @@ import { useSwapContract } from "../Functions/SwapContractFunctions";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { TokensDetails } from "../data/TokensDetails";
-import pulsex from "../assets/pulsex.png";
-import { useAccount, useChainId } from "wagmi";
-import XerionLogo from "../assets/layti.png";
-import FluxinLogo from "../assets/FluxinLogo.png";
-import Rieva from "../assets/rieva.png";
+import pulsex from "../assets/ninemm.png";
+import { useChainId } from "wagmi";
+
 import DAVLogo from "../assets/d_logo.png";
 import sDAV from "../assets/sDAV.png";
-import TenDollar from "../assets/TenDollar.png";
-import Currus from "../assets/Currus.png";
-import ValirLogo from "../assets/Valir.png";
-import SanitasLogo from "../assets/Sanitas.png";
-import oned from "../assets/oned.png";
-import Domus from "../assets/domus.png";
-import Teeah from "../assets/teech.png";
 import stateLogo from "../assets/state_logo.png";
 import sState from "../assets/sonicstate.png";
+import { Auction_TESTNET } from "../ContractAddresses";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -39,26 +31,14 @@ const DetailsInfo = ({ selectedToken }) => {
     handleAddTokensDAV,
     handleAddTokenState,
     handleAddTokensState,
-    handleAddOneD,
-    handleAddFluxin,
-    handleAddXerion,
-    handleAddRieva,
-    handleAddDomus,
-    handleAddTenDollar,
-    handleAddCurrus,
-    handleAddValir,
-    handleAddTeeah,
-    handleAddSanitas,
+    setDavAndStateIntoSwap,
+    AddTokenIntoSwapContract,
   } = useSwapContract();
 
-  const { address } = useAccount();
   const chainId = useChainId();
 
-  const [authorized, setAuthorized] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
   const [localSearchQuery, setLocalSearchQuery] = useState("");
-
-  const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS.toLowerCase();
 
   const tokens = TokensDetails();
 
@@ -88,10 +68,6 @@ const DetailsInfo = ({ selectedToken }) => {
   }, []);
 
   useEffect(() => {
-    handleSetAddress();
-  }, [address]);
-
-  useEffect(() => {
     const nameCells = document.querySelectorAll(".name-cell");
     nameCells.forEach((cell) => {
       cell.style.cursor = "pointer";
@@ -102,16 +78,6 @@ const DetailsInfo = ({ selectedToken }) => {
     const data = chainId === 146 ? SonicData : originalData;
     setFilteredData(data);
   }, [chainId]);
-
-  const handleSetAddress = () => {
-    if (!address) {
-      setAuthorized(false);
-      console.warn("Wallet address not available");
-      return;
-    }
-
-    setAuthorized(AuthAddress === address.toLowerCase());
-  };
 
   const formatPrice = (price) => {
     if (!price || isNaN(price)) return "0.0000";
@@ -195,7 +161,7 @@ const DetailsInfo = ({ selectedToken }) => {
               <th></th>
               <th>
                 <a
-                  href={`https://otter.pulsechain.com/address/`}
+                  href={`https://scan.v4.testnet.pulsechain.com/#/address/${Auction_TESTNET}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ fontSize: "15px" }}
@@ -252,12 +218,16 @@ const DetailsInfo = ({ selectedToken }) => {
 
                     <img
                       src={MetaMaskIcon}
-					  onClick={token.handleAddTokens}
+                      onClick={token.handleAddTokens}
                       alt="State Logo"
-                      style={{ width: "20px", height: "20px",cursor:"pointer" }}
+                      style={{
+                        width: "20px",
+                        height: "20px",
+                        cursor: "pointer",
+                      }}
                     />
                     <a
-                      href="https://pulsex.mypinata.cloud/ipfs/bafybeibzu7nje2o2tufb3ifitjrto3n3xcwon7fghq2igtcupulfubnrim/"
+                      href="https://dex.9mm.pro/swap?chain=pulsechain"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -273,6 +243,20 @@ const DetailsInfo = ({ selectedToken }) => {
                         }}
                       />
                     </a>
+                    {token.tokenName === "DAV" ? (
+                      "-"
+                    ) : (
+                      <button
+                        className="btn btn-sm swap-btn btn-primary"
+                        onClick={
+                          token.tokenName === "STATE"
+                            ? () => setDavAndStateIntoSwap()
+                            : () => AddTokenIntoSwapContract()
+                        }
+                      >
+                        Add
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

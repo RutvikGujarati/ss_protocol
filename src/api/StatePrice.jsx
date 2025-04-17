@@ -11,6 +11,11 @@ const tokens = [
     isPool: true,
   },
   {
+    id: "0xf15f1f64891a3e2797328445cb28ba11fe468505",
+    key: "stateWplsRatio",
+    isRatio: true,
+  },
+  {
     id: "0xe4a02db896cee9dbf32d730dc9874eb058f0ca3f",
     key: "CurrusUsdPrice",
     isPool: true,
@@ -55,10 +60,10 @@ const PriceProvider = ({ children }) => {
   const [priceLoading, setPriceLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchPrice = async ({ id, key, isPool = false }) => {
+  const fetchPrice = async ({ id, key, isPool = false, isRatio = false }) => {
     try {
       const url = `https://api.geckoterminal.com/api/v2/${
-        isPool
+        isPool || isRatio
           ? "networks/pulsechain/pools"
           : "simple/networks/pulsechain/token_price"
       }/${id}${isPool ? "?include=dex" : ""}`;
@@ -66,6 +71,8 @@ const PriceProvider = ({ children }) => {
 
       const price = isPool
         ? response.data?.data?.attributes?.base_token_price_usd
+        : isRatio
+        ? response.data?.data?.attributes?.base_token_price_native_currency
         : response.data?.data?.attributes?.token_prices?.[id];
 
       setPrices((prev) => ({
