@@ -131,148 +131,143 @@ const DetailsInfo = ({ selectedToken }) => {
       <div className="mb-3 d-flex justify-content-center">
         <input
           type="text"
-          className="form-control text-center "
+          className="form-control text-center"
           placeholder="SEARCH"
           value={localSearchQuery}
           onChange={handleSearch}
           style={{ maxWidth: "300%" }}
         />
       </div>
-
-      {dataToShow ? (
-        <table className="table table-dark infoTable text-center align-middle">
-          <thead>
-            <tr>
-              <th className="fw-bold text-uppercase text-center col-1 py-3">
-                Logo
-              </th>
-              <th className="fw-bold text-uppercase text-center col-3 py-3 ">
-                Token Name
-              </th>
-              <th className="fw-bold text-uppercase text-center col-2 py-3">
-                Current Ratio
-              </th>
-              <th className="fw-bold text-uppercase text-center col-3 py-3">
-                Auctions
-              </th>
-              <th className="fw-bold text-uppercase text-center col py-3">
-                Info
-              </th>
-              <th></th>
-              <th></th>
-              <th></th>
-              <th>
-                <a
-                  href={`https://scan.v4.testnet.pulsechain.com/#/address/${Auction_TESTNET}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ fontSize: "15px", color: "white" }}
-                >
-                  <i className="bi bi-box-arrow-up-right"></i>
-                </a>
-              </th>
-              {dataToShow.tokenName !== "DAV" ? (
-                <th className="fw-bold text-uppercase text-end col-auto">
-                  <button className="swap-btn py-1 mx-3 btn btn-primary btn-sm">
-                    Price: ${formatPrice(dataToShow.Price)}
-                  </button>
+      <div className="table-responsive">
+        {dataToShow ? (
+          <table className="table table-dark">
+            <thead>
+              <tr>
+                <th className="text-center">Logo</th>
+                <th className="text-center">Token Name</th>
+                <th className="text-center">Current Ratio</th>
+                <th className="text-center">Auctions</th>
+                <th className="text-center">Info</th>
+                <th></th>
+                <th className="text-center">
+                  <a
+                    href={`https://scan.v4.testnet.pulsechain.com/#/address/${Auction_TESTNET}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: "15px", color: "white" }}
+                  >
+                    <i className="bi bi-box-arrow-up-right"></i>
+                  </a>
                 </th>
-              ) : (
-                <th className="col-auto"></th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTokens.map((token) => (
-              <tr key={token.tokenName}>
-                <td>
-                  <img
-                    src={
-                      filteredData.find((d) => d.name === token.tokenName)?.logo
-                    }
-                    className="mx-4"
-                    alt={`${token.tokenName} logo`}
-                    style={{ width: "40px", height: "40px" }}
-                  />
-                </td>
-                <td>{token.tokenName}</td>
-                <td>
-                  {token.tokenName === "DAV" || token.tokenName === "STATE"
-                    ? "------"
-                    : "1:1000"}
-                </td>
-
-                <td>
-                  <div className="mx-2">
-                    {token.tokenName === "DAV" || token.tokenName === "STATE"
-                      ? "-----"
-                      : `${token.Cycle + 1}/56`}
-                  </div>
-                </td>
-
-                <td>
-                  <div className="d-flex justify-content-center align-items-center gap-4">
-                    <a
-                      href={`https://scan.v4.testnet.pulsechain.com/#/address/${token.address}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ fontSize: "15px", color: "white" }}
-                    >
-                      <i className="bi bi-box-arrow-up-right"></i>
-                    </a>
-
+                {dataToShow.tokenName !== "DAV" ? (
+                  <th className="fw-bold text-uppercase text-end col-auto">
+                    <button className="swap-btn py-1 mx-3 btn btn-primary btn-sm">
+                      Price: ${formatPrice(dataToShow.Price)}
+                    </button>
+                  </th>
+                ) : (
+                  <th className="col-auto"></th>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTokens.map((token) => (
+                <tr key={token.tokenName}>
+                  <td className="text-center">
                     <img
-                      src={MetaMaskIcon}
-                      onClick={token.handleAddTokens}
-                      alt="State Logo"
-                      style={{
-                        width: "20px",
-                        height: "20px",
-                        cursor: "pointer",
-                      }}
+                      src={
+                        filteredData.find((d) => d.name === token.tokenName)
+                          ?.logo
+                      }
+                      className="mx-4"
+                      alt={`${token.tokenName} logo`}
+                      style={{ width: "40px", height: "40px" }}
                     />
-                    <a
-                      href="https://dex.9mm.pro/swap?chain=pulsechain"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
+                  </td>
+                  <td className="text-center">{token.tokenName}</td>
+                  <td className="text-center">
+                    <div className="mx-2">
+                      {token.tokenName === "DAV" || token.tokenName === "STATE"
+                        ? "------"
+                        : "1:1000"}
+                    </div>
+                  </td>
+                  <td className="text-center">
+                    <div className="mx-4">
+                      {token.tokenName === "DAV" || token.tokenName === "STATE"
+                        ? "-----"
+                        : `${token.Cycle + 1}/56`}
+                    </div>
+                  </td>
+                  <td className="text-center">
+                    <div className="d-flex justify-content-center align-items-center gap-4">
+                      <a
+                        href={`https://scan.v4.testnet.pulsechain.com/#/address/${token.address}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: "15px", color: "white" }}
+                      >
+                        <i className="bi bi-box-arrow-up-right"></i>
+                      </a>
                       <img
-                        src={pulsex}
-                        alt="sDAV Logo"
-                        className="mb-1"
+                        src={MetaMaskIcon}
+                        onClick={token.handleAddTokens}
+                        alt="State Logo"
                         style={{
-                          //   borderRadius: "50%",
-                          background: "transparent",
                           width: "20px",
                           height: "20px",
                           cursor: "pointer",
                         }}
                       />
-                    </a>
-
-                    <button
-                      className="btn btn-sm swap-btn btn-primary"
-                      onClick={
-                        token.tokenName === "STATE"
-                          ? () => setDavAndStateIntoSwap()
-                          : token.tokenName == "DAV"
-                          ? () => AddDavintoLP()
-                          : () => AddTokenIntoSwapContract()
-                      }
-                    >
-                      Add
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <div className="alert alert-warning text-center" role="alert">
-          Currently No detailed information is available for the selected token.
-        </div>
-      )}
+                      {token.tokenName === "DAV" ? (
+                        "----"
+                      ) : (
+                        <a
+                          href="https://dex.9mm.pro/swap?chain=pulsechain"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            src={pulsex}
+                            alt="sDAV Logo"
+                            className="mb-1"
+                            style={{
+                              background: "transparent",
+                              width: "20px",
+                              height: "20px",
+                              cursor: "pointer",
+                            }}
+                          />
+                        </a>
+                      )}
+                      <button
+                        className="btn btn-sm swap-btn btn-primary"
+                        onClick={
+                          token.tokenName === "STATE"
+                            ? () => setDavAndStateIntoSwap()
+                            : token.tokenName === "DAV"
+                            ? () => AddDavintoLP()
+                            : () => AddTokenIntoSwapContract()
+                        }
+                      >
+                        Add
+                      </button>
+                    </div>
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="alert alert-warning text-center" role="alert">
+            Currently No detailed information is available for the selected
+            token.
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -12,7 +12,7 @@ import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
 import { Addresses } from "../data/AddressMapping";
 
 const DataTable = () => {
-  const { DavBalance ,davHolds} = useDAvContract();
+  const { DavBalance, davHolds } = useDAvContract();
   const { CheckMintBalance } = useGeneralTokens();
 
   const {
@@ -37,12 +37,12 @@ const DataTable = () => {
       await CheckMintBalance(AddressMapping);
     } catch (e) {
       if (
-        e.reason === `${id}: No new DAV minted` ||
+        e.reason === `No new DAV holdings` ||
         (e.revert &&
           e.revert.args &&
-          e.revert.args[0] === `${id}: No new DAV minted`)
+          e.revert.args[0] === `No new DAV holdings`)
       ) {
-        console.error(`${id}: No new DAV minted:`, e);
+        console.error(`No new DAV holdings:`, e);
         setErrorPopup((prev) => ({ ...prev, [id]: true }));
       } else {
         console.error("Error calling CheckMintBalance:", e);
@@ -57,7 +57,7 @@ const DataTable = () => {
   console.log("obj tokens", tokens);
 
   return isAuction ? (
-    <div className="container mt-4 datatablemarginbottom">
+    <div className="container  datatablemarginbottom">
       <div className="table-responsive">
         <table className="table table-dark">
           <thead>
@@ -81,7 +81,6 @@ const DataTable = () => {
                   userHasReverse,
                   isReversing,
                   AuctionStatus,
-                  distributedAmount,
                 }) => {
                   console.log(`Filter Conditions:${name}`, {
                     userHasSwapped,
@@ -92,9 +91,7 @@ const DataTable = () => {
                   });
 
                   if (AuctionStatus == "false" && isReversing == "true") {
-                    if (!userHasReverse) {
-                      return true;
-                    } else if (distributedAmount > 1) {
+                    if (userHasReverse == "false") {
                       return true;
                     } else if (userHasSwapped && isReversing == "false") {
                       return false;
@@ -154,7 +151,9 @@ const DataTable = () => {
                         className="btn btn-primary btn-sm swap-btn"
                         disabled={checkingStates[id] || DavBalance == 0}
                       >
-                        {checkingStates[id] ? `${davHolds * 10000} AIRDROPPING...` : "AIRDROPPING"}
+                        {checkingStates[id]
+                          ? ` AIRDROPPING...`
+                          : `${davHolds * 10000} AIRDROP`}
                       </button>
                     </td>
 
@@ -243,9 +242,7 @@ const DataTable = () => {
                           {isReversing == "false" && (
                             <button
                               onClick={() => SwapT()}
-                              disabled={
-                                swappingStates[id] || AuctionStatus == "false"
-                              }
+                              disabled={swappingStates[id] || onlyInputAmount <= 0}
                               className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
                             >
                               {swappingStates[id]
