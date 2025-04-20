@@ -13,7 +13,7 @@
 				"internalType": "address"
 			},
 			{
-				"name": "_stateLP",
+				"name": "_stateToken",
 				"type": "address",
 				"internalType": "address"
 			},
@@ -29,6 +29,10 @@
 			}
 		],
 		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "fallback",
+		"stateMutability": "payable"
 	},
 	{
 		"type": "receive",
@@ -88,7 +92,7 @@
 	},
 	{
 		"type": "function",
-		"name": "REFERRAL_BONUS",
+		"name": "MIN_DAV",
 		"inputs": [],
 		"outputs": [
 			{
@@ -101,7 +105,7 @@
 	},
 	{
 		"type": "function",
-		"name": "STATELP_SHARE",
+		"name": "REFERRAL_BONUS",
 		"inputs": [],
 		"outputs": [
 			{
@@ -120,7 +124,7 @@
 			{
 				"name": "",
 				"type": "address",
-				"internalType": "address"
+				"internalType": "contract IERC20"
 			}
 		],
 		"stateMutability": "view"
@@ -217,6 +221,98 @@
 			}
 		],
 		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "burnHistory",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "amount",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "totalAtTime",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "timestamp",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "burnState",
+		"inputs": [
+			{
+				"name": "amount",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "canClaim",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "canClaimNow",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "claimPLS",
+		"inputs": [],
+		"outputs": [],
+		"stateMutability": "nonpayable"
 	},
 	{
 		"type": "function",
@@ -324,6 +420,45 @@
 	},
 	{
 		"type": "function",
+		"name": "getContractPLSBalance",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getCurrentDayOfMonth",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getCurrentMonthNumber",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "getDAVHoldersCount",
 		"inputs": [],
 		"outputs": [
@@ -339,6 +474,68 @@
 		"type": "function",
 		"name": "getHolderFunds",
 		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getMissedMonthsAndUnclaimedPLS",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "missedMonths",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "totalPLS",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getNextClaimDate",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getRemainingClaimablePLS",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
 				"name": "",
@@ -407,6 +604,25 @@
 	},
 	{
 		"type": "function",
+		"name": "getUserSharePercentage",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "holderFunds",
 		"inputs": [],
 		"outputs": [
@@ -458,6 +674,19 @@
 	},
 	{
 		"type": "function",
+		"name": "isOnOrAfter20th",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "isValidReferralCode",
 		"inputs": [
 			{
@@ -471,6 +700,25 @@
 				"name": "",
 				"type": "bool",
 				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "lastClaimedAt",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
 			}
 		],
 		"stateMutability": "view"
@@ -553,6 +801,25 @@
 	},
 	{
 		"type": "function",
+		"name": "monthNumberToName",
+		"inputs": [
+			{
+				"name": "month",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"stateMutability": "pure"
+	},
+	{
+		"type": "function",
 		"name": "name",
 		"inputs": [],
 		"outputs": [
@@ -624,6 +891,45 @@
 	},
 	{
 		"type": "function",
+		"name": "stateAddress",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "stateLpTotalShare",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "stateToken",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "symbol",
 		"inputs": [],
 		"outputs": [
@@ -634,6 +940,35 @@
 			}
 		],
 		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "timestampToDate",
+		"inputs": [
+			{
+				"name": "timestamp",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "year",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "month",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "day",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "pure"
 	},
 	{
 		"type": "function",
@@ -677,6 +1012,19 @@
 	{
 		"type": "function",
 		"name": "totalRewardPerTokenStored",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "totalStateBurned",
 		"inputs": [],
 		"outputs": [
 			{
@@ -786,6 +1134,35 @@
 		"outputs": [
 			{
 				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "userBurns",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "totalBurned",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "lastClaimedMonth",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "userShare",
 				"type": "uint256",
 				"internalType": "uint256"
 			}
@@ -1219,5 +1596,16 @@
 		"type": "error",
 		"name": "ReentrancyGuardReentrantCall",
 		"inputs": []
+	},
+	{
+		"type": "error",
+		"name": "SafeERC20FailedOperation",
+		"inputs": [
+			{
+				"name": "token",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
 	}
 ]

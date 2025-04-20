@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import FluxinLogo from "../assets/FluxinLogo.png";
+import FluxinLogo from "../assets/2.png";
 
 import {  Yees_testnet } from "../ContractAddresses";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
@@ -10,7 +10,7 @@ export const useAuctionTokens = () => {
 	const prices = useContext(PriceContext);
 	const { CurrentRatioPrice } = useGeneralTokens();
 	const {
-		SwapTokens, isReversed, RatioTargetsofTokens, IsAuctionActive,
+		SwapTokens, isReversed,AuctionTime, RatioTargetsofTokens, IsAuctionActive,
 		userHashSwapped, userHasReverseSwapped, InputAmount,OutPutAmount,
 		handleAddYees,
 	} = useSwapContract();
@@ -24,6 +24,7 @@ export const useAuctionTokens = () => {
 		ContractName: contract === "OneDollar" ? "oneD" : contract, image, token, handleAddToken,
 		ratio: `1:${RatioTargetsofTokens?.[contract] || 0}`,
 		currentRatio: `1:1000`,
+		TimeLeft : AuctionTime?.[contract],
 		isReversing: isReversed?.[contract],
 		currentTokenRatio: CurrentRatioPrice[contract],
 		RatioTargetToken: RatioTargetsofTokens?.[contract] || 0,

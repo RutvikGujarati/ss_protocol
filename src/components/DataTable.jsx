@@ -12,13 +12,14 @@ import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
 import { Addresses } from "../data/AddressMapping";
 
 const DataTable = () => {
-  const { DavBalance, davHolds } = useDAvContract();
+  const {  davHolds } = useDAvContract();
   const { CheckMintBalance } = useGeneralTokens();
 
   const {
     DavRequiredAmount,
     DavBalanceRequire,
     swappingStates,
+    AirdropClaimed,
     buttonTextStates,
   } = useSwapContract();
 
@@ -62,9 +63,10 @@ const DataTable = () => {
         <table className="table table-dark">
           <thead>
             <tr>
-              <th>#</th>
+              <th></th>
               <th>Name</th>
               <th>Claim</th>
+              <th>Auction Timer</th>
               {/* <th>Liquidity</th> */}
               <th></th>
               <th>Current Ratio</th>
@@ -74,35 +76,35 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-              .filter(
-                ({
-                  userHasSwapped,
-                  name,
-                  userHasReverse,
-                  isReversing,
-                  AuctionStatus,
-                }) => {
-                  console.log(`Filter Conditions:${name}`, {
-                    userHasSwapped,
-                    userHasReverse,
-                    isReversing,
-                    AuctionStatus,
-                    // dbCheck: db >= DavRequiredAmount,
-                  });
+              //   .filter(
+              //     ({
+              //       userHasSwapped,
+              //       name,
+              //       userHasReverse,
+              //       isReversing,
+              //       AuctionStatus,
+              //     }) => {
+              //       console.log(`Filter Conditions:${name}`, {
+              //         userHasSwapped,
+              //         userHasReverse,
+              //         isReversing,
+              //         AuctionStatus,
+              //         // dbCheck: db >= DavRequiredAmount,
+              //       });
 
-                  if (AuctionStatus == "false" && isReversing == "true") {
-                    if (userHasReverse == "false") {
-                      return true;
-                    } else if (userHasSwapped && isReversing == "false") {
-                      return false;
-                    }
-                  } else if (AuctionStatus == "true") {
-                    if (userHasSwapped == "false") {
-                      return true;
-                    }
-                  }
-                }
-              )
+              //       if (AuctionStatus == "false" && isReversing == "true") {
+              //         if (userHasReverse == "false") {
+              //           return true;
+              //         } else if (userHasSwapped && isReversing == "false") {
+              //           return false;
+              //         }
+              //       } else if (AuctionStatus == "true") {
+              //         if (userHasSwapped == "false") {
+              //           return true;
+              //         }
+              //       }
+              //     }
+              //   )
               .map(
                 (
                   {
@@ -113,14 +115,13 @@ const DataTable = () => {
                     currentRatio,
                     SwapT,
                     ContractName,
-                    Liquidity,
                     isReversing,
-                    AuctionStatus,
+                    // AuctionStatus,
                     ReverseName,
-
+                    AuctionTime,
                     inputTokenAmount,
                     onlyInputAmount,
-                    handleAddToken,
+                    // handleAddToken,
                     outputToken,
                   },
                   index
@@ -149,15 +150,18 @@ const DataTable = () => {
                       <button
                         onClick={() => Checking(id, ContractName)}
                         className="btn btn-primary btn-sm swap-btn"
-                        disabled={checkingStates[id] || DavBalance == 0}
+                        disabled={checkingStates[id] || davHolds == 0}
                       >
                         {checkingStates[id]
                           ? ` AIRDROPPING...`
-                          : `${davHolds * 10000} AIRDROP`}
+                          : AirdropClaimed == "true"
+                          ? " AIRDROP CLAIMED"
+                          : `${formatWithCommas(davHolds * 10000)} `}
                       </button>
                     </td>
 
-                    <td className="text-success">{Liquidity}</td>
+                    <td className="text-success">{AuctionTime}</td>
+                    <td className="text-success"></td>
                     <td>{currentRatio}</td>
 
                     <td>
@@ -242,7 +246,7 @@ const DataTable = () => {
                           {isReversing == "false" && (
                             <button
                               onClick={() => SwapT()}
-                              disabled={swappingStates[id] || onlyInputAmount <= 0}
+                              //   disabled={swappingStates[id] || onlyInputAmount <= 0}
                               className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
                             >
                               {swappingStates[id]
@@ -252,14 +256,14 @@ const DataTable = () => {
                           )}
                         </>
 
-                        <img
+                        {/* <img
                           src={MetaMaskIcon}
                           width={20}
                           height={20}
                           onClick={handleAddToken}
                           alt="Logo"
                           style={{ cursor: "pointer" }}
-                        />
+                        /> */}
                       </div>
                     </td>
                   </tr>

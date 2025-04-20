@@ -1,3 +1,3 @@
 export const Addresses = {
-	Yees: "0x0685ceAd5D9653C29B54b2B53E2c6454C074eBdB",
+	Yees: "0xAef0d4e2f4D680fF5F364041625Cd84c96c4E5a6",
 };

@@ -37,6 +37,7 @@ export const SwapContractProvider = ({ children }) => {
   const [StateHolds, setStateHoldings] = useState("0.0");
   const [LoadingState, setLoadingState] = useState(true);
   const [InputAmount, setInputAmount] = useState({});
+  const [AuctionTime, setAuctionTime] = useState({});
   const [CurrentCycleCount, setCurrentCycleCount] = useState({});
   const [OutPutAmount, setOutputAmount] = useState({});
   const [isReversed, setIsReverse] = useState({});
@@ -50,6 +51,7 @@ export const SwapContractProvider = ({ children }) => {
   const [RatioTargetsofTokens, setRatioTargetsOfTokens] = useState({});
 
   const [userHashSwapped, setUserHashSwapped] = useState({});
+  const [AirdropClaimed, setAirdropClaimed] = useState({});
   const [userHasReverseSwapped, setUserHasReverseSwapped] = useState({});
   const [RatioValues, SetRatioTargets] = useState("1000");
 
@@ -284,6 +286,31 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching input amounts:", e);
     }
   };
+  const getAuctionTimeLeft = async () => {
+    try {
+      const results = {};
+
+      console.log("Starting loop over Addresses:", Addresses);
+
+      for (const [tokenName, TokenAddress] of Object.entries(Addresses)) {
+        console.log(`Fetching AuctionTime for ${tokenName} at ${TokenAddress}`);
+
+        const AuctionTimeInWei =
+          await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
+
+        const AuctionTime = ethers.formatEther(AuctionTimeInWei); // 👈 convert to ether
+        const AuctionTimeToDecimals = Math.floor(Number(AuctionTime));
+        console.log(`Input amount for ${tokenName}:`, AuctionTimeToDecimals);
+
+        results[tokenName] = AuctionTimeToDecimals;
+      }
+
+      console.log("Final AuctionTimes:", results);
+      setAuctionTime(results);
+    } catch (e) {
+      console.error("Error fetching AuctionTimes:", e);
+    }
+  };
   const getCurrentAuctionCycle = async () => {
     try {
       const results = {};
@@ -455,6 +482,33 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching reverse:", e);
     }
   };
+  const isAirdropClaimed = async () => {
+    try {
+      const results = {};
+
+      console.log("Starting loop over Addresses:", Addresses);
+
+      for (const [tokenName, TokenAddress] of Object.entries(Addresses)) {
+        console.log(
+          `Fetching AirdropClaimed for ${tokenName} at ${TokenAddress}`
+        );
+
+        const AirdropClaimed =
+          await AllContracts.AuctionContract.hasAirdroppedClaim(address);
+
+        const AirdropClaimedString = AirdropClaimed.toString(); // 👈 convert to string
+
+        console.log(`User has Swapped for ${tokenName}:`, AirdropClaimedString);
+
+        results[tokenName] = AirdropClaimedString;
+      }
+
+      console.log("Final AirdropClaimed:", results);
+      setAirdropClaimed(results);
+    } catch (e) {
+      console.error("Error fetching reverse:", e);
+    }
+  };
   const setDavAndStateIntoSwap = async () => {
     if (!AllContracts?.AuctionContract || !address) return;
 
@@ -473,7 +527,10 @@ export const SwapContractProvider = ({ children }) => {
 
     try {
       // Replace these params if needed based on your contract's addToken function
-      const tx = await AllContracts.AuctionContract.addToken(Yees_testnet, Yees_testnet);
+      const tx = await AllContracts.AuctionContract.addToken(
+        Yees_testnet,
+        Yees_testnet
+      );
       await tx.wait();
       console.log("Token added successfully!");
     } catch (error) {
@@ -485,7 +542,9 @@ export const SwapContractProvider = ({ children }) => {
     getInputAmount();
     getOutPutAmount();
     CheckIsAuctionActive();
+    getAuctionTimeLeft();
     CheckIsReverse();
+	isAirdropClaimed();
     HasSwappedAucton();
     HasReverseSwappedAucton();
     getCurrentAuctionCycle();
@@ -698,6 +757,8 @@ export const SwapContractProvider = ({ children }) => {
         getCachedRatioTarget,
         buttonTextStates,
         swappingStates,
+        AuctionTime,
+		AirdropClaimed,
         isReversed,
         InputAmount,
         OutPutAmount,

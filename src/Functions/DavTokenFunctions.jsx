@@ -9,7 +9,7 @@ import { ethers } from "ethers";
 import { ContractContext } from "./ContractInitialize";
 import PropTypes from "prop-types";
 import { useAccount, useChainId } from "wagmi";
-import { DAV_TESTNET, STATE_TESTNET, StateLP } from "../ContractAddresses";
+import { DAV_TESTNET, STATE_TESTNET } from "../ContractAddresses";
 
 export const DAVContext = createContext();
 
@@ -27,6 +27,8 @@ export const DavProvider = ({ children }) => {
   const [ReferralAMount, setReferralAmount] = useState("0.0");
   const [claimableAmount, setClaimableAmount] = useState("0.0");
   const [claimableAmountForBurn, setClaimableAmountForBurn] = useState("0.0");
+  const [UserPercentage, setBurnUserPercentage] = useState("0.0");
+  const [ContractPls, setContractPls] = useState("0.0");
   const [davHolds, setDavHoldings] = useState("0.0");
 
   /*** Fetch Total Supply ***/
@@ -76,16 +78,40 @@ export const DavProvider = ({ children }) => {
   }, [AllContracts, address]);
 
   const ClaimableAmountInBurn = useCallback(async () => {
-    if (!AllContracts?.StateLP || !address) return;
+    if (!AllContracts?.davContract || !address) return;
 
     try {
-      const burnInfo = await AllContracts.StateLP.userBurns(address);
-      const amountInEth = ethers.formatUnits(burnInfo.totalBurned, 18);
+      const burnInfo = await AllContracts.davContract.getRemainingClaimablePLS(address);
+      const amountInEth = ethers.formatUnits(burnInfo, 18);
       setClaimableAmountForBurn(parseFloat(amountInEth).toFixed(2));
     } catch (error) {
       console.error("Error fetching claimable amount:", error);
     }
   }, [AllContracts, address]);
+
+  const PercentageOfBurn = useCallback(async () => {
+    if (!AllContracts?.davContract || !address) return;
+
+    try {
+      const burnInfo = await AllContracts.davContract.getUserSharePercentage(address);
+      const amountInEth = ethers.formatUnits(burnInfo, 18);
+      setBurnUserPercentage(parseFloat(amountInEth).toFixed(2));
+    } catch (error) {
+      console.error("Error fetching claimable amount:", error);
+    }
+  }, [AllContracts, address]);
+
+  const TreasuryBalance = useCallback(async () => {
+    if (!AllContracts?.davContract || !address) return;
+
+    try {
+      const burnInfo = await AllContracts.davContract.getContractPLSBalance();
+      const amountInEth = ethers.formatUnits(burnInfo, 18);
+      setContractPls(parseFloat(amountInEth).toFixed(2));
+    } catch (error) {
+      console.error("Error fetching claimable amount:", error);
+    }
+  }, [AllContracts]);
 
   /*** Mint DAV Tokens ***/
   const mintDAV = async (amount, amount2) => {
@@ -131,50 +157,36 @@ export const DavProvider = ({ children }) => {
     }
   };
   const claimBurnAmount = async (price) => {
-	if (!AllContracts?.davContract) return;
-  
-	try {
-	  const priceInWei = ethers.parseUnits(price.toString(), 18); // 👈 convert to wei
-  
-	  const transaction = await AllContracts.StateLP.claimPLS(priceInWei);
-	  await transaction.wait();
-  
-	} catch (error) {
-	  console.error("Error claiming rewards:", error);
-	}
+    if (!AllContracts?.davContract) return;
+
+    try {
+      const priceInWei = ethers.parseUnits(price.toString(), 18); // 👈 convert to wei
+
+      const transaction = await AllContracts.davContract.claimPLS(priceInWei);
+      await transaction.wait();
+    } catch (error) {
+      console.error("Error claiming rewards:", error);
+    }
   };
-  const AddDavintoLP = async () => {
-	if (!AllContracts?.davContract) return;
-  
-	try {
-  
-	  const transaction = await AllContracts.StateLP.addDavToken(DAV_TESTNET);
-	  await transaction.wait();
-  
-	} catch (error) {
-	  console.error("Error claiming rewards:", error);
-	}
-  };
-  
+
   const ERC20_ABI = [
     "function approve(address spender, uint256 amount) external returns (bool)",
     "function allowance(address owner, address spender) external view returns (uint256)",
   ];
   const BurnStateTokens = async (amount) => {
-    if (!AllContracts?.StateLP) return;
+    if (!AllContracts?.davContract) return;
     try {
       setIsClicked(true);
-      const amountIn1Billion = amount * 1000000000;
-      const amountInWei = ethers.parseUnits(amountIn1Billion.toString(), 18);
+      const amountInWei = ethers.parseUnits(amount.toString(), 18);
       const tokenContract = new ethers.Contract(
         STATE_TESTNET,
         ERC20_ABI,
         signer
       );
-      const approveTx = await tokenContract.approve(StateLP, amountInWei);
+      const approveTx = await tokenContract.approve(DAV_TESTNET, amountInWei);
       await approveTx.wait();
       console.log("Approval successful");
-      const transaction = await AllContracts.StateLP.burnState(amountInWei);
+      const transaction = await AllContracts.davContract.burnState(amountInWei);
       await transaction.wait();
       setIsClicked(false);
     } catch (error) {
@@ -221,10 +233,12 @@ export const DavProvider = ({ children }) => {
       await Promise.all([
         DavSupply(),
         ClaimableAmount(),
-		ClaimableAmountInBurn(),
+        ClaimableAmountInBurn(),
+		PercentageOfBurn(),
         StateHoldings(),
+		TreasuryBalance(),
         ReferralCode(),
-		DavHoldings(),
+        DavHoldings(),
         ReferralAmountReceived(),
       ]);
     } catch (error) {
@@ -276,11 +290,12 @@ export const DavProvider = ({ children }) => {
         ReferralCodeOfUser,
         claimableAmount,
         BurnStateTokens,
-		AddDavintoLP,
-		claimableAmountForBurn,
+		UserPercentage,
+        claimableAmountForBurn,
         BurnClicked,
-		claimBurnAmount,
-		davHolds,
+		ContractPls,
+        claimBurnAmount,
+        davHolds,
         claimAmount,
       }}
     >

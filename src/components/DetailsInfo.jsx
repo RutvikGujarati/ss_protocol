@@ -9,12 +9,12 @@ import { TokensDetails } from "../data/TokensDetails";
 import pulsex from "../assets/ninemm.png";
 import { useChainId } from "wagmi";
 
-import DAVLogo from "../assets/d_logo.png";
+import DAVLogo from "../assets/1.png";
 import sDAV from "../assets/sDAV.png";
-import stateLogo from "../assets/state_logo.png";
+import stateLogo from "../assets/3.png";
+import yees from "../assets/2.png";
 import sState from "../assets/sonicstate.png";
 import { Auction_TESTNET } from "../ContractAddresses";
-import { useDAvContract } from "../Functions/DavTokenFunctions";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -35,7 +35,6 @@ const DetailsInfo = ({ selectedToken }) => {
     setDavAndStateIntoSwap,
     AddTokenIntoSwapContract,
   } = useSwapContract();
-  const { AddDavintoLP } = useDAvContract();
 
   const chainId = useChainId();
 
@@ -47,6 +46,7 @@ const DetailsInfo = ({ selectedToken }) => {
   const originalData = [
     { id: "∈", name: "DAV", logo: DAVLogo, AddToken: handleAddTokenDAV },
     { id: "±", name: "STATE", logo: stateLogo, AddToken: handleAddTokenState },
+    { id: "±", name: "Yees", logo: yees, AddToken: handleAddTokenState },
   ];
 
   const SonicData = [
@@ -240,18 +240,20 @@ const DetailsInfo = ({ selectedToken }) => {
                           />
                         </a>
                       )}
-                      <button
-                        className="btn btn-sm swap-btn btn-primary"
-                        onClick={
-                          token.tokenName === "STATE"
-                            ? () => setDavAndStateIntoSwap()
-                            : token.tokenName === "DAV"
-                            ? () => AddDavintoLP()
-                            : () => AddTokenIntoSwapContract()
-                        }
-                      >
-                        Add
-                      </button>
+                      {token.tokenName === "DAV" ? (
+                        "---------------"
+                      ) : (
+                        <button
+                          className="btn btn-sm swap-btn btn-primary"
+                          onClick={
+                            token.tokenName === "STATE"
+                              ? () => setDavAndStateIntoSwap()
+                              : () => AddTokenIntoSwapContract()
+                          }
+                        >
+                          Add
+                        </button>
+                      )}
                     </div>
                   </td>
                   <td></td>

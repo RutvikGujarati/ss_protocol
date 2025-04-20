@@ -68,8 +68,10 @@ const InfoCards = () => {
     ReferralAMount,
     claimableAmountForBurn,
     BurnClicked,
+	ContractPls,
     claimBurnAmount,
-    AddDavintoLP,
+	UserPercentage,
+    // AddDavintoLP,
     stateHolding,
     ReferralCodeOfUser,
   } = useDAvContract();
@@ -178,27 +180,12 @@ const InfoCards = () => {
   const location = useLocation();
   const isBurn = location.pathname === "/StateLp";
   const isAuction = location.pathname === "/auction";
-  const [amountOfInput, setAmountOfInput] = useState(1);
+  const [amountOfInput, setAmountOfInput] = useState("");
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
 
-  // Function to start changing the amount
-  const startChanging = (step) => {
-    // Immediate change on first press
-    setAmountOfInput((prev) => {
-      const next = prev + step;
-      return next >= 1 ? next : 1; // Prevent going below 1
-    });
-
-    // Start interval after a short delay for smoother hold
-    timeoutRef.current = setTimeout(() => {
-      intervalRef.current = setInterval(() => {
-        setAmountOfInput((prev) => {
-          const next = prev + step;
-          return next >= 1 ? next : 1; // Prevent going below 1
-        });
-      }, 100); // Adjust interval speed (100ms)
-    }, 300); // Initial delay before continuous change
+  const handleInputChangeForBurn = (e) => {
+    setAmountOfInput(e.target.value);
   };
 
   // Function to stop changing the amount
@@ -460,7 +447,7 @@ const InfoCards = () => {
                           textTransform: "capitalize",
                         }}
                       >
-                        MINIMUM REQUIREMENTS - 50 DAV TOKENS
+                        MINIMUM REQUIREMENTS - 10 DAV TOKENS
                       </h6>
                     </div>
                   </div>
@@ -472,35 +459,13 @@ const InfoCards = () => {
                     {" "}
                     <p className="mb-2 detailText ">STATE TOKENS BURN</p>
                     <div className="d-flex align-items-center gap-2">
-                      <button
-                        className="btn btn-outline-light fw-bold"
-                        onMouseDown={() => startChanging(-1)}
-                        onMouseUp={stopChanging}
-                        onMouseLeave={stopChanging}
-                        onTouchStart={() => startChanging(-1)}
-                        onTouchEnd={stopChanging}
-                        disabled={amountOfInput <= 1}
-                      >
-                        -
-                      </button>
-
                       <input
                         type="text"
+                        placeholder="Enter Value"
                         className="form-control text-center fw-bold"
-                        value={`${amountOfInput} BILLION`}
-                        readOnly
+                        value={amountOfInput}
+                        onChange={handleInputChangeForBurn}
                       />
-
-                      <button
-                        className="btn btn-outline-light fw-bold"
-                        onMouseDown={() => startChanging(1)}
-                        onMouseUp={stopChanging}
-                        onMouseLeave={stopChanging}
-                        onTouchStart={() => startChanging(1)}
-                        onTouchEnd={stopChanging}
-                      >
-                        +
-                      </button>
                     </div>
                     <button
                       onClick={() => BurnStateTokens(amountOfInput)}
@@ -519,7 +484,7 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      DOUBLE YOUR INCOME IF YOU BURN VIA STATE LP
+                      PERCENTAGE BURN {UserPercentage}%
                     </h6>
                   </div>
                 </div>
@@ -531,9 +496,7 @@ const InfoCards = () => {
                     <p className="mb-2 detailText ">CLAIM PLS</p>
                     <div className="d-flex  justify-content-center">
                       <h5 className="mt-2">
-                        {(claimableAmountForBurn * stateUsdPrice * 2).toFixed(
-                          2
-                        )}
+                        {claimableAmountForBurn}
                       </h5>
                     </div>
                     <button
@@ -544,6 +507,17 @@ const InfoCards = () => {
                     >
                       {load ? "Claiming..." : "Claim"}
                     </button>
+                  </div>
+                  <div className="carddetails2 ">
+                    <h6
+                      className="detailText mb-0"
+                      style={{
+                        fontSize: "14px",
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      TREASURY PLS - {ContractPls} PLS
+                    </h6>
                   </div>
                 </div>
               </div>
