@@ -76,35 +76,35 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-              //   .filter(
-              //     ({
-              //       userHasSwapped,
-              //       name,
-              //       userHasReverse,
-              //       isReversing,
-              //       AuctionStatus,
-              //     }) => {
-              //       console.log(`Filter Conditions:${name}`, {
-              //         userHasSwapped,
-              //         userHasReverse,
-              //         isReversing,
-              //         AuctionStatus,
-              //         // dbCheck: db >= DavRequiredAmount,
-              //       });
+                .filter(
+                  ({
+                    userHasSwapped,
+                    name,
+                    userHasReverse,
+                    isReversing,
+                    AuctionStatus,
+                  }) => {
+                    console.log(`Filter Conditions:${name}`, {
+                      userHasSwapped,
+                      userHasReverse,
+                      isReversing,
+                      AuctionStatus,
+                      // dbCheck: db >= DavRequiredAmount,
+                    });
 
-              //       if (AuctionStatus == "false" && isReversing == "true") {
-              //         if (userHasReverse == "false") {
-              //           return true;
-              //         } else if (userHasSwapped && isReversing == "false") {
-              //           return false;
-              //         }
-              //       } else if (AuctionStatus == "true") {
-              //         if (userHasSwapped == "false") {
-              //           return true;
-              //         }
-              //       }
-              //     }
-              //   )
+                    if (AuctionStatus == "false" && isReversing == "true") {
+                      if (userHasReverse == "false") {
+                        return true;
+                      } else if (userHasSwapped && isReversing == "false") {
+                        return false;
+                      }
+                    } else if (AuctionStatus == "true") {
+                      if (userHasSwapped == "false") {
+                        return true;
+                      }
+                    }
+                  }
+                )
               .map(
                 (
                   {
