@@ -19,6 +19,8 @@ export const useAuctionTokens = () => {
 		["Yees", "Yees", FluxinLogo, Yees_testnet, handleAddYees],
 
 	];
+
+	// console.log("auction yees time",AuctionTime["Yees"])
 	return tokenConfigs.map(([id, contract, image, token, handleAddToken]) => ({
 		id, name: id, Pname: `${id} - State - ${id}`, ReverseName: `State - ${id}`,
 		ContractName: contract === "OneDollar" ? "oneD" : contract, image, token, handleAddToken,

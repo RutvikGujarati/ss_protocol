@@ -298,8 +298,7 @@ export const SwapContractProvider = ({ children }) => {
         const AuctionTimeInWei =
           await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
 
-        const AuctionTime = ethers.formatEther(AuctionTimeInWei); // 👈 convert to ether
-        const AuctionTimeToDecimals = Math.floor(Number(AuctionTime));
+        const AuctionTimeToDecimals = Math.floor(Number(AuctionTimeInWei));
         console.log(`Input amount for ${tokenName}:`, AuctionTimeToDecimals);
 
         results[tokenName] = AuctionTimeToDecimals;

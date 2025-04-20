@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
-import MetaMaskIcon from "../assets/metamask-icon.png";
+// import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useState } from "react";
@@ -118,7 +118,7 @@ const DataTable = () => {
                     isReversing,
                     // AuctionStatus,
                     ReverseName,
-                    AuctionTime,
+                    TimeLeft,
                     inputTokenAmount,
                     onlyInputAmount,
                     // handleAddToken,
@@ -160,7 +160,7 @@ const DataTable = () => {
                       </button>
                     </td>
 
-                    <td className="text-success">{AuctionTime}</td>
+                    <td >{TimeLeft}</td>
                     <td className="text-success"></td>
                     <td>{currentRatio}</td>
 
