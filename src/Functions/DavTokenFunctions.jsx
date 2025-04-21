@@ -128,7 +128,7 @@ export const DavProvider = ({ children }) => {
       if (chainId === 146) {
         cost = ethers.parseEther((amount * 100).toString());
       } else {
-        cost = ethers.parseEther((amount * 1000000).toString());
+        cost = ethers.parseEther((amount * 100000).toString());
       }
 
       if (!amount2 || amount2.trim() === "") {
