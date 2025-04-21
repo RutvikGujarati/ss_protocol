@@ -12,7 +12,7 @@ export const useAuctionTokens = () => {
 	const {
 		SwapTokens, isReversed,AuctionTime, RatioTargetsofTokens, IsAuctionActive,
 		userHashSwapped, userHasReverseSwapped, InputAmount,OutPutAmount,
-		handleAddYees,
+		handleAddYees,AirdropClaimed
 	} = useSwapContract();
 
 	const tokenConfigs = [
@@ -27,6 +27,7 @@ export const useAuctionTokens = () => {
 		ratio: `1:${RatioTargetsofTokens?.[contract] || 0}`,
 		currentRatio: `1:1000`,
 		TimeLeft : AuctionTime?.[contract],
+		AirdropClaimedForToken:AirdropClaimed[contract],
 		isReversing: isReversed?.[contract],
 		currentTokenRatio: CurrentRatioPrice[contract],
 		RatioTargetToken: RatioTargetsofTokens?.[contract] || 0,

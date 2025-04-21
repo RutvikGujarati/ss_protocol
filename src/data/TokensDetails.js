@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import {
-	DAV_TOKEN_ADDRESS, DAV_TOKEN_SONIC_ADDRESS,
+	DAV_TESTNET,
+	DAV_TOKEN_SONIC_ADDRESS,
 	STATE_TOKEN_ADDRESS, STATE_TOKEN_SONIC_ADDRESS,
 	Yees_testnet
 } from "../ContractAddresses";
@@ -23,7 +24,7 @@ export const TokensDetails = () => {
 			name: "DAV",
 			key: "DAV",
 			displayName: "pDAV",
-			address: DAV_TOKEN_ADDRESS,
+			address: DAV_TESTNET,
 			supply: "5,000,000.00",
 			price: 0,
 			actions: {
@@ -80,7 +81,7 @@ export const TokensDetails = () => {
 			key: shortenAddress(token.address),
 			name: token.displayName || token.name,
 			Price: token.price,
-
+			isSupported: swap.supportedToken[key],
 			address: token.address,
 			Cycle: swap.CurrentCycleCount[key],
 			handleAddTokens: () => swap[`handleAdd${key}`](),
@@ -90,7 +91,7 @@ export const TokensDetails = () => {
 				...(token.actions || {}), // Include any custom actions (e.g., for DAV)
 				ReanounceContract: swap[`Reanounce${key}Contract`] || swap.ReanounceContract,
 				ReanounceSwapContract: swap[`Renounce${key}Swap`],
-				
+
 				AddTokenToContract: () => swap.AddTokensToContract(token.address, STATE_TOKEN_ADDRESS, CurrentRatioPrice[key]),
 				...(isState && {
 					AddTokenToContract: swap.AddTokens,

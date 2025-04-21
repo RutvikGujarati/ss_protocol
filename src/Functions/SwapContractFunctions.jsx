@@ -37,6 +37,7 @@ export const SwapContractProvider = ({ children }) => {
   const [StateHolds, setStateHoldings] = useState("0.0");
   const [LoadingState, setLoadingState] = useState(true);
   const [InputAmount, setInputAmount] = useState({});
+  const [AirDropAmount, setAirdropAmount] = useState("0.0");
   const [AuctionTime, setAuctionTime] = useState({});
   const [CurrentCycleCount, setCurrentCycleCount] = useState({});
   const [OutPutAmount, setOutputAmount] = useState({});
@@ -51,6 +52,9 @@ export const SwapContractProvider = ({ children }) => {
   const [RatioTargetsofTokens, setRatioTargetsOfTokens] = useState({});
 
   const [userHashSwapped, setUserHashSwapped] = useState({});
+  const [DavAddress, setDavAddress] = useState("");
+  const [supportedToken, setIsSupported] = useState(false);
+  const [StateAddress, setStateAddress] = useState("");
   const [AirdropClaimed, setAirdropClaimed] = useState({});
   const [userHasReverseSwapped, setUserHasReverseSwapped] = useState({});
   const [RatioValues, SetRatioTargets] = useState("1000");
@@ -286,6 +290,20 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching input amounts:", e);
     }
   };
+  const getAirdropAmount = async () => {
+    try {
+      const inputAmountWei =
+        await AllContracts.AuctionContract.getClaimableReward(address);
+
+      const inputAmount = ethers.formatEther(inputAmountWei); // 👈 convert to ether
+      const inputAmountNoDecimals = Math.floor(Number(inputAmount));
+
+      console.log("Final input amounts:", inputAmountNoDecimals);
+      setAirdropAmount(inputAmountNoDecimals);
+    } catch (e) {
+      console.error("Error fetching input amounts:", e);
+    }
+  };
   const getAuctionTimeLeft = async () => {
     try {
       const results = {};
@@ -298,10 +316,14 @@ export const SwapContractProvider = ({ children }) => {
         const AuctionTimeInWei =
           await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
 
-        const AuctionTimeToDecimals = Math.floor(Number(AuctionTimeInWei));
-        console.log(`Input amount for ${tokenName}:`, AuctionTimeToDecimals);
+        const totalSeconds = Math.floor(Number(AuctionTimeInWei));
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
 
-        results[tokenName] = AuctionTimeToDecimals;
+        const formattedTime = `${minutes}m ${seconds}s`;
+        console.log(`Auction time left for ${tokenName}:`, formattedTime);
+
+        results[tokenName] = formattedTime;
       }
 
       console.log("Final AuctionTimes:", results);
@@ -310,6 +332,7 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching AuctionTimes:", e);
     }
   };
+
   const getCurrentAuctionCycle = async () => {
     try {
       const results = {};
@@ -497,7 +520,10 @@ export const SwapContractProvider = ({ children }) => {
 
         const AirdropClaimedString = AirdropClaimed.toString(); // 👈 convert to string
 
-        console.log(`User has Swapped for ${tokenName}:`, AirdropClaimedString);
+        console.log(
+          `User has Claimed Airdrop for ${tokenName}:`,
+          AirdropClaimedString
+        );
 
         results[tokenName] = AirdropClaimedString;
       }
@@ -508,6 +534,49 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching reverse:", e);
     }
   };
+  const AddressesFromContract = async () => {
+    if (!AllContracts?.AuctionContract) {
+      console.warn("AuctionContract not found");
+      return;
+    }
+
+    try {
+      const davAddress = await AllContracts.AuctionContract.dav();
+      const stateAddress = await AllContracts.AuctionContract.stateToken();
+
+      console.log("DAV:", davAddress);
+      console.log("State:", stateAddress);
+
+      setDavAddress(davAddress);
+      setStateAddress(stateAddress);
+    } catch (error) {
+      console.error("Error fetching addresses:", error);
+    }
+  };
+  const isTokenSupporteed = async () => {
+    if (!AllContracts?.AuctionContract) {
+      console.warn("AuctionContract not found");
+      return;
+    }
+    const results = {};
+
+    try {
+      for (const [tokenName, TokenAddress] of Object.entries(Addresses)) {
+        console.log(
+          `Fetching AirdropClaimed for ${tokenName} at ${TokenAddress}`
+        );
+        const InputTokenAddress =
+          await AllContracts.AuctionContract.isTokenSupported(TokenAddress);
+        const inputaddressString = InputTokenAddress.toString();
+        results[tokenName] = inputaddressString;
+      }
+
+      setIsSupported(results);
+    } catch (error) {
+      console.error("Error fetching addresses:", error);
+    }
+  };
+
   const setDavAndStateIntoSwap = async () => {
     if (!AllContracts?.AuctionContract || !address) return;
 
@@ -542,8 +611,11 @@ export const SwapContractProvider = ({ children }) => {
     getOutPutAmount();
     CheckIsAuctionActive();
     getAuctionTimeLeft();
+    getAirdropAmount();
     CheckIsReverse();
-	isAirdropClaimed();
+    isAirdropClaimed();
+    AddressesFromContract();
+    isTokenSupporteed();
     HasSwappedAucton();
     HasReverseSwappedAucton();
     getCurrentAuctionCycle();
@@ -716,7 +788,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddTokensState = () =>
     handleAddToken(STATE_TOKEN_SONIC_ADDRESS, "sState");
   const handleAddYees = () => handleAddToken(Yees_testnet, "Yees");
-
+  //   console.log("dav and state address", DavAddress, StateAddress);
   return (
     <SwapContractContext.Provider
       value={{
@@ -754,12 +826,17 @@ export const SwapContractProvider = ({ children }) => {
         RatioValues,
         // setReverseTime,
         getCachedRatioTarget,
+
         buttonTextStates,
+        DavAddress,
+        StateAddress,
         swappingStates,
         AuctionTime,
-		AirdropClaimed,
+        AirdropClaimed,
         isReversed,
         InputAmount,
+		AirDropAmount,
+        supportedToken,
         OutPutAmount,
         CurrentCycleCount,
         // userHasReverseSwapped,

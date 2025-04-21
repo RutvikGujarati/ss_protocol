@@ -19,8 +19,8 @@ const DataTable = () => {
     DavRequiredAmount,
     DavBalanceRequire,
     swappingStates,
-    AirdropClaimed,
     buttonTextStates,
+	AirDropAmount,
   } = useSwapContract();
 
   const location = useLocation();
@@ -116,6 +116,7 @@ const DataTable = () => {
                     SwapT,
                     ContractName,
                     isReversing,
+					AirdropClaimedForToken,
                     // AuctionStatus,
                     ReverseName,
                     TimeLeft,
@@ -154,9 +155,9 @@ const DataTable = () => {
                       >
                         {checkingStates[id]
                           ? ` AIRDROPPING...`
-                          : AirdropClaimed == "true"
+                          : AirdropClaimedForToken == "true"
                           ? " AIRDROP CLAIMED"
-                          : `${formatWithCommas(davHolds * 10000)} `}
+                          : `${formatWithCommas(AirDropAmount)} `}
                       </button>
                     </td>
 

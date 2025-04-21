@@ -34,6 +34,9 @@ const DetailsInfo = ({ selectedToken }) => {
     handleAddTokensState,
     setDavAndStateIntoSwap,
     AddTokenIntoSwapContract,
+    DavAddress,
+    StateAddress,
+    supportedToken,
   } = useSwapContract();
 
   const chainId = useChainId();
@@ -242,14 +245,24 @@ const DetailsInfo = ({ selectedToken }) => {
                       )}
                       {token.tokenName === "DAV" ? (
                         "---------------"
+                      ) : token.tokenName === "STATE" ? (
+                        DavAddress ===
+                        "0x0000000000000000000000000000000000000000" ? (
+                          <button
+                            className="btn btn-sm swap-btn btn-primary"
+                            onClick={() => setDavAndStateIntoSwap()}
+                          >
+                            Add
+                          </button>
+                        ) : (
+                          <span className="text-green-500">ADDED</span>
+                        )
+                      ) : token.isSupported === "true" ? (
+                        <span className="text-green-500">ADDED</span>
                       ) : (
                         <button
                           className="btn btn-sm swap-btn btn-primary"
-                          onClick={
-                            token.tokenName === "STATE"
-                              ? () => setDavAndStateIntoSwap()
-                              : () => AddTokenIntoSwapContract()
-                          }
+                          onClick={() => AddTokenIntoSwapContract()}
                         >
                           Add
                         </button>

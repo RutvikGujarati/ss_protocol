@@ -9,7 +9,6 @@ import { useLocation } from "react-router-dom";
 import PLSLogo from "../assets/pls1.png";
 import BNBLogo from "../assets/bnb.png";
 import sonic from "../assets/S_token.svg";
-import MetaMaskIcon from "../assets/metamask-icon.png";
 import { formatWithCommas } from "./DetailsInfo";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import DotAnimation from "../Animations/Animation";
@@ -68,9 +67,10 @@ const InfoCards = () => {
     ReferralAMount,
     claimableAmountForBurn,
     BurnClicked,
-	ContractPls,
+	Claiming,
+    ContractPls,
     claimBurnAmount,
-	UserPercentage,
+    UserPercentage,
     // AddDavintoLP,
     stateHolding,
     ReferralCodeOfUser,
@@ -125,7 +125,7 @@ const InfoCards = () => {
       : { width: "110px", height: "140px" }; // Default size
   };
 
-  const { handleAddTokenDAV, CalculationOfCost, TotalCost } = useSwapContract();
+  const {  CalculationOfCost, TotalCost } = useSwapContract();
   const [amount, setAmount] = useState("");
   const [Refferalamount, setReferralAmount] = useState("");
   const [load, setLoad] = useState(false);
@@ -313,7 +313,7 @@ const InfoCards = () => {
                         </div>
                       </div>
 
-                      <div className="mb-0 mx-1">
+                      {/* <div className="mb-0 mx-1">
                         <img
                           src={MetaMaskIcon}
                           width={20}
@@ -322,7 +322,7 @@ const InfoCards = () => {
                           style={{ cursor: "pointer", marginLeft: "5px" }}
                           onClick={handleAddTokenDAV}
                         />
-                      </div>
+                      </div> */}
                     </div>
                     <div className="carddetails2 mt-1">
                       <h6
@@ -373,7 +373,7 @@ const InfoCards = () => {
                           <span className="detailText">
                             Affiliate com received -{" "}
                           </span>
-                          <span>{ReferralAMount}</span>
+                          <span>{formatWithCommas(ReferralAMount)}</span>
                         </p>
                         <p className="mb-1 d-flex align-items-center gap-2 flex-wrap">
                           <span className="detailText">
@@ -495,17 +495,15 @@ const InfoCards = () => {
                     {" "}
                     <p className="mb-2 detailText ">CLAIM PLS</p>
                     <div className="d-flex  justify-content-center">
-                      <h5 className="mt-2">
-                        {claimableAmountForBurn}
-                      </h5>
+                      <h5 className="mt-2">{claimableAmountForBurn}</h5>
                     </div>
                     <button
-                      onClick={() => claimBurnAmount(stateUsdPrice)}
+                      onClick={() => claimBurnAmount()}
                       style={{ width: customWidth || "100%" }}
                       className="btn btn-primary mt-4 btn-sm d-flex justify-content-center align-items-center"
-                      disabled={load}
+                      disabled={Claiming}
                     >
-                      {load ? "Claiming..." : "Claim"}
+                      {Claiming ? "Claiming..." : "Claim"}
                     </button>
                   </div>
                   <div className="carddetails2 ">
@@ -516,7 +514,17 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      TREASURY PLS - {ContractPls} PLS
+                      TREASURY PLS - {formatWithCommas(ContractPls)} PLS
+                    </h6>
+                    <h6
+                      className="detailText mb-0"
+                      style={{
+                        fontSize: "14px",
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      TREASURY CLAIM PERIOD -
+                      {formatWithCommas((ContractPls / 12).toFixed(2))} PLS
                     </h6>
                   </div>
                 </div>

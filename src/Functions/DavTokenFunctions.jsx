@@ -21,6 +21,7 @@ export const DavProvider = ({ children }) => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [BurnClicked, setIsClicked] = useState(false);
+  const [Claiming, setClaiming] = useState(false);
   const [Supply, setSupply] = useState("0.0");
   const [stateHolding, setStateHolding] = useState("0.0");
   const [ReferralCodeOfUser, setReferralCode] = useState("0.0");
@@ -81,7 +82,9 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract || !address) return;
 
     try {
-      const burnInfo = await AllContracts.davContract.getRemainingClaimablePLS(address);
+      const burnInfo = await AllContracts.davContract.getRemainingClaimablePLS(
+        address
+      );
       const amountInEth = ethers.formatUnits(burnInfo, 18);
       setClaimableAmountForBurn(parseFloat(amountInEth).toFixed(2));
     } catch (error) {
@@ -93,9 +96,12 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract || !address) return;
 
     try {
-      const burnInfo = await AllContracts.davContract.getUserSharePercentage(address);
-      const amountInEth = ethers.formatUnits(burnInfo, 18);
-      setBurnUserPercentage(parseFloat(amountInEth).toFixed(2));
+      const burnInfo = await AllContracts.davContract.getUserSharePercentage(
+        address
+      );
+
+      console.log("user burn percentage", ethers.formatUnits(burnInfo, 2));
+      setBurnUserPercentage(ethers.formatUnits(burnInfo, 0)); // adjust decimals if needed
     } catch (error) {
       console.error("Error fetching claimable amount:", error);
     }
@@ -156,16 +162,19 @@ export const DavProvider = ({ children }) => {
       console.error("Error claiming rewards:", error);
     }
   };
-  const claimBurnAmount = async (price) => {
+  const claimBurnAmount = async () => {
     if (!AllContracts?.davContract) return;
 
     try {
-      const priceInWei = ethers.parseUnits(price.toString(), 18); // 👈 convert to wei
-
-      const transaction = await AllContracts.davContract.claimPLS(priceInWei);
+      setClaiming(true);
+      const transaction = await AllContracts.davContract.claimPLS();
       await transaction.wait();
+      setClaiming(false);
     } catch (error) {
       console.error("Error claiming rewards:", error);
+      setClaiming(false);
+    } finally {
+      setClaiming(false);
     }
   };
 
@@ -234,9 +243,9 @@ export const DavProvider = ({ children }) => {
         DavSupply(),
         ClaimableAmount(),
         ClaimableAmountInBurn(),
-		PercentageOfBurn(),
+        PercentageOfBurn(),
         StateHoldings(),
-		TreasuryBalance(),
+        TreasuryBalance(),
         ReferralCode(),
         DavHoldings(),
         ReferralAmountReceived(),
@@ -273,6 +282,7 @@ export const DavProvider = ({ children }) => {
     if (!isConnected) return;
     if (!AllContracts?.davContract) return;
     fetchData();
+    PercentageOfBurn();
   }, [isConnected, AllContracts, address]);
 
   DavProvider.propTypes = {
@@ -290,11 +300,12 @@ export const DavProvider = ({ children }) => {
         ReferralCodeOfUser,
         claimableAmount,
         BurnStateTokens,
-		UserPercentage,
+        UserPercentage,
         claimableAmountForBurn,
         BurnClicked,
-		ContractPls,
+        ContractPls,
         claimBurnAmount,
+		Claiming,
         davHolds,
         claimAmount,
       }}
