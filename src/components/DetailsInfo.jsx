@@ -35,8 +35,6 @@ const DetailsInfo = ({ selectedToken }) => {
     setDavAndStateIntoSwap,
     AddTokenIntoSwapContract,
     DavAddress,
-    StateAddress,
-    supportedToken,
   } = useSwapContract();
 
   const chainId = useChainId();

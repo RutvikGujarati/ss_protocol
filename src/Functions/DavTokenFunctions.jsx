@@ -29,6 +29,7 @@ export const DavProvider = ({ children }) => {
   const [claimableAmount, setClaimableAmount] = useState("0.0");
   const [claimableAmountForBurn, setClaimableAmountForBurn] = useState("0.0");
   const [UserPercentage, setBurnUserPercentage] = useState("0.0");
+  const [AllUserPercentage, setAllBurnUserPercentage] = useState("0.0");
   const [ContractPls, setContractPls] = useState("0.0");
   const [davHolds, setDavHoldings] = useState("0.0");
 
@@ -82,7 +83,7 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract || !address) return;
 
     try {
-      const burnInfo = await AllContracts.davContract.getRemainingClaimablePLS(
+      const burnInfo = await AllContracts.davContract.getClaimablePLS(
         address
       );
       const amountInEth = ethers.formatUnits(burnInfo, 18);
@@ -100,8 +101,21 @@ export const DavProvider = ({ children }) => {
         address
       );
 
-      console.log("user burn percentage", ethers.formatUnits(burnInfo, 2));
+      console.log("user burn percentage", ethers.formatUnits(burnInfo, 0));
       setBurnUserPercentage(ethers.formatUnits(burnInfo, 0)); // adjust decimals if needed
+    } catch (error) {
+      console.error("Error fetching claimable amount:", error);
+    }
+  }, [AllContracts, address]);
+  const PercentageOfTotalBurn = useCallback(async () => {
+    if (!AllContracts?.davContract || !address) return;
+
+    try {
+      const burnInfo =
+        await AllContracts.davContract.getAllUsersBurnedPercentageSum();
+
+      console.log("user burn percentage", ethers.formatUnits(burnInfo, 0));
+      setAllBurnUserPercentage(ethers.formatUnits(burnInfo, 0)); // adjust decimals if needed
     } catch (error) {
       console.error("Error fetching claimable amount:", error);
     }
@@ -111,7 +125,7 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract || !address) return;
 
     try {
-      const burnInfo = await AllContracts.davContract.getContractPLSBalance();
+      const burnInfo = await AllContracts.davContract.stateLpTotalShare();
       const amountInEth = ethers.formatUnits(burnInfo, 18);
       setContractPls(parseFloat(amountInEth).toFixed(2));
     } catch (error) {
@@ -128,7 +142,7 @@ export const DavProvider = ({ children }) => {
       if (chainId === 146) {
         cost = ethers.parseEther((amount * 100).toString());
       } else {
-        cost = ethers.parseEther((amount * 100000).toString());
+        cost = ethers.parseEther((amount * 1000000).toString());
       }
 
       if (!amount2 || amount2.trim() === "") {
@@ -248,6 +262,7 @@ export const DavProvider = ({ children }) => {
         TreasuryBalance(),
         ReferralCode(),
         DavHoldings(),
+		PercentageOfTotalBurn(),
         ReferralAmountReceived(),
       ]);
     } catch (error) {
@@ -305,7 +320,8 @@ export const DavProvider = ({ children }) => {
         BurnClicked,
         ContractPls,
         claimBurnAmount,
-		Claiming,
+        Claiming,
+		AllUserPercentage,
         davHolds,
         claimAmount,
       }}

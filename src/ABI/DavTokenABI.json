@@ -252,6 +252,11 @@
 				"name": "timestamp",
 				"type": "uint256",
 				"internalType": "uint256"
+			},
+			{
+				"name": "claimed",
+				"type": "bool",
+				"internalType": "bool"
 			}
 		],
 		"stateMutability": "view"
@@ -272,25 +277,6 @@
 	{
 		"type": "function",
 		"name": "canClaim",
-		"inputs": [
-			{
-				"name": "user",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool",
-				"internalType": "bool"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "canClaimNow",
 		"inputs": [
 			{
 				"name": "user",
@@ -420,33 +406,39 @@
 	},
 	{
 		"type": "function",
+		"name": "getAllUsersBurnedPercentageSum",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getClaimablePLS",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "getContractPLSBalance",
-		"inputs": [],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "getCurrentDayOfMonth",
-		"inputs": [],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "getCurrentMonthNumber",
 		"inputs": [],
 		"outputs": [
 			{
@@ -474,68 +466,6 @@
 		"type": "function",
 		"name": "getHolderFunds",
 		"inputs": [],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "getMissedMonthsAndUnclaimedPLS",
-		"inputs": [
-			{
-				"name": "user",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "missedMonths",
-				"type": "uint256",
-				"internalType": "uint256"
-			},
-			{
-				"name": "totalPLS",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "getNextClaimDate",
-		"inputs": [
-			{
-				"name": "user",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "string",
-				"internalType": "string"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "getRemainingClaimablePLS",
-		"inputs": [
-			{
-				"name": "user",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
 		"outputs": [
 			{
 				"name": "",
@@ -674,19 +604,6 @@
 	},
 	{
 		"type": "function",
-		"name": "isOnOrAfter20th",
-		"inputs": [],
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool",
-				"internalType": "bool"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
 		"name": "isValidReferralCode",
 		"inputs": [
 			{
@@ -798,25 +715,6 @@
 			}
 		],
 		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "monthNumberToName",
-		"inputs": [
-			{
-				"name": "month",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "string",
-				"internalType": "string"
-			}
-		],
-		"stateMutability": "pure"
 	},
 	{
 		"type": "function",
@@ -940,35 +838,6 @@
 			}
 		],
 		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "timestampToDate",
-		"inputs": [
-			{
-				"name": "timestamp",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"outputs": [
-			{
-				"name": "year",
-				"type": "uint256",
-				"internalType": "uint256"
-			},
-			{
-				"name": "month",
-				"type": "uint256",
-				"internalType": "uint256"
-			},
-			{
-				"name": "day",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "pure"
 	},
 	{
 		"type": "function",
@@ -1131,6 +1000,25 @@
 		"type": "function",
 		"name": "unallocatedHolderDust",
 		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "userBurnedAmount",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
 				"name": "",

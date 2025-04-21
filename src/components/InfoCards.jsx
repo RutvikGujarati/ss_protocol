@@ -67,9 +67,10 @@ const InfoCards = () => {
     ReferralAMount,
     claimableAmountForBurn,
     BurnClicked,
-	Claiming,
+    Claiming,
     ContractPls,
     claimBurnAmount,
+    AllUserPercentage,
     UserPercentage,
     // AddDavintoLP,
     stateHolding,
@@ -125,7 +126,7 @@ const InfoCards = () => {
       : { width: "110px", height: "140px" }; // Default size
   };
 
-  const {  CalculationOfCost, TotalCost } = useSwapContract();
+  const { CalculationOfCost, TotalCost } = useSwapContract();
   const [amount, setAmount] = useState("");
   const [Refferalamount, setReferralAmount] = useState("");
   const [load, setLoad] = useState(false);
@@ -484,7 +485,16 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      PERCENTAGE BURN {UserPercentage}%
+                      % STATE TOKENS BURNED BY YOU - {UserPercentage}%
+                    </h6>
+                    <h6
+                      className="detailText mb-0"
+                      style={{
+                        fontSize: "14px",
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      % STATE TOKENS BURNED IN TOTAL - {AllUserPercentage}%
                     </h6>
                   </div>
                 </div>
@@ -493,7 +503,7 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
                   <div className="p-2 pt-3 pb-2">
                     {" "}
-                    <p className="mb-2 detailText ">CLAIM PLS</p>
+                    <p className="mb-2 detailText ">YOUR CLAIM</p>
                     <div className="d-flex  justify-content-center">
                       <h5 className="mt-2">{claimableAmountForBurn}</h5>
                     </div>
@@ -514,7 +524,7 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      TREASURY PLS - {formatWithCommas(ContractPls)} PLS
+                      TREASURY - {formatWithCommas(ContractPls)} PLS
                     </h6>
                     <h6
                       className="detailText mb-0"
@@ -523,7 +533,7 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      TREASURY CLAIM PERIOD -
+                      CLAIMABLE TREASURY -{" "}
                       {formatWithCommas((ContractPls / 12).toFixed(2))} PLS
                     </h6>
                   </div>
