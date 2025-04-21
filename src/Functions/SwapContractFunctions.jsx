@@ -298,7 +298,7 @@ export const SwapContractProvider = ({ children }) => {
       const inputAmount = ethers.formatEther(inputAmountWei); // 👈 convert to ether
       const inputAmountNoDecimals = Math.floor(Number(inputAmount));
 
-      console.log("Final input amounts:", inputAmountNoDecimals);
+      console.log("Final Airdrop amounts:", inputAmountNoDecimals);
       setAirdropAmount(inputAmountNoDecimals);
     } catch (e) {
       console.error("Error fetching input amounts:", e);
