@@ -234,6 +234,7 @@ const InfoCards = () => {
 
                   <div className="mb-2 d-flex justify-content-center align-items-center gap-2">
                     <label className="mb-0 detailText">Mint DAV Token</label>
+
                     <input
                       type="text"
                       placeholder="Enter Value"
@@ -244,16 +245,26 @@ const InfoCards = () => {
                     />
                   </div>
 
-                  <h6 className="detailAmount ">
-                    1 DAV = {chainId == 943 ? "1000000 PLS" : "100 SONIC"}
+                  <h6 className="detailAmount justify-content-start mx-5 d-flex gap-5">
+                    <span>
+                      1 DAV = {chainId == 943 ? "1000000 PLS" : "100 SONIC"}
+                    </span>
+                    <span className="mx-4">
+                      {TotalCost
+                        ? formatNumber(ethers.formatUnits(TotalCost, 18))
+                        : "0"}{" "}
+                      {chainId == 943 ? "PLS" : "SONIC"}
+                    </span>
                   </h6>
 
-                  <h6 className="detailAmount mb-3">
+                  <h6></h6>
+
+                  {/* <h6 className="detailAmount mb-3">
                     {TotalCost
                       ? formatNumber(ethers.formatUnits(TotalCost, 18))
                       : "0"}{" "}
                     {chainId == 943 ? "PLS" : "SONIC"}
-                  </h6>
+                  </h6> */}
                   <div className="d-flex justify-content-center">
                     <button
                       onClick={handleMint}
