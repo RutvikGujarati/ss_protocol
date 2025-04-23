@@ -51,6 +51,18 @@ const Header = () => {
                   {/* <span className="active-dot"></span> */}
                 </NavLink>
               </li>
+              <li className="nav-item mx-2">
+                <NavLink
+                  className={({ isActive }) =>
+                    isActive
+                      ? "nav-link active-link text-light"
+                      : "nav-link text-light"
+                  }
+                  to="/AddToken"
+                >
+                  Add Token
+                </NavLink>
+              </li>
 
               <li className="nav-item mx-2">
                 <NavLink
