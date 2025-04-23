@@ -1,9 +1,8 @@
 // SwapContractContext.js
-import { createContext, useContext, useState, useEffect, useRef } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { ethers } from "ethers";
 import PropTypes from "prop-types";
 import toast from "react-hot-toast";
-import { PriceContext } from "../api/StatePrice";
 import { ContractContext } from "./ContractInitialize";
 import {
   Auction_TESTNET,
@@ -14,7 +13,6 @@ import {
   STATE_TOKEN_SONIC_ADDRESS,
   Yees_testnet,
 } from "../ContractAddresses";
-import { useGeneralTokens } from "./GeneralTokensFunctions";
 import { useAccount, useChainId } from "wagmi";
 import { Addresses } from "../data/AddressMapping";
 
@@ -23,9 +21,7 @@ const SwapContractContext = createContext();
 export const useSwapContract = () => useContext(SwapContractContext);
 
 export const SwapContractProvider = ({ children }) => {
-  const { stateUsdPrice } = useContext(PriceContext);
   const chainId = useChainId();
-  const { CurrentRatioPrice } = useGeneralTokens();
   const { loading, provider, signer, AllContracts } =
     useContext(ContractContext);
   const { address } = useAccount();
@@ -34,8 +30,6 @@ export const SwapContractProvider = ({ children }) => {
 
   const [TotalCost, setTotalCost] = useState(null);
 
-  const [StateHolds, setStateHoldings] = useState("0.0");
-  const [LoadingState, setLoadingState] = useState(true);
   const [InputAmount, setInputAmount] = useState({});
   const [AirDropAmount, setAirdropAmount] = useState("0.0");
   const [AuctionTime, setAuctionTime] = useState({});
@@ -44,12 +38,8 @@ export const SwapContractProvider = ({ children }) => {
   const [isReversed, setIsReverse] = useState({});
   const [IsAuctionActive, setisAuctionActive] = useState({});
 
-  const [TotalStateHoldsInUS, setTotalStateHoldsInUS] = useState("0.00");
-
   const [buttonTextStates, setButtonTextStates] = useState({});
   const [swappingStates, setSwappingStates] = useState({});
-
-  const [RatioTargetsofTokens, setRatioTargetsOfTokens] = useState({});
 
   const [userHashSwapped, setUserHashSwapped] = useState({});
   const [DavAddress, setDavAddress] = useState("");
@@ -57,207 +47,12 @@ export const SwapContractProvider = ({ children }) => {
   const [StateAddress, setStateAddress] = useState("");
   const [AirdropClaimed, setAirdropClaimed] = useState({});
   const [userHasReverseSwapped, setUserHasReverseSwapped] = useState({});
-  const [RatioValues, SetRatioTargets] = useState("1000");
-
-  const contractDetails = [
-    { name: "Fluxin", contract: AllContracts.RatioContract },
-    { name: "Xerion", contract: AllContracts.XerionRatioContract },
-    {
-      contract: AllContracts.RievaRatioContract,
-      name: "Rieva",
-    },
-    {
-      contract: AllContracts.DomusRatioContract,
-      name: "Domus",
-    },
-    {
-      contract: AllContracts.CurrusRatioContract,
-      name: "Currus",
-    },
-    {
-      contract: AllContracts.ValirRatioContract,
-      name: "Valir",
-    },
-    {
-      contract: AllContracts.TeeahRatioContract,
-      name: "Teeah",
-    },
-    {
-      contract: AllContracts.SanitasRatioContract,
-      name: "Sanitas",
-    },
-    { name: "OneDollar", contract: AllContracts.OneDollarRatioContract },
-    { name: "TenDollar", contract: AllContracts.TenDollarRatioContract },
-  ];
-
-  const handleContractCall = async (
-    contract,
-    method,
-    args = [],
-    formatter = (v) => v
-  ) => {
-    try {
-      if (loading || !contract) return console.error("Contract not loaded");
-      const result = await contract[method](...args);
-      return formatter(result);
-    } catch (error) {
-      if (error.reason || error.data) {
-        throw error;
-      }
-      console.log(error);
-      throw new Error("Unknown contract call error");
-    }
-  };
 
   const CalculationOfCost = async (amount) => {
     if (chainId == 146) {
       setTotalCost(ethers.parseEther((amount * 100).toString()));
     } else {
       setTotalCost(ethers.parseEther((amount * 1000000).toString()));
-    }
-  };
-
-  const fetchStateHoldingsAndCalculateUSD = async () => {
-    setLoadingState(true);
-    try {
-      const [holdingsRaw] = await Promise.all([
-        handleContractCall(
-          AllContracts.stateContract,
-          "balanceOf",
-          [address],
-          (h) => ethers.formatUnits(h, 18)
-        ),
-      ]);
-
-      if (!holdingsRaw || !stateUsdPrice) {
-        console.error("Invalid values for calculation:", {
-          holdingsRaw,
-          stateUsdPrice,
-        });
-        setStateHoldings("0");
-        setTotalStateHoldsInUS("0.0");
-        return;
-      }
-
-      const rawHoldings = parseFloat(holdingsRaw);
-      const priceNum = parseFloat(stateUsdPrice); // Convert once, avoid unnecessary `Number()`
-
-      const holdingsInUSD = rawHoldings * priceNum;
-
-      setStateHoldings(Math.floor(rawHoldings).toLocaleString("en-US")); // Format once
-      setTotalStateHoldsInUS(holdingsInUSD ? holdingsInUSD.toFixed(0) : "0.0");
-
-      console.log(
-        "Holdings:",
-        rawHoldings,
-        "Price:",
-        priceNum,
-        "Holdings in USD:",
-        holdingsInUSD
-      );
-    } catch (error) {
-      console.error("Error fetching state holdings:", error);
-      setStateHoldings("0");
-      setTotalStateHoldsInUS("0.0");
-    } finally {
-      setLoadingState(false);
-    }
-  };
-
-  useEffect(() => {
-    let interval;
-
-    const fetchLiveData = async () => {
-      if (
-        !AllContracts.davContract ||
-        !AllContracts.stateContract ||
-        !AllContracts.RatioContract ||
-        !AllContracts.XerionRatioContract
-      ) {
-        console.warn("Waiting for contracts to load...");
-        return;
-      }
-
-      try {
-        await Promise.all([
-          fetchStateHoldingsAndCalculateUSD(),
-          RatioTargetValues(),
-
-          getCachedRatioTarget(),
-        ]);
-      } catch (error) {
-        console.error("Error fetching live data:", error);
-      }
-    };
-
-    fetchLiveData(); // Fetch data once initially
-    interval = setInterval(fetchLiveData, 10000); // Poll every 10 seconds
-
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, [
-    AllContracts.davContract,
-    AllContracts.stateContract,
-    AllContracts.RatioContract,
-    AllContracts.XerionRatioContract,
-    address,
-  ]);
-
-  console.log("current ratio price", CurrentRatioPrice.Fluxin);
-
-  const RatioTargetValues = async () => {
-    try {
-      const results = await Promise.all(
-        contractDetails.map(async ({ contract, name }) => {
-          try {
-            const ratioTarget = await handleContractCall(
-              contract,
-              "getRatioTarget",
-              [],
-              (s) => ethers.formatUnits(s, 18)
-            );
-            return { name, value: Number(ratioTarget) };
-          } catch (error) {
-            console.error(`Error fetching Ratio Target for ${name}:`, error);
-            return null;
-          }
-        })
-      );
-
-      const ratioTargets = results.reduce((acc, entry) => {
-        if (entry) acc[entry.name] = entry.value;
-        return acc;
-      }, {});
-
-      SetRatioTargets(ratioTargets);
-      console.log("Ratio Targets:", ratioTargets);
-      return ratioTargets;
-    } catch (e) {
-      console.error("Error fetching ratio targets:", e);
-    }
-  };
-
-  const cachedRatioTargetsRef = useRef({});
-
-  const getCachedRatioTarget = async () => {
-    try {
-      if (Object.keys(cachedRatioTargetsRef.current).length > 0) {
-        console.log(
-          "Using cached Ratio Targets:",
-          cachedRatioTargetsRef.current
-        );
-        return cachedRatioTargetsRef.current;
-      }
-
-      const ratioTargetValues = await RatioTargetValues();
-      if (ratioTargetValues) {
-        cachedRatioTargetsRef.current = ratioTargetValues;
-        setRatioTargetsOfTokens(ratioTargetValues);
-        console.log("Fetched and cached Ratio Targets:", ratioTargetValues);
-      }
-
-      return ratioTargetValues;
-    } catch (e) {
-      console.error("Error fetching ratio targets:", e);
     }
   };
 
@@ -607,19 +402,20 @@ export const SwapContractProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    getInputAmount();
-    getOutPutAmount();
-    CheckIsAuctionActive();
-    getAuctionTimeLeft();
-    getAirdropAmount();
-    CheckIsReverse();
-    isAirdropClaimed();
-    AddressesFromContract();
-    isTokenSupporteed();
-    HasSwappedAucton();
-    HasReverseSwappedAucton();
-    getCurrentAuctionCycle();
-  });
+	getInputAmount();
+	getOutPutAmount();
+	CheckIsAuctionActive();
+	getAuctionTimeLeft();
+	getAirdropAmount();
+	CheckIsReverse();
+	isAirdropClaimed();
+	AddressesFromContract();
+	isTokenSupporteed();
+	HasSwappedAucton();
+	HasReverseSwappedAucton();
+	getCurrentAuctionCycle();
+  }, [AllContracts, address]); // Adjust based on when you want it to run
+  
 
   const ERC20_ABI = [
     "function approve(address spender, uint256 amount) external returns (bool)",
@@ -736,6 +532,18 @@ export const SwapContractProvider = ({ children }) => {
     }
   };
 
+  const CheckMintBalance = async (TokenAddress) => {
+    try {
+      const tx = await AllContracts.AuctionContract.distributeReward(
+        address,
+        TokenAddress
+      );
+      await tx.wait();
+    } catch (e) {
+      console.error("Error claiming tokens:", e);
+      throw e;
+    }
+  };
   const handleAddToken = async (
     tokenAddress,
     tokenSymbol,
@@ -798,18 +606,14 @@ export const SwapContractProvider = ({ children }) => {
         loading,
         address,
 
-        //DAV Contract
-        // davContract,
+        
         CalculationOfCost,
-        TotalCost,
         handleAddDAV,
         handleAddTokensDAV,
-        //STATE Token
-        StateHolds,
-
         handleAddstate,
         handleAddTokensState,
-        TotalStateHoldsInUS,
+        TotalCost,
+
         setClaiming,
 
         claiming,
@@ -823,9 +627,6 @@ export const SwapContractProvider = ({ children }) => {
         userHasReverseSwapped,
         // WithdrawLPTokens,
         AddTokenIntoSwapContract,
-        RatioValues,
-        // setReverseTime,
-        getCachedRatioTarget,
 
         buttonTextStates,
         DavAddress,
@@ -835,13 +636,12 @@ export const SwapContractProvider = ({ children }) => {
         AirdropClaimed,
         isReversed,
         InputAmount,
-		AirDropAmount,
+        AirDropAmount,
         supportedToken,
         OutPutAmount,
         CurrentCycleCount,
-        // userHasReverseSwapped,
-        RatioTargetsofTokens,
-        LoadingState,
+        CheckMintBalance,
+
         IsAuctionActive,
       }}
     >

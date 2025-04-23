@@ -4,11 +4,9 @@ import FluxinLogo from "../assets/2.png";
 import {  Yees_testnet } from "../ContractAddresses";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { PriceContext } from "../api/StatePrice";
-import { useGeneralTokens } from '../Functions/GeneralTokensFunctions';
 
 export const useAuctionTokens = () => {
 	const prices = useContext(PriceContext);
-	const { CurrentRatioPrice } = useGeneralTokens();
 	const {
 		SwapTokens, isReversed,AuctionTime, RatioTargetsofTokens, IsAuctionActive,
 		userHashSwapped, userHasReverseSwapped, InputAmount,OutPutAmount,
@@ -29,7 +27,7 @@ export const useAuctionTokens = () => {
 		TimeLeft : AuctionTime?.[contract],
 		AirdropClaimedForToken:AirdropClaimed[contract],
 		isReversing: isReversed?.[contract],
-		currentTokenRatio: CurrentRatioPrice[contract],
+		// currentTokenRatio: CurrentRatioPrice[contract],
 		RatioTargetToken: RatioTargetsofTokens?.[contract] || 0,
 		Price: prices?.[`${contract}UsdPrice`],
 		// isReversing: isReversed?.[contract],

@@ -64,6 +64,7 @@ const InfoCards = () => {
     isLoading,
     BurnStateTokens,
     claimAmount,
+    davHolds,
     ReferralAMount,
     claimableAmountForBurn,
     BurnClicked,
@@ -77,21 +78,7 @@ const InfoCards = () => {
     ReferralCodeOfUser,
   } = useDAvContract();
   const { address } = useAccount();
-  const [davHolds, setDavHoldings] = useState("0.0");
   const [davPercentage, setDavPercentage] = useState("0.0");
-
-  const DavHoldings = useCallback(async () => {
-    if (!AllContracts?.davContract) {
-      console.log("DAV contract or address not initialized...");
-      return;
-    }
-    try {
-      const holdings = await AllContracts.davContract.balanceOf(address);
-      setDavHoldings(ethers.formatUnits(holdings, 18));
-    } catch (error) {
-      console.error("Error fetching DAV holdings:", error);
-    }
-  }, [AllContracts, address]);
 
   const DavHoldingsPercentage = useCallback(async () => {
     if (!AllContracts?.davContract || !address) return;
@@ -105,7 +92,6 @@ const InfoCards = () => {
   }, [AllContracts, address]);
 
   useEffect(() => {
-    DavHoldings();
     DavHoldingsPercentage();
   });
   console.log("Connected Chain ID:", chainId);
@@ -215,37 +201,86 @@ const InfoCards = () => {
             <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 text-center w-100">
-                  <div className="mb-3 d-flex justify-content-center align-items-center gap-2">
-                    <label className="mb-0 detailText mx-2">
-                      affiliate link{" "}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Optional"
-                      list="referralSuggestions"
-                      className="form-control text-center fw-bold w-auto mx-1"
-                      value={Refferalamount}
-                      onChange={handleOptionalInputChange}
-                    />
+                  <div className="mb-3 text-center">
+                    <div className="d-flex justify-content-center">
+                      <input
+                        type="text"
+                        placeholder="Optional"
+                        list="referralSuggestions"
+                        className="form-control text-center fw-bold"
+                        value={Refferalamount}
+                        onChange={handleOptionalInputChange}
+                        style={{
+                          width: "270px",
+                          maxWidth: "100%",
+                          height: "30px",
+                        }}
+                      />
+                    </div>
+                    <div className="mt-1">
+                      <h6
+                        className="mb-0 detailText"
+                        style={{ fontSize: "11px" }}
+                      >
+                        AFFILIATE LINK
+                      </h6>
+                    </div>
                     <datalist id="referralSuggestions">
                       {copiedCode && <option value={copiedCode} />}
                     </datalist>
                   </div>
-
-                  <div className="mb-2 d-flex justify-content-center align-items-center gap-2">
-                    <label className="mb-0 detailText">Mint DAV Token</label>
-
-                    <input
-                      type="text"
-                      placeholder="Enter Value"
-                      className="form-control text-center fw-bold w-auto"
-                      value={amount}
-                      onChange={handleInputChange}
-                      required
-                    />
+                  <div className="mb-2 text-center">
+                    <div className="d-flex justify-content-center">
+                      <input
+                        type="text"
+                        placeholder="Enter Value"
+                        className="form-control text-center fw-bold "
+                        value={amount}
+                        onChange={handleInputChange}
+                        required
+                        style={{
+                          width: "270px",
+                          maxWidth: "100%",
+                          height: "30px",
+                        }}
+                      />
+                    </div>
+                    <div className="mt-1">
+                      <h6
+                        className="mb-0 detailText "
+                        style={{ fontSize: "11px" }}
+                      >
+                        MINT DAV TOKEN
+                      </h6>
+                    </div>
+                  </div>
+                  <div className="mb-2 text-center">
+                    <div className="d-flex justify-content-center">
+                      <input
+                        type="text"
+                        placeholder="Enter Value"
+                        className="form-control text-center fw-bold"
+                        value={amount}
+                        onChange={handleInputChange}
+                        required
+                        style={{
+                          width: "270px",
+                          maxWidth: "100%",
+                          height: "30px",
+                        }}
+                      />
+                    </div>
+                    <div className="mt-1">
+                      <h6
+                        className="mb-0 detailText "
+                        style={{ fontSize: "11px" }}
+                      >
+                        Add Address
+                      </h6>
+                    </div>
                   </div>
 
-                  <h6 className="detailAmount justify-content-start mx-5 d-flex gap-5">
+                  <h6 className="detailAmount justify-content-center  d-flex gap-5">
                     <span>
                       1 DAV = {chainId == 943 ? "1000000 PLS" : "100 SONIC"}
                     </span>
@@ -259,12 +294,6 @@ const InfoCards = () => {
 
                   <h6></h6>
 
-                  {/* <h6 className="detailAmount mb-3">
-                    {TotalCost
-                      ? formatNumber(ethers.formatUnits(TotalCost, 18))
-                      : "0"}{" "}
-                    {chainId == 943 ? "PLS" : "SONIC"}
-                  </h6> */}
                   <div className="d-flex justify-content-center">
                     <button
                       onClick={handleMint}
@@ -274,17 +303,6 @@ const InfoCards = () => {
                     >
                       {load ? "Minting..." : "Mint"}
                     </button>
-                  </div>
-                  <div className="carddetails2">
-                    <h6
-                      className="detailText "
-                      style={{
-                        fontSize: "14px",
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      Transferring DAV tokens is not allowed after minting
-                    </h6>
                   </div>
                 </div>
               </div>
@@ -324,17 +342,6 @@ const InfoCards = () => {
                           </h5>
                         </div>
                       </div>
-
-                      {/* <div className="mb-0 mx-1">
-                        <img
-                          src={MetaMaskIcon}
-                          width={20}
-                          height={20}
-                          alt="Logo"
-                          style={{ cursor: "pointer", marginLeft: "5px" }}
-                          onClick={handleAddTokenDAV}
-                        />
-                      </div> */}
                     </div>
                     <div className="carddetails2 mt-1">
                       <h6
@@ -410,11 +417,21 @@ const InfoCards = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="carddetails3">
+                    <div className="carddetails2">
+                      <h6 className="detailText">User Notes</h6>
                       <h6
-                        className="detailText mt-5"
+                        className="detailText "
                         style={{
-                          fontSize: "14px",
+                          fontSize: "13px",
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        Transferring DAV tokens is not allowed after minting
+                      </h6>
+                      <h6
+                        className="detailText "
+                        style={{
+                          fontSize: "13px",
                           textTransform: "capitalize",
                         }}
                       >

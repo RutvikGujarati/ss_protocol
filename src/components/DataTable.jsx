@@ -5,15 +5,12 @@ import { useLocation } from "react-router-dom";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
-import BurnDataTable from "./BurnDataTable";
 import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
-import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
 import { Addresses } from "../data/AddressMapping";
 
 const DataTable = () => {
   const {  davHolds } = useDAvContract();
-  const { CheckMintBalance } = useGeneralTokens();
 
   const {
     DavRequiredAmount,
@@ -21,6 +18,7 @@ const DataTable = () => {
     swappingStates,
     buttonTextStates,
 	AirDropAmount,
+	CheckMintBalance,
   } = useSwapContract();
 
   const location = useLocation();
@@ -276,7 +274,6 @@ const DataTable = () => {
     </div>
   ) : (
     <>
-      <BurnDataTable />
     </>
   );
 };

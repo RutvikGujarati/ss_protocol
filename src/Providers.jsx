@@ -9,7 +9,6 @@ import { PriceProvider } from "./api/StatePrice.jsx";
 import { SwapContractProvider } from "./Functions/SwapContractFunctions.jsx";
 import { ContractProvider } from "./Functions/ContractInitialize.jsx";
 import { DavProvider } from "./Functions/DavTokenFunctions.jsx";
-import { GeneralTokenProvider } from "./Functions/GeneralTokensFunctions.jsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,13 +41,12 @@ export default function Providers({ children }) {
             <PriceProvider>
               <ContractProvider>
                 <DavProvider>
-                  <GeneralTokenProvider>
                     <SwapContractProvider>
                       <Suspense fallback={<div>Loading...</div>}>
                         {children}
                       </Suspense>
                     </SwapContractProvider>
-                  </GeneralTokenProvider>
+                  
                 </DavProvider>
               </ContractProvider>
             </PriceProvider>

@@ -7,7 +7,6 @@ import {
 } from "../ContractAddresses";
 import { PriceContext } from "../api/StatePrice";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import { useGeneralTokens } from "../Functions/GeneralTokensFunctions";
 import { useChainId } from "wagmi";
 
 export const shortenAddress = (addr) => addr ? `${addr.slice(0, 6)}...${addr.slice(-6)}` : "";
@@ -15,7 +14,6 @@ export const shortenAddress = (addr) => addr ? `${addr.slice(0, 6)}...${addr.sli
 export const TokensDetails = () => {
 	const prices = useContext(PriceContext);
 
-	const { CurrentRatioPrice } = useGeneralTokens();
 
 	const swap = useSwapContract();
 	const chainId = useChainId()
@@ -28,7 +26,6 @@ export const TokensDetails = () => {
 			supply: "5,000,000.00",
 			price: 0,
 			actions: {
-
 				ReanounceContract: swap.ReanounceContract,
 			},
 		},
@@ -92,7 +89,6 @@ export const TokensDetails = () => {
 				ReanounceContract: swap[`Reanounce${key}Contract`] || swap.ReanounceContract,
 				ReanounceSwapContract: swap[`Renounce${key}Swap`],
 
-				AddTokenToContract: () => swap.AddTokensToContract(token.address, STATE_TOKEN_ADDRESS, CurrentRatioPrice[key]),
 				...(isState && {
 					AddTokenToContract: swap.AddTokens,
 				}),
