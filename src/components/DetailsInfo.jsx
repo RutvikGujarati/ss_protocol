@@ -206,14 +206,14 @@ const DetailsInfo = ({ selectedToken }) => {
                     <div className="mx-4">
                       {token.tokenName === "DAV"
                         ? "-----"
-                        : `${token.DavVault}`}
+                        : `${formatWithCommas(token.DavVault)}`}
                     </div>
                   </td>
                   <td className="text-center">
                     <div className="mx-4">
                       {token.tokenName === "DAV"
                         ? "-----"
-                        : `${token.burned}`}
+                        : `${formatWithCommas(token.burned)}`}
                     </div>
                   </td>
                   <td className="text-center">
@@ -258,7 +258,7 @@ const DetailsInfo = ({ selectedToken }) => {
                         </a>
                       )}
                       {token.tokenName === "DAV" ? (
-                        "---------------"
+                        "-----------"
                       ) : token.tokenName === "STATE" ? (
                         DavAddress ===
                         "0x0000000000000000000000000000000000000000" ? (

@@ -3,7 +3,7 @@ import "../Styles/InfoCards.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import {  useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import PLSLogo from "../assets/pls1.png";
@@ -12,7 +12,7 @@ import sonic from "../assets/S_token.svg";
 import { formatWithCommas } from "./DetailsInfo";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import DotAnimation from "../Animations/Animation";
-import {  useChainId } from "wagmi";
+import { useChainId } from "wagmi";
 import { PriceContext } from "../api/StatePrice";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
@@ -71,13 +71,12 @@ const InfoCards = () => {
     AllUserPercentage,
     TimeUntilNextClaim,
     UserPercentage,
-	davHolds,
-	davPercentage,
+    davHolds,
+    davPercentage,
     // AddDavintoLP,
     stateHolding,
     ReferralCodeOfUser,
   } = useDAvContract();
-  
 
   console.log("Connected Chain ID:", chainId);
   const setBackLogo = () => {
@@ -108,6 +107,7 @@ const InfoCards = () => {
     try {
       await mintDAV(amount, Refferalamount);
       setAmount("");
+      setReferralAmount("");
     } catch (error) {
       console.error("Error minting:", error);
       alert("Minting failed! Please try again.");
@@ -153,11 +153,19 @@ const InfoCards = () => {
   const isBurn = location.pathname === "/StateLp";
   const isAuction = location.pathname === "/auction";
   const [amountOfInput, setAmountOfInput] = useState("");
+  const [rawAmount, setRawAmount] = useState("");
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
 
   const handleInputChangeForBurn = (e) => {
-    setAmountOfInput(e.target.value);
+    const input = e.target.value.replace(/,/g, ""); // remove commas
+    if (!isNaN(input)) {
+      setRawAmount(input); // raw unformatted number
+      setAmountOfInput(Number(input).toLocaleString("en-US")); // formatted for display
+    } else if (input === "") {
+      setRawAmount("");
+      setAmountOfInput("");
+    }
   };
 
   // Function to stop changing the amount
@@ -215,27 +223,14 @@ const InfoCards = () => {
                       required
                     />
                   </div>
-
-                  <h6 className="detailAmount justify-content-start mx-5 d-flex gap-5">
-                    <span>
-                      1 DAV = {chainId == 943 ? "1000000 PLS" : "100 SONIC"}
-                    </span>
-                    <span className="mx-4">
-                      {TotalCost
-                        ? formatNumber(ethers.formatUnits(TotalCost, 18))
-                        : "0"}{" "}
-                      {chainId == 943 ? "PLS" : "SONIC"}
-                    </span>
-                  </h6>
-
-                  <h6></h6>
-
-                  {/* <h6 className="detailAmount mb-3">
+                  <h5 className="detailAmount">1 DAV TOKEN = 500000 PLS</h5>
+                  <h5 className="detailAmount mb-4">
                     {TotalCost
                       ? formatNumber(ethers.formatUnits(TotalCost, 18))
                       : "0"}{" "}
-                    {chainId == 943 ? "PLS" : "SONIC"}
-                  </h6> */}
+                    PLS{" "}
+                  </h5>
+
                   <div className="d-flex justify-content-center">
                     <button
                       onClick={handleMint}
@@ -268,8 +263,8 @@ const InfoCards = () => {
                       position: "absolute",
                       ...getLogoSize(),
                       opacity: 0.1, // Subtle shadow effect
-                      top: "40%",
-                      left: "70%",
+                      top: "25%",
+                      left: "80%",
                       transform: "translate(-50%, -50%)",
                       zIndex: 0, // Ensure it's behind
                       pointerEvents: "none", // Prevent interference
@@ -295,17 +290,6 @@ const InfoCards = () => {
                           </h5>
                         </div>
                       </div>
-
-                      {/* <div className="mb-0 mx-1">
-                        <img
-                          src={MetaMaskIcon}
-                          width={20}
-                          height={20}
-                          alt="Logo"
-                          style={{ cursor: "pointer", marginLeft: "5px" }}
-                          onClick={handleAddTokenDAV}
-                        />
-                      </div> */}
                     </div>
                     <div className="carddetails2 mt-1">
                       <h6
@@ -325,7 +309,7 @@ const InfoCards = () => {
                           onClick={handleClaim}
                           className="btn btn-primary d-flex btn-sm justify-content-center align-items-center mx-5 mt-4"
                           style={{ width: "190px" }}
-                          disabled={loadClaim}
+                          disabled={loadClaim || Number(claimableAmount) === 0}
                         >
                           {loadClaim ? "Claiming..." : "Claim"}
                         </button>
@@ -381,18 +365,17 @@ const InfoCards = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="carddetails3">
-                      <h6
-                        className="detailText mt-5"
-                        style={{
-                          fontSize: "14px",
-                          textTransform: "capitalize",
-                        }}
-                      >
-                        Referrers receive their commission directly in their
-                        wallet
-                      </h6>
-                    </div>
+                    <h6
+                      className="detailText"
+                      style={{
+                        fontSize: "14px",
+                        textTransform: "capitalize",
+                        marginTop: "3.5rem", // or whatever spacing you want
+                      }}
+                    >
+                      Referrers receive their commission directly in their
+                      wallet
+                    </h6>
                   </div>
                 </div>
               </div>
@@ -451,7 +434,7 @@ const InfoCards = () => {
                       />
                     </div>
                     <button
-                      onClick={() => BurnStateTokens(amountOfInput)}
+                      onClick={() => BurnStateTokens(rawAmount)}
                       style={{ width: customWidth }}
                       className="btn btn-primary mx-5 mt-4 btn-sm d-flex justify-content-center align-items-center"
                       disabled={load}
@@ -487,7 +470,9 @@ const InfoCards = () => {
                     {" "}
                     <p className="mb-2 detailText ">YOUR CLAIM</p>
                     <div className="d-flex  justify-content-center">
-                      <h5 className="mt-2">{formatWithCommas(claimableAmountForBurn)}</h5>
+                      <h5 className="mt-2">
+                        {formatWithCommas(claimableAmountForBurn)}
+                      </h5>
                     </div>
                     <button
                       onClick={() => claimBurnAmount()}
@@ -498,9 +483,11 @@ const InfoCards = () => {
                       {Claiming
                         ? "Claiming..."
                         : TimeUntilNextClaim > 0
-                        ? `Wait ${Math.floor(TimeUntilNextClaim / 60)} m ${
-                            TimeUntilNextClaim % 60
-                          } s`
+                        ? `Wait ${Math.floor(
+                            TimeUntilNextClaim / 3600
+                          )} h ${Math.floor(
+                            (TimeUntilNextClaim % 3600) / 60
+                          )} m ${TimeUntilNextClaim % 60} s`
                         : "Claim"}
                     </button>
                   </div>

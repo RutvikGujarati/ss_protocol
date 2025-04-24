@@ -448,7 +448,7 @@ export const SwapContractProvider = ({ children }) => {
         DAV_TESTNET
       );
       await tx.wait();
-	  await AddressesFromContract();
+      await AddressesFromContract();
     } catch (error) {
       console.error("Error fetching claimable amount:", error);
     }
@@ -463,6 +463,7 @@ export const SwapContractProvider = ({ children }) => {
         Yees_testnet
       );
       await tx.wait();
+      await CheckIsAuctionActive();
       console.log("Token added successfully!");
     } catch (error) {
       console.error("AddTokenIntoSwapContract failed:", error?.reason || error);
@@ -592,8 +593,8 @@ export const SwapContractProvider = ({ children }) => {
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
       }
       await CheckIsAuctionActive();
-      await userHashSwapped();
-      await userHasReverseSwapped();
+      await HasSwappedAucton();
+      await HasReverseSwappedAucton();
     } catch (error) {
       console.error("Error during token swap:", error);
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
@@ -602,6 +603,9 @@ export const SwapContractProvider = ({ children }) => {
       setSwappingStates((prev) => ({ ...prev, [id]: false }));
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swap Completed" }));
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swap" }));
+      await CheckIsAuctionActive();
+      await HasSwappedAucton();
+      await HasReverseSwappedAucton();
     }
   };
 
@@ -612,6 +616,10 @@ export const SwapContractProvider = ({ children }) => {
         TokenAddress
       );
       await tx.wait();
+      await isAirdropClaimed();
+      await getInputAmount();
+      await getOutPutAmount();
+      await getTokensBurned();
     } catch (e) {
       console.error("Error claiming tokens:", e);
       throw e;

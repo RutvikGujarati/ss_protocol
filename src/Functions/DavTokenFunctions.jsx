@@ -9,7 +9,11 @@ import PropTypes from "prop-types";
 import { ethers } from "ethers";
 import { useAccount, useChainId } from "wagmi";
 import { ContractContext } from "./ContractInitialize";
-import { Auction_TESTNET, DAV_TESTNET, STATE_TESTNET } from "../ContractAddresses";
+import {
+  Auction_TESTNET,
+  DAV_TESTNET,
+  STATE_TESTNET,
+} from "../ContractAddresses";
 
 export const DAVContext = createContext();
 
@@ -35,12 +39,12 @@ export const DavProvider = ({ children }) => {
     claimableAmount: "0.0",
     claimableAmountForBurn: "0.0",
     UserPercentage: "0.0",
-	TimeUntilNextClaim: "0.0",
+    TimeUntilNextClaim: "0.0",
     AllUserPercentage: "0.0",
-	stateHoldingOfSwapContract: "0.0",
+    stateHoldingOfSwapContract: "0.0",
     ContractPls: "0.0",
     davHolds: "0.0",
-	davPercentage: "0.0",
+    davPercentage: "0.0",
   });
 
   const fetchAndSet = async (label, fn, format = true, fixed = 2) => {
@@ -82,9 +86,7 @@ export const DavProvider = ({ children }) => {
           false,
           0
         ),
-        fetchAndSet("TimeUntilNextClaim", () =>
-          AllContracts.davContract.getTimeUntilNextClaim()
-        ),
+
         fetchAndSet("ContractPls", () =>
           AllContracts.davContract.stateLpTotalShare()
         ),
@@ -100,7 +102,7 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("stateHoldingOfSwapContract", () =>
           AllContracts.stateContract.balanceOf(Auction_TESTNET)
         ),
-       
+
         fetchAndSet(
           "ReferralCodeOfUser",
           () => AllContracts.davContract.getUserReferralCode(address),
@@ -120,6 +122,30 @@ export const DavProvider = ({ children }) => {
   useEffect(() => {
     if (address && AllContracts?.davContract) fetchData();
   }, [address, AllContracts?.davContract]);
+
+  const fetchTimeUntilNextClaim = useCallback(async () => {
+    if (!AllContracts?.davContract || !address) return;
+    try {
+      await fetchAndSet(
+        "TimeUntilNextClaim",
+        () => AllContracts.davContract.getTimeUntilNextClaim(address),
+        false,
+        0
+      );
+    } catch (error) {
+      console.error("Error fetching time until next claim:", error);
+    }
+  }, [AllContracts, address]);
+
+  useEffect(() => {
+    if (!AllContracts?.davContract || !address) return;
+
+    const interval = setInterval(() => {
+      fetchTimeUntilNextClaim();
+    }, 1000); // run every second
+
+    return () => clearInterval(interval); // clean up on unmount
+  }, [fetchTimeUntilNextClaim, AllContracts?.davContract, address]);
 
   console.log("user percentage", data.UserPercentage);
   console.log("all user percentage", data.AllUserPercentage);
@@ -185,11 +211,17 @@ export const DavProvider = ({ children }) => {
         signer
       );
 
-      await (await tokenContract.approve(DAV_TESTNET, weiAmount)).wait();
+      await (
+        await tokenContract.approve(
+          DAV_TESTNET,
+          weiAmount 
+        )
+      ).wait();
       await (await AllContracts.davContract.burnState(weiAmount)).wait();
 
       setClicked(false);
-	  await fetchData();
+      await fetchData();
+      await fetchTimeUntilNextClaim();
     } catch (err) {
       console.error("Burn error:", err);
       setClicked(false);
