@@ -78,6 +78,8 @@ export const TokensDetails = () => {
 			key: shortenAddress(token.address),
 			name: token.displayName || token.name,
 			Price: token.price,
+			DavVault :swap.TokenBalance[key],
+			burned: swap.burnedAmount[key],
 			isSupported: swap.supportedToken[key],
 			address: token.address,
 			Cycle: swap.CurrentCycleCount[key],

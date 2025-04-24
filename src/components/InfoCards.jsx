@@ -3,7 +3,7 @@ import "../Styles/InfoCards.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {  useContext, useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import PLSLogo from "../assets/pls1.png";
@@ -12,14 +12,12 @@ import sonic from "../assets/S_token.svg";
 import { formatWithCommas } from "./DetailsInfo";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import DotAnimation from "../Animations/Animation";
-import { useAccount, useChainId } from "wagmi";
-import { ContractContext } from "../Functions/ContractInitialize";
+import {  useChainId } from "wagmi";
 import { PriceContext } from "../api/StatePrice";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
 const InfoCards = () => {
   const chainId = useChainId();
-  const { AllContracts } = useContext(ContractContext);
   const { stateUsdPrice } = useContext(PriceContext);
   const formatPrice = (price) => {
     if (!price || isNaN(price)) {
@@ -71,43 +69,16 @@ const InfoCards = () => {
     ContractPls,
     claimBurnAmount,
     AllUserPercentage,
+    TimeUntilNextClaim,
     UserPercentage,
+	davHolds,
+	davPercentage,
     // AddDavintoLP,
     stateHolding,
     ReferralCodeOfUser,
   } = useDAvContract();
-  const { address } = useAccount();
-  const [davHolds, setDavHoldings] = useState("0.0");
-  const [davPercentage, setDavPercentage] = useState("0.0");
+  
 
-  const DavHoldings = useCallback(async () => {
-    if (!AllContracts?.davContract) {
-      console.log("DAV contract or address not initialized...");
-      return;
-    }
-    try {
-      const holdings = await AllContracts.davContract.balanceOf(address);
-      setDavHoldings(ethers.formatUnits(holdings, 18));
-    } catch (error) {
-      console.error("Error fetching DAV holdings:", error);
-    }
-  }, [AllContracts, address]);
-
-  const DavHoldingsPercentage = useCallback(async () => {
-    if (!AllContracts?.davContract || !address) return;
-    try {
-      const balance = await AllContracts.davContract.balanceOf(address);
-      const bal = ethers.formatUnits(balance, 18);
-      setDavPercentage(parseFloat(bal / 5000000).toFixed(8));
-    } catch (error) {
-      console.error("Error fetching DAV holdings percentage:", error);
-    }
-  }, [AllContracts, address]);
-
-  useEffect(() => {
-    DavHoldings();
-    DavHoldingsPercentage();
-  });
   console.log("Connected Chain ID:", chainId);
   const setBackLogo = () => {
     if (chainId === 369) {
@@ -516,15 +487,21 @@ const InfoCards = () => {
                     {" "}
                     <p className="mb-2 detailText ">YOUR CLAIM</p>
                     <div className="d-flex  justify-content-center">
-                      <h5 className="mt-2">{claimableAmountForBurn}</h5>
+                      <h5 className="mt-2">{formatWithCommas(claimableAmountForBurn)}</h5>
                     </div>
                     <button
                       onClick={() => claimBurnAmount()}
                       style={{ width: customWidth || "100%" }}
                       className="btn btn-primary mt-4 btn-sm d-flex justify-content-center align-items-center"
-                      disabled={Claiming}
+                      disabled={Claiming || TimeUntilNextClaim > 0}
                     >
-                      {Claiming ? "Claiming..." : "Claim"}
+                      {Claiming
+                        ? "Claiming..."
+                        : TimeUntilNextClaim > 0
+                        ? `Wait ${Math.floor(TimeUntilNextClaim / 60)} m ${
+                            TimeUntilNextClaim % 60
+                          } s`
+                        : "Claim"}
                     </button>
                   </div>
                   <div className="carddetails2 ">

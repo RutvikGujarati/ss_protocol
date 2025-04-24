@@ -148,6 +148,8 @@ const DetailsInfo = ({ selectedToken }) => {
                 <th className="text-center">Token Name</th>
                 <th className="text-center">Current Ratio</th>
                 <th className="text-center">Auctions</th>
+                <th className="text-center">DAV Vault</th>
+                <th className="text-center">Burned</th>
                 <th className="text-center">Info</th>
                 <th></th>
                 <th className="text-center">
@@ -198,6 +200,20 @@ const DetailsInfo = ({ selectedToken }) => {
                       {token.tokenName === "DAV" || token.tokenName === "STATE"
                         ? "-----"
                         : `${token.Cycle + 1}/21`}
+                    </div>
+                  </td>
+                  <td className="text-center">
+                    <div className="mx-4">
+                      {token.tokenName === "DAV"
+                        ? "-----"
+                        : `${token.DavVault}`}
+                    </div>
+                  </td>
+                  <td className="text-center">
+                    <div className="mx-4">
+                      {token.tokenName === "DAV"
+                        ? "-----"
+                        : `${token.burned}`}
                     </div>
                   </td>
                   <td className="text-center">

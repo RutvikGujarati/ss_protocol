@@ -28,9 +28,9 @@ export const TeeahRatioAddress = "0x143aD20E54e2557b549f6484b99fF876E7F27a00";
 
 //testnet 
 
-export const DAV_TESTNET = "0x5aAd1B152a174fb305FaA205e1eFd929b2859bC5"
-export const STATE_TESTNET = "0x736b31F8c91fDfbB5Dcb235c7E110E8e08225b5D"
-export const Yees_testnet = "0xB397c8CbA9cE09B9b8cE39b0c4cEF1e516C629e8"
-export const Auction_TESTNET = "0xE8d1c7F1ff4832ca9D7B66A6b4Db76DbeB9fB59a"
+export const DAV_TESTNET = "0xF6cF8F18c8049E2547a0457d3e5752f1F659c427"
+export const STATE_TESTNET = "0x752c713cF787c427f0D176efAD52dDB5E6531d4C"
+export const Yees_testnet = "0x25Aee485Cdc19343A82F3b64CD4aC47e2Ec81F4f"
+export const Auction_TESTNET = "0x75255eEF3475876D3C1fac6fB80045Bc6496C5C5"
 
 export const Addresses = [DAV_TESTNET, STATE_TESTNET, Auction_TESTNET, Yees_testnet]

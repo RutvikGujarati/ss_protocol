@@ -14,7 +14,7 @@ import {
   Yees_testnet,
 } from "../ContractAddresses";
 import { useAccount, useChainId } from "wagmi";
-import { Addresses } from "../data/AddressMapping";
+import { Addresses, AllAddresses } from "../data/AddressMapping";
 
 const SwapContractContext = createContext();
 
@@ -35,6 +35,8 @@ export const SwapContractProvider = ({ children }) => {
   const [AuctionTime, setAuctionTime] = useState({});
   const [CurrentCycleCount, setCurrentCycleCount] = useState({});
   const [OutPutAmount, setOutputAmount] = useState({});
+  const [burnedAmount, setBurnedAmount] = useState({});
+  const [TokenBalance, setTokenbalance] = useState({});
   const [isReversed, setIsReverse] = useState({});
   const [IsAuctionActive, setisAuctionActive] = useState({});
 
@@ -99,34 +101,39 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching input amounts:", e);
     }
   };
-  const getAuctionTimeLeft = async () => {
-    try {
-      const results = {};
+  useEffect(() => {
+    let interval;
 
-      console.log("Starting loop over Addresses:", Addresses);
+    const getAuctionTimeLeft = async () => {
+      try {
+        const results = {};
 
-      for (const [tokenName, TokenAddress] of Object.entries(Addresses)) {
-        console.log(`Fetching AuctionTime for ${tokenName} at ${TokenAddress}`);
+        for (const [tokenName, TokenAddress] of Object.entries(Addresses)) {
+          const AuctionTimeInWei =
+            await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
 
-        const AuctionTimeInWei =
-          await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
+          const totalSeconds = Math.floor(Number(AuctionTimeInWei));
+          const minutes = Math.floor(totalSeconds / 60);
+          const seconds = totalSeconds % 60;
 
-        const totalSeconds = Math.floor(Number(AuctionTimeInWei));
-        const minutes = Math.floor(totalSeconds / 60);
-        const seconds = totalSeconds % 60;
+          results[tokenName] = `${minutes}m ${seconds}s`;
+        }
 
-        const formattedTime = `${minutes}m ${seconds}s`;
-        console.log(`Auction time left for ${tokenName}:`, formattedTime);
-
-        results[tokenName] = formattedTime;
+        setAuctionTime(results);
+      } catch (e) {
+        console.error("Error fetching AuctionTimes:", e);
       }
+    };
 
-      console.log("Final AuctionTimes:", results);
-      setAuctionTime(results);
-    } catch (e) {
-      console.error("Error fetching AuctionTimes:", e);
-    }
-  };
+    // Initial call
+    getAuctionTimeLeft();
+
+    // Set interval to update every second
+    interval = setInterval(getAuctionTimeLeft, 1000);
+
+    // Cleanup on unmount
+    return () => clearInterval(interval);
+  }, [Addresses, AllContracts]);
 
   const getCurrentAuctionCycle = async () => {
     try {
@@ -183,6 +190,66 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching input amounts:", e);
     }
   };
+  const getTokensBurned = async () => {
+    try {
+      const results = {};
+
+      console.log("Starting loop over Addresses:", AllAddresses);
+
+      for (const [tokenName, TokenAddress] of Object.entries(AllAddresses)) {
+        console.log(
+          `Fetching Output amount for ${tokenName} at ${TokenAddress}`
+        );
+
+        const OutputAmountWei =
+          await AllContracts.AuctionContract.getTotalTokensBurned(TokenAddress);
+
+        const OutputAmount = ethers.formatEther(OutputAmountWei); // 👈 convert to ether
+        const OutputAmountNoDecimals = Math.floor(Number(OutputAmount));
+        console.log(`Input amount for ${tokenName}:`, OutputAmountNoDecimals);
+
+        results[tokenName] = OutputAmountNoDecimals;
+      }
+
+      console.log("Final Output amounts:", results);
+      setBurnedAmount(results);
+    } catch (e) {
+      console.error("Error fetching input amounts:", e);
+    }
+  };
+
+  const getTokenBalances = async () => {
+    try {
+      const results = {};
+
+      console.log("Starting loop over Addresses:", AllAddresses);
+
+      for (const [tokenName, TokenAddress] of Object.entries(AllAddresses)) {
+        console.log(
+          `Fetching token amount for ${tokenName} at ${TokenAddress}`
+        );
+        const tokenContract = new ethers.Contract(
+          TokenAddress,
+          ERC20_ABI,
+          provider
+        );
+        const rawBalance = await tokenContract.balanceOf(Auction_TESTNET);
+
+        // Convert to string in full units, then floor to get whole number
+        const formattedBalance = Math.floor(
+          Number(ethers.formatUnits(rawBalance, 18))
+        );
+
+        results[tokenName] = formattedBalance;
+      }
+
+      console.log("Final balance amounts:", results);
+      setTokenbalance(results);
+    } catch (e) {
+      console.error("Error fetching input amounts:", e);
+    }
+  };
+
   const CheckIsReverse = async () => {
     try {
       const results = {};
@@ -402,24 +469,26 @@ export const SwapContractProvider = ({ children }) => {
   };
 
   useEffect(() => {
-	getInputAmount();
-	getOutPutAmount();
-	CheckIsAuctionActive();
-	getAuctionTimeLeft();
-	getAirdropAmount();
-	CheckIsReverse();
-	isAirdropClaimed();
-	AddressesFromContract();
-	isTokenSupporteed();
-	HasSwappedAucton();
-	HasReverseSwappedAucton();
-	getCurrentAuctionCycle();
+    getInputAmount();
+    getOutPutAmount();
+    getTokensBurned();
+    CheckIsAuctionActive();
+    // getAuctionTimeLeft();
+    getAirdropAmount();
+    CheckIsReverse();
+    getTokenBalances();
+    isAirdropClaimed();
+    AddressesFromContract();
+    isTokenSupporteed();
+    HasSwappedAucton();
+    HasReverseSwappedAucton();
+    getCurrentAuctionCycle();
   }, [AllContracts, address]); // Adjust based on when you want it to run
-  
 
   const ERC20_ABI = [
     "function approve(address spender, uint256 amount) external returns (bool)",
     "function allowance(address owner, address spender) external view returns (uint256)",
+    "function balanceOf(address account) external view returns (uint256)",
   ];
 
   const SwapTokens = async (id, ContractName) => {
@@ -521,6 +590,9 @@ export const SwapContractProvider = ({ children }) => {
         console.error("Swap transaction failed.");
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
       }
+      await CheckIsAuctionActive();
+      await userHashSwapped();
+      await userHasReverseSwapped();
     } catch (error) {
       console.error("Error during token swap:", error);
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
@@ -606,7 +678,6 @@ export const SwapContractProvider = ({ children }) => {
         loading,
         address,
 
-        
         CalculationOfCost,
         handleAddDAV,
         handleAddTokensDAV,
@@ -615,7 +686,7 @@ export const SwapContractProvider = ({ children }) => {
         TotalCost,
 
         setClaiming,
-
+        TokenBalance,
         claiming,
         SwapTokens,
         setDavAndStateIntoSwap,
@@ -627,7 +698,7 @@ export const SwapContractProvider = ({ children }) => {
         userHasReverseSwapped,
         // WithdrawLPTokens,
         AddTokenIntoSwapContract,
-
+        burnedAmount,
         buttonTextStates,
         DavAddress,
         StateAddress,

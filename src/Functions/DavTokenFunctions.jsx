@@ -9,7 +9,7 @@ import PropTypes from "prop-types";
 import { ethers } from "ethers";
 import { useAccount, useChainId } from "wagmi";
 import { ContractContext } from "./ContractInitialize";
-import { DAV_TESTNET, STATE_TESTNET } from "../ContractAddresses";
+import { Auction_TESTNET, DAV_TESTNET, STATE_TESTNET } from "../ContractAddresses";
 
 export const DAVContext = createContext();
 
@@ -35,9 +35,12 @@ export const DavProvider = ({ children }) => {
     claimableAmount: "0.0",
     claimableAmountForBurn: "0.0",
     UserPercentage: "0.0",
+	TimeUntilNextClaim: "0.0",
     AllUserPercentage: "0.0",
+	stateHoldingOfSwapContract: "0.0",
     ContractPls: "0.0",
     davHolds: "0.0",
+	davPercentage: "0.0",
   });
 
   const fetchAndSet = async (label, fn, format = true, fixed = 2) => {
@@ -79,15 +82,25 @@ export const DavProvider = ({ children }) => {
           false,
           0
         ),
+        fetchAndSet("TimeUntilNextClaim", () =>
+          AllContracts.davContract.getTimeUntilNextClaim()
+        ),
         fetchAndSet("ContractPls", () =>
           AllContracts.davContract.stateLpTotalShare()
         ),
         fetchAndSet("davHolds", () =>
           AllContracts.davContract.balanceOf(address)
         ),
+        fetchAndSet("davPercentage", () =>
+          AllContracts.davContract.getUserHoldingPercentage(address)
+        ),
         fetchAndSet("stateHolding", () =>
           AllContracts.stateContract.balanceOf(address)
         ),
+        fetchAndSet("stateHoldingOfSwapContract", () =>
+          AllContracts.stateContract.balanceOf(Auction_TESTNET)
+        ),
+       
         fetchAndSet(
           "ReferralCodeOfUser",
           () => AllContracts.davContract.getUserReferralCode(address),
@@ -108,6 +121,8 @@ export const DavProvider = ({ children }) => {
     if (address && AllContracts?.davContract) fetchData();
   }, [address, AllContracts?.davContract]);
 
+  console.log("user percentage", data.UserPercentage);
+  console.log("all user percentage", data.AllUserPercentage);
   useEffect(() => {
     if (isConnected && AllContracts?.davContract) {
       fetchData();
@@ -174,6 +189,7 @@ export const DavProvider = ({ children }) => {
       await (await AllContracts.davContract.burnState(weiAmount)).wait();
 
       setClicked(false);
+	  await fetchData();
     } catch (err) {
       console.error("Burn error:", err);
       setClicked(false);

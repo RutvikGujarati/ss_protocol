@@ -18,6 +18,11 @@
 				"internalType": "address"
 			},
 			{
+				"name": "_gov",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
 				"name": "tokenName",
 				"type": "string",
 				"internalType": "string"
@@ -406,6 +411,25 @@
 	},
 	{
 		"type": "function",
+		"name": "firstBurnTimestamp",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "getAllUsersBurnedPercentageSum",
 		"inputs": [],
 		"outputs": [
@@ -464,8 +488,14 @@
 	},
 	{
 		"type": "function",
-		"name": "getHolderFunds",
-		"inputs": [],
+		"name": "getTimeUntilNextClaim",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
 				"name": "",
@@ -553,6 +583,19 @@
 	},
 	{
 		"type": "function",
+		"name": "governance",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "holderFunds",
 		"inputs": [],
 		"outputs": [
@@ -579,44 +622,6 @@
 				"name": "",
 				"type": "uint256",
 				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "isHolder",
-		"inputs": [
-			{
-				"name": "account",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool",
-				"internalType": "bool"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "isValidReferralCode",
-		"inputs": [
-			{
-				"name": "referralCode",
-				"type": "string",
-				"internalType": "string"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool",
-				"internalType": "bool"
 			}
 		],
 		"stateMutability": "view"

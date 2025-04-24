@@ -123,7 +123,13 @@
 	{
 		"type": "function",
 		"name": "TotalTokensBurned",
-		"inputs": [],
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
 				"name": "",
@@ -394,19 +400,6 @@
 	},
 	{
 		"type": "function",
-		"name": "getTotalBountyCollected",
-		"inputs": [],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
 		"name": "getTotalStateBurned",
 		"inputs": [],
 		"outputs": [
@@ -440,7 +433,13 @@
 	{
 		"type": "function",
 		"name": "getTotalTokensBurned",
-		"inputs": [],
+		"inputs": [
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
 				"name": "",
@@ -767,19 +766,6 @@
 	{
 		"type": "function",
 		"name": "totalAirdropMinted",
-		"inputs": [],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "totalBounty",
 		"inputs": [],
 		"outputs": [
 			{

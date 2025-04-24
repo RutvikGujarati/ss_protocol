@@ -1,3 +1,9 @@
+import { STATE_TESTNET, Yees_testnet } from "../ContractAddresses";
+
 export const Addresses = {
-	Yees: "0xB397c8CbA9cE09B9b8cE39b0c4cEF1e516C629e8",
+	Yees: Yees_testnet,
+};
+export const AllAddresses = {
+	Yees: Yees_testnet,
+	state: STATE_TESTNET
 };
