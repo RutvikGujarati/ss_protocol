@@ -448,6 +448,7 @@ export const SwapContractProvider = ({ children }) => {
         DAV_TESTNET
       );
       await tx.wait();
+	  await AddressesFromContract();
     } catch (error) {
       console.error("Error fetching claimable amount:", error);
     }
