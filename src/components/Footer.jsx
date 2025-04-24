@@ -1,5 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import youtube from "../assets/y.png";
 import { FaTelegramPlane } from "react-icons/fa";
 import { FaXTwitter, FaYoutube } from "react-icons/fa6";
 
@@ -11,20 +12,16 @@ const Footer = () => {
       <div className="container text-center">
         <div className="d-flex justify-content-center gap-3 gap-md-4">
           <a
-            href="https://t.me/pSystemstate"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-decoration-none text-primary fs-4"
-          >
-            <FaTelegramPlane />
-          </a>
-          <a
             href="https://www.youtube.com/@Statedex"
             target="_blank"
             rel="noopener noreferrer"
             className="text-danger fs-4"
           >
-            <FaYoutube />
+            <img
+              src={youtube}
+              alt="YouTube"
+              style={{ height: "24px", background: "transparent" }}
+            />
           </a>
           <a
             href="https://twitter.com/thestate_x"
@@ -32,7 +29,7 @@ const Footer = () => {
             rel="noopener noreferrer"
             className="text-white fs-4"
           >
-            <FaXTwitter />
+            <FaXTwitter style={{ height: "20px", width: "20px" }} />
           </a>
         </div>
       </div>
