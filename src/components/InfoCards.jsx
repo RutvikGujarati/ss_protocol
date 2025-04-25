@@ -223,7 +223,7 @@ const InfoCards = () => {
                       required
                     />
                   </div>
-                  <h5 className="detailAmount">1 DAV TOKEN = 500000 PLS</h5>
+                  <h5 className="detailAmount">1 DAV TOKEN = 1,000,000 PLS</h5>
                   <h5 className="detailAmount mb-4">
                     {TotalCost
                       ? formatNumber(ethers.formatUnits(TotalCost, 18))
