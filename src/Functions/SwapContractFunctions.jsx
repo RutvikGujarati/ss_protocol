@@ -15,6 +15,7 @@ import {
 } from "../ContractAddresses";
 import { useAccount, useChainId } from "wagmi";
 import { Addresses, AllAddresses } from "../data/AddressMapping";
+import { useDAvContract } from "./DavTokenFunctions";
 
 const SwapContractContext = createContext();
 
@@ -24,6 +25,7 @@ export const SwapContractProvider = ({ children }) => {
   const chainId = useChainId();
   const { loading, provider, signer, AllContracts } =
     useContext(ContractContext);
+	const {fetchData}= useDAvContract();
   const { address } = useAccount();
 
   const [claiming, setClaiming] = useState(false);
@@ -464,6 +466,7 @@ export const SwapContractProvider = ({ children }) => {
       );
       await tx.wait();
       await CheckIsAuctionActive();
+	  await isTokenSupporteed();
       console.log("Token added successfully!");
     } catch (error) {
       console.error("AddTokenIntoSwapContract failed:", error?.reason || error);
@@ -595,6 +598,7 @@ export const SwapContractProvider = ({ children }) => {
       await CheckIsAuctionActive();
       await HasSwappedAucton();
       await HasReverseSwappedAucton();
+	  await fetchData();
     } catch (error) {
       console.error("Error during token swap:", error);
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
@@ -606,6 +610,7 @@ export const SwapContractProvider = ({ children }) => {
       await CheckIsAuctionActive();
       await HasSwappedAucton();
       await HasReverseSwappedAucton();
+	  await fetchData();
     }
   };
 
@@ -693,7 +698,7 @@ export const SwapContractProvider = ({ children }) => {
         handleAddstate,
         handleAddTokensState,
         TotalCost,
-
+		isAirdropClaimed,
         setClaiming,
         TokenBalance,
         claiming,
@@ -717,11 +722,13 @@ export const SwapContractProvider = ({ children }) => {
         isReversed,
         InputAmount,
         AirDropAmount,
+		getAirdropAmount,
         supportedToken,
         OutPutAmount,
         CurrentCycleCount,
         CheckMintBalance,
-
+		getInputAmount,
+		getOutPutAmount,
         IsAuctionActive,
       }}
     >

@@ -78,6 +78,15 @@ const InfoCards = () => {
     ReferralCodeOfUser,
   } = useDAvContract();
 
+  const handleBurnClick = async () => {
+    try {
+      await BurnStateTokens(rawAmount); // Wait for burn to finish
+      setAmountOfInput(""); // Reset input after success
+    } catch (error) {
+      console.error("Burn failed:", error);
+    }
+  };
+
   console.log("Connected Chain ID:", chainId);
   const setBackLogo = () => {
     if (chainId === 369) {
@@ -96,7 +105,13 @@ const InfoCards = () => {
       : { width: "110px", height: "140px" }; // Default size
   };
 
-  const { CalculationOfCost, TotalCost } = useSwapContract();
+  const {
+    CalculationOfCost,
+    TotalCost,
+    getAirdropAmount,
+    getInputAmount,
+    getOutPutAmount,
+  } = useSwapContract();
   const [amount, setAmount] = useState("");
   const [Refferalamount, setReferralAmount] = useState("");
   const [load, setLoad] = useState(false);
@@ -106,6 +121,9 @@ const InfoCards = () => {
     setLoad(true);
     try {
       await mintDAV(amount, Refferalamount);
+      await getAirdropAmount();
+      await getInputAmount();
+      await getOutPutAmount();
       setAmount("");
       setReferralAmount("");
     } catch (error) {
@@ -434,7 +452,7 @@ const InfoCards = () => {
                       />
                     </div>
                     <button
-                      onClick={() => BurnStateTokens(rawAmount)}
+                      onClick={handleBurnClick}
                       style={{ width: customWidth }}
                       className="btn btn-primary mx-5 mt-4 btn-sm d-flex justify-content-center align-items-center"
                       disabled={load}
@@ -483,7 +501,7 @@ const InfoCards = () => {
                       {Claiming
                         ? "Claiming..."
                         : TimeUntilNextClaim > 0
-                        ? `Wait ${Math.floor(
+                        ? `${Math.floor(
                             TimeUntilNextClaim / 3600
                           )} h ${Math.floor(
                             (TimeUntilNextClaim % 3600) / 60

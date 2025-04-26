@@ -193,6 +193,7 @@ export const DavProvider = ({ children }) => {
       setClaiming(true);
       const tx = await AllContracts.davContract.claimPLS();
       await tx.wait();
+	  await fetchData();
     } catch (err) {
       console.error("Burn claim error:", err);
     } finally {
@@ -211,12 +212,7 @@ export const DavProvider = ({ children }) => {
         signer
       );
 
-      await (
-        await tokenContract.approve(
-          DAV_TESTNET,
-          weiAmount 
-        )
-      ).wait();
+      await (await tokenContract.approve(DAV_TESTNET, weiAmount)).wait();
       await (await AllContracts.davContract.burnState(weiAmount)).wait();
 
       setClicked(false);
@@ -243,6 +239,7 @@ export const DavProvider = ({ children }) => {
         BurnStateTokens,
         claimAmount,
         claimBurnAmount,
+        fetchData,
       }}
     >
       {children}
