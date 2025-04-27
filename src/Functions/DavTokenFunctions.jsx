@@ -14,6 +14,7 @@ import {
   DAV_TESTNET,
   STATE_TESTNET,
 } from "../ContractAddresses";
+import toast from "react-hot-toast";
 
 export const DAVContext = createContext();
 
@@ -36,7 +37,10 @@ export const DavProvider = ({ children }) => {
     stateHolding: "0.0",
     ReferralCodeOfUser: "0.0",
     ReferralAMount: "0.0",
+    totalStateBurned: "0.0",
     claimableAmount: "0.0",
+    usableTreasury: "0.0",
+    CanClaimNow: "false",
     claimableAmountForBurn: "0.0",
     UserPercentage: "0.0",
     TimeUntilNextClaim: "0.0",
@@ -90,9 +94,16 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("ContractPls", () =>
           AllContracts.davContract.stateLpTotalShare()
         ),
+        fetchAndSet("totalStateBurned", () =>
+          AllContracts.davContract.totalStateBurned()
+        ),
         fetchAndSet("davHolds", () =>
           AllContracts.davContract.balanceOf(address)
         ),
+        fetchAndSet("usableTreasury", () =>
+          AllContracts.davContract.getUsableTreasuryPLS()
+        ),
+
         fetchAndSet("davPercentage", () =>
           AllContracts.davContract.getUserHoldingPercentage(address)
         ),
@@ -128,9 +139,15 @@ export const DavProvider = ({ children }) => {
     try {
       await fetchAndSet(
         "TimeUntilNextClaim",
-        () => AllContracts.davContract.getTimeUntilNextClaim(address),
+        () => AllContracts.davContract.getTimeUntilNextClaim(),
         false,
         0
+      );
+      fetchAndSet(
+        "CanClaimNow",
+        async () =>
+          (await AllContracts.davContract.canClaim(address)) ? "true" : "false",
+        false
       );
     } catch (error) {
       console.error("Error fetching time until next claim:", error);
@@ -193,7 +210,16 @@ export const DavProvider = ({ children }) => {
       setClaiming(true);
       const tx = await AllContracts.davContract.claimPLS();
       await tx.wait();
-	  await fetchData();
+      await fetchData();
+      toast.success("Claimed PLS!", {
+        position: "top-center", // Centered
+        autoClose: 6000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     } catch (err) {
       console.error("Burn claim error:", err);
     } finally {
@@ -220,6 +246,17 @@ export const DavProvider = ({ children }) => {
       await fetchTimeUntilNextClaim();
     } catch (err) {
       console.error("Burn error:", err);
+      if (err?.reason && err.reason.includes("Claim your PLS before burning")) {
+        toast.error("Claim your pending PLS first!", {
+          position: "top-center",
+          autoClose: 7000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+      }
       setClicked(false);
     }
   };

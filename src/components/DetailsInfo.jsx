@@ -15,6 +15,7 @@ import stateLogo from "../assets/3.png";
 import yees from "../assets/2.png";
 import sState from "../assets/sonicstate.png";
 import { Auction_TESTNET } from "../ContractAddresses";
+import { useDAvContract } from "../Functions/DavTokenFunctions";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -36,7 +37,7 @@ const DetailsInfo = ({ selectedToken }) => {
     AddTokenIntoSwapContract,
     DavAddress,
   } = useSwapContract();
-
+const {totalStateBurned} = useDAvContract();
   const chainId = useChainId();
 
   const [filteredData, setFilteredData] = useState([]);
@@ -213,7 +214,9 @@ const DetailsInfo = ({ selectedToken }) => {
                     <div className="mx-4">
                       {token.tokenName === "DAV"
                         ? "-----"
-                        : `${formatWithCommas(token.burned)}`}
+						: token.tokenName === "STATE"
+						? formatWithCommas(Number(token.burned || 0) + (Number (totalStateBurned))) 
+                        : formatWithCommas(token.burned || 0) }
                     </div>
                   </td>
                   <td className="text-center">

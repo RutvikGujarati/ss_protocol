@@ -14,7 +14,6 @@ export const shortenAddress = (addr) => addr ? `${addr.slice(0, 6)}...${addr.sli
 export const TokensDetails = () => {
 	const prices = useContext(PriceContext);
 
-
 	const swap = useSwapContract();
 	const chainId = useChainId()
 	const tokens = [

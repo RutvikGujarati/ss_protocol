@@ -59,7 +59,9 @@ const InfoCards = () => {
   const {
     mintDAV,
     claimableAmount,
+	CanClaimNow,
     isLoading,
+	usableTreasury,
     BurnStateTokens,
     claimAmount,
     ReferralAMount,
@@ -68,7 +70,7 @@ const InfoCards = () => {
     Claiming,
     ContractPls,
     claimBurnAmount,
-    AllUserPercentage,
+    // AllUserPercentage,
     TimeUntilNextClaim,
     UserPercentage,
     davHolds,
@@ -470,7 +472,7 @@ const InfoCards = () => {
                     >
                       % STATE TOKENS BURNED BY YOU - {UserPercentage}%
                     </h6>
-                    <h6
+                    {/* <h6
                       className="detailText mb-0"
                       style={{
                         fontSize: "14px",
@@ -478,7 +480,7 @@ const InfoCards = () => {
                       }}
                     >
                       % STATE TOKENS BURNED IN TOTAL - {AllUserPercentage}%
-                    </h6>
+                    </h6> */}
                   </div>
                 </div>
               </div>
@@ -496,20 +498,23 @@ const InfoCards = () => {
                       onClick={() => claimBurnAmount()}
                       style={{ width: customWidth || "100%" }}
                       className="btn btn-primary mt-4 btn-sm d-flex justify-content-center align-items-center"
-                      disabled={Claiming || TimeUntilNextClaim > 0}
+                      disabled={Claiming || CanClaimNow == "false"}
                     >
-                      {Claiming
-                        ? "Claiming..."
-                        : TimeUntilNextClaim > 0
-                        ? `${Math.floor(
-                            TimeUntilNextClaim / 3600
-                          )} h ${Math.floor(
-                            (TimeUntilNextClaim % 3600) / 60
-                          )} m ${TimeUntilNextClaim % 60} s`
-                        : "Claim"}
+                      {Claiming ? "Claiming..." : "Claim"}
                     </button>
                   </div>
                   <div className="carddetails2 ">
+                    <h6
+                      className="detailText mb-1"
+                      style={{
+                        fontSize: "14px",
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      {Math.floor(TimeUntilNextClaim / 3600)} h {" "}
+                      {Math.floor((TimeUntilNextClaim % 3600) / 60)}m {" "}
+                      {TimeUntilNextClaim % 60}s
+                    </h6>
                     <h6
                       className="detailText mb-0"
                       style={{
@@ -527,7 +532,7 @@ const InfoCards = () => {
                       }}
                     >
                       CLAIMABLE TREASURY -{" "}
-                      {formatWithCommas((ContractPls / 12).toFixed(2))} PLS
+                      {formatWithCommas(usableTreasury)} PLS
                     </h6>
                   </div>
                 </div>
