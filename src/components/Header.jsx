@@ -13,7 +13,6 @@ import { useState } from "react";
 
 const Header = () => {
   const chainId = useChainId();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
     <>
@@ -87,54 +86,6 @@ const Header = () => {
                 >
                   Info
                 </NavLink>
-              </li>
-              <li
-                className="nav-item mx-2 dropdown position-relative"
-                onMouseEnter={() => setIsDropdownOpen(true)}
-                onMouseLeave={() => setIsDropdownOpen(false)}
-              >
-                <NavLink
-                  className={({ isActive }) =>
-                    isActive
-                      ? "nav-link active-link text-light"
-                      : "nav-link text-light"
-                  }
-                  to="https://system-state-documentation.gitbook.io/system-state"
-                  target="_blank"
-                >
-                  Docs
-                  <span
-                    className={`dropdown-arrow-wrapper ${
-                      isDropdownOpen ? "rotate-up" : "rotate-down"
-                    }`}
-                  >
-                    <svg
-                      className="dropdown-arrow-icon"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="12"
-                      height="12"
-                      fill="currentColor"
-                      viewBox="0 0 16 16"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M1.646 5.646a.5.5 0 0 1 .708 0L8 11.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"
-                      />
-                    </svg>
-                  </span>
-                </NavLink>
-
-                <ul className={`dropdown-menu ${isDropdownOpen ? "show" : ""}`}>
-                  <li>
-                    <NavLink
-                      className="dropdown-item"
-                      target="_blank"
-                      to="https://system-state-documentation.gitbook.io/system-state/career"
-                    >
-                      Career
-                    </NavLink>
-                  </li>
-                </ul>
               </li>
 
               <li className="nav-item mx-2 "></li>

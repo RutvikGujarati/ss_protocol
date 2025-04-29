@@ -59,9 +59,9 @@ const InfoCards = () => {
   const {
     mintDAV,
     claimableAmount,
-	CanClaimNow,
+    CanClaimNow,
     isLoading,
-	usableTreasury,
+    usableTreasury,
     BurnStateTokens,
     claimAmount,
     ReferralAMount,
@@ -74,7 +74,7 @@ const InfoCards = () => {
     TimeUntilNextClaim,
     UserPercentage,
     davHolds,
-    davPercentage,
+
     // AddDavintoLP,
     stateHolding,
     ReferralCodeOfUser,
@@ -295,18 +295,10 @@ const InfoCards = () => {
                       <div className="carddetails2">
                         <div className="d-flex">
                           <p className="mb-1 detailText">Dav holdings </p>
-                          <p className="mb-1 detailText mx-2"> / Dav Rank</p>
                         </div>
                         <div className="d-flex">
                           <h5 className="">
                             {isLoading ? <DotAnimation /> : davHolds}
-                          </h5>
-                          <h5 className="mx-1 ">
-                            {isLoading ? (
-                              <DotAnimation />
-                            ) : (
-                              `/ ${davPercentage}`
-                            )}
                           </h5>
                         </div>
                       </div>
@@ -447,8 +439,8 @@ const InfoCards = () => {
                     <div className="d-flex align-items-center gap-2">
                       <input
                         type="text"
-                        placeholder="Enter Value"
-                        className="form-control text-center fw-bold"
+                        placeholder={formatWithCommas(stateHolding)}
+                        className="form-control text-center fw-bold input-heavy-shadow"
                         value={amountOfInput}
                         onChange={handleInputChangeForBurn}
                       />
@@ -511,8 +503,10 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      {Math.floor(TimeUntilNextClaim / 3600)} h {" "}
-                      {Math.floor((TimeUntilNextClaim % 3600) / 60)}m {" "}
+                      {Math.floor(TimeUntilNextClaim / 3600)}
+                      <span style={{ textTransform: "none" }}>h</span>{" "}
+                      {Math.floor((TimeUntilNextClaim % 3600) / 60)}
+                      <span style={{ textTransform: "none" }}>m</span>{" "}
                       {TimeUntilNextClaim % 60}s
                     </h6>
                     <h6
@@ -531,8 +525,8 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      CLAIMABLE TREASURY -{" "}
-                      {formatWithCommas(usableTreasury)} PLS
+                      CLAIMABLE TREASURY - {formatWithCommas(usableTreasury)}{" "}
+                      PLS
                     </h6>
                   </div>
                 </div>

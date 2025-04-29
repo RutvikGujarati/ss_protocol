@@ -142,3 +142,9 @@
   transform: scale(2);
   z-index: 999; /* Ensure it's above everything */
 }
+
+.input-heavy-shadow::placeholder {
+	color: #ccc; /* light gray */
+	opacity: 0.9; /* make it even lighter */
+  }
+  
