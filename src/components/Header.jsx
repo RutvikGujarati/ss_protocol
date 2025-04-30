@@ -7,7 +7,6 @@ import pulsex from "../assets/ninemm.png";
 import shadow from "../assets/shadow.jpeg";
 
 import { useChainId } from "wagmi";
-import { useState } from "react";
 // import { Tooltip } from "bootstrap";
 // import { useDAVToken } from "../Context/DavTokenContext";
 
@@ -21,7 +20,7 @@ const Header = () => {
         <div className="container d-flex justify-content-between align-items-center w-100">
           {/* Navbar Brand */}
           <NavLink className="navbar-brand text-light pb-0 mb-0" to="/">
-            <h5 className="uppercase fs-2 fw-bolder">THE STATE</h5>
+            <h5 className="uppercase fs-2 fw-bolder">STATE DEX</h5>
             <p className="detailAmount mb-0" style={{ fontSize: "0.8rem" }}>
               Tokenized Micro-Economy
               <br /> by System State Protocol
@@ -125,7 +124,7 @@ const Header = () => {
       <nav className="navbar bg-dark d-lg-none justify-content-between align-items-center py-2">
         {/* Navbar Brand */}
         <NavLink className="navbar-brand text-light small-text" to="/">
-          <h5 className="uppercase fs-2 fw-bolder">THE STATE</h5>
+          <h5 className="uppercase fs-2 fw-bolder">STATE DEX</h5>
         </NavLink>
         {/* Wallet Connector */}
         <div className="me-3 small-text">

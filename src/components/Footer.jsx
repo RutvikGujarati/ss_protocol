@@ -38,6 +38,7 @@ const Footer = () => {
             <a
               href="https://system-state-documentation.gitbook.io/system-state"
               className="text-white "
+			  style={{fontSize:"14px"}}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -46,6 +47,7 @@ const Footer = () => {
             <a
               href="https://system-state-documentation.gitbook.io/system-state/career"
               className="text-white "
+			  style={{fontSize:"14px"}}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -54,6 +56,7 @@ const Footer = () => {
             <a
               href="https://system-state-documentation.gitbook.io/system-state/disclaimer"
               className="text-white "
+			  style={{fontSize:"14px"}}
               target="_blank"
               rel="noopener noreferrer"
             >

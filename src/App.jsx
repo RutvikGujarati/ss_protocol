@@ -69,6 +69,15 @@ const App = () => {
                 }
               />
               <Route
+                path="/ADDToken"
+                element={
+                  <>
+                    <InfoCards />
+                    {/* <DataTable /> */}
+                  </>
+                }
+              />
+              <Route
                 path="/info"
                 element={
                   <>

@@ -172,6 +172,7 @@ const InfoCards = () => {
   const location = useLocation();
   const isBurn = location.pathname === "/StateLp";
   const isAuction = location.pathname === "/auction";
+  const isAddToken = location.pathname === "/AddToken";
   const [amountOfInput, setAmountOfInput] = useState("");
   const [rawAmount, setRawAmount] = useState("");
   const intervalRef = useRef(null);
@@ -214,15 +215,15 @@ const InfoCards = () => {
             <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 text-center w-100">
-                  <div className="mb-3 d-flex justify-content-center align-items-center gap-2">
-                    <label className="mb-0 detailText mx-2">
+                  <div className="mb-3 d-flex justify-content-start align-items-center gap-2">
+                    <label className="mb-0 detailText ">
                       affiliate link{" "}
                     </label>
                     <input
                       type="text"
                       placeholder="Optional"
                       list="referralSuggestions"
-                      className="form-control text-center fw-bold w-auto mx-1"
+                      className="form-control text-center fw-bold w-auto mx-4"
                       value={Refferalamount}
                       onChange={handleOptionalInputChange}
                     />
@@ -231,13 +232,13 @@ const InfoCards = () => {
                     </datalist>
                   </div>
 
-                  <div className="mb-2 d-flex justify-content-center align-items-center gap-2">
+                  <div className="mb-2 d-flex justify-content-start align-items-center gap-2">
                     <label className="mb-0 detailText">Mint DAV Token</label>
 
                     <input
                       type="text"
                       placeholder="Enter Value"
-                      className="form-control text-center fw-bold w-auto"
+                      className="form-control text-center fw-bold w-auto mx-2"
                       value={amount}
                       onChange={handleInputChange}
                       required
@@ -377,17 +378,19 @@ const InfoCards = () => {
                         </p>
                       </div>
                     </div>
+					<div className="carddetails2 ">
                     <h6
                       className="detailText"
                       style={{
                         fontSize: "14px",
                         textTransform: "capitalize",
-                        marginTop: "3.5rem", // or whatever spacing you want
+                        marginTop: "2.0rem", // or whatever spacing you want
                       }}
                     >
                       Referrers receive their commission directly in their
                       wallet
                     </h6>
+					</div>
                   </div>
                 </div>
               </div>
@@ -434,7 +437,6 @@ const InfoCards = () => {
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
                   <div className="p-2 pt-3 pb-2">
-                    {" "}
                     <p className="mb-2 detailText ">STATE TOKENS BURN</p>
                     <div className="d-flex align-items-center gap-2">
                       <input
@@ -464,15 +466,6 @@ const InfoCards = () => {
                     >
                       % STATE TOKENS BURNED BY YOU - {UserPercentage}%
                     </h6>
-                    {/* <h6
-                      className="detailText mb-0"
-                      style={{
-                        fontSize: "14px",
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      % STATE TOKENS BURNED IN TOTAL - {AllUserPercentage}%
-                    </h6> */}
                   </div>
                 </div>
               </div>
@@ -528,6 +521,82 @@ const InfoCards = () => {
                       CLAIMABLE TREASURY - {formatWithCommas(usableTreasury)}{" "}
                       PLS
                     </h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      ) : isAddToken ? (
+        <>
+          <div className="container mt-4">
+            <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
+              <div className="col-md-4 p-0 m-2 cards">
+                <div className="card bg-dark text-light border-light p-3 d-flex w-100">
+                  <div>
+                    <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
+                      <div className="carddetails2 ">
+                        <h6 className="detailText">LISTING A TOKEN</h6>
+                        <ul className="mb-1" style={{ paddingLeft: "20px" }}>
+                          <li className="detailText">
+                            List 1 Token @ 10 Million PLS market Making Services
+                          </li>
+                          <li className="detailText">
+                            Free Liquidity Pool Tokens (1%) Paired with state
+                            Token
+                          </li>
+                          <li className="detailText">
+                            Market Making Service For 21 Auctions (3 Years)
+                          </li>
+                          <li className="detailText">
+                            Token Creators Receive Periodical Airdrops
+                          </li>
+                          <li className="detailText">
+                            Add a Standard State Dex Logo
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-4 p-0 m-2 cards">
+                <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
+                  <div className="p-2 pt-3 pb-2">
+                    <p className="mb-2 detailText ">Token Name</p>
+                    <div className="d-flex align-items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="Enter Name"
+                        className="form-control text-center fw-bold"
+                        value={amountOfInput}
+                        onChange={handleInputChangeForBurn}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-4 p-0 m-2 cards">
+                <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
+                  <div className="p-2 pt-3 pb-2">
+                    <p className="mb-2 detailText ">Market Maker Fee</p>
+                    <div className="d-flex align-items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="10 000 000 PLS"
+                        className="form-control text-center fw-bold "
+                        value={amountOfInput}
+                        onChange={handleInputChangeForBurn}
+                      />
+                    </div>
+                    <button
+                      onClick={handleBurnClick}
+                      style={{ width: customWidth }}
+                      className="btn btn-primary mx-5 mt-4 btn-sm d-flex justify-content-center align-items-center"
+                      disabled={load}
+                    >
+                      Process Listing
+                    </button>
                   </div>
                 </div>
               </div>
