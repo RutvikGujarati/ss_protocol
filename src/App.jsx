@@ -73,7 +73,7 @@ const App = () => {
                 element={
                   <>
                     <InfoCards />
-                    {/* <DataTable /> */}
+                    <DataTable />
                   </>
                 }
               />

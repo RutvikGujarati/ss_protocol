@@ -5,6 +5,8 @@ import {
   useState,
   useCallback,
 } from "react";
+import userTokenAbi from "../abi/UserTokenABI.json";
+import userTokenByteCode from "../abi/UserByteCode.json";
 import PropTypes from "prop-types";
 import { ethers } from "ethers";
 import { useAccount, useChainId } from "wagmi";
@@ -31,7 +33,8 @@ export const DavProvider = ({ children }) => {
   const [isLoading, setLoading] = useState(true);
   const [BurnClicked, setClicked] = useState(false);
   const [Claiming, setClaiming] = useState(false);
-
+  const [users, setUsers] = useState([]);
+  const [names, setNames] = useState([]);
   const [data, setData] = useState({
     Supply: "0.0",
     stateHolding: "0.0",
@@ -40,6 +43,7 @@ export const DavProvider = ({ children }) => {
     totalStateBurned: "0.0",
     claimableAmount: "0.0",
     usableTreasury: "0.0",
+    tokenEntries: null,
     CanClaimNow: "false",
     claimableAmountForBurn: "0.0",
     UserPercentage: "0.0",
@@ -113,6 +117,11 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("stateHoldingOfSwapContract", () =>
           AllContracts.stateContract.balanceOf(Auction_TESTNET)
         ),
+        fetchAndSet(
+          "tokenEntries",
+          () => AllContracts.davContract.getAllTokenEntries(),
+          false
+        ),
 
         fetchAndSet(
           "ReferralCodeOfUser",
@@ -129,11 +138,28 @@ export const DavProvider = ({ children }) => {
       setLoading(false);
     }
   }, [AllContracts, address]);
+  console.log("dav entries", data.tokenEntries);
+  const fetchAndStoreTokenEntries = async () => {
+    try {
+      // Fetch token entries from the contract
+      const tokenEntries = await AllContracts.davContract.getAllTokenEntries();
 
+      // Extract addresses and token names
+      const addresses = tokenEntries.map((entry) => entry.user);
+      const tokenNames = tokenEntries.map((entry) => entry.tokenName);
+
+      // Update state
+      setUsers(addresses); // e.g., ["0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483"]
+      setNames(tokenNames); // e.g., ["rutvik"]
+    } catch (error) {
+      console.error("Error fetching token entries:", error);
+    }
+  };
   useEffect(() => {
     if (address && AllContracts?.davContract) fetchData();
   }, [address, AllContracts?.davContract]);
-
+  console.log("from entry", users); // e.g., "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483"
+  console.log("from entry", names[0]);
   const fetchTimeUntilNextClaim = useCallback(async () => {
     if (!AllContracts?.davContract || !address) return;
     try {
@@ -159,6 +185,7 @@ export const DavProvider = ({ children }) => {
 
     const interval = setInterval(() => {
       fetchTimeUntilNextClaim();
+      fetchAndStoreTokenEntries();
     }, 1000); // run every second
 
     return () => clearInterval(interval); // clean up on unmount
@@ -182,6 +209,22 @@ export const DavProvider = ({ children }) => {
 
     try {
       const tx = await AllContracts.davContract.mintDAV(ethAmount, referral, {
+        value: cost,
+      });
+      await tx.wait();
+      await fetchData();
+      return tx;
+    } catch (error) {
+      console.error("Minting error:", error);
+      throw error;
+    }
+  };
+  const AddYourToken = async (amount) => {
+    if (!AllContracts?.davContract) return;
+    const cost = ethers.parseEther((chainId === 146 ? 100 : 10).toString());
+
+    try {
+      const tx = await AllContracts.davContract.ProcessYourToken(amount, {
         value: cost,
       });
       await tx.wait();
@@ -261,6 +304,97 @@ export const DavProvider = ({ children }) => {
     }
   };
 
+  async function deployUserToken(name, symbol, _One, _swap, provider, signer) {
+    try {
+      // Validate inputs
+        // Validate and normalize inputs
+    const validatedName = Array.isArray(name) ? name[0] : name;
+    const validatedSymbol = Array.isArray(symbol) ? symbol[0] : symbol;
+
+    if (!validatedName || typeof validatedName !== 'string' || validatedName.length === 0) {
+      throw new Error('Invalid or missing token name');
+    }
+    if (!validatedSymbol || typeof validatedSymbol !== 'string' || validatedSymbol.length === 0) {
+      throw new Error('Invalid or missing token symbol');
+    }
+    if (!ethers.isAddress(_One)) {
+      throw new Error('Invalid _One address');
+    }
+    if (!ethers.isAddress(_swap)) {
+      throw new Error('Invalid _swap address');
+    }
+    if (!provider) {
+      throw new Error('Provider is required');
+    }
+    if (!signer) {
+      throw new Error('Signer is required');
+    }
+
+      // Create a contract factory
+      const factory = new ethers.ContractFactory(
+        userTokenAbi,
+        userTokenByteCode,
+        signer
+      );
+
+      // Deploy the contract
+      const contract = await factory.deploy(name, symbol, _One, _swap);
+
+      // Wait for the contract to be mined
+      await contract.waitForDeployment();
+
+      // Get the deployed contract address
+      const contractAddress = await contract.getAddress();
+      console.log(`UserToken contract deployed at: ${contractAddress}`);
+
+      // Return the contract instance and address
+      return { contract, address: contractAddress };
+    } catch (error) {
+      console.error("Error deploying UserToken contract:", error);
+      throw error;
+    }
+  }
+
+  // State to store the deployed contract address
+  const [deployedAddress, setDeployedAddress] = useState("");
+
+  // Function to deploy with MetaMask and save the address
+  const deployWithMetaMask = async (name, symbol, _One, _swap) => {
+    try {
+      // Check if MetaMask is available
+      if (typeof window.ethereum === "undefined") {
+        throw new Error("MetaMask is not installed");
+      }
+	  const normalizedName = Array.isArray(name) ? name[0] : name;
+      const normalizedSymbol = Array.isArray(symbol) ? symbol[0] : symbol;
+      // Create a provider and signer
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      // Deploy the contract
+      const { contract, address } = await deployUserToken(
+        normalizedName,
+        normalizedSymbol,
+        _One,
+        _swap,
+        provider,
+        signer
+      );
+
+      // Save the deployed address to state
+      setDeployedAddress(address);
+      console.log("Saved deployed address:", address);
+
+      // Return the contract instance for further use
+      return contract;
+    } catch (error) {
+      console.error("Deployment failed:", error);
+      throw error;
+    }
+  };
+
+ 
+
   DavProvider.propTypes = {
     children: PropTypes.node.isRequired,
   };
@@ -276,7 +410,12 @@ export const DavProvider = ({ children }) => {
         BurnStateTokens,
         claimAmount,
         claimBurnAmount,
+        AddYourToken,
         fetchData,
+        deployWithMetaMask,
+        deployedAddress,
+        users,
+        names,
       }}
     >
       {children}

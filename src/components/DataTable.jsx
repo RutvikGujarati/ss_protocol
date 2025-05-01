@@ -3,29 +3,53 @@ import "../Styles/DataTable.css";
 // import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
 import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { Addresses } from "../data/AddressMapping";
+import { useAccount } from "wagmi";
+import { useAddTokens, useUsersOwnerTokens } from "../data/AddTokens";
 
 const DataTable = () => {
-  const {  davHolds } = useDAvContract();
+  const { davHolds, deployWithMetaMask } = useDAvContract();
+  const { address } = useAccount();
 
   const {
     DavRequiredAmount,
     DavBalanceRequire,
     swappingStates,
     buttonTextStates,
-	AirDropAmount,
-	CheckMintBalance,
+    AirDropAmount,
+    AddTokenIntoSwapContract,
+    CheckMintBalance,
   } = useSwapContract();
 
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
+  const isAddToken = location.pathname === "/AddToken";
   const [errorPopup, setErrorPopup] = useState({});
   const [checkingStates, setCheckingStates] = useState({});
+  const [inputValues, setInputValues] = useState({});
+  // Handle input change for tokenAddress or pairAddress for a specific user
+  const handleInputChange = (user, field, value) => {
+    setInputValues((prev) => ({
+      ...prev,
+      [user]: {
+        ...prev[user],
+        [field]: value,
+      },
+    }));
+  };
 
+  // Handle Add button click (calls AddTokenIntoSwapContract)
+  const handleAdd = (name, user) => {
+    const { tokenAddress = "", pairAddress = "" } = inputValues[name] || {};
+    console.log(
+      `Add clicked for token ${name} with tokenAddress: ${tokenAddress}, pairAddress: ${pairAddress}, user: ${user}`
+    );
+    AddTokenIntoSwapContract(tokenAddress, pairAddress, user);
+  };
   console.log("required dav amount", DavRequiredAmount);
 
   const Checking = async (id, ContractName) => {
@@ -53,7 +77,25 @@ const DataTable = () => {
   console.log("db required for Auction", DavBalanceRequire);
 
   const tokens = useAuctionTokens();
+  const Addtokens = useAddTokens();
+  const OwnersTokens = useUsersOwnerTokens();
   console.log("obj tokens", tokens);
+  const [authorized, setAuthorized] = useState(false);
+
+  const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS.toLowerCase();
+  const handleSetAddress = () => {
+    if (!address) {
+      setAuthorized(false);
+      console.warn("Wallet address not available");
+      return;
+    }
+
+    setAuthorized(AuthAddress === address.toLowerCase());
+    console.log(address);
+  };
+  useEffect(() => {
+    handleSetAddress();
+  }, [address, AuthAddress]);
 
   return isAuction ? (
     <div className="container  datatablemarginbottom">
@@ -74,35 +116,35 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-                .filter(
-                  ({
+              .filter(
+                ({
+                  userHasSwapped,
+                  name,
+                  userHasReverse,
+                  isReversing,
+                  AuctionStatus,
+                }) => {
+                  console.log(`Filter Conditions:${name}`, {
                     userHasSwapped,
-                    name,
                     userHasReverse,
                     isReversing,
                     AuctionStatus,
-                  }) => {
-                    console.log(`Filter Conditions:${name}`, {
-                      userHasSwapped,
-                      userHasReverse,
-                      isReversing,
-                      AuctionStatus,
-                      // dbCheck: db >= DavRequiredAmount,
-                    });
+                    // dbCheck: db >= DavRequiredAmount,
+                  });
 
-                    if (AuctionStatus == "false" && isReversing == "true") {
-                      if (userHasReverse == "false") {
-                        return true;
-                      } else if (userHasSwapped && isReversing == "false") {
-                        return false;
-                      }
-                    } else if (AuctionStatus == "true") {
-                      if (userHasSwapped == "false") {
-                        return true;
-                      }
+                  if (AuctionStatus == "false" && isReversing == "true") {
+                    if (userHasReverse == "false") {
+                      return true;
+                    } else if (userHasSwapped && isReversing == "false") {
+                      return false;
+                    }
+                  } else if (AuctionStatus == "true") {
+                    if (userHasSwapped == "false") {
+                      return true;
                     }
                   }
-                )
+                }
+              )
               .map(
                 (
                   {
@@ -114,7 +156,7 @@ const DataTable = () => {
                     SwapT,
                     ContractName,
                     isReversing,
-					AirdropClaimedForToken,
+                    AirdropClaimedForToken,
                     // AuctionStatus,
                     ReverseName,
                     TimeLeft,
@@ -159,7 +201,7 @@ const DataTable = () => {
                       </button>
                     </td>
 
-                    <td >{TimeLeft}</td>
+                    <td>{TimeLeft}</td>
                     <td className="text-success"></td>
                     <td>{currentRatio}</td>
 
@@ -272,9 +314,132 @@ const DataTable = () => {
         </table>
       </div>
     </div>
-  ) : (
+  ) : isAddToken ? (
     <>
+      <div className="container  datatablemarginbottom">
+        <div className="table-responsive">
+          <table className="table table-dark">
+            <thead>
+              {authorized ? (
+                <tr>
+                  {/* <th></th> */}
+                  <th>Logo</th>
+                  <th>Token Name</th>
+                  <th>Token Address/Pair</th>
+
+                  <th>Renounced</th>
+                  <th>Time To claim</th>
+                  <th>Airdrop</th>
+                  <th>Deploy</th>
+                </tr>
+              ) : (
+                <tr>
+                  <th></th>
+                  <th>Logo</th>
+                  <th>Token Name</th>
+                  <th>Token Address</th>
+                  {/* <th>Liquidity</th> */}
+                  <th></th>
+                  <th>Supply</th>
+                  <th>Pair</th>
+                  <th>Amount</th>
+                  <th>Time To claim</th>
+                  <th>Airdrop</th>
+                  <th></th>
+                </tr>
+              )}
+            </thead>
+            <tbody>
+              {authorized
+                ? Addtokens.map(({ image, user, name, TimeLeft }, index) => (
+                    <tr key={index}>
+                      <td>
+                        <div className="nameImage">
+                          <img src={image} width={40} height={40} alt="Logo" />
+                        </div>
+                      </td>
+                      <td>{name}</td>
+                      <td>
+                        <div className="d-flex align-items-center justify-content-center gap-2">
+                          <input
+                            type="text"
+                            className="form-control form-control-sm"
+                            placeholder="Enter Token Address"
+                            value={inputValues[name]?.tokenAddress || ""}
+                            onChange={(e) =>
+                              handleInputChange(
+                                name,
+                                "tokenAddress",
+                                e.target.value
+                              )
+                            }
+                            style={{ width: "120px" }}
+                          />
+                          <input
+                            type="text"
+                            className="form-control form-control-sm"
+                            placeholder="Enter Pair Address"
+                            value={inputValues[name]?.pairAddress || ""}
+                            onChange={(e) =>
+                              handleInputChange(
+                                name,
+                                "pairAddress",
+                                e.target.value
+                              )
+                            }
+                            style={{ width: "120px" }}
+                          />
+                          <button
+                            className="btn btn-sm swap-btn btn-primary"
+                            onClick={() => handleAdd(name, user)}
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </td>
+                      <td>
+                        <button className="btn btn-sm swap-btn btn-primary">
+                          Renounce
+                        </button>
+                      </td>
+                      <td>{TimeLeft}</td>
+                      <td>{TimeLeft}</td>
+                      <td>
+                        <button
+                          className="btn btn-sm swap-btn btn-primary"
+                          onClick={() =>
+                            deployWithMetaMask(name, name, address, address)
+                          }
+                        >
+                          Deploy
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                : OwnersTokens.map(({ name, address }, index) => (
+                    <tr key={index}>
+                      <td></td>
+                      <td>
+                       
+                      </td>
+                      <td>{name}</td>
+                      <td>{address}</td>
+                      <td></td>
+                      <td>--</td>
+                      <td>--</td>
+                      <td>--</td>
+                      <td>--</td>
+                      <td>--</td>
+                      <td></td>
+                    </tr>
+                  ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </>
+  ) : (
+    <></>
   );
 };
 

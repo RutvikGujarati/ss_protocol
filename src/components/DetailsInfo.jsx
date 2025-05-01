@@ -7,7 +7,7 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { TokensDetails } from "../data/TokensDetails";
 import pulsex from "../assets/ninemm.png";
-import { useChainId } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 
 import DAVLogo from "../assets/1.png";
 import sDAV from "../assets/sDAV.png";
@@ -39,6 +39,7 @@ const DetailsInfo = ({ selectedToken }) => {
   } = useSwapContract();
 const {totalStateBurned} = useDAvContract();
   const chainId = useChainId();
+  const { address } = useAccount();
 
   const [filteredData, setFilteredData] = useState([]);
   const [localSearchQuery, setLocalSearchQuery] = useState("");
@@ -279,7 +280,7 @@ const {totalStateBurned} = useDAvContract();
                       ) : (
                         <button
                           className="btn btn-sm swap-btn btn-primary"
-                          onClick={() => AddTokenIntoSwapContract()}
+                          onClick={() => AddTokenIntoSwapContract(token.TokenAddress,token.TokenAddress,address)}
                         >
                           Add
                         </button>

@@ -80,7 +80,7 @@ export const TokensDetails = () => {
 			DavVault :swap.TokenBalance[key],
 			burned: swap.burnedAmount[key],
 			isSupported: swap.supportedToken[key],
-			address: token.address,
+			TokenAddress: token.address,
 			Cycle: swap.CurrentCycleCount[key],
 			handleAddTokens: () => swap[`handleAdd${key}`](),
 			renounceSmartContract: key == "OneDollar" ? swap.isRenounced["oneD"] : swap.isRenounced?.[key] ?? "Unknown",

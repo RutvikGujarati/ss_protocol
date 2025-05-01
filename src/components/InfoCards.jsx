@@ -74,7 +74,7 @@ const InfoCards = () => {
     TimeUntilNextClaim,
     UserPercentage,
     davHolds,
-
+    AddYourToken,
     // AddDavintoLP,
     stateHolding,
     ReferralCodeOfUser,
@@ -176,6 +176,7 @@ const InfoCards = () => {
   const isAuction = location.pathname === "/auction";
   const isAddToken = location.pathname === "/AddToken";
   const [amountOfInput, setAmountOfInput] = useState("");
+  const [TokenName, setTokenName] = useState("");
   const [rawAmount, setRawAmount] = useState("");
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -189,6 +190,9 @@ const InfoCards = () => {
       setRawAmount("");
       setAmountOfInput("");
     }
+  };
+  const handleInputChangeForAddtoken = (e) => {
+    setTokenName(e.target.value);
   };
 
   // Function to stop changing the amount
@@ -262,15 +266,15 @@ const InfoCards = () => {
                       {load ? "Minting..." : "Mint"}
                     </button>
                   </div>
-                    <h6
-                      className="detailText mb-0 mt-2"
-                      style={{
-                        fontSize: "14px",
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      Transferring DAV tokens is not allowed after minting
-                    </h6>
+                  <h6
+                    className="detailText mb-0 mt-2"
+                    style={{
+                      fontSize: "14px",
+                      textTransform: "capitalize",
+                    }}
+                  >
+                    Transferring DAV tokens is not allowed after minting
+                  </h6>
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
@@ -330,7 +334,7 @@ const InfoCards = () => {
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
-                <div className="card bg-dark text-light border-light p-3 d-flex w-100" >
+                <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                   <div>
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
                       <div className="carddetails2 ">
@@ -376,18 +380,18 @@ const InfoCards = () => {
                         </p>
                       </div>
                     </div>
-                      <h6
-                        className="detailText mb-0 mt-5 px-3"
-                        style={{
-                          fontSize: "14px",
-                          textTransform: "capitalize",
-                          marginTop: "2.0rem", // or whatever spacing you want
-                        }}
-                      >
-                        Referrers receive their commission directly in their
-                        wallet
-                      </h6>
-                    </div>
+                    <h6
+                      className="detailText mb-0 mt-5 px-3"
+                      style={{
+                        fontSize: "14px",
+                        textTransform: "capitalize",
+                        marginTop: "2.0rem", // or whatever spacing you want
+                      }}
+                    >
+                      Referrers receive their commission directly in their
+                      wallet
+                    </h6>
+                  </div>
                 </div>
               </div>
             </div>
@@ -568,8 +572,8 @@ const InfoCards = () => {
                         type="text"
                         placeholder="Enter Name"
                         className="form-control text-center fw-bold"
-                        value={amountOfInput}
-                        onChange={handleInputChangeForBurn}
+                        value={TokenName}
+                        onChange={handleInputChangeForAddtoken}
                       />
                     </div>
                   </div>
@@ -579,10 +583,10 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
                   <div className="p-2 pt-3 pb-2">
                     <p className="mb-2 detailText ">Market Maker Fee</p>
-                     <h6 className="text-center  mt-3">10 000 000 PLS</h6>
-                   
+                    <h6 className="text-center  mt-3">10 000 000 PLS</h6>
+
                     <button
-                      onClick={handleBurnClick}
+                      onClick={() => AddYourToken(TokenName)}
                       style={{ width: customWidth }}
                       className="btn btn-primary mx-5 mt-4 btn-sm d-flex justify-content-center align-items-center"
                       disabled={load}

@@ -25,7 +25,7 @@ export const SwapContractProvider = ({ children }) => {
   const chainId = useChainId();
   const { loading, provider, signer, AllContracts } =
     useContext(ContractContext);
-	const {fetchData}= useDAvContract();
+  const { fetchData } = useDAvContract();
   const { address } = useAccount();
 
   const [claiming, setClaiming] = useState(false);
@@ -48,6 +48,7 @@ export const SwapContractProvider = ({ children }) => {
   const [userHashSwapped, setUserHashSwapped] = useState({});
   const [DavAddress, setDavAddress] = useState("");
   const [supportedToken, setIsSupported] = useState(false);
+  const [UsersSupportedTokens, setUsersSupportedTokens] = useState("");
   const [StateAddress, setStateAddress] = useState("");
   const [AirdropClaimed, setAirdropClaimed] = useState({});
   const [userHasReverseSwapped, setUserHasReverseSwapped] = useState({});
@@ -440,7 +441,42 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching addresses:", error);
     }
   };
-
+ 
+  const ERC20Name_ABI = [
+	"function name() view returns (string)"
+  ];
+  const getTokenNamesByUser = async () => {
+	if (!AllContracts?.AuctionContract || !provider) {
+	  console.warn("AuctionContract or provider not found");
+	  return;
+	}
+  
+	try {
+	  const result = await AllContracts.AuctionContract.getTokensByOwner(address);
+	  const tokenAddresses = Array.isArray(result) ? [...result] : Object.values(result);
+  
+	  console.log("User's Token Addresses", tokenAddresses);
+  
+	  const tokenNames = await Promise.all(
+		tokenAddresses.map(async (tokenAddr) => {
+		  try {
+			const tokenContract = new ethers.Contract(tokenAddr, ERC20Name_ABI, provider);
+			const name = await tokenContract.name();
+			return { address: tokenAddr, name };
+		  } catch (err) {
+			console.error(`Failed to fetch name for token: ${tokenAddr}`, err);
+			return { address: tokenAddr, name: "Unknown" };
+		  }
+		})
+	  );
+  
+	  console.log("Token Names:", tokenNames);
+	  setUsersSupportedTokens(tokenNames); // or use a separate state
+	} catch (error) {
+	  console.error("Error fetching token names:", error);
+	}
+  };
+	
   const setDavAndStateIntoSwap = async () => {
     if (!AllContracts?.AuctionContract || !address) return;
 
@@ -455,23 +491,24 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching claimable amount:", error);
     }
   };
-  const AddTokenIntoSwapContract = async () => {
+  const AddTokenIntoSwapContract = async (TokenAddress, PairAddress, Owner) => {
     if (!AllContracts?.AuctionContract || !address) return;
 
     try {
       // Replace these params if needed based on your contract's addToken function
       const tx = await AllContracts.AuctionContract.addToken(
-        Yees_testnet,
-        Yees_testnet
+        TokenAddress,
+        PairAddress,
+        Owner
       );
       await tx.wait();
       await CheckIsAuctionActive();
-	  await isTokenSupporteed();
+      await isTokenSupporteed();
       console.log("Token added successfully!");
     } catch (error) {
       console.error("AddTokenIntoSwapContract failed:", error?.reason || error);
     }
-  };
+  };console.log("Is array:", Array.isArray(UsersSupportedTokens));
 
   useEffect(() => {
     getInputAmount();
@@ -485,6 +522,8 @@ export const SwapContractProvider = ({ children }) => {
     isAirdropClaimed();
     AddressesFromContract();
     isTokenSupporteed();
+    // getTokensByUser();
+	getTokenNamesByUser();
     HasSwappedAucton();
     HasReverseSwappedAucton();
     getCurrentAuctionCycle();
@@ -598,7 +637,7 @@ export const SwapContractProvider = ({ children }) => {
       await CheckIsAuctionActive();
       await HasSwappedAucton();
       await HasReverseSwappedAucton();
-	  await fetchData();
+      await fetchData();
     } catch (error) {
       console.error("Error during token swap:", error);
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
@@ -610,7 +649,7 @@ export const SwapContractProvider = ({ children }) => {
       await CheckIsAuctionActive();
       await HasSwappedAucton();
       await HasReverseSwappedAucton();
-	  await fetchData();
+      await fetchData();
     }
   };
 
@@ -694,11 +733,12 @@ export const SwapContractProvider = ({ children }) => {
 
         CalculationOfCost,
         handleAddDAV,
+        UsersSupportedTokens,
         handleAddTokensDAV,
         handleAddstate,
         handleAddTokensState,
         TotalCost,
-		isAirdropClaimed,
+        isAirdropClaimed,
         setClaiming,
         TokenBalance,
         claiming,
@@ -722,13 +762,13 @@ export const SwapContractProvider = ({ children }) => {
         isReversed,
         InputAmount,
         AirDropAmount,
-		getAirdropAmount,
+        getAirdropAmount,
         supportedToken,
         OutPutAmount,
         CurrentCycleCount,
         CheckMintBalance,
-		getInputAmount,
-		getOutPutAmount,
+        getInputAmount,
+        getOutPutAmount,
         IsAuctionActive,
       }}
     >
