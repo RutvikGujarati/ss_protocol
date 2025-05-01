@@ -81,8 +81,10 @@ const InfoCards = () => {
   } = useDAvContract();
 
   const handleBurnClick = async () => {
+    const amountToBurn = rawAmount.trim() === "" ? stateHolding : rawAmount;
+
     try {
-      await BurnStateTokens(rawAmount); // Wait for burn to finish
+      await BurnStateTokens(amountToBurn); // Use input or default
       setAmountOfInput(""); // Reset input after success
     } catch (error) {
       console.error("Burn failed:", error);
@@ -216,9 +218,7 @@ const InfoCards = () => {
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 text-center w-100">
                   <div className="mb-3 d-flex justify-content-start align-items-center gap-2">
-                    <label className="mb-0 detailText ">
-                      affiliate link{" "}
-                    </label>
+                    <label className="mb-0 detailText ">affiliate link </label>
                     <input
                       type="text"
                       placeholder="Optional"
@@ -262,9 +262,8 @@ const InfoCards = () => {
                       {load ? "Minting..." : "Mint"}
                     </button>
                   </div>
-                  <div className="carddetails2">
                     <h6
-                      className="detailText "
+                      className="detailText mb-0 mt-2"
                       style={{
                         fontSize: "14px",
                         textTransform: "capitalize",
@@ -272,7 +271,6 @@ const InfoCards = () => {
                     >
                       Transferring DAV tokens is not allowed after minting
                     </h6>
-                  </div>
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
@@ -332,7 +330,7 @@ const InfoCards = () => {
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
-                <div className="card bg-dark text-light border-light p-3 d-flex w-100">
+                <div className="card bg-dark text-light border-light p-3 d-flex w-100" >
                   <div>
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
                       <div className="carddetails2 ">
@@ -378,20 +376,18 @@ const InfoCards = () => {
                         </p>
                       </div>
                     </div>
-					<div className="carddetails2 ">
-                    <h6
-                      className="detailText"
-                      style={{
-                        fontSize: "14px",
-                        textTransform: "capitalize",
-                        marginTop: "2.0rem", // or whatever spacing you want
-                      }}
-                    >
-                      Referrers receive their commission directly in their
-                      wallet
-                    </h6>
-					</div>
-                  </div>
+                      <h6
+                        className="detailText mb-0 mt-5 px-3"
+                        style={{
+                          fontSize: "14px",
+                          textTransform: "capitalize",
+                          marginTop: "2.0rem", // or whatever spacing you want
+                        }}
+                      >
+                        Referrers receive their commission directly in their
+                        wallet
+                      </h6>
+                    </div>
                 </div>
               </div>
             </div>
@@ -404,7 +400,7 @@ const InfoCards = () => {
               <div className="col-md-4 p-0 m-2 cards">
                 <div
                   className="card bg-dark text-light border-light p-3 d-flex w-100"
-                  style={{ minHeight: "250px" }}
+                  style={{ minHeight: "260px" }}
                 >
                   <div>
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
@@ -442,7 +438,7 @@ const InfoCards = () => {
                       <input
                         type="text"
                         placeholder={formatWithCommas(stateHolding)}
-                        className="form-control text-center fw-bold input-heavy-shadow"
+                        className="form-control text-center fw-bold "
                         value={amountOfInput}
                         onChange={handleInputChangeForBurn}
                       />
@@ -532,7 +528,10 @@ const InfoCards = () => {
           <div className="container mt-4">
             <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
               <div className="col-md-4 p-0 m-2 cards">
-                <div className="card bg-dark text-light border-light p-3 d-flex w-100">
+                <div
+                  className="card bg-dark text-light border-light p-3 d-flex w-100"
+                  style={{ minHeight: "260px" }}
+                >
                   <div>
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
                       <div className="carddetails2 ">
@@ -580,15 +579,8 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
                   <div className="p-2 pt-3 pb-2">
                     <p className="mb-2 detailText ">Market Maker Fee</p>
-                    <div className="d-flex align-items-center gap-2">
-                      <input
-                        type="text"
-                        placeholder="10 000 000 PLS"
-                        className="form-control text-center fw-bold "
-                        value={amountOfInput}
-                        onChange={handleInputChangeForBurn}
-                      />
-                    </div>
+                     <h6 className="text-center  mt-3">10 000 000 PLS</h6>
+                   
                     <button
                       onClick={handleBurnClick}
                       style={{ width: customWidth }}
