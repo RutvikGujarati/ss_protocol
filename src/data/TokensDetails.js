@@ -63,7 +63,7 @@ export const TokensDetails = () => {
 		.filter((name) => name !== "DAV" && name !== "STATE")
 		.map((name) => ({
 			name,
-			key: name.toLowerCase(),
+			key: name,
 			address: swap.tokenMap?.[name] || "0x0000000000000000000000000000000000000000",
 			price: 0,
 		}));
