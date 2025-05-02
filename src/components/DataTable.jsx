@@ -51,10 +51,13 @@ const DataTable = () => {
     AddTokenIntoSwapContract(tokenAddress, pairAddress, user);
   };
   function formatTimeVerbose(seconds) {
-    const days = Math.floor(seconds / 86400); // 86400 seconds in a day
+    if (typeof seconds !== "number" || isNaN(seconds) || seconds <= 0)
+      return "0";
+
+    const days = Math.floor(seconds / 86400);
     const hrs = Math.floor((seconds % 86400) / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+    const secs = Math.floor(seconds % 60); // in case it's float
 
     return `${days}d ${hrs}h ${mins}m ${secs}s`;
   }
@@ -104,8 +107,9 @@ const DataTable = () => {
       return;
     }
 
-    setAuthorized(AuthAddress === address);
-    console.log(address);
+    setAuthorized(AuthAddress?.toLowerCase() === address.toLowerCase());
+
+    console.log("comparing auth address", address);
   };
   useEffect(() => {
     handleSetAddress();
