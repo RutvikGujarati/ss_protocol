@@ -99,7 +99,7 @@ const DataTable = () => {
   console.log("obj tokens", tokens);
   const [authorized, setAuthorized] = useState(false);
 
-  const AuthAddress = "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483";
+  const AuthAddress = "0xBAaB2913ec979d9d21785063a0e4141e5B787D28";
   const handleSetAddress = () => {
     if (!address) {
       setAuthorized(false);
