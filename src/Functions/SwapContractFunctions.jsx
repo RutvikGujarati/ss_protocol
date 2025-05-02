@@ -910,7 +910,7 @@ export const SwapContractProvider = ({ children }) => {
   const handleAddDAV = () => handleAddToken(DAV_TESTNET, "pDAV");
   const handleAddTokensDAV = () =>
     handleAddToken(DAV_TOKEN_SONIC_ADDRESS, "sDAV");
-  const handleAddstate = () => handleAddToken(STATE_TESTNET, "State");
+ 
   const handleAddTokensState = () =>
     handleAddToken(STATE_TOKEN_SONIC_ADDRESS, "sState");
   const handleAddYees = () => handleAddToken(Yees_testnet, "Yees");
@@ -928,7 +928,6 @@ export const SwapContractProvider = ({ children }) => {
         handleAddDAV,
         UsersSupportedTokens,
         handleAddTokensDAV,
-        handleAddstate,
         handleAddTokensState,
         TotalCost,
         isAirdropClaimed,

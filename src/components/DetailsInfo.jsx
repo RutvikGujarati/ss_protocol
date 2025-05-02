@@ -35,9 +35,10 @@ const DetailsInfo = ({ selectedToken }) => {
     handleAddTokensState,
     setDavAndStateIntoSwap,
     AddTokenIntoSwapContract,
+    handleAddToken,
     DavAddress,
   } = useSwapContract();
-const {totalStateBurned} = useDAvContract();
+  const { totalStateBurned } = useDAvContract();
   const chainId = useChainId();
   const { address } = useAccount();
 
@@ -215,9 +216,11 @@ const {totalStateBurned} = useDAvContract();
                     <div className="mx-4">
                       {token.tokenName === "DAV"
                         ? "-----"
-						: token.tokenName === "STATE"
-						? formatWithCommas(Number(token.burned || 0) + (Number (totalStateBurned))) 
-                        : formatWithCommas(token.burned || 0) }
+                        : token.tokenName === "STATE"
+                        ? formatWithCommas(
+                            Number(token.burned || 0) + Number(totalStateBurned)
+                          )
+                        : formatWithCommas(token.burned || 0)}
                     </div>
                   </td>
                   <td className="text-center">
@@ -232,7 +235,16 @@ const {totalStateBurned} = useDAvContract();
                       </a>
                       <img
                         src={MetaMaskIcon}
-                        onClick={token.handleAddTokens}
+                        onClick={() =>
+                          handleAddToken(
+                            token.TokenAddress,
+                            token.tokenName === "DAV"
+                              ? "pDAV"
+                              : token.tokenName === "STATE"
+                              ? "State"
+                              : token.tokenName
+                          )
+                        }
                         alt="State Logo"
                         style={{
                           width: "20px",
@@ -240,6 +252,7 @@ const {totalStateBurned} = useDAvContract();
                           cursor: "pointer",
                         }}
                       />
+
                       {token.tokenName === "DAV" ? (
                         "----"
                       ) : (
@@ -280,7 +293,13 @@ const {totalStateBurned} = useDAvContract();
                       ) : (
                         <button
                           className="btn btn-sm swap-btn btn-primary"
-                          onClick={() => AddTokenIntoSwapContract(token.TokenAddress,token.TokenAddress,address)}
+                          onClick={() =>
+                            AddTokenIntoSwapContract(
+                              token.TokenAddress,
+                              token.TokenAddress,
+                              address
+                            )
+                          }
                         >
                           Add
                         </button>
