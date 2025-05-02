@@ -99,7 +99,7 @@ const DataTable = () => {
   console.log("obj tokens", tokens);
   const [authorized, setAuthorized] = useState(false);
 
-  const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
+  const AuthAddress = "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483";
   const handleSetAddress = () => {
     if (!address) {
       setAuthorized(false);
@@ -107,7 +107,7 @@ const DataTable = () => {
       return;
     }
 
-    setAuthorized(AuthAddress?.toLowerCase() === address.toLowerCase());
+    setAuthorized(AuthAddress === address);
 
     console.log("comparing auth address", address);
   };
