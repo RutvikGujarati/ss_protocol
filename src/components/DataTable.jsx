@@ -7,9 +7,9 @@ import { useEffect, useState } from "react";
 import { formatWithCommas } from "./DetailsInfo";
 import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
-import { Addresses } from "../data/AddressMapping";
 import { useAccount } from "wagmi";
 import { useAddTokens, useUsersOwnerTokens } from "../data/AddTokens";
+import { Auction_TESTNET } from "../ContractAddresses";
 
 const DataTable = () => {
   const { davHolds, deployWithMetaMask } = useDAvContract();
@@ -22,7 +22,10 @@ const DataTable = () => {
     buttonTextStates,
     AirDropAmount,
     AddTokenIntoSwapContract,
+    renounceTokenContract,
     CheckMintBalance,
+    tokenMap,
+    giveRewardForAirdrop,
   } = useSwapContract();
 
   const location = useLocation();
@@ -32,31 +35,42 @@ const DataTable = () => {
   const [checkingStates, setCheckingStates] = useState({});
   const [inputValues, setInputValues] = useState({});
   // Handle input change for tokenAddress or pairAddress for a specific user
-  const handleInputChange = (user, field, value) => {
+  const handleInputChange = (tokenName, value) => {
     setInputValues((prev) => ({
       ...prev,
-      [user]: {
-        ...prev[user],
-        [field]: value,
-      },
+      [tokenName]: value, // store pairAddress directly
     }));
   };
 
   // Handle Add button click (calls AddTokenIntoSwapContract)
-  const handleAdd = (name, user) => {
-    const { tokenAddress = "", pairAddress = "" } = inputValues[name] || {};
+  const handleAdd = (tokenAddress, tokenName, user) => {
+    const pairAddress = inputValues[tokenName] || "";
     console.log(
-      `Add clicked for token ${name} with tokenAddress: ${tokenAddress}, pairAddress: ${pairAddress}, user: ${user}`
+      `Add clicked for token ${tokenName} with tokenAddress: ${tokenAddress}, pairAddress: ${pairAddress}, user: ${user}`
     );
     AddTokenIntoSwapContract(tokenAddress, pairAddress, user);
   };
+  function formatTimeVerbose(seconds) {
+    const days = Math.floor(seconds / 86400); // 86400 seconds in a day
+    const hrs = Math.floor((seconds % 86400) / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    return `${days}d ${hrs}h ${mins}m ${secs}s`;
+  }
+
   console.log("required dav amount", DavRequiredAmount);
 
   const Checking = async (id, ContractName) => {
     setCheckingStates((prev) => ({ ...prev, [id]: true }));
     try {
-      const AddressMapping = Addresses[ContractName];
-      console.log("address get from mapping", AddressMapping);
+      // Dynamically get address from swap.tokenMap (or pass it as prop if needed)
+      const AddressMapping = tokenMap?.[ContractName];
+      if (!AddressMapping) {
+        throw new Error(`Token address not found for ${ContractName}`);
+      }
+
+      console.log("Address fetched from tokenMap:", AddressMapping);
       await CheckMintBalance(AddressMapping);
     } catch (e) {
       if (
@@ -329,6 +343,7 @@ const DataTable = () => {
 
                   <th>Renounced</th>
                   <th>Time To claim</th>
+                  <th>Amount</th>
                   <th>Airdrop</th>
                   <th>Deploy</th>
                 </tr>
@@ -351,88 +366,171 @@ const DataTable = () => {
             </thead>
             <tbody>
               {authorized
-                ? Addtokens.map(({ image, user, name, TimeLeft }, index) => (
-                    <tr key={index}>
-                      <td>
-                        <div className="nameImage">
-                          <img src={image} width={40} height={40} alt="Logo" />
-                        </div>
-                      </td>
-                      <td>{name}</td>
-                      <td>
-                        <div className="d-flex align-items-center justify-content-center gap-2">
-                          <input
-                            type="text"
-                            className="form-control form-control-sm"
-                            placeholder="Enter Token Address"
-                            value={inputValues[name]?.tokenAddress || ""}
-                            onChange={(e) =>
-                              handleInputChange(
-                                name,
-                                "tokenAddress",
-                                e.target.value
-                              )
-                            }
-                            style={{ width: "120px" }}
-                          />
-                          <input
-                            type="text"
-                            className="form-control form-control-sm"
-                            placeholder="Enter Pair Address"
-                            value={inputValues[name]?.pairAddress || ""}
-                            onChange={(e) =>
-                              handleInputChange(
-                                name,
-                                "pairAddress",
-                                e.target.value
-                              )
-                            }
-                            style={{ width: "120px" }}
-                          />
+                ? Addtokens.map(
+                    ({ image, user, name, TimeLeft, TokenAddress }, index) => (
+                      <tr key={index}>
+                        <td>
+                          <div className="nameImage">
+                            <img
+                              src={image}
+                              width={40}
+                              height={40}
+                              alt="Logo"
+                            />
+                          </div>
+                        </td>
+                        <td>{name}</td>
+                        <td>
+                          <div className="d-flex align-items-center justify-content-center gap-2">
+                            <td
+                              onClick={() => {
+                                if (TokenAddress) {
+                                  navigator.clipboard.writeText(TokenAddress);
+                                  alert("Address copied to clipboard!");
+                                }
+                              }}
+                              className={
+                                TokenAddress ? "clickable-TokenAddress" : ""
+                              }
+                              title={
+                                TokenAddress
+                                  ? "Click to copy full TokenAddress"
+                                  : ""
+                              }
+                            >
+                              {TokenAddress
+                                ? `${TokenAddress.slice(
+                                    0,
+                                    6
+                                  )}...${TokenAddress.slice(-4)}`
+                                : "N/A"}
+                            </td>
+                            <input
+                              type="text"
+                              className="form-control form-control-sm"
+                              placeholder="Enter Pair Address"
+                              value={inputValues[name] || ""}
+                              onChange={(e) =>
+                                handleInputChange(name, e.target.value)
+                              }
+                              style={{ width: "120px" }}
+                            />
+                            <button
+                              className="btn btn-sm swap-btn btn-primary"
+                              onClick={() =>
+                                handleAdd(TokenAddress, name, user)
+                              }
+                            >
+                              Add
+                            </button>
+                          </div>
+                        </td>
+                        <td>
                           <button
                             className="btn btn-sm swap-btn btn-primary"
-                            onClick={() => handleAdd(name, user)}
+                            onClick={() =>
+                              renounceTokenContract(TokenAddress, name)
+                            }
+                            disabled
                           >
-                            Add
+                            Renounce
                           </button>
-                        </div>
-                      </td>
-                      <td>
-                        <button className="btn btn-sm swap-btn btn-primary">
-                          Renounce
-                        </button>
-                      </td>
-                      <td>{TimeLeft}</td>
-                      <td>{TimeLeft}</td>
-                      <td>
-                        <button
-                          className="btn btn-sm swap-btn btn-primary"
-                          onClick={() =>
-                            deployWithMetaMask(name, name, address, address)
+                        </td>
+                        <td>{formatTimeVerbose(TimeLeft)}</td>
+
+                        <td>500,000</td>
+                        <td>
+                          <button
+                            className="btn btn-sm swap-btn btn-primary"
+                            onClick={() => giveRewardForAirdrop(TokenAddress)}
+                          >
+                            Claim
+                          </button>
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-sm swap-btn btn-primary"
+                            onClick={() =>
+                              deployWithMetaMask(
+                                name,
+                                name,
+                                address,
+                                Auction_TESTNET
+                              )
+                            }
+                          >
+                            Deploy
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  )
+                : OwnersTokens.map(
+                    (
+                      { image, name, address, pairAddress, nextClaimTime },
+                      index
+                    ) => (
+                      <tr key={index}>
+                        <td></td>
+                        <td>
+                          <div className="nameImage">
+                            <img
+                              src={image}
+                              width={40}
+                              height={40}
+                              alt="Logo"
+                            />
+                          </div>
+                        </td>
+                        <td>{name}</td>
+                        <td
+                          onClick={() => {
+                            if (address) {
+                              navigator.clipboard.writeText(address);
+                              alert("Address copied to clipboard!");
+                            }
+                          }}
+                          className={address ? "clickable-address" : ""}
+                          title={address ? "Click to copy full address" : ""}
+                        >
+                          {address
+                            ? `${address.slice(0, 6)}...${address.slice(-4)}`
+                            : "N/A"}
+                        </td>
+                        <td></td>
+                        <td>500 Billion</td>
+                        <td
+                          onClick={() => {
+                            if (pairAddress) {
+                              navigator.clipboard.writeText(pairAddress);
+                              alert("Address copied to clipboard!");
+                            }
+                          }}
+                          className={pairAddress ? "clickable-pairAddress" : ""}
+                          title={
+                            pairAddress ? "Click to copy full pairAddress" : ""
                           }
                         >
-                          Deploy
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                : OwnersTokens.map(({ name, address }, index) => (
-                    <tr key={index}>
-                      <td></td>
-                      <td>
-                       
-                      </td>
-                      <td>{name}</td>
-                      <td>{address}</td>
-                      <td></td>
-                      <td>--</td>
-                      <td>--</td>
-                      <td>--</td>
-                      <td>--</td>
-                      <td>--</td>
-                      <td></td>
-                    </tr>
-                  ))}
+                          {pairAddress
+                            ? `${pairAddress.slice(0, 6)}...${pairAddress.slice(
+                                -4
+                              )}`
+                            : "N/A"}
+                        </td>
+                        <td>2,500,000</td>
+                        <td>{formatTimeVerbose(nextClaimTime)}</td>
+                        <td>
+                          <button
+                            className="btn btn-sm swap-btn btn-primary"
+                            onClick={() => giveRewardForAirdrop(address)}
+                          >
+                            Claim
+                          </button>
+                        </td>
+                        <td></td>
+                      </tr>
+                    )
+                  )}
             </tbody>
           </table>
         </div>

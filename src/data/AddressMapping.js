@@ -4,6 +4,6 @@ export const Addresses = {
 	Yees: Yees_testnet,
 };
 export const AllAddresses = {
-	Yees: Yees_testnet,
+	"first 1": Yees_testnet,
 	state: STATE_TESTNET
 };

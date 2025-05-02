@@ -5,8 +5,7 @@ import {
   useState,
   useCallback,
 } from "react";
-import userTokenAbi from "../abi/UserTokenABI.json";
-import userTokenByteCode from "../abi/UserByteCode.json";
+
 import PropTypes from "prop-types";
 import { ethers } from "ethers";
 import { useAccount, useChainId } from "wagmi";
@@ -203,7 +202,7 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract) return;
     const ethAmount = ethers.parseEther(amount.toString());
     const cost = ethers.parseEther(
-      (amount * (chainId === 146 ? 100 : 100000)).toString()
+      (amount * (chainId === 146 ? 100 : 10000)).toString()
     );
     const referral = ref.trim() || "0x0000000000000000000000000000000000000000";
 
@@ -221,14 +220,26 @@ export const DavProvider = ({ children }) => {
   };
   const AddYourToken = async (amount) => {
     if (!AllContracts?.davContract) return;
-    const cost = ethers.parseEther((chainId === 146 ? 100 : 10).toString());
+
+    // Define the cost based on the chainId
+    const cost = ethers.parseEther((chainId === 146 ? 100 : 100000).toString());
 
     try {
-      const tx = await AllContracts.davContract.ProcessYourToken(amount, {
-        value: cost,
-      });
+      // Check if the address is the VITE_AUTH_ADDRESS, if so, pass no value for ether
+      const tx =
+        address == import.meta.env.VITE_AUTH_ADDRESS
+          ? await AllContracts.davContract.ProcessYourToken(amount)
+          : await AllContracts.davContract.ProcessYourToken(amount, {
+              value: cost,
+            });
+
+      // Wait for the transaction to be mined
       await tx.wait();
+
+      // Fetch updated data
       await fetchData();
+
+      // Return the transaction object
       return tx;
     } catch (error) {
       console.error("Minting error:", error);
@@ -240,6 +251,21 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract) return;
     try {
       const tx = await AllContracts.davContract.claimReward();
+      await tx.wait();
+      await fetchData();
+    } catch (err) {
+      console.error("Claim error:", err);
+    }
+  };
+  const deployWithMetaMask = async (name, symbol, five, swap) => {
+    if (!AllContracts?.AuctionContract) return;
+    try {
+      const tx = await AllContracts.AuctionContract.deployUserToken(
+        name,
+        symbol,
+        five,
+        swap
+      );
       await tx.wait();
       await fetchData();
     } catch (err) {
@@ -304,97 +330,6 @@ export const DavProvider = ({ children }) => {
     }
   };
 
-  async function deployUserToken(name, symbol, _One, _swap, provider, signer) {
-    try {
-      // Validate inputs
-        // Validate and normalize inputs
-    const validatedName = Array.isArray(name) ? name[0] : name;
-    const validatedSymbol = Array.isArray(symbol) ? symbol[0] : symbol;
-
-    if (!validatedName || typeof validatedName !== 'string' || validatedName.length === 0) {
-      throw new Error('Invalid or missing token name');
-    }
-    if (!validatedSymbol || typeof validatedSymbol !== 'string' || validatedSymbol.length === 0) {
-      throw new Error('Invalid or missing token symbol');
-    }
-    if (!ethers.isAddress(_One)) {
-      throw new Error('Invalid _One address');
-    }
-    if (!ethers.isAddress(_swap)) {
-      throw new Error('Invalid _swap address');
-    }
-    if (!provider) {
-      throw new Error('Provider is required');
-    }
-    if (!signer) {
-      throw new Error('Signer is required');
-    }
-
-      // Create a contract factory
-      const factory = new ethers.ContractFactory(
-        userTokenAbi,
-        userTokenByteCode,
-        signer
-      );
-
-      // Deploy the contract
-      const contract = await factory.deploy(name, symbol, _One, _swap);
-
-      // Wait for the contract to be mined
-      await contract.waitForDeployment();
-
-      // Get the deployed contract address
-      const contractAddress = await contract.getAddress();
-      console.log(`UserToken contract deployed at: ${contractAddress}`);
-
-      // Return the contract instance and address
-      return { contract, address: contractAddress };
-    } catch (error) {
-      console.error("Error deploying UserToken contract:", error);
-      throw error;
-    }
-  }
-
-  // State to store the deployed contract address
-  const [deployedAddress, setDeployedAddress] = useState("");
-
-  // Function to deploy with MetaMask and save the address
-  const deployWithMetaMask = async (name, symbol, _One, _swap) => {
-    try {
-      // Check if MetaMask is available
-      if (typeof window.ethereum === "undefined") {
-        throw new Error("MetaMask is not installed");
-      }
-	  const normalizedName = Array.isArray(name) ? name[0] : name;
-      const normalizedSymbol = Array.isArray(symbol) ? symbol[0] : symbol;
-      // Create a provider and signer
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-
-      // Deploy the contract
-      const { contract, address } = await deployUserToken(
-        normalizedName,
-        normalizedSymbol,
-        _One,
-        _swap,
-        provider,
-        signer
-      );
-
-      // Save the deployed address to state
-      setDeployedAddress(address);
-      console.log("Saved deployed address:", address);
-
-      // Return the contract instance for further use
-      return contract;
-    } catch (error) {
-      console.error("Deployment failed:", error);
-      throw error;
-    }
-  };
-
- 
-
   DavProvider.propTypes = {
     children: PropTypes.node.isRequired,
   };
@@ -413,7 +348,6 @@ export const DavProvider = ({ children }) => {
         AddYourToken,
         fetchData,
         deployWithMetaMask,
-        deployedAddress,
         users,
         names,
       }}
