@@ -96,7 +96,7 @@ const DataTable = () => {
   console.log("obj tokens", tokens);
   const [authorized, setAuthorized] = useState(false);
 
-  const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS.toLowerCase();
+  const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
   const handleSetAddress = () => {
     if (!address) {
       setAuthorized(false);
@@ -104,7 +104,7 @@ const DataTable = () => {
       return;
     }
 
-    setAuthorized(AuthAddress === address.toLowerCase());
+    setAuthorized(AuthAddress === address);
     console.log(address);
   };
   useEffect(() => {
