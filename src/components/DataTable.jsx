@@ -12,8 +12,10 @@ import { useAddTokens, useUsersOwnerTokens } from "../data/AddTokens";
 import { Auction_TESTNET } from "../ContractAddresses";
 
 const DataTable = () => {
-  const { davHolds, deployWithMetaMask } = useDAvContract();
+  const { davHolds, deployWithMetaMask, isProcessing, pendingToken } =
+    useDAvContract();
   const { address } = useAccount();
+  const [processingToken, setProcessingToken] = useState(null);
 
   const {
     DavRequiredAmount,
@@ -24,6 +26,8 @@ const DataTable = () => {
     AddTokenIntoSwapContract,
     renounceTokenContract,
     CheckMintBalance,
+    isCliamProcessing,
+    fetchUserTokenAddresses,
     tokenMap,
     giveRewardForAirdrop,
   } = useSwapContract();
@@ -43,13 +47,18 @@ const DataTable = () => {
   };
 
   // Handle Add button click (calls AddTokenIntoSwapContract)
-  const handleAdd = (tokenAddress, tokenName, user) => {
+  const handleAdd = async (tokenAddress, tokenName, user, name) => {
     const pairAddress = inputValues[tokenName] || "";
-    console.log(
-      `Add clicked for token ${tokenName} with tokenAddress: ${tokenAddress}, pairAddress: ${pairAddress}, user: ${user}`
-    );
-    AddTokenIntoSwapContract(tokenAddress, pairAddress, user);
+    setProcessingToken(tokenName); // Set current token being processed
+    try {
+      await AddTokenIntoSwapContract(tokenAddress, pairAddress, user, name);
+    } catch (error) {
+      console.error("AddTokenIntoSwapContract failed:", error);
+    } finally {
+      setProcessingToken(null); // Reset after processing
+    }
   };
+
   function formatTimeVerbose(seconds) {
     if (typeof seconds !== "number" || isNaN(seconds) || seconds <= 0)
       return "0";
@@ -99,7 +108,7 @@ const DataTable = () => {
   console.log("obj tokens", tokens);
   const [authorized, setAuthorized] = useState(false);
 
-  const AuthAddress = "0xBAaB2913ec979d9d21785063a0e4141e5B787D28";
+  const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
   const handleSetAddress = () => {
     if (!address) {
       setAuthorized(false);
@@ -169,7 +178,7 @@ const DataTable = () => {
                     id,
                     name,
                     Pname,
-                    image,
+                    emoji,
                     currentRatio,
                     SwapT,
                     ContractName,
@@ -189,9 +198,7 @@ const DataTable = () => {
                     <td></td>
                     <td>
                       <div className="tableName d-flex gap-5 align-items-center">
-                        <div className="nameImage">
-                          <img src={image} width={40} height={40} alt="Logo" />
-                        </div>
+                        <h3>{emoji}</h3>
                         <div className="nameDetails">
                           <h5 className="nameBig">{name}</h5>
                           {isReversing == "true" ? (
@@ -343,13 +350,13 @@ const DataTable = () => {
                   {/* <th></th> */}
                   <th>Logo</th>
                   <th>Token Name</th>
+                  <th>Deploy</th>
                   <th>Token Address/Pair</th>
 
                   <th>Renounced</th>
                   <th>Time To claim</th>
                   <th>Amount</th>
                   <th>Airdrop</th>
-                  <th>Deploy</th>
                 </tr>
               ) : (
                 <tr>
@@ -371,74 +378,140 @@ const DataTable = () => {
             <tbody>
               {authorized
                 ? Addtokens.map(
-                    ({ image, user, name, TimeLeft, TokenAddress }, index) => (
+                    (
+                      {
+                        user,
+                        name,
+                        Emojis,
+                        isAdded,
+                        TimeLeft,
+                        isDeployed,
+                        isRenounceToken,
+                        TokenAddress,
+                      },
+                      index
+                    ) => (
                       <tr key={index}>
                         <td>
-                          <div className="nameImage">
-                            <img
-                              src={image}
-                              width={40}
-                              height={40}
-                              alt="Logo"
-                            />
-                          </div>
+                          <h3>{Emojis} </h3>
                         </td>
                         <td>{name}</td>
                         <td>
-                          <div className="d-flex align-items-center justify-content-center gap-2">
-                            <td
-                              onClick={() => {
-                                if (TokenAddress) {
-                                  navigator.clipboard.writeText(TokenAddress);
-                                  alert("Address copied to clipboard!");
+                          {isDeployed ? (
+                            <span
+                              className="badge bg-gradient bg-success px-3 py-2 rounded-pill shadow-lg"
+                              style={{ fontSize: "12px" }}
+                            >
+                              ✅ Token Deployed
+                            </span>
+                          ) : (
+                            <button
+                              className="btn btn-sm swap-btn btn-primary"
+                              onClick={async () => {
+                                try {
+                                  await deployWithMetaMask(
+                                    name,
+                                    name,
+                                    Emojis,
+                                    address,
+                                    Auction_TESTNET,
+                                    address
+                                  );
+
+                                  await fetchUserTokenAddresses();
+                                } catch (error) {
+                                  console.error("Deployment failed:", error);
                                 }
                               }}
-                              className={
-                                TokenAddress ? "clickable-TokenAddress" : ""
-                              }
-                              title={
-                                TokenAddress
-                                  ? "Click to copy full TokenAddress"
-                                  : ""
-                              }
+                              disabled={isProcessing == name}
                             >
-                              {TokenAddress
-                                ? `${TokenAddress.slice(
-                                    0,
-                                    6
-                                  )}...${TokenAddress.slice(-4)}`
-                                : "N/A"}
-                            </td>
-                            <input
-                              type="text"
-                              className="form-control form-control-sm"
-                              placeholder="Enter Pair Address"
-                              value={inputValues[name] || ""}
-                              onChange={(e) =>
-                                handleInputChange(name, e.target.value)
-                              }
-                              style={{ width: "120px" }}
-                            />
+                              {isProcessing == name ? "Deploying..." : "Deploy"}
+                            </button>
+                          )}
+                        </td>
+
+                        <td>
+                          {isAdded ? (
+                            <span
+                              className="badge bg-gradient bg-success px-3 py-2 rounded-pill shadow-lg"
+                              style={{ fontSize: "12px" }}
+                            >
+                              ✅ Token Added
+                            </span>
+                          ) : (
+                            <div className="d-flex align-items-center justify-content-center gap-2">
+                              <div
+                                onClick={() => {
+                                  if (TokenAddress) {
+                                    navigator.clipboard.writeText(TokenAddress);
+                                    alert("Address copied to clipboard!");
+                                  }
+                                }}
+                                className={
+                                  TokenAddress ? "clickable-TokenAddress" : ""
+                                }
+                                title={
+                                  TokenAddress
+                                    ? "Click to copy full TokenAddress"
+                                    : ""
+                                }
+                                style={{
+                                  minWidth: "100px",
+                                  textAlign: "center",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                {TokenAddress
+                                  ? `${TokenAddress.slice(
+                                      0,
+                                      6
+                                    )}...${TokenAddress.slice(-4)}`
+                                  : "N/A"}
+                              </div>
+                              <input
+                                type="text"
+                                className="form-control form-control-sm"
+                                placeholder="Enter Pair Address"
+                                value={inputValues[name] || ""}
+                                onChange={(e) =>
+                                  handleInputChange(name, e.target.value)
+                                }
+                                style={{ width: "120px" }}
+                              />
+
+                              <button
+                                className="btn btn-sm swap-btn btn-primary"
+                                onClick={() =>
+                                  handleAdd(TokenAddress, name, user, name)
+                                }
+                                disabled={processingToken === name}
+                              >
+                                {processingToken === name
+                                  ? "Processing..."
+                                  : "Add"}
+                              </button>
+                            </div>
+                          )}
+                        </td>
+
+                        <td>
+                          {isRenounceToken == "true" ? (
+                            <span
+                              className="badge bg-gradient bg-success px-3 py-2 rounded-pill shadow-lg"
+                              style={{ fontSize: "12px" }}
+                            >
+                              ✅ Token Renounced
+                            </span>
+                          ) : (
                             <button
                               className="btn btn-sm swap-btn btn-primary"
                               onClick={() =>
-                                handleAdd(TokenAddress, name, user)
+                                renounceTokenContract(TokenAddress, name)
                               }
                             >
-                              Add
+                              Renounce
                             </button>
-                          </div>
-                        </td>
-                        <td>
-                          <button
-                            className="btn btn-sm swap-btn btn-primary"
-                            onClick={() =>
-                              renounceTokenContract(TokenAddress, name)
-                            }
-                            disabled
-                          >
-                            Renounce
-                          </button>
+                          )}
                         </td>
                         <td>{formatTimeVerbose(TimeLeft)}</td>
 
@@ -447,23 +520,13 @@ const DataTable = () => {
                           <button
                             className="btn btn-sm swap-btn btn-primary"
                             onClick={() => giveRewardForAirdrop(TokenAddress)}
-                          >
-                            Claim
-                          </button>
-                        </td>
-                        <td>
-                          <button
-                            className="btn btn-sm swap-btn btn-primary"
-                            onClick={() =>
-                              deployWithMetaMask(
-                                name,
-                                name,
-                                address,
-                                Auction_TESTNET
-                              )
+                            disabled={
+                              isCliamProcessing == TokenAddress || TimeLeft > 0
                             }
                           >
-                            Deploy
+                            {isCliamProcessing == TokenAddress
+                              ? "Processing..."
+                              : "Claim"}
                           </button>
                         </td>
                       </tr>
@@ -471,70 +534,89 @@ const DataTable = () => {
                   )
                 : OwnersTokens.map(
                     (
-                      { image, name, address, pairAddress, nextClaimTime },
+                      { name, address, pairAddress, Emojis, nextClaimTime },
                       index
                     ) => (
-                      <tr key={index}>
-                        <td></td>
-                        <td>
-                          <div className="nameImage">
-                            <img
-                              src={image}
-                              width={40}
-                              height={40}
-                              alt="Logo"
-                            />
-                          </div>
-                        </td>
-                        <td>{name}</td>
-                        <td
-                          onClick={() => {
-                            if (address) {
-                              navigator.clipboard.writeText(address);
-                              alert("Address copied to clipboard!");
-                            }
-                          }}
-                          className={address ? "clickable-address" : ""}
-                          title={address ? "Click to copy full address" : ""}
-                        >
-                          {address
-                            ? `${address.slice(0, 6)}...${address.slice(-4)}`
-                            : "N/A"}
-                        </td>
-                        <td></td>
-                        <td>500 Billion</td>
-                        <td
-                          onClick={() => {
-                            if (pairAddress) {
-                              navigator.clipboard.writeText(pairAddress);
-                              alert("Address copied to clipboard!");
-                            }
-                          }}
-                          className={pairAddress ? "clickable-pairAddress" : ""}
-                          title={
-                            pairAddress ? "Click to copy full pairAddress" : ""
-                          }
-                        >
-                          {pairAddress
-                            ? `${pairAddress.slice(0, 6)}...${pairAddress.slice(
-                                -4
-                              )}`
-                            : "N/A"}
-                        </td>
-                        <td>2,500,000</td>
-                        <td>{formatTimeVerbose(nextClaimTime)}</td>
-                        <td>
-                          <button
-                            className="btn btn-sm swap-btn btn-primary"
-                            onClick={() => giveRewardForAirdrop(address)}
+                      <>
+                        <tr key={index}>
+                          <td></td>
+                          <td>
+                            <h3>{Emojis}</h3>
+                          </td>
+                          <td>{name}</td>
+                          <td
+                            onClick={() => {
+                              if (address) {
+                                navigator.clipboard.writeText(address);
+                                alert("Address copied to clipboard!");
+                              }
+                            }}
+                            className={address ? "clickable-address" : ""}
+                            title={address ? "Click to copy full address" : ""}
                           >
-                            Claim
-                          </button>
-                        </td>
-                        <td></td>
-                      </tr>
+                            {address
+                              ? `${address.slice(0, 6)}...${address.slice(-4)}`
+                              : "N/A"}
+                          </td>
+                          <td></td>
+                          <td>500 Billion</td>
+                          <td
+                            onClick={() => {
+                              if (pairAddress) {
+                                navigator.clipboard.writeText(pairAddress);
+                                alert("Address copied to clipboard!");
+                              }
+                            }}
+                            className={
+                              pairAddress ? "clickable-pairAddress" : ""
+                            }
+                            title={
+                              pairAddress
+                                ? "Click to copy full pairAddress"
+                                : ""
+                            }
+                          >
+                            {pairAddress
+                              ? `${pairAddress.slice(
+                                  0,
+                                  6
+                                )}...${pairAddress.slice(-4)}`
+                              : "N/A"}
+                          </td>
+                          <td>2,500,000</td>
+                          <td>{formatTimeVerbose(nextClaimTime)}</td>
+                          <td>
+                            <button
+                              className="btn btn-sm swap-btn btn-primary"
+                              onClick={() => giveRewardForAirdrop(address)}
+                              disabled={
+                                isCliamProcessing == address ||
+                                nextClaimTime > 0
+                              }
+                            >
+                              {isCliamProcessing == address
+                                ? "Processing..."
+                                : "Claim"}
+                            </button>
+                          </td>
+                          <td></td>
+                        </tr>
+                      </>
                     )
                   )}
+              {pendingToken && (
+                <tr>
+                  <td
+                    colSpan={14}
+                    style={{
+                      textAlign: "center",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {`your ${pendingToken} Tokens will be listed in 24-48 hr`}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

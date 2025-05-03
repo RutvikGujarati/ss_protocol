@@ -1,8 +1,9 @@
 
 
 import { useContext } from "react";
-import FluxinLogo from "../assets/2.png"; import { PriceContext } from "../api/StatePrice";
+import { PriceContext } from "../api/StatePrice";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
+import { useDAvContract } from "../Functions/DavTokenFunctions";
 export const useAuctionTokens = () => {
 	const prices = useContext(PriceContext);
 	const {
@@ -10,34 +11,32 @@ export const useAuctionTokens = () => {
 		userHashSwapped, userHasReverseSwapped, InputAmount, OutPutAmount,
 		AirdropClaimed, TokenNames, tokenMap,
 	} = useSwapContract();
+	const { Emojies } = useDAvContract();
 
 	const dynamicTokenNames = Array.from(TokenNames || []).filter(
 		(name) => name !== "DAV" && name !== "STATE"
 	);
 
-	const imageMap = {
-		Fluxin: FluxinLogo,
-		// Add more image mappings here
-	};
 
 	const handleAddMap = {
 		second: () => { }, // Replace with actual handler if exists
 		// Add more mappings
 	};
 
-	const tokenConfigs = dynamicTokenNames.map((contract) => {
+
+
+	const tokenConfigs = dynamicTokenNames.map((contract, index) => {
 		const id = contract;
-		const image = imageMap[contract] || null;
 		const handleAddToken = handleAddMap[contract] || (() => { });
 		const address = tokenMap?.[contract] || "0x0000000000000000000000000000000000000000";
 
 		return {
 			id,
 			name: id,
+			emoji: Emojies?.[index] || "🔹", // fallback if no emoji
 			Pname: `${id} - State - ${id}`,
 			ReverseName: `State - ${id}`,
 			ContractName: contract === "OneDollar" ? "oneD" : contract,
-			image,
 			token: address,
 			handleAddToken,
 			ratio: `1:${RatioTargetsofTokens?.[contract] || 0}`,
@@ -57,6 +56,7 @@ export const useAuctionTokens = () => {
 			outputToken: `${OutPutAmount?.[contract] || 0} State`,
 		};
 	});
+
 
 	return tokenConfigs;
 

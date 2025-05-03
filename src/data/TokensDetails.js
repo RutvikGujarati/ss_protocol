@@ -8,6 +8,7 @@ import {
 import { PriceContext } from "../api/StatePrice";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useChainId } from "wagmi";
+import { useDAvContract } from "../Functions/DavTokenFunctions";
 
 export const shortenAddress = (addr) =>
 	addr ? `${addr.slice(0, 6)}...${addr.slice(-6)}` : "";
@@ -15,6 +16,7 @@ export const shortenAddress = (addr) =>
 export const TokensDetails = () => {
 	const prices = useContext(PriceContext);
 	const swap = useSwapContract();
+	const { Emojies } = useDAvContract();
 	const chainId = useChainId();
 
 	const staticTokens = [
@@ -73,15 +75,24 @@ export const TokensDetails = () => {
 	return data.map((token) => {
 		const key = token.key;
 		const isState = token.name === "STATE";
+		const emojiMap = Array.isArray(swap.TokenNames) && Array.isArray(Emojies)
+			? swap.TokenNames.reduce((acc, name, index) => {
+				acc[name.toLowerCase()] = Emojies[index];
+				return acc;
+			}, {})
+			: {};
+
 
 		return {
 			tokenName: token.name,
 			key: shortenAddress(token.address),
 			name: token.displayName || token.name,
 			Price: token.price,
+			emoji: emojiMap[key.toLowerCase()],
+
 			DavVault: swap.TokenBalance?.[key],
 			burned: swap.burnedAmount?.[key],
-			isSupported: swap.supportedToken?.[key],
+			isSupported: token.name == "DAV" ? "true" : token.name == "STATE" ? "true" : swap.supportedToken?.[key],
 			TokenAddress: token.address,
 			Cycle: swap.CurrentCycleCount?.[key],
 			handleAddTokens: () => swap[`handleAdd${key}`]?.(),

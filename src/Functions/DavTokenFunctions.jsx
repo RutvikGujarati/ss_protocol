@@ -34,12 +34,19 @@ export const DavProvider = ({ children }) => {
   const [Claiming, setClaiming] = useState(false);
   const [users, setUsers] = useState([]);
   const [names, setNames] = useState([]);
+  const [Emojies, setEmojies] = useState([]);
+  const [TokenStatus, setTokenStatus] = useState([]);
+  const [isUsed, setisUsed] = useState([]);
+  const [isProcessing, setIsProcessing] = useState(null);
+  const [isProcessingToken, setProcessToken] = useState(false);
+
   const [data, setData] = useState({
     Supply: "0.0",
     stateHolding: "0.0",
     ReferralCodeOfUser: "0.0",
     ReferralAMount: "0.0",
     totalStateBurned: "0.0",
+	pendingToken:"0.0",
     claimableAmount: "0.0",
     usableTreasury: "0.0",
     tokenEntries: null,
@@ -106,6 +113,10 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("usableTreasury", () =>
           AllContracts.davContract.getUsableTreasuryPLS()
         ),
+        fetchAndSet("pendingToken", () =>
+          AllContracts.davContract.getPendingTokenNames(address),
+		false
+        ),
 
         fetchAndSet("davPercentage", () =>
           AllContracts.davContract.getUserHoldingPercentage(address)
@@ -146,17 +157,37 @@ export const DavProvider = ({ children }) => {
       // Extract addresses and token names
       const addresses = tokenEntries.map((entry) => entry.user);
       const tokenNames = tokenEntries.map((entry) => entry.tokenName);
-
+      const tokenEmojis = tokenEntries.map((entry) => entry.emoji);
+      const tokenStatus = tokenEntries.map((entry) => entry.TokenStatus);
+      console.log("token status:,", tokenEntries);
       // Update state
       setUsers(addresses); // e.g., ["0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483"]
       setNames(tokenNames); // e.g., ["rutvik"]
+      setEmojies(tokenEmojis); // e.g., ["rutvik"]
+      setTokenStatus(tokenStatus); // e.g., ["rutvik"]
     } catch (error) {
       console.error("Error fetching token entries:", error);
     }
   };
+
+  const isTokenDeployed = async () => {
+    try {
+      const results = await Promise.all(
+        names.map((name) => AllContracts.AuctionContract.isTokenNameUsed(name))
+      );
+
+      // Store the results directly as an array of booleans in the state
+      setisUsed(results); // Assuming setisUsed accepts an array of booleans
+    } catch (error) {
+      console.log("Error getting deployed details", error);
+    }
+  };
+
   useEffect(() => {
     if (address && AllContracts?.davContract) fetchData();
   }, [address, AllContracts?.davContract]);
+
+  isTokenDeployed();
   console.log("from entry", users); // e.g., "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483"
   console.log("from entry", names[0]);
   const fetchTimeUntilNextClaim = useCallback(async () => {
@@ -202,7 +233,7 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract) return;
     const ethAmount = ethers.parseEther(amount.toString());
     const cost = ethers.parseEther(
-      (amount * (chainId === 146 ? 100 : 10000)).toString()
+      (amount * (chainId === 146 ? 100 : 10)).toString()
     );
     const referral = ref.trim() || "0x0000000000000000000000000000000000000000";
 
@@ -218,18 +249,20 @@ export const DavProvider = ({ children }) => {
       throw error;
     }
   };
-  const AddYourToken = async (amount) => {
+  const AddYourToken = async (amount, Emoji) => {
     if (!AllContracts?.davContract) return;
 
     // Define the cost based on the chainId
-    const cost = ethers.parseEther((chainId === 146 ? 100 : 100000).toString());
+    const cost = ethers.parseEther((chainId === 146 ? 100 : 1).toString());
 
     try {
       // Check if the address is the VITE_AUTH_ADDRESS, if so, pass no value for ether
+
+      setProcessToken(true);
       const tx =
         address == import.meta.env.VITE_AUTH_ADDRESS
-          ? await AllContracts.davContract.ProcessYourToken(amount)
-          : await AllContracts.davContract.ProcessYourToken(amount, {
+          ? await AllContracts.davContract.ProcessYourToken(amount, Emoji)
+          : await AllContracts.davContract.ProcessYourToken(amount, Emoji, {
               value: cost,
             });
 
@@ -243,7 +276,10 @@ export const DavProvider = ({ children }) => {
       return tx;
     } catch (error) {
       console.error("Minting error:", error);
+      setProcessToken(false);
       throw error;
+    } finally {
+      setProcessToken(false);
     }
   };
 
@@ -257,19 +293,25 @@ export const DavProvider = ({ children }) => {
       console.error("Claim error:", err);
     }
   };
-  const deployWithMetaMask = async (name, symbol, five, swap) => {
+  const deployWithMetaMask = async (name, symbol, emoji, five, swap, gov) => {
     if (!AllContracts?.AuctionContract) return;
     try {
+      setIsProcessing(name); // Start processing
       const tx = await AllContracts.AuctionContract.deployUserToken(
         name,
         symbol,
+        emoji,
         five,
-        swap
+        swap,
+        gov
       );
       await tx.wait();
       await fetchData();
+      await isTokenDeployed();
     } catch (err) {
       console.error("Claim error:", err);
+    } finally {
+      setIsProcessing(null);
     }
   };
 
@@ -349,7 +391,12 @@ export const DavProvider = ({ children }) => {
         fetchData,
         deployWithMetaMask,
         users,
+        isProcessingToken,
         names,
+        Emojies,
+        TokenStatus,
+        isProcessing,
+        isUsed,
       }}
     >
       {children}

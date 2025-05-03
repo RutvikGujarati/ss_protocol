@@ -7,16 +7,32 @@ import { useSwapContract } from "../Functions/SwapContractFunctions";
 
 // ✅ 1. First hook: for general token config
 export const useAddTokens = () => {
-	const { names, users } = useDAvContract(); // tokenMap replaces deployedAddress
-	const { tokenMap, TimeLeftClaim } = useSwapContract(); // tokenMap replaces deployedAddress
+	const { names, users, Emojies, isUsed } = useDAvContract(); // tokenMap replaces deployedAddress
+	const { tokenMap, TimeLeftClaim, supportedToken, isTokenRenounce } = useSwapContract(); // tokenMap replaces deployedAddress
+
+
+	// Create name → isUsed map
+	const isUsedMap = names.reduce((acc, name, index) => {
+		acc[name] = isUsed?.[index] ?? false;
+		return acc;
+	}, {});
+
 
 	const tokenConfigs = users.map((user, index) => {
 		const name = names[index] || 'Unknown';
+		const isDeployed = isUsedMap[name];
+		const isRenounceToken = isTokenRenounce[name];
+		const isAdded = supportedToken[name];
+		const Emojis = Emojies[index] || 'Unknown';
 		const tokenAddress = tokenMap?.[name] || '0x0000000000000000000000000000000000000000';
 		const timeLeft = TimeLeftClaim?.[name]
 		return {
 			user,
 			name,
+			Emojis,
+			isDeployed,
+			isAdded,
+			isRenounceToken,
 			contract: name || user,
 			image: FluxinLogo,
 			tokenAddress,
@@ -28,6 +44,10 @@ export const useAddTokens = () => {
 		id: config.user,
 		user: config.user,
 		name: config.name,
+		isDeployed: config.isDeployed,
+		Emojis: config.Emojis,
+		isRenounceToken: config.isRenounceToken,
+		isAdded: config.isAdded,
 		Pname: `${config.name} - State - ${config.name}`,
 		ReverseName: `State - ${config.name}`,
 		ContractName: config.contract === 'OneDollar' ? 'oneD' : config.contract,
@@ -43,8 +63,16 @@ export const useAddTokens = () => {
 
 export const useUsersOwnerTokens = () => {
 	const { UsersSupportedTokens } = useSwapContract();
+	const { names, Emojies } = useDAvContract();
 
 	console.log("Raw UsersSupportedTokens:", UsersSupportedTokens);
+
+	// Create name → Emojies map
+	const emojiesMap = names.reduce((acc, name, index) => {
+		acc[name] = Emojies?.[index] ?? 'Unknown';
+		return acc;
+	}, {});
+
 
 	let tokenList = [];
 
@@ -69,13 +97,15 @@ export const useUsersOwnerTokens = () => {
 		let tokenName = `Token_${index + 1}`;
 		let pairAddress = "0x0000000000000000000000000000000000000000";
 		let nextClaimTime = "0";
-
+		let emojis = emojiesMap[tokenName] || 'Unknown';
 		if (token && typeof token === "object") {
 			if (token.address && ethers.isAddress(token.address)) {
 				actualAddress = token.address;
 			}
 			if (token.name) {
 				tokenName = token.name;
+				emojis = emojiesMap[tokenName] || 'Unknown';
+
 			}
 			if (token.pairAddress && ethers.isAddress(token.pairAddress)) {
 				pairAddress = token.pairAddress;
@@ -92,6 +122,7 @@ export const useUsersOwnerTokens = () => {
 			address: actualAddress,
 			pairAddress: pairAddress,
 			nextClaimTime: nextClaimTime,
+			Emojis: emojis,
 		};
 
 		console.log("Token entry:", tokenEntry);

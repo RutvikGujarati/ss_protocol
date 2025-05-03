@@ -78,6 +78,7 @@ const InfoCards = () => {
     // AddDavintoLP,
     stateHolding,
     ReferralCodeOfUser,
+    isProcessingToken,
   } = useDAvContract();
 
   const handleBurnClick = async () => {
@@ -177,6 +178,7 @@ const InfoCards = () => {
   const isAddToken = location.pathname === "/AddToken";
   const [amountOfInput, setAmountOfInput] = useState("");
   const [TokenName, setTokenName] = useState("");
+  const [Emoji, setEmoji] = useState("");
   const [rawAmount, setRawAmount] = useState("");
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -191,8 +193,13 @@ const InfoCards = () => {
       setAmountOfInput("");
     }
   };
-  const handleInputChangeForAddtoken = (e) => {
-    setTokenName(e.target.value);
+  const handleInputChangeForAddtoken = (value) => {
+    setTokenName(value);
+  };
+  const handleInputChangeForEmoji = (input) => {
+    const graphemes = [...input]; // Spread into array of Unicode grapheme clusters
+    if (graphemes.length > 1) return; // Optionally restrict to 1 emoji/logogram
+    setEmoji(input);
   };
 
   // Function to stop changing the amount
@@ -542,20 +549,21 @@ const InfoCards = () => {
                         <h6 className="detailText">LISTING A TOKEN</h6>
                         <ul className="mb-1" style={{ paddingLeft: "20px" }}>
                           <li className="detailText">
-                            List 1 Token @ 10 Million PLS market Making Services
+                            Market-making service for 21 auctions / 3 years
                           </li>
                           <li className="detailText">
-                            Free Liquidity Pool Tokens (1%) Paired with state
-                            Token
+                            Free liquidity pool tokens paired with the STATE
+                            token
                           </li>
                           <li className="detailText">
-                            Market Making Service For 21 Auctions (3 Years)
+                            Token creators receive periodic airdrops / 2.5
+                            million tokens
                           </li>
+                          <li className="detailText">Airdrops every 50 days</li>
+                          <li className="detailText">Add your badge (emoji)</li>
+                          <li className="detailText">Cost - 10 Million PLS</li>
                           <li className="detailText">
-                            Token Creators Receive Periodical Airdrops
-                          </li>
-                          <li className="detailText">
-                            Add a Standard State Dex Logo
+                            Token listed within 24-48 hrs
                           </li>
                         </ul>
                       </div>
@@ -572,8 +580,29 @@ const InfoCards = () => {
                         type="text"
                         placeholder="Enter Name"
                         className="form-control text-center fw-bold"
+                        maxLength={10}
                         value={TokenName}
-                        onChange={handleInputChangeForAddtoken}
+                        disabled={isProcessingToken}
+                        onChange={(e) =>
+                          handleInputChangeForAddtoken(
+                            e.target.value.toUpperCase()
+                          )
+                        }
+                      />
+                    </div>
+                    <p className="mb-2 detailText mt-3">Emoji</p>
+                    <div className="d-flex align-items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="Enter emoji/logo"
+                        className="form-control text-center fw-bold"
+                        value={Emoji}
+                        maxLength={2}
+                        disabled={isProcessingToken}
+                        onChange={(e) =>
+                          handleInputChangeForEmoji(e.target.value)
+                        }
+                        inputMode="text"
                       />
                     </div>
                   </div>
@@ -583,15 +612,27 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
                   <div className="p-2 pt-3 pb-2">
                     <p className="mb-2 detailText ">Market Maker Fee</p>
-                    <h6 className="text-center  mt-3">10 000 000 PLS</h6>
+                    <h6 className="text-center  mt-3">10, 000, 000 PLS</h6>
 
                     <button
-                      onClick={() => AddYourToken(TokenName)}
+                      onClick={async () => {
+                        setTokenName(""); // clear input immediately
+                        setEmoji("");
+                        setTimeout(async () => {
+                          try {
+                            await AddYourToken(TokenName, Emoji);
+                          } catch (err) {
+                            console.error("Error processing token:", err);
+                          }
+                        }, 100); // Allow UI to re-render before tx.wait blocks
+                      }}
                       style={{ width: customWidth }}
                       className="btn btn-primary mx-5 mt-4 btn-sm d-flex justify-content-center align-items-center"
-                      disabled={load}
+                      disabled={isProcessingToken}
                     >
-                      Process Listing
+                      {isProcessingToken
+                        ? "Processing..."
+                        : "  Process Listing"}
                     </button>
                   </div>
                 </div>

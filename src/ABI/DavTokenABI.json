@@ -129,6 +129,11 @@
 				"name": "_tokenName",
 				"type": "string",
 				"internalType": "string"
+			},
+			{
+				"name": "_emoji",
+				"type": "string",
+				"internalType": "string"
 			}
 		],
 		"outputs": [],
@@ -206,6 +211,16 @@
 				"name": "tokenName",
 				"type": "string",
 				"internalType": "string"
+			},
+			{
+				"name": "emoji",
+				"type": "string",
+				"internalType": "string"
+			},
+			{
+				"name": "status",
+				"type": "uint8",
+				"internalType": "enum Decentralized_Autonomous_Vaults_DAV_V2_1.TokenStatus"
 			}
 		],
 		"stateMutability": "view"
@@ -570,8 +585,31 @@
 						"name": "tokenName",
 						"type": "string",
 						"internalType": "string"
+					},
+					{
+						"name": "emoji",
+						"type": "string",
+						"internalType": "string"
+					},
+					{
+						"name": "status",
+						"type": "uint8",
+						"internalType": "enum Decentralized_Autonomous_Vaults_DAV_V2_1.TokenStatus"
 					}
 				]
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getAvailableCycleFunds",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
 			}
 		],
 		"stateMutability": "view"
@@ -636,20 +674,26 @@
 	},
 	{
 		"type": "function",
-		"name": "getTimeUntilNextClaim",
-		"inputs": [],
+		"name": "getPendingTokenNames",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
 		"outputs": [
 			{
 				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
+				"type": "string[]",
+				"internalType": "string[]"
 			}
 		],
 		"stateMutability": "view"
 	},
 	{
 		"type": "function",
-		"name": "getUsableTreasuryPLS",
+		"name": "getTimeUntilNextClaim",
 		"inputs": [],
 		"outputs": [
 			{
@@ -801,6 +845,25 @@
 				"name": "",
 				"type": "uint256",
 				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "isTokenNameUsed",
+		"inputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
 			}
 		],
 		"stateMutability": "view"
@@ -1214,6 +1277,34 @@
 	},
 	{
 		"type": "function",
+		"name": "updateTokenStatus",
+		"inputs": [
+			{
+				"name": "_owner",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "_gov",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "_tokenName",
+				"type": "string",
+				"internalType": "string"
+			},
+			{
+				"name": "_status",
+				"type": "uint8",
+				"internalType": "enum Decentralized_Autonomous_Vaults_DAV_V2_1.TokenStatus"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
 		"name": "userBurnedAmount",
 		"inputs": [
 			{
@@ -1589,6 +1680,31 @@
 				"type": "string",
 				"indexed": false,
 				"internalType": "string"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "TokenStatusUpdated",
+		"inputs": [
+			{
+				"name": "owner",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "tokenName",
+				"type": "string",
+				"indexed": false,
+				"internalType": "string"
+			},
+			{
+				"name": "status",
+				"type": "uint8",
+				"indexed": false,
+				"internalType": "enum Decentralized_Autonomous_Vaults_DAV_V2_1.TokenStatus"
 			}
 		],
 		"anonymous": false

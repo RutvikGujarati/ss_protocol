@@ -183,6 +183,11 @@
 				"name": "_tokenOwner",
 				"type": "address",
 				"internalType": "address"
+			},
+			{
+				"name": "_tokenName",
+				"type": "string",
+				"internalType": "string"
 			}
 		],
 		"outputs": [],
@@ -311,7 +316,7 @@
 			{
 				"name": "",
 				"type": "address",
-				"internalType": "contract IERC20"
+				"internalType": "contract Decentralized_Autonomous_Vaults_DAV_V2_1"
 			}
 		],
 		"stateMutability": "view"
@@ -331,12 +336,22 @@
 				"internalType": "string"
 			},
 			{
+				"name": "emojies",
+				"type": "string",
+				"internalType": "string"
+			},
+			{
 				"name": "_One",
 				"type": "address",
 				"internalType": "address"
 			},
 			{
 				"name": "_swap",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "_owner",
 				"type": "address",
 				"internalType": "address"
 			}
@@ -445,6 +460,25 @@
 				"name": "",
 				"type": "uint256",
 				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getEmojiByTokenName",
+		"inputs": [
+			{
+				"name": "_tokenName",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
 			}
 		],
 		"stateMutability": "view"
@@ -798,6 +832,25 @@
 	},
 	{
 		"type": "function",
+		"name": "isTokenRenounced",
+		"inputs": [
+			{
+				"name": "tokenAddress",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "isTokenSupported",
 		"inputs": [
 			{
@@ -1020,6 +1073,25 @@
 		],
 		"outputs": [],
 		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "tokenNameToEmoji",
+		"inputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"stateMutability": "view"
 	},
 	{
 		"type": "function",

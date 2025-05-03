@@ -8,7 +8,6 @@ import {
   Auction_TESTNET,
   DAV_TESTNET,
   DAV_TOKEN_SONIC_ADDRESS,
-  Ratio_TOKEN_ADDRESS,
   STATE_TESTNET,
   STATE_TOKEN_SONIC_ADDRESS,
   Yees_testnet,
@@ -41,6 +40,7 @@ export const SwapContractProvider = ({ children }) => {
   const [TokenBalance, setTokenbalance] = useState({});
   const [isReversed, setIsReverse] = useState({});
   const [IsAuctionActive, setisAuctionActive] = useState({});
+  const [isTokenRenounce, setRenonced] = useState({});
   const [tokenMap, setTokenMap] = useState({});
   const [TokenNames, setTokenNames] = useState({});
 
@@ -55,6 +55,7 @@ export const SwapContractProvider = ({ children }) => {
   const [AirdropClaimed, setAirdropClaimed] = useState({});
   const [userHasReverseSwapped, setUserHasReverseSwapped] = useState({});
 
+  const [isCliamProcessing, setIsCllaimProccessing] = useState(null);
   const CalculationOfCost = async (amount) => {
     if (chainId == 146) {
       setTotalCost(ethers.parseEther((amount * 100).toString()));
@@ -320,7 +321,6 @@ export const SwapContractProvider = ({ children }) => {
       return {};
     }
   };
-  const [isRenounced, setIsRenounced] = useState({});
   const TokenABI = [
     {
       type: "function",
@@ -339,7 +339,7 @@ export const SwapContractProvider = ({ children }) => {
       await tx.wait();
 
       console.log(`Renounced ownership for ${tokenName}`);
-      setIsRenounced((prev) => ({ ...prev, [tokenName]: true }));
+      await isRenounced();
     } catch (error) {
       console.error(`Error renouncing ownership for ${tokenName}:`, error);
     }
@@ -372,6 +372,34 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching Auction Active:", e);
     }
   };
+  const isRenounced = async () => {
+    try {
+      const results = {};
+      const tokenMap = await ReturnfetchUserTokenAddresses();
+      console.log("Starting loop over Addresses in renounce:", tokenMap);
+
+      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
+        console.log(
+          `Fetching renouncing for ${tokenName} at ${TokenAddress}`
+        );
+
+        const renouncing =
+          await AllContracts.AuctionContract.isTokenRenounced(TokenAddress);
+
+        const renouncingString = renouncing.toString(); // 👈 convert to string
+
+        console.log(`renounce Active for ${tokenName}:`, renouncingString);
+
+        results[tokenName] = renouncingString;
+      }
+
+      console.log("Final renouncing:", results);
+      setRenonced(results);
+    } catch (e) {
+      console.error("Error fetching renounce Active:", e);
+    }
+  };
+
   const HasReverseSwappedAucton = async () => {
     try {
       const results = {};
@@ -559,22 +587,39 @@ export const SwapContractProvider = ({ children }) => {
       console.warn("AuctionContract not found");
       return;
     }
+
     const results = {};
     const tokenMap = await ReturnfetchUserTokenAddresses();
+
     try {
       for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
         console.log(
-          `Fetching AirdropClaimed for ${tokenName} at ${TokenAddress}`
+          `Fetching token support status for ${tokenName} at ${TokenAddress}`
         );
-        const InputTokenAddress =
-          await AllContracts.AuctionContract.isTokenSupported(TokenAddress);
-        const inputaddressString = InputTokenAddress.toString();
-        results[tokenName] = inputaddressString;
+
+        // Fetch support status (expecting a boolean or address)
+        const isSupported = await AllContracts.AuctionContract.isTokenSupported(
+          TokenAddress
+        );
+
+        // If it's an address and should check if valid or if it's a boolean, handle accordingly
+        if (typeof isSupported === "boolean") {
+          results[tokenName] = isSupported; // Directly store the boolean result
+        } else if (
+          isSupported &&
+          isSupported !== "0x0000000000000000000000000000000000000000"
+        ) {
+          // If it's an address, check if it is a valid address
+          results[tokenName] = true;
+        } else {
+          results[tokenName] = false;
+        }
       }
 
+      // Update state with results
       setIsSupported(results);
     } catch (error) {
-      console.error("Error fetching addresses:", error);
+      console.error("Error fetching token support status:", error);
     }
   };
 
@@ -663,6 +708,7 @@ export const SwapContractProvider = ({ children }) => {
       return;
     }
     try {
+      setIsCllaimProccessing(tokenAddress);
       console.log(
         "Calling giveRewardToTokenOwner with tokenAddress:",
         tokenAddress
@@ -675,10 +721,17 @@ export const SwapContractProvider = ({ children }) => {
       console.log("Reward claimed successfully");
     } catch (error) {
       console.error("Error claiming reward:", error);
+    } finally {
+      setIsCllaimProccessing(null);
     }
   };
 
-  const AddTokenIntoSwapContract = async (TokenAddress, PairAddress, Owner) => {
+  const AddTokenIntoSwapContract = async (
+    TokenAddress,
+    PairAddress,
+    Owner,
+    name
+  ) => {
     if (!AllContracts?.AuctionContract || !address) return;
 
     try {
@@ -686,7 +739,8 @@ export const SwapContractProvider = ({ children }) => {
       const tx = await AllContracts.AuctionContract.addToken(
         TokenAddress,
         PairAddress,
-        Owner
+        Owner,
+        name
       );
       await tx.wait();
       await CheckIsAuctionActive();
@@ -711,7 +765,7 @@ export const SwapContractProvider = ({ children }) => {
     getTokenBalances();
     isAirdropClaimed();
     AddressesFromContract();
-
+	isRenounced();
     getTokenNamesForUser();
     isTokenSupporteed();
     // getTokensByUser();
@@ -904,13 +958,10 @@ export const SwapContractProvider = ({ children }) => {
     }
   };
 
-  // Example usage for different tokens
-  const handleAddTokenRatio = () =>
-    handleAddToken(Ratio_TOKEN_ADDRESS, "Fluxin");
   const handleAddDAV = () => handleAddToken(DAV_TESTNET, "pDAV");
   const handleAddTokensDAV = () =>
     handleAddToken(DAV_TOKEN_SONIC_ADDRESS, "sDAV");
- 
+
   const handleAddTokensState = () =>
     handleAddToken(STATE_TOKEN_SONIC_ADDRESS, "sState");
   const handleAddYees = () => handleAddToken(Yees_testnet, "Yees");
@@ -938,10 +989,11 @@ export const SwapContractProvider = ({ children }) => {
         setDavAndStateIntoSwap,
         handleAddToken,
         // setReverseEnable,
-        handleAddTokenRatio,
         handleAddYees,
         userHashSwapped,
         userHasReverseSwapped,
+        isCliamProcessing,
+		isTokenRenounce,
         // WithdrawLPTokens,
         AddTokenIntoSwapContract,
         burnedAmount,
@@ -950,6 +1002,7 @@ export const SwapContractProvider = ({ children }) => {
         StateAddress,
         swappingStates,
         AuctionTime,
+		fetchUserTokenAddresses,
         AirdropClaimed,
         isReversed,
         InputAmount,
@@ -961,7 +1014,6 @@ export const SwapContractProvider = ({ children }) => {
         giveRewardForAirdrop,
         CheckMintBalance,
         getInputAmount,
-        isRenounced,
         TokenNames,
         getOutPutAmount,
         TimeLeftClaim,

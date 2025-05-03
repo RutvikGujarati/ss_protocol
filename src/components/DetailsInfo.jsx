@@ -7,7 +7,7 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { TokensDetails } from "../data/TokensDetails";
 import pulsex from "../assets/ninemm.png";
-import { useAccount, useChainId } from "wagmi";
+import { useChainId } from "wagmi";
 
 import DAVLogo from "../assets/1.png";
 import sDAV from "../assets/sDAV.png";
@@ -34,13 +34,11 @@ const DetailsInfo = ({ selectedToken }) => {
     handleAddTokenState,
     handleAddTokensState,
     setDavAndStateIntoSwap,
-    AddTokenIntoSwapContract,
     handleAddToken,
     DavAddress,
   } = useSwapContract();
   const { totalStateBurned } = useDAvContract();
   const chainId = useChainId();
-  const { address } = useAccount();
 
   const [filteredData, setFilteredData] = useState([]);
   const [localSearchQuery, setLocalSearchQuery] = useState("");
@@ -177,140 +175,126 @@ const DetailsInfo = ({ selectedToken }) => {
               </tr>
             </thead>
             <tbody>
-              {filteredTokens.map((token) => (
-                <tr key={token.tokenName}>
-                  <td className="text-center">
-                    <img
-                      src={
-                        filteredData.find((d) => d.name === token.tokenName)
-                          ?.logo
-                      }
-                      className="mx-4"
-                      alt={`${token.tokenName} logo`}
-                      style={{ width: "40px", height: "40px" }}
-                    />
-                  </td>
-                  <td className="text-center">{token.tokenName}</td>
-                  <td className="text-center">
-                    <div className="mx-2">
-                      {token.tokenName === "DAV" || token.tokenName === "STATE"
-                        ? "------"
-                        : "1:1000"}
-                    </div>
-                  </td>
-                  <td className="text-center">
-                    <div className="mx-4">
-                      {token.tokenName === "DAV" || token.tokenName === "STATE"
-                        ? "-----"
-                        : `${token.Cycle + 1}/21`}
-                    </div>
-                  </td>
-                  <td className="text-center">
-                    <div className="mx-4">
-                      {token.tokenName === "DAV"
-                        ? "-----"
-                        : `${formatWithCommas(token.DavVault)}`}
-                    </div>
-                  </td>
-                  <td className="text-center">
-                    <div className="mx-4">
-                      {token.tokenName === "DAV"
-                        ? "-----"
-                        : token.tokenName === "STATE"
-                        ? formatWithCommas(
-                            Number(token.burned || 0) + Number(totalStateBurned)
-                          )
-                        : formatWithCommas(token.burned || 0)}
-                    </div>
-                  </td>
-                  <td className="text-center">
-                    <div className="d-flex justify-content-center align-items-center gap-4">
-                      <a
-                        href={`https://scan.v4.testnet.pulsechain.com/#/address/${token.address}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ fontSize: "15px", color: "white" }}
-                      >
-                        <i className="bi bi-box-arrow-up-right"></i>
-                      </a>
-                      <img
-                        src={MetaMaskIcon}
-                        onClick={() =>
-                          handleAddToken(
-                            token.TokenAddress,
-                            token.tokenName === "DAV"
-                              ? "pDAV"
-                              : token.tokenName === "STATE"
-                              ? "State"
-                              : token.tokenName
-                          )
-                        }
-                        alt="State Logo"
-                        style={{
-                          width: "20px",
-                          height: "20px",
-                          cursor: "pointer",
-                        }}
-                      />
-
-                      {token.tokenName === "DAV" ? (
-                        "----"
-                      ) : (
+              {filteredTokens
+                .filter((token) => token.isSupported)
+                .map((token) => (
+                  <tr key={token.tokenName}>
+                    <td className="text-center">
+                      <h3>{token.emoji}</h3>
+                    </td>
+                    <td className="text-center">{token.tokenName}</td>
+                    <td className="text-center">
+                      <div className="mx-2">
+                        {token.tokenName === "DAV" ||
+                        token.tokenName === "STATE"
+                          ? "------"
+                          : "1:1000"}
+                      </div>
+                    </td>
+                    <td className="text-center">
+                      <div className="mx-4">
+                        {token.tokenName === "DAV" ||
+                        token.tokenName === "STATE"
+                          ? "-----"
+                          : `${token.Cycle + 1}/21`}
+                      </div>
+                    </td>
+                    <td className="text-center">
+                      <div className="mx-4">
+                        {token.tokenName === "DAV"
+                          ? "-----"
+                          : `${formatWithCommas(token.DavVault)}`}
+                      </div>
+                    </td>
+                    <td className="text-center">
+                      <div className="mx-4">
+                        {token.tokenName === "DAV"
+                          ? "-----"
+                          : token.tokenName === "STATE"
+                          ? formatWithCommas(
+                              Number(token.burned || 0) +
+                                Number(totalStateBurned)
+                            )
+                          : formatWithCommas(token.burned || 0)}
+                      </div>
+                    </td>
+                    <td className="text-center">
+                      <div className="d-flex justify-content-center align-items-center gap-4">
                         <a
-                          href="https://dex.9mm.pro/swap?chain=pulsechain"
+                          href={`https://scan.v4.testnet.pulsechain.com/#/address/${token.address}`}
                           target="_blank"
                           rel="noopener noreferrer"
+                          style={{ fontSize: "15px", color: "white" }}
                         >
-                          <img
-                            src={pulsex}
-                            alt="sDAV Logo"
-                            className="mb-1"
-                            style={{
-                              background: "transparent",
-                              width: "20px",
-                              height: "20px",
-                              cursor: "pointer",
-                            }}
-                          />
+                          <i className="bi bi-box-arrow-up-right"></i>
                         </a>
-                      )}
-                      {token.tokenName === "DAV" ? (
-                        "-----------"
-                      ) : token.tokenName === "STATE" ? (
-                        DavAddress ===
-                        "0x0000000000000000000000000000000000000000" ? (
-                          <button
-                            className="btn btn-sm swap-btn btn-primary"
-                            onClick={() => setDavAndStateIntoSwap()}
-                          >
-                            Add
-                          </button>
-                        ) : (
-                          <span className="text-green-500">ADDED</span>
-                        )
-                      ) : token.isSupported === "true" ? (
-                        <span className="text-green-500">ADDED</span>
-                      ) : (
-                        <button
-                          className="btn btn-sm swap-btn btn-primary"
+                        <img
+                          src={MetaMaskIcon}
                           onClick={() =>
-                            AddTokenIntoSwapContract(
+                            handleAddToken(
                               token.TokenAddress,
-                              token.TokenAddress,
-                              address
+                              token.tokenName === "DAV"
+                                ? "pDAV"
+                                : token.tokenName === "STATE"
+                                ? "State"
+                                : token.tokenName
                             )
                           }
-                        >
-                          Add
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                </tr>
-              ))}
+                          alt="State Logo"
+                          style={{
+                            width: "20px",
+                            height: "20px",
+                            cursor: "pointer",
+                          }}
+                        />
+
+                        {token.tokenName === "DAV" ? (
+                          "----"
+                        ) : (
+                          <a
+                            href="https://dex.9mm.pro/swap?chain=pulsechain"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <img
+                              src={pulsex}
+                              alt="sDAV Logo"
+                              className="mb-1"
+                              style={{
+                                background: "transparent",
+                                width: "20px",
+                                height: "20px",
+                                cursor: "pointer",
+                              }}
+                            />
+                          </a>
+                        )}
+                        {token.tokenName === "DAV" ? (
+                          "-----------"
+                        ) : token.tokenName === "STATE" ? (
+                          DavAddress ===
+                          "0x0000000000000000000000000000000000000000" ? (
+                            <button
+                              className="btn btn-sm swap-btn btn-primary"
+                              onClick={() => setDavAndStateIntoSwap()}
+                            >
+                              Add
+                            </button>
+                          ) : (
+                            <span className="text-green-500">ADDED</span>
+                          )
+                        ) : token.isSupported === "true" ? (
+                          <span className="text-green-500">ADDED</span>
+                        ) : (
+                          <span className="text-green-500">ADDED</span>
+                        )}
+                      </div>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         ) : (
