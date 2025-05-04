@@ -146,6 +146,16 @@ const Header = () => {
           <div>Auction</div>
         </NavLink>
         <NavLink
+          to="/AddToken"
+          className={({ isActive }) =>
+            isActive
+              ? "text-light active-link text-center"
+              : "text-light text-center"
+          }
+        >
+          <i className="bi bi-plus-circle"></i> <div>Add Token</div>
+        </NavLink>
+        <NavLink
           to="/StateLp"
           className={({ isActive }) =>
             isActive

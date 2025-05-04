@@ -10,7 +10,6 @@ import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useAccount } from "wagmi";
 import { useAddTokens, useUsersOwnerTokens } from "../data/AddTokens";
 import { Auction_TESTNET } from "../ContractAddresses";
-
 const DataTable = () => {
   const { davHolds, deployWithMetaMask, isProcessing, pendingToken } =
     useDAvContract();
@@ -24,6 +23,7 @@ const DataTable = () => {
     buttonTextStates,
     AirDropAmount,
     AddTokenIntoSwapContract,
+    isTokenSupporteed,
     renounceTokenContract,
     CheckMintBalance,
     isCliamProcessing,
@@ -52,6 +52,7 @@ const DataTable = () => {
     setProcessingToken(tokenName); // Set current token being processed
     try {
       await AddTokenIntoSwapContract(tokenAddress, pairAddress, user, name);
+      await isTokenSupporteed();
     } catch (error) {
       console.error("AddTokenIntoSwapContract failed:", error);
     } finally {
@@ -86,12 +87,12 @@ const DataTable = () => {
       await CheckMintBalance(AddressMapping);
     } catch (e) {
       if (
-        e.reason === `No new DAV holdings` ||
+        e.reason === `No new DAV holdings for this token` ||
         (e.revert &&
           e.revert.args &&
-          e.revert.args[0] === `No new DAV holdings`)
+          e.revert.args[0] === `No new DAV holdings for this token`)
       ) {
-        console.error(`No new DAV holdings:`, e);
+        console.error(`No new DAV holdings for this token:`, e);
         setErrorPopup((prev) => ({ ...prev, [id]: true }));
       } else {
         console.error("Error calling CheckMintBalance:", e);
@@ -108,7 +109,7 @@ const DataTable = () => {
   console.log("obj tokens", tokens);
   const [authorized, setAuthorized] = useState(false);
 
-  const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
+  const AuthAddress = "0xBAaB2913ec979d9d21785063a0e4141e5B787D28";
   const handleSetAddress = () => {
     if (!address) {
       setAuthorized(false);
@@ -131,14 +132,15 @@ const DataTable = () => {
           <thead>
             <tr>
               <th></th>
-              <th>Name</th>
-              <th>Claim</th>
               <th>Auction Timer</th>
+              <th>Name</th>
+              <th>Claim Airdrop</th>
               {/* <th>Liquidity</th> */}
               <th></th>
-              <th>Current Ratio</th>
+              {/* <th>Current Ratio</th> */}
               <th>Ratio Swap</th>
               <th></th>
+              <th>market maker</th>
             </tr>
           </thead>
           <tbody>
@@ -177,15 +179,13 @@ const DataTable = () => {
                   {
                     id,
                     name,
-                    Pname,
                     emoji,
-                    currentRatio,
+                    // currentRatio,
                     SwapT,
                     ContractName,
                     isReversing,
                     AirdropClaimedForToken,
                     // AuctionStatus,
-                    ReverseName,
                     TimeLeft,
                     inputTokenAmount,
                     onlyInputAmount,
@@ -196,20 +196,10 @@ const DataTable = () => {
                 ) => (
                   <tr key={index}>
                     <td></td>
+                    <td>{TimeLeft}</td>
+
                     <td>
-                      <div className="tableName d-flex gap-5 align-items-center">
-                        <h3>{emoji}</h3>
-                        <div className="nameDetails">
-                          <h5 className="nameBig">{name}</h5>
-                          {isReversing == "true" ? (
-                            <p className="nameSmall mb-1 uppercase px-2 mx-5">
-                              {ReverseName}
-                            </p>
-                          ) : (
-                            <p className="nameSmall mb-1 uppercase">{Pname}</p>
-                          )}
-                        </div>
-                      </div>
+                      <h5 className="nameBig align-items-center">{`${emoji}${name}`}</h5>
                     </td>
 
                     <td>
@@ -222,13 +212,12 @@ const DataTable = () => {
                           ? ` AIRDROPPING...`
                           : AirdropClaimedForToken == "true"
                           ? " AIRDROP CLAIMED"
-                          : `${formatWithCommas(AirDropAmount)} `}
+                          : `${formatWithCommas(AirDropAmount[name])} `}
                       </button>
                     </td>
 
-                    <td>{TimeLeft}</td>
                     <td className="text-success"></td>
-                    <td>{currentRatio}</td>
+                    {/* <td>{currentRatio}</td> */}
 
                     <td>
                       <div className="d-flex justify-content-center gap-3 w-100">
@@ -321,17 +310,9 @@ const DataTable = () => {
                             </button>
                           )}
                         </>
-
-                        {/* <img
-                          src={MetaMaskIcon}
-                          width={20}
-                          height={20}
-                          onClick={handleAddToken}
-                          alt="Logo"
-                          style={{ cursor: "pointer" }}
-                        /> */}
                       </div>
                     </td>
+                    <td>1,000,000 STATE token to 1:1 token</td>
                   </tr>
                 )
               )}
@@ -376,8 +357,39 @@ const DataTable = () => {
               )}
             </thead>
             <tbody>
-              {authorized
-                ? Addtokens.map(
+              {authorized &&
+                Addtokens.slice() // Create a copy to avoid mutating the original array
+                  .sort((a, b) => {
+                    // Normalize values to handle booleans, strings, or undefined
+                    const aDeployed = String(a.isDeployed) === "true";
+                    const bDeployed = String(b.isDeployed) === "true";
+                    const aAdded = String(a.isAdded) === "true";
+                    const bAdded = String(b.isAdded) === "true";
+                    const aRenounced = String(a.isRenounceToken) === "true";
+                    const bRenounced = String(b.isRenounceToken) === "true";
+
+                    // Priority 1: isDeployed == "false", isAdded == "false", isRenounceToken == "false"
+                    const aPriority1 = !aDeployed && !aAdded && !aRenounced;
+                    const bPriority1 = !bDeployed && !bAdded && !bRenounced;
+                    if (aPriority1 && !bPriority1) return -1;
+                    if (!aPriority1 && bPriority1) return 1;
+
+                    // Priority 2: isAdded == "false", isRenounceToken == "false"
+                    const aPriority2 = !aAdded && !aRenounced;
+                    const bPriority2 = !bAdded && !bRenounced;
+                    if (aPriority2 && !bPriority2) return -1;
+                    if (!aPriority2 && bPriority2) return 1;
+
+                    // Priority 3: isRenounceToken == "false"
+                    const aPriority3 = !aRenounced;
+                    const bPriority3 = !bRenounced;
+                    if (aPriority3 && !bPriority3) return -1;
+                    if (!aPriority3 && bPriority3) return 1;
+
+                    // Priority 4: Remaining tokens (maintain original order)
+                    return 0;
+                  })
+                  .map(
                     (
                       {
                         user,
@@ -393,7 +405,7 @@ const DataTable = () => {
                     ) => (
                       <tr key={index}>
                         <td>
-                          <h3>{Emojis} </h3>
+                          <h3>{Emojis}</h3>
                         </td>
                         <td>{name}</td>
                         <td>
@@ -417,7 +429,6 @@ const DataTable = () => {
                                     Auction_TESTNET,
                                     address
                                   );
-
                                   await fetchUserTokenAddresses();
                                 } catch (error) {
                                   console.error("Deployment failed:", error);
@@ -429,7 +440,6 @@ const DataTable = () => {
                             </button>
                           )}
                         </td>
-
                         <td>
                           {isAdded ? (
                             <span
@@ -478,7 +488,6 @@ const DataTable = () => {
                                 }
                                 style={{ width: "120px" }}
                               />
-
                               <button
                                 className="btn btn-sm swap-btn btn-primary"
                                 onClick={() =>
@@ -493,7 +502,6 @@ const DataTable = () => {
                             </div>
                           )}
                         </td>
-
                         <td>
                           {isRenounceToken == "true" ? (
                             <span
@@ -514,7 +522,6 @@ const DataTable = () => {
                           )}
                         </td>
                         <td>{formatTimeVerbose(TimeLeft)}</td>
-
                         <td>500,000</td>
                         <td>
                           <button
@@ -531,91 +538,88 @@ const DataTable = () => {
                         </td>
                       </tr>
                     )
-                  )
-                : OwnersTokens.map(
+                  )}
+
+              {!authorized && (
+                <>
+                  {pendingToken && (
+                    <tr>
+                      <td
+                        colSpan={14}
+                        style={{
+                          textAlign: "center",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {`Your ${pendingToken} Tokens will be listed in 24-48 hr`}
+                      </td>
+                    </tr>
+                  )}
+                  {OwnersTokens.map(
                     (
                       { name, address, pairAddress, Emojis, nextClaimTime },
                       index
                     ) => (
-                      <>
-                        <tr key={index}>
-                          <td></td>
-                          <td>
-                            <h3>{Emojis}</h3>
-                          </td>
-                          <td>{name}</td>
-                          <td
-                            onClick={() => {
-                              if (address) {
-                                navigator.clipboard.writeText(address);
-                                alert("Address copied to clipboard!");
-                              }
-                            }}
-                            className={address ? "clickable-address" : ""}
-                            title={address ? "Click to copy full address" : ""}
-                          >
-                            {address
-                              ? `${address.slice(0, 6)}...${address.slice(-4)}`
-                              : "N/A"}
-                          </td>
-                          <td></td>
-                          <td>500 Billion</td>
-                          <td
-                            onClick={() => {
-                              if (pairAddress) {
-                                navigator.clipboard.writeText(pairAddress);
-                                alert("Address copied to clipboard!");
-                              }
-                            }}
-                            className={
-                              pairAddress ? "clickable-pairAddress" : ""
+                      <tr key={index}>
+                        <td></td>
+                        <td>
+                          <h3>{Emojis}</h3>
+                        </td>
+                        <td>{name}</td>
+                        <td
+                          onClick={() => {
+                            if (address) {
+                              navigator.clipboard.writeText(address);
+                              alert("Address copied to clipboard!");
                             }
-                            title={
-                              pairAddress
-                                ? "Click to copy full pairAddress"
-                                : ""
+                          }}
+                          className={address ? "clickable-address" : ""}
+                          title={address ? "Click to copy full address" : ""}
+                        >
+                          {address
+                            ? `${address.slice(0, 6)}...${address.slice(-4)}`
+                            : "N/A"}
+                        </td>
+                        <td></td>
+                        <td>500 Billion</td>
+                        <td
+                          onClick={() => {
+                            if (pairAddress) {
+                              navigator.clipboard.writeText(pairAddress);
+                              alert("Address copied to clipboard!");
+                            }
+                          }}
+                          className={pairAddress ? "clickable-pairAddress" : ""}
+                          title={
+                            pairAddress ? "Click to copy full pairAddress" : ""
+                          }
+                        >
+                          {pairAddress
+                            ? `${pairAddress.slice(0, 6)}...${pairAddress.slice(
+                                -4
+                              )}`
+                            : "N/A"}
+                        </td>
+                        <td>2,500,000</td>
+                        <td>{formatTimeVerbose(nextClaimTime)}</td>
+                        <td>
+                          <button
+                            className="btn btn-sm swap-btn btn-primary"
+                            onClick={() => giveRewardForAirdrop(address)}
+                            disabled={
+                              isCliamProcessing == address || nextClaimTime > 0
                             }
                           >
-                            {pairAddress
-                              ? `${pairAddress.slice(
-                                  0,
-                                  6
-                                )}...${pairAddress.slice(-4)}`
-                              : "N/A"}
-                          </td>
-                          <td>2,500,000</td>
-                          <td>{formatTimeVerbose(nextClaimTime)}</td>
-                          <td>
-                            <button
-                              className="btn btn-sm swap-btn btn-primary"
-                              onClick={() => giveRewardForAirdrop(address)}
-                              disabled={
-                                isCliamProcessing == address ||
-                                nextClaimTime > 0
-                              }
-                            >
-                              {isCliamProcessing == address
-                                ? "Processing..."
-                                : "Claim"}
-                            </button>
-                          </td>
-                          <td></td>
-                        </tr>
-                      </>
+                            {isCliamProcessing == address
+                              ? "Processing..."
+                              : "Claim"}
+                          </button>
+                        </td>
+                        <td></td>
+                      </tr>
                     )
                   )}
-              {pendingToken && (
-                <tr>
-                  <td
-                    colSpan={14}
-                    style={{
-                      textAlign: "center",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {`your ${pendingToken} Tokens will be listed in 24-48 hr`}
-                  </td>
-                </tr>
+                </>
               )}
             </tbody>
           </table>

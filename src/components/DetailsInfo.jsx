@@ -7,13 +7,6 @@ import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { TokensDetails } from "../data/TokensDetails";
 import pulsex from "../assets/ninemm.png";
-import { useChainId } from "wagmi";
-
-import DAVLogo from "../assets/1.png";
-import sDAV from "../assets/sDAV.png";
-import stateLogo from "../assets/3.png";
-import yees from "../assets/2.png";
-import sState from "../assets/sonicstate.png";
 import { Auction_TESTNET } from "../ContractAddresses";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 
@@ -29,32 +22,15 @@ const DetailsInfo = ({ selectedToken }) => {
   const {
     setDBRequired,
     setDBForBurnRequired,
-    handleAddTokenDAV,
-    handleAddTokensDAV,
-    handleAddTokenState,
-    handleAddTokensState,
     setDavAndStateIntoSwap,
     handleAddToken,
     DavAddress,
   } = useSwapContract();
   const { totalStateBurned } = useDAvContract();
-  const chainId = useChainId();
 
-  const [filteredData, setFilteredData] = useState([]);
   const [localSearchQuery, setLocalSearchQuery] = useState("");
 
   const tokens = TokensDetails();
-
-  const originalData = [
-    { id: "∈", name: "DAV", logo: DAVLogo, AddToken: handleAddTokenDAV },
-    { id: "±", name: "STATE", logo: stateLogo, AddToken: handleAddTokenState },
-    { id: "±", name: "Yees", logo: yees, AddToken: handleAddTokenState },
-  ];
-
-  const SonicData = [
-    { id: "∈", name: "DAV", logo: sDAV, AddToken: handleAddTokensDAV },
-    { id: "±", name: "STATE", logo: sState, AddToken: handleAddTokensState },
-  ];
 
   useEffect(() => {
     const handleStorageChange = (event) => {
@@ -76,12 +52,7 @@ const DetailsInfo = ({ selectedToken }) => {
     nameCells.forEach((cell) => {
       cell.style.cursor = "pointer";
     });
-  }, [filteredData]);
-
-  useEffect(() => {
-    const data = chainId === 146 ? SonicData : originalData;
-    setFilteredData(data);
-  }, [chainId]);
+  }, []);
 
   const formatPrice = (price) => {
     if (!price || isNaN(price)) return "0.0000";
@@ -116,12 +87,14 @@ const DetailsInfo = ({ selectedToken }) => {
   };
 
   const handleSearch = (e) => {
-    const query = e.target.value.toLowerCase();
+    const query = e.target.value;
     setLocalSearchQuery(query);
   };
 
-  const filteredTokens = tokens.filter((item) =>
-    item.tokenName.toLowerCase().includes(localSearchQuery.toLowerCase())
+  const filteredTokens = tokens.filter(
+    (item) =>
+      item.tokenName.toLowerCase().includes(localSearchQuery.toLowerCase()) ||
+      item.emoji.includes(localSearchQuery)
   );
 
   const dataToShow = selectedToken
@@ -145,7 +118,6 @@ const DetailsInfo = ({ selectedToken }) => {
           <table className="table table-dark">
             <thead>
               <tr>
-                <th className="text-center">Logo</th>
                 <th className="text-center">Token Name</th>
                 <th className="text-center">Current Ratio</th>
                 <th className="text-center">Auctions</th>
@@ -179,10 +151,7 @@ const DetailsInfo = ({ selectedToken }) => {
                 .filter((token) => token.isSupported)
                 .map((token) => (
                   <tr key={token.tokenName}>
-                    <td className="text-center">
-                      <h3>{token.emoji}</h3>
-                    </td>
-                    <td className="text-center">{token.tokenName}</td>
+                    <td className="text-center">{`${token.emoji} ${token.tokenName}`}</td>
                     <td className="text-center">
                       <div className="mx-2">
                         {token.tokenName === "DAV" ||
@@ -247,7 +216,6 @@ const DetailsInfo = ({ selectedToken }) => {
                             cursor: "pointer",
                           }}
                         />
-
                         {token.tokenName === "DAV" ? (
                           "----"
                         ) : (

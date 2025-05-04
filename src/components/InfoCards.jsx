@@ -3,7 +3,7 @@ import "../Styles/InfoCards.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import { useContext, useEffect, useRef, useState } from "react";
+import {  useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import PLSLogo from "../assets/pls1.png";
@@ -13,46 +13,11 @@ import { formatWithCommas } from "./DetailsInfo";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import DotAnimation from "../Animations/Animation";
 import { useChainId } from "wagmi";
-import { PriceContext } from "../api/StatePrice";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
 const InfoCards = () => {
   const chainId = useChainId();
-  const { stateUsdPrice } = useContext(PriceContext);
-  const formatPrice = (price) => {
-    if (!price || isNaN(price)) {
-      return "$0.0000";
-    }
 
-    const formattedPrice = parseFloat(price).toFixed(10);
-    const [integerPart, decimalPart] = formattedPrice.split(".");
-
-    const leadingZerosMatch = decimalPart.match(/^0+(.)/);
-    if (leadingZerosMatch) {
-      const leadingZeros = leadingZerosMatch[0].slice(0, -1);
-      const firstSignificantDigit = leadingZerosMatch[1];
-      const zeroCount = leadingZeros.length;
-      if (zeroCount < 4) {
-        return `${integerPart}.${"0".repeat(
-          zeroCount
-        )}${firstSignificantDigit}${decimalPart
-          .slice(zeroCount + 1)
-          .slice(0, 3)}`;
-      } else {
-        return (
-          <>
-            {integerPart}.<span>0</span>
-            <sub>{zeroCount}</sub>
-            {firstSignificantDigit}
-            {decimalPart.slice(zeroCount + 1).slice(0, 3)}
-          </>
-        );
-      }
-    }
-
-    // General case: No significant leading zeros
-    return `${parseFloat(price).toFixed(7)}`;
-  };
   const [copied, setCopied] = useState(false);
   const [copiedCode, setCopiedCode] = useState("");
 
@@ -198,7 +163,7 @@ const InfoCards = () => {
   };
   const handleInputChangeForEmoji = (input) => {
     const graphemes = [...input]; // Spread into array of Unicode grapheme clusters
-    if (graphemes.length > 1) return; // Optionally restrict to 1 emoji/logogram
+    if (graphemes.length > 3) return; // Optionally restrict to 1 emoji/logogram
     setEmoji(input);
   };
 
@@ -228,13 +193,13 @@ const InfoCards = () => {
             <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 text-center w-100">
-                  <div className="mb-3 d-flex justify-content-start align-items-center gap-2">
-                    <label className="mb-0 detailText ">affiliate link </label>
+                  <div className="mb-2 d-flex justify-content-center align-items-center gap-2">
                     <input
                       type="text"
-                      placeholder="Optional"
+                      placeholder="Affiliate Link - Optional"
                       list="referralSuggestions"
-                      className="form-control text-center fw-bold w-auto mx-4"
+                      style={{ maxWidth: "300px" }}
+                      className="form-control text-center fw-bold  mx-4"
                       value={Refferalamount}
                       onChange={handleOptionalInputChange}
                     />
@@ -243,13 +208,12 @@ const InfoCards = () => {
                     </datalist>
                   </div>
 
-                  <div className="mb-2 d-flex justify-content-start align-items-center gap-2">
-                    <label className="mb-0 detailText">Mint DAV Token</label>
-
+                  <div className="mb-2 d-flex justify-content-center align-items-center ">
                     <input
                       type="text"
-                      placeholder="Enter Value"
-                      className="form-control text-center fw-bold w-auto mx-2"
+                      placeholder="Mint DAV Token - Enter Amount"
+                      style={{ maxWidth: "300px" }}
+                      className="form-control text-center fw-bold mx-4"
                       value={amount}
                       onChange={handleInputChange}
                       required
@@ -321,11 +285,11 @@ const InfoCards = () => {
                           textTransform: "capitalize",
                         }}
                       >
-                        {chainId == 146
-                          ? "SONIC - SWAP LEVY"
-                          : "PLS - SWAP LEVY"}
+                        {chainId == 146 ? "SONIC - SWAP LEVY" : "SWAP LEVY"}
                       </h6>
-                      <h5 className="">{formatWithCommas(claimableAmount)}</h5>
+                      <h5 className="">
+                        {formatWithCommas(claimableAmount)} PLS
+                      </h5>
                       <div className="d-flex justify-content-center ">
                         <button
                           onClick={handleClaim}
@@ -352,12 +316,7 @@ const InfoCards = () => {
                           </span>
                           <span>{formatWithCommas(stateHolding)}</span>
                         </p>
-                        <p className="mb-1">
-                          <span className="detailText">
-                            State Token Price -{" "}
-                          </span>
-                          <span>{formatPrice(stateUsdPrice)}</span>
-                        </p>
+
                         <p className="mb-1">
                           <span className="detailText">
                             Affiliate com received -{" "}
@@ -388,11 +347,11 @@ const InfoCards = () => {
                       </div>
                     </div>
                     <h6
-                      className="detailText mb-0 mt-5 px-3"
+                      className="detailText mb-0 m px-3"
                       style={{
                         fontSize: "14px",
                         textTransform: "capitalize",
-                        marginTop: "2.0rem", // or whatever spacing you want
+                        marginTop: "3rem", // or whatever spacing you want
                       }}
                     >
                       Referrers receive their commission directly in their
@@ -490,7 +449,11 @@ const InfoCards = () => {
                       onClick={() => claimBurnAmount()}
                       style={{ width: customWidth || "100%" }}
                       className="btn btn-primary mt-4 btn-sm d-flex justify-content-center align-items-center"
-                      disabled={Claiming || CanClaimNow == "false"}
+                      disabled={
+                        Claiming ||
+                        claimableAmountForBurn == 0 ||
+                        CanClaimNow == "false"
+                      }
                     >
                       {Claiming ? "Claiming..." : "Claim"}
                     </button>
@@ -597,7 +560,7 @@ const InfoCards = () => {
                         placeholder="Enter emoji/logo"
                         className="form-control text-center fw-bold"
                         value={Emoji}
-                        maxLength={2}
+                        maxLength={6}
                         disabled={isProcessingToken}
                         onChange={(e) =>
                           handleInputChangeForEmoji(e.target.value)

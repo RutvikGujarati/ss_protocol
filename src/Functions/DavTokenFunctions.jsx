@@ -46,7 +46,7 @@ export const DavProvider = ({ children }) => {
     ReferralCodeOfUser: "0.0",
     ReferralAMount: "0.0",
     totalStateBurned: "0.0",
-	pendingToken:"0.0",
+    pendingToken: "0.0",
     claimableAmount: "0.0",
     usableTreasury: "0.0",
     tokenEntries: null,
@@ -85,9 +85,7 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("claimableAmount", () =>
           AllContracts.davContract.earned(address)
         ),
-        fetchAndSet("claimableAmountForBurn", () =>
-          AllContracts.davContract.getClaimablePLS(address)
-        ),
+
         fetchAndSet(
           "UserPercentage",
           () => AllContracts.davContract.getUserSharePercentage(address),
@@ -101,9 +99,6 @@ export const DavProvider = ({ children }) => {
           0
         ),
 
-        fetchAndSet("ContractPls", () =>
-          AllContracts.davContract.stateLpTotalShare()
-        ),
         fetchAndSet("totalStateBurned", () =>
           AllContracts.davContract.totalStateBurned()
         ),
@@ -111,11 +106,12 @@ export const DavProvider = ({ children }) => {
           AllContracts.davContract.balanceOf(address)
         ),
         fetchAndSet("usableTreasury", () =>
-          AllContracts.davContract.getUsableTreasuryPLS()
+          AllContracts.davContract.getAvailableCycleFunds()
         ),
-        fetchAndSet("pendingToken", () =>
-          AllContracts.davContract.getPendingTokenNames(address),
-		false
+        fetchAndSet(
+          "pendingToken",
+          () => AllContracts.davContract.getPendingTokenNames(address),
+          false
         ),
 
         fetchAndSet("davPercentage", () =>
@@ -199,12 +195,20 @@ export const DavProvider = ({ children }) => {
         false,
         0
       );
-      fetchAndSet(
-        "CanClaimNow",
-        async () =>
-          (await AllContracts.davContract.canClaim(address)) ? "true" : "false",
-        false
-      );
+      fetchAndSet("claimableAmountForBurn", () =>
+        AllContracts.davContract.getClaimablePLS(address)
+      ),
+        fetchAndSet("ContractPls", () =>
+          AllContracts.davContract.getContractPLSBalance()
+        ),
+        fetchAndSet(
+          "CanClaimNow",
+          async () =>
+            (await AllContracts.davContract.canClaim(address))
+              ? "true"
+              : "false",
+          false
+        );
     } catch (error) {
       console.error("Error fetching time until next claim:", error);
     }
@@ -221,6 +225,13 @@ export const DavProvider = ({ children }) => {
     return () => clearInterval(interval); // clean up on unmount
   }, [fetchTimeUntilNextClaim, AllContracts?.davContract, address]);
 
+  useEffect(() => {
+    console.log("tim left:", data.TimeUntilNextClaim);
+    if (data.TimeUntilNextClaim === 0) {
+      fetchData();
+    }
+  }, [data.TimeUntilNextClaim]);
+
   console.log("user percentage", data.UserPercentage);
   console.log("all user percentage", data.AllUserPercentage);
   useEffect(() => {
@@ -233,7 +244,7 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract) return;
     const ethAmount = ethers.parseEther(amount.toString());
     const cost = ethers.parseEther(
-      (amount * (chainId === 146 ? 100 : 10)).toString()
+      (amount * (chainId === 146 ? 100 : 10000)).toString()
     );
     const referral = ref.trim() || "0x0000000000000000000000000000000000000000";
 
@@ -253,7 +264,7 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract) return;
 
     // Define the cost based on the chainId
-    const cost = ethers.parseEther((chainId === 146 ? 100 : 1).toString());
+    const cost = ethers.parseEther((chainId === 146 ? 100 : 100000).toString());
 
     try {
       // Check if the address is the VITE_AUTH_ADDRESS, if so, pass no value for ether

@@ -2,7 +2,7 @@ import { useContext } from "react";
 import {
 	DAV_TESTNET,
 	DAV_TOKEN_SONIC_ADDRESS,
-	STATE_TOKEN_ADDRESS,
+	STATE_TESTNET,
 	STATE_TOKEN_SONIC_ADDRESS,
 } from "../ContractAddresses";
 import { PriceContext } from "../api/StatePrice";
@@ -34,7 +34,7 @@ export const TokensDetails = () => {
 		{
 			name: "STATE",
 			key: "state",
-			address: STATE_TOKEN_ADDRESS,
+			address:STATE_TESTNET,
 			price: prices.stateUsdPrice,
 		},
 	];
@@ -88,7 +88,7 @@ export const TokensDetails = () => {
 			key: shortenAddress(token.address),
 			name: token.displayName || token.name,
 			Price: token.price,
-			emoji: emojiMap[key.toLowerCase()],
+			emoji: token.name == "DAV" ? "🧮" : token.name == "STATE" ? "🧮" : emojiMap[key.toLowerCase()],
 
 			DavVault: swap.TokenBalance?.[key],
 			burned: swap.burnedAmount?.[key],

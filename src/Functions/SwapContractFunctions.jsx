@@ -96,18 +96,39 @@ export const SwapContractProvider = ({ children }) => {
   };
   const getAirdropAmount = async () => {
     try {
-      const inputAmountWei =
-        await AllContracts.AuctionContract.getClaimableReward(address);
+      const results = {};
+      const tokenMap = await ReturnfetchUserTokenAddresses();
 
-      const inputAmount = ethers.formatEther(inputAmountWei); // 👈 convert to ether
-      const inputAmountNoDecimals = Math.floor(Number(inputAmount));
+      console.log("Starting loop over Addresses:", tokenMap);
 
-      console.log("Final Airdrop amounts:", inputAmountNoDecimals);
-      setAirdropAmount(inputAmountNoDecimals);
+      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
+        console.log(
+          `Fetching airdrop amount for ${tokenName} at ${TokenAddress}`
+        );
+
+        const airdropAmountWei =
+          await AllContracts.AuctionContract.getClaimableReward(
+            address,
+            TokenAddress
+          ); // 👈 assuming this function accepts a token address
+
+        const airdropAmount = ethers.formatEther(airdropAmountWei); // Convert from Wei
+        const airdropAmountNoDecimals = Math.floor(Number(airdropAmount));
+        console.log(
+          `Airdrop amount for ${tokenName}:`,
+          airdropAmountNoDecimals
+        );
+
+        results[tokenName] = airdropAmountNoDecimals;
+      }
+
+      console.log("Final airdrop amounts:", results);
+      setAirdropAmount(results);
     } catch (e) {
-      console.error("Error fetching input amounts:", e);
+      console.error("Error fetching airdrop amounts:", e);
     }
   };
+
   useEffect(() => {
     let interval;
 
@@ -132,15 +153,20 @@ export const SwapContractProvider = ({ children }) => {
       }
     };
 
-    // Initial call
-    getAuctionTimeLeft();
+    const runBothFunctions = async () => {
+      await getAuctionTimeLeft();
+      await CheckIsAuctionActive(); // <--- your second function
+    };
 
-    // Set interval to update every second
-    interval = setInterval(getAuctionTimeLeft, 1000);
+    // Initial run
+    runBothFunctions();
 
-    // Cleanup on unmount
+    // Run both functions every second
+    interval = setInterval(runBothFunctions, 1000);
+
+    // Cleanup
     return () => clearInterval(interval);
-  }, [tokenMap, AllContracts]);
+  }, [AllContracts, tokenMap]);
 
   const getCurrentAuctionCycle = async () => {
     try {
@@ -379,12 +405,11 @@ export const SwapContractProvider = ({ children }) => {
       console.log("Starting loop over Addresses in renounce:", tokenMap);
 
       for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        console.log(
-          `Fetching renouncing for ${tokenName} at ${TokenAddress}`
-        );
+        console.log(`Fetching renouncing for ${tokenName} at ${TokenAddress}`);
 
-        const renouncing =
-          await AllContracts.AuctionContract.isTokenRenounced(TokenAddress);
+        const renouncing = await AllContracts.AuctionContract.isTokenRenounced(
+          TokenAddress
+        );
 
         const renouncingString = renouncing.toString(); // 👈 convert to string
 
@@ -472,7 +497,10 @@ export const SwapContractProvider = ({ children }) => {
         );
 
         const AirdropClaimed =
-          await AllContracts.AuctionContract.hasAirdroppedClaim(address);
+          await AllContracts.AuctionContract.hasAirdroppedClaim(
+            address,
+            TokenAddress
+          );
 
         const AirdropClaimedString = AirdropClaimed.toString(); // 👈 convert to string
 
@@ -742,9 +770,15 @@ export const SwapContractProvider = ({ children }) => {
         Owner,
         name
       );
-      await tx.wait();
-      await CheckIsAuctionActive();
-      await isTokenSupporteed();
+      const receipt = await tx.wait();
+      if (receipt.status === 1) {
+        console.log("Transaction successful");
+        await CheckIsAuctionActive();
+        await isTokenSupporteed(); // Corrected function name
+        console.log("Token added successfully!");
+      } else {
+        console.error("Transaction failed");
+      }
       console.log("Token added successfully!");
     } catch (error) {
       console.error("AddTokenIntoSwapContract failed:", error?.reason || error);
@@ -765,7 +799,7 @@ export const SwapContractProvider = ({ children }) => {
     getTokenBalances();
     isAirdropClaimed();
     AddressesFromContract();
-	isRenounced();
+    isRenounced();
     getTokenNamesForUser();
     isTokenSupporteed();
     // getTokensByUser();
@@ -805,7 +839,7 @@ export const SwapContractProvider = ({ children }) => {
       console.log("rps", isReversed[ContractName]);
 
       let selectedContract;
-      if (ContractName == "Yees" && isReversed[ContractName] == "true") {
+      if (isReversed[ContractName] == "true") {
         selectedContract = new ethers.Contract(
           STATE_TESTNET,
           ERC20_ABI,
@@ -818,9 +852,9 @@ export const SwapContractProvider = ({ children }) => {
           approvalAmount.toString()
         );
       } else {
+        console.log("second condition");
         selectedContract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
         approvalAmount = ethers.parseUnits(InAmountMapping.toString(), 18);
-        console.log("second condition");
         console.log(
           "Normal swap, approving OnePBalance:",
           approvalAmount.toString()
@@ -993,16 +1027,17 @@ export const SwapContractProvider = ({ children }) => {
         userHashSwapped,
         userHasReverseSwapped,
         isCliamProcessing,
-		isTokenRenounce,
+        isTokenRenounce,
         // WithdrawLPTokens,
         AddTokenIntoSwapContract,
+        isTokenSupporteed,
         burnedAmount,
         buttonTextStates,
         DavAddress,
         StateAddress,
         swappingStates,
         AuctionTime,
-		fetchUserTokenAddresses,
+        fetchUserTokenAddresses,
         AirdropClaimed,
         isReversed,
         InputAmount,

@@ -278,21 +278,7 @@
 				"name": "",
 				"type": "address",
 				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "cumulativeMintableHoldings",
-		"inputs": [
+			},
 			{
 				"name": "",
 				"type": "address",
@@ -434,6 +420,11 @@
 				"name": "user",
 				"type": "address",
 				"internalType": "address"
+			},
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
 			}
 		],
 		"outputs": [
@@ -460,25 +451,6 @@
 				"name": "",
 				"type": "uint256",
 				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "getEmojiByTokenName",
-		"inputs": [
-			{
-				"name": "_tokenName",
-				"type": "string",
-				"internalType": "string"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "string",
-				"internalType": "string"
 			}
 		],
 		"stateMutability": "view"
@@ -743,6 +715,11 @@
 				"name": "user",
 				"type": "address",
 				"internalType": "address"
+			},
+			{
+				"name": "inputToken",
+				"type": "address",
+				"internalType": "address"
 			}
 		],
 		"outputs": [
@@ -758,6 +735,11 @@
 		"type": "function",
 		"name": "hasClaimed",
 		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
 			{
 				"name": "",
 				"type": "address",
@@ -896,6 +878,11 @@
 		"type": "function",
 		"name": "lastDavHolding",
 		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
 			{
 				"name": "",
 				"type": "address",
