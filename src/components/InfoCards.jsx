@@ -508,24 +508,24 @@ const InfoCards = () => {
                 >
                   <div>
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
-                      <div className="carddetails2 ">
+                      <div className="carddetails2 " >
                         <h6 className="detailText">LISTING A TOKEN</h6>
                         <ul className="mb-1" style={{ paddingLeft: "20px" }}>
-                          <li className="detailText">
+                          <li className="detailText2">
                             Market-making service for 21 auctions / 3 years
                           </li>
-                          <li className="detailText">
+                          <li className="detailText2">
                             Free liquidity pool tokens paired with the STATE
                             token
                           </li>
-                          <li className="detailText">
+                          <li className="detailText2">
                             Token creators receive periodic airdrops / 2.5
                             million tokens
                           </li>
-                          <li className="detailText">Airdrops every 50 days</li>
-                          <li className="detailText">Add your badge (emoji)</li>
-                          <li className="detailText">Cost - 10 Million PLS</li>
-                          <li className="detailText">
+                          <li className="detailText2">Airdrops every 50 days</li>
+                          <li className="detailText2">Add your badge (emoji)</li>
+                          <li className="detailText2">Cost - 10 Million PLS</li>
+                          <li className="detailText2">
                             Token listed within 24-48 hrs
                           </li>
                         </ul>
@@ -575,7 +575,7 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
                   <div className="p-2 pt-3 pb-2">
                     <p className="mb-2 detailText ">Market Maker Fee</p>
-                    <h6 className="text-center  mt-3">10, 000, 000 PLS</h6>
+                    <h6 className="text-center  mt-3">10,000,000 PLS</h6>
 
                     <button
                       onClick={async () => {

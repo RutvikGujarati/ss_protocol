@@ -145,35 +145,36 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-              .filter(
-                ({
-                  userHasSwapped,
-                  name,
-                  userHasReverse,
-                  isReversing,
-                  AuctionStatus,
-                }) => {
-                  console.log(`Filter Conditions:${name}`, {
-                    userHasSwapped,
-                    userHasReverse,
+                .filter(
+                  ({
+                  //   userHasSwapped,
+                    name,
+                    // userHasReverse,
                     isReversing,
                     AuctionStatus,
-                    // dbCheck: db >= DavRequiredAmount,
-                  });
+                  }) => {
+                    console.log(`Filter Conditions:${name}`, {
+                      // userHasSwapped,
+                    //   userHasReverse,
+                      isReversing,
+                      AuctionStatus,
+                      // dbCheck: db >= DavRequiredAmount,
+                    });
 
-                  if (AuctionStatus == "false" && isReversing == "true") {
-                    if (userHasReverse == "false") {
-                      return true;
-                    } else if (userHasSwapped && isReversing == "false") {
-                      return false;
-                    }
-                  } else if (AuctionStatus == "true") {
-                    if (userHasSwapped == "false") {
-                      return true;
+                    if (AuctionStatus == "false" && isReversing == "true") {
+                    //   if (userHasReverse == "false") {
+                    //     return true;
+                    //   } 
+					   if ( isReversing == "false") {
+                        return false;
+                      }
+                    } else if (AuctionStatus == "true") {
+                        return true;
+                      // if (userHasSwapped == "false") {
+                      // }
                     }
                   }
-                }
-              )
+                )
               .map(
                 (
                   {
@@ -198,8 +199,8 @@ const DataTable = () => {
                     <td></td>
                     <td>{TimeLeft}</td>
 
-                    <td>
-                      <h5 className="nameBig align-items-center">{`${emoji}${name}`}</h5>
+                    <td style={{ textAlign: "center" }}>
+                      <h5 className="nameBig">{`${emoji}${name}`}</h5>
                     </td>
 
                     <td>
@@ -312,7 +313,10 @@ const DataTable = () => {
                         </>
                       </div>
                     </td>
-                    <td>1,000,000 STATE token to 1:1 token</td>
+                    <td>
+                      {formatWithCommas(onlyInputAmount)} STATE token to 1:1
+                      token
+                    </td>
                   </tr>
                 )
               )}
@@ -342,13 +346,13 @@ const DataTable = () => {
               ) : (
                 <tr>
                   <th></th>
-                  <th>Logo</th>
                   <th>Token Name</th>
-                  <th>Token Address</th>
+                  <th>Supply</th>
+
                   {/* <th>Liquidity</th> */}
                   <th></th>
-                  <th>Supply</th>
-                  <th>Pair</th>
+                  <th>Token Address</th>
+                  <th>Pair Address</th>
                   <th>Amount</th>
                   <th>Time To claim</th>
                   <th>Airdrop</th>
@@ -551,7 +555,7 @@ const DataTable = () => {
                           fontWeight: "bold",
                         }}
                       >
-                        {`Your ${pendingToken} Tokens will be listed in 24-48 hr`}
+                        {`${pendingToken} Tokens will be listed in 24-48 hr`}
                       </td>
                     </tr>
                   )}
@@ -562,10 +566,9 @@ const DataTable = () => {
                     ) => (
                       <tr key={index}>
                         <td></td>
-                        <td>
-                          <h3>{Emojis}</h3>
-                        </td>
-                        <td>{name}</td>
+                        <td>{`${Emojis} ${name}`}</td>
+                        <td>500 Billion</td>
+                        <td></td>
                         <td
                           onClick={() => {
                             if (address) {
@@ -580,8 +583,7 @@ const DataTable = () => {
                             ? `${address.slice(0, 6)}...${address.slice(-4)}`
                             : "N/A"}
                         </td>
-                        <td></td>
-                        <td>500 Billion</td>
+
                         <td
                           onClick={() => {
                             if (pairAddress) {
