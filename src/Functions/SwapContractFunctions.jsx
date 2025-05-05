@@ -909,6 +909,15 @@ export const SwapContractProvider = ({ children }) => {
 
       if (swapReceipt.status === 1) {
         console.log("Swap Complete!");
+        toast.success(`swapped success with ${ContractName} `, {
+          position: "top-center", // Centered
+          autoClose: 18000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap Complete!" }));
       } else {
         console.error("Swap transaction failed.");

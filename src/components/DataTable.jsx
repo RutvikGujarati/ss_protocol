@@ -109,7 +109,7 @@ const DataTable = () => {
   console.log("obj tokens", tokens);
   const [authorized, setAuthorized] = useState(false);
 
-  const AuthAddress = "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483";
+  const AuthAddress = "0xBAaB2913ec979d9d21785063a0e4141e5B787D28";
   const handleSetAddress = () => {
     if (!address) {
       setAuthorized(false);
@@ -140,41 +140,41 @@ const DataTable = () => {
               {/* <th>Current Ratio</th> */}
               <th>Ratio Swap</th>
               <th></th>
-              <th>market maker</th>
+              <th>Market Maker</th>
             </tr>
           </thead>
           <tbody>
             {tokens
-              .filter(
-                ({
-                  //   userHasSwapped,
-                  name,
-                  // userHasReverse,
-                  isReversing,
-                  AuctionStatus,
-                }) => {
-                  console.log(`Filter Conditions:${name}`, {
-                    // userHasSwapped,
-                    //   userHasReverse,
+                .filter(
+                  ({
+                    //   userHasSwapped,
+                    name,
+                    // userHasReverse,
                     isReversing,
                     AuctionStatus,
-                    // dbCheck: db >= DavRequiredAmount,
-                  });
+                  }) => {
+                    console.log(`Filter Conditions:${name}`, {
+                      // userHasSwapped,
+                      //   userHasReverse,
+                      isReversing,
+                      AuctionStatus,
+                      // dbCheck: db >= DavRequiredAmount,
+                    });
 
-                  if (AuctionStatus == "false" && isReversing == "true") {
-                    //   if (userHasReverse == "false") {
-                    //     return true;
-                    //   }
-                    if (isReversing == "false") {
-                      return false;
+                    if (AuctionStatus == "false" && isReversing == "true") {
+                      //   if (userHasReverse == "false") {
+                      //     return true;
+                      //   }
+                      if (isReversing == "false") {
+                        return false;
+                      }
+                    } else if (AuctionStatus == "true") {
+                      return true;
+                      // if (userHasSwapped == "false") {
+                      // }
                     }
-                  } else if (AuctionStatus == "true") {
-                    return true;
-                    // if (userHasSwapped == "false") {
-                    // }
                   }
-                }
-              )
+                )
               .map(
                 (
                   {
@@ -199,9 +199,7 @@ const DataTable = () => {
                     <td></td>
                     <td>{TimeLeft}</td>
 
-                    <td style={{ textAlign: "center" }}>
-                      <h5 className="nameBig">{`${emoji}${name}`}</h5>
-                    </td>
+                    <td className="justify-content-center">{`${emoji}${name}`}</td>
 
                     <td>
                       <button
