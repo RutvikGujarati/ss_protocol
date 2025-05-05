@@ -203,7 +203,7 @@ const InfoCards = () => {
                       <input
                         type="text"
                         id="affiliateLink"
-						 list="referralSuggestions"
+                        list="referralSuggestions"
                         className={`form-control text-center fw-bold ${
                           Refferalamount ? "filled" : ""
                         }`}
@@ -343,7 +343,7 @@ const InfoCards = () => {
                           <span className="detailText">
                             Affiliate com received -{" "}
                           </span>
-                          <span>{formatWithCommas(ReferralAMount)}</span>
+                          <span>{formatWithCommas(ReferralAMount)} PLS</span>
                         </p>
                         <p className="mb-1 d-flex align-items-center gap-2 flex-wrap">
                           <span className="detailText">
@@ -431,16 +431,24 @@ const InfoCards = () => {
                         type="text"
                         placeholder={formatWithCommas(stateHolding)}
                         className="form-control text-center fw-bold "
-						style={{ "--placeholder-color": "#6c757d" }}
+                        style={{ "--placeholder-color": "#6c757d" }}
                         value={amountOfInput}
                         onChange={handleInputChangeForBurn}
                       />
                     </div>
                     <button
-                      onClick={handleBurnClick}
+                      onClick={async () => {
+                        setTimeout(async () => {
+                          try {
+                            await handleBurnClick(); // your async burn function
+                          } catch (err) {
+                            console.error("Burn failed:", err);
+                          }
+                        }, 100); // Allow re-render before blocking
+                      }}
                       style={{ width: customWidth }}
                       className="btn btn-primary mx-5 mt-4 btn-sm d-flex justify-content-center align-items-center"
-                      disabled={load}
+                      disabled={load || BurnClicked}
                     >
                       {BurnClicked ? "Burning..." : "Burn"}
                     </button>
@@ -480,18 +488,26 @@ const InfoCards = () => {
                     {Number(claimableAmountForBurn) == 0 && (
                       <div className="d-flex justify-content-center">
                         <h5 className="detailText">
-                          expected next Claim {formatWithCommas(expectedClaim)}
+                          expected next Claim :{formatWithCommas(expectedClaim)}
                         </h5>
                       </div>
                     )}
                     <button
-                      onClick={() => claimBurnAmount()}
+                      onClick={() => {
+                        setTimeout(async () => {
+                          try {
+                            await claimBurnAmount();
+                          } catch (err) {
+                            console.error("Claim failed:", err);
+                          }
+                        }, 100);
+                      }}
                       style={{ width: customWidth || "100%" }}
                       className="btn btn-primary mt-4 btn-sm d-flex justify-content-center align-items-center"
                       disabled={
                         Claiming ||
                         claimableAmountForBurn == 0 ||
-                        CanClaimNow == "false"
+                        CanClaimNow === "false"
                       }
                     >
                       {Claiming ? "Claiming..." : "Claim"}
@@ -586,7 +602,7 @@ const InfoCards = () => {
                         type="text"
                         placeholder="Enter Name"
                         className="form-control text-center fw-bold"
-						style={{ "--placeholder-color": "#6c757d" }}
+                        style={{ "--placeholder-color": "#6c757d" }}
                         maxLength={10}
                         value={TokenName}
                         disabled={isProcessingToken}
@@ -603,9 +619,8 @@ const InfoCards = () => {
                         type="text"
                         placeholder="Enter Emoji"
                         className="form-control text-center fw-bold"
-						style={{ "--placeholder-color": "#6c757d" }}
+                        style={{ "--placeholder-color": "#6c757d" }}
                         value={Emoji}
-                        maxLength={6}
                         disabled={isProcessingToken}
                         onChange={(e) =>
                           handleInputChangeForEmoji(e.target.value)
@@ -624,11 +639,11 @@ const InfoCards = () => {
 
                     <button
                       onClick={async () => {
-                        setTokenName(""); // clear input immediately
-                        setEmoji("");
                         setTimeout(async () => {
                           try {
                             await AddYourToken(TokenName, Emoji);
+                             setTokenName("");
+                             setEmoji("");
                           } catch (err) {
                             console.error("Error processing token:", err);
                           }

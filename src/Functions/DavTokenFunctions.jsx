@@ -50,7 +50,7 @@ export const DavProvider = ({ children }) => {
     claimableAmount: "0.0",
     usableTreasury: "0.0",
     tokenEntries: null,
-	expectedClaim:"0.0",
+    expectedClaim: "0.0",
     CanClaimNow: "false",
     claimableAmountForBurn: "0.0",
     UserPercentage: "0.0",
@@ -210,9 +210,9 @@ export const DavProvider = ({ children }) => {
       fetchAndSet("claimableAmountForBurn", () =>
         AllContracts.davContract.getClaimablePLS(address)
       ),
-      fetchAndSet("expectedClaim", () =>
-        AllContracts.davContract.getExpectedClaimablePLS(address)
-      ),
+        fetchAndSet("expectedClaim", () =>
+          AllContracts.davContract.getExpectedClaimablePLS(address)
+        ),
         fetchAndSet("usableTreasury", () =>
           AllContracts.davContract.getAvailableCycleFunds()
         ),
@@ -271,6 +271,15 @@ export const DavProvider = ({ children }) => {
         value: cost,
       });
       await tx.wait();
+      toast.success(`${amount} token minted successfully!`, {
+        position: "top-center",
+        autoClose: 12000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       await fetchData();
       return tx;
     } catch (error) {
@@ -278,34 +287,58 @@ export const DavProvider = ({ children }) => {
       throw error;
     }
   };
+
   const AddYourToken = async (amount, Emoji) => {
     if (!AllContracts?.davContract) return;
 
-    // Define the cost based on the chainId
     const cost = ethers.parseEther((chainId === 146 ? 100 : 10).toString());
 
-    try {
-      // Check if the address is the VITE_AUTH_ADDRESS, if so, pass no value for ether
+    let toastId = null;
 
+    try {
       setProcessToken(true);
+
+      // Wait for user confirmation (this is where rejection happens)
       const tx =
-        address == import.meta.env.VITE_AUTH_ADDRESS
+        address === import.meta.env.VITE_AUTH_ADDRESS
           ? await AllContracts.davContract.ProcessYourToken(amount, Emoji)
           : await AllContracts.davContract.ProcessYourToken(amount, Emoji, {
               value: cost,
             });
 
-      // Wait for the transaction to be mined
-      await tx.wait();
+      // 🟡 Only show toast *after* MetaMask confirmation
+      toastId = toast.loading(`Processing token: ${amount} ${Emoji}`, {
+        position: "top-center",
+      });
 
-      // Fetch updated data
+      await tx.wait();
+      toast.dismiss(toastId);
+      toast.success(`Token listed: ${amount} ${Emoji}`, {
+        position: "top-center",
+        autoClose: 5000,
+      });
       await fetchData();
 
-      // Return the transaction object
       return tx;
     } catch (error) {
-      console.error("Minting error:", error);
-      setProcessToken(false);
+      console.error("Token listing error:", error);
+
+      toast.dismiss(toastId);
+      if (!toastId) {
+        toast.info("❌ Transaction rejected by user", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+      } else {
+        toast.update(toastId, {
+          render: `❌ Error: ${error.message || "Transaction failed"}`,
+          type: "error",
+          isLoading: false,
+          autoClose: 5000,
+          position: "top-center",
+        });
+      }
+
       throw error;
     } finally {
       setProcessToken(false);
@@ -353,7 +386,7 @@ export const DavProvider = ({ children }) => {
       await fetchData();
       toast.success("Claimed PLS!", {
         position: "top-center", // Centered
-        autoClose: 6000,
+        autoClose: 12000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -382,6 +415,15 @@ export const DavProvider = ({ children }) => {
       await (await AllContracts.davContract.burnState(weiAmount)).wait();
 
       setClicked(false);
+      toast.success(`${amount} of tokens Burned Successfully`, {
+        position: "top-center", // Centered
+        autoClose: 12000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       await fetchData();
       await fetchTimeUntilNextClaim();
     } catch (err) {
