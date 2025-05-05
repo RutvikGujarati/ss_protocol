@@ -109,7 +109,7 @@ const DataTable = () => {
   console.log("obj tokens", tokens);
   const [authorized, setAuthorized] = useState(false);
 
-  const AuthAddress = "0xBAaB2913ec979d9d21785063a0e4141e5B787D28";
+  const AuthAddress = "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483";
   const handleSetAddress = () => {
     if (!address) {
       setAuthorized(false);
@@ -145,36 +145,36 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-                .filter(
-                  ({
+              .filter(
+                ({
                   //   userHasSwapped,
-                    name,
-                    // userHasReverse,
+                  name,
+                  // userHasReverse,
+                  isReversing,
+                  AuctionStatus,
+                }) => {
+                  console.log(`Filter Conditions:${name}`, {
+                    // userHasSwapped,
+                    //   userHasReverse,
                     isReversing,
                     AuctionStatus,
-                  }) => {
-                    console.log(`Filter Conditions:${name}`, {
-                      // userHasSwapped,
-                    //   userHasReverse,
-                      isReversing,
-                      AuctionStatus,
-                      // dbCheck: db >= DavRequiredAmount,
-                    });
+                    // dbCheck: db >= DavRequiredAmount,
+                  });
 
-                    if (AuctionStatus == "false" && isReversing == "true") {
+                  if (AuctionStatus == "false" && isReversing == "true") {
                     //   if (userHasReverse == "false") {
                     //     return true;
-                    //   } 
-					   if ( isReversing == "false") {
-                        return false;
-                      }
-                    } else if (AuctionStatus == "true") {
-                        return true;
-                      // if (userHasSwapped == "false") {
-                      // }
+                    //   }
+                    if (isReversing == "false") {
+                      return false;
                     }
+                  } else if (AuctionStatus == "true") {
+                    return true;
+                    // if (userHasSwapped == "false") {
+                    // }
                   }
-                )
+                }
+              )
               .map(
                 (
                   {
@@ -313,10 +313,7 @@ const DataTable = () => {
                         </>
                       </div>
                     </td>
-                    <td>
-                      {formatWithCommas(onlyInputAmount)} STATE token to 1:1
-                      token
-                    </td>
+                    <td>{formatWithCommas(outputToken)} token to 1:1 token</td>
                   </tr>
                 )
               )}
@@ -490,7 +487,10 @@ const DataTable = () => {
                                 onChange={(e) =>
                                   handleInputChange(name, e.target.value)
                                 }
-                                style={{ width: "120px" }}
+                                style={{
+                                  width: "120px",
+                                  "--placeholder-color": "#6c757d",
+                                }}
                               />
                               <button
                                 className="btn btn-sm swap-btn btn-primary"
@@ -555,7 +555,7 @@ const DataTable = () => {
                           fontWeight: "bold",
                         }}
                       >
-                        {`${pendingToken} Tokens will be listed in 24-48 hr`}
+                        {`${pendingToken} Token will be listed in 24-48 hr`}
                       </td>
                     </tr>
                   )}

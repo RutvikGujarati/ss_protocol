@@ -110,7 +110,7 @@ const DetailsInfo = ({ selectedToken }) => {
           placeholder="SEARCH"
           value={localSearchQuery}
           onChange={handleSearch}
-          style={{ maxWidth: "300%" }}
+          style={{ maxWidth: "300%", "--placeholder-color": "#6c757d" }}
         />
       </div>
       <div className="table-responsive">

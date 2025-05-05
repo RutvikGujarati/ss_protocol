@@ -50,6 +50,7 @@ export const DavProvider = ({ children }) => {
     claimableAmount: "0.0",
     usableTreasury: "0.0",
     tokenEntries: null,
+	expectedClaim:"0.0",
     CanClaimNow: "false",
     claimableAmountForBurn: "0.0",
     UserPercentage: "0.0",
@@ -64,11 +65,19 @@ export const DavProvider = ({ children }) => {
   const fetchAndSet = async (label, fn, format = true, fixed = 2) => {
     try {
       const res = await fn();
+      let value;
+
+      if (label === "UserPercentage") {
+        value = (Number(res) / 100).toFixed(fixed);
+      } else {
+        value = format
+          ? parseFloat(ethers.formatUnits(res, 18)).toFixed(fixed)
+          : res.toString();
+      }
+
       setData((prev) => ({
         ...prev,
-        [label]: format
-          ? parseFloat(ethers.formatUnits(res, 18)).toFixed(fixed)
-          : res.toString(),
+        [label]: value,
       }));
     } catch (err) {
       console.error(`Error fetching ${label}:`, err);
@@ -85,12 +94,15 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("claimableAmount", () =>
           AllContracts.davContract.earned(address)
         ),
+        fetchAndSet("userBurnedAmount", () =>
+          AllContracts.davContract.userBurnedAmount(address)
+        ),
 
         fetchAndSet(
           "UserPercentage",
           () => AllContracts.davContract.getUserSharePercentage(address),
-          false,
-          0
+          true, // Enable formatting
+          2 // Keep 2 decimal places
         ),
         fetchAndSet(
           "AllUserPercentage",
@@ -105,17 +117,17 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("davHolds", () =>
           AllContracts.davContract.balanceOf(address)
         ),
-        fetchAndSet("usableTreasury", () =>
-          AllContracts.davContract.getAvailableCycleFunds()
-        ),
+
         fetchAndSet(
           "pendingToken",
           () => AllContracts.davContract.getPendingTokenNames(address),
           false
         ),
 
-        fetchAndSet("davPercentage", () =>
-          AllContracts.davContract.getUserHoldingPercentage(address)
+        fetchAndSet(
+          "davPercentage",
+          () => AllContracts.davContract.getUserHoldingPercentage(address),
+          false
         ),
         fetchAndSet("stateHolding", () =>
           AllContracts.stateContract.balanceOf(address)
@@ -198,6 +210,12 @@ export const DavProvider = ({ children }) => {
       fetchAndSet("claimableAmountForBurn", () =>
         AllContracts.davContract.getClaimablePLS(address)
       ),
+      fetchAndSet("expectedClaim", () =>
+        AllContracts.davContract.getExpectedClaimablePLS(address)
+      ),
+        fetchAndSet("usableTreasury", () =>
+          AllContracts.davContract.getAvailableCycleFunds()
+        ),
         fetchAndSet("ContractPls", () =>
           AllContracts.davContract.getContractPLSBalance()
         ),
@@ -264,7 +282,7 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract) return;
 
     // Define the cost based on the chainId
-    const cost = ethers.parseEther((chainId === 146 ? 100 : 100000).toString());
+    const cost = ethers.parseEther((chainId === 146 ? 100 : 10).toString());
 
     try {
       // Check if the address is the VITE_AUTH_ADDRESS, if so, pass no value for ether

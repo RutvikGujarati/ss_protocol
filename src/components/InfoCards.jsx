@@ -1,9 +1,9 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/InfoCards.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import {  useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import { useLocation } from "react-router-dom";
 import PLSLogo from "../assets/pls1.png";
@@ -34,7 +34,9 @@ const InfoCards = () => {
     BurnClicked,
     Claiming,
     ContractPls,
+    userBurnedAmount,
     claimBurnAmount,
+    expectedClaim,
     // AllUserPercentage,
     TimeUntilNextClaim,
     UserPercentage,
@@ -193,32 +195,52 @@ const InfoCards = () => {
             <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-3 text-center w-100">
-                  <div className="mb-2 d-flex justify-content-center align-items-center gap-2">
-                    <input
-                      type="text"
-                      placeholder="Affiliate Link - Optional"
-                      list="referralSuggestions"
+                  <div className=" mb-2 d-flex justify-content-center align-items-center gap-2">
+                    <div
+                      className="floating-input-container"
                       style={{ maxWidth: "300px" }}
-                      className="form-control text-center fw-bold  mx-4"
-                      value={Refferalamount}
-                      onChange={handleOptionalInputChange}
-                    />
-                    <datalist id="referralSuggestions">
-                      {copiedCode && <option value={copiedCode} />}
-                    </datalist>
+                    >
+                      <input
+                        type="text"
+                        id="affiliateLink"
+						 list="referralSuggestions"
+                        className={`form-control text-center fw-bold ${
+                          Refferalamount ? "filled" : ""
+                        }`}
+                        value={Refferalamount}
+                        onChange={handleOptionalInputChange}
+                        style={{ height: "38px", color: "#ffffff" }}
+                      />
+                      <label htmlFor="affiliateLink" className="floating-label">
+                        Affiliate Link - Optional
+                      </label>
+                      <datalist id="referralSuggestions">
+                        {copiedCode && <option value={copiedCode} />}
+                      </datalist>
+                    </div>
+                  </div>
+                  <div className="mt-2 mb-2 d-flex justify-content-center align-items-center ">
+                    <div
+                      className="floating-input-container"
+                      style={{ maxWidth: "300px" }}
+                    >
+                      <input
+                        type="text"
+                        id="mintAmount"
+                        className={`form-control text-center fw-bold ${
+                          amount ? "filled" : ""
+                        }`}
+                        value={amount}
+                        onChange={handleInputChange}
+                        required
+                        style={{ height: "38px", color: "#ffffff" }}
+                      />
+                      <label htmlFor="mintAmount" className="floating-label">
+                        Mint DAV Token - Enter Amount
+                      </label>
+                    </div>
                   </div>
 
-                  <div className="mb-2 d-flex justify-content-center align-items-center ">
-                    <input
-                      type="text"
-                      placeholder="Mint DAV Token - Enter Amount"
-                      style={{ maxWidth: "300px" }}
-                      className="form-control text-center fw-bold mx-4"
-                      value={amount}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
                   <h5 className="detailAmount">1 DAV TOKEN = 1,000,000 PLS</h5>
                   <h5 className="detailAmount mb-4">
                     {TotalCost
@@ -409,6 +431,7 @@ const InfoCards = () => {
                         type="text"
                         placeholder={formatWithCommas(stateHolding)}
                         className="form-control text-center fw-bold "
+						style={{ "--placeholder-color": "#6c757d" }}
                         value={amountOfInput}
                         onChange={handleInputChangeForBurn}
                       />
@@ -432,6 +455,15 @@ const InfoCards = () => {
                     >
                       % STATE TOKENS BURNED BY YOU - {UserPercentage}%
                     </h6>
+                    <h6
+                      className="detailText mb-0"
+                      style={{
+                        fontSize: "14px",
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      STATE TOKENS BURNED- {formatWithCommas(userBurnedAmount)}
+                    </h6>
                   </div>
                 </div>
               </div>
@@ -445,6 +477,13 @@ const InfoCards = () => {
                         {formatWithCommas(claimableAmountForBurn)}
                       </h5>
                     </div>
+                    {Number(claimableAmountForBurn) == 0 && (
+                      <div className="d-flex justify-content-center">
+                        <h5 className="detailText">
+                          expected next Claim {formatWithCommas(expectedClaim)}
+                        </h5>
+                      </div>
+                    )}
                     <button
                       onClick={() => claimBurnAmount()}
                       style={{ width: customWidth || "100%" }}
@@ -488,8 +527,8 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      CLAIMABLE TREASURY - {formatWithCommas(usableTreasury)}{" "}
-                      PLS
+                      (Pre Cycle) CLAIMABLE TREASURY -{" "}
+                      {formatWithCommas(usableTreasury)} PLS
                     </h6>
                   </div>
                 </div>
@@ -508,7 +547,7 @@ const InfoCards = () => {
                 >
                   <div>
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
-                      <div className="carddetails2 " >
+                      <div className="carddetails2 ">
                         <h6 className="detailText">LISTING A TOKEN</h6>
                         <ul className="mb-1" style={{ paddingLeft: "20px" }}>
                           <li className="detailText2">
@@ -522,8 +561,12 @@ const InfoCards = () => {
                             Token creators receive periodic airdrops / 2.5
                             million tokens
                           </li>
-                          <li className="detailText2">Airdrops every 50 days</li>
-                          <li className="detailText2">Add your badge (emoji)</li>
+                          <li className="detailText2">
+                            Airdrops every 50 days
+                          </li>
+                          <li className="detailText2">
+                            Add your badge (emoji)
+                          </li>
                           <li className="detailText2">Cost - 10 Million PLS</li>
                           <li className="detailText2">
                             Token listed within 24-48 hrs
@@ -543,6 +586,7 @@ const InfoCards = () => {
                         type="text"
                         placeholder="Enter Name"
                         className="form-control text-center fw-bold"
+						style={{ "--placeholder-color": "#6c757d" }}
                         maxLength={10}
                         value={TokenName}
                         disabled={isProcessingToken}
@@ -557,8 +601,9 @@ const InfoCards = () => {
                     <div className="d-flex align-items-center gap-2">
                       <input
                         type="text"
-                        placeholder="Enter emoji/logo"
+                        placeholder="Enter Emoji"
                         className="form-control text-center fw-bold"
+						style={{ "--placeholder-color": "#6c757d" }}
                         value={Emoji}
                         maxLength={6}
                         disabled={isProcessingToken}

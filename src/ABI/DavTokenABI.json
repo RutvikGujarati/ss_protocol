@@ -674,6 +674,25 @@
 	},
 	{
 		"type": "function",
+		"name": "getExpectedClaimablePLS",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "getPendingTokenNames",
 		"inputs": [
 			{
