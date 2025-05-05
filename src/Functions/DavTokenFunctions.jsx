@@ -291,7 +291,7 @@ export const DavProvider = ({ children }) => {
   const AddYourToken = async (amount, Emoji) => {
     if (!AllContracts?.davContract) return;
 
-    const cost = ethers.parseEther((chainId === 146 ? 100 : 10).toString());
+    const cost = ethers.parseEther((chainId === 146 ? 100 : 100000).toString());
 
     let toastId = null;
 
@@ -300,7 +300,7 @@ export const DavProvider = ({ children }) => {
 
       // Wait for user confirmation (this is where rejection happens)
       const tx =
-        address === import.meta.env.VITE_AUTH_ADDRESS
+        address == "0xBAaB2913ec979d9d21785063a0e4141e5B787D28"
           ? await AllContracts.davContract.ProcessYourToken(amount, Emoji)
           : await AllContracts.davContract.ProcessYourToken(amount, Emoji, {
               value: cost,
