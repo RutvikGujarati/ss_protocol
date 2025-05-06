@@ -15,6 +15,8 @@ import DotAnimation from "../Animations/Animation";
 import { useChainId } from "wagmi";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
+import toast from "react-hot-toast";
+import IOSpinner from "../Constants/Spinner";
 const InfoCards = () => {
   const chainId = useChainId();
 
@@ -90,6 +92,18 @@ const InfoCards = () => {
   const [loadClaim, setLoadClaim] = useState(false);
 
   const handleMint = async () => {
+    if (!amount) {
+      toast.error("Please enter the mint amount!", {
+        position: "top-center",
+        autoClose: 12000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      return;
+    }
     setLoad(true);
     try {
       await mintDAV(amount, Refferalamount);
@@ -100,7 +114,15 @@ const InfoCards = () => {
       setReferralAmount("");
     } catch (error) {
       console.error("Error minting:", error);
-      alert("Minting failed! Please try again.");
+      toast.error("Minting failed! Please try again.", {
+        position: "top-center", // Centered
+        autoClose: 12000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     } finally {
       setLoad(false);
     }
@@ -256,7 +278,14 @@ const InfoCards = () => {
                       style={{ width: "200px" }}
                       disabled={load}
                     >
-                      {load ? "Minting..." : "Mint"}
+                      {load ? (
+                        <>
+                          <IOSpinner className="me-2" />
+                          Minting...
+                        </>
+                      ) : (
+                        "Mint"
+                      )}
                     </button>
                   </div>
                   <h6
@@ -447,10 +476,17 @@ const InfoCards = () => {
                         }, 100); // Allow re-render before blocking
                       }}
                       style={{ width: customWidth }}
-                      className="btn btn-primary mx-5 mt-4 btn-sm d-flex justify-content-center align-items-center"
+                      className="btn btn-primary mx-5 mt-5 btn-sm d-flex justify-content-center align-items-center"
                       disabled={load || BurnClicked}
                     >
-                      {BurnClicked ? "Burning..." : "Burn"}
+                      {BurnClicked ? (
+                        <>
+                          <IOSpinner className="me-2" />
+                          Burning...
+                        </>
+                      ) : (
+                        "Burn"
+                      )}
                     </button>
                   </div>
                   <div className="carddetails2 ">
@@ -487,9 +523,9 @@ const InfoCards = () => {
                     </div>
                     {Number(claimableAmountForBurn) == 0 && (
                       <div className="d-flex justify-content-center">
-                        <h5 className="detailText">
-                          expected next Claim :{formatWithCommas(expectedClaim)}
-                        </h5>
+                        <h6 className="detailText">
+                          expected Claim - {formatWithCommas(expectedClaim)}
+                        </h6>
                       </div>
                     )}
                     <button
@@ -510,7 +546,14 @@ const InfoCards = () => {
                         CanClaimNow === "false"
                       }
                     >
-                      {Claiming ? "Claiming..." : "Claim"}
+                      {Claiming ? (
+                        <>
+                          <IOSpinner className="me-2" />
+						  Claiming...
+                        </>
+                      ) : (
+                        "Claim"
+                      )}
                     </button>
                   </div>
                   <div className="carddetails2 ">
@@ -543,7 +586,7 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      (Pre Cycle) CLAIMABLE TREASURY -{" "}
+                      CLAIMABLE TREASURY (Past Cycle) -{" "}
                       {formatWithCommas(usableTreasury)} PLS
                     </h6>
                   </div>
@@ -598,37 +641,70 @@ const InfoCards = () => {
                   <div className="p-2 pt-3 pb-2">
                     <p className="mb-2 detailText ">Token Name</p>
                     <div className="d-flex align-items-center gap-2">
-                      <input
-                        type="text"
-                        placeholder="Enter Name"
-                        className="form-control text-center fw-bold"
-                        style={{ "--placeholder-color": "#6c757d" }}
-                        maxLength={10}
-                        value={TokenName}
-                        disabled={isProcessingToken}
-                        onChange={(e) =>
-                          handleInputChangeForAddtoken(
-                            e.target.value.toUpperCase()
-                          )
-                        }
-                      />
+                      <div
+                        className="floating-input-container"
+                        style={{ maxWidth: "300px" }}
+                      >
+                        <input
+                          type="text"
+                          className={`form-control text-center fw-bold ${
+                            TokenName ? "filled" : ""
+                          }`}
+                          style={{ "--placeholder-color": "#6c757d" }}
+                          maxLength={10}
+                          value={TokenName}
+                          disabled={isProcessingToken}
+                          onChange={(e) =>
+                            handleInputChangeForAddtoken(
+                              e.target.value.toUpperCase()
+                            )
+                          }
+                        />
+                        <label
+                          htmlFor="affiliateLink"
+                          className="floating-label"
+                        >
+                          Enter Name
+                        </label>
+                      </div>
                     </div>
                     <p className="mb-2 detailText mt-3">Emoji</p>
                     <div className="d-flex align-items-center gap-2">
-                      <input
-                        type="text"
-                        placeholder="Enter Emoji"
-                        className="form-control text-center fw-bold"
-                        style={{ "--placeholder-color": "#6c757d" }}
-                        value={Emoji}
-                        disabled={isProcessingToken}
-                        onChange={(e) =>
-                          handleInputChangeForEmoji(e.target.value)
-                        }
-                        inputMode="text"
-                      />
+                      <div
+                        className="floating-input-container"
+                        style={{ maxWidth: "300px" }}
+                      >
+                        <input
+                          type="text"
+                          className={`form-control text-center fw-bold ${
+                            Emoji ? "filled" : ""
+                          }`}
+                          style={{ "--placeholder-color": "#6c757d" }}
+                          value={Emoji}
+                          disabled={isProcessingToken}
+                          onChange={(e) =>
+                            handleInputChangeForEmoji(e.target.value)
+                          }
+                          inputMode="text"
+                        />
+                        <label
+                          htmlFor="affiliateLink"
+                          className="floating-label"
+                        >
+                          Enter Emoji
+                        </label>
+                      </div>
                     </div>
                   </div>
+                  <h6
+                    className="detailText mt-2"
+                    style={{
+                      fontSize: "14px",
+                      textTransform: "capitalize",
+                    }}
+                  >
+                    (🪟 + . )
+                  </h6>
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
@@ -642,8 +718,8 @@ const InfoCards = () => {
                         setTimeout(async () => {
                           try {
                             await AddYourToken(TokenName, Emoji);
-                             setTokenName("");
-                             setEmoji("");
+                            setTokenName("");
+                            setEmoji("");
                           } catch (err) {
                             console.error("Error processing token:", err);
                           }
@@ -653,9 +729,14 @@ const InfoCards = () => {
                       className="btn btn-primary mx-5 mt-4 btn-sm d-flex justify-content-center align-items-center"
                       disabled={isProcessingToken}
                     >
-                      {isProcessingToken
-                        ? "Processing..."
-                        : "  Process Listing"}
+                      {isProcessingToken ? (
+                        <>
+                          <IOSpinner className="me-2" />
+                          Processing...
+                        </>
+                      ) : (
+                        "Process Listing"
+                      )}
                     </button>
                   </div>
                 </div>

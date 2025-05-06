@@ -194,5 +194,20 @@
   color: transparent; /* Hide default placeholder */
 }
 .form-control::placeholder {
-	color: var(--placeholder-color, transparent); /* Use custom property with fallback */
-  }
+  color: var(
+    --placeholder-color,
+    transparent
+  ); /* Use custom property with fallback */
+}
+.form-control.filled:disabled {
+  background-color: #6c757d; /* light neutral gray, not white */
+  border-color: #dee2e6; /* lighter border */
+  cursor: not-allowed;
+}
+.form-control:disabled::placeholder {
+  color: #adb5bd;
+  opacity: 5; /* ensure it's visible */
+}
+.form-control.filled:disabled {
+  color: #212529;
+}

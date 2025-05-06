@@ -190,7 +190,7 @@ const DetailsInfo = ({ selectedToken }) => {
                     <td className="text-center">
                       <div className="d-flex justify-content-center align-items-center gap-4">
                         <a
-                          href={`https://scan.v4.testnet.pulsechain.com/#/address/${token.address}`}
+                          href={`https://scan.v4.testnet.pulsechain.com/#/address/${token.TokenAddress}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           style={{ fontSize: "15px", color: "white" }}

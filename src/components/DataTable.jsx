@@ -10,6 +10,7 @@ import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useAccount } from "wagmi";
 import { useAddTokens, useUsersOwnerTokens } from "../data/AddTokens";
 import { Auction_TESTNET } from "../ContractAddresses";
+import IOSpinner from "../Constants/Spinner";
 const DataTable = () => {
   const { davHolds, deployWithMetaMask, isProcessing, pendingToken } =
     useDAvContract();
@@ -145,36 +146,36 @@ const DataTable = () => {
           </thead>
           <tbody>
             {tokens
-                .filter(
-                  ({
-                    //   userHasSwapped,
-                    name,
-                    // userHasReverse,
+              .filter(
+                ({
+                  //   userHasSwapped,
+                  name,
+                  // userHasReverse,
+                  isReversing,
+                  AuctionStatus,
+                }) => {
+                  console.log(`Filter Conditions:${name}`, {
+                    // userHasSwapped,
+                    //   userHasReverse,
                     isReversing,
                     AuctionStatus,
-                  }) => {
-                    console.log(`Filter Conditions:${name}`, {
-                      // userHasSwapped,
-                      //   userHasReverse,
-                      isReversing,
-                      AuctionStatus,
-                      // dbCheck: db >= DavRequiredAmount,
-                    });
+                    // dbCheck: db >= DavRequiredAmount,
+                  });
 
-                    if (AuctionStatus == "false" && isReversing == "true") {
-                      //   if (userHasReverse == "false") {
-                      //     return true;
-                      //   }
-                      if (isReversing == "false") {
-                        return false;
-                      }
-                    } else if (AuctionStatus == "true") {
-                      return true;
-                      // if (userHasSwapped == "false") {
-                      // }
+                  if (AuctionStatus == "false" && isReversing == "true") {
+                    //   if (userHasReverse == "false") {
+                    //     return true;
+                    //   }
+                    if (isReversing == "false") {
+                      return false;
                     }
+                  } else if (AuctionStatus == "true") {
+                    return true;
+                    // if (userHasSwapped == "false") {
+                    // }
                   }
-                )
+                }
+              )
               .map(
                 (
                   {
@@ -477,6 +478,7 @@ const DataTable = () => {
                                     )}...${TokenAddress.slice(-4)}`
                                   : "N/A"}
                               </div>
+
                               <input
                                 type="text"
                                 className="form-control form-control-sm"
@@ -486,7 +488,7 @@ const DataTable = () => {
                                   handleInputChange(name, e.target.value)
                                 }
                                 style={{
-                                  width: "120px",
+                                  width: "140px",
                                   "--placeholder-color": "#6c757d",
                                 }}
                               />
@@ -497,9 +499,14 @@ const DataTable = () => {
                                 }
                                 disabled={processingToken === name}
                               >
-                                {processingToken === name
-                                  ? "Processing..."
-                                  : "Add"}
+                                {processingToken === name ? (
+                                  <>
+                                    <IOSpinner className="me-2" />
+                                    Processing...
+                                  </>
+                                ) : (
+                                  "Add"
+                                )}
                               </button>
                             </div>
                           )}
