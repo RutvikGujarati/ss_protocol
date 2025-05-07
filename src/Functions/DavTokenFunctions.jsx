@@ -264,7 +264,7 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract) return;
     const ethAmount = ethers.parseEther(amount.toString());
     const cost = ethers.parseEther(
-      (amount * (chainId === 146 ? 100 : 1)).toString()
+      (amount * (chainId === 146 ? 100 : 10000)).toString()
     );
     const referral = ref.trim() || "0x0000000000000000000000000000000000000000";
 
