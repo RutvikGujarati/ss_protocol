@@ -260,38 +260,36 @@ export const DavProvider = ({ children }) => {
 
   const [txStatus, setTxStatus] = useState(""); // e.g. "initiated", "pending", "confirmed", "error"
 
-
   const mintDAV = async (amount, ref = "") => {
-	if (!AllContracts?.davContract) return;
-	const ethAmount = ethers.parseEther(amount.toString());
-	const cost = ethers.parseEther(
-	  (amount * (chainId === 146 ? 100 : 1)).toString()
-	);
-	const referral = ref.trim() || "0x0000000000000000000000000000000000000000";
-  
-	try {
-	  setTxStatus("initiated");
-	  const tx = await AllContracts.davContract.mintDAV(ethAmount, referral, {
-		value: cost,
-	  });
-  
-	  setTxStatus("pending");
-	  await tx.wait();
-  
-	  setTxStatus("confirmed");
-	  toast.success(`${amount} token minted successfully!`, {
-		position: "top-center",
-		autoClose: 12000,
-	  });
-	  await fetchData();
-	  return tx;
-	} catch (error) {
-	  setTxStatus("error");
-	  console.error("Minting error:", error);
-	  throw error;
-	}
+    if (!AllContracts?.davContract) return;
+    const ethAmount = ethers.parseEther(amount.toString());
+    const cost = ethers.parseEther(
+      (amount * (chainId === 146 ? 100 : 1)).toString()
+    );
+    const referral = ref.trim() || "0x0000000000000000000000000000000000000000";
+
+    try {
+      setTxStatus("initiated");
+      const tx = await AllContracts.davContract.mintDAV(ethAmount, referral, {
+        value: cost,
+      });
+
+      setTxStatus("pending");
+      await tx.wait();
+
+      setTxStatus("confirmed");
+      toast.success(`${amount} token minted successfully!`, {
+        position: "top-center",
+        autoClose: 12000,
+      });
+      await fetchData();
+      return tx;
+    } catch (error) {
+      setTxStatus("error");
+      console.error("Minting error:", error);
+      throw error;
+    }
   };
-  
 
   const AddYourToken = async (amount, Emoji) => {
     if (!AllContracts?.davContract) return;
@@ -305,7 +303,7 @@ export const DavProvider = ({ children }) => {
 
       // Wait for user confirmation (this is where rejection happens)
       const tx =
-        address == "0xBAaB2913ec979d9d21785063a0e4141e5B787D28"
+        address == import.meta.env.VITE_AUTH_ADDRESS
           ? await AllContracts.davContract.ProcessYourToken(amount, Emoji)
           : await AllContracts.davContract.ProcessYourToken(amount, Emoji, {
               value: cost,
@@ -472,7 +470,7 @@ export const DavProvider = ({ children }) => {
         Emojies,
         TokenStatus,
         isProcessing,
-		txStatus,
+        txStatus,
         isUsed,
       }}
     >
