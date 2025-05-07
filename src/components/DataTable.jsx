@@ -113,6 +113,8 @@ const DataTable = () => {
   const [authorized, setAuthorized] = useState(false);
 
   const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
+  console.log("ENV Auth Address:", import.meta.env.VITE_AUTH_ADDRESS);
+
   const handleSetAddress = () => {
     if (!address) {
       setAuthorized(false);
