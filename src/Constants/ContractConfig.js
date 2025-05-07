@@ -6,7 +6,6 @@
 // } from "../ContractAddresses";
 
 import DAVTokenABI from "../ABI/DavTokenABI.json";
-import sDAVABI from "../ABI/sDAVToken.json";
 import StateABI from "../ABI/StateTokenABI.json";
 import RatioABI from "../ABI/RatioABI.json";
 import { Auction_TESTNET, DAV_TESTNET, STATE_TESTNET, Yees_testnet } from "../ContractAddresses";
@@ -18,7 +17,7 @@ export const setChainId = (chainId) => {
 };
 
 // const getStateAddress = () => (currentChainId == 146 ? STATE_TOKEN_SONIC_ADDRESS : STATE_TOKEN_ADDRESS);
-const getDavABI = () => (currentChainId == 146 ? sDAVABI : DAVTokenABI);
+const getDavABI = () => (currentChainId == 146 ? DAVTokenABI : DAVTokenABI);
 
 export const getContractConfigs = () => ({
 	davContract: { address: DAV_TESTNET, abi: getDavABI() },

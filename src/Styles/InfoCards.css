@@ -211,3 +211,125 @@
 .form-control.filled:disabled {
   color: #212529;
 }
+.tx-progress-container {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 16px 0;
+}
+
+.step-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  background: linear-gradient(to right, #d1d5db 0%, #d1d5db 100%);
+  height: 2px;
+  margin: 0 6px; /* Half the dot width to align edges */
+}
+
+.step {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Background fill for active steps */
+.step-line::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: #22c55e;
+  transition: width 0.3s ease;
+}
+
+/* Adjust width of the active line based on the active step */
+.step-line:has(.step:nth-child(1).active)::before {
+  width: 0%;
+}
+
+.step-line:has(.step:nth-child(2).active)::before {
+  width: 33.33%;
+}
+
+.step-line:has(.step:nth-child(3).active)::before {
+  width: 66.66%;
+}
+
+.step-line:has(.step:nth-child(4).active)::before {
+  width: 100%;
+}
+@keyframes shimmer {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+.step .dot {
+  width: 12px;
+  height: 12px;
+  background-color: #ffffff;
+  border: 2px solid #22c55e;
+  border-radius: 50%;
+  position: relative;
+  top: -5px; /* Align dot center with the line */
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.step.active .dot {
+  background: linear-gradient(145deg, #22c55e, #16a34a);
+  border-color: #22c55e;
+  transform: scale(1.2);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.6), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.step-line:has(.step:nth-child(1).active):not(:has(.step:nth-child(2).active))
+  .step:nth-child(1)
+  .dot,
+.step-line:has(.step:nth-child(2).active):not(:has(.step:nth-child(3).active))
+  .step:nth-child(2)
+  .dot,
+.step-line:has(.step:nth-child(3).active):not(:has(.step:nth-child(4).active))
+  .step:nth-child(3)
+  .dot,
+.step-line:has(.step:nth-child(4).active) .step:nth-child(4) .dot {
+  animation: blink 1s infinite ease-in-out;
+}
+
+/* Blinking animation */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.label {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #ffffff;
+  transition: color 0.3s ease;
+}
+
+.step.active .label {
+  color: #22c55e;
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}

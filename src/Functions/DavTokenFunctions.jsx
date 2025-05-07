@@ -258,35 +258,40 @@ export const DavProvider = ({ children }) => {
     }
   }, [isConnected, AllContracts]);
 
-  const mintDAV = async (amount, ref = "") => {
-    if (!AllContracts?.davContract) return;
-    const ethAmount = ethers.parseEther(amount.toString());
-    const cost = ethers.parseEther(
-      (amount * (chainId === 146 ? 100 : 10000)).toString()
-    );
-    const referral = ref.trim() || "0x0000000000000000000000000000000000000000";
+  const [txStatus, setTxStatus] = useState(""); // e.g. "initiated", "pending", "confirmed", "error"
 
-    try {
-      const tx = await AllContracts.davContract.mintDAV(ethAmount, referral, {
-        value: cost,
-      });
-      await tx.wait();
-      toast.success(`${amount} token minted successfully!`, {
-        position: "top-center",
-        autoClose: 12000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      await fetchData();
-      return tx;
-    } catch (error) {
-      console.error("Minting error:", error);
-      throw error;
-    }
+
+  const mintDAV = async (amount, ref = "") => {
+	if (!AllContracts?.davContract) return;
+	const ethAmount = ethers.parseEther(amount.toString());
+	const cost = ethers.parseEther(
+	  (amount * (chainId === 146 ? 100 : 1)).toString()
+	);
+	const referral = ref.trim() || "0x0000000000000000000000000000000000000000";
+  
+	try {
+	  setTxStatus("initiated");
+	  const tx = await AllContracts.davContract.mintDAV(ethAmount, referral, {
+		value: cost,
+	  });
+  
+	  setTxStatus("pending");
+	  await tx.wait();
+  
+	  setTxStatus("confirmed");
+	  toast.success(`${amount} token minted successfully!`, {
+		position: "top-center",
+		autoClose: 12000,
+	  });
+	  await fetchData();
+	  return tx;
+	} catch (error) {
+	  setTxStatus("error");
+	  console.error("Minting error:", error);
+	  throw error;
+	}
   };
+  
 
   const AddYourToken = async (amount, Emoji) => {
     if (!AllContracts?.davContract) return;
@@ -467,6 +472,7 @@ export const DavProvider = ({ children }) => {
         Emojies,
         TokenStatus,
         isProcessing,
+		txStatus,
         isUsed,
       }}
     >

@@ -10,6 +10,8 @@ import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useAccount } from "wagmi";
 import { useAddTokens, useUsersOwnerTokens } from "../data/AddTokens";
 import { Auction_TESTNET } from "../ContractAddresses";
+import pulsex from "../assets/ninemm.png";
+
 import IOSpinner from "../Constants/Spinner";
 const DataTable = () => {
   const { davHolds, deployWithMetaMask, isProcessing, pendingToken } =
@@ -110,7 +112,7 @@ const DataTable = () => {
   console.log("obj tokens", tokens);
   const [authorized, setAuthorized] = useState(false);
 
-  const AuthAddress = "0xBAaB2913ec979d9d21785063a0e4141e5B787D28";
+  const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
   const handleSetAddress = () => {
     if (!address) {
       setAuthorized(false);
@@ -137,7 +139,7 @@ const DataTable = () => {
               <th>Name</th>
               <th>Claim Airdrop</th>
               {/* <th>Liquidity</th> */}
-              <th></th>
+              {/* <th></th> */}
               {/* <th>Current Ratio</th> */}
               <th>Ratio Swap</th>
               <th></th>
@@ -187,6 +189,8 @@ const DataTable = () => {
                     ContractName,
                     isReversing,
                     AirdropClaimedForToken,
+                    userHasSwapped,
+                    userHasReverse,
                     // AuctionStatus,
                     TimeLeft,
                     inputTokenAmount,
@@ -211,12 +215,12 @@ const DataTable = () => {
                         {checkingStates[id]
                           ? ` AIRDROPPING...`
                           : AirdropClaimedForToken == "true"
-                          ? " AIRDROP CLAIMED"
+                          ? " AIRDROPPED"
                           : `${formatWithCommas(AirDropAmount[name])} `}
                       </button>
                     </td>
 
-                    <td className="text-success"></td>
+                    {/* <td className="text-success"></td> */}
                     {/* <td>{currentRatio}</td> */}
 
                     <td>
@@ -288,11 +292,15 @@ const DataTable = () => {
                             <button
                               onClick={() => SwapT()}
                               disabled={
-                                swappingStates[id] || outputToken <= "1"
+                                userHasReverse == "true" ||
+                                swappingStates[id] ||
+                                outputToken <= "1"
                               }
                               className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
                             >
-                              {swappingStates[id]
+                              {userHasReverse == "true"
+                                ? "Reverse Swapped"
+                                : swappingStates[id]
                                 ? "Swapping..."
                                 : "Reverse Swap"}
                             </button>
@@ -301,10 +309,16 @@ const DataTable = () => {
                           {isReversing == "false" && (
                             <button
                               onClick={() => SwapT()}
-                              //   disabled={swappingStates[id] || onlyInputAmount <= 0}
-                              className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
+                              disabled={
+                                userHasSwapped == "true" ||
+                                swappingStates[id] ||
+                                onlyInputAmount <= 0
+                              }
+                              className="btn btn-sm swap-btn btn-primary"
                             >
-                              {swappingStates[id]
+                              {userHasSwapped == "true"
+                                ? "Swapped"
+                                : swappingStates[id]
                                 ? "Swapping..."
                                 : buttonTextStates[id] || "Swap"}
                             </button>
@@ -312,7 +326,28 @@ const DataTable = () => {
                         </>
                       </div>
                     </td>
-                    <td>{formatWithCommas(outputToken)} token to 1:1 token</td>
+                    <td>
+                      Swap {formatWithCommas(outputToken)} tokens for {name}{" "}
+                      tokens on external DEX
+                      <a
+                        href="https://dex.9mm.pro/swap?chain=pulsechain"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src={pulsex}
+                          alt="sDAV Logo"
+                          className="mb-1 "
+                          style={{
+                            background: "transparent",
+                            width: "20px",
+                            height: "20px",
+                            cursor: "pointer",
+                            marginLeft: "8px",
+                          }}
+                        />
+                      </a>
+                    </td>
                   </tr>
                 )
               )}

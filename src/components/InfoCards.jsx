@@ -38,6 +38,7 @@ const InfoCards = () => {
     ContractPls,
     userBurnedAmount,
     claimBurnAmount,
+    txStatus,
     expectedClaim,
     // AllUserPercentage,
     TimeUntilNextClaim,
@@ -91,42 +92,38 @@ const InfoCards = () => {
   const [load, setLoad] = useState(false);
   const [loadClaim, setLoadClaim] = useState(false);
 
-  const handleMint = async () => {
+  const handleMint = () => {
     if (!amount) {
       toast.error("Please enter the mint amount!", {
         position: "top-center",
         autoClose: 12000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
       });
       return;
     }
+
     setLoad(true);
-    try {
-      await mintDAV(amount, Refferalamount);
-      await getAirdropAmount();
-      await getInputAmount();
-      await getOutPutAmount();
-      setAmount("");
-      setReferralAmount("");
-    } catch (error) {
-      console.error("Error minting:", error);
-      toast.error("Minting failed! Please try again.", {
-        position: "top-center", // Centered
-        autoClose: 12000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-    } finally {
-      setLoad(false);
-    }
+
+    // Allow React to re-render and apply disabled state
+    setTimeout(async () => {
+      try {
+        await mintDAV(amount, Refferalamount);
+        await getAirdropAmount();
+        await getInputAmount();
+        await getOutPutAmount();
+        setAmount("");
+        setReferralAmount("");
+      } catch (error) {
+        console.error("Error minting:", error);
+        toast.error("Minting failed! Please try again.", {
+          position: "top-center",
+          autoClose: 12000,
+        });
+      } finally {
+        setLoad(false);
+      }
+    }, 0);
   };
+
   const handleClaim = async () => {
     setLoadClaim(true);
     try {
@@ -271,23 +268,67 @@ const InfoCards = () => {
                     PLS{" "}
                   </h5>
 
-                  <div className="d-flex justify-content-center">
-                    <button
-                      onClick={handleMint}
-                      className="btn btn-primary btn-sm mb-0"
-                      style={{ width: "200px" }}
-                      disabled={load}
-                    >
-                      {load ? (
-                        <>
-                          <IOSpinner className="me-2" />
-                          Minting...
-                        </>
-                      ) : (
-                        "Mint"
-                      )}
-                    </button>
-                  </div>
+                  {load ? (
+                    <div className="tx-progress-container">
+                      <div className="step-line">
+                        <div
+                          className={`step ${
+                            txStatus === "initializing" ||
+                            txStatus === "initiated" ||
+                            txStatus === "pending" ||
+                            txStatus === "confirmed"
+                              ? "active"
+                              : ""
+                          }`}
+                        >
+                          <span className="dot" />
+                          <span className="label">Initializing</span>
+                        </div>
+                        <div
+                          className={`step ${
+                            txStatus === "initiated" ||
+                            txStatus === "pending" ||
+                            txStatus === "confirmed"
+                              ? "active"
+                              : ""
+                          }`}
+                        >
+                          <span className="dot" />
+                          <span className="label">Initiated</span>
+                        </div>
+                        <div
+                          className={`step ${
+                            txStatus === "pending" || txStatus === "confirmed"
+                              ? "active"
+                              : ""
+                          }`}
+                        >
+                          <span className="dot" />
+                          <span className="label">Pending</span>
+                        </div>
+                        <div
+                          className={`step ${
+                            txStatus === "confirmed" ? "active" : ""
+                          }`}
+                        >
+                          <span className="dot" />
+                          <span className="label">Confirmed</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="d-flex justify-content-center">
+                      <button
+                        onClick={handleMint}
+                        className="btn btn-primary btn-sm mb-0"
+                        style={{ width: "200px" }}
+                        disabled={load}
+                      >
+                        Mint
+                      </button>
+                    </div>
+                  )}
+
                   <h6
                     className="detailText mb-0 mt-2"
                     style={{
@@ -437,15 +478,16 @@ const InfoCards = () => {
                       </div>
                     </div>
 
-                    <div className="carddetails2 mt-1">
+                    <div className="carddetails2 mt-4">
                       <h6
-                        className="detailText mt-5  d-flex justify-content-center"
+                        className="detailText mt-5 text-center"
                         style={{
                           fontSize: "14px",
                           textTransform: "capitalize",
                         }}
                       >
-                        MINIMUM REQUIREMENTS - 10 DAV TOKENS
+                        A MINIMUM OF 10 DAV TOKENS ARE REQUIRED TO CLAIM MARKET
+                        MAKER REWARDS
                       </h6>
                     </div>
                   </div>
@@ -518,43 +560,46 @@ const InfoCards = () => {
                     <p className="mb-2 detailText ">YOUR CLAIM</p>
                     <div className="d-flex  justify-content-center">
                       <h5 className="mt-2">
-                        {formatWithCommas(claimableAmountForBurn)}
+                        {formatWithCommas(claimableAmountForBurn)} PLS
                       </h5>
                     </div>
                     {Number(claimableAmountForBurn) == 0 && (
                       <div className="d-flex justify-content-center">
                         <h6 className="detailText">
-                          expected Claim - {formatWithCommas(expectedClaim)}
+                          expected Claim (@ Current Burn %) -{" "}
+                          {formatWithCommas(expectedClaim)} PLS
                         </h6>
                       </div>
                     )}
-                    <button
-                      onClick={() => {
-                        setTimeout(async () => {
-                          try {
-                            await claimBurnAmount();
-                          } catch (err) {
-                            console.error("Claim failed:", err);
-                          }
-                        }, 100);
-                      }}
-                      style={{ width: customWidth || "100%" }}
-                      className="btn btn-primary mt-4 btn-sm d-flex justify-content-center align-items-center"
-                      disabled={
-                        Claiming ||
-                        claimableAmountForBurn == 0 ||
-                        CanClaimNow === "false"
-                      }
-                    >
-                      {Claiming ? (
-                        <>
-                          <IOSpinner className="me-2" />
-						  Claiming...
-                        </>
-                      ) : (
-                        "Claim"
-                      )}
-                    </button>
+                    <div className="d-flex justify-content-center mt-4">
+                      <button
+                        onClick={() => {
+                          setTimeout(async () => {
+                            try {
+                              await claimBurnAmount();
+                            } catch (err) {
+                              console.error("Claim failed:", err);
+                            }
+                          }, 100);
+                        }}
+                        style={{ width: customWidth || "100%" }}
+                        className="btn btn-primary btn-sm d-flex justify-content-center align-items-center"
+                        disabled={
+                          Claiming ||
+                          claimableAmountForBurn == 0 ||
+                          CanClaimNow === "false"
+                        }
+                      >
+                        {Claiming ? (
+                          <>
+                            <IOSpinner className="me-2" />
+                            Claiming...
+                          </>
+                        ) : (
+                          "Claim"
+                        )}
+                      </button>
+                    </div>
                   </div>
                   <div className="carddetails2 ">
                     <h6
@@ -624,7 +669,7 @@ const InfoCards = () => {
                             Airdrops every 50 days
                           </li>
                           <li className="detailText2">
-                            Add your badge (emoji)
+                            ADD YOUR TRIBE (EMOJI). ONLY 3 CHARACTERS ALLOWED
                           </li>
                           <li className="detailText2">Cost - 10 Million PLS</li>
                           <li className="detailText2">
@@ -703,7 +748,7 @@ const InfoCards = () => {
                       textTransform: "capitalize",
                     }}
                   >
-                    (🪟 + . )
+                    Windows key + . (period)
                   </h6>
                 </div>
               </div>
