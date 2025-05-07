@@ -140,12 +140,11 @@ const DataTable = () => {
               <th>Auction Timer</th>
               <th>Name</th>
               <th>Claim Airdrop</th>
-              {/* <th>Liquidity</th> */}
-              {/* <th></th> */}
-              {/* <th>Current Ratio</th> */}
+
               <th>Ratio Swap</th>
+              <th>STATE LP to MARKET MAKER</th>
               <th></th>
-              <th>Market Maker</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -222,9 +221,6 @@ const DataTable = () => {
                       </button>
                     </td>
 
-                    {/* <td className="text-success"></td> */}
-                    {/* <td>{currentRatio}</td> */}
-
                     <td>
                       <div className="d-flex justify-content-center gap-3 w-100">
                         {id !== "state" && (
@@ -261,34 +257,7 @@ const DataTable = () => {
                             )}
                           </>
                         )}
-                      </div>
-                    </td>
-                    {errorPopup[id] && (
-                      <div className="popup-overlay">
-                        <div className="popup-content">
-                          <h4 className="popup-header">
-                            Mint Additional DAV Tokens
-                          </h4>
-                          <p className="popup-para">
-                            You need to mint additional DAV tokens to claim
-                            extra rewards.
-                          </p>
-                          <button
-                            onClick={() =>
-                              setErrorPopup((prev) => ({
-                                ...prev,
-                                [id]: false,
-                              }))
-                            }
-                            className="btn btn-secondary popup-button"
-                          >
-                            Close
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                    <td>
-                      <div className="d-flex align-items-center gap-2">
+						 <div className="d-flex align-items-center gap-2">
                         <>
                           {isReversing == "true" && (
                             <button
@@ -327,10 +296,38 @@ const DataTable = () => {
                           )}
                         </>
                       </div>
+                      </div>
+                    </td>
+                    {errorPopup[id] && (
+                      <div className="popup-overlay">
+                        <div className="popup-content">
+                          <h4 className="popup-header">
+                            Mint Additional DAV Tokens
+                          </h4>
+                          <p className="popup-para">
+                            You need to mint additional DAV tokens to claim
+                            extra rewards.
+                          </p>
+                          <button
+                            onClick={() =>
+                              setErrorPopup((prev) => ({
+                                ...prev,
+                                [id]: false,
+                              }))
+                            }
+                            className="btn btn-secondary popup-button"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  
+                    <td>
+                      Swap {formatWithCommas(outputToken)} tokens <br /> for{" "}
+                      {name} tokens on external DEX
                     </td>
                     <td>
-                      Swap {formatWithCommas(outputToken)} tokens for {name}{" "}
-                      tokens on external DEX
                       <a
                         href="https://dex.9mm.pro/swap?chain=pulsechain"
                         target="_blank"
@@ -350,6 +347,7 @@ const DataTable = () => {
                         />
                       </a>
                     </td>
+					<td></td>
                   </tr>
                 )
               )}
