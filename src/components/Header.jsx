@@ -69,9 +69,9 @@ const Header = () => {
                       ? "nav-link active-link text-light"
                       : "nav-link text-light"
                   }
-                  to="/StateLp"
+                  to="/MarketMaker"
                 >
-                  State LP
+                  Market Maker
                 </NavLink>
               </li>
               <li className="nav-item mx-2">
@@ -156,7 +156,7 @@ const Header = () => {
           <i className="bi bi-plus-circle"></i> <div>Add Token</div>
         </NavLink>
         <NavLink
-          to="/StateLp"
+          to="/MarketMaker"
           className={({ isActive }) =>
             isActive
               ? "text-light active-link text-center"
@@ -164,7 +164,7 @@ const Header = () => {
           }
         >
           <i className="bi bi-graph-up"></i>
-          <div> State LP</div>
+          <div> Market Maker</div>
         </NavLink>
 
         <NavLink

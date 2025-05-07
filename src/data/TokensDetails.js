@@ -34,7 +34,7 @@ export const TokensDetails = () => {
 		{
 			name: "STATE",
 			key: "state",
-			address:STATE_TESTNET,
+			address: STATE_TESTNET,
 			price: prices.stateUsdPrice,
 		},
 	];
@@ -94,7 +94,7 @@ export const TokensDetails = () => {
 			burned: swap.burnedAmount?.[key],
 			isSupported: token.name == "DAV" ? "true" : token.name == "STATE" ? "true" : swap.supportedToken?.[key],
 			TokenAddress: token.address,
-			Cycle: swap.CurrentCycleCount?.[key] ,
+			Cycle: swap.CurrentCycleCount?.[key] == "not started" ? "Not Started" : swap.CurrentCycleCount?.[key] + 1,
 			handleAddTokens: () => swap[`handleAdd${key}`]?.(),
 			renounceSmartContract:
 				key === "OneDollar"

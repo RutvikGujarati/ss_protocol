@@ -137,16 +137,28 @@ export const SwapContractProvider = ({ children }) => {
         const results = {};
         const tokenMap = await ReturnfetchUserTokenAddresses();
         for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-          const AuctionTimeInWei =
-            await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
+          try {
+            const AuctionTimeInWei =
+              await AllContracts.AuctionContract.getAuctionTimeLeft(
+                TokenAddress
+              );
 
-          const totalSeconds = Math.floor(Number(AuctionTimeInWei));
-          const days = Math.floor(totalSeconds / (24 * 60 * 60));
-          const hours = Math.floor((totalSeconds % (24 * 60 * 60)) / (60 * 60));
-          const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
-          const seconds = totalSeconds % 60;
+            const totalSeconds = Math.floor(Number(AuctionTimeInWei));
+            const days = Math.floor(totalSeconds / (24 * 60 * 60));
+            const hours = Math.floor(
+              (totalSeconds % (24 * 60 * 60)) / (60 * 60)
+            );
+            const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+            const seconds = totalSeconds % 60;
 
-          results[tokenName] = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+            results[tokenName] = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+          } catch (innerError) {
+            console.warn(
+              `Error fetching auction time for ${tokenName}:`,
+              innerError
+            );
+            results[tokenName] = "not started"; // fallback on error
+          }
         }
 
         setAuctionTime(results);
@@ -157,18 +169,15 @@ export const SwapContractProvider = ({ children }) => {
 
     const runBothFunctions = async () => {
       await getAuctionTimeLeft();
-      await CheckIsAuctionActive(); // <--- your second function
+      await CheckIsAuctionActive();
     };
 
-    // Initial run
-    runBothFunctions();
+    runBothFunctions(); // Initial run
 
-    // Run both functions every second
-    interval = setInterval(runBothFunctions, 1000);
+    interval = setInterval(runBothFunctions, 1000); // Run every second
 
-    // Cleanup
-    return () => clearInterval(interval);
-  }, [AllContracts, tokenMap]);
+    return () => clearInterval(interval); // Cleanup
+  }, [AllContracts]);
 
   const getCurrentAuctionCycle = async () => {
     try {
@@ -177,19 +186,24 @@ export const SwapContractProvider = ({ children }) => {
       console.log("Starting loop over Addresses:", tokenMap);
 
       for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        console.log(
-          `Fetching input amount for ${tokenName} at ${TokenAddress}`
-        );
-
-        const CycleCountWei =
-          await AllContracts.AuctionContract.getCurrentAuctionCycle(
-            TokenAddress
+        try {
+          console.log(
+            `Fetching input amount for ${tokenName} at ${TokenAddress}`
           );
-
-        const CycleCountNoDecimals = Math.floor(Number(CycleCountWei));
-        console.log(`Input amount for ${tokenName}:`, CycleCountNoDecimals);
-
-        results[tokenName] = CycleCountNoDecimals;
+          const CycleCountWei =
+            await AllContracts.AuctionContract.getCurrentAuctionCycle(
+              TokenAddress
+            );
+          const CycleCountNoDecimals = Math.floor(Number(CycleCountWei));
+          console.log(`Input amount for ${tokenName}:`, CycleCountNoDecimals);
+          results[tokenName] = CycleCountNoDecimals;
+        } catch (innerError) {
+          console.warn(
+            `Error fetching cycle count for ${tokenName}:`,
+            innerError
+          );
+          results[tokenName] = "not started"; // fallback value
+        }
       }
 
       console.log("Final Cycle amounts:", results);
@@ -198,6 +212,7 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching Cycle amounts:", e);
     }
   };
+
   const getOutPutAmount = async () => {
     try {
       const results = {};
@@ -328,16 +343,21 @@ export const SwapContractProvider = ({ children }) => {
       console.log("Starting loop over Addresses:", tokenMap);
 
       for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        console.log(`Fetching IsReverse for ${tokenName} at ${TokenAddress}`);
-
-        const IsReverse =
-          await AllContracts.AuctionContract.isReverseAuctionActive(
-            TokenAddress
+        try {
+          console.log(
+            `Fetching AuctionActive for ${tokenName} at ${TokenAddress}`
           );
-
-        console.log(`isReverse for ${tokenName}:`, IsReverse);
-
-        results[tokenName] = String(IsReverse); // 👈 if you want "true"/"false" strings
+          const AuctionActive =
+            await AllContracts.AuctionContract.isReverseAuctionActive(
+              TokenAddress
+            );
+          const AuctionActiveString = AuctionActive.toString();
+          console.log(`Auction Active for ${tokenName}:`, AuctionActiveString);
+          results[tokenName] = AuctionActiveString;
+        } catch (innerError) {
+          console.warn(`Error checking auction for ${tokenName}:`, innerError);
+          results[tokenName] = "not started"; // fallback if error
+        }
       }
 
       console.log("Final IsReverse:", JSON.stringify(results));
@@ -380,18 +400,19 @@ export const SwapContractProvider = ({ children }) => {
       console.log("Starting loop over Addresses:", tokenMap);
 
       for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        console.log(
-          `Fetching AuctionActive for ${tokenName} at ${TokenAddress}`
-        );
-
-        const AuctionActive =
-          await AllContracts.AuctionContract.isAuctionActive(TokenAddress);
-
-        const AuctionActiveString = AuctionActive.toString(); // 👈 convert to string
-
-        console.log(`Auction Active for ${tokenName}:`, AuctionActiveString);
-
-        results[tokenName] = AuctionActiveString;
+        try {
+          console.log(
+            `Fetching AuctionActive for ${tokenName} at ${TokenAddress}`
+          );
+          const AuctionActive =
+            await AllContracts.AuctionContract.isAuctionActive(TokenAddress);
+          const AuctionActiveString = AuctionActive.toString();
+          console.log(`Auction Active for ${tokenName}:`, AuctionActiveString);
+          results[tokenName] = AuctionActiveString;
+        } catch (innerError) {
+          console.warn(`Error checking auction for ${tokenName}:`, innerError);
+          results[tokenName] = "not started"; // fallback if error
+        }
       }
 
       console.log("Final AuctionActive:", results);
@@ -400,6 +421,7 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching Auction Active:", e);
     }
   };
+
   const isRenounced = async () => {
     try {
       const results = {};

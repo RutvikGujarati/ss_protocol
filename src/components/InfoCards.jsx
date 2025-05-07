@@ -159,7 +159,7 @@ const InfoCards = () => {
   }, [amount]);
 
   const location = useLocation();
-  const isBurn = location.pathname === "/StateLp";
+  const isBurn = location.pathname === "/MarketMaker";
   const isAuction = location.pathname === "/auction";
   const isAddToken = location.pathname === "/AddToken";
   const [amountOfInput, setAmountOfInput] = useState("");

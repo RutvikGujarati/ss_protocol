@@ -165,7 +165,7 @@ const DetailsInfo = ({ selectedToken }) => {
                         {token.tokenName === "DAV" ||
                         token.tokenName === "STATE"
                           ? "-----"
-                          : `${token.Cycle + 1}/21`}
+                          : `${token.Cycle}/21`}
                       </div>
                     </td>
                     <td className="text-center">

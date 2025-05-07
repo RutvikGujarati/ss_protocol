@@ -60,7 +60,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/StateLp"
+                path="/MarketMaker"
                 element={
                   <>
                     <InfoCards />
