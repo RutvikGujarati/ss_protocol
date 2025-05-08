@@ -612,11 +612,14 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      {Math.floor(TimeUntilNextClaim / 3600)}
+                      {Math.floor(TimeUntilNextClaim / 86400)}
+                      <span style={{ textTransform: "none" }}>d</span>{" "}
+                      {Math.floor((TimeUntilNextClaim % 86400) / 3600)}
                       <span style={{ textTransform: "none" }}>h</span>{" "}
                       {Math.floor((TimeUntilNextClaim % 3600) / 60)}
                       <span style={{ textTransform: "none" }}>m</span>{" "}
-                      {TimeUntilNextClaim % 60}s
+                      {TimeUntilNextClaim % 60}
+                      <span style={{ textTransform: "none" }}>s</span>
                     </h6>
                     <h6
                       className="detailText mb-0"
