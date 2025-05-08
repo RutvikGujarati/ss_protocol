@@ -25,9 +25,11 @@ const DataTable = () => {
     swappingStates,
     buttonTextStates,
     AirDropAmount,
+    setTxStatusForSwap,
     AddTokenIntoSwapContract,
     isTokenSupporteed,
     renounceTokenContract,
+    txStatusForSwap,
     CheckMintBalance,
     isCliamProcessing,
     fetchUserTokenAddresses,
@@ -138,6 +140,23 @@ const DataTable = () => {
     handleSetAddress();
   }, [address, AuthAddress]);
 
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  // Show/hide popup based on txStatus
+  useEffect(() => {
+    if (txStatusForSwap) {
+      setIsPopupOpen(true);
+    }
+    if (txStatusForSwap === "confirmed" || txStatusForSwap === "error") {
+      // Delay to allow user to see the final status
+      const timer = setTimeout(() => {
+        setIsPopupOpen(false);
+        setTxStatusForSwap(null); // Reset txStatusForSwap to revert button to default state
+      }, 2000); // 2-second delay for visibility
+      return () => clearTimeout(timer);
+    }
+  }, [txStatusForSwap, setTxStatusForSwap]);
+
   return isAuction ? (
     <div className="container  datatablemarginbottom">
       <div className="table-responsive">
@@ -211,8 +230,7 @@ const DataTable = () => {
                 ) => (
                   <tr key={index}>
                     <td></td>
-					<td className="timer-cell">{formatCountdown(TimeLeft)}</td>
-
+                    <td className="timer-cell">{formatCountdown(TimeLeft)}</td>
 
                     <td className="justify-content-center">{`${emoji}${name}`}</td>
 
@@ -225,7 +243,7 @@ const DataTable = () => {
                         {checkingStates[id]
                           ? ` AIRDROPPING...`
                           : AirdropClaimedForToken == "true"
-                          ? " AIRDROPPED"
+                          ? " CLAIMED"
                           : `${formatWithCommas(AirDropAmount[name])} `}
                       </button>
                     </td>
@@ -308,9 +326,9 @@ const DataTable = () => {
                       </div>
                     </td>
                     {errorPopup[id] && (
-                      <div className="popup-overlay">
-                        <div className="popup-content">
-                          <h4 className="popup-header">
+                      <div className="popup-overlay2">
+                        <div className="popup-content2">
+                          <h4 className="popup-header2">
                             Mint Additional DAV Tokens
                           </h4>
                           <p className="popup-para">
@@ -357,6 +375,102 @@ const DataTable = () => {
                       </a>
                     </td>
                     <td></td>
+                    {isPopupOpen && (
+                      <div
+                        className="modal d-flex align-items-center justify-content-center"
+                        style={{
+                          zIndex: 30000,
+                          background: "rgba(33, 37, 41, 0.1)",
+                          backdropFilter: "blur(2px)",
+                          pointerEvents: "none",
+                        }}
+                      >
+                        <div className="modal-dialog modal-dialog-centered">
+                          <div className="modal-content popup-content">
+                            <div className="modal-header border-0">
+                              <h3 className="modal-title text-light">
+                                Transaction Status
+                              </h3>
+                            </div>
+                            <div className="modal-body">
+                              <div className="tx-progress-container">
+                                <div className="step-line">
+                                  <div
+                                    className={`step ${
+                                      txStatusForSwap === "initializing" ||
+                                      txStatusForSwap === "initiated" ||
+                                      txStatusForSwap === "Approving" ||
+                                      txStatusForSwap === "swap pending" ||
+                                      txStatusForSwap === "confirmed" ||
+                                      txStatusForSwap === "error"
+                                        ? "active"
+                                        : ""
+                                    }`}
+                                  >
+                                    <span className="dot" />
+                                    <span className="label">Initializing</span>
+                                  </div>
+                                  <div
+                                    className={`step ${
+                                      txStatusForSwap === "initiated" ||
+                                      txStatusForSwap === "Approving" ||
+                                      txStatusForSwap === "pending" ||
+                                      txStatusForSwap === "confirmed" ||
+                                      txStatusForSwap === "error"
+                                        ? "active"
+                                        : ""
+                                    }`}
+                                  >
+                                    <span className="dot" />
+                                    <span className="label">Initiated</span>
+                                  </div>
+                                  <div
+                                    className={`step ${
+                                      txStatusForSwap === "Approving" ||
+                                      txStatusForSwap === "pending" ||
+                                      txStatusForSwap === "confirmed" ||
+                                      txStatusForSwap === "error"
+                                        ? "active"
+                                        : ""
+                                    }`}
+                                  >
+                                    <span className="dot" />
+                                    <span className="label">Approving</span>
+                                  </div>
+                                  <div
+                                    className={`step ${
+                                      txStatusForSwap === "pending" ||
+                                      txStatusForSwap === "confirmed" ||
+                                      txStatusForSwap === "error"
+                                        ? "active"
+                                        : ""
+                                    }`}
+                                  >
+                                    <span className="dot" />
+                                    <span className="label">Swapping</span>
+                                  </div>
+                                  <div
+                                    className={`step ${
+                                      txStatusForSwap === "confirmed" ||
+                                      txStatusForSwap === "error"
+                                        ? "active"
+                                        : ""
+                                    }`}
+                                  >
+                                    <span className="dot" />
+                                    <span className="label">
+                                      {txStatusForSwap === "error"
+                                        ? "Error"
+                                        : "Confirmed"}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </tr>
                 )
               )}
@@ -574,7 +688,9 @@ const DataTable = () => {
                             </button>
                           )}
                         </td>
-                        <td className="timer-cell">{formatCountdown(TimeLeft)}</td>
+                        <td className="timer-cell">
+                          {formatCountdown(TimeLeft)}
+                        </td>
                         <td>500,000</td>
                         <td>
                           <button

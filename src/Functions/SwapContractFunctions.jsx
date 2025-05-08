@@ -10,7 +10,6 @@ import {
   DAV_TOKEN_SONIC_ADDRESS,
   STATE_TESTNET,
   STATE_TOKEN_SONIC_ADDRESS,
-  Yees_testnet,
 } from "../ContractAddresses";
 import { useAccount, useChainId } from "wagmi";
 import { useDAvContract } from "./DavTokenFunctions";
@@ -27,7 +26,7 @@ export const SwapContractProvider = ({ children }) => {
   const { address } = useAccount();
 
   const [claiming, setClaiming] = useState(false);
-
+  const [txStatusForSwap, setTxStatusForSwap] = useState("");
   const [TotalCost, setTotalCost] = useState(null);
 
   const [InputAmount, setInputAmount] = useState({});
@@ -844,6 +843,7 @@ export const SwapContractProvider = ({ children }) => {
 
   const SwapTokens = async (id, ContractName) => {
     try {
+      setTxStatusForSwap("initiated");
       setSwappingStates((prev) => ({ ...prev, [id]: true }));
       setButtonTextStates((prev) => ({
         ...prev,
@@ -907,6 +907,7 @@ export const SwapContractProvider = ({ children }) => {
         console.log("Insufficient allowance. Sending approval transaction...");
 
         try {
+          setTxStatusForSwap("Approving");
           const approveTx = await selectedContract.approve(
             ContractAddressToUse,
             approvalAmount
@@ -917,6 +918,7 @@ export const SwapContractProvider = ({ children }) => {
           console.error("Approval transaction failed:", approvalError);
           setButtonTextStates((prev) => ({ ...prev, [id]: "Approval failed" }));
           setSwappingStates((prev) => ({ ...prev, [id]: false }));
+          setTxStatusForSwap("error");
           return false;
         }
       } else {
@@ -926,7 +928,7 @@ export const SwapContractProvider = ({ children }) => {
       }
 
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swapping..." }));
-
+      setTxStatusForSwap("pending");
       // Perform the token swap
       const swapTx = await AllContracts.AuctionContract.swapTokens(
         address,
@@ -936,6 +938,7 @@ export const SwapContractProvider = ({ children }) => {
 
       if (swapReceipt.status === 1) {
         console.log("Swap Complete!");
+        setTxStatusForSwap("confirmed");
         toast.success(`swapped success with ${ContractName} `, {
           position: "top-center", // Centered
           autoClose: 18000,
@@ -948,6 +951,7 @@ export const SwapContractProvider = ({ children }) => {
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap Complete!" }));
       } else {
         console.error("Swap transaction failed.");
+        setTxStatusForSwap("error");
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
       }
       await CheckIsAuctionActive();
@@ -956,9 +960,11 @@ export const SwapContractProvider = ({ children }) => {
       await fetchData();
     } catch (error) {
       console.error("Error during token swap:", error);
+      setTxStatusForSwap("error");
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
     } finally {
       // Reset swapping state
+      setTxStatusForSwap("");
       setSwappingStates((prev) => ({ ...prev, [id]: false }));
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swap Completed" }));
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swap" }));
@@ -1034,7 +1040,6 @@ export const SwapContractProvider = ({ children }) => {
 
   const handleAddTokensState = () =>
     handleAddToken(STATE_TOKEN_SONIC_ADDRESS, "sState");
-  const handleAddYees = () => handleAddToken(Yees_testnet, "Yees");
   //   console.log("dav and state address", DavAddress, StateAddress);
   return (
     <SwapContractContext.Provider
@@ -1059,7 +1064,6 @@ export const SwapContractProvider = ({ children }) => {
         setDavAndStateIntoSwap,
         handleAddToken,
         // setReverseEnable,
-        handleAddYees,
         userHashSwapped,
         userHasReverseSwapped,
         isCliamProcessing,
@@ -1073,10 +1077,12 @@ export const SwapContractProvider = ({ children }) => {
         StateAddress,
         swappingStates,
         AuctionTime,
+        txStatusForSwap,
         fetchUserTokenAddresses,
         AirdropClaimed,
         isReversed,
         InputAmount,
+		setTxStatusForSwap,
         AirDropAmount,
         getAirdropAmount,
         supportedToken,

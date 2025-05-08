@@ -28,6 +28,7 @@ export const DavProvider = ({ children }) => {
   const { AllContracts, signer } = useContext(ContractContext);
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
+  const [buttonTextStates, setButtonTextStates] = useState({});
 
   const [isLoading, setLoading] = useState(true);
   const [BurnClicked, setClicked] = useState(false);
@@ -407,6 +408,7 @@ export const DavProvider = ({ children }) => {
   const BurnStateTokens = async (amount) => {
     if (!AllContracts?.davContract) return;
     try {
+      setButtonTextStates("initiated");
       setClicked(true);
       const weiAmount = ethers.parseUnits(amount.toString(), 18);
       const tokenContract = new ethers.Contract(
@@ -414,10 +416,11 @@ export const DavProvider = ({ children }) => {
         ERC20_ABI,
         signer
       );
-
+      setButtonTextStates("Approving");
       await (await tokenContract.approve(DAV_TESTNET, weiAmount)).wait();
+      setButtonTextStates("Pending");
       await (await AllContracts.davContract.burnState(weiAmount)).wait();
-
+      setButtonTextStates("confirmed");
       setClicked(false);
       toast.success(`${amount} of tokens Burned Successfully`, {
         position: "top-center", // Centered
@@ -432,6 +435,7 @@ export const DavProvider = ({ children }) => {
       await fetchTimeUntilNextClaim();
     } catch (err) {
       console.error("Burn error:", err);
+      setButtonTextStates("error");
       if (err?.reason && err.reason.includes("Claim your PLS before burning")) {
         toast.error("Claim your pending PLS first!", {
           position: "top-center",
@@ -444,6 +448,8 @@ export const DavProvider = ({ children }) => {
         });
       }
       setClicked(false);
+    } finally {
+      setButtonTextStates("");
     }
   };
 
@@ -463,6 +469,7 @@ export const DavProvider = ({ children }) => {
         claimAmount,
         claimBurnAmount,
         AddYourToken,
+		buttonTextStates,
         fetchData,
         deployWithMetaMask,
         users,

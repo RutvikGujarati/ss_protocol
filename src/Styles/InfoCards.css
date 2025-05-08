@@ -253,16 +253,21 @@
 }
 
 .step-line:has(.step:nth-child(2).active)::before {
-  width: 33.33%;
+  width: 25%;
 }
 
 .step-line:has(.step:nth-child(3).active)::before {
-  width: 66.66%;
+  width: 50%;
 }
 
 .step-line:has(.step:nth-child(4).active)::before {
+  width: 75%;
+}
+
+.step-line:has(.step:nth-child(5).active)::before {
   width: 100%;
 }
+
 @keyframes shimmer {
   0% {
     transform: translateX(0);
@@ -271,6 +276,7 @@
     transform: translateX(200%);
   }
 }
+/* Dot */
 .step .dot {
   width: 12px;
   height: 12px;
@@ -282,36 +288,17 @@
   transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease,
     box-shadow 0.3s ease;
 }
+
+/* Active Dot */
 .step.active .dot {
   background: linear-gradient(145deg, #22c55e, #16a34a);
   border-color: #22c55e;
   transform: scale(1.2);
   box-shadow: 0 0 8px rgba(34, 197, 94, 0.6), 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-.step-line:has(.step:nth-child(1).active):not(:has(.step:nth-child(2).active))
-  .step:nth-child(1)
-  .dot,
-.step-line:has(.step:nth-child(2).active):not(:has(.step:nth-child(3).active))
-  .step:nth-child(2)
-  .dot,
-.step-line:has(.step:nth-child(3).active):not(:has(.step:nth-child(4).active))
-  .step:nth-child(3)
-  .dot,
-.step-line:has(.step:nth-child(4).active) .step:nth-child(4) .dot {
   animation: blink 1s infinite ease-in-out;
 }
 
-/* Blinking animation */
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.3;
-  }
-}
-
+/* Label */
 .label {
   margin-top: 6px;
   font-size: 0.75rem;
@@ -323,6 +310,8 @@
 .step.active .label {
   color: #22c55e;
 }
+
+/* Blinking Animation */
 @keyframes blink {
   0%,
   100% {

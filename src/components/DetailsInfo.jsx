@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { TokensDetails } from "../data/TokensDetails";
 import { Auction_TESTNET } from "../ContractAddresses";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
+import { Tooltip } from "bootstrap";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -52,6 +53,36 @@ const DetailsInfo = ({ selectedToken }) => {
       cell.style.cursor = "pointer";
     });
   }, []);
+  const targetRatio = 0.03;
+
+  const getVaultIndicator = (token) => {
+    if (token.tokenName === "DAV" || token.tokenName === "STATE") return null;
+
+    const value = (500000000000 - token.DavVault) / token.DavVault;
+    const isBuy = value <= targetRatio;
+    const tooltipText = isBuy ? "Buy" : "Sell";
+
+    return (
+      <span
+        className="ms-2"
+        style={{ color: isBuy ? "green" : "red", cursor: "pointer" }}
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        title={tooltipText}
+      >
+        ●
+      </span>
+    );
+  };
+
+  useEffect(() => {
+    const tooltipTriggerList = document.querySelectorAll(
+      '[data-bs-toggle="tooltip"]'
+    );
+    tooltipTriggerList.forEach((el) => {
+      new Tooltip(el);
+    });
+  }, []);
 
   const formatPrice = (price) => {
     if (!price || isNaN(price)) return "0.0000";
@@ -90,11 +121,16 @@ const DetailsInfo = ({ selectedToken }) => {
     setLocalSearchQuery(query);
   };
 
+
   const filteredTokens = tokens.filter(
     (item) =>
       item.tokenName.toLowerCase().includes(localSearchQuery.toLowerCase()) ||
       item.emoji.includes(localSearchQuery)
   );
+  const getVaultRatio = (token) => {
+    if (token.tokenName === "DAV" || token.tokenName === "STATE") return null;
+    return (500000000000 - token.DavVault) / token.DavVault;
+  };
 
   const dataToShow = selectedToken
     ? tokens.find((token) => token.tokenName === selectedToken.name)
@@ -148,6 +184,29 @@ const DetailsInfo = ({ selectedToken }) => {
             <tbody>
               {filteredTokens
                 .filter((token) => token.isSupported)
+                .sort((a, b) => {
+                  const order = { DAV: 0, STATE: 1 };
+
+                  // Handle DAV and STATE first
+                  if (
+                    order[a.tokenName] !== undefined ||
+                    order[b.tokenName] !== undefined
+                  ) {
+                    return (
+                      (order[a.tokenName] ?? 99) - (order[b.tokenName] ?? 99)
+                    );
+                  }
+
+                  // Now sort by vault ratio
+                  const aRatio = getVaultRatio(a);
+                  const bRatio = getVaultRatio(b);
+
+                  const aIsRed = aRatio !== null && aRatio > targetRatio;
+                  const bIsRed = bRatio !== null && bRatio > targetRatio;
+
+                  return aIsRed === bIsRed ? 0 : aIsRed ? -1 : 1;
+                })
+
                 .map((token) => (
                   <tr key={token.tokenName}>
                     <td className="text-center">{`${token.emoji} ${token.tokenName}`}</td>
@@ -215,7 +274,7 @@ const DetailsInfo = ({ selectedToken }) => {
                             cursor: "pointer",
                           }}
                         />
-                       
+
                         {token.tokenName === "DAV" ? (
                           "-------"
                         ) : token.tokenName === "STATE" ? (
@@ -238,7 +297,8 @@ const DetailsInfo = ({ selectedToken }) => {
                       </div>
                     </td>
                     <td></td>
-                    <td></td>
+                    <td>{getVaultIndicator(token)}</td>
+
                     <td></td>
                   </tr>
                 ))}
