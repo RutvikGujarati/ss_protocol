@@ -74,7 +74,6 @@ export const TokensDetails = () => {
 
 	return data.map((token) => {
 		const key = token.key;
-		const isState = token.name === "STATE";
 		const emojiMap = Array.isArray(swap.TokenNames) && Array.isArray(Emojies)
 			? swap.TokenNames.reduce((acc, name, index) => {
 				acc[name.toLowerCase()] = Emojies[index];
@@ -89,25 +88,12 @@ export const TokensDetails = () => {
 			name: token.displayName || token.name,
 			Price: token.price,
 			emoji: token.name == "DAV" ? "🧮" : token.name == "STATE" ? "🧮" : emojiMap[key.toLowerCase()],
-
+			isRenounced: swap.isTokenRenounce[token.name],
 			DavVault: swap.TokenBalance?.[key],
 			burned: swap.burnedAmount?.[key],
 			isSupported: token.name == "DAV" ? "true" : token.name == "STATE" ? "true" : swap.supportedToken?.[key],
 			TokenAddress: token.address,
 			Cycle: swap.CurrentCycleCount?.[key] == "not started" ? "Not Started" : swap.CurrentCycleCount?.[key] + 1,
-			handleAddTokens: () => swap[`handleAdd${key}`]?.(),
-			renounceSmartContract:
-				key === "OneDollar"
-					? swap.isRenounced?.["oneD"]
-					: swap.isRenounced?.[key] ?? "Unknown",
-			actions: {
-				...(token.actions || {}),
-				ReanounceContract: swap[`Reanounce${key}Contract`] || swap.ReanounceContract,
-				ReanounceSwapContract: swap[`Renounce${key}Swap`],
-				...(isState && {
-					AddTokenToContract: swap.AddTokens,
-				}),
-			},
 		};
 	});
 };

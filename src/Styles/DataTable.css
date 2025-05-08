@@ -15,7 +15,11 @@
 .font-size {
   font-size: 10px;
 }
-
+.timer-cell {
+	min-width: 110px; /* adjust as needed */
+	white-space: nowrap;
+  }
+  
 .hover-box {
   display: none; /* Initially hidden */
   position: absolute;

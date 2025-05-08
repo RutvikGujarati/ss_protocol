@@ -198,6 +198,7 @@ export const DavProvider = ({ children }) => {
   isTokenDeployed();
   console.log("from entry", users); // e.g., "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483"
   console.log("from entry", names[0]);
+
   const fetchTimeUntilNextClaim = useCallback(async () => {
     if (!AllContracts?.davContract || !address) return;
     try {

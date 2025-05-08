@@ -34,9 +34,8 @@ export const useAuctionTokens = () => {
 			id,
 			name: id,
 			emoji: Emojies?.[index] || "🔹", // fallback if no emoji
-			Pname: `${id} - State - ${id}`,
-			ReverseName: `State - ${id}`,
-			ContractName: contract === "OneDollar" ? "oneD" : contract,
+
+			ContractName: contract,
 			token: address,
 			handleAddToken,
 			ratio: `1:${RatioTargetsofTokens?.[contract] || 0}`,

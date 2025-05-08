@@ -6,7 +6,6 @@ import { useSwapContract } from "../Functions/SwapContractFunctions";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { TokensDetails } from "../data/TokensDetails";
-import pulsex from "../assets/ninemm.png";
 import { Auction_TESTNET } from "../ContractAddresses";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 
@@ -216,29 +215,9 @@ const DetailsInfo = ({ selectedToken }) => {
                             cursor: "pointer",
                           }}
                         />
+                       
                         {token.tokenName === "DAV" ? (
-                          "----"
-                        ) : (
-                          <a
-                            href="https://dex.9mm.pro/swap?chain=pulsechain"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <img
-                              src={pulsex}
-                              alt="sDAV Logo"
-                              className="mb-1"
-                              style={{
-                                background: "transparent",
-                                width: "20px",
-                                height: "20px",
-                                cursor: "pointer",
-                              }}
-                            />
-                          </a>
-                        )}
-                        {token.tokenName === "DAV" ? (
-                          "-----------"
+                          "-------"
                         ) : token.tokenName === "STATE" ? (
                           DavAddress ===
                           "0x0000000000000000000000000000000000000000" ? (
@@ -251,10 +230,10 @@ const DetailsInfo = ({ selectedToken }) => {
                           ) : (
                             <span className="text-green-500">ADDED</span>
                           )
-                        ) : token.isSupported === "true" ? (
-                          <span className="text-green-500">ADDED</span>
+                        ) : token.isRenounced == "true" ? (
+                          <span className="text-green-500">Renounced</span>
                         ) : (
-                          <span className="text-green-500">ADDED</span>
+                          <span className="text-green-500">-------</span>
                         )}
                       </div>
                     </td>

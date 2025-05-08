@@ -8,7 +8,7 @@
 import DAVTokenABI from "../ABI/DavTokenABI.json";
 import StateABI from "../ABI/StateTokenABI.json";
 import RatioABI from "../ABI/RatioABI.json";
-import { Auction_TESTNET, DAV_TESTNET, STATE_TESTNET, Yees_testnet } from "../ContractAddresses";
+import { Auction_TESTNET, DAV_TESTNET, STATE_TESTNET } from "../ContractAddresses";
 
 let currentChainId = 369; // Default chainId
 
@@ -23,5 +23,4 @@ export const getContractConfigs = () => ({
 	davContract: { address: DAV_TESTNET, abi: getDavABI() },
 	AuctionContract: { address: Auction_TESTNET, abi: RatioABI },
 	stateContract: { address: STATE_TESTNET, abi: StateABI },
-	YeesContract: { address: Yees_testnet, abi: StateABI },
 });

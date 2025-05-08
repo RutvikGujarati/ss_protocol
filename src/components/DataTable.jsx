@@ -48,6 +48,14 @@ const DataTable = () => {
       [tokenName]: value, // store pairAddress directly
     }));
   };
+  function formatCountdown(seconds) {
+    const days = Math.floor(seconds / (24 * 60 * 60));
+    const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
+    const minutes = Math.floor((seconds % (60 * 60)) / 60);
+    const secs = seconds % 60;
+
+    return `${days}d ${hours}h ${minutes}m ${secs}s`;
+  }
 
   // Handle Add button click (calls AddTokenIntoSwapContract)
   const handleAdd = async (tokenAddress, tokenName, user, name) => {
@@ -138,7 +146,7 @@ const DataTable = () => {
             <tr>
               <th></th>
               <th>Auction Timer</th>
-              <th>Name</th>
+              <th>Token Name</th>
               <th>Claim Airdrop</th>
 
               <th>Ratio Swap</th>
@@ -203,7 +211,8 @@ const DataTable = () => {
                 ) => (
                   <tr key={index}>
                     <td></td>
-                    <td>{TimeLeft}</td>
+					<td className="timer-cell">{formatCountdown(TimeLeft)}</td>
+
 
                     <td className="justify-content-center">{`${emoji}${name}`}</td>
 
@@ -257,45 +266,45 @@ const DataTable = () => {
                             )}
                           </>
                         )}
-						 <div className="d-flex align-items-center gap-2">
-                        <>
-                          {isReversing == "true" && (
-                            <button
-                              onClick={() => SwapT()}
-                              disabled={
-                                userHasReverse == "true" ||
-                                swappingStates[id] ||
-                                outputToken <= "1"
-                              }
-                              className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
-                            >
-                              {userHasReverse == "true"
-                                ? "Reverse Swapped"
-                                : swappingStates[id]
-                                ? "Swapping..."
-                                : "Reverse Swap"}
-                            </button>
-                          )}
+                        <div className="d-flex align-items-center gap-2">
+                          <>
+                            {isReversing == "true" && (
+                              <button
+                                onClick={() => SwapT()}
+                                disabled={
+                                  userHasReverse == "true" ||
+                                  swappingStates[id] ||
+                                  outputToken <= "1"
+                                }
+                                className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
+                              >
+                                {userHasReverse == "true"
+                                  ? "Reverse Swapped"
+                                  : swappingStates[id]
+                                  ? "Swapping..."
+                                  : "Reverse Swap"}
+                              </button>
+                            )}
 
-                          {isReversing == "false" && (
-                            <button
-                              onClick={() => SwapT()}
-                              disabled={
-                                userHasSwapped == "true" ||
-                                swappingStates[id] ||
-                                onlyInputAmount <= 0
-                              }
-                              className="btn btn-sm swap-btn btn-primary"
-                            >
-                              {userHasSwapped == "true"
-                                ? "Swapped"
-                                : swappingStates[id]
-                                ? "Swapping..."
-                                : buttonTextStates[id] || "Swap"}
-                            </button>
-                          )}
-                        </>
-                      </div>
+                            {isReversing == "false" && (
+                              <button
+                                onClick={() => SwapT()}
+                                disabled={
+                                  userHasSwapped == "true" ||
+                                  swappingStates[id] ||
+                                  onlyInputAmount <= 0
+                                }
+                                className="btn btn-sm swap-btn btn-primary"
+                              >
+                                {userHasSwapped == "true"
+                                  ? "Swapped"
+                                  : swappingStates[id]
+                                  ? "Swapping..."
+                                  : buttonTextStates[id] || "Swap"}
+                              </button>
+                            )}
+                          </>
+                        </div>
                       </div>
                     </td>
                     {errorPopup[id] && (
@@ -322,7 +331,7 @@ const DataTable = () => {
                         </div>
                       </div>
                     )}
-                  
+
                     <td>
                       Swap {formatWithCommas(outputToken)} tokens <br /> for{" "}
                       {name} tokens on external DEX
@@ -347,7 +356,7 @@ const DataTable = () => {
                         />
                       </a>
                     </td>
-					<td></td>
+                    <td></td>
                   </tr>
                 )
               )}
@@ -565,7 +574,7 @@ const DataTable = () => {
                             </button>
                           )}
                         </td>
-                        <td>{formatTimeVerbose(TimeLeft)}</td>
+                        <td className="timer-cell">{formatCountdown(TimeLeft)}</td>
                         <td>500,000</td>
                         <td>
                           <button

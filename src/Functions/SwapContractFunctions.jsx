@@ -130,53 +130,42 @@ export const SwapContractProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    let interval;
+    const intervalHandles = {};
+    const results = {};
 
-    const getAuctionTimeLeft = async () => {
-      try {
-        const results = {};
-        const tokenMap = await ReturnfetchUserTokenAddresses();
-        for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-          try {
-            const AuctionTimeInWei =
-              await AllContracts.AuctionContract.getAuctionTimeLeft(
-                TokenAddress
-              );
+    const initializeCountdowns = async () => {
+      const tokenMap = await ReturnfetchUserTokenAddresses();
+      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
+        try {
+          const AuctionTimeInWei =
+            await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
+          const totalSeconds = Math.floor(Number(AuctionTimeInWei));
 
-            const totalSeconds = Math.floor(Number(AuctionTimeInWei));
-            const days = Math.floor(totalSeconds / (24 * 60 * 60));
-            const hours = Math.floor(
-              (totalSeconds % (24 * 60 * 60)) / (60 * 60)
-            );
-            const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
-            const seconds = totalSeconds % 60;
+          results[tokenName] = totalSeconds;
 
-            results[tokenName] = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-          } catch (innerError) {
-            console.warn(
-              `Error fetching auction time for ${tokenName}:`,
-              innerError
-            );
-            results[tokenName] = "not started"; // fallback on error
-          }
+          intervalHandles[tokenName] = setInterval(() => {
+            setAuctionTime((prev) => {
+              const newTime = { ...prev };
+              if (newTime[tokenName] > 0) {
+                newTime[tokenName] = newTime[tokenName] - 1;
+              }
+              return newTime;
+            });
+          }, 1000);
+        } catch (e) {
+          results[tokenName] = 0;
+          console.log("error", e);
         }
-
-        setAuctionTime(results);
-      } catch (e) {
-        console.error("Error fetching AuctionTimes:", e);
       }
+
+      setAuctionTime(results);
     };
 
-    const runBothFunctions = async () => {
-      await getAuctionTimeLeft();
-      await CheckIsAuctionActive();
+    initializeCountdowns();
+
+    return () => {
+      Object.values(intervalHandles).forEach(clearInterval);
     };
-
-    runBothFunctions(); // Initial run
-
-    interval = setInterval(runBothFunctions, 1000); // Run every second
-
-    return () => clearInterval(interval); // Cleanup
   }, [AllContracts]);
 
   const getCurrentAuctionCycle = async () => {
@@ -240,32 +229,48 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching input amounts:", e);
     }
   };
-  const getTimeLeftOfClaim = async () => {
-    try {
-      const results = {};
+  useEffect(() => {
+    const intervalHandles = {};
+    const results = {};
+
+    const initializeClaimCountdowns = async () => {
       const tokenMap = await ReturnfetchUserTokenAddresses();
-      console.log("Starting loop over Addresses:", tokenMap);
 
       for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        console.log(
-          `Fetching TimeLeft amount for ${tokenName} at ${TokenAddress}`
-        );
+        try {
+          const timeLeftInSeconds =
+            await AllContracts.AuctionContract.getNextClaimTime(TokenAddress);
 
-        const timeLeftInSeconds =
-          await AllContracts.AuctionContract.getNextClaimTime(TokenAddress);
-        const timeLeft = Number(timeLeftInSeconds);
+          const timeLeft = Number(timeLeftInSeconds);
+          results[tokenName] = timeLeft;
 
-        console.log(`Time left for ${tokenName}: ${timeLeft} seconds`);
-
-        results[tokenName] = timeLeft;
+          // Start countdown interval
+          intervalHandles[tokenName] = setInterval(() => {
+            setTimeLeftClaim((prev) => {
+              const updated = { ...prev };
+              if (updated[tokenName] > 0) {
+                updated[tokenName] = updated[tokenName] - 1;
+              }
+              return updated;
+            });
+          }, 1000);
+        } catch (err) {
+          console.warn(`Error getting claim time for ${tokenName}`, err);
+          results[tokenName] = 0;
+        }
       }
 
-      console.log("Final TimeLeft amounts:", results);
       setTimeLeftClaim(results);
-    } catch (e) {
-      console.error("Error fetching input amounts:", e);
-    }
-  };
+    };
+
+    initializeClaimCountdowns();
+
+    return () => {
+      // Cleanup intervals
+      Object.values(intervalHandles).forEach(clearInterval);
+    };
+  }, [AllContracts]);
+
   const getTokensBurned = async () => {
     try {
       const results = {};
@@ -769,7 +774,6 @@ export const SwapContractProvider = ({ children }) => {
         tokenAddress
       );
       await tx.wait();
-      await getTimeLeftOfClaim();
       console.log("Reward claimed successfully");
     } catch (error) {
       console.error("Error claiming reward:", error);
@@ -814,7 +818,6 @@ export const SwapContractProvider = ({ children }) => {
     fetchUserTokenAddresses();
     getInputAmount();
     getOutPutAmount();
-    getTimeLeftOfClaim();
     getTokensBurned();
     CheckIsAuctionActive();
     // getAuctionTimeLeft();

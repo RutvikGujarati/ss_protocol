@@ -548,7 +548,7 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      STATE TOKENS BURNED- {formatWithCommas(userBurnedAmount)}
+                      STATE TOKENS BURNED BY YOU - {formatWithCommas(userBurnedAmount)}
                     </h6>
                   </div>
                 </div>
@@ -565,8 +565,8 @@ const InfoCards = () => {
                     </div>
                     {Number(claimableAmountForBurn) == 0 && (
                       <div className="d-flex justify-content-center">
-                        <h6 className="detailText">
-                          expected Claim (@ Current Burn %) -{" "}
+                        <h6 className="detailText2">
+                          EXPECTED CLAIM (@ Current Burn %) - {" "}
                           {formatWithCommas(expectedClaim)} PLS
                         </h6>
                       </div>
@@ -650,7 +650,7 @@ const InfoCards = () => {
                   style={{ minHeight: "260px" }}
                 >
                   <div>
-                    <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
+                    <div className="carddetaildiv  d-flex justify-content-between align-items-center">
                       <div className="carddetails2 ">
                         <h6 className="detailText">LISTING A TOKEN</h6>
                         <ul className="mb-1" style={{ paddingLeft: "20px" }}>
@@ -669,7 +669,7 @@ const InfoCards = () => {
                             Airdrops every 50 days
                           </li>
                           <li className="detailText2">
-                            ADD YOUR TRIBE (EMOJI). ONLY 3 CHARACTERS ALLOWED
+                            Add your tribe (Emoji). only 3 characters allowed
                           </li>
                           <li className="detailText2">Cost - 10 Million PLS</li>
                           <li className="detailText2">
