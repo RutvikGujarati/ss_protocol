@@ -475,29 +475,36 @@ export const SwapContractProvider = ({ children }) => {
       console.log("Starting loop over Addresses:", tokenMap);
 
       for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        console.log(
-          `Fetching UserHasSwapped for ${tokenName} at ${TokenAddress}`
-        );
-
-        const UserHasSwapped =
-          await AllContracts.AuctionContract.getUserHasReverseSwapped(
-            address,
-            TokenAddress
+        try {
+          console.log(
+            `Fetching ReverseSwapped for ${tokenName} at ${TokenAddress}`
           );
 
-        const UserHasSwappedString = UserHasSwapped.toString(); // 👈 convert to string
+          const UserHasSwapped =
+            await AllContracts.AuctionContract.getUserHasReverseSwapped(
+              address,
+              TokenAddress
+            );
 
-        console.log(`User has Swapped for ${tokenName}:`, UserHasSwappedString);
-
-        results[tokenName] = UserHasSwappedString;
+          const UserHasSwappedString = UserHasSwapped.toString();
+          console.log(
+            `User has ReverseSwapped for ${tokenName}:`,
+            UserHasSwappedString
+          );
+          results[tokenName] = UserHasSwappedString;
+        } catch (tokenError) {
+          console.warn(`Error for ${tokenName} in ReverseSwapped:`, tokenError);
+          results[tokenName] = "not started";
+        }
       }
 
-      console.log("Final UserHasSwapped:", results);
+      console.log("Final UserHasReverseSwapped:", results);
       setUserHasReverseSwapped(results);
     } catch (e) {
-      console.error("Error fetching reverse:", e);
+      console.error("Error in HasReverseSwappedAucton:", e);
     }
   };
+
   const HasSwappedAucton = async () => {
     try {
       const results = {};
@@ -505,29 +512,34 @@ export const SwapContractProvider = ({ children }) => {
       console.log("Starting loop over Addresses:", tokenMap);
 
       for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        console.log(
-          `Fetching UserHasSwapped for ${tokenName} at ${TokenAddress}`
-        );
+        try {
+          console.log(`Fetching Swapped for ${tokenName} at ${TokenAddress}`);
 
-        const UserHasSwapped =
-          await AllContracts.AuctionContract.getUserHasSwapped(
-            address,
-            TokenAddress
+          const UserHasSwapped =
+            await AllContracts.AuctionContract.getUserHasSwapped(
+              address,
+              TokenAddress
+            );
+
+          const UserHasSwappedString = UserHasSwapped.toString();
+          console.log(
+            `User has Swapped for ${tokenName}:`,
+            UserHasSwappedString
           );
-
-        const UserHasSwappedString = UserHasSwapped.toString(); // 👈 convert to string
-
-        console.log(`User has Swapped for ${tokenName}:`, UserHasSwappedString);
-
-        results[tokenName] = UserHasSwappedString;
+          results[tokenName] = UserHasSwappedString;
+        } catch (tokenError) {
+          console.warn(`Error for ${tokenName} in Swapped:`, tokenError);
+          results[tokenName] = "not started";
+        }
       }
 
       console.log("Final UserHasSwapped:", results);
       setUserHashSwapped(results);
     } catch (e) {
-      console.error("Error fetching reverse:", e);
+      console.error("Error in HasSwappedAucton:", e);
     }
   };
+
   const isAirdropClaimed = async () => {
     try {
       const results = {};
