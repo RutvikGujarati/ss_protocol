@@ -71,28 +71,34 @@ export const SwapContractProvider = ({ children }) => {
       console.log("Starting loop over Addresses:", tokenMap);
 
       for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        console.log(
-          `Fetching input amount for ${tokenName} at ${TokenAddress}`
-        );
-
-        const inputAmountWei =
-          await AllContracts.AuctionContract.calculateAuctionEligibleAmount(
-            TokenAddress
+        try {
+          console.log(
+            `Fetching input amount for ${tokenName} at ${TokenAddress}`
           );
 
-        const inputAmount = ethers.formatEther(inputAmountWei); // 👈 convert to ether
-        const inputAmountNoDecimals = Math.floor(Number(inputAmount));
-        console.log(`Input amount for ${tokenName}:`, inputAmountNoDecimals);
+          const inputAmountWei =
+            await AllContracts.AuctionContract.calculateAuctionEligibleAmount(
+              TokenAddress
+            );
 
-        results[tokenName] = inputAmountNoDecimals;
+          const inputAmount = ethers.formatEther(inputAmountWei); // 👈 convert to ether
+          const inputAmountNoDecimals = Math.floor(Number(inputAmount));
+          console.log(`Input amount for ${tokenName}:`, inputAmountNoDecimals);
+
+          results[tokenName] = inputAmountNoDecimals;
+        } catch (err) {
+          console.error(`Error fetching input amount for ${tokenName}:`, err);
+          results[tokenName] = "not started";
+        }
       }
 
       console.log("Final input amounts:", results);
       setInputAmount(results);
     } catch (e) {
-      console.error("Error fetching input amounts:", e);
+      console.error("Unexpected error fetching input amounts:", e);
     }
   };
+
   const getAirdropAmount = async () => {
     try {
       const results = {};
@@ -208,26 +214,35 @@ export const SwapContractProvider = ({ children }) => {
       console.log("Starting loop over Addresses:", tokenMap);
 
       for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        console.log(
-          `Fetching Output amount for ${tokenName} at ${TokenAddress}`
-        );
+        try {
+          console.log(
+            `Fetching Output amount for ${tokenName} at ${TokenAddress}`
+          );
 
-        const OutputAmountWei =
-          await AllContracts.AuctionContract.getOutPutAmount(TokenAddress);
+          const OutputAmountWei =
+            await AllContracts.AuctionContract.getOutPutAmount(TokenAddress);
 
-        const OutputAmount = ethers.formatEther(OutputAmountWei); // 👈 convert to ether
-        const OutputAmountNoDecimals = Math.floor(Number(OutputAmount));
-        console.log(`Input amount for ${tokenName}:`, OutputAmountNoDecimals);
+          const OutputAmount = ethers.formatEther(OutputAmountWei); // 👈 convert to ether
+          const OutputAmountNoDecimals = Math.floor(Number(OutputAmount));
+          console.log(
+            `Output amount for ${tokenName}:`,
+            OutputAmountNoDecimals
+          );
 
-        results[tokenName] = OutputAmountNoDecimals;
+          results[tokenName] = OutputAmountNoDecimals;
+        } catch (err) {
+          console.error(`Error fetching output amount for ${tokenName}:`, err);
+          results[tokenName] = "not started";
+        }
       }
 
       console.log("Final Output amounts:", results);
       setOutputAmount(results);
     } catch (e) {
-      console.error("Error fetching input amounts:", e);
+      console.error("Unexpected error fetching output amounts:", e);
     }
   };
+
   useEffect(() => {
     const intervalHandles = {};
     const results = {};
