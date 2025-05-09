@@ -1,5 +1,5 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { pulsechain, pulsechainV4, sonic } from 'viem/chains';
+import { pulsechain, pulsechainV4 } from 'viem/chains';
 
 export const config = getDefaultConfig({
 	appName: 'ss-protocol',

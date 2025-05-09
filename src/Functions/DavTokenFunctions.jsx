@@ -157,6 +157,7 @@ export const DavProvider = ({ children }) => {
       setLoading(false);
     }
   }, [AllContracts, address]);
+  
   console.log("dav entries", data.tokenEntries);
   const fetchAndStoreTokenEntries = async () => {
     try {

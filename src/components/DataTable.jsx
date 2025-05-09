@@ -51,12 +51,12 @@ const DataTable = () => {
     }));
   };
   function formatCountdown(seconds) {
-    const days = Math.floor(seconds / (24 * 60 * 60));
+    if (!seconds || seconds <= 0) return "0h 0m";
+
     const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
     const minutes = Math.floor((seconds % (60 * 60)) / 60);
-    const secs = seconds % 60;
 
-    return `${days}d ${hours}h ${minutes}m ${secs}s`;
+    return `${hours}h ${minutes}m`;
   }
 
   // Handle Add button click (calls AddTokenIntoSwapContract)
@@ -381,17 +381,18 @@ const DataTable = () => {
                         style={{
                           zIndex: 30000,
                           background: "rgba(33, 37, 41, 0.1)",
-                          backdropFilter: "blur(2px)",
+                          backdropFilter: "blur(0.5px)",
                           pointerEvents: "none",
                         }}
                       >
                         <div className="modal-dialog modal-dialog-centered">
                           <div className="modal-content popup-content">
-                            <div className="modal-header border-0">
+                            <div className="modal-header border-0 text-center w-100 d-block">
                               <h3 className="modal-title text-light">
                                 Transaction Status
                               </h3>
                             </div>
+
                             <div className="modal-body">
                               <div className="tx-progress-container">
                                 <div className="step-line">
