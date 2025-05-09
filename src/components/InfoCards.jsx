@@ -632,7 +632,7 @@ const InfoCards = () => {
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
                   <div className="p-2 pt-3 pb-2">
                     {" "}
-                    <p className="mb-2 detailText ">YOUR CLAIM</p>
+                    <p className="mb-2 detailText ">EXPECTED CLAIM </p>
                     <div className="d-flex  justify-content-center">
                       <h5 className="mt-2">
                         {formatWithCommas(claimableAmountForBurn)} PLS
@@ -641,7 +641,7 @@ const InfoCards = () => {
                     {Number(claimableAmountForBurn) == 0 && (
                       <div className="d-flex justify-content-center">
                         <h6 className="detailText2">
-                          EXPECTED CLAIM (@ Current Burn %) -{" "}
+                           @ Current Burn % -{" "}
                           {formatWithCommas(expectedClaim)} PLS
                         </h6>
                       </div>
@@ -762,8 +762,8 @@ const InfoCards = () => {
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
                   <div className="p-2 pt-3 pb-2">
-                    <p className="mb-2 detailText ">Token Name</p>
-                    <div className="d-flex align-items-center gap-2">
+                    {/* <p className="mb-2 detailText ">Token Name</p> */}
+                    <div className="mb-2 mt-3 d-flex align-items-center gap-2">
                       <div
                         className="floating-input-container"
                         style={{ maxWidth: "300px" }}
@@ -787,11 +787,11 @@ const InfoCards = () => {
                           htmlFor="affiliateLink"
                           className="floating-label"
                         >
-                          Enter Name
+                         Enter Token Name
                         </label>
                       </div>
                     </div>
-                    <p className="mb-2 detailText mt-3">Emoji</p>
+                    {/* <p className="mb-2 detailText mt-3">Emoji</p> */}
                     <div className="d-flex align-items-center gap-2">
                       <div
                         className="floating-input-container"

@@ -174,7 +174,7 @@ const DataTable = () => {
               <th>Claim Airdrop</th>
 
               <th>Ratio Swap</th>
-              <th>Market Maker</th>
+              <th>Market Maker Instructions</th>
               <th></th>
               <th></th>
             </tr>

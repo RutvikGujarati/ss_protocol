@@ -10,6 +10,7 @@
   --border-color: #333333; /* Border color */
   --font-family: "Satoshi", sans-serif; /* Satoshi font */
 }
+
 ::selection {
   background-color: #ff79a7;
   color: #ffffff;

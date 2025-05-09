@@ -20,10 +20,15 @@ const Header = () => {
         <div className="container d-flex justify-content-between align-items-center w-100">
           {/* Navbar Brand */}
           <NavLink className="navbar-brand text-light pb-0 mb-0" to="/">
-            <h5 className="uppercase fs-2 fw-bolder">STATE DEX</h5>
+            <label
+              className="uppercase fs-2 fw-bolder"
+			  style={{ fontFamily: "Satoshi, sans-serif" }}
+
+            >
+              STATE DEX
+            </label>
             <p className="detailAmount mb-0" style={{ fontSize: "0.8rem" }}>
-              Tokenized Micro-Economy
-              <br /> by System State Protocol
+              Not just a swap — it’s your new job
             </p>
           </NavLink>
 
