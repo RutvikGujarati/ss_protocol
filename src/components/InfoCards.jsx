@@ -44,6 +44,7 @@ const InfoCards = () => {
     TimeUntilNextClaim,
     UserPercentage,
     davHolds,
+    buttonTextStates,
     AddYourToken,
     // AddDavintoLP,
     stateHolding,
@@ -494,46 +495,116 @@ const InfoCards = () => {
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
-                <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
+                <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100">
                   <div className="p-2 pt-3 pb-2">
-                    <p className="mb-2 detailText ">STATE TOKENS BURN</p>
+                    <p className="mb-2 detailText">STATE TOKENS BURN</p>
 
                     <div className="d-flex align-items-center gap-2">
                       <input
                         type="text"
                         placeholder={formatWithCommas(stateHolding)}
-                        className="form-control text-center fw-bold "
+                        className="form-control text-center fw-bold"
                         style={{ "--placeholder-color": "#6c757d" }}
                         value={amountOfInput}
                         onChange={handleInputChangeForBurn}
                       />
                     </div>
 
-                    <button
-                      onClick={async () => {
-                        setTimeout(async () => {
-                          try {
-                            await handleBurnClick(); // your async burn function
-                          } catch (err) {
-                            console.error("Burn failed:", err);
-                          }
-                        }, 100); // Allow re-render before blocking
-                      }}
-                      style={{ width: customWidth }}
-                      className="btn btn-primary mx-5 mt-5 btn-sm d-flex justify-content-center align-items-center"
-                      disabled={load || BurnClicked}
-                    >
-                      {BurnClicked ? (
-                        <>
-                          <IOSpinner className="me-2" />
-                          Burning...
-                        </>
-                      ) : (
-                        "Burn"
-                      )}
-                    </button>
+                    {BurnClicked ? (
+                      <div className="tx-progress-container mt-5 ">
+                        <div
+                          className="step-line"
+                          style={{
+                            justifyContent: "space-between",
+                            gap: "20px",
+                          }}
+                        >
+                          <div
+                            className={`step ${
+                              [
+                                "initializing",
+                                "initiated",
+                                "Approving",
+                                "Pending",
+                                "confirmed",
+                              ].includes(buttonTextStates)
+                                ? "active"
+                                : ""
+                            }`}
+                          >
+                            <span className="dot" />
+                            <span className="label">Initializing</span>
+                          </div>
+                          <div
+                            className={`step ${
+                              [
+                                "initiated",
+                                "Approving",
+                                "Pending",
+                                "confirmed",
+                              ].includes(buttonTextStates)
+                                ? "active"
+                                : ""
+                            }`}
+                          >
+                            <span className="dot" />
+                            <span className="label">Initiated</span>
+                          </div>
+                          <div
+                            className={`step ${
+                              ["Approving", "Pending", "confirmed"].includes(
+                                buttonTextStates
+                              )
+                                ? "active"
+                                : ""
+                            }`}
+                          >
+                            <span className="dot" />
+                            <span className="label">Approving</span>
+                          </div>
+                          <div
+                            className={`step ${
+                              ["Pending", "confirmed"].includes(
+                                buttonTextStates
+                              )
+                                ? "active"
+                                : ""
+                            }`}
+                          >
+                            <span className="dot" />
+                            <span className="label">Burning</span>
+                          </div>
+                          <div
+                            className={`step ${
+                              buttonTextStates === "confirmed" ? "active" : ""
+                            }`}
+                          >
+                            <span className="dot" />
+                            <span className="label">Confirmed</span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={async () => {
+                          setTimeout(async () => {
+                            try {
+                              await handleBurnClick(); // your async burn function
+                            } catch (err) {
+                              console.error("Burn failed:", err);
+                            }
+                          }, 100); // Allow re-render before blocking
+                        }}
+                        style={{ width: customWidth }}
+                        className="btn btn-primary mx-5 mt-5 btn-sm d-flex justify-content-center align-items-center"
+                        disabled={load || BurnClicked}
+                      >
+                        Burn
+                      </button>
+                    )}
                   </div>
-                  <div className="carddetails2 ">
+
+                  <div className="carddetails2">
                     <h6
                       className="detailText mb-0"
                       style={{
@@ -556,6 +627,7 @@ const InfoCards = () => {
                   </div>
                 </div>
               </div>
+
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
                   <div className="p-2 pt-3 pb-2">

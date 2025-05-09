@@ -157,7 +157,7 @@ export const DavProvider = ({ children }) => {
       setLoading(false);
     }
   }, [AllContracts, address]);
-  
+
   console.log("dav entries", data.tokenEntries);
   const fetchAndStoreTokenEntries = async () => {
     try {
@@ -437,17 +437,35 @@ export const DavProvider = ({ children }) => {
     } catch (err) {
       console.error("Burn error:", err);
       setButtonTextStates("error");
-      if (err?.reason && err.reason.includes("Claim your PLS before burning")) {
-        toast.error("Claim your pending PLS first!", {
-          position: "top-center",
-          autoClose: 7000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+
+      // Default error message
+      let errorMessage = "An error occurred during burn.";
+
+      // Extract message from different possible sources
+      if (err?.reason) {
+        errorMessage = err.reason;
+      } else if (err?.data?.message) {
+        errorMessage = err.data.message;
+      } else if (err?.message) {
+        errorMessage = err.message;
       }
+
+      // Custom handling for specific known case
+      if (errorMessage.includes("execution reverted (unknown custom error)")) {
+        errorMessage = "Check state token balance";
+      }
+
+      // Show toast with extracted message
+      toast.error(errorMessage, {
+        position: "top-center",
+        autoClose: 5000, // 5 seconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
       setClicked(false);
     } finally {
       setButtonTextStates("");
@@ -470,7 +488,7 @@ export const DavProvider = ({ children }) => {
         claimAmount,
         claimBurnAmount,
         AddYourToken,
-		buttonTextStates,
+        buttonTextStates,
         fetchData,
         deployWithMetaMask,
         users,

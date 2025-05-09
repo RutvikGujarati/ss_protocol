@@ -144,18 +144,23 @@ const DataTable = () => {
 
   // Show/hide popup based on txStatus
   useEffect(() => {
-    if (txStatusForSwap) {
-      setIsPopupOpen(true);
+    if (!txStatusForSwap) {
+      setIsPopupOpen(false);
+      return;
     }
-    if (txStatusForSwap === "confirmed" || txStatusForSwap === "error") {
-      // Delay to allow user to see the final status
-      const timer = setTimeout(() => {
+
+    setIsPopupOpen(true);
+
+    let timer;
+    if (["confirmed", "error"].includes(txStatusForSwap)) {
+      timer = setTimeout(() => {
         setIsPopupOpen(false);
-        setTxStatusForSwap(null); // Reset txStatusForSwap to revert button to default state
-      }, 2000); // 2-second delay for visibility
-      return () => clearTimeout(timer);
+        setTxStatusForSwap("");
+      }, 2000); // 2-second delay for confirmed and error states
     }
-  }, [txStatusForSwap, setTxStatusForSwap]);
+
+    return () => clearTimeout(timer);
+  }, [txStatusForSwap]);
 
   return isAuction ? (
     <div className="container  datatablemarginbottom">
@@ -381,8 +386,7 @@ const DataTable = () => {
                         style={{
                           zIndex: 30000,
                           background: "rgba(33, 37, 41, 0.1)",
-                          backdropFilter: "blur(0.5px)",
-                          pointerEvents: "none",
+                          pointerEvents: isPopupOpen ? "auto" : "none",
                         }}
                       >
                         <div className="modal-dialog modal-dialog-centered">

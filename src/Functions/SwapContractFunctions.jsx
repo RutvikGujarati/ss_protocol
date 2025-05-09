@@ -960,7 +960,40 @@ export const SwapContractProvider = ({ children }) => {
       await fetchData();
     } catch (error) {
       console.error("Error during token swap:", error);
+
+      // 👇 Detect user rejection
+      if (error?.code === 4001) {
+        setTxStatusForSwap("cancelled");
+        toast.info("Transaction cancelled by user.", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+        setButtonTextStates((prev) => ({ ...prev, [id]: "Cancelled" }));
+        return;
+      }
+
       setTxStatusForSwap("error");
+
+      let errorMessage = "An error occurred during swap.";
+
+      // Extract message from known places
+      if (error?.reason) {
+        errorMessage = error.reason;
+      } else if (error?.data?.message) {
+        errorMessage = error.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      if (errorMessage.includes("execution reverted (unknown custom error)")) {
+        errorMessage = "Check Token Balance on your account or Make Airdrop";
+      }
+
+      toast.error(errorMessage, {
+        position: "top-center",
+        autoClose: 5000,
+      });
+
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
     } finally {
       // Reset swapping state
@@ -1082,7 +1115,7 @@ export const SwapContractProvider = ({ children }) => {
         AirdropClaimed,
         isReversed,
         InputAmount,
-		setTxStatusForSwap,
+        setTxStatusForSwap,
         AirDropAmount,
         getAirdropAmount,
         supportedToken,
