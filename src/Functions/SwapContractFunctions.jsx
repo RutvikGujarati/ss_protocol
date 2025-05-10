@@ -62,76 +62,71 @@ export const SwapContractProvider = ({ children }) => {
       setTotalCost(ethers.parseEther((amount * 1000000).toString()));
     }
   };
-
-  const getInputAmount = async () => {
+  const fetchTokenData = async ({
+    contractMethod,
+    setState,
+    formatFn = (v) => v.toString(),
+    includeTestState = false,
+    customContractInstance = null,
+    buildArgs, // 👈 new: function to build args per token
+  }) => {
     try {
       const results = {};
       const tokenMap = await ReturnfetchUserTokenAddresses();
+      const extendedMap = includeTestState
+        ? { ...tokenMap, state: STATE_TESTNET }
+        : tokenMap;
 
-      console.log("Starting loop over Addresses:", tokenMap);
-
-      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
+      for (const [tokenName, TokenAddress] of Object.entries(extendedMap)) {
         try {
-          console.log(
-            `Fetching input amount for ${tokenName} at ${TokenAddress}`
-          );
+          const contract = customContractInstance
+            ? customContractInstance(TokenAddress)
+            : AllContracts.AuctionContract;
 
-          const inputAmountWei =
-            await AllContracts.AuctionContract.calculateAuctionEligibleAmount(
-              TokenAddress
-            );
+          const args = buildArgs
+            ? buildArgs(TokenAddress, tokenName)
+            : [TokenAddress];
 
-          const inputAmount = ethers.formatEther(inputAmountWei); // 👈 convert to ether
-          const inputAmountNoDecimals = Math.floor(Number(inputAmount));
-          console.log(`Input amount for ${tokenName}:`, inputAmountNoDecimals);
+          if (!contract || typeof contract[contractMethod] !== "function") {
+            throw new Error(`Method ${contractMethod} not found on contract`);
+          }
 
-          results[tokenName] = inputAmountNoDecimals;
+          const rawResult = await contract[contractMethod](...args);
+          const formattedResult = formatFn(rawResult);
+
+          results[tokenName] = formattedResult;
         } catch (err) {
-          console.error(`Error fetching input amount for ${tokenName}:`, err);
+          console.error(
+            `❌ Error calling ${contractMethod} for ${tokenName}:`,
+            err
+          );
           results[tokenName] = "not started";
         }
       }
 
-      console.log("Final input amounts:", results);
-      setInputAmount(results);
-    } catch (e) {
-      console.error("Unexpected error fetching input amounts:", e);
+      setState(results);
+      return results;
+    } catch (err) {
+      console.error("Top-level error in fetchTokenData:", err);
+      return {};
     }
   };
 
+  const getInputAmount = async () => {
+    await fetchTokenData({
+      contractMethod: "calculateAuctionEligibleAmount",
+      setState: setInputAmount,
+      formatFn: (v) => Math.floor(Number(ethers.formatEther(v))),
+    });
+  };
+
   const getAirdropAmount = async () => {
-    try {
-      const results = {};
-      const tokenMap = await ReturnfetchUserTokenAddresses();
-
-      console.log("Starting loop over Addresses:", tokenMap);
-
-      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        console.log(
-          `Fetching airdrop amount for ${tokenName} at ${TokenAddress}`
-        );
-
-        const airdropAmountWei =
-          await AllContracts.AuctionContract.getClaimableReward(
-            address,
-            TokenAddress
-          ); // 👈 assuming this function accepts a token address
-
-        const airdropAmount = ethers.formatEther(airdropAmountWei); // Convert from Wei
-        const airdropAmountNoDecimals = Math.floor(Number(airdropAmount));
-        console.log(
-          `Airdrop amount for ${tokenName}:`,
-          airdropAmountNoDecimals
-        );
-
-        results[tokenName] = airdropAmountNoDecimals;
-      }
-
-      console.log("Final airdrop amounts:", results);
-      setAirdropAmount(results);
-    } catch (e) {
-      console.error("Error fetching airdrop amounts:", e);
-    }
+    await fetchTokenData({
+      contractMethod: "getClaimableReward",
+      setState: setAirdropAmount,
+      formatFn: (v) => Math.floor(Number(ethers.formatEther(v))),
+      buildArgs: (tokenAddress) => [address, tokenAddress],
+    });
   };
 
   useEffect(() => {
@@ -174,73 +169,19 @@ export const SwapContractProvider = ({ children }) => {
   }, [AllContracts]);
 
   const getCurrentAuctionCycle = async () => {
-    try {
-      const results = {};
-      const tokenMap = await ReturnfetchUserTokenAddresses();
-      console.log("Starting loop over Addresses:", tokenMap);
-
-      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        try {
-          console.log(
-            `Fetching input amount for ${tokenName} at ${TokenAddress}`
-          );
-          const CycleCountWei =
-            await AllContracts.AuctionContract.getCurrentAuctionCycle(
-              TokenAddress
-            );
-          const CycleCountNoDecimals = Math.floor(Number(CycleCountWei));
-          console.log(`Input amount for ${tokenName}:`, CycleCountNoDecimals);
-          results[tokenName] = CycleCountNoDecimals;
-        } catch (innerError) {
-          console.warn(
-            `Error fetching cycle count for ${tokenName}:`,
-            innerError
-          );
-          results[tokenName] = "not started"; // fallback value
-        }
-      }
-
-      console.log("Final Cycle amounts:", results);
-      setCurrentCycleCount(results);
-    } catch (e) {
-      console.error("Error fetching Cycle amounts:", e);
-    }
+    await fetchTokenData({
+      contractMethod: "getCurrentAuctionCycle",
+      setState: setCurrentCycleCount,
+      formatFn: (v) => Math.floor(Number(v)), // assuming the result is a number-like BigNumber
+    });
   };
 
   const getOutPutAmount = async () => {
-    try {
-      const results = {};
-      const tokenMap = await ReturnfetchUserTokenAddresses();
-      console.log("Starting loop over Addresses:", tokenMap);
-
-      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        try {
-          console.log(
-            `Fetching Output amount for ${tokenName} at ${TokenAddress}`
-          );
-
-          const OutputAmountWei =
-            await AllContracts.AuctionContract.getOutPutAmount(TokenAddress);
-
-          const OutputAmount = ethers.formatEther(OutputAmountWei); // 👈 convert to ether
-          const OutputAmountNoDecimals = Math.floor(Number(OutputAmount));
-          console.log(
-            `Output amount for ${tokenName}:`,
-            OutputAmountNoDecimals
-          );
-
-          results[tokenName] = OutputAmountNoDecimals;
-        } catch (err) {
-          console.error(`Error fetching output amount for ${tokenName}:`, err);
-          results[tokenName] = "not started";
-        }
-      }
-
-      console.log("Final Output amounts:", results);
-      setOutputAmount(results);
-    } catch (e) {
-      console.error("Unexpected error fetching output amounts:", e);
-    }
+    await fetchTokenData({
+      contractMethod: "getOutPutAmount",
+      setState: setOutputAmount,
+      formatFn: (v) => Math.floor(Number(ethers.formatEther(v))),
+    });
   };
 
   useEffect(() => {
@@ -287,32 +228,12 @@ export const SwapContractProvider = ({ children }) => {
 
   const getTokensBurned = async () => {
     try {
-      const results = {};
-      const tokenMap = await ReturnfetchUserTokenAddresses();
-      const extendedMap = {
-        ...tokenMap,
-        state: STATE_TESTNET,
-      };
-
-      console.log("Starting loop over Addresses:", extendedMap);
-
-      for (const [tokenName, TokenAddress] of Object.entries(extendedMap)) {
-        console.log(
-          `Fetching Output amount for ${tokenName} at ${TokenAddress}`
-        );
-
-        const OutputAmountWei =
-          await AllContracts.AuctionContract.getTotalTokensBurned(TokenAddress);
-
-        const OutputAmount = ethers.formatEther(OutputAmountWei); // 👈 convert to ether
-        const OutputAmountNoDecimals = Math.floor(Number(OutputAmount));
-        console.log(`Input amount for ${tokenName}:`, OutputAmountNoDecimals);
-
-        results[tokenName] = OutputAmountNoDecimals;
-      }
-
-      console.log("Final Output amounts:", results);
-      setBurnedAmount(results);
+      fetchTokenData({
+        contractMethod: "getTotalTokensBurned",
+        setState: setBurnedAmount,
+        formatFn: (v) => Math.floor(Number(ethers.formatEther(v))),
+        includeTestState: true,
+      });
     } catch (e) {
       console.error("Error fetching input amounts:", e);
     }
@@ -356,37 +277,10 @@ export const SwapContractProvider = ({ children }) => {
   };
 
   const CheckIsReverse = async () => {
-    try {
-      const results = {};
-      const tokenMap = await ReturnfetchUserTokenAddresses();
-      console.log("Starting loop over Addresses:", tokenMap);
-
-      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        try {
-          console.log(
-            `Fetching AuctionActive for ${tokenName} at ${TokenAddress}`
-          );
-          const AuctionActive =
-            await AllContracts.AuctionContract.isReverseAuctionActive(
-              TokenAddress
-            );
-          const AuctionActiveString = AuctionActive.toString();
-          console.log(`Auction Active for ${tokenName}:`, AuctionActiveString);
-          results[tokenName] = AuctionActiveString;
-        } catch (innerError) {
-          console.warn(`Error checking auction for ${tokenName}:`, innerError);
-          results[tokenName] = "not started"; // fallback if error
-        }
-      }
-
-      console.log("Final IsReverse:", JSON.stringify(results));
-      setIsReverse(results); // ✅ keep it as an object
-
-      return results;
-    } catch (e) {
-      console.error("Error fetching reverse:", e);
-      return {};
-    }
+    await fetchTokenData({
+      contractMethod: "isReverseAuctionActive",
+      setState: setIsReverse,
+    });
   };
   const TokenABI = [
     {
@@ -414,28 +308,10 @@ export const SwapContractProvider = ({ children }) => {
 
   const CheckIsAuctionActive = async () => {
     try {
-      const results = {};
-      const tokenMap = await ReturnfetchUserTokenAddresses();
-      console.log("Starting loop over Addresses:", tokenMap);
-
-      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        try {
-          console.log(
-            `Fetching AuctionActive for ${tokenName} at ${TokenAddress}`
-          );
-          const AuctionActive =
-            await AllContracts.AuctionContract.isAuctionActive(TokenAddress);
-          const AuctionActiveString = AuctionActive.toString();
-          console.log(`Auction Active for ${tokenName}:`, AuctionActiveString);
-          results[tokenName] = AuctionActiveString;
-        } catch (innerError) {
-          console.warn(`Error checking auction for ${tokenName}:`, innerError);
-          results[tokenName] = "not started"; // fallback if error
-        }
-      }
-
-      console.log("Final AuctionActive:", results);
-      setisAuctionActive(results);
+      fetchTokenData({
+        contractMethod: "isAuctionActive",
+        setState: setisAuctionActive,
+      });
     } catch (e) {
       console.error("Error fetching Auction Active:", e);
     }
@@ -469,110 +345,32 @@ export const SwapContractProvider = ({ children }) => {
   };
 
   const HasReverseSwappedAucton = async () => {
-    try {
-      const results = {};
-      const tokenMap = await ReturnfetchUserTokenAddresses();
-      console.log("Starting loop over Addresses:", tokenMap);
-
-      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        try {
-          console.log(
-            `Fetching ReverseSwapped for ${tokenName} at ${TokenAddress}`
-          );
-
-          const UserHasSwapped =
-            await AllContracts.AuctionContract.getUserHasReverseSwapped(
-              address,
-              TokenAddress
-            );
-
-          const UserHasSwappedString = UserHasSwapped.toString();
-          console.log(
-            `User has ReverseSwapped for ${tokenName}:`,
-            UserHasSwappedString
-          );
-          results[tokenName] = UserHasSwappedString;
-        } catch (tokenError) {
-          console.warn(`Error for ${tokenName} in ReverseSwapped:`, tokenError);
-          results[tokenName] = "not started";
-        }
-      }
-
-      console.log("Final UserHasReverseSwapped:", results);
-      setUserHasReverseSwapped(results);
-    } catch (e) {
-      console.error("Error in HasReverseSwappedAucton:", e);
-    }
+    await fetchTokenData({
+      contractMethod: "getUserHasReverseSwapped",
+      setState: setUserHasReverseSwapped,
+      formatFn: (v) => v.toString(), // ensures consistent string output
+      buildArgs: (tokenAddress) => [address, tokenAddress], // user address + token
+    });
   };
 
   const HasSwappedAucton = async () => {
-    try {
-      const results = {};
-      const tokenMap = await ReturnfetchUserTokenAddresses();
-      console.log("Starting loop over Addresses:", tokenMap);
-
-      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        try {
-          console.log(`Fetching Swapped for ${tokenName} at ${TokenAddress}`);
-
-          const UserHasSwapped =
-            await AllContracts.AuctionContract.getUserHasSwapped(
-              address,
-              TokenAddress
-            );
-
-          const UserHasSwappedString = UserHasSwapped.toString();
-          console.log(
-            `User has Swapped for ${tokenName}:`,
-            UserHasSwappedString
-          );
-          results[tokenName] = UserHasSwappedString;
-        } catch (tokenError) {
-          console.warn(`Error for ${tokenName} in Swapped:`, tokenError);
-          results[tokenName] = "not started";
-        }
-      }
-
-      console.log("Final UserHasSwapped:", results);
-      setUserHashSwapped(results);
-    } catch (e) {
-      console.error("Error in HasSwappedAucton:", e);
-    }
+    await fetchTokenData({
+      contractMethod: "getUserHasSwapped",
+      setState: setUserHashSwapped,
+      formatFn: (v) => v.toString(), // ensures consistent string output
+      buildArgs: (tokenAddress) => [address, tokenAddress], // user address + token
+    });
   };
 
   const isAirdropClaimed = async () => {
-    try {
-      const results = {};
-      const tokenMap = await ReturnfetchUserTokenAddresses();
-      console.log("Starting loop over Addresses:", tokenMap);
-
-      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        console.log(
-          `Fetching AirdropClaimed for ${tokenName} at ${TokenAddress}`
-        );
-
-        const AirdropClaimed =
-          await AllContracts.AuctionContract.hasAirdroppedClaim(
-            address,
-            TokenAddress
-          );
-
-        const AirdropClaimedString = AirdropClaimed.toString(); // 👈 convert to string
-
-        console.log(
-          `User has Claimed Airdrop for ${tokenName}:`,
-          AirdropClaimedString
-        );
-
-        results[tokenName] = AirdropClaimedString;
-      }
-
-      console.log("Final AirdropClaimed:", results);
-      setAirdropClaimed(results);
-    } catch (e) {
-      console.error("Error fetching reverse:", e);
-    }
+    await fetchTokenData({
+      contractMethod: "hasAirdroppedClaim",
+      setState: setAirdropClaimed,
+      formatFn: (v) => v.toString(), // Convert boolean to string
+      buildArgs: (tokenAddress) => [address, tokenAddress], // Pass user address and token address
+    });
   };
+
   const AddressesFromContract = async () => {
     if (!AllContracts?.AuctionContract) {
       console.warn("AuctionContract not found");
@@ -592,6 +390,7 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching addresses:", error);
     }
   };
+
   const fetchUserTokenAddresses = async () => {
     if (!AllContracts?.AuctionContract) {
       console.warn("AuctionContract not found");
@@ -839,28 +638,42 @@ export const SwapContractProvider = ({ children }) => {
     }
   };
   console.log("Is array:", Array.isArray(UsersSupportedTokens));
-
   useEffect(() => {
-    fetchUserTokenAddresses();
-    getInputAmount();
-    getOutPutAmount();
-    getTokensBurned();
-    CheckIsAuctionActive();
-    // getAuctionTimeLeft();
-    getAirdropAmount();
-    CheckIsReverse();
-    getTokenBalances();
-    isAirdropClaimed();
-    AddressesFromContract();
-    isRenounced();
-    getTokenNamesForUser();
-    isTokenSupporteed();
-    // getTokensByUser();
-    getTokenNamesByUser();
-    HasSwappedAucton();
-    HasReverseSwappedAucton();
-    getCurrentAuctionCycle();
-  }, [AllContracts, address]); // Adjust based on when you want it to run
+    const functions = [
+      fetchUserTokenAddresses,
+      getInputAmount,
+      getOutPutAmount,
+      getTokensBurned,
+      CheckIsAuctionActive,
+      getAirdropAmount,
+      CheckIsReverse,
+      getTokenBalances,
+      isAirdropClaimed,
+      AddressesFromContract,
+      isRenounced,
+      getTokenNamesForUser,
+      isTokenSupporteed,
+      getTokenNamesByUser,
+      HasSwappedAucton,
+      HasReverseSwappedAucton,
+      getCurrentAuctionCycle,
+    ];
+
+    const runAll = async () => {
+      const results = await Promise.allSettled(functions.map((fn) => fn()));
+      results.forEach((result, index) => {
+        if (result.status === "rejected") {
+          console.error(
+            `Function ${functions[index].name} failed:`,
+            result.reason
+          );
+        }
+      });
+    };
+
+    runAll();
+  }, [AllContracts, address]);
+  // Adjust based on when you want it to run
 
   const ERC20_ABI = [
     "function approve(address spender, uint256 amount) external returns (bool)",

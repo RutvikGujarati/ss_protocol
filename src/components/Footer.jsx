@@ -23,7 +23,7 @@ const Footer = () => {
             className="flex-grow-1 text-center text-white"
             style={{ fontSize: "14px", marginLeft: "200px" }}
           >
-            <i>The blockchain job where your swaps shape the market.</i>
+            The blockchain job where your swaps shape the market.
           </div>
           {/* Right side - links */}
           <div className="d-flex align-items-center gap-3 gap-md-4">
