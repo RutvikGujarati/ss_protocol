@@ -9,6 +9,7 @@ import { TokensDetails } from "../data/TokensDetails";
 import { Auction_TESTNET } from "../ContractAddresses";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { Tooltip } from "bootstrap";
+import IOSpinner from "../Constants/Spinner";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -27,10 +28,8 @@ const DetailsInfo = ({ selectedToken }) => {
     DavAddress,
   } = useSwapContract();
   const { totalStateBurned } = useDAvContract();
-
   const [localSearchQuery, setLocalSearchQuery] = useState("");
-
-  const tokens = TokensDetails();
+  const { tokens, loading } = TokensDetails(); // Destructure tokens and loading
 
   useEffect(() => {
     const handleStorageChange = (event) => {
@@ -53,6 +52,7 @@ const DetailsInfo = ({ selectedToken }) => {
       cell.style.cursor = "pointer";
     });
   }, []);
+
   const targetRatio = 0.03;
 
   const getVaultIndicator = (token) => {
@@ -122,6 +122,7 @@ const DetailsInfo = ({ selectedToken }) => {
       item.tokenName.toLowerCase().includes(localSearchQuery.toLowerCase()) ||
       item.emoji.includes(localSearchQuery)
   );
+
   const getVaultRatio = (token) => {
     if (token.tokenName === "DAV" || token.tokenName === "STATE") return null;
     return (500000000000 - token.DavVault) / token.DavVault;
@@ -130,6 +131,11 @@ const DetailsInfo = ({ selectedToken }) => {
   const dataToShow = selectedToken
     ? tokens.find((token) => token.tokenName === selectedToken.name)
     : filteredTokens[0] || tokens[0];
+
+  // Filter static tokens (DAV and STATE) for display during loading
+  const staticTokens = filteredTokens.filter(
+    (token) => token.tokenName === "DAV" || token.tokenName === "STATE"
+  );
 
   return (
     <div className="container mt-3 p-0">
@@ -145,177 +151,176 @@ const DetailsInfo = ({ selectedToken }) => {
       </div>
       <div className="table-responsive">
         {dataToShow ? (
-          <table className="table table-dark">
-            <thead>
-              <tr>
-                <th className="text-center">Token Name</th>
-                <th className="text-center">Current Ratio</th>
-                <th className="text-center">Auctions</th>
-                <th className="text-center">DAV Vault</th>
-                <th className="text-center">Burned</th>
-                <th className="text-center">Info</th>
-                <th></th>
-                <th className="text-center">
-                  <a
-                    href={`https://scan.v4.testnet.pulsechain.com/#/address/${Auction_TESTNET}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ fontSize: "15px", color: "white" }}
-                  >
-                    <i className="bi bi-box-arrow-up-right"></i>
-                  </a>
-                </th>
-                {dataToShow.tokenName !== "DAV" ? (
-                  <th className="fw-bold text-uppercase text-end col-auto">
-                    <button className="swap-btn py-1 mx-3 btn btn-primary btn-sm">
-                      Price: ${formatPrice(dataToShow.Price)}
-                    </button>
+          <>
+            <table className="table table-dark">
+              <thead>
+                <tr>
+                  <th className="text-center">Token Name</th>
+                  <th className="text-center">Current Ratio</th>
+                  <th className="text-center">Auctions</th>
+                  <th className="text-center">DAV Vault</th>
+                  <th className="text-center">Burned</th>
+                  <th className="text-center">Info</th>
+                  <th></th>
+                  <th className="text-center">
+                    <a
+                      href={`https://scan.v4.testnet.pulsechain.com/#/address/${Auction_TESTNET}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: "15px", color: "white" }}
+                    >
+                      <i className="bi bi-box-arrow-up-right"></i>
+                    </a>
                   </th>
-                ) : (
-                  <th className="col-auto"></th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTokens
-                .filter((token) => token.isSupported)
-                .sort((a, b) => {
-                  const order = { DAV: 0, STATE: 1 };
+                  {dataToShow.tokenName !== "DAV" ? (
+                    <th className="fw-bold text-uppercase text-end col-auto">
+                      <button className="swap-btn py-1 mx-3 btn btn-primary btn-sm">
+                        Price: ${formatPrice(dataToShow.Price)}
+                      </button>
+                    </th>
+                  ) : (
+                    <th className="col-auto"></th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {(loading ? staticTokens : filteredTokens)
+                  .filter((token) => token.isSupported)
+                  .sort((a, b) => {
+                    const order = { DAV: 0, STATE: 1 };
 
-                  // Handle DAV and STATE first
-                  if (
-                    order[a.tokenName] !== undefined ||
-                    order[b.tokenName] !== undefined
-                  ) {
-                    return (
-                      (order[a.tokenName] ?? 99) - (order[b.tokenName] ?? 99)
-                    );
-                  }
+                    if (
+                      order[a.tokenName] !== undefined ||
+                      order[b.tokenName] !== undefined
+                    ) {
+                      return (
+                        (order[a.tokenName] ?? 99) - (order[b.tokenName] ?? 99)
+                      );
+                    }
 
-                  // Now sort by vault ratio
-                  const aRatio = getVaultRatio(a);
-                  const bRatio = getVaultRatio(b);
+                    const aRatio = getVaultRatio(a);
+                    const bRatio = getVaultRatio(b);
 
-                  const aIsRed = aRatio !== null && aRatio > targetRatio;
-                  const bIsRed = bRatio !== null && bRatio > targetRatio;
+                    const aIsRed = aRatio !== null && aRatio > targetRatio;
+                    const bIsRed = bRatio !== null && bRatio > targetRatio;
 
-                  return aIsRed === bIsRed ? 0 : aIsRed ? -1 : 1;
-                })
-
-                .map((token) => (
-                  <tr key={token.tokenName}>
-                    <td className="text-center">{`${token.emoji} ${token.tokenName}`}</td>
-                    <td className="text-center">
-                      <div className="mx-2">
-                        {token.tokenName === "DAV" ||
-                        token.tokenName === "STATE"
-                          ? "------"
-                          : "1:1000"}
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <div className="mx-4">
-                        {token.tokenName === "DAV" ||
-                        token.tokenName === "STATE"
-                          ? "-----"
-                          : `${token.Cycle}/21`}
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <div className="mx-4">
-                        {token.tokenName === "DAV"
-                          ? "-----"
-                          : `${formatWithCommas(token.DavVault)}`}
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <div className="mx-4">
-                        {token.tokenName === "DAV"
-                          ? "-----"
-                          : token.tokenName === "STATE"
-                          ? formatWithCommas(
-                              Number(token.burned || 0) +
-                                Number(totalStateBurned)
-                            )
-                          : formatWithCommas(token.burned || 0)}
-                      </div>
-                    </td>
-                    <td className="text-center">
-                      <div className="d-flex justify-content-center align-items-center gap-3">
-                        {/* Column 1: External link */}
-                        <div className="d-flex flex-column align-items-center">
-                          <a
-                            href={`https://scan.v4.testnet.pulsechain.com/#/address/${token.TokenAddress}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ fontSize: "15px", color: "white" }}
-                          >
-                            <i className="bi bi-box-arrow-up-right"></i>
-                          </a>
+                    return aIsRed === bIsRed ? 0 : aIsRed ? -1 : 1;
+                  })
+                  .map((token) => (
+                    <tr key={token.tokenName}>
+                      <td className="text-center">{`${token.emoji} ${token.tokenName}`}</td>
+                      <td className="text-center">
+                        <div className="mx-2">
+                          {token.tokenName === "DAV" ||
+                          token.tokenName === "STATE"
+                            ? "------"
+                            : "1:1000"}
                         </div>
-
-                        {/* Column 2: MetaMask Icon */}
-                        <div
-                          className="d-flex  align-items-center"
-                          style={{ marginRight: "-10px" }}
-                        >
-                          <img
-                            src={MetaMaskIcon}
-                            onClick={() =>
-                              handleAddToken(
-                                token.TokenAddress,
-                                token.tokenName === "DAV"
-                                  ? "pDAV"
-                                  : token.tokenName === "STATE"
-                                  ? "State"
-                                  : token.tokenName
+                      </td>
+                      <td className="text-center">
+                        <div className="mx-4">
+                          {token.tokenName === "DAV" ||
+                          token.tokenName === "STATE"
+                            ? "-----"
+                            : `${token.Cycle}/21`}
+                        </div>
+                      </td>
+                      <td className="text-center">
+                        <div className="mx-4">
+                          {token.tokenName === "DAV"
+                            ? "-----"
+                            : `${formatWithCommas(token.DavVault)}`}
+                        </div>
+                      </td>
+                      <td className="text-center">
+                        <div className="mx-4">
+                          {token.tokenName === "DAV"
+                            ? "-----"
+                            : token.tokenName === "STATE"
+                            ? formatWithCommas(
+                                Number(token.burned || 0) +
+                                  Number(totalStateBurned)
                               )
-                            }
-                            alt="MetaMask"
-                            style={{
-                              width: "20px",
-                              height: "20px",
-                              cursor: "pointer",
-                            }}
-                          />
+                            : formatWithCommas(token.burned || 0)}
                         </div>
-
-                        {/* Column 3: Status / Button */}
-                        <div
-                          className="d-flex flex-column align-items-center"
-                          style={{ minWidth: "80px" }}
-                        >
-                          {token.tokenName === "DAV" ? (
-                            "-------"
-                          ) : token.tokenName === "STATE" ? (
-                            DavAddress ===
-                            "0x0000000000000000000000000000000000000000" ? (
-                              <button
-                                className="btn btn-sm swap-btn btn-primary"
-                                onClick={() => setDavAndStateIntoSwap()}
-                              >
-                                Add
-                              </button>
+                      </td>
+                      <td className="text-center">
+                        <div className="d-flex justify-content-center align-items-center gap-3">
+                          <div className="d-flex flex-column align-items-center">
+                            <a
+                              href={`https://scan.v4.testnet.pulsechain.com/#/address/${token.TokenAddress}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ fontSize: "15px", color: "white" }}
+                            >
+                              <i className="bi bi-box-arrow-up-right"></i>
+                            </a>
+                          </div>
+                          <div
+                            className="d-flex align-items-center"
+                            style={{ marginRight: "-10px" }}
+                          >
+                            <img
+                              src={MetaMaskIcon}
+                              onClick={() =>
+                                handleAddToken(
+                                  token.TokenAddress,
+                                  token.tokenName === "DAV"
+                                    ? "pDAV"
+                                    : token.tokenName === "STATE"
+                                    ? "State"
+                                    : token.tokenName
+                                )
+                              }
+                              alt="MetaMask"
+                              style={{
+                                width: "20px",
+                                height: "20px",
+                                cursor: "pointer",
+                              }}
+                            />
+                          </div>
+                          <div
+                            className="d-flex flex-column align-items-center"
+                            style={{ minWidth: "80px" }}
+                          >
+                            {token.tokenName === "DAV" ? (
+                              "-------"
+                            ) : token.tokenName === "STATE" ? (
+                              DavAddress ===
+                              "0x0000000000000000000000000000000000000000" ? (
+                                <button
+                                  className="btn btn-sm swap-btn btn-primary"
+                                  onClick={() => setDavAndStateIntoSwap()}
+                                >
+                                  Add
+                                </button>
+                              ) : (
+                                <span>ADDED</span>
+                              )
+                            ) : token.isRenounced === "true" ? (
+                              <span>Renounced</span>
                             ) : (
-                              <span>ADDED</span>
-                            )
-                          ) : token.isRenounced === "true" ? (
-                            <span>Renounced</span>
-                          ) : (
-                            <span >-------</span>
-                          )}
+                              <span>-------</span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </td>
-
-                    <td></td>
-                    <td>{getVaultIndicator(token)}</td>
-
-                    <td></td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+                      </td>
+                      <td></td>
+                      <td>{getVaultIndicator(token)}</td>
+                      <td></td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+            {loading && staticTokens.length > 0 && (
+              <div className="container text-center mt-5">
+                <p className="funny-loading-text">
+                  <IOSpinner /> Fetching..
+                </p>
+              </div>
+            )}
+          </>
         ) : (
           <div className="alert alert-warning text-center" role="alert">
             Currently No detailed information is available for the selected

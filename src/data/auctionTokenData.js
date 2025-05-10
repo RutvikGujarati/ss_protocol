@@ -1,40 +1,45 @@
-
-
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { PriceContext } from "../api/StatePrice";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
+
 export const useAuctionTokens = () => {
 	const prices = useContext(PriceContext);
 	const {
-		SwapTokens, isReversed, AuctionTime, RatioTargetsofTokens, IsAuctionActive,
-		userHashSwapped, userHasReverseSwapped, InputAmount, OutPutAmount,
-		AirdropClaimed, TokenNames, tokenMap,
+		SwapTokens,
+		isReversed,
+		AuctionTime,
+		RatioTargetsofTokens,
+		IsAuctionActive,
+		userHashSwapped,
+		userHasReverseSwapped,
+		InputAmount,
+		OutPutAmount,
+		AirdropClaimed,
+		TokenNames,
+		tokenMap,
 	} = useSwapContract();
 	const { Emojies } = useDAvContract();
+	const [loading, setLoading] = useState(true); // Add loading state
 
 	const dynamicTokenNames = Array.from(TokenNames || []).filter(
 		(name) => name !== "DAV" && name !== "STATE"
 	);
 
-
 	const handleAddMap = {
 		second: () => { }, // Replace with actual handler if exists
-		// Add more mappings
 	};
-
-
 
 	const tokenConfigs = dynamicTokenNames.map((contract, index) => {
 		const id = contract;
 		const handleAddToken = handleAddMap[contract] || (() => { });
-		const address = tokenMap?.[contract] || "0x0000000000000000000000000000000000000000";
+		const address =
+			tokenMap?.[contract] || "0x0000000000000000000000000000000000000000";
 
 		return {
 			id,
 			name: id,
-			emoji: Emojies?.[index] || "🔹", // fallback if no emoji
-
+			emoji: Emojies?.[index] || "🔹",
 			ContractName: contract,
 			token: address,
 			handleAddToken,
@@ -56,10 +61,43 @@ export const useAuctionTokens = () => {
 		};
 	});
 
+	useEffect(() => {
+		const checkDataFetched = () => {
+			// Ensure all required arrays/objects are non-empty and defined
+			const isDataReady =
+				TokenNames?.length > 0 &&
+				AuctionTime &&
+				tokenMap &&
+				isReversed &&
+				IsAuctionActive &&
+				userHashSwapped &&
+				userHasReverseSwapped &&
+				InputAmount &&
+				OutPutAmount &&
+				AirdropClaimed;
 
-	return tokenConfigs;
+			if (isDataReady) {
+				setLoading(false); 
+			} else {
+				setLoading(true); 
+			}
+		};
 
+		checkDataFetched();
 
+	}, [
+		TokenNames,
+		AuctionTime,
+		tokenMap,
+		Emojies,
+		isReversed,
+		IsAuctionActive,
+		userHashSwapped,
+		userHasReverseSwapped,
+		InputAmount,
+		OutPutAmount,
+		AirdropClaimed,
+	]);
+
+	return { tokens: tokenConfigs, loading }; // Return loading state
 };
-
-

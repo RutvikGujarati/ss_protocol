@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import {
 	DAV_TESTNET,
 	DAV_TOKEN_SONIC_ADDRESS,
@@ -18,6 +18,7 @@ export const TokensDetails = () => {
 	const swap = useSwapContract();
 	const { Emojies } = useDAvContract();
 	const chainId = useChainId();
+	const [loading, setLoading] = useState(true); // Add loading state
 
 	const staticTokens = [
 		{
@@ -61,7 +62,6 @@ export const TokensDetails = () => {
 	];
 
 	const dynamicTokens = Array.from(swap.TokenNames || [])
-
 		.filter((name) => name !== "DAV" && name !== "STATE")
 		.map((name) => ({
 			name,
@@ -72,28 +72,88 @@ export const TokensDetails = () => {
 
 	const data = chainId === 146 ? sonicTokens : [...staticTokens, ...dynamicTokens];
 
-	return data.map((token) => {
+	const tokens = data.map((token) => {
 		const key = token.key;
-		const emojiMap = Array.isArray(swap.TokenNames) && Array.isArray(Emojies)
-			? swap.TokenNames.reduce((acc, name, index) => {
-				acc[name.toLowerCase()] = Emojies[index];
-				return acc;
-			}, {})
-			: {};
-
+		const emojiMap =
+			Array.isArray(swap.TokenNames) && Array.isArray(Emojies)
+				? swap.TokenNames.reduce((acc, name, index) => {
+					acc[name.toLowerCase()] = Emojies[index];
+					return acc;
+				}, {})
+				: {};
 
 		return {
 			tokenName: token.name,
 			key: shortenAddress(token.address),
 			name: token.displayName || token.name,
 			Price: token.price,
-			emoji: token.name == "DAV" ? "🧮" : token.name == "STATE" ? "🧮" : emojiMap[key.toLowerCase()],
+			emoji:
+				token.name === "DAV"
+					? "🧮"
+					: token.name === "STATE"
+						? "🧮"
+						: emojiMap[key.toLowerCase()] || "🔹", // Fallback emoji for dynamic tokens
 			isRenounced: swap.isTokenRenounce[token.name],
 			DavVault: swap.TokenBalance?.[key],
 			burned: swap.burnedAmount?.[key],
-			isSupported: token.name == "DAV" ? "true" : token.name == "STATE" ? "true" : swap.supportedToken?.[key],
+			isSupported:
+				token.name === "DAV"
+					? "true"
+					: token.name === "STATE"
+						? "true"
+						: swap.supportedToken?.[key],
 			TokenAddress: token.address,
-			Cycle: swap.CurrentCycleCount?.[key] == "not started" ? "Not Started" : swap.CurrentCycleCount?.[key] + 1,
+			Cycle:
+				swap.CurrentCycleCount?.[key] === "not started"
+					? "Not Started"
+					: swap.CurrentCycleCount?.[key] + 1,
 		};
 	});
+
+	// Check if all required data for dynamic tokens is fetched
+	useEffect(() => {
+		const checkDataFetched = () => {
+			// If there are no dynamic tokens, set loading to false as only static tokens (DAV and STATE) are present
+			if (dynamicTokens.length === 0) {
+				setLoading(false);
+				return;
+			}
+
+			// Ensure all required arrays/objects for dynamic tokens are non-empty and defined
+			const isDataReady =
+				swap.TokenNames?.length > 0 &&
+				swap.tokenMap &&
+				Object.keys(swap.tokenMap).length > 0 &&
+				Emojies?.length > 0 &&
+				swap.isTokenRenounce &&
+				swap.TokenBalance &&
+				swap.burnedAmount &&
+				swap.supportedToken &&
+				swap.CurrentCycleCount &&
+				prices;
+
+			if (isDataReady) {
+				setLoading(false); // All data for dynamic tokens is fetched
+			} else {
+				setLoading(true); // Keep loading until all data is ready
+			}
+		};
+
+		checkDataFetched();
+
+		// Re-check when any of the dependencies change
+	}, [
+		swap.TokenNames,
+		swap.tokenMap,
+		Emojies,
+		swap.isTokenRenounce,
+		swap.TokenBalance,
+		swap.burnedAmount,
+		swap.supportedToken,
+		swap.CurrentCycleCount,
+		prices,
+		dynamicTokens.length, // Add dynamicTokens.length to handle case when no dynamic tokens exist
+	]);
+
+	return { tokens, loading }; // Return tokens and loading state
 };

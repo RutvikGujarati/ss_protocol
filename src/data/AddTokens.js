@@ -4,12 +4,13 @@ import { ethers } from "ethers";
 import FluxinLogo from "../assets/2.png";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
+import { useEffect, useState } from "react";
 
 // ✅ 1. First hook: for general token config
 export const useAddTokens = () => {
 	const { names, users, Emojies, isUsed } = useDAvContract(); // tokenMap replaces deployedAddress
 	const { tokenMap, TimeLeftClaim, supportedToken, isTokenRenounce } = useSwapContract(); // tokenMap replaces deployedAddress
-
+	const [AuthLoading, setAuthLoading] = useState(true);
 
 	// Create name → isUsed map
 	const isUsedMap = names.reduce((acc, name, index) => {
@@ -40,23 +41,51 @@ export const useAddTokens = () => {
 		};
 	});
 
-	return tokenConfigs.map(config => ({
-		id: config.user,
-		user: config.user,
-		name: config.name,
-		isDeployed: config.isDeployed,
-		Emojis: config.Emojis,
-		isRenounceToken: config.isRenounceToken,
-		isAdded: config.isAdded,
-		Pname: `${config.name} - State - ${config.name}`,
-		ReverseName: `State - ${config.name}`,
-		ContractName: config.contract === 'OneDollar' ? 'oneD' : config.contract,
-		image: config.image,
-		TokenAddress: config.tokenAddress,
-		TimeLeft: config.timeLeft,
-	}));
-};
+	useEffect(() => {
+		const checkDataFetched = () => {
+			// Ensure all required arrays/objects are non-empty and defined
+			const isDataReady =
+				names?.length > 0 &&
+				users?.length > 0 &&
+				Emojies?.length > 0 &&
+				isUsed?.length > 0 &&
+				tokenMap &&
+				Object.keys(tokenMap).length > 0 &&
+				TimeLeftClaim &&
+				supportedToken &&
+				isTokenRenounce;
 
+			if (isDataReady) {
+				setAuthLoading(false); // All data is fetched
+			} else {
+				setAuthLoading(true); // Keep loading until all data is ready
+			}
+		};
+
+		checkDataFetched();
+
+		// Re-check when any of the dependencies change
+	}, [names, users, Emojies, isUsed, tokenMap, TimeLeftClaim, supportedToken, isTokenRenounce]);
+
+	return {
+		tokens: tokenConfigs.map((config) => ({
+			id: config.user,
+			user: config.user,
+			name: config.name,
+			isDeployed: config.isDeployed,
+			Emojis: config.Emojis,
+			isRenounceToken: config.isRenounceToken,
+			isAdded: config.isAdded,
+			Pname: `${config.name} - State - ${config.name}`,
+			ReverseName: `State - ${config.name}`,
+			ContractName: config.contract === "OneDollar" ? "oneD" : config.contract,
+			image: config.image,
+			TokenAddress: config.tokenAddress,
+			TimeLeft: config.timeLeft,
+		})),
+		AuthLoading, // Return loading state
+	};
+};
 
 // ✅ 2. Second hook: for owner-specific supported tokens
 
