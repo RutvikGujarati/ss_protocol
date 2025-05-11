@@ -287,3 +287,6 @@ table.table-dark tbody tr:last-child td:last-child {
   padding: 24px;
   pointer-events: auto;
 }
+.small-font-row * {
+  font-size: 13px !important;
+}

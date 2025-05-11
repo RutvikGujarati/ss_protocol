@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DataTable.css";
-// import MetaMaskIcon from "../assets/metamask-icon.png";
+import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useEffect, useState } from "react";
@@ -31,6 +31,7 @@ const DataTable = () => {
     CheckMintBalance,
     isCliamProcessing,
     fetchUserTokenAddresses,
+    handleAddToken,
     tokenMap,
     giveRewardForAirdrop,
   } = useSwapContract();
@@ -225,6 +226,7 @@ const DataTable = () => {
                       id,
                       name,
                       emoji,
+                      token,
                       // currentRatio,
                       SwapT,
                       ContractName,
@@ -241,15 +243,14 @@ const DataTable = () => {
                     },
                     index
                   ) => (
-                    <tr key={index}>
+                    <tr className="small-font-row" key={index}>
                       <td></td>
                       <td className="timer-cell">
                         {formatCountdown(TimeLeft)}
                       </td>
 
                       <td className="justify-content-center">{`${emoji}${name}`}</td>
-
-                      <td>
+                      <td style={{ position: "relative" }}>
                         <button
                           onClick={() => Checking(id, ContractName)}
                           className="btn btn-primary btn-sm swap-btn"
@@ -261,6 +262,28 @@ const DataTable = () => {
                             ? " CLAIMED"
                             : `${formatWithCommas(AirDropAmount[name])} `}
                         </button>
+
+                        <img
+                          src={MetaMaskIcon}
+                          onClick={() =>
+                            handleAddToken(
+                              token,
+                              name === "DAV"
+                                ? "pDAV"
+                                : name === "STATE"
+                                ? "State"
+                                : name
+                            )
+                          }
+                          alt="MetaMask"
+                          style={{
+                            width: "20px",
+                            height: "20px",
+                            cursor: "pointer",
+                            marginLeft: "6px",
+                            verticalAlign: "middle",
+                          }}
+                        />
                       </td>
 
                       <td>
@@ -312,7 +335,7 @@ const DataTable = () => {
                                   className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
                                 >
                                   {userHasReverse == "true"
-                                    ? "Reverse Swapped"
+                                    ? "Reverse Swapped ✅"
                                     : swappingStates[id]
                                     ? "Swapping..."
                                     : "Reverse Swap"}
@@ -330,7 +353,7 @@ const DataTable = () => {
                                   className="btn btn-sm swap-btn btn-primary"
                                 >
                                   {userHasSwapped == "true"
-                                    ? "Swapped"
+                                    ? "Swapped ✅"
                                     : swappingStates[id]
                                     ? "Swapping..."
                                     : buttonTextStates[id] || "Swap"}
@@ -348,7 +371,7 @@ const DataTable = () => {
                             </h4>
                             <p className="popup-para">
                               You need to mint additional DAV tokens to claim
-                              extra rewards.
+                              extra.
                             </p>
                             <button
                               onClick={() =>
