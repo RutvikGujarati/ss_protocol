@@ -164,7 +164,7 @@ const DataTable = () => {
 
   return !isConnected || !address ? (
     <div className="container text-center mt-5">
-      <p className="text-light">Not connected. Please connect your wallet.</p>
+      <p className="text-light">Please connect your wallet.</p>
     </div>
   ) : isAuction ? (
     loading ? (
@@ -178,10 +178,11 @@ const DataTable = () => {
             <thead>
               <tr>
                 <th></th>
-                <th>Auction Timer</th>
+                <th>Emoticon</th>
                 <th>Token Name</th>
                 <th>Claim Airdrop</th>
 
+                <th>Ratio Swapping Auction</th>
                 <th>Ratio Swap</th>
                 <th>Market Maker Instructions</th>
                 <th></th>
@@ -192,31 +193,22 @@ const DataTable = () => {
               {tokens
                 .filter(
                   ({
-                    //   userHasSwapped,
                     name,
-                    // userHasReverse,
+
                     isReversing,
                     AuctionStatus,
                   }) => {
                     console.log(`Filter Conditions:${name}`, {
-                      // userHasSwapped,
-                      //   userHasReverse,
                       isReversing,
                       AuctionStatus,
-                      // dbCheck: db >= DavRequiredAmount,
                     });
 
                     if (AuctionStatus == "false" && isReversing == "true") {
-                      //   if (userHasReverse == "false") {
-                      //     return true;
-                      //   }
                       if (isReversing == "false") {
                         return false;
                       }
                     } else if (AuctionStatus == "true") {
                       return true;
-                      // if (userHasSwapped == "false") {
-                      // }
                     }
                   }
                 )
@@ -245,11 +237,8 @@ const DataTable = () => {
                   ) => (
                     <tr className="small-font-row" key={index}>
                       <td></td>
-                      <td className="timer-cell">
-                        {formatCountdown(TimeLeft)}
-                      </td>
-
-                      <td className="justify-content-center">{`${emoji}${name}`}</td>
+                      <td>{emoji}</td>
+                      <td className="justify-content-center">{`${name}`}</td>
                       <td style={{ position: "relative" }}>
                         <button
                           onClick={() => Checking(id, ContractName)}
@@ -285,7 +274,9 @@ const DataTable = () => {
                           }}
                         />
                       </td>
-
+					  <td className="timer-cell">
+                        {formatCountdown(TimeLeft)}
+                      </td>
                       <td>
                         <div className="d-flex justify-content-center gap-3 w-100">
                           {id !== "state" && (
@@ -546,7 +537,7 @@ const DataTable = () => {
                   </tr>
                 ) : (
                   <tr>
-                    <th></th>
+                    <th>Emoticon</th>
                     <th>Token Name</th>
                     <th>Supply</th>
 
@@ -782,8 +773,8 @@ const DataTable = () => {
                         index
                       ) => (
                         <tr key={index}>
-                          <td></td>
-                          <td>{`${Emojis} ${name}`}</td>
+                          <td>{Emojis}</td>
+                          <td>{`${name}`}</td>
                           <td>500 Billion</td>
                           <td></td>
                           <td

@@ -208,7 +208,14 @@ const DetailsInfo = ({ selectedToken }) => {
                   })
                   .map((token) => (
                     <tr key={token.tokenName}>
-                      <td className="text-center">{`${token.emoji} ${token.tokenName}`}</td>
+                      <td className="text-center align-middle">
+                        <div className="d-flex flex-column align-items-center">
+                          <span style={{ fontSize: "1rem", lineHeight: "1" }}>
+                            {token.emoji}
+                          </span>
+                          <span>{token.tokenName}</span>
+                        </div>
+                      </td>
                       <td className="text-center">
                         <div className="mx-2">
                           {token.tokenName === "DAV" ||
