@@ -469,19 +469,30 @@ const InfoCards = () => {
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
                       <div className="carddetails2 mb-4">
                         <div className="d-flex justify-content-center ">
-                          <p className="mb-1 detailText">Dav Token holdings </p>
+                          <p className="mb-1 detailText">TREASURY</p>
                         </div>
                         <div className="d-flex  justify-content-center">
                           <h5 className="">
-                            {isLoading ? <DotAnimation /> : davHolds}
+                            {formatWithCommas(ContractPls)} PLS
                           </h5>
                         </div>
                       </div>
                     </div>
 
-                    <div className="carddetails2 mt-4">
+                    <div className="carddetails2 ">
+                      <div className="d-flex justify-content-center ">
+                        <p className="mb-1 detailText"> Dav Token holdings </p>
+                      </div>
+                      <div className="d-flex  justify-content-center">
+                        <h5 className="">
+                          {isLoading ? <DotAnimation /> : davHolds}
+                        </h5>
+                      </div>
+                    </div>
+
+                    <div className="carddetails2 ">
                       <h6
-                        className="detailText mt-5 text-center"
+                        className="detailText mt-3 text-center"
                         style={{
                           fontSize: "14px",
                           textTransform: "capitalize",
@@ -641,8 +652,8 @@ const InfoCards = () => {
                     {Number(claimableAmountForBurn) == 0 && (
                       <div className="d-flex justify-content-center">
                         <h6 className="detailText2">
-                           @ Current Burn % -{" "}
-                          {formatWithCommas(expectedClaim)} PLS
+                          @ Current Burn % - {formatWithCommas(expectedClaim)}{" "}
+                          PLS
                         </h6>
                       </div>
                     )}
@@ -693,15 +704,7 @@ const InfoCards = () => {
                       {TimeUntilNextClaim % 60}
                       <span style={{ textTransform: "none" }}>s</span>
                     </h6>
-                    <h6
-                      className="detailText mb-0"
-                      style={{
-                        fontSize: "14px",
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      TREASURY - {formatWithCommas(ContractPls)} PLS
-                    </h6>
+
                     <h6
                       className="detailText mb-0"
                       style={{
@@ -747,7 +750,7 @@ const InfoCards = () => {
                             Airdrops every 50 days
                           </li>
                           <li className="detailText2">
-                            Add your tribe (Emoji). only 3 characters allowed
+                            Add your Emoticon (Emoji). only 3 characters allowed
                           </li>
                           <li className="detailText2">Cost - 10 Million PLS</li>
                           <li className="detailText2">
@@ -787,7 +790,7 @@ const InfoCards = () => {
                           htmlFor="affiliateLink"
                           className="floating-label"
                         >
-                         Enter Token Name
+                          Enter Token Name
                         </label>
                       </div>
                     </div>
