@@ -181,9 +181,8 @@ const DataTable = () => {
                 <th>Emoticon</th>
                 <th>Token Name</th>
                 <th>Claim Airdrop</th>
-
+                <th>Auction Timer</th>
                 <th>Ratio Swapping Auction</th>
-                <th>Ratio Swap</th>
                 <th>Market Maker Instructions</th>
                 <th></th>
                 <th></th>
@@ -274,7 +273,7 @@ const DataTable = () => {
                           }}
                         />
                       </td>
-					  <td className="timer-cell">
+                      <td className="timer-cell">
                         {formatCountdown(TimeLeft)}
                       </td>
                       <td>
