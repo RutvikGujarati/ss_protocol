@@ -600,7 +600,7 @@ const DataTable = () => {
                       ) => (
                         <tr key={index}>
                           <td>
-                            <h3>{Emojis}</h3>
+                            <h5>{Emojis}</h5>
                           </td>
                           <td>{name}</td>
                           <td>

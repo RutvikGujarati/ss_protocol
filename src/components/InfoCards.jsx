@@ -750,7 +750,7 @@ const InfoCards = () => {
                             Airdrops every 50 days
                           </li>
                           <li className="detailText2">
-                            Add your Emoticon (Emoji). only 3 characters allowed
+                            Add your Emoticon (Emoji).
                           </li>
                           <li className="detailText2">Cost - 10 Million PLS</li>
                           <li className="detailText2">
