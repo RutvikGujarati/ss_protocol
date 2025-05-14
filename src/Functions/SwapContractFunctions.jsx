@@ -10,7 +10,7 @@ import {
   DAV_TOKEN_SONIC_ADDRESS,
   STATE_TESTNET,
   STATE_TOKEN_SONIC_ADDRESS,
-} from "../ContractAddresses";
+} from  "../Constants/ContractAddresses";
 import { useAccount, useChainId } from "wagmi";
 import { useDAvContract } from "./DavTokenFunctions";
 

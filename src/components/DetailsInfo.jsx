@@ -6,7 +6,7 @@ import { useSwapContract } from "../Functions/SwapContractFunctions";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { TokensDetails } from "../data/TokensDetails";
-import { Auction_TESTNET } from "../ContractAddresses";
+import { Auction_TESTNET } from "../Constants/ContractAddresses";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { Tooltip } from "bootstrap";
 import IOSpinner from "../Constants/Spinner";

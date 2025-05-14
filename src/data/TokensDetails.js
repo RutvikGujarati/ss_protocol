@@ -4,7 +4,7 @@ import {
 	DAV_TOKEN_SONIC_ADDRESS,
 	STATE_TESTNET,
 	STATE_TOKEN_SONIC_ADDRESS,
-} from "../ContractAddresses";
+} from  "../Constants/ContractAddresses";
 import { PriceContext } from "../api/StatePrice";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useChainId } from "wagmi";

@@ -14,7 +14,7 @@ import {
   Auction_TESTNET,
   DAV_TESTNET,
   STATE_TESTNET,
-} from "../ContractAddresses";
+} from  "../Constants/ContractAddresses";
 import toast from "react-hot-toast";
 
 export const DAVContext = createContext();

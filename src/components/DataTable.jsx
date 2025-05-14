@@ -9,7 +9,7 @@ import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useAccount } from "wagmi";
 import { useAddTokens, useUsersOwnerTokens } from "../data/AddTokens";
-import { Auction_TESTNET } from "../ContractAddresses";
+import { Auction_TESTNET } from  "../Constants/ContractAddresses";
 import pulsex from "../assets/ninemm.png";
 
 import IOSpinner from "../Constants/Spinner";
