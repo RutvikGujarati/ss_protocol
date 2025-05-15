@@ -10,16 +10,20 @@ contract Token is ERC20, Ownable {
     constructor(
         string memory name,
         string memory symbol,
-        address _One,
-        address _swap,
+        address _gov,
+        address _swapTreasury,
         address _owner
     ) ERC20(name, symbol) Ownable(_owner) {
-        require(_One != address(0) && _swap != address(0), "Invalid address");
+        require(
+            _gov != address(0) && _swapTreasury != address(0),
+            "Invalid address"
+        );
+        require(_owner != address(0), "Invalid owner address");
 
         uint256 onePercent = (MAX_SUPPLY * 1) / 100;
         uint256 ninetyNinePercent = MAX_SUPPLY - onePercent;
 
-        _mint(_One, onePercent);
-        _mint(_swap, ninetyNinePercent);
+        _mint(_gov, onePercent);
+        _mint(_swapTreasury, ninetyNinePercent);
     }
 }
