@@ -77,8 +77,11 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         string emoji; // 🆕 Add this field
         TokenStatus status;
     }
-    // already assign as max tokens user can pass is according to dav amount. so not require to bound with 1000 limit.
+    // allTokenEntries is implicitly bounded by each user's DAV balance.
+    // Each user can only submit one token per DAV they hold, and DAV itself is capped.
+    // This natural upper bound eliminates the need for a hardcoded limit like 1,000 entries.
     TokenEntry[] public allTokenEntries;
+
     mapping(address => uint256) public userBurnedAmount;
     mapping(address => mapping(uint256 => bool)) public hasClaimedCycle;
     mapping(address => UserBurn[]) public burnHistory;
@@ -461,10 +464,10 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
      */
     function ProcessYourToken(
         string memory _tokenName,
-        //not check emoji length validation. user can pass any length of emoji because that is fun part for users of this proceesing.
         string memory _emoji
     ) public payable {
         require(bytes(_tokenName).length > 0, "Please provide tokenName");
+        require(bytes(_emoji).length <= 10, "Max 4-byte emoji");
         require(!isTokenNameUsed[_tokenName], "Token name already used");
 
         // ⚖️ Token entry limit is indirectly enforced via DAV balance
@@ -509,6 +512,9 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
 
         emit TokenNameAdded(msg.sender, _tokenName);
     }
+    // allTokenEntries is implicitly bounded by each user's DAV balance.
+    // Each user can only submit one token per DAV they hold, and DAV itself is capped.
+    // This natural upper bound eliminates the need for a hardcoded limit like 1,000 entries.
     function getPendingTokenNames(
         address user
     ) public view returns (string[] memory) {
@@ -581,9 +587,11 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             !canClaim(msg.sender),
             "Must claim previous cycle rewards before burning"
         );
+
+        //totalStateBurned, userBurnedAmount,userCycleBurned,cycleTotalBurned mapping it is not consuming too much gas wanted to show in dapp.
         // keep track global burn amount.
         totalStateBurned += amount;
-        // keep this to track total amount burned by user
+        // keep this to track total amount burned by user - it is not consuming too much gas wanted to show in dapp.
         userBurnedAmount[msg.sender] += amount;
         // keep track this for  cycle amount burn by user
         userCycleBurned[msg.sender][currentCycle] += amount;
@@ -657,6 +665,11 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         uint256 currentCycle = getCurrentCycle();
         uint256 totalReward = 0;
         uint256 bitmap = claimableCycleBitmap[user];
+        // Note: We intentionally loop through the entire burnHistory array during claimPLS()
+        // instead of maintaining a nested mapping like unclaimedBurns[address][cycle].
+        // This avoids increased storage complexity and simplifies state management.
+        // Gas costs are acceptable under expected usage patterns, and this tradeoff
+        // prioritizes simplicity and data consistency over micro-optimization.
 
         // Loop over user's burn history to find unclaimed burns in claimable cycles
         for (uint256 i = 0; i < burnHistory[user].length; i++) {
