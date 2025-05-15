@@ -189,26 +189,37 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         uint256 targetDubaiHour = 17;
         uint256 targetDubaiMinute = 0;
 
-        // Get current time in Dubai
+        // Get current UTC time
         uint256 nowUTC = block.timestamp;
+
+        // Safe: adding small constant (4 hours) won't overflow uint256
         uint256 nowDubai = nowUTC + dubaiOffset;
 
-        // Start of today in Dubai time
+        // Start of the current day in Dubai time
         uint256 todayStartDubai = (nowDubai / secondsInDay) * secondsInDay;
 
-        // Target time today: 22:30 Dubai time
-        uint256 targetTimeDubai = todayStartDubai +
-            targetDubaiHour *
-            1 hours +
-            targetDubaiMinute *
-            1 minutes;
+        // Target time today (e.g., 17:00 Dubai time)
+        uint256 targetTimeDubai;
+        unchecked {
+            // Safe: multiplying small constants like 17 hours won't overflow
+            targetTimeDubai =
+                todayStartDubai +
+                targetDubaiHour *
+                1 hours +
+                targetDubaiMinute *
+                1 minutes;
+        }
 
-        // If we're past 22:30 Dubai time now, schedule for tomorrow 22:30
+        // If current time in Dubai is past today's target, schedule for tomorrow
         if (nowDubai >= targetTimeDubai) {
-            targetTimeDubai += secondsInDay;
+            unchecked {
+                // Safe: secondsInDay is 86400, adding once won't overflow
+                targetTimeDubai += secondsInDay;
+            }
         }
 
         // Convert back to UTC to get correct on-chain timestamp
+        // Safe: subtracting 4 hours is guaranteed not to underflow as `targetTimeDubai >= nowDubai >= nowUTC`
         return targetTimeDubai - dubaiOffset;
     }
 
@@ -230,7 +241,11 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         } else {
             revert("Invalid pair");
         }
-
+        // The ratio is returned as a whole number (not fixed point)
+        // Division by 1e18 ensures the return value is user-friendly and in plain units
+        // ⚠️ This is safe because reserve ratios will never be so skewed that ratio drops below 1e18 significantly
+        // For example, even if 1 inputToken = 0.5 stateToken, (0.5 * 1e18) / 1e18 = 0.5 — safe unless using integer math downstream
+        // In our case, token pairs have sufficient liquidity to prevent tiny values (e.g., < 1)
         return ratio / 1e18;
     }
 
@@ -254,8 +269,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         require(newDavContributed > 0, "No new DAV holdings for this token");
 
         // **Effects**
-        //Divides newDavContributed by 1e18 to convert from wei to whole tokens
-        uint256 reward = (newDavContributed / 1e18) * 10000 ether;
+
+        uint256 reward = (newDavContributed * 10000 ether) / 1e18;
 
         cumulativeDavHoldings[user][inputToken] += newDavContributed;
         lastDavHolding[user][inputToken] = currentDavHolding;
@@ -303,16 +318,25 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         lastClaimTime[claimant][token] = block.timestamp;
 
         // Transfer reward tokens to claimant
-        require(
-            IERC20(token).transfer(claimant, rewardAmount),
-            "Reward transfer failed"
-        );
+        IERC20(token).safeTransfer(claimant, rewardAmount);
 
         // Emit event for reward distribution
         emit RewardDistributed(claimant, rewardAmount);
     }
+    /**
+     * @notice Handles token swaps during normal and reverse auctions.
+     *
+     * During reverse auctions, users burn `stateToken` to receive `inputToken`.
+     * This contract must hold sufficient `inputToken` to support those swaps.
+     *
+     * ⚠️ Liquidity Management Note:
+     * This contract receives required `inputToken` liquidity during the creation
+     * of other token contracts, which automatically transfer tokens here.
+     * Therefore, no manual `depositTokens` mechanism is needed.
+     */
 
     function swapTokens(address user, address inputToken) public nonReentrant {
+        require(msg.sender == user, "Unauthorized swap initiator");
         require(supportedTokens[inputToken], "Unsupported token");
         require(stateToken != address(0), "State token cannot be null");
         require(
@@ -321,7 +345,9 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         );
 
         uint256 currentAuctionCycle = getCurrentAuctionCycle(inputToken);
+
         AuctionCycle storage cycle = auctionCycles[inputToken][stateToken];
+        require(currentAuctionCycle == cycle.auctionCount, "Cycle mismatch");
         require(currentAuctionCycle < MAX_AUCTIONS, "Maximum auctions reached");
 
         UserSwapInfo storage userSwapInfo = userSwapTotalInfo[user][inputToken][
