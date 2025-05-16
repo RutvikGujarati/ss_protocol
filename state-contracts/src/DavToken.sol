@@ -98,6 +98,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
 	mapping(address => mapping(string => TokenEntry)) public userTokenEntries;
 	mapping(address => uint256) public userTokenCount;
 	mapping(address => string[]) public usersTokenNames;
+	mapping(string => address) public tokenNameToOwner;
+	// it is strictly necessary to keep track all tokenNames to show on dapp with each token entries, so, keep it as it is
 	string[] public allTokenNames;
     // Tracks total tokens burned by each user across all cycles
     // Used in DApp to show user-specific burn history
@@ -138,6 +140,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // Used to optimize claimPLS() by iterating only over relevant cycles
     // Simple and avoids bitmap complexity
     mapping(address => uint256[]) public userUnclaimedCycles;
+	//to keep track unique name of each tokens. so, not conflict in protocol.
 	mapping(string => bool) public isTokenNameUsed;
     event TokensBurned(address indexed user, uint256 amount, uint256 cycle);
     event RewardClaimed(address indexed user, uint256 amount, uint256 cycle);
@@ -246,7 +249,6 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     function _assignReferralCodeIfNeeded(address user) internal {
         if (bytes(userReferralCode[user]).length == 0) {
             string memory code = _generateReferralCode(user);
-        // Assign only to user mapping — no need to touch referralCodeToUser again
             userReferralCode[user] = code;
             emit ReferralCodeGenerated(user, code);
         }
@@ -294,7 +296,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             // Convert hash to 8-character alphanumeric string
             code = _toAlphanumericString(hash, 8);
         } while (referralCodeToUser[code] != address(0)); // Check for collision
-
+	// only assinged referralCodeToUser here. not in _assignReferralCodeIfNeeded function 
         referralCodeToUser[code] = user;// Set mapping ONCE here
         return code;
     }
@@ -528,6 +530,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             }        }
         // Add the user's token name to their list and mark it as used
         usersTokenNames[msg.sender].push(_tokenName);
+		tokenNameToOwner[_tokenName] = msg.sender;
         isTokenNameUsed[_tokenName] = true;
         userTokenCount[msg.sender]++;
         allTokenNames.push(_tokenName);
@@ -603,23 +606,15 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         userTokenEntries[_owner][_tokenName].status = _status;
         emit TokenStatusUpdated(_owner, _tokenName, _status);
     }
+	function getAllTokenEntries() public view returns (TokenEntry[] memory) {
+    TokenEntry[] memory entries = new TokenEntry[](allTokenNames.length);
+    for (uint256 i = 0; i < allTokenNames.length; i++) {
+        string memory tokenName = allTokenNames[i];
+        address user = tokenNameToOwner[tokenName]; // ✅ Direct lookup
+        entries[i] = userTokenEntries[user][tokenName];
+    }    return entries;
+		}
 
-   function getAllTokenEntries() public view returns (TokenEntry[] memory) {
-        TokenEntry[] memory entries = new TokenEntry[](allTokenNames.length);
-        for (uint256 i = 0; i < allTokenNames.length; i++) {
-            string memory tokenName = allTokenNames[i];
-            address user;
-            // Find the user who owns this tokenName
-            for (uint256 j = 0; j < usersTokenNames[user].length; j++) {
-                if (
-                    keccak256(bytes(usersTokenNames[user][j])) ==
-                    keccak256(bytes(tokenName))
-                ) {                    user = user;                    break;                }
-            }
-            entries[i] = userTokenEntries[user][tokenName];
-        }
-        return entries;
-    }
     // ------------------ Burn functions ------------------------------
     // Burn tokens and update cycle tracking
     function burnState(uint256 amount) external {
