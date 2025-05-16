@@ -254,36 +254,37 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             holderRewards[account];
     }
     /**
-     * @notice Generates a unique referral code for a user
-     * @dev Uses internal entropy sources and avoids miner-influenced values like blockhash
+     * @notice Generates a unique referral code for a given user
+     * @dev Uses internal entropy and a nonce to prevent collisions
      * @param user The address of the user for whom the code is generated
-     * @return A unique alphanumeric referral code
+     * @return code A unique 8-character alphanumeric referral code
      */
-   function _generateReferralCode(address user) internal returns (string memory code) {
-    userNonce[user]++;
-    bytes32 hash;
-    // Loop until a unique referral code is found
-    do {
-        hash = keccak256(
-            abi.encodePacked(
-                user,
-                userNonce[user],
-                msg.sender,
-                tx.origin,
-                block.timestamp,
-                gasleft(),
-                block.number
-            )
-        );
-        // Convert hash to 8-character alphanumeric string
-        code = _toAlphanumericString(hash, 8);
-    } while (referralCodeToUser[code] != address(0)); // Check for collision
+    function _generateReferralCode(
+        address user
+    ) internal returns (string memory code) {
+        userNonce[user]++;
+        bytes32 hash;
+        // Loop until a unique referral code is found
+        do {     hash = keccak256(
+                abi.encodePacked(
+                    user,
+                    userNonce[user],
+                    msg.sender,
+                    tx.origin,
+                    block.timestamp,
+                    gasleft(),
+                    block.number
+                )
+            );   // Convert hash to 8-character alphanumeric string
+            code = _toAlphanumericString(hash, 8);
+        } while (referralCodeToUser[code] != address(0)); // Check for collision
 
-    // Map the unique code to the user
-    referralCodeToUser[code] = user;
+        // Map the unique code to the user
+        referralCodeToUser[code] = user;
 
-    return code;
-}   function _toAlphanumericString(
+        return code;
+    }
+    function _toAlphanumericString(
         bytes32 hash,
         uint256 length
     ) internal pure returns (string memory) {
@@ -300,8 +301,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         uint256 value,
         address sender,
         string memory referralCode
-    )
-        internal
+    )   internal
         view
         returns (
             uint256 holderShare,
@@ -340,7 +340,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             referralShare;
         require(distributed <= value, "Over-allocation");
         stateLPShare = value - distributed;
-    }    function mintDAV(
+    }
+    function mintDAV(
         uint256 amount,
         string memory referralCode
     ) external payable nonReentrant {
@@ -357,8 +358,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             referralCodeToUser[newReferralCode] = msg.sender;
             emit ReferralCodeGenerated(msg.sender, newReferralCode);
         }
-        (
-            uint256 holderShare,
+        (   uint256 holderShare,
             uint256 liquidityShare,
             uint256 developmentShare,
             uint256 referralShare,
@@ -425,7 +425,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         _mint(msg.sender, amount);
         _updateRewards(msg.sender);
         emit TokensMinted(msg.sender, amount, msg.value);
-    }    function claimReward() external nonReentrant {
+    }
+    function claimReward() external nonReentrant {
         require(balanceOf(msg.sender) > 0, "Not a DAV holder");
         _updateRewards(msg.sender);
         uint256 reward = holderRewards[msg.sender];
@@ -473,7 +474,10 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         string memory _emoji
     ) public payable {
         require(bytes(_tokenName).length > 0, "Please provide tokenName");
-		require(_utfStringLength(_emoji) <= 10, "Max 10 emoji characters allowed");
+        require(
+            _utfStringLength(_emoji) <= 10,
+            "Max 10 emoji characters allowed"
+        );
         require(!isTokenNameUsed[_tokenName], "Token name already used");
         // ⚖️ Token entry limit is indirectly enforced via DAV balance
         // Each user can process one token per DAV they hold. This means the number of tokens they can process is limited by their DAV balance.
@@ -486,7 +490,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         );
         // If not the governance, ensure the user sends the required PLS amount
         if (msg.sender != governance) {
-			//it is  100,000 Ether not in wei form
+            //it is  100,000 Ether not in wei form
             require(
                 msg.value == TOKEN_PROCESSING_FEE,
                 "Please send exactly 100,000 PLS"
@@ -502,8 +506,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                 uint256 targetCycle = currentCycle + i;
                 cycleTreasuryAllocation[targetCycle] += cycleAllocation;
                 cycleUnclaimedPLS[targetCycle] += cycleAllocation;
-            }
-        }
+            }        }
         // Add the user's token name to their list and mark it as used
         usersTokenNames[msg.sender].push(_tokenName);
         allTokenEntries.push(
@@ -512,25 +515,28 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         isTokenNameUsed[_tokenName] = true;
         emit TokenNameAdded(msg.sender, _tokenName);
     }
-	/// @notice Counts the number of UTF-8 characters in a string
-/// @dev Each emoji can be 1–4 bytes. This counts actual characters, not bytes.
-	function _utfStringLength(string memory str) internal pure returns (uint256 length) {
-    uint256 i = 0;
-    bytes memory strBytes = bytes(str);
-    while (i < strBytes.length) {
-        if (strBytes[i] >> 7 == 0) {            i += 1; // 1-byte character (ASCII)
-        } else if (strBytes[i] >> 5 == 0x6) {            i += 2; // 2-byte character
-        } else if (strBytes[i] >> 4 == 0xE) {            i += 3; // 3-byte character
-        } else if (strBytes[i] >> 3 == 0x1E) {            i += 4; // 4-byte character (emojis, many symbols)
-        } else {            revert("Invalid UTF-8 character");
-        }
-        length++;
+    /// @notice Counts the number of UTF-8 characters in a string
+    /// @dev Each emoji can be 1–4 bytes. This counts actual characters, not bytes.
+    function _utfStringLength(
+        string memory str
+    ) internal pure returns (uint256 length) {
+        uint256 i = 0;
+        bytes memory strBytes = bytes(str);
+        while (i < strBytes.length) {
+            uint8 b = uint8(strBytes[i]);
+            if (b >> 7 == 0) {                i += 1; // 1-byte character (ASCII)
+            } else if (b >> 5 == 0x6) {                i += 2; // 2-byte character
+            } else if (b >> 4 == 0xE) {                i += 3; // 3-byte character
+            } else if (b >> 3 == 0x1E) {
+                i += 4; // 4-byte character (emojis, many symbols)
+            } else {                revert("Invalid UTF-8 character");
+            }            length++;        }
     }
-}    // allTokenEntries is implicitly bounded by each user's DAV balance.
+    // allTokenEntries is implicitly bounded by each user's DAV balance.
     // Each user can only submit one token per DAV they hold, and DAV itself is capped.
     // This natural upper bound eliminates the need for a hardcoded limit like 1,000 entries.
-	/// @notice Returns the list of pending token names for a user.
-	/// @dev This function is intended for off-chain use only. It may consume too much gas if called on-chain for users with many entries.
+    /// @notice Returns the list of pending token names for a user.
+    /// @dev This function is intended for off-chain use only. It may consume too much gas if called on-chain for users with many entries.
     function getPendingTokenNames(
         address user
     ) public view returns (string[] memory) {
@@ -539,9 +545,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             if (
                 allTokenEntries[i].user == user &&
                 allTokenEntries[i].status == TokenStatus.Pending
-            ) {
-                count++;
-            }
+            ) {                count++;            }
         } // Create an array with the right size
         string[] memory pendingNames = new string[](count);
         uint256 index = 0;
@@ -554,17 +558,15 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                 pendingNames[index] = allTokenEntries[i].tokenName;
                 index++;
             }
-        }
-        return pendingNames;
-    }
+        }        return pendingNames;    }
     /// @notice Modifier to restrict access so that only the governance externally owned account (EOA) can call the function.
     /// @dev This ensures that the transaction originator (tx.origin) must be the governance address.
-      ///It prevents smart contracts (including trusted contracts) from calling the function, even if they are authorized.
-      ///⚠️ Use with caution: relying on tx.origin is discouraged in most cases due to potential security risks in complex call chains.
-	modifier onlyTxOrigin() {
-    	require(tx.origin == governance, "Caller is not governance EOA");
-    	_;
-	}
+    ///It prevents smart contracts (including trusted contracts) from calling the function, even if they are authorized.
+    ///⚠️ Use with caution: relying on tx.origin is discouraged in most cases due to potential security risks in complex call chains.
+    modifier onlyTxOrigin() {
+        require(tx.origin == governance, "Caller is not governance EOA");
+        _;
+    }
     /// @notice Updates the status of a user's submitted token name
     /// @dev This function can only be called by the governance address.
     /// Governance reviews and approves/rejects token submissions from users.
@@ -574,7 +576,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         address _owner,
         string memory _tokenName,
         TokenStatus _status
-    ) external onlyTxOrigin{
+    ) external onlyTxOrigin {
         // Find and update the token entry
         for (uint256 i = 0; i < allTokenEntries.length; i++) {
             if (
@@ -585,9 +587,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                 allTokenEntries[i].status = _status;
                 emit TokenStatusUpdated(_owner, _tokenName, _status);
                 break;
-            }
-        }
-    }    function getAllTokenEntries() public view returns (TokenEntry[] memory) {
+            }        }    }
+    function getAllTokenEntries() public view returns (TokenEntry[] memory) {
         return allTokenEntries;
     }
     // ------------------ Burn functions ------------------------------
@@ -624,7 +625,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                 cycleExists = true;
                 break;
             }
-        }   if (!cycleExists) {
+        }
+        if (!cycleExists) {
             userUnclaimedCycles[msg.sender].push(currentCycle);
         }
         // Log burn in history for DApp display
@@ -646,18 +648,16 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // Check if a user has claimable rewards
     function canClaim(address user) public view returns (bool) {
         uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
-        // Iterate over user's unclaimed cycles instead of all cycles
-        // Simple and efficient, avoids bitmap complexity
         for (uint256 i = 0; i < userUnclaimedCycles[user].length; i++) {
             uint256 cycle = userUnclaimedCycles[user][i];
-            if (cycle >= currentCycle) continue; // Skip current cycle
+            if (cycle >= currentCycle) continue; // Skip current or future cycles
             if (cycleTreasuryAllocation[cycle] == 0) continue;
             if (
                 userCycleBurned[user][cycle] > 0 &&
                 !hasClaimedCycle[user][cycle]
-            ) {                return true; // User has claimable rewards            }
-        }
-        return false;
+            ) {                return true; // User has claimable rewards
+            }
+        }        return false;
     }
     // Calculate total claimable PLS for a user
     function getClaimablePLS(address user) public view returns (uint256) {
@@ -684,7 +684,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                 cycleReward = availableFunds;
             }
             totalClaimable += cycleReward;
-        }        return totalClaimable;
+        }
+        return totalClaimable;
     }
     function claimPLS() external {
         address user = msg.sender;
@@ -709,8 +710,9 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             if (userBurn == 0 || totalBurn == 0) {
                 cyclesToRemove[removeCount++] = cycle; // Mark cycle for removal
                 continue;
-            }            // Calculate reward in real-time
-            uint256 reward = (cycleTreasuryAllocation[cycle] * userBurn) /  totalBurn;
+            } // Calculate reward in real-time
+            uint256 reward = (cycleTreasuryAllocation[cycle] * userBurn) /
+                totalBurn;
             require(
                 cycleUnclaimedPLS[cycle] >= reward,
                 "Insufficient cycle funds"
@@ -726,13 +728,12 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                     if (
                         burnHistory[user][j].cycleNumber == cycle &&
                         !burnHistory[user][j].claimed
-                    ) {
-                        burnHistory[user][j].claimed = true;
-                    }
+                    ) {                        burnHistory[user][j].claimed = true;                    }
                 }
                 // Mark cycle for removal from userUnclaimedCycles
                 cyclesToRemove[removeCount++] = cycle;
-            }   }
+            }
+        }
         // Note: We intentionally loop through the entire burnHistory array during claimPLS()
         // instead of maintaining a nested mapping like unclaimedBurns[address][cycle].
         // This avoids increased storage complexity and simplifies state management.
@@ -748,7 +749,9 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                     ];
                     userUnclaimedCycles[user].pop();
                     break;
-                }            }        }
+                }
+            }
+        }
         require(totalReward > 0, "Nothing to claim");
         require(
             (address(this).balance - holderFunds) >= totalReward,
@@ -793,8 +796,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         // Check if current time is still inside this cycle
         if (
             block.timestamp < deployTime + (currentCycle + 1) * CLAIM_INTERVAL
-        ) {
-            // We're inside the current cycle – show live percentage
+        ) {            // We're inside the current cycle – show live percentage
             uint256 userBurn = userCycleBurned[user][currentCycle];
             uint256 totalBurn = cycleTotalBurned[currentCycle];
             if (totalBurn == 0 || userBurn == 0) return 0;
@@ -806,17 +808,13 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             if (
                 userBurnClaimed[user][previousCycle] ||
                 cycleTotalBurned[previousCycle] == 0
-            ) {
-                return 0;
-            }
+            ) {                return 0;            }
             uint256 userBurn = userCycleBurned[user][previousCycle];
             uint256 totalBurn = cycleTotalBurned[previousCycle];
             if (totalBurn == 0 || userBurn == 0) return 0;
             return (userBurn * BASIS_POINTS) / totalBurn;
         }
     }
-    receive() external payable {
-        revert("Direct ETH transfers not allowed");
-    }
-   fallback() external payable { revert("Invalid call"); }
+    receive() external payable {        revert("Direct ETH transfers not allowed");    }
+    fallback() external payable {        revert("Invalid call");    }
 }
