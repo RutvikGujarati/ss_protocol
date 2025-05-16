@@ -389,13 +389,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             "Insufficient tokens in vault for the output token"
         );
 
-        // Increment auction count if this is the first swap in a new cycle
-        if (cycle.auctionCount < currentAuctionCycle) {
-            cycle.auctionCount = currentAuctionCycle + 1;
-            auctionCycles[stateToken][inputToken].auctionCount = cycle
-                .auctionCount;
-        }
-
         userSwapInfo.cycle = currentAuctionCycle;
         /**
          * @dev This check ensures that internal token tracking is aligned with actual contract holdings.
@@ -406,7 +399,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         if (isReverseActive) {
             userSwapInfo.hasReverseSwap = true;
             require(
-                IERC20(tokenOut).balanceOf(address(this)) > amountOut,
+                IERC20(tokenOut).balanceOf(address(this)) >= amountOut,
                 "Insufficient output token liquidity"
             );
             TotalBurnedStates += amountIn;
@@ -417,7 +410,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         } else {
             userSwapInfo.hasSwapped = true;
             require(
-                IERC20(tokenOut).balanceOf(address(this)) > amountOut,
+                IERC20(tokenOut).balanceOf(address(this)) >= amountOut,
                 "Insufficient output token liquidity"
             );
             TotalTokensBurned[tokenIn] += amountIn;
