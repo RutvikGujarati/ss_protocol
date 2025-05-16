@@ -137,8 +137,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     function addToken(
         address token,
         address pairAddress,
-        address _tokenOwner,
-        string memory _tokenName
+        address _tokenOwner
     ) external onlyGovernance {
         IPair pair = IPair(pairAddress);
         require(
@@ -191,16 +190,19 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         uint256 targetDubaiMinute = 0;
         // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;
-        // Shift current time to Dubai timezone (UTC+4)
-        // Safe: Adding 4 hours will not overflow a uint256
-        uint256 nowDubai = nowUTC + dubaiOffset;
-        // Calculate the start of today in Dubai time
-        // E.g., if nowDubai is 17:05, todayStartDubai is 00:00 Dubai time
-        uint256 todayStartDubai = (nowDubai / secondsInDay) * secondsInDay;
+        uint256 nowDubai;
+        unchecked {
+            // ✅ Safe: 4 hours addition will never overflow
+            nowDubai = nowUTC + dubaiOffset;
+        }
+        uint256 todayStartDubai;
+        unchecked {
+            // ✅ Safe: all values are well within bounds
+            todayStartDubai = (nowDubai / secondsInDay) * secondsInDay;
+        }
         uint256 targetTimeDubai;
         unchecked {
-            // Calculate today's target time (e.g., 17:00 Dubai time)
-            // Safe: Multiplying small constants like 17*1hr is far below overflow limits
+            // ✅ Safe: all constants are within time bounds
             targetTimeDubai =
                 todayStartDubai +
                 targetDubaiHour *
@@ -208,16 +210,18 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
                 targetDubaiMinute *
                 1 minutes;
         }
-        // If we've already passed today's 17:00 in Dubai, schedule for tomorrow
         if (nowDubai >= targetTimeDubai) {
             unchecked {
-                // Safe: Adding 1 day (86400 seconds) will not overflow
+                // ✅ Safe: adding one day is always within range
                 targetTimeDubai += secondsInDay;
             }
         }
-        // Return the UTC timestamp for the next 17:00 Dubai time
-        // Safe: nowDubai >= nowUTC ensures subtraction won't underflow
-        return targetTimeDubai - dubaiOffset;
+        uint256 finalTimestamp;
+        unchecked {
+            // ✅ Safe: nowDubai >= nowUTC, so subtraction won't underflow
+            finalTimestamp = targetTimeDubai - dubaiOffset;
+        }
+        return finalTimestamp;
     }
 
     //used for only mainnet
@@ -486,14 +490,16 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             bool isValidCycle
         )
     {
-        // ✅ Optimization: cache the struct in memory to avoid repeated SLOAD
-        AuctionCycle memory cycle = auctionCycles[inputToken][stateToken];
+        // ✅ Optimization: reference struct from storage once
+        AuctionCycle storage cycle = auctionCycles[inputToken][stateToken];
+
+        // ✅ Cache SLOADs into local variables
         initialized = cycle.isInitialized;
-        currentTime = block.timestamp;
-        // Full length of a cycle includes the auction + its interval
-        fullCycleLength = AUCTION_DURATION + AUCTION_INTERVAL;
         firstAuctionStart = cycle.firstAuctionStart;
-        // Early return if cycle hasn't been initialized or hasn't started yet
+
+        currentTime = block.timestamp;
+        fullCycleLength = AUCTION_DURATION + AUCTION_INTERVAL;
+
         if (!initialized || currentTime < firstAuctionStart) {
             isValidCycle = false;
             return (
@@ -504,11 +510,10 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
                 0,
                 isValidCycle
             );
-        } // Time since the first auction started
+        }
+
         uint256 timeSinceStart = currentTime - firstAuctionStart;
-        // Calculate which auction cycle we're currently in
         cycleNumber = timeSinceStart / fullCycleLength;
-        // Valid if the cycle is within allowed range
         isValidCycle = cycleNumber < MAX_AUCTIONS;
     }
 

@@ -370,9 +370,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         mintedSupply += amount;
         lastMintTimestamp[msg.sender] = block.timestamp;
         if (bytes(userReferralCode[msg.sender]).length == 0) {
-            string memory newReferralCode = _generateReferralCode(msg.sender)(
-                msg.sender
-            );
+            string memory newReferralCode = _generateReferralCode(msg.sender);
             userReferralCode[msg.sender] = newReferralCode;
             referralCodeToUser[newReferralCode] = msg.sender;
             emit ReferralCodeGenerated(msg.sender, newReferralCode);
