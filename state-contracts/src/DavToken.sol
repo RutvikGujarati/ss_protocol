@@ -537,28 +537,25 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // This natural upper bound eliminates the need for a hardcoded limit like 1,000 entries.
     /// @notice Returns the list of pending token names for a user.
     /// @dev This function is intended for off-chain use only. It may consume too much gas if called on-chain for users with many entries.
-    function getPendingTokenNames(
-        address user
-    ) public view returns (string[] memory) {
-        uint256 count = 0;
-        for (uint256 i = 0; i < allTokenEntries.length; i++) {
-            if (
-                allTokenEntries[i].user == user &&
-                allTokenEntries[i].status == TokenStatus.Pending
-            ) {                count++;            }
-        } // Create an array with the right size
-        string[] memory pendingNames = new string[](count);
-        uint256 index = 0;
-        // Populate the result array
-        for (uint256 i = 0; i < allTokenEntries.length; i++) {
-            if (
-                allTokenEntries[i].user == user &&
-                allTokenEntries[i].status == TokenStatus.Pending
-            ) {
-                pendingNames[index] = allTokenEntries[i].tokenName;
-                index++;
-            }
-        }        return pendingNames;    }
+    function getPendingTokenNames(address user) public view returns (string[] memory) {
+    // Use a temporary array with the maximum possible size
+    string[] memory tempNames = new string[](allTokenEntries.length);
+    uint256 count = 0;
+    // Single loop to collect pending token names
+    for (uint256 i = 0; i < allTokenEntries.length; i++) {
+        if (
+            allTokenEntries[i].user == user &&
+            allTokenEntries[i].status == TokenStatus.Pending
+        ) {
+            tempNames[count] = allTokenEntries[i].tokenName;
+            count++;
+        }
+    }
+    // Create a correctly sized array for the result
+    string[] memory pendingNames = new string[](count);
+    for (uint256 i = 0; i < count; i++) {
+        pendingNames[i] = tempNames[i];
+    }    return pendingNames;}
     /// @notice Modifier to restrict access so that only the governance externally owned account (EOA) can call the function.
     /// @dev This ensures that the transaction originator (tx.origin) must be the governance address.
     ///It prevents smart contracts (including trusted contracts) from calling the function, even if they are authorized.
@@ -687,81 +684,68 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         }
         return totalClaimable;
     }
-    function claimPLS() external {
-        address user = msg.sender;
-        require(canClaim(user), "No claimable rewards");
-        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
-        require(currentCycle > 0, "Claim period not started");
-        uint256 totalReward = 0;
-        uint256[] memory cyclesToRemove = new uint256[](
-            userUnclaimedCycles[user].length
-        );
-        uint256 removeCount = 0;
-        // Iterate over user's unclaimed cycles
-        for (uint256 i = 0; i < userUnclaimedCycles[user].length; i++) {
-            uint256 cycle = userUnclaimedCycles[user][i];
+   function claimPLS() external {
+    address user = msg.sender;
+    uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+    require(currentCycle > 0, "Claim period not started");
+    uint256 totalReward = 0;
+    uint256 unclaimedLength = userUnclaimedCycles[user].length;
+    uint256[] memory cyclesToKeep = new uint256[](unclaimedLength);
+    uint256 keepCount = 0;
+    // Single loop to process unclaimed cycles
+    for (uint256 i = 0; i < unclaimedLength; i++) {
+        uint256 cycle = userUnclaimedCycles[user][i];
+        if (
+            cycle >= currentCycle ||
+            cycleTreasuryAllocation[cycle] == 0 ||
+            hasClaimedCycle[user][cycle]
+        ) {
+            cyclesToKeep[keepCount++] = cycle; // Keep invalid or future cycles
+            continue;
+        }
+        uint256 userBurn = userCycleBurned[user][cycle];
+        uint256 totalBurn = cycleTotalBurned[cycle];
+        if (userBurn == 0 || totalBurn == 0) {
+            continue; // Skip invalid cycles
+        }
+        // Calculate reward
+        uint256 reward = (cycleTreasuryAllocation[cycle] * userBurn) / totalBurn;
+        if (cycleUnclaimedPLS[cycle] < reward) {
+            cyclesToKeep[keepCount++] = cycle; // Keep if insufficient funds
+            continue;
+        }
+        cycleUnclaimedPLS[cycle] -= reward;
+        totalReward += reward;
+        // Update state
+        hasClaimedCycle[user][cycle] = true;
+        userBurnClaimed[user][cycle] = true;
+        // Update burnHistory in the same loop
+        for (uint256 j = 0; j < burnHistory[user].length; j++) {
             if (
-                cycle >= currentCycle ||
-                cycleTreasuryAllocation[cycle] == 0 ||
-                hasClaimedCycle[user][cycle]
-            ) {                continue;            }
-            uint256 userBurn = userCycleBurned[user][cycle];
-            uint256 totalBurn = cycleTotalBurned[cycle];
-            if (userBurn == 0 || totalBurn == 0) {
-                cyclesToRemove[removeCount++] = cycle; // Mark cycle for removal
-                continue;
-            } // Calculate reward in real-time
-            uint256 reward = (cycleTreasuryAllocation[cycle] * userBurn) /
-                totalBurn;
-            require(
-                cycleUnclaimedPLS[cycle] >= reward,
-                "Insufficient cycle funds"
-            );
-            cycleUnclaimedPLS[cycle] -= reward;
-            if (reward > 0) {
-                totalReward += reward;
-                // Update state
-                hasClaimedCycle[user][cycle] = true;
-                userBurnClaimed[user][cycle] = true;
-                // Mark burn history as claimed
-                for (uint256 j = 0; j < burnHistory[user].length; j++) {
-                    if (
-                        burnHistory[user][j].cycleNumber == cycle &&
-                        !burnHistory[user][j].claimed
-                    ) {                        burnHistory[user][j].claimed = true;                    }
-                }
-                // Mark cycle for removal from userUnclaimedCycles
-                cyclesToRemove[removeCount++] = cycle;
-            }
+                burnHistory[user][j].cycleNumber == cycle &&
+                !burnHistory[user][j].claimed
+            ) {
+                burnHistory[user][j].claimed = true;
+            }        }
+    }    // Update userUnclaimedCycles efficiently
+    if (keepCount < unclaimedLength) {
+        // Create new array with kept cycles
+        uint256[] memory newUnclaimed = new uint256[](keepCount);
+        for (uint256 i = 0; i < keepCount; i++) {
+            newUnclaimed[i] = cyclesToKeep[i];
         }
-        // Note: We intentionally loop through the entire burnHistory array during claimPLS()
-        // instead of maintaining a nested mapping like unclaimedBurns[address][cycle].
-        // This avoids increased storage complexity and simplifies state management.
-        // Gas costs are acceptable under expected usage patterns, and this tradeoff
-        // prioritizes simplicity and data consistency over micro-optimization.
-        // Remove claimed or invalid cycles from userUnclaimedCycles
-        for (uint256 i = 0; i < removeCount; i++) {
-            for (uint256 j = 0; j < userUnclaimedCycles[user].length; j++) {
-                if (userUnclaimedCycles[user][j] == cyclesToRemove[i]) {
-                    // Move last element to current position and reduce length
-                    userUnclaimedCycles[user][j] = userUnclaimedCycles[user][
-                        userUnclaimedCycles[user].length - 1
-                    ];
-                    userUnclaimedCycles[user].pop();
-                    break;
-                }
-            }
-        }
-        require(totalReward > 0, "Nothing to claim");
-        require(
-            (address(this).balance - holderFunds) >= totalReward,
-            "Insufficient contract balance"
-        );
-        // Transfer rewards
-        (bool success, ) = payable(user).call{value: totalReward}("");
-        require(success, "PLS transfer failed");
-        emit RewardClaimed(user, totalReward, currentCycle);
+        userUnclaimedCycles[user] = newUnclaimed;
     }
+    require(totalReward > 0, "Nothing to claim");
+    require(
+        (address(this).balance - holderFunds) >= totalReward,
+        "Insufficient contract balance"
+    );
+    // Transfer rewards
+    (bool success, ) = payable(user).call{value: totalReward}("");
+    require(success, "PLS transfer failed");
+    emit RewardClaimed(user, totalReward, currentCycle);
+}
     function getCurrentCycle() public view returns (uint256) {
         return (block.timestamp - deployTime) / CLAIM_INTERVAL;
     }
