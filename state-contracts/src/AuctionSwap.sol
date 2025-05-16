@@ -174,12 +174,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         });
         auctionCycles[stateToken][token] = reverseCycle;
 
-        dav.updateTokenStatus(
-            _tokenOwner,
-            _tokenName,
-            Decentralized_Autonomous_Vaults_DAV_V2_1.TokenStatus.Processed
-        );
-
         emit TokenAdded(token, pairAddress);
         emit AuctionStarted(
             auctionStart,

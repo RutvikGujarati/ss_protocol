@@ -95,6 +95,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // allTokenEntries is implicitly bounded by each user's DAV balance.
     // Each user can only submit one token per DAV they hold, and DAV itself is capped.
     // This natural upper bound eliminates the need for a hardcoded limit like 1,000 entries.
+    // NOTE: Each user is limited to DAV_AMOUNT token entries, so this loop is bounded
+
     TokenEntry[] public allTokenEntries;
     // Tracks total tokens burned by each user across all cycles
     // Used in DApp to show user-specific burn history
@@ -136,7 +138,6 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // Simple and avoids bitmap complexity
     mapping(address => uint256[]) public userUnclaimedCycles;
     mapping(address => string[]) public usersTokenNames;
-    mapping(string => bool) public isTokenNameUsed;
     event TokensBurned(address indexed user, uint256 amount, uint256 cycle);
     event RewardClaimed(address indexed user, uint256 amount, uint256 cycle);
     event TokensMinted(
@@ -246,7 +247,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             string memory code = _generateReferralCode(user);
             // Assign the referral code to the user once, avoiding redundant writes
             userReferralCode[user] = code;
-            referralCodeToUser[code] = user;
+            // No need to set referralCodeToUser[code] again here
             emit ReferralCodeGenerated(user, code);
         }
     }
@@ -295,7 +296,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         } while (referralCodeToUser[code] != address(0)); // Check for collision
 
         // Removed redundant assignment here — mapping is set in _assignReferralCodeIfNeeded
-
+        referralCodeToUser[code] = user;
         return code;
     }
     function _toAlphanumericString(
@@ -369,7 +370,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         mintedSupply += amount;
         lastMintTimestamp[msg.sender] = block.timestamp;
         if (bytes(userReferralCode[msg.sender]).length == 0) {
-            string memory newReferralCode = _assignReferralCodeIfNeeded(
+            string memory newReferralCode = _generateReferralCode(msg.sender)(
                 msg.sender
             );
             userReferralCode[msg.sender] = newReferralCode;
@@ -489,7 +490,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
      *      Each user can process tokens up to the number of DAV they hold.
      *      Governance is trusted to operate transparently and verifiably.
      */
-    function ProcessYourToken(
+    function processYourToken(
         string memory _tokenName,
         string memory _emoji
     ) public payable {
@@ -498,7 +499,6 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             _utfStringLength(_emoji) <= 10,
             "Max 10 UTF-8 characters allowed"
         );
-        require(!isTokenNameUsed[_tokenName], "Token name already used");
         // ⚖️ Token entry limit is indirectly enforced via DAV balance
         // Each user can process one token per DAV they hold. This means the number of tokens they can process is limited by their DAV balance.
         uint256 userTokenBalance = balanceOf(msg.sender); // The amount of DAV the user holds
@@ -526,14 +526,12 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                 uint256 targetCycle = currentCycle + i;
                 cycleTreasuryAllocation[targetCycle] += cycleAllocation;
                 cycleUnclaimedPLS[targetCycle] += cycleAllocation;
-            }
-        }
+            }        }
         // Add the user's token name to their list and mark it as used
         usersTokenNames[msg.sender].push(_tokenName);
         allTokenEntries.push(
             TokenEntry(msg.sender, _tokenName, _emoji, TokenStatus.Pending)
         );
-        isTokenNameUsed[_tokenName] = true;
         emit TokenNameAdded(msg.sender, _tokenName);
     }
     /// @notice Counts the number of UTF-8 characters in a string
@@ -550,8 +548,9 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             } else if (b >> 4 == 0xE) {                i += 3; // 3-byte character
             } else if (b >> 3 == 0x1E) {
                 i += 4; // 4-byte character (emojis, many symbols)
-            } else {                revert("Invalid UTF-8 character");
-            }            length++;        }
+            } else {                revert("Invalid UTF-8 character");            }
+            length++;
+        }
     }
     // allTokenEntries is implicitly bounded by each user's DAV balance.
     // Each user can only submit one token per DAV they hold, and DAV itself is capped.
@@ -573,33 +572,13 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                 tempNames[count] = allTokenEntries[i].tokenName;
                 count++;
             }
-        }       // Create a correctly sized array for the result
+        } // Create a correctly sized array for the result
         string[] memory pendingNames = new string[](count);
         for (uint256 i = 0; i < count; i++) {
             pendingNames[i] = tempNames[i];
         }
         return pendingNames;
     }
-    /// @notice Modifier to restrict access to the governance EOA (Externally Owned Account) only.
-    /// @dev This uses `tx.origin` to ensure that the original initiator of the transaction
-    ///      is the governance address — even if the call is proxied through another smart contract.
-    /// ⚠️ WARNING: Using `tx.origin` is generally discouraged in Solidity security best practices,
-    ///      because it can introduce vulnerabilities when contracts call each other.
-    ///      However, in this use case, we deliberately use `tx.origin` to verify that the original
-    ///      caller of the transaction (not an intermediary contract) is the governance EOA.
-    ///      This is useful when this function may be called *through another contract*,
-    ///      but we still want to ensure the transaction started from the governance EOA.
-    ///      Do NOT use this pattern unless you are sure of the implications
-    modifier onlyTxOrigin() {
-        require(tx.origin == governance, "Caller is not governance EOA");
-        _;
-    }
-    /// @notice Update the status of a token owned by a user.
-    /// @dev Can only be called by a transaction initiated by the governance EOA.
-    ///      The use of `onlyTxOrigin` allows this function to be called from another contract,
-    ///      while still ensuring that the top-level originator of the transaction is governance.
-    ///      This bypasses the usual `msg.sender` check, which would only verify the immediate caller.
-
     /// @notice Updates the status of a specific token owned by a user.
     /// @dev This function loops through `allTokenEntries`, which could grow indefinitely.
     ///      To prevent excessive gas usage:
@@ -607,11 +586,12 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     ///      - Each user/tokenName pair is unique; duplicates are not allowed.
     ///      - The loop is efficient under controlled data growth, and pagination is intentionally avoided
     ///        for simplicity and governance-controlled updates only.
+    // NOTE: Each user is limited to DAV_AMOUNT (balanceOf(address(this))) token entries, so this loop is bounded
     function updateTokenStatus(
         address _owner,
         string memory _tokenName,
         TokenStatus _status
-    ) external onlyTxOrigin {
+    ) external onlyGovernance {
         // Track whether we found and updated a matching entry
         bool updated = false;
 
@@ -699,7 +679,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             if (
                 userCycleBurned[user][cycle] > 0 &&
                 !hasClaimedCycle[user][cycle]
-            ) {                return true; // User has claimable rewards
+            ) {
+                return true; // User has claimable rewards
             }
         }
         return false;
@@ -715,7 +696,9 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                 cycle >= currentCycle ||
                 cycleTreasuryAllocation[cycle] == 0 ||
                 hasClaimedCycle[user][cycle]
-            ) {                continue;            }
+            ) {
+                continue;
+            }
             uint256 userBurn = userCycleBurned[user][cycle];
             uint256 totalBurn = cycleTotalBurned[cycle];
             if (userBurn == 0 || totalBurn == 0) continue;
@@ -729,7 +712,9 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                 cycleReward = availableFunds;
             }
             totalClaimable += cycleReward;
-        }        return totalClaimable;    }
+        }
+        return totalClaimable;
+    }
     function claimPLS() external {
         address user = msg.sender;
         uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
@@ -745,7 +730,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                 cycle >= currentCycle ||
                 cycleTreasuryAllocation[cycle] == 0 ||
                 hasClaimedCycle[user][cycle]
-            ) {                cyclesToKeep[keepCount++] = cycle; // Keep invalid or future cycles
+            ) {
+                cyclesToKeep[keepCount++] = cycle; // Keep invalid or future cycles
                 continue;
             }
             uint256 userBurn = userCycleBurned[user][cycle];
@@ -782,8 +768,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                 newUnclaimed[i] = cyclesToKeep[i];
             }
             userUnclaimedCycles[user] = newUnclaimed;
-        }
-        require(totalReward > 0, "Nothing to claim");
+        }        require(totalReward > 0, "Nothing to claim");
         require(
             (address(this).balance - holderFunds) >= totalReward,
             "Insufficient contract balance"
@@ -827,20 +812,20 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         // Check if current time is still inside this cycle
         if (
             block.timestamp < deployTime + (currentCycle + 1) * CLAIM_INTERVAL
-        ) {            // We're inside the current cycle – show live percentage
+        ) {
+            // We're inside the current cycle – show live percentage
             uint256 userBurn = userCycleBurned[user][currentCycle];
             uint256 totalBurn = cycleTotalBurned[currentCycle];
             if (totalBurn == 0 || userBurn == 0) return 0;
             return (userBurn * BASIS_POINTS) / totalBurn; // basis points (10000 = 100.00%)
-        } else {            // Cycle has ended – show percentage from the previous cycle, if not yet claimed
+        } else {
+            // Cycle has ended – show percentage from the previous cycle, if not yet claimed
             if (currentCycle == 0) return 0; // No previous cycle
             uint256 previousCycle = currentCycle - 1;
             if (
                 userBurnClaimed[user][previousCycle] ||
                 cycleTotalBurned[previousCycle] == 0
-            ) {
-                return 0;
-            }
+            ) {                return 0;            }
             uint256 userBurn = userCycleBurned[user][previousCycle];
             uint256 totalBurn = cycleTotalBurned[previousCycle];
             if (totalBurn == 0 || userBurn == 0) return 0;
