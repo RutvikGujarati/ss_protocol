@@ -140,6 +140,12 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address _tokenOwner,
         string memory _tokenName
     ) external onlyGovernance {
+        IPair pair = IPair(pairAddress);
+        require(
+            (pair.token0() == token && pair.token1() == stateToken) ||
+                (pair.token1() == token && pair.token0() == stateToken),
+            "Pair must contain stateToken"
+        );
         require(token != address(0), "Invalid token address");
         require(stateToken != address(0), "State token not initialized");
         require(pairAddress != address(0), "Invalid pair address");
@@ -238,19 +244,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         } else {
             revert("Invalid pair");
         }
-        // The ratio is returned as a whole number (not fixed point)
-        // Division by 1e18 ensures the return value is user-friendly and in plain units
-        // ⚠️ This is safe because reserve ratios will never be so skewed that ratio drops below 1e18 significantly
-        // For example, even if 1 inputToken = 0.5 stateToken, (0.5 * 1e18) / 1e18 = 0.5 — safe unless using integer math downstream
-        // In our case, token pairs have sufficient liquidity to prevent tiny values (e.g., < 1)
 
-        // If ratio is less than 1e18 (i.e., < 1), return with full precision
-        // Otherwise, truncate to whole number for readability/simplicity
-        if (ratio < 1e18) {
-            return ratio; // retains 18 decimals
-        } else {
-            return ratio / 1e18; // truncated
-        }
+        return ratio; // retains 18 decimals
     }
 
     /**
@@ -392,7 +387,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         require(amountOut > 0, "Output amount must be greater than zero");
 
         require(
-            IERC20(stateToken).balanceOf(address(this)) >= amountOut,
+            IERC20(tokenOut).balanceOf(address(this)) >= amountOut,
             "Insufficient tokens in vault for the output token"
         );
 
@@ -413,8 +408,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         if (isReverseActive) {
             userSwapInfo.hasReverseSwap = true;
             require(
-                IERC20(tokenOut).balanceOf(address(this)) > 0,
-                "Output token vault empty"
+                IERC20(tokenOut).balanceOf(address(this)) > amountOut,
+                "Insufficient output token liquidity"
             );
             TotalBurnedStates += amountIn;
             TotalTokensBurned[tokenIn] += amountIn;
@@ -424,8 +419,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         } else {
             userSwapInfo.hasSwapped = true;
             require(
-                IERC20(tokenOut).balanceOf(address(this)) > 0,
-                "Output token vault empty"
+                IERC20(tokenOut).balanceOf(address(this)) > amountOut,
+                "Insufficient output token liquidity"
             );
             TotalTokensBurned[tokenIn] += amountIn;
             IERC20(tokenIn).safeTransferFrom(user, BURN_ADDRESS, amountIn);
@@ -496,7 +491,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             uint256 cycleNumber,
             bool isValidCycle
         )
-    {        // ✅ Optimization: cache the struct in memory to avoid repeated SLOAD
+    {
+        // ✅ Optimization: cache the struct in memory to avoid repeated SLOAD
         AuctionCycle memory cycle = auctionCycles[inputToken][stateToken];
         initialized = cycle.isInitialized;
         currentTime = block.timestamp;
@@ -514,7 +510,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
                 0,
                 isValidCycle
             );
-        }        // Time since the first auction started
+        } // Time since the first auction started
         uint256 timeSinceStart = currentTime - firstAuctionStart;
         // Calculate which auction cycle we're currently in
         cycleNumber = timeSinceStart / fullCycleLength;
