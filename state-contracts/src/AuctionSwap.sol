@@ -141,6 +141,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         string memory _tokenName
     ) external onlyGovernance {
         require(token != address(0), "Invalid token address");
+        require(stateToken != address(0), "State token not initialized");
         require(pairAddress != address(0), "Invalid pair address");
         require(pairAddress != token, "Invalid pair address");
         require(!supportedTokens[token], "Token already added");
@@ -181,26 +182,25 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             stateToken
         );
     }
-
+    /// @notice Calculates the next Dubai auction start time in UTC
+    /// @dev Target time is 17:00 Dubai time (UTC+4). Uses `unchecked` for safe, gas-efficient arithmetic.
     function _calculateDubaiAuctionStart() internal view returns (uint256) {
         uint256 dubaiOffset = 4 hours;
         uint256 secondsInDay = 86400;
         uint256 targetDubaiHour = 17;
         uint256 targetDubaiMinute = 0;
-
-        // Get current UTC time
+        // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;
-
-        // Safe: adding small constant (4 hours) won't overflow uint256
+        // Shift current time to Dubai timezone (UTC+4)
+        // Safe: Adding 4 hours will not overflow a uint256
         uint256 nowDubai = nowUTC + dubaiOffset;
-
-        // Start of the current day in Dubai time
+        // Calculate the start of today in Dubai time
+        // E.g., if nowDubai is 17:05, todayStartDubai is 00:00 Dubai time
         uint256 todayStartDubai = (nowDubai / secondsInDay) * secondsInDay;
-
-        // Target time today (e.g., 17:00 Dubai time)
         uint256 targetTimeDubai;
         unchecked {
-            // Safe: multiplying small constants like 17 hours won't overflow
+            // Calculate today's target time (e.g., 17:00 Dubai time)
+            // Safe: Multiplying small constants like 17*1hr is far below overflow limits
             targetTimeDubai =
                 todayStartDubai +
                 targetDubaiHour *
@@ -208,17 +208,15 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
                 targetDubaiMinute *
                 1 minutes;
         }
-
-        // If current time in Dubai is past today's target, schedule for tomorrow
+        // If we've already passed today's 17:00 in Dubai, schedule for tomorrow
         if (nowDubai >= targetTimeDubai) {
             unchecked {
-                // Safe: secondsInDay is 86400, adding once won't overflow
+                // Safe: Adding 1 day (86400 seconds) will not overflow
                 targetTimeDubai += secondsInDay;
             }
         }
-
-        // Convert back to UTC to get correct on-chain timestamp
-        // Safe: subtracting 4 hours is guaranteed not to underflow as `targetTimeDubai >= nowDubai >= nowUTC`
+        // Return the UTC timestamp for the next 17:00 Dubai time
+        // Safe: nowDubai >= nowUTC ensures subtraction won't underflow
         return targetTimeDubai - dubaiOffset;
     }
 
@@ -245,7 +243,14 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         // ⚠️ This is safe because reserve ratios will never be so skewed that ratio drops below 1e18 significantly
         // For example, even if 1 inputToken = 0.5 stateToken, (0.5 * 1e18) / 1e18 = 0.5 — safe unless using integer math downstream
         // In our case, token pairs have sufficient liquidity to prevent tiny values (e.g., < 1)
-        return ratio / 1e18;
+
+        // If ratio is less than 1e18 (i.e., < 1), return with full precision
+        // Otherwise, truncate to whole number for readability/simplicity
+        if (ratio < 1e18) {
+            return ratio; // retains 18 decimals
+        } else {
+            return ratio / 1e18; // truncated
+        }
     }
 
     /**
@@ -399,6 +404,11 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         }
 
         userSwapInfo.cycle = currentAuctionCycle;
+        /**
+         * @dev This check ensures that internal token tracking is aligned with actual contract holdings.
+         * Tokens sent manually (e.g., via MetaMask and through token sc), so we can't assume tracking alone is sufficient.
+         *  Especially important for auction logic or any logic that sends tokens out.
+         */
 
         if (isReverseActive) {
             userSwapInfo.hasReverseSwap = true;
@@ -464,6 +474,15 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
                 .hasReverseSwap;
     }
 
+    /// @notice Returns auction cycle data for a given input token
+    /// @dev Caches auctionCycles[inputToken][stateToken] in memory to reduce SLOAD gas costs
+    /// @param inputToken The ERC20 token address being auctioned
+    /// @return initialized Whether the auction cycle has started
+    /// @return currentTime Current block timestamp
+    /// @return fullCycleLength Sum of auction duration and interval
+    /// @return firstAuctionStart Timestamp of the first auction start
+    /// @return cycleNumber Which auction cycle we're in
+    /// @return isValidCycle Whether the current cycle is active and valid
     function _getAuctionCycleData(
         address inputToken
     )
@@ -477,13 +496,14 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             uint256 cycleNumber,
             bool isValidCycle
         )
-    {
+    {        // ✅ Optimization: cache the struct in memory to avoid repeated SLOAD
         AuctionCycle memory cycle = auctionCycles[inputToken][stateToken];
         initialized = cycle.isInitialized;
         currentTime = block.timestamp;
+        // Full length of a cycle includes the auction + its interval
         fullCycleLength = AUCTION_DURATION + AUCTION_INTERVAL;
         firstAuctionStart = cycle.firstAuctionStart;
-
+        // Early return if cycle hasn't been initialized or hasn't started yet
         if (!initialized || currentTime < firstAuctionStart) {
             isValidCycle = false;
             return (
@@ -494,10 +514,11 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
                 0,
                 isValidCycle
             );
-        }
-
+        }        // Time since the first auction started
         uint256 timeSinceStart = currentTime - firstAuctionStart;
+        // Calculate which auction cycle we're currently in
         cycleNumber = timeSinceStart / fullCycleLength;
+        // Valid if the cycle is within allowed range
         isValidCycle = cycleNumber < MAX_AUCTIONS;
     }
 
