@@ -96,11 +96,11 @@ const DataTable = () => {
   };
 
   // Handle Add button click (calls AddTokenIntoSwapContract)
-  const handleAdd = async (tokenAddress, tokenName, user, name) => {
+  const handleAdd = async (tokenAddress, tokenName, user,name) => {
     const pairAddress = inputValues[tokenName] || "";
     setProcessingToken(tokenName); // Set current token being processed
     try {
-      await AddTokenIntoSwapContract(tokenAddress, pairAddress, user, name);
+      await AddTokenIntoSwapContract(tokenAddress, pairAddress, user,name);
       await isTokenSupporteed();
     } catch (error) {
       console.error("AddTokenIntoSwapContract failed:", error);
@@ -167,11 +167,12 @@ const DataTable = () => {
       <p className="text-light">Please connect your wallet.</p>
     </div>
   ) : isAuction ? (
-    loading ? (
-      <div className="container text-center mt-5">
-        <IOSpinner />
-      </div>
-    ) : (
+    // loading ? (
+    //   <div className="container text-center mt-5">
+    //     <IOSpinner />
+    //   </div>
+    // ) :
+	 (
       <div className="container  datatablemarginbottom">
         <div className="table-responsive">
           <table className="table table-dark">
@@ -510,12 +511,13 @@ const DataTable = () => {
       </div>
     )
   ) : isAddToken ? (
-    addTokensLoading ? (
-      <div className="container text-center mt-5">
-        <IOSpinner />
-        <p className="funny-loading-text">Fetching...</p>
-      </div>
-    ) : (
+    // addTokensLoading ? (
+    //   <div className="container text-center mt-5">
+    //     <IOSpinner />
+    //     <p className="funny-loading-text">Fetching...</p>
+    //   </div>
+    // ) : 
+	(
       <>
         <div className="container  datatablemarginbottom">
           <div className="table-responsive">
@@ -694,7 +696,7 @@ const DataTable = () => {
                                 <button
                                   className="btn btn-sm swap-btn btn-primary"
                                   onClick={() =>
-                                    handleAdd(TokenAddress, name, user, name)
+                                    handleAdd(TokenAddress, name, user,name)
                                   }
                                   disabled={processingToken === name}
                                 >

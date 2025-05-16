@@ -37,12 +37,12 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     }
 
     //For Airdrop
-    uint256 public constant AUCTION_INTERVAL = 5 days;
-    uint256 public constant AUCTION_DURATION = 24 hours;
-    uint256 public constant REVERSE_DURATION = 24 hours;
+    uint256 public constant AUCTION_INTERVAL = 4 hours;
+    uint256 public constant AUCTION_DURATION = 2 hours;
+    uint256 public constant REVERSE_DURATION = 2 hours;
     uint256 public constant MAX_AUCTIONS = 20;
     uint256 public constant OWNER_REWARD_AMOUNT = 2500000 * 1e18;
-    uint256 public constant CLAIM_INTERVAL = 5 days;
+    uint256 public constant CLAIM_INTERVAL = 4 hours;
     uint256 public constant MAX_SUPPLY = 500000000000 ether;
     uint256 public percentage = 1;
     address private constant BURN_ADDRESS =
@@ -139,12 +139,12 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address pairAddress,
         address _tokenOwner
     ) external onlyGovernance {
-        IPair pair = IPair(pairAddress);
-        require(
-            (pair.token0() == token && pair.token1() == stateToken) ||
-                (pair.token1() == token && pair.token0() == stateToken),
-            "Pair must contain stateToken"
-        );
+        // IPair pair = IPair(pairAddress);
+        // require(
+        //     (pair.token0() == token && pair.token1() == stateToken) ||
+        //         (pair.token1() == token && pair.token0() == stateToken),
+        //     "Pair must contain stateToken"
+        // );
         require(token != address(0), "Invalid token address");
         require(stateToken != address(0), "State token not initialized");
         require(pairAddress != address(0), "Invalid pair address");

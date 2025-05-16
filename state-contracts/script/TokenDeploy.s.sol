@@ -8,7 +8,7 @@ contract DeployState is Script {
     function run() external {
         vm.startBroadcast();
         address Five = 0xBAaB2913ec979d9d21785063a0e4141e5B787D28;
-        address Swap = 0x655da3e47Fd34c07487FF37ee08FD311b29B2FdC;
+        address Swap = 0xf28E1b766c486ED6DB5C4629410354c79dDF43e4;
         STATE_Token_V2_1_Ratio_Swapping state = new STATE_Token_V2_1_Ratio_Swapping(
                 "State",
                 "State",

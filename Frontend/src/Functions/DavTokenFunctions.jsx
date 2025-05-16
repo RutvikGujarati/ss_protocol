@@ -105,12 +105,6 @@ export const DavProvider = ({ children }) => {
           true, // Enable formatting
           2 // Keep 2 decimal places
         ),
-        fetchAndSet(
-          "AllUserPercentage",
-          () => AllContracts.davContract.getAllUsersBurnedPercentageSum(),
-          false,
-          0
-        ),
 
         fetchAndSet("totalStateBurned", () =>
           AllContracts.davContract.totalStateBurned()
@@ -136,11 +130,11 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("stateHoldingOfSwapContract", () =>
           AllContracts.stateContract.balanceOf(Auction_TESTNET)
         ),
-        fetchAndSet(
-          "tokenEntries",
-          () => AllContracts.davContract.getAllTokenEntries(),
-          false
-        ),
+        // fetchAndSet(
+        //   "tokenEntries",
+        //   () => AllContracts.davContract.getAllTokenEntries(),
+        //   false
+        // ),
 
         fetchAndSet(
           "ReferralCodeOfUser",
@@ -171,10 +165,10 @@ export const DavProvider = ({ children }) => {
       const tokenStatus = tokenEntries.map((entry) => entry.TokenStatus);
       console.log("token status:,", tokenEntries);
       // Update state
-      setUsers(addresses); // e.g., ["0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483"]
-      setNames(tokenNames); // e.g., ["rutvik"]
-      setEmojies(tokenEmojis); // e.g., ["rutvik"]
-      setTokenStatus(tokenStatus); // e.g., ["rutvik"]
+      setUsers(addresses); 
+      setNames(tokenNames); 
+      setEmojies(tokenEmojis); 
+      setTokenStatus(tokenStatus); 
     } catch (error) {
       console.error("Error fetching token entries:", error);
     }
@@ -213,9 +207,7 @@ export const DavProvider = ({ children }) => {
       fetchAndSet("claimableAmountForBurn", () =>
         AllContracts.davContract.getClaimablePLS(address)
       ),
-        fetchAndSet("expectedClaim", () =>
-          AllContracts.davContract.getExpectedClaimablePLS(address)
-        ),
+     
         fetchAndSet("usableTreasury", () =>
           AllContracts.davContract.getAvailableCycleFunds()
         ),
@@ -267,7 +259,7 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract) return;
     const ethAmount = ethers.parseEther(amount.toString());
     const cost = ethers.parseEther(
-      (amount * (chainId === 146 ? 100 : 10000)).toString()
+      (amount * (chainId === 146 ? 100 : 1000)).toString()
     );
     const referral = ref.trim() || "0x0000000000000000000000000000000000000000";
 
@@ -297,7 +289,7 @@ export const DavProvider = ({ children }) => {
   const AddYourToken = async (amount, Emoji) => {
     if (!AllContracts?.davContract) return;
 
-    const cost = ethers.parseEther((chainId === 146 ? 100 : 100000).toString());
+    const cost = ethers.parseEther((chainId === 146 ? 100 : 10000).toString());
 
     let toastId = null;
 
@@ -307,8 +299,8 @@ export const DavProvider = ({ children }) => {
       // Wait for user confirmation (this is where rejection happens)
       const tx =
         address == import.meta.env.VITE_AUTH_ADDRESS
-          ? await AllContracts.davContract.ProcessYourToken(amount, Emoji)
-          : await AllContracts.davContract.ProcessYourToken(amount, Emoji, {
+          ? await AllContracts.davContract.processYourToken(amount, Emoji)
+          : await AllContracts.davContract.processYourToken(amount, Emoji, {
               value: cost,
             });
 

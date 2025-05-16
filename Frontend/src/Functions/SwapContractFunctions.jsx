@@ -10,7 +10,7 @@ import {
   DAV_TOKEN_SONIC_ADDRESS,
   STATE_TESTNET,
   STATE_TOKEN_SONIC_ADDRESS,
-} from  "../Constants/ContractAddresses";
+} from "../Constants/ContractAddresses";
 import { useAccount, useChainId } from "wagmi";
 import { useDAvContract } from "./DavTokenFunctions";
 
@@ -611,7 +611,7 @@ export const SwapContractProvider = ({ children }) => {
     TokenAddress,
     PairAddress,
     Owner,
-    name
+	name
   ) => {
     if (!AllContracts?.AuctionContract || !address) return;
 
@@ -620,11 +620,12 @@ export const SwapContractProvider = ({ children }) => {
       const tx = await AllContracts.AuctionContract.addToken(
         TokenAddress,
         PairAddress,
-        Owner,
-        name
+        Owner
       );
-      const receipt = await tx.wait();
-      if (receipt.status === 1) {
+      await tx.wait();
+      const tx2 = await AllContracts.davContract.updateTokenStatus(Owner, name,1);
+      const receipt2 = await tx2.wait();
+      if (receipt2.status === 1) {
         console.log("Transaction successful");
         await CheckIsAuctionActive();
         await isTokenSupporteed(); // Corrected function name
@@ -634,6 +635,9 @@ export const SwapContractProvider = ({ children }) => {
       }
       console.log("Token added successfully!");
     } catch (error) {
+		const errorMessage = error.reason || error.message || "Unknown error occurred";
+    console.error("AddTokenIntoSwapContract failed:", error);
+    alert(`Failed to add token: ${errorMessage}`);
       console.error("AddTokenIntoSwapContract failed:", error?.reason || error);
     }
   };

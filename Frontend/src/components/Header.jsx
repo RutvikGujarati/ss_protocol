@@ -88,7 +88,7 @@ const Header = () => {
                   }
                   to="/info"
                 >
-                  Info
+                  Dav Vault
                 </NavLink>
               </li>
 
@@ -181,7 +181,7 @@ const Header = () => {
           }
         >
           <i className="bi bi-info-circle"></i>
-          <div>Info</div>
+          <div>Dav Vault</div>
         </NavLink>
         <NavLink
           target="_blank"

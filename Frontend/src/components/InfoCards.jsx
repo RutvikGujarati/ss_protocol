@@ -185,7 +185,7 @@ const InfoCards = () => {
   };
   const handleInputChangeForEmoji = (input) => {
     const graphemes = [...input]; // Spread into array of Unicode grapheme clusters
-    if (graphemes.length > 3) return; // Optionally restrict to 1 emoji/logogram
+    if (graphemes.length > 10) return; // Optionally restrict to 1 emoji/logogram
     setEmoji(input);
   };
 
@@ -777,7 +777,6 @@ const InfoCards = () => {
                             TokenName ? "filled" : ""
                           }`}
                           style={{ "--placeholder-color": "#6c757d" }}
-                          maxLength={10}
                           value={TokenName}
                           disabled={isProcessingToken}
                           onChange={(e) =>

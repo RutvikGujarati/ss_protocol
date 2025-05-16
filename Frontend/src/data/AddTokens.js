@@ -8,84 +8,87 @@ import { useEffect, useState } from "react";
 
 // ✅ 1. First hook: for general token config
 export const useAddTokens = () => {
-	const { names, users, Emojies, isUsed } = useDAvContract(); // tokenMap replaces deployedAddress
-	const { tokenMap, TimeLeftClaim, supportedToken, isTokenRenounce } = useSwapContract(); // tokenMap replaces deployedAddress
+	const { names, users, Emojies, isUsed } = useDAvContract();
+	const { tokenMap, TimeLeftClaim, supportedToken, isTokenRenounce } = useSwapContract();
 	const [AuthLoading, setAuthLoading] = useState(true);
-
-	// Create name → isUsed map
-	const isUsedMap = names.reduce((acc, name, index) => {
-		acc[name] = isUsed?.[index] ?? false;
-		return acc;
-	}, {});
-
-
-	const tokenConfigs = users.map((user, index) => {
-		const name = names[index] || 'Unknown';
-		const isDeployed = isUsedMap[name];
-		const isRenounceToken = isTokenRenounce[name];
-		const isAdded = supportedToken[name];
-		const Emojis = Emojies[index] || 'Unknown';
-		const tokenAddress = tokenMap?.[name] || '0x0000000000000000000000000000000000000000';
-		const timeLeft = TimeLeftClaim?.[name]
-		return {
-			user,
-			name,
-			Emojis,
-			isDeployed,
-			isAdded,
-			isRenounceToken,
-			contract: name || user,
-			image: FluxinLogo,
-			tokenAddress,
-			timeLeft: timeLeft,
-		};
-	});
-
+  
 	useEffect(() => {
-		const checkDataFetched = () => {
-			// Ensure all required arrays/objects are non-empty and defined
-			const isDataReady =
-				names?.length > 0 &&
-				users?.length > 0 &&
-				Emojies?.length > 0 &&
-				isUsed?.length > 0 &&
-				tokenMap &&
-				Object.keys(tokenMap).length > 0 &&
-				TimeLeftClaim &&
-				supportedToken &&
-				isTokenRenounce;
-
-			if (isDataReady) {
-				setAuthLoading(false); // All data is fetched
-			} else {
-				setAuthLoading(true); // Keep loading until all data is ready
-			}
-		};
-
-		checkDataFetched();
-
-		// Re-check when any of the dependencies change
+	  console.log("useAddTokens Dependencies:", {
+		names,
+		users,
+		Emojies,
+		isUsed,
+		tokenMap,
+		TimeLeftClaim,
+		supportedToken,
+		isTokenRenounce,
+	  });
+  
+	  const checkDataFetched = () => {
+		const isDataReady =
+		  names?.length > 0 &&
+		  users?.length > 0 &&
+		  Emojies?.length > 0 &&
+		  isUsed?.length > 0 &&
+		  tokenMap &&
+		  Object.keys(tokenMap).length > 0 &&
+		  TimeLeftClaim &&
+		  supportedToken &&
+		  isTokenRenounce;
+  
+		console.log("isDataReady:", isDataReady);
+		setAuthLoading(!isDataReady);
+	  };
+  
+	  checkDataFetched();
 	}, [names, users, Emojies, isUsed, tokenMap, TimeLeftClaim, supportedToken, isTokenRenounce]);
-
+  
+	const isUsedMap = names.reduce((acc, name, index) => {
+	  acc[name] = isUsed?.[index] ?? false;
+	  return acc;
+	}, {});
+  
+	const tokenConfigs = users.map((user, index) => {
+	  const name = names[index] || `Unknown_${index}`;
+	  const isDeployed = isUsedMap[name] ?? false;
+	  const isRenounceToken = isTokenRenounce?.[name] ?? false;
+	  const isAdded = supportedToken?.[name] ?? false;
+	  const Emojis = Emojies[index] || "❓";
+	  const tokenAddress = tokenMap?.[name] || "0x0000000000000000000000000000000000000000";
+	  const timeLeft = TimeLeftClaim?.[name] || "0";
+	  return {
+		user,
+		name,
+		Emojis,
+		isDeployed,
+		isAdded,
+		isRenounceToken,
+		contract: name || user,
+		image: FluxinLogo,
+		tokenAddress,
+		timeLeft,
+	  };
+	});
+  
 	return {
-		tokens: tokenConfigs.map((config) => ({
-			id: config.user,
-			user: config.user,
-			name: config.name,
-			isDeployed: config.isDeployed,
-			Emojis: config.Emojis,
-			isRenounceToken: config.isRenounceToken,
-			isAdded: config.isAdded,
-			Pname: `${config.name} - State - ${config.name}`,
-			ReverseName: `State - ${config.name}`,
-			ContractName: config.contract === "OneDollar" ? "oneD" : config.contract,
-			image: config.image,
-			TokenAddress: config.tokenAddress,
-			TimeLeft: config.timeLeft,
-		})),
-		AuthLoading, // Return loading state
+	  tokens: tokenConfigs.map((config) => ({
+		id: config.user,
+		user: config.user,
+		name: config.name,
+		isDeployed: config.isDeployed,
+		Emojis: config.Emojis,
+		isRenounceToken: config.isRenounceToken,
+		isAdded: config.isAdded,
+		Pname: `${config.name} - State - ${config.name}`,
+		ReverseName: `State - ${config.name}`,
+		ContractName: config.contract === "OneDollar" ? "oneD" : config.contract,
+		image: config.image,
+		TokenAddress: config.tokenAddress,
+		TimeLeft: config.timeLeft,
+	  })),
+	  AuthLoading,
 	};
-};
+  };
 
 // ✅ 2. Second hook: for owner-specific supported tokens
 
@@ -93,7 +96,7 @@ export const useAddTokens = () => {
 export const useUsersOwnerTokens = () => {
 	const { UsersSupportedTokens } = useSwapContract();
 	const { names, Emojies } = useDAvContract();
-
+console.log("names",names)
 	console.log("Raw UsersSupportedTokens:", UsersSupportedTokens);
 
 	// Create name → Emojies map
