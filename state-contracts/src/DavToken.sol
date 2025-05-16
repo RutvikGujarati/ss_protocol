@@ -92,12 +92,13 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         string emoji; // 🆕 Add this field
         TokenStatus status;
     }
-    // allTokenEntries is implicitly bounded by each user's DAV balance.
-    // Each user can only submit one token per DAV they hold, and DAV itself is capped.
-    // This natural upper bound eliminates the need for a hardcoded limit like 1,000 entries.
+   
     // NOTE: Each user is limited to DAV_AMOUNT token entries, so this loop is bounded
 
-    TokenEntry[] public allTokenEntries;
+	mapping(address => mapping(string => TokenEntry)) public userTokenEntries;
+	mapping(address => uint256) public userTokenCount;
+	mapping(address => string[]) public usersTokenNames;
+	string[] public allTokenNames;
     // Tracks total tokens burned by each user across all cycles
     // Used in DApp to show user-specific burn history
     mapping(address => uint256) public userBurnedAmount;
@@ -137,7 +138,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // Used to optimize claimPLS() by iterating only over relevant cycles
     // Simple and avoids bitmap complexity
     mapping(address => uint256[]) public userUnclaimedCycles;
-    mapping(address => string[]) public usersTokenNames;
+	mapping(string => bool) public isTokenNameUsed;
     event TokensBurned(address indexed user, uint256 amount, uint256 cycle);
     event RewardClaimed(address indexed user, uint256 amount, uint256 cycle);
     event TokensMinted(
@@ -245,9 +246,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     function _assignReferralCodeIfNeeded(address user) internal {
         if (bytes(userReferralCode[user]).length == 0) {
             string memory code = _generateReferralCode(user);
-            // Assign the referral code to the user once, avoiding redundant writes
+        // Assign only to user mapping — no need to touch referralCodeToUser again
             userReferralCode[user] = code;
-            // No need to set referralCodeToUser[code] again here
             emit ReferralCodeGenerated(user, code);
         }
     }
@@ -295,8 +295,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             code = _toAlphanumericString(hash, 8);
         } while (referralCodeToUser[code] != address(0)); // Check for collision
 
-        // Removed redundant assignment here — mapping is set in _assignReferralCodeIfNeeded
-        referralCodeToUser[code] = user;
+        referralCodeToUser[code] = user;// Set mapping ONCE here
         return code;
     }
     function _toAlphanumericString(
@@ -493,6 +492,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         string memory _emoji
     ) public payable {
         require(bytes(_tokenName).length > 0, "Please provide tokenName");
+		// no commit-reveal scheme or time lock require to unique token name. it will not front run
+		  require(!isTokenNameUsed[_tokenName], "Token name already used");
         require(
             _utfStringLength(_emoji) <= 10,
             "Max 10 UTF-8 characters allowed"
@@ -500,7 +501,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         // ⚖️ Token entry limit is indirectly enforced via DAV balance
         // Each user can process one token per DAV they hold. This means the number of tokens they can process is limited by their DAV balance.
         uint256 userTokenBalance = balanceOf(msg.sender); // The amount of DAV the user holds
-        uint256 tokensSubmitted = usersTokenNames[msg.sender].length; // Number of tokens the user has already processed
+      uint256 tokensSubmitted = userTokenCount[msg.sender]; // Number of tokens the user has already processed
         // Ensure that the user has enough DAV to process a new token
         require(
             userTokenBalance > tokensSubmitted,
@@ -527,8 +528,14 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             }        }
         // Add the user's token name to their list and mark it as used
         usersTokenNames[msg.sender].push(_tokenName);
-        allTokenEntries.push(
-            TokenEntry(msg.sender, _tokenName, _emoji, TokenStatus.Pending)
+        isTokenNameUsed[_tokenName] = true;
+        userTokenCount[msg.sender]++;
+        allTokenNames.push(_tokenName);
+        userTokenEntries[msg.sender][_tokenName] = TokenEntry(
+            msg.sender,
+            _tokenName,
+            _emoji,
+            TokenStatus.Pending
         );
         emit TokenNameAdded(msg.sender, _tokenName);
     }
@@ -559,15 +566,14 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         address user
     ) public view returns (string[] memory) {
         // Use a temporary array with the maximum possible size
-        string[] memory tempNames = new string[](allTokenEntries.length);
+        string[] memory userTokens = usersTokenNames[user];
+        string[] memory tempNames = new string[](userTokens.length);
         uint256 count = 0;
         // Single loop to collect pending token names
-        for (uint256 i = 0; i < allTokenEntries.length; i++) {
-            if (
-                allTokenEntries[i].user == user &&
-                allTokenEntries[i].status == TokenStatus.Pending
-            ) {
-                tempNames[count] = allTokenEntries[i].tokenName;
+       for (uint256 i = 0; i < userTokens.length; i++) {
+            string memory tokenName = userTokens[i];
+            if (userTokenEntries[user][tokenName].status == TokenStatus.Pending) {
+                tempNames[count] = tokenName;
                 count++;
             }
         } // Create a correctly sized array for the result
@@ -590,28 +596,29 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         string memory _tokenName,
         TokenStatus _status
     ) external onlyGovernance {
-        // Track whether we found and updated a matching entry
-        bool updated = false;
-
-        // Efficient search loop — assumes per-user limits and unique token entries
-        for (uint256 i = 0; i < allTokenEntries.length; i++) {
-            if (
-                allTokenEntries[i].user == _owner &&
-                keccak256(bytes(allTokenEntries[i].tokenName)) ==
-                keccak256(bytes(_tokenName))
-            ) {
-                allTokenEntries[i].status = _status;
-                emit TokenStatusUpdated(_owner, _tokenName, _status);
-                updated = true;
-                break;
-            }
-        }
-
-        require(updated, "Token entry not found");
+        require(
+            bytes(userTokenEntries[_owner][_tokenName].tokenName).length > 0,
+            "Token entry not found"
+        );
+        userTokenEntries[_owner][_tokenName].status = _status;
+        emit TokenStatusUpdated(_owner, _tokenName, _status);
     }
 
-    function getAllTokenEntries() public view returns (TokenEntry[] memory) {
-        return allTokenEntries;
+   function getAllTokenEntries() public view returns (TokenEntry[] memory) {
+        TokenEntry[] memory entries = new TokenEntry[](allTokenNames.length);
+        for (uint256 i = 0; i < allTokenNames.length; i++) {
+            string memory tokenName = allTokenNames[i];
+            address user;
+            // Find the user who owns this tokenName
+            for (uint256 j = 0; j < usersTokenNames[user].length; j++) {
+                if (
+                    keccak256(bytes(usersTokenNames[user][j])) ==
+                    keccak256(bytes(tokenName))
+                ) {                    user = user;                    break;                }
+            }
+            entries[i] = userTokenEntries[user][tokenName];
+        }
+        return entries;
     }
     // ------------------ Burn functions ------------------------------
     // Burn tokens and update cycle tracking
