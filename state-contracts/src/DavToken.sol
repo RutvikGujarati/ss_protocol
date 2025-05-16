@@ -21,10 +21,10 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     uint256 public constant LIQUIDITY_SHARE = 30; // 20% LIQUIDITY SHARE
     uint256 public constant DEVELOPMENT_SHARE = 5; // 5% DEV SHARE
     uint256 public constant HOLDER_SHARE = 10; // 10% HOLDER SHARE
-    uint256 private constant BASIS_POINTS = 10000;
+    uint256 public constant BASIS_POINTS = 10000;
     //cycle assinging to 10. not want to update or configure later
-    uint256 private constant CYCLE_ALLOCATION_COUNT = 10;
-    uint256 private constant TOKEN_PROCESSING_FEE = 100000 ether;
+    uint256 public constant CYCLE_ALLOCATION_COUNT = 10;
+    uint256 public constant TOKEN_PROCESSING_FEE = 100000 ether;
     uint256 public totalReferralRewardsDistributed;
     uint256 public mintedSupply; // Total Minted DAV Tokens
     uint256 public stateLpTotalShare;
@@ -42,7 +42,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     uint256 public totalStateBurned;
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
     uint256 public constant CLAIM_INTERVAL = 3 days; // 4 hour claim timer
-    uint256 public constant MIN_DAV = 1 * 1e18;
+    uint256 public constant MIN_DAV = 10 * 1e18;
 
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
@@ -169,7 +169,6 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         _mint(_gov, 1000 ether);
         mintedSupply += 1000 ether;
         StateToken = IERC20(_stateToken);
-        _transferOwnership(msg.sender);
         deployTime = block.timestamp;
     }
     modifier onlyGovernance() {
@@ -260,24 +259,31 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
      * @param user The address of the user for whom the code is generated
      * @return A unique alphanumeric referral code
      */
-    function _generateReferralCode(
-        address user
-    ) internal returns (string memory) {
-        userNonce[user]++;
-        // Avoid blockhash (miner-influenced); use timestamp and nonce for uniqueness
-        bytes32 hash = keccak256(
+   function _generateReferralCode(address user) internal returns (string memory code) {
+    userNonce[user]++;
+    bytes32 hash;
+    // Loop until a unique referral code is found
+    do {
+        hash = keccak256(
             abi.encodePacked(
                 user,
                 userNonce[user],
                 msg.sender,
                 tx.origin,
-                block.timestamp, // miner can control within a few seconds, but not enough to predict
-                gasleft(), // adds minor entropy from tx conditions
-                block.number // helps change across blocks
+                block.timestamp,
+                gasleft(),
+                block.number
             )
         );
-        return _toAlphanumericString(hash, 8);
-    }    function _toAlphanumericString(
+        // Convert hash to 8-character alphanumeric string
+        code = _toAlphanumericString(hash, 8);
+    } while (referralCodeToUser[code] != address(0)); // Check for collision
+
+    // Map the unique code to the user
+    referralCodeToUser[code] = user;
+
+    return code;
+}   function _toAlphanumericString(
         bytes32 hash,
         uint256 length
     ) internal pure returns (string memory) {
@@ -467,7 +473,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         string memory _emoji
     ) public payable {
         require(bytes(_tokenName).length > 0, "Please provide tokenName");
-        require(bytes(_emoji).length <= 10, "Max 4-byte emoji");
+		require(_utfStringLength(_emoji) <= 10, "Max 10 emoji characters allowed");
         require(!isTokenNameUsed[_tokenName], "Token name already used");
         // ⚖️ Token entry limit is indirectly enforced via DAV balance
         // Each user can process one token per DAV they hold. This means the number of tokens they can process is limited by their DAV balance.
@@ -480,9 +486,10 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         );
         // If not the governance, ensure the user sends the required PLS amount
         if (msg.sender != governance) {
+			//it is  100,000 Ether not in wei form
             require(
                 msg.value == TOKEN_PROCESSING_FEE,
-                "Please give 100000 PLS"
+                "Please send exactly 100,000 PLS"
             );
             // Allocate funds to State LP cycle similar to mintDAV logic
             uint256 stateLPShare = msg.value;
@@ -505,9 +512,25 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         isTokenNameUsed[_tokenName] = true;
         emit TokenNameAdded(msg.sender, _tokenName);
     }
-    // allTokenEntries is implicitly bounded by each user's DAV balance.
+	/// @notice Counts the number of UTF-8 characters in a string
+/// @dev Each emoji can be 1–4 bytes. This counts actual characters, not bytes.
+	function _utfStringLength(string memory str) internal pure returns (uint256 length) {
+    uint256 i = 0;
+    bytes memory strBytes = bytes(str);
+    while (i < strBytes.length) {
+        if (strBytes[i] >> 7 == 0) {            i += 1; // 1-byte character (ASCII)
+        } else if (strBytes[i] >> 5 == 0x6) {            i += 2; // 2-byte character
+        } else if (strBytes[i] >> 4 == 0xE) {            i += 3; // 3-byte character
+        } else if (strBytes[i] >> 3 == 0x1E) {            i += 4; // 4-byte character (emojis, many symbols)
+        } else {            revert("Invalid UTF-8 character");
+        }
+        length++;
+    }
+}    // allTokenEntries is implicitly bounded by each user's DAV balance.
     // Each user can only submit one token per DAV they hold, and DAV itself is capped.
     // This natural upper bound eliminates the need for a hardcoded limit like 1,000 entries.
+	/// @notice Returns the list of pending token names for a user.
+	/// @dev This function is intended for off-chain use only. It may consume too much gas if called on-chain for users with many entries.
     function getPendingTokenNames(
         address user
     ) public view returns (string[] memory) {
@@ -534,6 +557,14 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         }
         return pendingNames;
     }
+    /// @notice Modifier to restrict access so that only the governance externally owned account (EOA) can call the function.
+    /// @dev This ensures that the transaction originator (tx.origin) must be the governance address.
+      ///It prevents smart contracts (including trusted contracts) from calling the function, even if they are authorized.
+      ///⚠️ Use with caution: relying on tx.origin is discouraged in most cases due to potential security risks in complex call chains.
+	modifier onlyTxOrigin() {
+    	require(tx.origin == governance, "Caller is not governance EOA");
+    	_;
+	}
     /// @notice Updates the status of a user's submitted token name
     /// @dev This function can only be called by the governance address.
     /// Governance reviews and approves/rejects token submissions from users.
@@ -541,11 +572,9 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     /// While governance has authority, the process can be made transparent through on-chain within 24 hrs.
     function updateTokenStatus(
         address _owner,
-        address _gov,
         string memory _tokenName,
         TokenStatus _status
-    ) external {
-        require(_gov == governance, "Only governance can update status");
+    ) external onlyTxOrigin{
         // Find and update the token entry
         for (uint256 i = 0; i < allTokenEntries.length; i++) {
             if (
@@ -595,8 +624,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
                 cycleExists = true;
                 break;
             }
-        }
-        if (!cycleExists) {
+        }   if (!cycleExists) {
             userUnclaimedCycles[msg.sender].push(currentCycle);
         }
         // Log burn in history for DApp display
@@ -787,9 +815,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             return (userBurn * BASIS_POINTS) / totalBurn;
         }
     }
-
     receive() external payable {
         revert("Direct ETH transfers not allowed");
     }
-    fallback() external payable {}
+   fallback() external payable { revert("Invalid call"); }
 }
