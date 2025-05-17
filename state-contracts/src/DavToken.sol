@@ -45,7 +45,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // Used in DApp to display total burn statistics
     uint256 public totalStateBurned;
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
-    uint256 public constant CLAIM_INTERVAL = 4 hours; // 4 hour claim timer
+    uint256 public constant CLAIM_INTERVAL = 3 hours; // 4 hour claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
 
     address private constant BURN_ADDRESS =

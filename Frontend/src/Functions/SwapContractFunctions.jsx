@@ -1,5 +1,12 @@
 // SwapContractContext.js
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from "react";
 import { ethers } from "ethers";
 import PropTypes from "prop-types";
 import toast from "react-hot-toast";
@@ -184,47 +191,52 @@ export const SwapContractProvider = ({ children }) => {
     });
   };
 
-  useEffect(() => {
-    const intervalHandles = {};
+  const intervalHandlesRef = useRef({}); // useRef to persist across renders
+
+  const initializeClaimCountdowns = useCallback(async () => {
+    const intervalHandles = intervalHandlesRef.current;
     const results = {};
 
-    const initializeClaimCountdowns = async () => {
-      const tokenMap = await ReturnfetchUserTokenAddresses();
+    // Clear existing intervals
+    Object.values(intervalHandles).forEach(clearInterval);
+    intervalHandlesRef.current = {};
 
-      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        try {
-          const timeLeftInSeconds =
-            await AllContracts.AuctionContract.getNextClaimTime(TokenAddress);
+    const tokenMap = await ReturnfetchUserTokenAddresses();
 
-          const timeLeft = Number(timeLeftInSeconds);
-          results[tokenName] = timeLeft;
+    for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
+      try {
+        const timeLeftInSeconds =
+          await AllContracts.AuctionContract.getNextClaimTime(TokenAddress);
 
-          // Start countdown interval
-          intervalHandles[tokenName] = setInterval(() => {
-            setTimeLeftClaim((prev) => {
-              const updated = { ...prev };
-              if (updated[tokenName] > 0) {
-                updated[tokenName] = updated[tokenName] - 1;
-              }
-              return updated;
-            });
-          }, 1000);
-        } catch (err) {
-          console.warn(`Error getting claim time for ${tokenName}`, err);
-          results[tokenName] = 0;
-        }
+        const timeLeft = Number(timeLeftInSeconds);
+        results[tokenName] = timeLeft;
+
+        // Start countdown interval
+        intervalHandles[tokenName] = setInterval(() => {
+          setTimeLeftClaim((prev) => {
+            const updated = { ...prev };
+            if (updated[tokenName] > 0) {
+              updated[tokenName] = updated[tokenName] - 1;
+            }
+            return updated;
+          });
+        }, 1000);
+      } catch (err) {
+        console.warn(`Error getting claim time for ${tokenName}`, err);
+        results[tokenName] = 0;
       }
+    }
 
-      setTimeLeftClaim(results);
-    };
-
+    setTimeLeftClaim(results);
+  }, [AllContracts]);
+  useEffect(() => {
     initializeClaimCountdowns();
 
     return () => {
-      // Cleanup intervals
+      const intervalHandles = intervalHandlesRef.current;
       Object.values(intervalHandles).forEach(clearInterval);
     };
-  }, [AllContracts]);
+  }, [initializeClaimCountdowns]);
 
   const getTokensBurned = async () => {
     try {
@@ -599,6 +611,7 @@ export const SwapContractProvider = ({ children }) => {
         tokenAddress
       );
       await tx.wait();
+	  await initializeClaimCountdowns();
       console.log("Reward claimed successfully");
     } catch (error) {
       console.error("Error claiming reward:", error);
@@ -611,7 +624,7 @@ export const SwapContractProvider = ({ children }) => {
     TokenAddress,
     PairAddress,
     Owner,
-	name
+    name
   ) => {
     if (!AllContracts?.AuctionContract || !address) return;
 
@@ -623,7 +636,11 @@ export const SwapContractProvider = ({ children }) => {
         Owner
       );
       await tx.wait();
-      const tx2 = await AllContracts.davContract.updateTokenStatus(Owner, name,1);
+      const tx2 = await AllContracts.davContract.updateTokenStatus(
+        Owner,
+        name,
+        1
+      );
       const receipt2 = await tx2.wait();
       if (receipt2.status === 1) {
         console.log("Transaction successful");
@@ -635,9 +652,10 @@ export const SwapContractProvider = ({ children }) => {
       }
       console.log("Token added successfully!");
     } catch (error) {
-		const errorMessage = error.reason || error.message || "Unknown error occurred";
-    console.error("AddTokenIntoSwapContract failed:", error);
-    alert(`Failed to add token: ${errorMessage}`);
+      const errorMessage =
+        error.reason || error.message || "Unknown error occurred";
+      console.error("AddTokenIntoSwapContract failed:", error);
+      alert(`Failed to add token: ${errorMessage}`);
       console.error("AddTokenIntoSwapContract failed:", error?.reason || error);
     }
   };

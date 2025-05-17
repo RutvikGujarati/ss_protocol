@@ -186,7 +186,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     function _calculateDubaiAuctionStart() internal view returns (uint256) {
         uint256 dubaiOffset = 4 hours;
         uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 14;
+        uint256 targetDubaiHour = 17;
         uint256 targetDubaiMinute = 0;
         // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;
@@ -644,7 +644,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
     function getOutPutAmount(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
-        uint256 currentRatio = getRatioPrice(inputToken);
+        // uint256 currentRatio = getRatioPrice(inputToken);
+        uint256 currentRatio = 1000;
         require(currentRatio > 0, "Invalid ratio");
 
         uint256 userBalance = dav.balanceOf(msg.sender);
