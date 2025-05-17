@@ -442,6 +442,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             davHoldersCount += 1;
             emit HolderAdded(msg.sender);
         }
+        _updateRewards(msg.sender);
         _mint(msg.sender, amount);
         _updateRewards(msg.sender);
         emit TokensMinted(msg.sender, amount, msg.value);

@@ -14,7 +14,7 @@ import {
   Auction_TESTNET,
   DAV_TESTNET,
   STATE_TESTNET,
-} from  "../Constants/ContractAddresses";
+} from "../Constants/ContractAddresses";
 import toast from "react-hot-toast";
 
 export const DAVContext = createContext();
@@ -49,6 +49,8 @@ export const DavProvider = ({ children }) => {
     totalStateBurned: "0.0",
     pendingToken: "0.0",
     claimableAmount: "0.0",
+    currentBurnCycle: "0.0",
+    userBurnedAmountInCycle: "0.0",
     usableTreasury: "0.0",
     tokenEntries: null,
     expectedClaim: "0.0",
@@ -90,6 +92,15 @@ export const DavProvider = ({ children }) => {
 
     setLoading(true);
     try {
+      // First, get currentBurnCycle and update it
+      const currentCycleRaw = await AllContracts.davContract.getCurrentCycle();
+      const currentCycle = parseInt(currentCycleRaw.toString());
+
+      setData((prev) => ({
+        ...prev,
+        currentBurnCycle: currentCycle.toString(), // or format as needed
+      }));
+
       await Promise.all([
         fetchAndSet("Supply", () => AllContracts.davContract.totalSupply()),
         fetchAndSet("claimableAmount", () =>
@@ -99,11 +110,12 @@ export const DavProvider = ({ children }) => {
           AllContracts.davContract.userBurnedAmount(address)
         ),
 
-        fetchAndSet(
-          "UserPercentage",
-          () => AllContracts.davContract.getUserSharePercentage(address),
-          true, // Enable formatting
-          2 // Keep 2 decimal places
+        fetchAndSet("userBurnedAmountInCycle", () =>
+          AllContracts.davContract.cycleTotalBurned(currentCycle)
+        ),
+
+        fetchAndSet("UserPercentage", () =>
+          AllContracts.davContract.getUserSharePercentage(address)
         ),
 
         fetchAndSet("totalStateBurned", () =>
@@ -112,13 +124,11 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("davHolds", () =>
           AllContracts.davContract.balanceOf(address)
         ),
-
         fetchAndSet(
           "pendingToken",
           () => AllContracts.davContract.getPendingTokenNames(address),
           false
         ),
-
         fetchAndSet(
           "davPercentage",
           () => AllContracts.davContract.getUserHoldingPercentage(address),
@@ -130,12 +140,11 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("stateHoldingOfSwapContract", () =>
           AllContracts.stateContract.balanceOf(Auction_TESTNET)
         ),
-        // fetchAndSet(
-        //   "tokenEntries",
-        //   () => AllContracts.davContract.getAllTokenEntries(),
-        //   false
-        // ),
-
+        fetchAndSet(
+          "tokenEntries",
+          () => AllContracts.davContract.getAllTokenEntries(),
+          false
+        ),
         fetchAndSet(
           "ReferralCodeOfUser",
           () => AllContracts.davContract.getUserReferralCode(address),
@@ -165,10 +174,10 @@ export const DavProvider = ({ children }) => {
       const tokenStatus = tokenEntries.map((entry) => entry.TokenStatus);
       console.log("token status:,", tokenEntries);
       // Update state
-      setUsers(addresses); 
-      setNames(tokenNames); 
-      setEmojies(tokenEmojis); 
-      setTokenStatus(tokenStatus); 
+      setUsers(addresses);
+      setNames(tokenNames);
+      setEmojies(tokenEmojis);
+      setTokenStatus(tokenStatus);
     } catch (error) {
       console.error("Error fetching token entries:", error);
     }
@@ -207,7 +216,6 @@ export const DavProvider = ({ children }) => {
       fetchAndSet("claimableAmountForBurn", () =>
         AllContracts.davContract.getClaimablePLS(address)
       ),
-     
         fetchAndSet("usableTreasury", () =>
           AllContracts.davContract.getAvailableCycleFunds()
         ),
@@ -342,7 +350,6 @@ export const DavProvider = ({ children }) => {
       setProcessToken(false);
     }
   };
-
   const claimAmount = async () => {
     if (!AllContracts?.davContract) return;
     try {
@@ -351,8 +358,20 @@ export const DavProvider = ({ children }) => {
       await fetchData();
     } catch (err) {
       console.error("Claim error:", err);
+      let errorMessage = "An unknown error occurred while claiming reward.";
+
+      if (err?.error?.message) {
+        errorMessage = err.error.message;
+      } else if (err?.reason) {
+        errorMessage = err.reason;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+
+      alert(`Claim failed: ${errorMessage}`);
     }
   };
+
   const deployWithMetaMask = async (name, symbol, emoji, five, swap, gov) => {
     if (!AllContracts?.AuctionContract) return;
     try {

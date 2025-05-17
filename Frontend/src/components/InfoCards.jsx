@@ -32,6 +32,7 @@ const InfoCards = () => {
     BurnStateTokens,
     claimAmount,
     ReferralAMount,
+	userBurnedAmountInCycle,
     claimableAmountForBurn,
     BurnClicked,
     Claiming,
@@ -634,6 +635,16 @@ const InfoCards = () => {
                     >
                       STATE TOKENS BURNED BY YOU -{" "}
                       {formatWithCommas(userBurnedAmount)}
+                    </h6>
+                    <h6
+                      className="detailText mb-0"
+                      style={{
+                        fontSize: "14px",
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      STATE TOKENS BURNED IN CURRENT CYCLE-{" "}
+                      {formatWithCommas(userBurnedAmountInCycle)}
                     </h6>
                   </div>
                 </div>
