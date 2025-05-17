@@ -36,8 +36,8 @@ const DataTable = () => {
     giveRewardForAirdrop,
   } = useSwapContract();
 
-  const { tokens, loading } = useAuctionTokens();
-  const { tokens: Addtokens, AuthLoading: addTokensLoading } = useAddTokens();
+  const { tokens } = useAuctionTokens();
+  const { tokens: Addtokens } = useAddTokens();
   const OwnersTokens = useUsersOwnerTokens();
   console.log("obj tokens", tokens);
 

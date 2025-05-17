@@ -186,7 +186,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     function _calculateDubaiAuctionStart() internal view returns (uint256) {
         uint256 dubaiOffset = 4 hours;
         uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 17;
+        uint256 targetDubaiHour = 14;
         uint256 targetDubaiMinute = 0;
         // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;
