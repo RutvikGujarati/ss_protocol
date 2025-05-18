@@ -10,8 +10,17 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @dev Uses OpenZeppelin ERC20 and Ownable contracts
 contract STATE_Token_V2_1_Ratio_Swapping is ERC20, Ownable(msg.sender) {
     /// @notice Maximum total supply of the token (1 quadrillion tokens, 18 decimals)
-    uint256 public constant MAX_TOTAL_SUPPLY = 1_000_000_000_000_000 ether;
-
+    uint256 public constant MAX_TOTAL_SUPPLY = 1000000000000000 ether;
+    event InitialAllocation(
+        address indexed fivePercentRecipient,
+        address indexed ninetyFivePercentRecipient,
+        uint256 fivePercentAmount,
+        uint256 ninetyFivePercentAmount
+    );
+    uint256 public constant FIVE_PERCENT_ALLOCATION =
+        (MAX_TOTAL_SUPPLY * 5) / 100;
+    uint256 public constant NINETY_FIVE_PERCENT_ALLOCATION =
+        MAX_TOTAL_SUPPLY - FIVE_PERCENT_ALLOCATION;
     /// @param tokenName The name of the token
     /// @param tokenSymbol The symbol of the token
     /// @param recipientFivePercent Address receiving 5% of total supply
@@ -24,15 +33,21 @@ contract STATE_Token_V2_1_Ratio_Swapping is ERC20, Ownable(msg.sender) {
     ) ERC20(tokenName, tokenSymbol) {
         require(recipientFivePercent != address(0), "Invalid 5% address");
         require(
+            recipientFivePercent != recipientNinetyFivePercent,
+            "Recipients must be different"
+        );
+        require(
             recipientNinetyFivePercent != address(0),
             "Invalid 95% address"
         );
 
-        uint256 fivePercentAllocation = (MAX_TOTAL_SUPPLY * 5) / 100;
-        uint256 ninetyFivePercentAllocation = MAX_TOTAL_SUPPLY -
-            fivePercentAllocation;
-
-        _mint(recipientFivePercent, fivePercentAllocation);
-        _mint(recipientNinetyFivePercent, ninetyFivePercentAllocation);
+        _mint(recipientFivePercent, FIVE_PERCENT_ALLOCATION);
+        _mint(recipientNinetyFivePercent, NINETY_FIVE_PERCENT_ALLOCATION);
+        emit InitialAllocation(
+            recipientFivePercent,
+            recipientNinetyFivePercent,
+            FIVE_PERCENT_ALLOCATION,
+            NINETY_FIVE_PERCENT_ALLOCATION
+        );
     }
 }
