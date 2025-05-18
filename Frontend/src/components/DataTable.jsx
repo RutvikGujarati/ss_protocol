@@ -163,7 +163,7 @@ const DataTable = () => {
     }
 
     return () => clearTimeout(timer);
-  }, [txStatusForSwap]);
+  }, [txStatusForAdding]);
   useEffect(() => {
     if (!txStatusForSwap) {
       setIsPopupOpen(false);
