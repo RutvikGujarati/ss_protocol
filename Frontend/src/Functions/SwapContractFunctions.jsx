@@ -34,6 +34,7 @@ export const SwapContractProvider = ({ children }) => {
 
   const [claiming, setClaiming] = useState(false);
   const [txStatusForSwap, setTxStatusForSwap] = useState("");
+  const [txStatusForAdding, setTxStatusForAdding] = useState("");
   const [TotalCost, setTotalCost] = useState(null);
 
   const [InputAmount, setInputAmount] = useState({});
@@ -627,15 +628,17 @@ export const SwapContractProvider = ({ children }) => {
     name
   ) => {
     if (!AllContracts?.AuctionContract || !address) return;
-
+	setTxStatusForAdding("initiated")
     try {
       // Replace these params if needed based on your contract's addToken function
+	  setTxStatusForAdding("Adding")
       const tx = await AllContracts.AuctionContract.addToken(
         TokenAddress,
         PairAddress,
         Owner
       );
       await tx.wait();
+	  setTxStatusForAdding("Status Updating")
       const tx2 = await AllContracts.davContract.updateTokenStatus(
         Owner,
         name,
@@ -644,20 +647,26 @@ export const SwapContractProvider = ({ children }) => {
       const receipt2 = await tx2.wait();
       if (receipt2.status === 1) {
         console.log("Transaction successful");
+		setTxStatusForAdding("confirmed")
         await CheckIsAuctionActive();
         await isTokenSupporteed(); // Corrected function name
         console.log("Token added successfully!");
       } else {
         console.error("Transaction failed");
+		setTxStatusForAdding("error")
       }
+	  setTxStatusForAdding("confirmed")
       console.log("Token added successfully!");
     } catch (error) {
       const errorMessage =
         error.reason || error.message || "Unknown error occurred";
       console.error("AddTokenIntoSwapContract failed:", error);
+	  setTxStatusForAdding("")
       alert(`Failed to add token: ${errorMessage}`);
       console.error("AddTokenIntoSwapContract failed:", error?.reason || error);
-    }
+    }finally{
+		setTxStatusForAdding("confirmed")
+	}
   };
   console.log("Is array:", Array.isArray(UsersSupportedTokens));
   useEffect(() => {
@@ -988,6 +997,8 @@ export const SwapContractProvider = ({ children }) => {
         getInputAmount,
         TokenNames,
         getOutPutAmount,
+		txStatusForAdding,
+		setTxStatusForAdding,
         TimeLeftClaim,
         renounceTokenContract,
         tokenMap,

@@ -342,9 +342,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         );
 
         uint256 currentAuctionCycle = getCurrentAuctionCycle(inputToken);
-
-        AuctionCycle storage cycle = auctionCycles[inputToken][stateToken];
-        require(currentAuctionCycle == cycle.auctionCount, "Cycle mismatch");
         require(currentAuctionCycle < MAX_AUCTIONS, "Maximum auctions reached");
 
         UserSwapInfo storage userSwapInfo = userSwapTotalInfo[user][inputToken][

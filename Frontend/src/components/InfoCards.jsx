@@ -32,7 +32,7 @@ const InfoCards = () => {
     BurnStateTokens,
     claimAmount,
     ReferralAMount,
-	userBurnedAmountInCycle,
+    userBurnedAmountInCycle,
     claimableAmountForBurn,
     BurnClicked,
     Claiming,
@@ -761,6 +761,9 @@ const InfoCards = () => {
                             Airdrops every 50 days
                           </li>
                           <li className="detailText2">
+                            Token name characters are limited to 11{" "}
+                          </li>
+                          <li className="detailText2">
                             Add your Emoticon (Emoji).
                           </li>
                           <li className="detailText2">Cost - 10 Million PLS</li>
@@ -789,6 +792,7 @@ const InfoCards = () => {
                           }`}
                           style={{ "--placeholder-color": "#6c757d" }}
                           value={TokenName}
+						  maxLength={11}
                           disabled={isProcessingToken}
                           onChange={(e) =>
                             handleInputChangeForAddtoken(
