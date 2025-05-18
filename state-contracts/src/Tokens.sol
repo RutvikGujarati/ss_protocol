@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -11,6 +11,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Token is ERC20, Ownable {
     /// @notice The maximum total supply of tokens (500 billion tokens with 18 decimals)
     uint256 public constant MAX_SUPPLY = 500000000000 ether; // 500 billion
+    uint256 public constant ONE_PERCENT = (MAX_SUPPLY * 1) / 100;
+    uint256 public constant NINETY_NINE_PERCENT = MAX_SUPPLY - ONE_PERCENT;
+	event InitialDistribution(address indexed gov, address indexed treasury, uint256 govAmount, uint256 treasuryAmount);
 
     /**
      * @notice Constructs the Token contract and mints initial tokens
@@ -30,15 +33,14 @@ contract Token is ERC20, Ownable {
         address _owner
     ) ERC20(name, symbol) Ownable(_owner) {
         require(
-            _gov != address(0) && _swapTreasury != address(0),
+            _gov != address(0) &&
+                _swapTreasury != address(0) &&
+                _owner != address(0),
             "Invalid address"
         );
-        require(_owner != address(0), "Invalid owner address");
 
-        uint256 onePercent = (MAX_SUPPLY * 1) / 100;
-        uint256 ninetyNinePercent = MAX_SUPPLY - onePercent;
-
-        _mint(_gov, onePercent);
-        _mint(_swapTreasury, ninetyNinePercent);
+        _mint(_gov, ONE_PERCENT);
+        _mint(_swapTreasury, NINETY_NINE_PERCENT);
+		emit InitialDistribution(_gov, _swapTreasury, ONE_PERCENT, NINETY_NINE_PERCENT);
     }
 }
