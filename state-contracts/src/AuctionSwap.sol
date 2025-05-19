@@ -41,17 +41,24 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     uint256 public constant AUCTION_DURATION = 1 hours;
     uint256 public constant REVERSE_DURATION = 1 hours;
     uint256 public constant MAX_AUCTIONS = 20;
-    uint256 public constant OWNER_REWARD_AMOUNT = 2500000 * 1e18;
+    uint256 public constant OWNER_REWARD_AMOUNT = 2500000 ether;
     uint256 public constant CLAIM_INTERVAL = 4 hours;
     uint256 public constant MAX_SUPPLY = 500000000000 ether;
-	uint256 constant DAV_FACTOR = 5000000 * 1e18;
+    uint256 constant DAV_FACTOR = 5000000 ether;
+    //For Airdrop
+    uint256 constant AIRDROP_AMOUNT = 10000 ether;
+    uint256 constant TOKEN_OWNER_AIRDROP = 2500000 ether;
+    uint256 constant GOV_OWNER_AIRDROP = 500000 ether;
+
+    uint256 constant PRECISE_FACTOR = 1e18;
     uint256 public constant percentage = 1;
+    //it is used for pulsechain and it is standered burn address
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
     uint256 public TotalBurnedStates;
 
     address public stateToken;
-    address public immutable governanceAddress;
+    address public governanceAddress;
 
     mapping(address => mapping(address => uint256)) public lastDavHolding; // user => token => last DAV holding
     mapping(address => mapping(address => uint256))
@@ -108,7 +115,19 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     constructor(address _gov) {
         governanceAddress = _gov;
     }
-
+    //to update governance if needed
+    function updateGovernance(address newGov) external onlyGovernance {
+        require(newGov != address(0), "RSA: Invalid governance address");
+        governanceAddress = newGov;
+    }
+    //to deposit tokens if needed
+    function depositTokens(
+        address token,
+        uint256 amount
+    ) external onlyGovernance {
+        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
+        emit TokensDeposited(token, amount);
+    }
     // Deploy a Token
     function deployUserToken(
         string memory name,
@@ -139,12 +158,12 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address pairAddress,
         address _tokenOwner
     ) external onlyGovernance {
-        // IPair pair = IPair(pairAddress);
-        // require(
-        //     (pair.token0() == token && pair.token1() == stateToken) ||
-        //         (pair.token1() == token && pair.token0() == stateToken),
-        //     "Pair must contain stateToken"
-        // );
+        IPair pair = IPair(pairAddress);
+        require(
+            (pair.token0() == token && pair.token1() == stateToken) ||
+                (pair.token1() == token && pair.token0() == stateToken),
+            "Pair must contain stateToken"
+        );
         require(token != address(0), "Invalid token address");
         require(stateToken != address(0), "State token not initialized");
         require(pairAddress != address(0), "Invalid pair address");
@@ -236,9 +255,9 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
         uint256 ratio;
         if (token0 == inputToken && token1 == stateToken) {
-            ratio = (uint256(reserve1) * 1e18) / uint256(reserve0);
+            ratio = (uint256(reserve1) * PRECISE_FACTOR) / uint256(reserve0);
         } else if (token0 == stateToken && token1 == inputToken) {
-            ratio = (uint256(reserve0) * 1e18) / uint256(reserve1);
+            ratio = (uint256(reserve0) * PRECISE_FACTOR) / uint256(reserve1);
         } else {
             revert("Invalid pair");
         }
@@ -267,7 +286,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
         // **Effects**
 
-        uint256 reward = (newDavContributed * 10000 ether) / 1e18;
+        uint256 reward = (newDavContributed * AIRDROP_AMOUNT) / PRECISE_FACTOR;
 
         cumulativeDavHoldings[user][inputToken] += newDavContributed;
         lastDavHolding[user][inputToken] = currentDavHolding;
@@ -290,18 +309,18 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
         if (msg.sender == governanceAddress) {
             claimant = governanceAddress;
-            rewardAmount = 500000 * 1e18;
+            rewardAmount = GOV_OWNER_AIRDROP;
         } else {
             require(
                 msg.sender == owner,
                 "Only token owner or governance can claim"
             );
             require(
-                dav.balanceOf(owner) >= 1e18,
+                dav.balanceOf(owner) >= PRECISE_FACTOR,
                 "Owner must hold at least 1 DAV"
             );
             claimant = owner;
-            rewardAmount = 2500000 * 1e18;
+            rewardAmount = TOKEN_OWNER_AIRDROP;
         }
 
         // Enforce claim interval
@@ -387,6 +406,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
          * Tokens sent manually (e.g., via MetaMask and through token sc), so we can't assume tracking alone is sufficient.
          *  Especially important for auction logic or any logic that sends tokens out.
          */
+        //placed correctly require statments before if-else condition
         require(
             IERC20(tokenOut).balanceOf(address(this)) >= amountOut,
             "Insufficient tokens in vault for the output token"
@@ -616,21 +636,20 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         bool isReverse = isReverseAuctionActive(inputToken);
 
         // Adjust calculation to avoid truncation
-        uint256 precisionFactor = 1e18; // Match typical ERC20 decimals
-        uint256 firstCal = (MAX_SUPPLY * percentage * precisionFactor) / 100;
-        uint256 secondCalWithDavMax = (firstCal / DAV_FACTOR) *
-            davbalance;
+        uint256 firstCal = (MAX_SUPPLY * percentage * PRECISE_FACTOR) / 100;
+        uint256 secondCalWithDavMax = (firstCal / DAV_FACTOR) * davbalance;
         uint256 baseAmount = isReverse
             ? secondCalWithDavMax * 2
             : secondCalWithDavMax;
 
-        return baseAmount / precisionFactor; // Scale back to correct units
+        return baseAmount / PRECISE_FACTOR; // Scale back to correct units
     }
 
     function getOutPutAmount(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
-        uint256 currentRatio = getRatioPrice(inputToken) / 1e18;
-        require(currentRatio > 0, "Invalid ratio");
+        uint256 currentRatio = getRatioPrice(inputToken);
+        uint256 currentRatioNormalized = currentRatio / PRECISE_FACTOR;
+        require(currentRatioNormalized > 0, "Invalid ratio");
 
         uint256 userBalance = dav.balanceOf(msg.sender);
         if (userBalance == 0) {
@@ -643,18 +662,9 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
         uint256 multiplications;
         if (isReverseActive) {
-            multiplications = (onePercent * currentRatio) / 2;
+            multiplications = (onePercent * currentRatioNormalized) / 2;
         } else {
-            multiplications = (onePercent * currentRatio);
-            require(
-                multiplications <= type(uint256).max / 2,
-                "Multiplication overflow"
-            );
-            require(
-                multiplications <= type(uint256).max / 2,
-                "Multiplication overflow"
-            );
-            multiplications *= 2;
+            multiplications = (onePercent * currentRatioNormalized) * 2;
         }
 
         return multiplications;
@@ -674,7 +684,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             : 0;
 
         // Calculate reward as in distributeReward
-        uint256 reward = (newDavContributed * 10000 ether) / 1e18;
+        uint256 reward = (newDavContributed * AIRDROP_AMOUNT) / PRECISE_FACTOR;
 
         return reward;
     }
