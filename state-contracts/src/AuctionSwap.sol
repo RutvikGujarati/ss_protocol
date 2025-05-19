@@ -59,6 +59,9 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
     address public stateToken;
     address public governanceAddress;
+    uint256 public constant GOVERNANCE_UPDATE_DELAY = 1 days;
+    address public pendingGovernance;
+    uint256 public governanceUpdateTimestamp;
 
     mapping(address => mapping(address => uint256)) public lastDavHolding; // user => token => last DAV holding
     mapping(address => mapping(address => uint256))
@@ -118,7 +121,17 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     //to update governance if needed
     function updateGovernance(address newGov) external onlyGovernance {
         require(newGov != address(0), "RSA: Invalid governance address");
-        governanceAddress = newGov;
+        pendingGovernance = newGov;
+        governanceUpdateTimestamp = block.timestamp + GOVERNANCE_UPDATE_DELAY;
+    }
+
+    function confirmGovernanceUpdate() external onlyGovernance {
+        require(
+            block.timestamp >= governanceUpdateTimestamp,
+            "RSA: Delay not met"
+        );
+        governanceAddress = pendingGovernance;
+        pendingGovernance = address(0);
     }
     //to deposit tokens if needed
     function depositTokens(
@@ -251,7 +264,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address token0 = pair.token0();
         address token1 = pair.token1();
 
-        require(reserve0 > 0 && reserve1 > 0, "Invalid reserves");
+        // Ensures no division by zero
+        require(reserve0 > 0 && reserve1 > 0, "RSA: Invalid reserves");
 
         uint256 ratio;
         if (token0 == inputToken && token1 == stateToken) {
@@ -345,10 +359,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
      * During reverse auctions, users burn `stateToken` to receive `inputToken`.
      * This contract must hold sufficient `inputToken` to support those swaps.
      *
-     * ⚠️ Liquidity Management Note:
-     * This contract receives required `inputToken` liquidity during the creation
-     * of other token contracts, which automatically transfer tokens here.
-     * Therefore, no manual `depositTokens` mechanism is needed.
+     * Liquidity is provided via Token contract deployments and manual deposits through depositTokens.
      */
 
     function swapTokens(address user, address inputToken) public nonReentrant {
@@ -647,9 +658,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
     function getOutPutAmount(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
-        uint256 currentRatio = getRatioPrice(inputToken);
-        uint256 currentRatioNormalized = currentRatio / PRECISE_FACTOR;
-        require(currentRatioNormalized > 0, "Invalid ratio");
+        uint256 currentRatio = 1000;
+        require(currentRatio > 0, "Invalid ratio");
 
         uint256 userBalance = dav.balanceOf(msg.sender);
         if (userBalance == 0) {
@@ -662,9 +672,9 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
         uint256 multiplications;
         if (isReverseActive) {
-            multiplications = (onePercent * currentRatioNormalized) / 2;
+            multiplications = (onePercent * currentRatio) / 2;
         } else {
-            multiplications = (onePercent * currentRatioNormalized) * 2;
+            multiplications = (onePercent * currentRatio) * 2;
         }
 
         return multiplications;
