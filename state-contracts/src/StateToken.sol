@@ -2,6 +2,9 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+// The Ownable contract from OpenZeppelin is used exclusively to manage ownership during deployment.
+// Ownership enables the deployer to perform initial setup tasks and then renounce ownership immediately after.
+// This ensures that no centralized control remains, increasing user trust and decentralization.
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title STATE Token V2.1 with Ratio-Based Initial Supply Allocation

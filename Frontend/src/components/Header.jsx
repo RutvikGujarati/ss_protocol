@@ -76,7 +76,7 @@ const Header = () => {
                   }
                   to="/MarketMaker"
                 >
-                  Market Maker
+                  Market Makers
                 </NavLink>
               </li>
               <li className="nav-item mx-2">
@@ -169,7 +169,7 @@ const Header = () => {
           }
         >
           <i className="bi bi-graph-up"></i>
-          <div> Market Maker</div>
+          <div> Market Makers</div>
         </NavLink>
 
         <NavLink
