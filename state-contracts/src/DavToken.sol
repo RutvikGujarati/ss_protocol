@@ -5,16 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {ReferralCodeLibrary} from "./libs/ReferralCodeLibrary.sol";
-import {ETHDistributionLibrary} from "./libs/ETHDistributionLibrary.sol";
-import {TokenProcessingLibrary} from "./libs/TokenProcessingLibrary.sol";
-import {BurnClaimLibrary} from "./libs/BurnClaimLibrary.sol";
-/**
- * @title Governance Management for DAV Contract
- * @dev Manages governance logic. The `governance` address should be a multi-signature wallet
- *      (e.g., Gnosis Safe) for secure, distributed control. Critical functions are restricted
- *      using the `onlyGovernance` modifier.
- */
+
 contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     ERC20,
     Ownable(msg.sender),
@@ -26,6 +17,10 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // DAV TOken
     uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
     uint256 public constant TOKEN_COST = 1000 ether; // 1000000 org
+    uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
+    uint256 public constant LIQUIDITY_SHARE = 30; // 20% LIQUIDITY SHARE
+    uint256 public constant DEVELOPMENT_SHARE = 5; // 5% DEV SHARE
+    uint256 public constant HOLDER_SHARE = 10; // 10% HOLDER SHARE
     uint256 public constant BASIS_POINTS = 10000;
     //cycle assinging to 10. not want to update or configure later
     uint256 public constant CYCLE_ALLOCATION_COUNT = 10;
@@ -50,8 +45,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // Used in DApp to display total burn statistics
     uint256 public totalStateBurned;
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
-    uint256 public constant CLAIM_INTERVAL = 5 minutes; // 4 hour claim timer
-    uint256 public constant MIN_DAV = 1 * 1e18;
+    uint256 public constant CLAIM_INTERVAL = 3 hours; // 4 hour claim timer
+    uint256 public constant MIN_DAV = 10 * 1e18;
 
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
@@ -60,9 +55,6 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
 
     //Governance Privilage
     /*This implementation introduces a ratio-based liquidity provisioning (LP) mechanism, which is currently in beta and undergoing testing. The design is experimental and aims to collect meaningful data to inform and refine the concept. Due to its early-stage nature, certain centralized elements remain in place to ensure flexibility during the testing phase. These will be reviewed and potentially decentralized as the model matures.*/
-
-    /// @notice The governance address with special privileges, set at deployment.
-    /// @dev This address is immutable and cannot be changed post-deployment.
     address public immutable governance;
     address public liquidityWallet;
     address public developmentWallet;
@@ -73,21 +65,47 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // @notice Mapping to track nonce for each user to ensure unique referral code generation
     // @dev Incremented each time a referral code is generated for a user
     mapping(address => uint256) private userNonce;
+    struct UserBurn {
+        uint256 amount;
+        uint256 totalAtTime;
+        uint256 timestamp;
+        uint256 cycleNumber; // Tracks which 1-hour cycle this burn belongs to
+        uint256 userShare; // User's share percentage at burn time (scaled by 1e18)
+        bool claimed; // Tracks if this burn's reward has been claimed
+    }
+    enum TokenStatus {
+        Pending,
+        Processed
+    }
+    /**
+     * 🔒 Front-Running Protection Design:
+     * - Token names are tracked *per user*, not globally.
+     * - A user’s token name cannot be stolen or overwritten by others.
+     * - This prevents front-running without needing a commit-reveal scheme.
+     * - Even if another user submits the same token name, it is independent and scoped to them.
+     * - Users do not lose their processing fees due to front-running.
+     */
 
+    struct TokenEntry {
+        address user;
+        string tokenName;
+        string emoji; // 🆕 Add this field
+        TokenStatus status;
+    }
+   
     // NOTE: Each user is limited to DAV_AMOUNT token entries, so this loop is bounded
 
-    mapping(address => mapping(string => TokenProcessingLibrary.TokenEntry))
-        public userTokenEntries;
-    mapping(address => uint256) public userTokenCount;
-    mapping(address => string[]) public usersTokenNames;
-    mapping(string => address) public tokenNameToOwner;
-    // it is strictly necessary to keep track all tokenNames to show on dapp with each token entries, so, keep it as it is
-    string[] public allTokenNames;
+	mapping(address => mapping(string => TokenEntry)) public userTokenEntries;
+	mapping(address => uint256) public userTokenCount;
+	mapping(address => string[]) public usersTokenNames;
+	mapping(string => address) public tokenNameToOwner;
+	// it is strictly necessary to keep track all tokenNames to show on dapp with each token entries, so, keep it as it is
+	string[] public allTokenNames;
     // Tracks total tokens burned by each user across all cycles
     // Used in DApp to show user-specific burn history
     mapping(address => uint256) public userBurnedAmount;
     mapping(address => mapping(uint256 => bool)) public hasClaimedCycle;
-    mapping(address => BurnClaimLibrary.UserBurn[]) public burnHistory;
+    mapping(address => UserBurn[]) public burnHistory;
     mapping(address => string) public userReferralCode; // User's own referral code
     mapping(string => address) public referralCodeToUser; // Referral code to user address
     mapping(address => uint256) public referralRewards; // Tracks referral rewards earned
@@ -122,14 +140,17 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // Used to optimize claimPLS() by iterating only over relevant cycles
     // Simple and avoids bitmap complexity
     mapping(address => uint256[]) public userUnclaimedCycles;
-    //to keep track unique name of each tokens. so, not conflict in protocol.
-    mapping(string => bool) public isTokenNameUsed;
+	//to keep track unique name of each tokens. so, not conflict in protocol.
+	mapping(string => bool) public isTokenNameUsed;
+    event TokensBurned(address indexed user, uint256 amount, uint256 cycle);
+    event RewardClaimed(address indexed user, uint256 amount, uint256 cycle);
     event TokensMinted(
         address indexed user,
         uint256 davAmount,
         uint256 stateAmount
     );
     event FundsWithdrawn(string fundType, uint256 amount, uint256 timestamp);
+    event RewardsClaimed(address indexed user, uint256 amount);
     event HolderAdded(address indexed holder);
     event ReferralBonusPaid(
         address indexed referrer,
@@ -137,11 +158,12 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         string referralCode,
         uint256 amount
     );
-    event ReferralCodeGenerated(address indexed user, string referralCode);  
-	  event TokenStatusUpdated(
+    event ReferralCodeGenerated(address indexed user, string referralCode);
+    event TokenNameAdded(address indexed user, string name);
+    event TokenStatusUpdated(
         address indexed owner,
         string tokenName,
-        uint256 status
+        TokenStatus status
     );
     constructor(
         address _liquidityWallet,
@@ -209,12 +231,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     ) public override whenTransfersAllowed returns (bool) {
         bool success = super.transfer(recipient, amount);
         if (success) {
-            ReferralCodeLibrary.assignReferralCodeIfNeeded(
-                recipient,
-                userReferralCode,
-                userNonce,
-                referralCodeToUser
-            );
+            _assignReferralCodeIfNeeded(recipient); // safe, only if no code
         }
         return success;
     }
@@ -225,16 +242,17 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     ) public override whenTransfersAllowed returns (bool) {
         bool success = super.transferFrom(sender, recipient, amount);
         if (success) {
-            ReferralCodeLibrary.assignReferralCodeIfNeeded(
-                recipient,
-                userReferralCode,
-                userNonce,
-                referralCodeToUser
-            );
+            _assignReferralCodeIfNeeded(recipient); // safe, only if no code
         }
         return success;
+    } // assign reffer to direct sended user
+    function _assignReferralCodeIfNeeded(address user) internal {
+        if (bytes(userReferralCode[user]).length == 0) {
+            string memory code = _generateReferralCode(user);
+            userReferralCode[user] = code;
+            emit ReferralCodeGenerated(user, code);
+        }
     }
-
     function _updateRewards(address account) internal {
         if (account != address(0) && account != governance) {
             holderRewards[account] = earned(account);
@@ -251,36 +269,113 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             1e18 +
             holderRewards[account];
     }
-
+    /**
+     * @notice Generates a unique referral code for a given user
+     * @dev Uses internal entropy and a nonce to prevent collisions
+     * @param user The address of the user for whom the code is generated
+     * @return code A unique 8-character alphanumeric referral code
+     */
+    function _generateReferralCode(
+        address user
+    ) internal returns (string memory code) {
+        userNonce[user]++;
+        bytes32 hash;
+        // Loop until a unique referral code is found
+        do {
+            hash = keccak256(
+                abi.encodePacked(
+                    user,
+                    userNonce[user],
+                    msg.sender,
+                    tx.origin,
+                    block.timestamp,
+                    gasleft(),
+                    block.number
+                )
+            );
+            // Convert hash to 8-character alphanumeric string
+            code = _toAlphanumericString(hash, 8);
+        } while (referralCodeToUser[code] != address(0)); // Check for collision
+	// only assinged referralCodeToUser here. not in _assignReferralCodeIfNeeded function 
+        referralCodeToUser[code] = user;// Set mapping ONCE here
+        return code;
+    }
+    function _toAlphanumericString(
+        bytes32 hash,
+        uint256 length
+    ) internal pure returns (string memory) {
+        bytes
+            memory charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        bytes memory result = new bytes(length);
+        for (uint256 i = 0; i < length; i++) {
+            // Use each byte in the hash to pick a character from the charset
+            result[i] = charset[uint8(hash[i]) % charset.length];
+        }
+        return string(result);
+    }
+    function _calculateETHDistribution(
+        uint256 value,
+        address sender,
+        string memory referralCode
+    )
+        internal
+        view
+        returns (
+            uint256 holderShare,
+            uint256 liquidityShare,
+            uint256 developmentShare,
+            uint256 referralShare,
+            uint256 stateLPShare,
+            address referrer
+        )
+    {
+        // Explicitly exclude governance address from receiving holder share
+        bool excludeHolderShare = sender == governance;
+        require(
+            !excludeHolderShare || sender != address(0),
+            "Invalid governance address"
+        );
+        // Set holder share to 0 for governance address
+        holderShare = excludeHolderShare ? 0 : (value * HOLDER_SHARE) / 100;
+        liquidityShare = (value * LIQUIDITY_SHARE) / 100;
+        developmentShare = (value * DEVELOPMENT_SHARE) / 100;
+        referralShare = 0;
+        referrer = address(0);
+        if (bytes(referralCode).length > 0) {
+            address _referrer = referralCodeToUser[referralCode];
+            if (_referrer != address(0) && _referrer != sender) {
+                referralShare = (value * REFERRAL_BONUS) / 100;
+                referrer = _referrer;
+            }
+        } // If no holders or total supply is 0, redirect holder share to liquidity
+        if (davHoldersCount == 0 || totalSupply() == 0) {
+            liquidityShare += holderShare;
+            holderShare = 0;
+        } // Ensure total distribution does not exceed value
+        uint256 distributed = holderShare +
+            liquidityShare +
+            developmentShare +
+            referralShare;
+        require(distributed <= value, "Over-allocation");
+        stateLPShare = value - distributed;
+    }
     function mintDAV(
         uint256 amount,
         string memory referralCode
     ) external payable nonReentrant {
-        // Checks
         require(amount > 0, "Amount must be greater than zero");
         require(amount % 1 ether == 0, "Amount must be a whole number");
         require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
         uint256 cost = (amount * TOKEN_COST) / 1 ether;
         require(msg.value == cost, "Incorrect PLS amount sent");
-
-        // Effects: Update all state variables
         mintedSupply += amount;
         lastMintTimestamp[msg.sender] = block.timestamp;
-
-        // Generate referral code if not set
         if (bytes(userReferralCode[msg.sender]).length == 0) {
-            string memory newReferralCode = ReferralCodeLibrary
-                .generateReferralCode(
-                    msg.sender,
-                    userNonce,
-                    referralCodeToUser
-                );
+            string memory newReferralCode = _generateReferralCode(msg.sender);
             userReferralCode[msg.sender] = newReferralCode;
             referralCodeToUser[newReferralCode] = msg.sender;
             emit ReferralCodeGenerated(msg.sender, newReferralCode);
         }
-
-        // Calculate ETH distribution
         (
             uint256 holderShare,
             uint256 liquidityShare,
@@ -288,118 +383,69 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             uint256 referralShare,
             uint256 stateLPShare,
             address referrer
-        ) = ETHDistributionLibrary.calculateETHDistribution(
-                msg.value,
-                msg.sender,
-                referralCode,
-                governance,
-                referralCodeToUser,
-                totalSupply(),
-                davHoldersCount
-            );
-
-        // Update liquidity pool share
-        uint256 tempStateLpTotalShare = stateLpTotalShare + stateLPShare;
-        // Update treasury allocations
+        ) = _calculateETHDistribution(msg.value, msg.sender, referralCode);
+        stateLpTotalShare += stateLPShare;
         uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
         uint256 cycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) /
             100;
-        // Temporary arrays to accumulate cycle updates
-        uint256[CYCLE_ALLOCATION_COUNT] memory tempCycleTreasury;
-        uint256[CYCLE_ALLOCATION_COUNT] memory tempCycleUnclaimed;
         for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
             uint256 targetCycle = currentCycle + i;
-            tempCycleTreasury[i] =
-                cycleTreasuryAllocation[targetCycle] +
-                cycleAllocation;
-            tempCycleUnclaimed[i] =
-                cycleUnclaimedPLS[targetCycle] +
-                cycleAllocation;
+            cycleTreasuryAllocation[targetCycle] += cycleAllocation;
+            cycleUnclaimedPLS[targetCycle] += cycleAllocation;
         }
-
-        // Update holder rewards
+        // Distribute rewards to holders, excluding governance balance
+        // @dev Total supply is never zero due to initial minting to governance during deployment, ensuring effectiveSupply calculations are safe
+        //totalSupply() is the original circulating supply
         if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
             uint256 effectiveSupply = totalSupply() - balanceOf(governance);
-            // Accumulate holderShare * 1e18 to preserve precision
-            holderFunds += holderShare; // Temporarily store full share
-            uint256 rewardPerToken = (holderFunds * 1e18) / effectiveSupply;
-            // Recalculate to ensure no over-distribution
+            uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
             uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e18;
-            holderFunds = usedHolderShare; // Update to actual distributed amount
+            holderFunds += usedHolderShare;
             totalRewardPerTokenStored += rewardPerToken;
-        }
-        // Write batched cycle updates to storage
-        for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
-            uint256 targetCycle = currentCycle + i;
-            cycleTreasuryAllocation[targetCycle] = tempCycleTreasury[i];
-            cycleUnclaimedPLS[targetCycle] = tempCycleUnclaimed[i];
-        }
-        stateLpTotalShare = tempStateLpTotalShare; // Single SSTORE
-        // Update referral rewards
+        } // Send referral bonus
         if (referrer != address(0) && referralShare > 0) {
             referralRewards[referrer] += referralShare;
             totalReferralRewardsDistributed += referralShare;
-        }
-
-        // Update liquidity and development allocations
-        if (liquidityShare > 0) {
-            totalLiquidityAllocated += liquidityShare;
-        }
-        if (developmentShare > 0) {
-            totalDevelopmentAllocated += developmentShare;
-        }
-
-        // Update user minting and holder status
-        userMintedAmount[msg.sender] += amount;
-        if (!isDAVHolder[msg.sender] && msg.sender != governance) {
-            isDAVHolder[msg.sender] = true;
-            davHoldersCount += 1;
-            emit HolderAdded(msg.sender);
-        }
-
-        // Update rewards and mint tokens
-        _updateRewards(msg.sender);
-        _mint(msg.sender, amount);
-        _updateRewards(msg.sender);
-
-        // Emit events for state changes
-        emit TokensMinted(msg.sender, amount, msg.value);
-        if (referrer != address(0) && referralShare > 0) {
+            (bool successRef, ) = referrer.call{value: referralShare}("");
+            require(successRef, "Referral transfer failed");
             emit ReferralBonusPaid(
                 referrer,
                 msg.sender,
                 referralCode,
                 referralShare
             );
-        }
+        } // Transfer to liquidity wallet
         if (liquidityShare > 0) {
+            (bool successLiquidity, ) = liquidityWallet.call{
+                value: liquidityShare
+            }("");
+            require(successLiquidity, "Liquidity transfer failed");
+            totalLiquidityAllocated += liquidityShare;
             emit FundsWithdrawn("Liquidity", liquidityShare, block.timestamp);
-        }
+        } // Transfer to development wallet
         if (developmentShare > 0) {
+            (bool successDev, ) = developmentWallet.call{
+                value: developmentShare
+            }("");
+            require(successDev, "Development transfer failed");
+            totalDevelopmentAllocated += developmentShare;
             emit FundsWithdrawn(
                 "Development",
                 developmentShare,
                 block.timestamp
             );
         }
-
-        // Interactions: Perform external transfers
-        if (referrer != address(0) && referralShare > 0) {
-            (bool successRef, ) = referrer.call{value: referralShare}("");
-            require(successRef, "Referral transfer failed");
+        userMintedAmount[msg.sender] += amount;
+        // Only add non-governance addresses as holders
+        if (!isDAVHolder[msg.sender] && msg.sender != governance) {
+            isDAVHolder[msg.sender] = true;
+            davHoldersCount += 1;
+            emit HolderAdded(msg.sender);
         }
-        if (liquidityShare > 0) {
-            (bool successLiquidity, ) = liquidityWallet.call{
-                value: liquidityShare
-            }("");
-            require(successLiquidity, "Liquidity transfer failed");
-        }
-        if (developmentShare > 0) {
-            (bool successDev, ) = developmentWallet.call{
-                value: developmentShare
-            }("");
-            require(successDev, "Development transfer failed");
-        }
+        _updateRewards(msg.sender);
+        _mint(msg.sender, amount);
+        _updateRewards(msg.sender);
+        emit TokensMinted(msg.sender, amount, msg.value);
     }
     function claimReward() external nonReentrant {
         require(balanceOf(msg.sender) > 0, "Not a DAV holder");
@@ -448,32 +494,72 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         string memory _tokenName,
         string memory _emoji
     ) public payable {
+        require(bytes(_tokenName).length > 0, "Please provide tokenName");
+		// no commit-reveal scheme or time lock require to unique token name. it will not front run
+		  require(!isTokenNameUsed[_tokenName], "Token name already used");
+        require(
+            _utfStringLength(_emoji) <= 10,
+            "Max 10 UTF-8 characters allowed"
+        );
+        // ⚖️ Token entry limit is indirectly enforced via DAV balance
+        // Each user can process one token per DAV they hold. This means the number of tokens they can process is limited by their DAV balance.
+        uint256 userTokenBalance = balanceOf(msg.sender); // The amount of DAV the user holds
+      uint256 tokensSubmitted = userTokenCount[msg.sender]; // Number of tokens the user has already processed
+        // Ensure that the user has enough DAV to process a new token
+        require(
+            userTokenBalance > tokensSubmitted,
+            "You need more DAV to process new token"
+        );
+        // If not the governance, ensure the user sends the required PLS amount
         if (msg.sender != governance) {
+            //it is  100,000 Ether not in wei form
             require(
                 msg.value == TOKEN_PROCESSING_FEE,
                 "Please send exactly 100,000 PLS"
             );
-        }
-        TokenProcessingLibrary.processYourToken(
+            // Allocate funds to State LP cycle similar to mintDAV logic
+            uint256 stateLPShare = msg.value;
+            uint256 currentCycle = (block.timestamp - deployTime) /
+                CLAIM_INTERVAL;
+            uint256 cycleAllocation = (stateLPShare *
+                TREASURY_CLAIM_PERCENTAGE) / 100;
+            // Allocate to each cycle over the defined number of periods
+            for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
+                uint256 targetCycle = currentCycle + i;
+                cycleTreasuryAllocation[targetCycle] += cycleAllocation;
+                cycleUnclaimedPLS[targetCycle] += cycleAllocation;
+            }        }
+        // Add the user's token name to their list and mark it as used
+        usersTokenNames[msg.sender].push(_tokenName);
+		tokenNameToOwner[_tokenName] = msg.sender;
+        isTokenNameUsed[_tokenName] = true;
+        userTokenCount[msg.sender]++;
+        allTokenNames.push(_tokenName);
+        userTokenEntries[msg.sender][_tokenName] = TokenEntry(
+            msg.sender,
             _tokenName,
             _emoji,
-            msg.sender,
-            balanceOf(msg.sender),
-            governance,
-            msg.value, // Pass msg.value as stateLPShare
-            userTokenEntries,
-            userTokenCount,
-            usersTokenNames,
-            tokenNameToOwner,
-            isTokenNameUsed,
-            allTokenNames,
-            deployTime,
-            CLAIM_INTERVAL,
-            CYCLE_ALLOCATION_COUNT,
-            TREASURY_CLAIM_PERCENTAGE,
-            cycleTreasuryAllocation,
-            cycleUnclaimedPLS
+            TokenStatus.Pending
         );
+        emit TokenNameAdded(msg.sender, _tokenName);
+    }
+    /// @notice Counts the number of UTF-8 characters in a string
+    /// @dev Each emoji can be 1–4 bytes. This counts actual characters, not bytes.
+    function _utfStringLength(
+        string memory str
+    ) internal pure returns (uint256 length) {
+        uint256 i = 0;
+        bytes memory strBytes = bytes(str);
+        while (i < strBytes.length) {
+            uint8 b = uint8(strBytes[i]);
+            if (b >> 7 == 0) {                i += 1; // 1-byte character (ASCII)
+            } else if (b >> 5 == 0x6) {                i += 2; // 2-byte character
+            } else if (b >> 4 == 0xE) {                i += 3; // 3-byte character
+            } else if (b >> 3 == 0x1E) {
+                i += 4; // 4-byte character (emojis, many symbols)
+            } else {                revert("Invalid UTF-8 character");            }
+            length++;
+        }
     }
     // allTokenEntries is implicitly bounded by each user's DAV balance.
     // Each user can only submit one token per DAV they hold, and DAV itself is capped.
@@ -483,12 +569,23 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     function getPendingTokenNames(
         address user
     ) public view returns (string[] memory) {
-        return
-            TokenProcessingLibrary.getPendingTokenNames(
-                user,
-                usersTokenNames,
-                userTokenEntries
-            );
+        // Use a temporary array with the maximum possible size
+        string[] memory userTokens = usersTokenNames[user];
+        string[] memory tempNames = new string[](userTokens.length);
+        uint256 count = 0;
+        // Single loop to collect pending token names
+       for (uint256 i = 0; i < userTokens.length; i++) {
+            string memory tokenName = userTokens[i];
+            if (userTokenEntries[user][tokenName].status == TokenStatus.Pending) {
+                tempNames[count] = tokenName;
+                count++;
+            }
+        } // Create a correctly sized array for the result
+        string[] memory pendingNames = new string[](count);
+        for (uint256 i = 0; i < count; i++) {
+            pendingNames[i] = tempNames[i];
+        }
+        return pendingNames;
     }
     /// @notice Updates the status of a specific token owned by a user.
     /// @dev This function loops through `allTokenEntries`, which could grow indefinitely.
@@ -501,54 +598,77 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     function updateTokenStatus(
         address _owner,
         string memory _tokenName,
-        uint8 _status
+        TokenStatus _status
     ) external onlyGovernance {
         require(
             bytes(userTokenEntries[_owner][_tokenName].tokenName).length > 0,
             "Token entry not found"
         );
-        require(_status <= 1, "Invalid status");
         userTokenEntries[_owner][_tokenName].status = _status;
         emit TokenStatusUpdated(_owner, _tokenName, _status);
     }
-    function getAllTokenEntries()
-        public
-        view
-        returns (TokenProcessingLibrary.TokenEntry[] memory)
-    {
-        TokenProcessingLibrary.TokenEntry[]
-            memory entries = new TokenProcessingLibrary.TokenEntry[](
-                allTokenNames.length
-            );
-        for (uint256 i = 0; i < allTokenNames.length; i++) {
-            string memory tokenName = allTokenNames[i];
-            address user = tokenNameToOwner[tokenName];
-            entries[i] = userTokenEntries[user][tokenName];
-        }
-        return entries;
-    }
+	function getAllTokenEntries() public view returns (TokenEntry[] memory) {
+    TokenEntry[] memory entries = new TokenEntry[](allTokenNames.length);
+    for (uint256 i = 0; i < allTokenNames.length; i++) {
+        string memory tokenName = allTokenNames[i];
+        address user = tokenNameToOwner[tokenName]; // ✅ Direct lookup
+        entries[i] = userTokenEntries[user][tokenName];
+    }    return entries;
+		}
 
     // ------------------ Burn functions ------------------------------
     // Burn tokens and update cycle tracking
     function burnState(uint256 amount) external {
-        BurnClaimLibrary.burnState(
-            amount,
-            msg.sender,
-            balanceOf(msg.sender),
-            MIN_DAV,
-            StateToken,
-            deployTime,
-            CLAIM_INTERVAL,
-            canClaim(msg.sender),
-            BURN_ADDRESS,
-            totalStateBurned,
-            userBurnedAmount,
-            userCycleBurned,
-            cycleTotalBurned,
-            userUnclaimedCycles,
-            burnHistory,
-            lastBurnCycle
+        require(balanceOf(msg.sender) >= MIN_DAV, "Need at least 10 DAV");
+        require(amount > 0, "Burn amount must be > 0");
+        require(
+            StateToken.allowance(msg.sender, address(this)) >= amount,
+            "Insufficient allowance"
         );
+        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+        // Ensure user has no unclaimed rewards before burning
+        // Simplifies state management by enforcing claim-before-burn
+        require(
+            !canClaim(msg.sender),
+            "Must claim previous rewards before burning"
+        );
+        // Update burn tracking mappings for DApp display
+        totalStateBurned += amount; // Global burn total
+        userBurnedAmount[msg.sender] += amount; // User total burn
+        userCycleBurned[msg.sender][currentCycle] += amount; // User cycle burn
+        cycleTotalBurned[currentCycle] += amount; // Cycle total burn
+        // Calculate user share for this cycle (in 1e18 precision)
+        uint256 userShare = cycleTotalBurned[currentCycle] > 0
+            ? (userCycleBurned[msg.sender][currentCycle] * 1e18) /
+                cycleTotalBurned[currentCycle]
+            : 1e18; // 100% if first burner in cycle
+        // NEW: Add cycle to userUnclaimedCycles if not already present
+        // Ensures claimPLS() only checks relevant cycles
+        bool cycleExists = false;
+        for (uint256 i = 0; i < userUnclaimedCycles[msg.sender].length; i++) {
+            if (userUnclaimedCycles[msg.sender][i] == currentCycle) {
+                cycleExists = true;
+                break;
+            }
+        }
+        if (!cycleExists) {
+            userUnclaimedCycles[msg.sender].push(currentCycle);
+        }
+        // Log burn in history for DApp display
+        burnHistory[msg.sender].push(
+            UserBurn({
+                amount: amount,
+                totalAtTime: cycleTotalBurned[currentCycle],
+                timestamp: block.timestamp,
+                cycleNumber: currentCycle,
+                userShare: userShare,
+                claimed: false
+            })
+        );
+        lastBurnCycle[msg.sender] = currentCycle;
+        // Transfer and burn tokens
+        StateToken.safeTransferFrom(msg.sender, BURN_ADDRESS, amount);
+        emit TokensBurned(msg.sender, amount, currentCycle);
     }
     // Check if a user has claimable rewards
     function canClaim(address user) public view returns (bool) {
@@ -568,33 +688,96 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     }
     // Calculate total claimable PLS for a user
     function getClaimablePLS(address user) public view returns (uint256) {
-        return
-            BurnClaimLibrary.getClaimablePLS(
-                user,
-                getCurrentCycle(),
-                cycleTreasuryAllocation,
-                hasClaimedCycle,
-                userUnclaimedCycles,
-                cycleUnclaimedPLS,
-                userCycleBurned,
-                cycleTotalBurned
-            );
+        uint256 currentCycle = getCurrentCycle();
+        uint256 totalClaimable = 0;
+        // Iterate over user's unclaimed cycles
+        for (uint256 i = 0; i < userUnclaimedCycles[user].length; i++) {
+            uint256 cycle = userUnclaimedCycles[user][i];
+            if (
+                cycle >= currentCycle ||
+                cycleTreasuryAllocation[cycle] == 0 ||
+                hasClaimedCycle[user][cycle]
+            ) {
+                continue;
+            }
+            uint256 userBurn = userCycleBurned[user][cycle];
+            uint256 totalBurn = cycleTotalBurned[cycle];
+            if (userBurn == 0 || totalBurn == 0) continue;
+            // Calculate reward in real-time
+            uint256 userShare = (userBurn * 1e18) / totalBurn;
+            uint256 cycleReward = (cycleTreasuryAllocation[cycle] * userShare) /
+                1e18;
+            // Cap reward by available funds
+            uint256 availableFunds = cycleUnclaimedPLS[cycle];
+            if (cycleReward > availableFunds) {
+                cycleReward = availableFunds;
+            }
+            totalClaimable += cycleReward;
+        }
+        return totalClaimable;
     }
     function claimPLS() external {
-        BurnClaimLibrary.claimPLS(
-            msg.sender,
-            deployTime,
-            CLAIM_INTERVAL,
-            userUnclaimedCycles,
-            cycleTreasuryAllocation,
-            cycleUnclaimedPLS,
-            userCycleBurned,
-            cycleTotalBurned,
-            hasClaimedCycle,
-            userBurnClaimed,
-            burnHistory,
-            holderFunds
+        address user = msg.sender;
+        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+        require(currentCycle > 0, "Claim period not started");
+        uint256 totalReward = 0;
+        uint256 unclaimedLength = userUnclaimedCycles[user].length;
+        uint256[] memory cyclesToKeep = new uint256[](unclaimedLength);
+        uint256 keepCount = 0;
+        // Single loop to process unclaimed cycles
+        for (uint256 i = 0; i < unclaimedLength; i++) {
+            uint256 cycle = userUnclaimedCycles[user][i];
+            if (
+                cycle >= currentCycle ||
+                cycleTreasuryAllocation[cycle] == 0 ||
+                hasClaimedCycle[user][cycle]
+            ) {
+                cyclesToKeep[keepCount++] = cycle; // Keep invalid or future cycles
+                continue;
+            }
+            uint256 userBurn = userCycleBurned[user][cycle];
+            uint256 totalBurn = cycleTotalBurned[cycle];
+            if (userBurn == 0 || totalBurn == 0) {
+                continue; // Skip invalid cycles
+            }
+            // Calculate reward
+            uint256 reward = (cycleTreasuryAllocation[cycle] * userBurn) /
+                totalBurn;
+            if (cycleUnclaimedPLS[cycle] < reward) {
+                cyclesToKeep[keepCount++] = cycle; // Keep if insufficient funds
+                continue;
+            }
+            cycleUnclaimedPLS[cycle] -= reward;
+            totalReward += reward;
+            // Update state
+            hasClaimedCycle[user][cycle] = true;
+            userBurnClaimed[user][cycle] = true;
+            // Update burnHistory in the same loop
+            for (uint256 j = 0; j < burnHistory[user].length; j++) {
+                if (
+                    burnHistory[user][j].cycleNumber == cycle &&
+                    !burnHistory[user][j].claimed
+                ) {
+                    burnHistory[user][j].claimed = true;
+                }
+            }
+        } // Update userUnclaimedCycles efficiently
+        if (keepCount < unclaimedLength) {
+            // Create new array with kept cycles
+            uint256[] memory newUnclaimed = new uint256[](keepCount);
+            for (uint256 i = 0; i < keepCount; i++) {
+                newUnclaimed[i] = cyclesToKeep[i];
+            }
+            userUnclaimedCycles[user] = newUnclaimed;
+        }        require(totalReward > 0, "Nothing to claim");
+        require(
+            (address(this).balance - holderFunds) >= totalReward,
+            "Insufficient contract balance"
         );
+        // Transfer rewards
+        (bool success, ) = payable(user).call{value: totalReward}("");
+        require(success, "PLS transfer failed");
+        emit RewardClaimed(user, totalReward, currentCycle);
     }
     function getCurrentCycle() public view returns (uint256) {
         return (block.timestamp - deployTime) / CLAIM_INTERVAL;
@@ -626,21 +809,30 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     function getUserSharePercentage(
         address user
     ) external view returns (uint256) {
-        return
-            BurnClaimLibrary.getUserSharePercentage(
-                user,
-                deployTime,
-                CLAIM_INTERVAL,
-                BASIS_POINTS,
-                userCycleBurned,
-                cycleTotalBurned,
-                userBurnClaimed
-            );
+        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+        // Check if current time is still inside this cycle
+        if (
+            block.timestamp < deployTime + (currentCycle + 1) * CLAIM_INTERVAL
+        ) {
+            // We're inside the current cycle – show live percentage
+            uint256 userBurn = userCycleBurned[user][currentCycle];
+            uint256 totalBurn = cycleTotalBurned[currentCycle];
+            if (totalBurn == 0 || userBurn == 0) return 0;
+            return (userBurn * BASIS_POINTS) / totalBurn; // basis points (10000 = 100.00%)
+        } else {
+            // Cycle has ended – show percentage from the previous cycle, if not yet claimed
+            if (currentCycle == 0) return 0; // No previous cycle
+            uint256 previousCycle = currentCycle - 1;
+            if (
+                userBurnClaimed[user][previousCycle] ||
+                cycleTotalBurned[previousCycle] == 0
+            ) {                return 0;            }
+            uint256 userBurn = userCycleBurned[user][previousCycle];
+            uint256 totalBurn = cycleTotalBurned[previousCycle];
+            if (totalBurn == 0 || userBurn == 0) return 0;
+            return (userBurn * BASIS_POINTS) / totalBurn;
+        }
     }
-    receive() external payable {
-        revert("Direct ETH transfers not allowed");
-    }
-    fallback() external payable {
-        revert("Invalid call");
-    }
+    receive() external payable {        revert("Direct ETH transfers not allowed");    }
+    fallback() external payable {        revert("Invalid call");    }
 }
