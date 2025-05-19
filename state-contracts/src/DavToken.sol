@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
+//NOTE: not required of library use
 contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     ERC20,
     Ownable(msg.sender),
@@ -58,7 +59,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     /*This implementation introduces a ratio-based liquidity provisioning (LP) mechanism, which is currently in beta and undergoing testing. The design is experimental and aims to collect meaningful data to inform and refine the concept. Due to its early-stage nature, certain centralized elements remain in place to ensure flexibility during the testing phase. These will be reviewed and potentially decentralized as the model matures.*/
 
 	//NOTE: Governance is using multi-sig method to ensure security of that wallet address.
-    address public immutable governance;
+    address public  governance;
     address public liquidityWallet;
     address public developmentWallet;
     address public stateToken;
@@ -159,6 +160,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         string tokenName,
         TokenStatus status
     );
+	//not needed custom errors
 	event DistributionEvent(
     address indexed user,
     uint256 amountMinted,
@@ -198,6 +200,10 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         require(msg.sender == governance, "Caller is not governance");
         _;
     }
+	function transferGovernance(address newGovernance) external onlyGovernance {
+    require(newGovernance != address(0), "Invalid governance address");
+    governance = newGovernance;
+}
     function updateLiquidityWallet(
         address _newLiquidityWallet
     ) external onlyGovernance {
@@ -307,6 +313,11 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         }
         return string(result);
     }
+/// @notice Distributes ETH contributions across holders, liquidity, development, and referrals
+/// @param value Amount of ETH to distribute
+/// @param sender Sender of the ETH
+/// @param referralCode Optional referral code for bonus allocation
+
     function _calculateETHDistribution(
         uint256 value,
         address sender,
@@ -369,6 +380,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         uint256 stateLPShare,
         address referrer
     ) = _calculateETHDistribution(msg.value, msg.sender, referralCode);
+	// temp store of values to ensure original values
     uint256 newStateLpTotalShare = stateLpTotalShare + stateLPShare;
 	uint256 newHolderFunds = holderFunds;
     uint256 newTotalRewardPerTokenStored = totalRewardPerTokenStored;
@@ -390,8 +402,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     }
   if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
         uint256 effectiveSupply = totalSupply() - balanceOf(governance);
-        uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
-        uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e18;
+   uint256 rewardPerToken = (holderShare * 1e36) / effectiveSupply;
+	uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e36;
         newHolderFunds += usedHolderShare;
         newTotalRewardPerTokenStored += rewardPerToken;
     }
@@ -414,6 +426,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         require(successRef, "Referral transfer failed");
     }
     if (liquidityShare > 0) {
+		    require(address(liquidityWallet).code.length == 0, "Liquidity wallet is a contract");
         (bool successLiquidity, ) = liquidityWallet.call{value: liquidityShare}("");
         require(successLiquidity, "Liquidity transfer failed");
         totalLiquidityAllocated += liquidityShare;
@@ -590,6 +603,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         userTokenEntries[_owner][_tokenName].status = _status;
         emit TokenStatusUpdated(_owner, _tokenName, _status);
     }
+	//want to fetch all entries not perticular from start to end
 	function getAllTokenEntries() public view returns (TokenEntry[] memory) {
     TokenEntry[] memory entries = new TokenEntry[](allTokenNames.length);
     for (uint256 i = 0; i < allTokenNames.length; i++) {
@@ -701,6 +715,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     }
 	/// @notice Claims PLS rewards for a user across eligible cycles
 /// @dev Iterates over userUnclaimedCycles to calculate and distribute rewards
+/// required to iterate through all users unclaimed cycle that way user can't loose their funds so, no use of cycle arrays
     function claimPLS() external {
         address user = msg.sender;
         uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;

@@ -50,7 +50,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     uint256 constant TOKEN_OWNER_AIRDROP = 2500000 ether;
     uint256 constant GOV_OWNER_AIRDROP = 500000 ether;
 
-    uint256 constant PRECISE_FACTOR = 1e18;
+    uint256 constant PRECISION_FACTOR = 1e18;
     uint256 public constant percentage = 1;
     //it is used for pulsechain and it is standered burn address
     address private constant BURN_ADDRESS =
@@ -107,7 +107,9 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         uint256 amountOut
     );
     event TokenAdded(address indexed token, address pairAddress);
-
+event GovernanceUpdateProposed(address newGov, uint256 timestamp);
+event GovernanceUpdated(address newGov);
+// Custom Errors are not required
     modifier onlyGovernance() {
         require(
             msg.sender == governanceAddress,
@@ -123,6 +125,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         require(newGov != address(0), "RSA: Invalid governance address");
         pendingGovernance = newGov;
         governanceUpdateTimestamp = block.timestamp + GOVERNANCE_UPDATE_DELAY;
+		    emit GovernanceUpdateProposed(newGov, governanceUpdateTimestamp);
     }
 
     function confirmGovernanceUpdate() external onlyGovernance {
@@ -132,15 +135,14 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         );
         governanceAddress = pendingGovernance;
         pendingGovernance = address(0);
+		    emit GovernanceUpdated(governanceAddress);
     }
     //to deposit tokens if needed
-    function depositTokens(
-        address token,
-        uint256 amount
-    ) external onlyGovernance {
-        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
-        emit TokensDeposited(token, amount);
-    }
+  function depositTokens(address token, uint256 amount) external onlyGovernance {
+    require(amount > 0, "RSA: Invalid deposit amount");
+    IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
+    emit TokensDeposited(token, amount);
+}
     // Deploy a Token
     function deployUserToken(
         string memory name,
@@ -257,6 +259,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     }
 
     //used for only mainnet
+	///NOTE: flash loans might be issue but as users are not putting any input of amounts he just get tokens through dav holdings and protocol calculation so, if ratio goes high or less unconditionally user can't impact on input values.(they need to mint more dav tokens)
     function getRatioPrice(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
         IPair pair = IPair(pairAddresses[inputToken]);
@@ -269,9 +272,9 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
         uint256 ratio;
         if (token0 == inputToken && token1 == stateToken) {
-            ratio = (uint256(reserve1) * PRECISE_FACTOR) / uint256(reserve0);
+            ratio = (uint256(reserve1) * PRECISION_FACTOR) / uint256(reserve0);
         } else if (token0 == stateToken && token1 == inputToken) {
-            ratio = (uint256(reserve0) * PRECISE_FACTOR) / uint256(reserve1);
+            ratio = (uint256(reserve0) * PRECISION_FACTOR) / uint256(reserve1);
         } else {
             revert("Invalid pair");
         }
@@ -300,7 +303,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
         // **Effects**
 
-        uint256 reward = (newDavContributed * AIRDROP_AMOUNT) / PRECISE_FACTOR;
+        uint256 reward = (newDavContributed * AIRDROP_AMOUNT) / PRECISION_FACTOR;
 
         cumulativeDavHoldings[user][inputToken] += newDavContributed;
         lastDavHolding[user][inputToken] = currentDavHolding;
@@ -330,7 +333,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
                 "Only token owner or governance can claim"
             );
             require(
-                dav.balanceOf(owner) >= PRECISE_FACTOR,
+                dav.balanceOf(owner) >= PRECISION_FACTOR,
                 "Owner must hold at least 1 DAV"
             );
             claimant = owner;
@@ -647,17 +650,18 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         bool isReverse = isReverseAuctionActive(inputToken);
 
         // Adjust calculation to avoid truncation
-        uint256 firstCal = (MAX_SUPPLY * percentage * PRECISE_FACTOR) / 100;
+        uint256 firstCal = (MAX_SUPPLY * percentage * PRECISION_FACTOR) / 100;
         uint256 secondCalWithDavMax = (firstCal / DAV_FACTOR) * davbalance;
         uint256 baseAmount = isReverse
             ? secondCalWithDavMax * 2
             : secondCalWithDavMax;
 
-        return baseAmount / PRECISE_FACTOR; // Scale back to correct units
+        return baseAmount / PRECISION_FACTOR; // Scale back to correct units
     }
 
     function getOutPutAmount(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
+		// @dev Hardcoded ratio of 1000 (1:1000 token-to-stateToken) for Pulsechain stability and only ffor testing
         uint256 currentRatio = 1000;
         require(currentRatio > 0, "Invalid ratio");
 
@@ -694,7 +698,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             : 0;
 
         // Calculate reward as in distributeReward
-        uint256 reward = (newDavContributed * AIRDROP_AMOUNT) / PRECISE_FACTOR;
+        uint256 reward = (newDavContributed * AIRDROP_AMOUNT) / PRECISION_FACTOR;
 
         return reward;
     }
