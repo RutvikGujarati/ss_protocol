@@ -80,6 +80,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         Pending,
         Processed
     }
+	
     /**
      * 🔒 Front-Running Protection Design:
      * - Token names are tracked *per user*, not globally.
@@ -166,6 +167,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     uint256 referralShare,
     uint256 liquidityShare,
     uint256 developmentShare,
+	uint256 holderShare,
     uint256 timestamp
 );
 
@@ -424,6 +426,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
 
 	emit DistributionEvent(   msg.sender,    amount,    msg.value,    referrer,    referralShare,   liquidityShare,
     developmentShare,
+	holderShare,
     block.timestamp
 );
 }
