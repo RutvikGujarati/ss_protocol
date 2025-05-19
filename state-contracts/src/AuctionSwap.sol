@@ -44,7 +44,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     uint256 public constant OWNER_REWARD_AMOUNT = 2500000 * 1e18;
     uint256 public constant CLAIM_INTERVAL = 4 hours;
     uint256 public constant MAX_SUPPLY = 500000000000 ether;
-    uint256 public percentage = 1;
+    uint256 public constant percentage = 1;
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
     uint256 public TotalBurnedStates;
@@ -77,7 +77,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     mapping(address => mapping(address => AuctionCycle)) public auctionCycles; // inputToken => stateToken => AuctionCycle
     mapping(address => uint256) public TotalStateBurnedByUser;
     mapping(address => uint256) public TotalTokensBurned;
-    mapping(address => uint256) private lastGovernanceUpdate;
     mapping(address => mapping(address => bool)) public hasClaimed; // user => token => has claimed
 
     event AuctionStarted(
@@ -395,10 +394,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
         if (isReverseActive) {
             userSwapInfo.hasReverseSwap = true;
-            require(
-                IERC20(tokenOut).balanceOf(address(this)) >= amountOut,
-                "Insufficient output token liquidity"
-            );
             TotalBurnedStates += amountIn;
             TotalTokensBurned[tokenIn] += amountIn;
             TotalStateBurnedByUser[user] += amountIn;
@@ -406,10 +401,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             IERC20(tokenOut).safeTransfer(user, amountOut);
         } else {
             userSwapInfo.hasSwapped = true;
-            require(
-                IERC20(tokenOut).balanceOf(address(this)) >= amountOut,
-                "Insufficient output token liquidity"
-            );
             TotalTokensBurned[tokenIn] += amountIn;
             IERC20(tokenIn).safeTransferFrom(user, BURN_ADDRESS, amountIn);
             IERC20(tokenOut).safeTransfer(user, amountOut);
@@ -663,6 +654,12 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
                 multiplications <= type(uint256).max / 2,
                 "Multiplication overflow"
             );
+            require(
+                multiplications <= type(uint256).max / 2,
+                "Multiplication overflow"
+            );
+            multiplications *= 2;
+
             multiplications *= 2;
         }
 
