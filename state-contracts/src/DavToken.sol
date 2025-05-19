@@ -22,6 +22,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     uint256 public constant DEVELOPMENT_SHARE = 5; // 5% DEV SHARE
     uint256 public constant HOLDER_SHARE = 10; // 10% HOLDER SHARE
     uint256 public constant BASIS_POINTS = 10000;
+	uint256 public constant INITIAL_GOV_MINT = 1000 ether;
     //cycle assinging to 10. not want to update or configure later
     uint256 public constant CYCLE_ALLOCATION_COUNT = 10;
     /// @notice Token processing fee required to execute certain operations.
@@ -55,6 +56,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
 
     //Governance Privilage
     /*This implementation introduces a ratio-based liquidity provisioning (LP) mechanism, which is currently in beta and undergoing testing. The design is experimental and aims to collect meaningful data to inform and refine the concept. Due to its early-stage nature, certain centralized elements remain in place to ensure flexibility during the testing phase. These will be reviewed and potentially decentralized as the model matures.*/
+
+	//NOTE: Governance is using multi-sig method to ensure security of that wallet address.
     address public immutable governance;
     address public liquidityWallet;
     address public developmentWallet;
@@ -144,20 +147,10 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
 	mapping(string => bool) public isTokenNameUsed;
     event TokensBurned(address indexed user, uint256 amount, uint256 cycle);
     event RewardClaimed(address indexed user, uint256 amount, uint256 cycle);
-    event TokensMinted(
-        address indexed user,
-        uint256 davAmount,
-        uint256 stateAmount
-    );
-    event FundsWithdrawn(string fundType, uint256 amount, uint256 timestamp);
+ 
     event RewardsClaimed(address indexed user, uint256 amount);
     event HolderAdded(address indexed holder);
-    event ReferralBonusPaid(
-        address indexed referrer,
-        address indexed referee,
-        string referralCode,
-        uint256 amount
-    );
+
     event ReferralCodeGenerated(address indexed user, string referralCode);
     event TokenNameAdded(address indexed user, string name);
     event TokenStatusUpdated(
@@ -165,6 +158,17 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         string tokenName,
         TokenStatus status
     );
+	event DistributionEvent(
+    address indexed user,
+    uint256 amountMinted,
+    uint256 amountPaid,
+    address indexed referrer,
+    uint256 referralShare,
+    uint256 liquidityShare,
+    uint256 developmentShare,
+    uint256 timestamp
+);
+
     constructor(
         address _liquidityWallet,
         address _developmentWallet,
@@ -183,8 +187,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         developmentWallet = _developmentWallet;
         stateToken = _stateToken;
         governance = _gov;
-        _mint(_gov, 1000 ether);
-        mintedSupply += 1000 ether;
+        _mint(_gov, INITIAL_GOV_MINT);
+        mintedSupply += INITIAL_GOV_MINT;
         StateToken = IERC20(_stateToken);
         deployTime = block.timestamp;
     }
@@ -275,31 +279,19 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
      * @param user The address of the user for whom the code is generated
      * @return code A unique 8-character alphanumeric referral code
      */
-    function _generateReferralCode(
-        address user
-    ) internal returns (string memory code) {
-        userNonce[user]++;
-        bytes32 hash;
-        // Loop until a unique referral code is found
-        do {
-            hash = keccak256(
-                abi.encodePacked(
-                    user,
-                    userNonce[user],
-                    msg.sender,
-                    tx.origin,
-                    block.timestamp,
-                    gasleft(),
-                    block.number
-                )
-            );
-            // Convert hash to 8-character alphanumeric string
-            code = _toAlphanumericString(hash, 8);
-        } while (referralCodeToUser[code] != address(0)); // Check for collision
-	// only assinged referralCodeToUser here. not in _assignReferralCodeIfNeeded function 
-        referralCodeToUser[code] = user;// Set mapping ONCE here
-        return code;
+   function _generateReferralCode(address user) internal returns (string memory code) {
+    userNonce[user]++;
+    uint256 maxAttempts = 10;
+    for (uint256 i = 0; i < maxAttempts; i++) {
+        bytes32 hash = keccak256(abi.encodePacked(user, userNonce[user], i));
+        code = _toAlphanumericString(hash, 8);
+        if (referralCodeToUser[code] == address(0)) {
+            referralCodeToUser[code] = user;
+            return code;
+        }
     }
+    revert("Unable to generate unique referral code");
+}
     function _toAlphanumericString(
         bytes32 hash,
         uint256 length
@@ -359,94 +351,83 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         require(distributed <= value, "Over-allocation");
         stateLPShare = value - distributed;
     }
-    function mintDAV(
-        uint256 amount,
-        string memory referralCode
-    ) external payable nonReentrant {
-        require(amount > 0, "Amount must be greater than zero");
-        require(amount % 1 ether == 0, "Amount must be a whole number");
-        require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
-        uint256 cost = (amount * TOKEN_COST) / 1 ether;
-        require(msg.value == cost, "Incorrect PLS amount sent");
-        mintedSupply += amount;
-        lastMintTimestamp[msg.sender] = block.timestamp;
-        if (bytes(userReferralCode[msg.sender]).length == 0) {
-            string memory newReferralCode = _generateReferralCode(msg.sender);
-            userReferralCode[msg.sender] = newReferralCode;
-            referralCodeToUser[newReferralCode] = msg.sender;
-            emit ReferralCodeGenerated(msg.sender, newReferralCode);
-        }
-        (
-            uint256 holderShare,
-            uint256 liquidityShare,
-            uint256 developmentShare,
-            uint256 referralShare,
-            uint256 stateLPShare,
-            address referrer
-        ) = _calculateETHDistribution(msg.value, msg.sender, referralCode);
-        stateLpTotalShare += stateLPShare;
-        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
-        uint256 cycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) /
-            100;
-        for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
-            uint256 targetCycle = currentCycle + i;
-            cycleTreasuryAllocation[targetCycle] += cycleAllocation;
-            cycleUnclaimedPLS[targetCycle] += cycleAllocation;
-        }
-        // Distribute rewards to holders, excluding governance balance
-        // @dev Total supply is never zero due to initial minting to governance during deployment, ensuring effectiveSupply calculations are safe
-        //totalSupply() is the original circulating supply
-        if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
-            uint256 effectiveSupply = totalSupply() - balanceOf(governance);
-            uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
-            uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e18;
-            holderFunds += usedHolderShare;
-            totalRewardPerTokenStored += rewardPerToken;
-        } // Send referral bonus
-        if (referrer != address(0) && referralShare > 0) {
-            referralRewards[referrer] += referralShare;
-            totalReferralRewardsDistributed += referralShare;
-            (bool successRef, ) = referrer.call{value: referralShare}("");
-            require(successRef, "Referral transfer failed");
-            emit ReferralBonusPaid(
-                referrer,
-                msg.sender,
-                referralCode,
-                referralShare
-            );
-        } // Transfer to liquidity wallet
-        if (liquidityShare > 0) {
-            (bool successLiquidity, ) = liquidityWallet.call{
-                value: liquidityShare
-            }("");
-            require(successLiquidity, "Liquidity transfer failed");
-            totalLiquidityAllocated += liquidityShare;
-            emit FundsWithdrawn("Liquidity", liquidityShare, block.timestamp);
-        } // Transfer to development wallet
-        if (developmentShare > 0) {
-            (bool successDev, ) = developmentWallet.call{
-                value: developmentShare
-            }("");
-            require(successDev, "Development transfer failed");
-            totalDevelopmentAllocated += developmentShare;
-            emit FundsWithdrawn(
-                "Development",
-                developmentShare,
-                block.timestamp
-            );
-        }
-        userMintedAmount[msg.sender] += amount;
-        // Only add non-governance addresses as holders
-        if (!isDAVHolder[msg.sender] && msg.sender != governance) {
-            isDAVHolder[msg.sender] = true;
-            davHoldersCount += 1;
-            emit HolderAdded(msg.sender);
-        }
-        _updateRewards(msg.sender);
-        _mint(msg.sender, amount);
-        _updateRewards(msg.sender);
-        emit TokensMinted(msg.sender, amount, msg.value);
+ function mintDAV(uint256 amount, string memory referralCode) external payable nonReentrant {
+    // Checks
+    require(amount > 0, "Amount must be greater than zero");
+    require(amount % 1 ether == 0, "Amount must be a whole number");
+    require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
+    uint256 cost = (amount * TOKEN_COST) / 1 ether;
+    require(msg.value == cost, "Incorrect PLS amount sent");
+    // Effects
+    (
+        uint256 holderShare,
+        uint256 liquidityShare,
+        uint256 developmentShare,
+        uint256 referralShare,
+        uint256 stateLPShare,
+        address referrer
+    ) = _calculateETHDistribution(msg.value, msg.sender, referralCode);
+    uint256 newStateLpTotalShare = stateLpTotalShare + stateLPShare;
+	uint256 newHolderFunds = holderFunds;
+    uint256 newTotalRewardPerTokenStored = totalRewardPerTokenStored;
+    mintedSupply += amount;
+	userMintedAmount[msg.sender] += amount;
+    lastMintTimestamp[msg.sender] = block.timestamp;
+    if (bytes(userReferralCode[msg.sender]).length == 0) {
+        string memory newReferralCode = _generateReferralCode(msg.sender);
+        userReferralCode[msg.sender] = newReferralCode;
+        referralCodeToUser[newReferralCode] = msg.sender;
+        emit ReferralCodeGenerated(msg.sender, newReferralCode);
+    }    
+    uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+    uint256 cycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) / 100;
+    for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
+        uint256 targetCycle = currentCycle + i;
+        cycleTreasuryAllocation[targetCycle] += cycleAllocation;
+        cycleUnclaimedPLS[targetCycle] += cycleAllocation;
     }
+  if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
+        uint256 effectiveSupply = totalSupply() - balanceOf(governance);
+        uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
+        uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e18;
+        newHolderFunds += usedHolderShare;
+        newTotalRewardPerTokenStored += rewardPerToken;
+    }
+    stateLpTotalShare = newStateLpTotalShare;
+    holderFunds = newHolderFunds;
+    totalRewardPerTokenStored = newTotalRewardPerTokenStored;
+    if (!isDAVHolder[msg.sender] && msg.sender != governance) {
+        isDAVHolder[msg.sender] = true;
+        davHoldersCount += 1;
+        emit HolderAdded(msg.sender);
+    }
+    _updateRewards(msg.sender);
+    _mint(msg.sender, amount);
+    _updateRewards(msg.sender);
+    // Interactions (safe to do last)
+    if (referrer != address(0) && referralShare > 0) {
+        referralRewards[referrer] += referralShare;
+        totalReferralRewardsDistributed += referralShare;
+        (bool successRef, ) = referrer.call{value: referralShare}("");
+        require(successRef, "Referral transfer failed");
+    }
+    if (liquidityShare > 0) {
+        (bool successLiquidity, ) = liquidityWallet.call{value: liquidityShare}("");
+        require(successLiquidity, "Liquidity transfer failed");
+        totalLiquidityAllocated += liquidityShare;
+    }
+    if (developmentShare > 0) {
+        (bool successDev, ) = developmentWallet.call{value: developmentShare}("");
+        require(successDev, "Development transfer failed");
+        totalDevelopmentAllocated += developmentShare;
+    }
+
+	emit DistributionEvent(   msg.sender,    amount,    msg.value,    referrer,    referralShare,   liquidityShare,
+    developmentShare,
+    block.timestamp
+);
+}
+
     function claimReward() external nonReentrant {
         require(balanceOf(msg.sender) > 0, "Not a DAV holder");
         _updateRewards(msg.sender);
@@ -497,6 +478,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         require(bytes(_tokenName).length > 0, "Please provide tokenName");
 		// no commit-reveal scheme or time lock require to unique token name. it will not front run
 		  require(!isTokenNameUsed[_tokenName], "Token name already used");
+		  require(userTokenEntries[msg.sender][_tokenName].user == address(0), "Token name already used by user");
         require(
             _utfStringLength(_emoji) <= 10,
             "Max 10 UTF-8 characters allowed"
@@ -566,27 +548,25 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // This natural upper bound eliminates the need for a hardcoded limit like 1,000 entries.
     /// @notice Returns the list of pending token names for a user.
     /// @dev This function is intended for off-chain use only. It may consume too much gas if called on-chain for users with many entries.
-    function getPendingTokenNames(
-        address user
-    ) public view returns (string[] memory) {
-        // Use a temporary array with the maximum possible size
-        string[] memory userTokens = usersTokenNames[user];
-        string[] memory tempNames = new string[](userTokens.length);
-        uint256 count = 0;
-        // Single loop to collect pending token names
-       for (uint256 i = 0; i < userTokens.length; i++) {
-            string memory tokenName = userTokens[i];
-            if (userTokenEntries[user][tokenName].status == TokenStatus.Pending) {
-                tempNames[count] = tokenName;
-                count++;
-            }
-        } // Create a correctly sized array for the result
-        string[] memory pendingNames = new string[](count);
-        for (uint256 i = 0; i < count; i++) {
-            pendingNames[i] = tempNames[i];
+    function getPendingTokenNames(address user) public view returns (string[] memory) {
+    string[] memory all = usersTokenNames[user];
+    uint256 limit = all.length > 50 ? 50 : all.length; // hardcoded limit
+    string[] memory temp = new string[](limit);
+    uint256 count = 0;
+    for (uint256 i = 0; i < limit; i++) {
+        if (userTokenEntries[user][all[i]].status == TokenStatus.Pending) {
+            temp[count] = all[i];
+            count++;
         }
-        return pendingNames;
     }
+    string[] memory result = new string[](count);
+    for (uint256 j = 0; j < count; j++) {
+        result[j] = temp[j];
+    }
+
+    return result;
+}
+
     /// @notice Updates the status of a specific token owned by a user.
     /// @dev This function loops through `allTokenEntries`, which could grow indefinitely.
     ///      To prevent excessive gas usage:
@@ -716,6 +696,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         }
         return totalClaimable;
     }
+	/// @notice Claims PLS rewards for a user across eligible cycles
+/// @dev Iterates over userUnclaimedCycles to calculate and distribute rewards
     function claimPLS() external {
         address user = msg.sender;
         uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;

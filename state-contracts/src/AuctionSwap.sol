@@ -44,13 +44,14 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     uint256 public constant OWNER_REWARD_AMOUNT = 2500000 * 1e18;
     uint256 public constant CLAIM_INTERVAL = 4 hours;
     uint256 public constant MAX_SUPPLY = 500000000000 ether;
+	uint256 constant DAV_FACTOR = 5000000 * 1e18;
     uint256 public constant percentage = 1;
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
     uint256 public TotalBurnedStates;
 
     address public stateToken;
-    address public governanceAddress;
+    address public immutable governanceAddress;
 
     mapping(address => mapping(address => uint256)) public lastDavHolding; // user => token => last DAV holding
     mapping(address => mapping(address => uint256))
@@ -380,18 +381,16 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         );
         require(amountOut > 0, "Output amount must be greater than zero");
 
-        require(
-            IERC20(tokenOut).balanceOf(address(this)) >= amountOut,
-            "Insufficient tokens in vault for the output token"
-        );
-
         userSwapInfo.cycle = currentAuctionCycle;
         /**
          * @dev This check ensures that internal token tracking is aligned with actual contract holdings.
          * Tokens sent manually (e.g., via MetaMask and through token sc), so we can't assume tracking alone is sufficient.
          *  Especially important for auction logic or any logic that sends tokens out.
          */
-
+        require(
+            IERC20(tokenOut).balanceOf(address(this)) >= amountOut,
+            "Insufficient tokens in vault for the output token"
+        );
         if (isReverseActive) {
             userSwapInfo.hasReverseSwap = true;
             TotalBurnedStates += amountIn;
@@ -471,10 +470,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             bool isValidCycle
         )
     {
-        // ✅ Optimization: reference struct from storage once
-        AuctionCycle storage cycle = auctionCycles[inputToken][stateToken];
+        AuctionCycle memory cycle = auctionCycles[inputToken][stateToken];
 
-        // ✅ Cache SLOADs into local variables
         initialized = cycle.isInitialized;
         firstAuctionStart = cycle.firstAuctionStart;
 
@@ -621,7 +618,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         // Adjust calculation to avoid truncation
         uint256 precisionFactor = 1e18; // Match typical ERC20 decimals
         uint256 firstCal = (MAX_SUPPLY * percentage * precisionFactor) / 100;
-        uint256 secondCalWithDavMax = (firstCal / (5000000 * 1e18)) *
+        uint256 secondCalWithDavMax = (firstCal / DAV_FACTOR) *
             davbalance;
         uint256 baseAmount = isReverse
             ? secondCalWithDavMax * 2
@@ -632,8 +629,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
     function getOutPutAmount(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
-        // uint256 currentRatio = getRatioPrice(inputToken);
-        uint256 currentRatio = 1000;
+        uint256 currentRatio = getRatioPrice(inputToken) / 1e18;
         require(currentRatio > 0, "Invalid ratio");
 
         uint256 userBalance = dav.balanceOf(msg.sender);
@@ -658,8 +654,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
                 multiplications <= type(uint256).max / 2,
                 "Multiplication overflow"
             );
-            multiplications *= 2;
-
             multiplications *= 2;
         }
 
