@@ -173,12 +173,12 @@ event GovernanceUpdated(address newGov);
         address pairAddress,
         address _tokenOwner
     ) external onlyGovernance {
-        IPair pair = IPair(pairAddress);
-        require(
-            (pair.token0() == token && pair.token1() == stateToken) ||
-                (pair.token1() == token && pair.token0() == stateToken),
-            "Pair must contain stateToken"
-        );
+        // IPair pair = IPair(pairAddress);
+        // require(
+        //     (pair.token0() == token && pair.token1() == stateToken) ||
+        //         (pair.token1() == token && pair.token0() == stateToken),
+        //     "Pair must contain stateToken"
+        // );
         require(token != address(0), "Invalid token address");
         require(stateToken != address(0), "State token not initialized");
         require(pairAddress != address(0), "Invalid pair address");
@@ -220,7 +220,7 @@ event GovernanceUpdated(address newGov);
     function _calculateDubaiAuctionStart() internal view returns (uint256) {
         uint256 dubaiOffset = 4 hours;
         uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 11;
+        uint256 targetDubaiHour = 14;
         uint256 targetDubaiMinute = 0;
         // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;
