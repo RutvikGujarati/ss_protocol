@@ -203,6 +203,7 @@ const DataTable = () => {
                 <th>Emoticon</th>
                 <th>Token Name</th>
                 <th>Claim Airdrop</th>
+                <th></th>
                 <th>Auction Timer</th>
                 <th>Ratio Swapping Auction</th>
                 <th>Market Maker Instructions</th>
@@ -273,7 +274,9 @@ const DataTable = () => {
                             : `${formatWithCommas(AirDropAmount[name])} `}
                         </button>
 
-                        <img
+                      
+                      </td>
+					  <td>  <img
                           src={MetaMaskIcon}
                           onClick={() =>
                             handleAddToken(
@@ -293,8 +296,7 @@ const DataTable = () => {
                             marginLeft: "6px",
                             verticalAlign: "middle",
                           }}
-                        />
-                      </td>
+                        /></td>
                       <td className="timer-cell">
                         {formatCountdown(TimeLeft)}
                       </td>
