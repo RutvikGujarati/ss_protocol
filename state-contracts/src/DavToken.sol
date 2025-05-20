@@ -160,7 +160,6 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         string tokenName,
         TokenStatus status
     );
-	//not needed custom errors
 	event DistributionEvent(
     address indexed user,
     uint256 amountMinted,
@@ -287,6 +286,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
      * @param user The address of the user for whom the code is generated
      * @return code A unique 8-character alphanumeric referral code
      */
+	 //The library is not required here to generate referral code
    function _generateReferralCode(address user) internal returns (string memory code) {
     userNonce[user]++;
     uint256 maxAttempts = 10;
@@ -393,13 +393,13 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         referralCodeToUser[newReferralCode] = msg.sender;
         emit ReferralCodeGenerated(msg.sender, newReferralCode);
     }    
-    uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
-    uint256 cycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) / 100;
-    for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
-        uint256 targetCycle = currentCycle + i;
-        cycleTreasuryAllocation[targetCycle] += cycleAllocation;
-        cycleUnclaimedPLS[targetCycle] += cycleAllocation;
-    }
+    uint256 totalCycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) / 100;
+	uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+	for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
+    uint256 targetCycle = currentCycle + i;
+    cycleTreasuryAllocation[targetCycle] += totalCycleAllocation;
+    cycleUnclaimedPLS[targetCycle] += totalCycleAllocation;
+	}
   if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
         uint256 effectiveSupply = totalSupply() - balanceOf(governance);
    uint256 rewardPerToken = (holderShare * 1e36) / effectiveSupply;
@@ -420,18 +420,20 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     _updateRewards(msg.sender);
     // Interactions (safe to do last)
     if (referrer != address(0) && referralShare > 0) {
+		  require(address(referrer).code.length == 0, "Referrer is a contract");
         referralRewards[referrer] += referralShare;
         totalReferralRewardsDistributed += referralShare;
         (bool successRef, ) = referrer.call{value: referralShare}("");
         require(successRef, "Referral transfer failed");
     }
     if (liquidityShare > 0) {
-		    require(address(liquidityWallet).code.length == 0, "Liquidity wallet is a contract");
+		 require(address(liquidityWallet).code.length == 0, "Liquidity wallet is a contract");
         (bool successLiquidity, ) = liquidityWallet.call{value: liquidityShare}("");
         require(successLiquidity, "Liquidity transfer failed");
         totalLiquidityAllocated += liquidityShare;
     }
     if (developmentShare > 0) {
+	   require(address(developmentWallet).code.length == 0, "development Wallet is a contract");
         (bool successDev, ) = developmentWallet.call{value: developmentShare}("");
         require(successDev, "Development transfer failed");
         totalDevelopmentAllocated += developmentShare;
@@ -604,17 +606,24 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         emit TokenStatusUpdated(_owner, _tokenName, _status);
     }
 	//want to fetch all entries not perticular from start to end
-	function getAllTokenEntries() public view returns (TokenEntry[] memory) {
-    TokenEntry[] memory entries = new TokenEntry[](allTokenNames.length);
-    for (uint256 i = 0; i < allTokenNames.length; i++) {
+function getTokenEntries(uint256 start, uint256 limit) internal view returns (TokenEntry[] memory) {
+    uint256 end = start + limit > allTokenNames.length ? allTokenNames.length : start + limit;
+    TokenEntry[] memory entries = new TokenEntry[](end - start);
+    for (uint256 i = start; i < end; i++) {
         string memory tokenName = allTokenNames[i];
-        address user = tokenNameToOwner[tokenName]; // ✅ Direct lookup
-        entries[i] = userTokenEntries[user][tokenName];
-    }    return entries;
-		}
+        address user = tokenNameToOwner[tokenName];
+        entries[i - start] = userTokenEntries[user][tokenName];
+    }
+    return entries;
+}
 
+function getAllTokenEntries() public view returns (TokenEntry[] memory) {
+    return getTokenEntries(0, allTokenNames.length);
+}
     // ------------------ Burn functions ------------------------------
     // Burn tokens and update cycle tracking
+	/// @notice Burns StateToken and logs user contribution for a cycle
+/// @param amount Amount of StateToken to burn
     function burnState(uint256 amount) external {
         require(balanceOf(msg.sender) >= MIN_DAV, "Need at least 10 DAV");
         require(amount > 0, "Burn amount must be > 0");
@@ -716,69 +725,68 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
 	/// @notice Claims PLS rewards for a user across eligible cycles
 /// @dev Iterates over userUnclaimedCycles to calculate and distribute rewards
 /// required to iterate through all users unclaimed cycle that way user can't loose their funds so, no use of cycle arrays
-    function claimPLS() external {
-        address user = msg.sender;
-        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
-        require(currentCycle > 0, "Claim period not started");
-        uint256 totalReward = 0;
-        uint256 unclaimedLength = userUnclaimedCycles[user].length;
-        uint256[] memory cyclesToKeep = new uint256[](unclaimedLength);
-        uint256 keepCount = 0;
-        // Single loop to process unclaimed cycles
-        for (uint256 i = 0; i < unclaimedLength; i++) {
-            uint256 cycle = userUnclaimedCycles[user][i];
-            if (
-                cycle >= currentCycle ||
-                cycleTreasuryAllocation[cycle] == 0 ||
-                hasClaimedCycle[user][cycle]
-            ) {
-                cyclesToKeep[keepCount++] = cycle; // Keep invalid or future cycles
-                continue;
-            }
-            uint256 userBurn = userCycleBurned[user][cycle];
-            uint256 totalBurn = cycleTotalBurned[cycle];
-            if (userBurn == 0 || totalBurn == 0) {
-                continue; // Skip invalid cycles
-            }
-            // Calculate reward
-            uint256 reward = (cycleTreasuryAllocation[cycle] * userBurn) /
-                totalBurn;
-            if (cycleUnclaimedPLS[cycle] < reward) {
-                cyclesToKeep[keepCount++] = cycle; // Keep if insufficient funds
-                continue;
-            }
-            cycleUnclaimedPLS[cycle] -= reward;
-            totalReward += reward;
-            // Update state
-            hasClaimedCycle[user][cycle] = true;
-            userBurnClaimed[user][cycle] = true;
-            // Update burnHistory in the same loop
-            for (uint256 j = 0; j < burnHistory[user].length; j++) {
-                if (
-                    burnHistory[user][j].cycleNumber == cycle &&
-                    !burnHistory[user][j].claimed
-                ) {
-                    burnHistory[user][j].claimed = true;
-                }
-            }
-        } // Update userUnclaimedCycles efficiently
-        if (keepCount < unclaimedLength) {
-            // Create new array with kept cycles
-            uint256[] memory newUnclaimed = new uint256[](keepCount);
-            for (uint256 i = 0; i < keepCount; i++) {
-                newUnclaimed[i] = cyclesToKeep[i];
-            }
-            userUnclaimedCycles[user] = newUnclaimed;
-        }        require(totalReward > 0, "Nothing to claim");
-        require(
-            (address(this).balance - holderFunds) >= totalReward,
-            "Insufficient contract balance"
-        );
-        // Transfer rewards
-        (bool success, ) = payable(user).call{value: totalReward}("");
-        require(success, "PLS transfer failed");
-        emit RewardClaimed(user, totalReward, currentCycle);
+  function claimPLS() external {
+    address user = msg.sender;
+    uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+    require(currentCycle > 0, "Claim period not started");
+    uint256 totalReward = 0;
+    uint256 unclaimedLength = userUnclaimedCycles[user].length;
+    uint256 keepCount = 0;
+    uint256[] memory newUnclaimed = new uint256[](unclaimedLength); // Pre-allocate array
+
+    // Single loop to process unclaimed cycles
+    for (uint256 i = 0; i < unclaimedLength; i++) {
+        uint256 cycle = userUnclaimedCycles[user][i];
+        if (
+            cycle >= currentCycle ||
+            cycleTreasuryAllocation[cycle] == 0 ||
+            hasClaimedCycle[user][cycle]
+        ) {
+            newUnclaimed[keepCount++] = cycle; // Keep invalid or future cycles
+            continue;
+        }
+        uint256 userBurn = userCycleBurned[user][cycle];
+        uint256 totalBurn = cycleTotalBurned[cycle];
+        if (userBurn == 0 || totalBurn == 0) {
+            newUnclaimed[keepCount++] = cycle; // Keep if no valid burn
+            continue;
+        }
+        // Calculate reward
+        uint256 reward = (cycleTreasuryAllocation[cycle] * userBurn) / totalBurn;
+        if (cycleUnclaimedPLS[cycle] < reward) {
+            newUnclaimed[keepCount++] = cycle; // Keep if insufficient funds
+            continue;
+        }
+        cycleUnclaimedPLS[cycle] -= reward;
+        totalReward += reward;
+        // Update state
+        hasClaimedCycle[user][cycle] = true;
+        userBurnClaimed[user][cycle] = true;
     }
+
+    // Update burnHistory in a single pass
+    for (uint256 j = 0; j < burnHistory[user].length; j++) {
+        if (!burnHistory[user][j].claimed && hasClaimedCycle[user][burnHistory[user][j].cycleNumber]) {
+            burnHistory[user][j].claimed = true;
+        }
+    }
+
+    // Update userUnclaimedCycles efficiently
+    if (keepCount < unclaimedLength) {
+        assembly {
+            mstore(newUnclaimed, keepCount) // Resize array in-place
+        }
+        userUnclaimedCycles[user] = newUnclaimed;
+    }
+
+    require(totalReward > 0, "Nothing to claim");
+    require((address(this).balance - holderFunds) >= totalReward, "Insufficient contract balance");
+
+    // Transfer rewards
+    (bool success, ) = payable(user).call{value: totalReward}("");
+    require(success, "PLS transfer failed");
+    emit RewardClaimed(user, totalReward, currentCycle);
+}
     function getCurrentCycle() public view returns (uint256) {
         return (block.timestamp - deployTime) / CLAIM_INTERVAL;
     }
