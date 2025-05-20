@@ -402,8 +402,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
 	}
   if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
         uint256 effectiveSupply = totalSupply() - balanceOf(governance);
-   uint256 rewardPerToken = (holderShare * 1e36) / effectiveSupply;
-	uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e36;
+   uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
+	uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e18;
         newHolderFunds += usedHolderShare;
         newTotalRewardPerTokenStored += rewardPerToken;
     }

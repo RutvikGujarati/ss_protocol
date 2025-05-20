@@ -42,7 +42,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     uint256 public constant REVERSE_DURATION = 1 hours;
     uint256 public constant MAX_AUCTIONS = 20;
     uint256 public constant OWNER_REWARD_AMOUNT = 2500000 ether;
-    uint256 public constant CLAIM_INTERVAL = 4 hours;
+    uint256 public constant CLAIM_INTERVAL = 1 hours;
     uint256 public constant MAX_SUPPLY = 500000000000 ether;
     uint256 constant DAV_FACTOR = 5000000 ether;
     //For Airdrop
@@ -220,7 +220,7 @@ event GovernanceUpdated(address newGov);
     function _calculateDubaiAuctionStart() internal view returns (uint256) {
         uint256 dubaiOffset = 4 hours;
         uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 17;
+        uint256 targetDubaiHour = 11;
         uint256 targetDubaiMinute = 0;
         // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;
