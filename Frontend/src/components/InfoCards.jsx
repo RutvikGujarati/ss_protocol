@@ -660,14 +660,22 @@ const InfoCards = () => {
                         {formatWithCommas(claimableAmountForBurn)} PLS
                       </h5>
                     </div>
-                    {Number(claimableAmountForBurn) == 0 && (
-                      <div className="d-flex justify-content-center">
-                        <h6 className="detailText2">
-                          @ Current Burn % - {formatWithCommas(expectedClaim)}{" "}
-                          PLS
-                        </h6>
-                      </div>
-                    )}
+                    <div
+                      className="d-flex justify-content-center"
+                      style={{ minHeight: "24px" }}
+                    >
+                      <h6
+                        className="detailText2"
+                        style={{
+                          visibility:
+                            Number(claimableAmountForBurn) == 0
+                              ? "visible"
+                              : "hidden",
+                        }}
+                      >
+                        @ Current Burn % - {formatWithCommas(expectedClaim)} PLS
+                      </h6>
+                    </div>
                     <div className="d-flex justify-content-center mt-4">
                       <button
                         onClick={() => {
@@ -723,8 +731,8 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      CLAIMABLE TREASURY (Past Cycle) -{" "}
-                      {formatWithCommas(usableTreasury)} PLS
+                      CLAIMABLE TREASURY - {formatWithCommas(usableTreasury)}{" "}
+                      PLS
                     </h6>
                   </div>
                 </div>
@@ -792,7 +800,7 @@ const InfoCards = () => {
                           }`}
                           style={{ "--placeholder-color": "#6c757d" }}
                           value={TokenName}
-						  maxLength={11}
+                          maxLength={11}
                           disabled={isProcessingToken}
                           onChange={(e) =>
                             handleInputChangeForAddtoken(
