@@ -37,12 +37,12 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     }
 
     //For Airdrop
-    uint256 public constant AUCTION_INTERVAL = 1 hours;
-    uint256 public constant AUCTION_DURATION = 1 hours;
-    uint256 public constant REVERSE_DURATION = 1 hours;
+    uint256 public constant AUCTION_INTERVAL = 2 hours;
+    uint256 public constant AUCTION_DURATION = 2 hours;
+    uint256 public constant REVERSE_DURATION = 2 hours;
     uint256 public constant MAX_AUCTIONS = 20;
     uint256 public constant OWNER_REWARD_AMOUNT = 2500000 ether;
-    uint256 public constant CLAIM_INTERVAL = 1 hours;
+    uint256 public constant CLAIM_INTERVAL = 2 hours;
     uint256 public constant MAX_SUPPLY = 500000000000 ether;
     uint256 constant DAV_FACTOR = 5000000 ether;
     //For Airdrop
@@ -59,6 +59,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
     address public stateToken;
     address public governanceAddress;
+    address public DevAddress;
     uint256 public constant GOVERNANCE_UPDATE_DELAY = 1 days;
     address public pendingGovernance;
     uint256 public governanceUpdateTimestamp;
@@ -117,8 +118,9 @@ event GovernanceUpdated(address newGov);
         );
         _;
     }
-    constructor(address _gov) {
+    constructor(address _gov,address _dev) {
         governanceAddress = _gov;
+        DevAddress = _dev;
     }
     //to update governance if needed
     function updateGovernance(address newGov) external onlyGovernance {
@@ -220,7 +222,7 @@ event GovernanceUpdated(address newGov);
     function _calculateDubaiAuctionStart() internal view returns (uint256) {
         uint256 dubaiOffset = 4 hours;
         uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 14;
+        uint256 targetDubaiHour = 12;
         uint256 targetDubaiMinute = 0;
         // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;
@@ -325,7 +327,7 @@ event GovernanceUpdated(address newGov);
         uint256 rewardAmount;
 
         if (msg.sender == governanceAddress) {
-            claimant = governanceAddress;
+            claimant = DevAddress;
             rewardAmount = GOV_OWNER_AIRDROP;
         } else {
             require(

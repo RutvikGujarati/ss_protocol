@@ -668,6 +668,7 @@ export const SwapContractProvider = ({ children }) => {
 		setTxStatusForAdding("confirmed")
 	}
   };
+  
   console.log("Is array:", Array.isArray(UsersSupportedTokens));
   useEffect(() => {
     const functions = [
@@ -675,9 +676,7 @@ export const SwapContractProvider = ({ children }) => {
       getInputAmount,
       getOutPutAmount,
       getTokensBurned,
-      CheckIsAuctionActive,
       getAirdropAmount,
-      CheckIsReverse,
       getTokenBalances,
       isAirdropClaimed,
       AddressesFromContract,
@@ -687,8 +686,8 @@ export const SwapContractProvider = ({ children }) => {
       getTokenNamesByUser,
       HasSwappedAucton,
       HasReverseSwappedAucton,
-      getCurrentAuctionCycle,
     ];
+    const pollingFunctions = [CheckIsAuctionActive, CheckIsReverse,getCurrentAuctionCycle];
 
     const runAll = async () => {
       const results = await Promise.allSettled(functions.map((fn) => fn()));
@@ -701,10 +700,26 @@ export const SwapContractProvider = ({ children }) => {
         }
       });
     };
+	 const pollData = async () => {
+      const results = await Promise.allSettled(pollingFunctions.map((fn) => fn()));
+      results.forEach((result, index) => {
+        if (result.status === "rejected") {
+          console.error(
+            `Polling function ${pollingFunctions[index].name} failed:`,
+            result.reason
+          );
+        }
+      });
+    };
 
     runAll();
+	  const pollingInterval = setInterval(pollData, 2000); // Poll every 2 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(pollingInterval);
   }, [AllContracts, address]);
   // Adjust based on when you want it to run
+
 
   const ERC20_ABI = [
     "function approve(address spender, uint256 amount) external returns (bool)",

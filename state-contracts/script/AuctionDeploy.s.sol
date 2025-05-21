@@ -6,11 +6,13 @@ import {Ratio_Swapping_Auctions_V2_1} from "../src/AuctionSwap.sol";
 contract AuctionSwapDeploy is Script {
     function run() external {
         address governance = 0xBAaB2913ec979d9d21785063a0e4141e5B787D28;
+        address DAVWallet = 0x5E19e86F1D10c59Ed9290cb986e587D2541e942C;
 
         vm.startBroadcast();
 
         Ratio_Swapping_Auctions_V2_1 swap = new Ratio_Swapping_Auctions_V2_1(
-            governance
+            governance,
+            DAVWallet
         );
         console.log("Swap deployed at:", address(swap));
         vm.stopBroadcast();
