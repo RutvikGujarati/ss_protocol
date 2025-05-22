@@ -85,9 +85,9 @@ const DataTable = () => {
     const days = Math.floor(seconds / 86400);
     const hrs = Math.floor((seconds % 86400) / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60); // in case it's float
+    // const secs = Math.floor(seconds % 60); // in case it's float
 
-    return `${days}d ${hrs}h ${mins}m ${secs}s`;
+    return `${days}d ${hrs}h ${mins}m`;
   }
   // Handle input change for tokenAddress or pairAddress for a specific user
   const handleInputChange = (tokenName, value) => {
@@ -736,7 +736,7 @@ const DataTable = () => {
                           )}
                         </td>
                         <td className="timer-cell">
-                          {formatCountdown(TimeLeft)}
+                          {formatTimeVerbose(TimeLeft)}
                         </td>
                         <td>500,000</td>
                         <td>
