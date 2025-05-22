@@ -624,7 +624,7 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      % STATE TOKENS BURNED BY YOU - {UserPercentage}%
+                      %  BURNED BY YOU - {UserPercentage}%
                     </h6>
                     <h6
                       className="detailText mb-0"
@@ -633,7 +633,7 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      STATE TOKENS BURNED BY YOU -{" "}
+                       BURNED BY YOU -{" "}
                       {formatWithCommas(userBurnedAmount)}
                     </h6>
                     <h6
@@ -643,7 +643,7 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      STATE TOKENS BURNED IN CURRENT CYCLE-{" "}
+                       BURNED IN CURRENT CYCLE-{" "}
                       {formatWithCommas(userBurnedAmountInCycle)}
                     </h6>
                   </div>

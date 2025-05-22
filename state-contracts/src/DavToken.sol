@@ -30,7 +30,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     /// @dev Intentionally set to 100,000 tokens in full native unit (i.e., 100000 ether).
     ///      ⚠️ This is NOT a unit error — the fee is meant to be very high, either for testing,
     ///      access restriction, or deterrence. Adjust only if this is NOT the intended behavior.
-    uint256 public constant TOKEN_PROCESSING_FEE = 10000 ether;
+    uint256 public constant TOKEN_PROCESSING_FEE = 2000 ether;
     uint256 public totalReferralRewardsDistributed;
     uint256 public mintedSupply; // Total Minted DAV Tokens
     uint256 public stateLpTotalShare;
@@ -47,7 +47,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // Used in DApp to display total burn statistics
     uint256 public totalStateBurned;
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
-    uint256 public constant CLAIM_INTERVAL = 4 hours; // 4 hour claim timer
+    uint256 public constant CLAIM_INTERVAL = 4 days; // 4 hour claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
 
     address private constant BURN_ADDRESS =

@@ -297,7 +297,7 @@ export const DavProvider = ({ children }) => {
   const AddYourToken = async (amount, Emoji) => {
     if (!AllContracts?.davContract) return;
 
-    const cost = ethers.parseEther((chainId === 146 ? 100 : 10000).toString());
+    const cost = ethers.parseEther((chainId === 146 ? 100 : 2000).toString());
 
     let toastId = null;
 

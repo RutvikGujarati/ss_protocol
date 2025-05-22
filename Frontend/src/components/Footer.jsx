@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 const Footer = () => {
   const messages = [
-    "your swaps shape the market.",
+    "Your swaps shape the market.",
     "Refresh when minting more DAV tokens.",
   ];
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
