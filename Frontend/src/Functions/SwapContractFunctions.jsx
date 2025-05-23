@@ -42,6 +42,7 @@ export const SwapContractProvider = ({ children }) => {
   const [AuctionTime, setAuctionTime] = useState({});
   const [CurrentCycleCount, setCurrentCycleCount] = useState({});
   const [OutPutAmount, setOutputAmount] = useState({});
+  const [TokenRatio, setTokenRatio] = useState({});
   const [TimeLeftClaim, setTimeLeftClaim] = useState({});
   const [burnedAmount, setBurnedAmount] = useState({});
   const [TokenBalance, setTokenbalance] = useState({});
@@ -108,7 +109,8 @@ export const SwapContractProvider = ({ children }) => {
             `❌ Error calling ${contractMethod} for ${tokenName}:`,
             err
           );
-          results[tokenName] = "not started";
+          results[tokenName] =
+      contractMethod === "getRatioPrice" ? "not listed" : "not started";
         }
       }
 
@@ -188,6 +190,13 @@ export const SwapContractProvider = ({ children }) => {
     await fetchTokenData({
       contractMethod: "getOutPutAmount",
       setState: setOutputAmount,
+      formatFn: (v) => Math.floor(Number(ethers.formatEther(v))),
+    });
+  };
+  const getTokenRatio = async () => {
+    await fetchTokenData({
+      contractMethod: "getRatioPrice",
+      setState: setTokenRatio,
       formatFn: (v) => Math.floor(Number(ethers.formatEther(v))),
     });
   };
@@ -675,6 +684,7 @@ export const SwapContractProvider = ({ children }) => {
       fetchUserTokenAddresses,
       getInputAmount,
       getOutPutAmount,
+	  getTokenRatio,
       getTokensBurned,
       getAirdropAmount,
       getTokenBalances,
@@ -1018,6 +1028,7 @@ export const SwapContractProvider = ({ children }) => {
         renounceTokenContract,
         tokenMap,
         IsAuctionActive,
+		TokenRatio,
       }}
     >
       {children}

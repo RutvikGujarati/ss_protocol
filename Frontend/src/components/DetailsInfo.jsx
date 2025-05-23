@@ -56,7 +56,7 @@ const DetailsInfo = ({ selectedToken }) => {
   const targetRatio = 0.03;
 
   const getVaultIndicator = (token) => {
-    if (token.tokenName === "DAV" || token.tokenName === "STATE") return null;
+    if (token.tokenName === "DAV" || token.tokenName === "$TATE1") return null;
 
     const value = (500000000000 - token.DavVault) / token.DavVault;
     const isBuy = value <= targetRatio;
@@ -164,7 +164,7 @@ const DetailsInfo = ({ selectedToken }) => {
                   <th></th>
                   <th className="text-center">
                     <a
-                      href={`https://scan.v4.testnet.pulsechain.com/#/address/${Auction_TESTNET}`}
+                      href={`https://midgard.wtf/address/${Auction_TESTNET}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{ fontSize: "15px", color: "white" }}
@@ -219,15 +219,15 @@ const DetailsInfo = ({ selectedToken }) => {
                       <td className="text-center">
                         <div className="mx-2">
                           {token.tokenName === "DAV" ||
-                          token.tokenName === "STATE"
+                          token.tokenName === "$TATE1"
                             ? "------"
-                            : "1:1000"}
+                            : `1:${token.ratio}`}
                         </div>
                       </td>
                       <td className="text-center">
                         <div className="mx-4">
                           {token.tokenName === "DAV" ||
-                          token.tokenName === "STATE"
+                          token.tokenName === "$TATE1"
                             ? "-----"
                             : `${token.Cycle}/21`}
                         </div>
@@ -243,7 +243,7 @@ const DetailsInfo = ({ selectedToken }) => {
                         <div className="mx-4">
                           {token.tokenName === "DAV"
                             ? "-----"
-                            : token.tokenName === "STATE"
+                            : token.tokenName === "$TATE1"
                             ? formatWithCommas(
                                 Number(token.burned || 0) +
                                   Number(totalStateBurned)
@@ -255,7 +255,7 @@ const DetailsInfo = ({ selectedToken }) => {
                         <div className="d-flex justify-content-center align-items-center gap-3">
                           <div className="d-flex flex-column align-items-center">
                             <a
-                              href={`https://scan.v4.testnet.pulsechain.com/#/address/${token.TokenAddress}`}
+                              href={`https://midgard.wtf/address/${token.TokenAddress}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               style={{ fontSize: "15px", color: "white" }}
@@ -274,7 +274,7 @@ const DetailsInfo = ({ selectedToken }) => {
                                   token.TokenAddress,
                                   token.tokenName === "DAV"
                                     ? "pDAV"
-                                    : token.tokenName === "STATE"
+                                    : token.tokenName === "$TATE1"
                                     ? "State"
                                     : token.tokenName
                                 )
@@ -293,7 +293,7 @@ const DetailsInfo = ({ selectedToken }) => {
                           >
                             {token.tokenName === "DAV" ? (
                               "-------"
-                            ) : token.tokenName === "STATE" ? (
+                            ) : token.tokenName === "$TATE1" ? (
                               DavAddress ===
                               "0x0000000000000000000000000000000000000000" ? (
                                 <button

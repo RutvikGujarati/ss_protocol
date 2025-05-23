@@ -108,9 +108,9 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         uint256 amountOut
     );
     event TokenAdded(address indexed token, address pairAddress);
-event GovernanceUpdateProposed(address newGov, uint256 timestamp);
-event GovernanceUpdated(address newGov);
-// Custom Errors are not required
+    event GovernanceUpdateProposed(address newGov, uint256 timestamp);
+    event GovernanceUpdated(address newGov);
+    // Custom Errors are not required
     modifier onlyGovernance() {
         require(
             msg.sender == governanceAddress,
@@ -118,7 +118,7 @@ event GovernanceUpdated(address newGov);
         );
         _;
     }
-    constructor(address _gov,address _dev) {
+    constructor(address _gov, address _dev) {
         governanceAddress = _gov;
         DevAddress = _dev;
     }
@@ -127,7 +127,7 @@ event GovernanceUpdated(address newGov);
         require(newGov != address(0), "RSA: Invalid governance address");
         pendingGovernance = newGov;
         governanceUpdateTimestamp = block.timestamp + GOVERNANCE_UPDATE_DELAY;
-		    emit GovernanceUpdateProposed(newGov, governanceUpdateTimestamp);
+        emit GovernanceUpdateProposed(newGov, governanceUpdateTimestamp);
     }
 
     function confirmGovernanceUpdate() external onlyGovernance {
@@ -137,14 +137,17 @@ event GovernanceUpdated(address newGov);
         );
         governanceAddress = pendingGovernance;
         pendingGovernance = address(0);
-		    emit GovernanceUpdated(governanceAddress);
+        emit GovernanceUpdated(governanceAddress);
     }
     //to deposit tokens if needed
-  function depositTokens(address token, uint256 amount) external onlyGovernance {
-    require(amount > 0, "RSA: Invalid deposit amount");
-    IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
-    emit TokensDeposited(token, amount);
-}
+    function depositTokens(
+        address token,
+        uint256 amount
+    ) external onlyGovernance {
+        require(amount > 0, "RSA: Invalid deposit amount");
+        IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
+        emit TokensDeposited(token, amount);
+    }
     // Deploy a Token
     function deployUserToken(
         string memory name,
@@ -175,12 +178,12 @@ event GovernanceUpdated(address newGov);
         address pairAddress,
         address _tokenOwner
     ) external onlyGovernance {
-        // IPair pair = IPair(pairAddress);
-        // require(
-        //     (pair.token0() == token && pair.token1() == stateToken) ||
-        //         (pair.token1() == token && pair.token0() == stateToken),
-        //     "Pair must contain stateToken"
-        // );
+        IPair pair = IPair(pairAddress);
+        require(
+            (pair.token0() == token && pair.token1() == stateToken) ||
+                (pair.token1() == token && pair.token0() == stateToken),
+            "Pair must contain stateToken"
+        );
         require(token != address(0), "Invalid token address");
         require(stateToken != address(0), "State token not initialized");
         require(pairAddress != address(0), "Invalid pair address");
@@ -261,7 +264,7 @@ event GovernanceUpdated(address newGov);
     }
 
     //used for only mainnet
-	///NOTE: flash loans might be issue but as users are not putting any input of amounts he just get tokens through dav holdings and protocol calculation so, if ratio goes high or less unconditionally user can't impact on input values.(they need to mint more dav tokens)
+    ///NOTE: flash loans might be issue but as users are not putting any input of amounts he just get tokens through dav holdings and protocol calculation so, if ratio goes high or less unconditionally user can't impact on input values.(they need to mint more dav tokens)
     function getRatioPrice(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
         IPair pair = IPair(pairAddresses[inputToken]);
@@ -305,7 +308,8 @@ event GovernanceUpdated(address newGov);
 
         // **Effects**
 
-        uint256 reward = (newDavContributed * AIRDROP_AMOUNT) / PRECISION_FACTOR;
+        uint256 reward = (newDavContributed * AIRDROP_AMOUNT) /
+            PRECISION_FACTOR;
 
         cumulativeDavHoldings[user][inputToken] += newDavContributed;
         lastDavHolding[user][inputToken] = currentDavHolding;
@@ -663,9 +667,10 @@ event GovernanceUpdated(address newGov);
 
     function getOutPutAmount(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
-		// @dev Hardcoded ratio of 1000 (1:1000 token-to-stateToken) for Pulsechain stability and only ffor testing
-        uint256 currentRatio = 1000;
-        require(currentRatio > 0, "Invalid ratio");
+        // @dev Hardcoded ratio of 1000 (1:1000 token-to-stateToken) for Pulsechain stability and only ffor testing
+        uint256 currentRatio = getRatioPrice(inputToken);
+        uint256 currentRatioNormalize = currentRatio / 1e18;
+        require(currentRatioNormalize > 0, "Invalid ratio");
 
         uint256 userBalance = dav.balanceOf(msg.sender);
         if (userBalance == 0) {
@@ -678,9 +683,9 @@ event GovernanceUpdated(address newGov);
 
         uint256 multiplications;
         if (isReverseActive) {
-            multiplications = (onePercent * currentRatio) / 2;
+            multiplications = (onePercent * currentRatioNormalize) / 2;
         } else {
-            multiplications = (onePercent * currentRatio) * 2;
+            multiplications = (onePercent * currentRatioNormalize) * 2;
         }
 
         return multiplications;
@@ -700,7 +705,8 @@ event GovernanceUpdated(address newGov);
             : 0;
 
         // Calculate reward as in distributeReward
-        uint256 reward = (newDavContributed * AIRDROP_AMOUNT) / PRECISION_FACTOR;
+        uint256 reward = (newDavContributed * AIRDROP_AMOUNT) /
+            PRECISION_FACTOR;
 
         return reward;
     }
@@ -710,9 +716,7 @@ event GovernanceUpdated(address newGov);
         address owner = tokenOwners[token];
         require(owner != address(0), "Token has no registered owner");
 
-        address claimant = msg.sender == governanceAddress
-            ? DevAddress
-            : owner;
+        address claimant = msg.sender == governanceAddress ? DevAddress : owner;
 
         uint256 lastClaim = lastClaimTime[claimant][token];
 

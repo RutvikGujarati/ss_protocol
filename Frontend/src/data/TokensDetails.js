@@ -33,7 +33,7 @@ export const TokensDetails = () => {
 			},
 		},
 		{
-			name: "STATE",
+			name: "$TATE1",
 			key: "state",
 			address: STATE_TESTNET,
 			price: prices.stateUsdPrice,
@@ -53,7 +53,7 @@ export const TokensDetails = () => {
 			},
 		},
 		{
-			name: "STATE",
+			name: "$TATE1",
 			key: "state",
 			address: STATE_TOKEN_SONIC_ADDRESS,
 			price: "0.0000",
@@ -62,7 +62,7 @@ export const TokensDetails = () => {
 	];
 
 	const dynamicTokens = Array.from(swap.TokenNames || [])
-		.filter((name) => name !== "DAV" && name !== "STATE")
+		.filter((name) => name !== "DAV" && name !== "$TATE1")
 		.map((name) => ({
 			name,
 			key: name,
@@ -87,10 +87,11 @@ export const TokensDetails = () => {
 			key: shortenAddress(token.address),
 			name: token.displayName || token.name,
 			Price: token.price,
+			ratio:swap.TokenRatio?.[key],
 			emoji:
 				token.name === "DAV"
 					? "🧮"
-					: token.name === "STATE"
+					: token.name === "$TATE1"
 						? "🧮"
 						: emojiMap[key.toLowerCase()] || "🔹", // Fallback emoji for dynamic tokens
 			isRenounced: swap.isTokenRenounce[token.name],
@@ -99,7 +100,7 @@ export const TokensDetails = () => {
 			isSupported:
 				token.name === "DAV"
 					? "true"
-					: token.name === "STATE"
+					: token.name === "$TATE1"
 						? "true"
 						: swap.supportedToken?.[key],
 			TokenAddress: token.address,
