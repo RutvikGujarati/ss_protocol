@@ -10,6 +10,7 @@ import { Auction_TESTNET } from "../Constants/ContractAddresses";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { Tooltip } from "bootstrap";
 import IOSpinner from "../Constants/Spinner";
+import toast from "react-hot-toast";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -264,6 +265,37 @@ const DetailsInfo = ({ selectedToken }) => {
                             </a>
                           </div>
                           <div
+                            className="d-flex flex-column align-items-center"
+                            style={{ cursor: "pointer" }}
+                          >
+                            <i
+                             className="fa-solid fa-copy"
+                              onClick={() => {
+                                navigator.clipboard.writeText(
+                                  token.TokenAddress
+                                );
+                                toast.success(
+                                  `${token.tokenName} Address copied to clipboard!`,
+                                  {
+                                    position: "top-center",
+                                    autoClose: 2000,
+                                    hideProgressBar: true,
+                                    closeOnClick: true,
+                                    pauseOnHover: false,
+                                    draggable: false,
+                                    theme: "dark",
+                                  }
+                                );
+                              }}
+                              title="Copy Address"
+                              style={{
+                                fontSize: "15px",
+                                color: "white",
+                                cursor: "pointer",
+                              }}
+                            ></i>
+                          </div>
+                          <div
                             className="d-flex align-items-center"
                             style={{ marginRight: "-10px" }}
                           >
@@ -275,7 +307,7 @@ const DetailsInfo = ({ selectedToken }) => {
                                   token.tokenName === "DAV"
                                     ? "pDAV"
                                     : token.tokenName === "$TATE1"
-                                    ? "State"
+                                    ? "$TATE1"
                                     : token.tokenName
                                 )
                               }
