@@ -643,7 +643,7 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                       BURNED IN CURRENT CYCLE-{" "}
+                       TOTAL BURNED - CURRENT CYCLE-{" "}
                       {formatWithCommas(userBurnedAmountInCycle)}
                     </h6>
                   </div>
@@ -673,7 +673,7 @@ const InfoCards = () => {
                               : "hidden",
                         }}
                       >
-                        @ Current Burn % - {formatWithCommas(expectedClaim)} PLS
+                        {/* @ Current Burn % - {formatWithCommas(expectedClaim)} PLS */}
                       </h6>
                     </div>
                     <div className="d-flex justify-content-center mt-4">

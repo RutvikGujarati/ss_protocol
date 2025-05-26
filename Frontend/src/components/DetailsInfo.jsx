@@ -6,7 +6,6 @@ import { useSwapContract } from "../Functions/SwapContractFunctions";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { TokensDetails } from "../data/TokensDetails";
-import { Auction_TESTNET } from "../Constants/ContractAddresses";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { Tooltip } from "bootstrap";
 import IOSpinner from "../Constants/Spinner";
@@ -128,6 +127,24 @@ const DetailsInfo = ({ selectedToken }) => {
     if (token.tokenName === "DAV" || token.tokenName === "STATE") return null;
     return (500000000000 - token.DavVault) / token.DavVault;
   };
+  const sortedTokens = tokens
+    .filter((token) => token.isSupported)
+    .sort((a, b) => {
+      const order = { DAV: 0, $TATE1: 1 };
+
+      // Prioritize DAV and STATE
+      if (
+        order[a.tokenName] !== undefined ||
+        order[b.tokenName] !== undefined
+      ) {
+        return (order[a.tokenName] ?? 99) - (order[b.tokenName] ?? 99);
+      }
+
+      // Sort by ratio in descending order for other tokens
+      const aRatio = a.ratio ?? -Infinity; // Handle null/undefined ratios
+      const bRatio = b.ratio ?? -Infinity;
+      return bRatio - aRatio; // Descending order
+    });
 
   const dataToShow = selectedToken
     ? tokens.find((token) => token.tokenName === selectedToken.name)
@@ -163,16 +180,7 @@ const DetailsInfo = ({ selectedToken }) => {
                   <th className="text-center">Burned</th>
                   <th className="text-center">Info</th>
                   <th></th>
-                  <th className="text-center">
-                    <a
-                      href={`https://midgard.wtf/address/${Auction_TESTNET}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ fontSize: "15px", color: "white" }}
-                    >
-                      <i className="bi bi-box-arrow-up-right"></i>
-                    </a>
-                  </th>
+                  <th className="text-center">Market Maker</th>
                   {dataToShow.tokenName !== "DAV" ? (
                     <th className="fw-bold text-uppercase text-end col-auto">
                       <button className="swap-btn py-1 mx-3 btn btn-primary btn-sm">
@@ -185,7 +193,7 @@ const DetailsInfo = ({ selectedToken }) => {
                 </tr>
               </thead>
               <tbody>
-                {(loading ? staticTokens : filteredTokens)
+                {(loading ? staticTokens : sortedTokens)
                   .filter((token) => token.isSupported)
                   .sort((a, b) => {
                     const order = { DAV: 0, STATE: 1 };
@@ -269,7 +277,7 @@ const DetailsInfo = ({ selectedToken }) => {
                             style={{ cursor: "pointer" }}
                           >
                             <i
-                             className="fa-solid fa-copy"
+                              className="fa-solid fa-copy"
                               onClick={() => {
                                 navigator.clipboard.writeText(
                                   token.TokenAddress

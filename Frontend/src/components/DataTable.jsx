@@ -195,328 +195,344 @@ const DataTable = () => {
     // ) :
     <div className="container  datatablemarginbottom">
       <div className="table-responsive">
-        <table className="table table-dark">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Emoticon</th>
-              <th>Token Name</th>
-              <th>Claim Airdrop</th>
-              <th></th>
-              <th>Auction Timer</th>
-              <th>Ratio Swapping Auction</th>
-              <th>Market Maker Instructions</th>
-              <th></th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {tokens
-              .filter(({ name, isReversing, AuctionStatus }) => {
-                console.log(`Filter Conditions: ${name}`, {
-                  isReversing,
-                  AuctionStatus,
-                });
+        <div style={{ maxHeight: "190px", overflowY: "auto" }}>
+          <table className="table table-dark">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Emoticon</th>
+                <th>Token Name</th>
+                <th>Claim Airdrop</th>
+                <th></th>
+                <th>Auction Timer</th>
+                <th className="text-center">
+                 <span className="mx-3"> Ratio Swapping Auction</span>
+                  <a
+                    href={`https://midgard.wtf/address/${Auction_TESTNET}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: "15px", color: "white" }}
+                  >
+                    <i className="bi bi-box-arrow-up-right"></i>
+                  </a>
+                </th>
+                <th>Market Maker Instructions</th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {tokens
+                  .filter(({ name, isReversing, AuctionStatus }) => {
+                    console.log(`Filter Conditions: ${name}`, {
+                      isReversing,
+                      AuctionStatus,
+                    });
 
-                const isAuctionActive = AuctionStatus === "true";
-                const isReverseAuction =
-                  AuctionStatus === "false" && isReversing === "true";
+                    const isAuctionActive = AuctionStatus === "true";
+                    const isReverseAuction =
+                      AuctionStatus === "false" && isReversing === "true";
 
-                return isAuctionActive || isReverseAuction;
-              })
-              .map(
-                (
-                  {
-                    id,
-                    name,
-                    emoji,
-                    token,
-                    // currentRatio,
-                    SwapT,
-                    ContractName,
-                    isReversing,
-                    AirdropClaimedForToken,
-                    userHasSwapped,
-                    userHasReverse,
-                    // AuctionStatus,
-                    TimeLeft,
-                    inputTokenAmount,
-                    onlyInputAmount,
-                    // handleAddToken,
-                    outputToken,
-                  },
-                  index
-                ) => (
-                  <tr className="small-font-row" key={index}>
-                    <td></td>
-                    <td>{emoji}</td>
-                    <td className="justify-content-center">{`${name}`}</td>
-                    <td style={{ position: "relative" }}>
-                      <button
-                        onClick={() => Checking(id, ContractName)}
-                        className="btn btn-primary btn-sm swap-btn"
-                        disabled={checkingStates[id] || davHolds == 0}
-                      >
-                        {checkingStates[id]
-                          ? ` AIRDROPPING...`
-                          : AirdropClaimedForToken == "true"
-                          ? " CLAIMED"
-                          : `${formatWithCommas(AirDropAmount[name])} `}
-                      </button>
-                    </td>
-                    <td>
-                      {" "}
-                      <img
-                        src={MetaMaskIcon}
-                        onClick={() =>
-                          handleAddToken(
-                            token,
-                            name === "DAV"
-                              ? "pDAV"
-                              : name === "STATE"
-                              ? "State"
-                              : name
-                          )
-                        }
-                        alt="MetaMask"
-                        style={{
-                          width: "20px",
-                          height: "20px",
-                          cursor: "pointer",
-                          marginLeft: "6px",
-                          verticalAlign: "middle",
-                        }}
-                      />
-                    </td>
-                    <td className="timer-cell">{formatCountdown(TimeLeft)}</td>
-                    <td>
-                      <div className="d-flex justify-content-center gap-3 w-100">
-                        {id !== "state" && (
-                          <>
-                            {isReversing == "true" ? (
-                              <>
-                                <div className="tableClaim hover-container">
-                                  {outputToken <= "1" && (
-                                    <div className="hover-box">
-                                      {`not enough State Token available in your account`}
-                                    </div>
-                                  )}
-                                  {formatWithCommas(outputToken)}
-                                </div>
-                                <div className="tableClaim">
-                                  {formatWithCommas(inputTokenAmount)}
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <div className="tableClaim hover-container">
-                                  {onlyInputAmount <= 0 && (
-                                    <div className="hover-box">
-                                      {`not enough ${name} available in your account`}
-                                    </div>
-                                  )}
-                                  {formatWithCommas(inputTokenAmount)}
-                                </div>
-
-                                <div className="tableClaim">
-                                  {formatWithCommas(outputToken)}
-                                </div>
-                              </>
-                            )}
-                          </>
-                        )}
-                        <div className="d-flex align-items-center gap-2">
-                          <>
-                            {isReversing == "true" && (
-                              <button
-                                onClick={() => SwapT()}
-                                disabled={
-                                  userHasReverse == "true" ||
-                                  swappingStates[id] ||
-                                  outputToken <= "1"
-                                }
-                                className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
-                              >
-                                {userHasReverse == "true"
-                                  ? "Reverse Swapped ✅"
-                                  : swappingStates[id]
-                                  ? "Swapping..."
-                                  : "Reverse Swap"}
-                              </button>
-                            )}
-
-                            {isReversing == "false" && (
-                              <button
-                                onClick={() => SwapT()}
-                                disabled={
-                                  userHasSwapped == "true" ||
-                                  swappingStates[id] ||
-                                  onlyInputAmount <= 0
-                                }
-                                className="btn btn-sm swap-btn btn-primary"
-                              >
-                                {userHasSwapped == "true"
-                                  ? "Swapped ✅"
-                                  : swappingStates[id]
-                                  ? "Swapping..."
-                                  : buttonTextStates[id] || "Swap"}
-                              </button>
-                            )}
-                          </>
-                        </div>
-                      </div>
-                    </td>
-                    {errorPopup[id] && (
-                      <div className="popup-overlay2">
-                        <div className="popup-content2">
-                          <h4 className="popup-header2">
-                            Mint Additional DAV Tokens
-                          </h4>
-                          <p className="popup-para">
-                            You need to mint additional DAV tokens to claim
-                            extra.
-                          </p>
-                          <button
-                            onClick={() =>
-                              setErrorPopup((prev) => ({
-                                ...prev,
-                                [id]: false,
-                              }))
-                            }
-                            className="btn btn-secondary popup-button"
-                          >
-                            Close
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    <td>
-                      Swap {formatWithCommas(outputToken)} tokens <br /> for{" "}
-                      {name} tokens on external DEX
-                    </td>
-                    <td>
-                      <a
-                        href="https://dex.9mm.pro/swap?chain=pulsechain"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                    return isAuctionActive || isReverseAuction;
+                  })
+                .map(
+                  (
+                    {
+                      id,
+                      name,
+                      emoji,
+                      token,
+                      // currentRatio,
+                      SwapT,
+                      ContractName,
+                      isReversing,
+                      AirdropClaimedForToken,
+                      userHasSwapped,
+                      userHasReverse,
+                      // AuctionStatus,
+                      TimeLeft,
+                      inputTokenAmount,
+                      onlyInputAmount,
+                      // handleAddToken,
+                      outputToken,
+                    },
+                    index
+                  ) => (
+                    <tr className="small-font-row" key={index}>
+                      <td></td>
+                      <td>{emoji}</td>
+                      <td className="justify-content-center">{`${name}`}</td>
+                      <td style={{ position: "relative" }}>
+                        <button
+                          onClick={() => Checking(id, ContractName)}
+                          className="btn btn-primary btn-sm swap-btn"
+                          disabled={checkingStates[id] || davHolds == 0}
+                        >
+                          {checkingStates[id]
+                            ? ` AIRDROPPING...`
+                            : AirdropClaimedForToken == "true"
+                            ? " CLAIMED"
+                            : `${formatWithCommas(AirDropAmount[name])} `}
+                        </button>
+                      </td>
+                      <td>
+                        {" "}
                         <img
-                          src={pulsex}
-                          alt="sDAV Logo"
-                          className="mb-1 "
+                          src={MetaMaskIcon}
+                          onClick={() =>
+                            handleAddToken(
+                              token,
+                              name === "DAV"
+                                ? "pDAV"
+                                : name === "STATE"
+                                ? "State"
+                                : name
+                            )
+                          }
+                          alt="MetaMask"
                           style={{
-                            background: "transparent",
                             width: "20px",
                             height: "20px",
                             cursor: "pointer",
-                            marginLeft: "8px",
+                            marginLeft: "6px",
+                            verticalAlign: "middle",
                           }}
                         />
-                      </a>
-                    </td>
-                    <td></td>
-                    {isPopupOpen && (
-                      <div
-                        className="modal d-flex align-items-center justify-content-center"
-                        style={{
-                          zIndex: 30000,
-                          background: "rgba(33, 37, 41, 0.1)",
-                          pointerEvents: isPopupOpen ? "auto" : "none",
-                        }}
-                      >
-                        <div className="modal-dialog modal-dialog-centered">
-                          <div className="modal-content popup-content">
-                            <div className="modal-header border-0 text-center w-100 d-block">
-                              <h3 className="modal-title text-light">
-                                Transaction Status
-                              </h3>
-                            </div>
+                      </td>
+                      <td className="timer-cell">
+                        {formatCountdown(TimeLeft)}
+                      </td>
+                      <td>
+                        <div className="d-flex justify-content-center gap-3 w-100">
+                          {id !== "state" && (
+                            <>
+                              {isReversing == "true" ? (
+                                <>
+                                  <div className="tableClaim hover-container">
+                                    {outputToken <= "1" && (
+                                      <div className="hover-box">
+                                        {`not enough State Token available in your account`}
+                                      </div>
+                                    )}
+                                    {formatWithCommas(outputToken)}
+                                  </div>
+                                  <div className="tableClaim">
+                                    {formatWithCommas(inputTokenAmount)}
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div className="tableClaim hover-container">
+                                    {onlyInputAmount <= 0 && (
+                                      <div className="hover-box">
+                                        {`not enough ${name} available in your account`}
+                                      </div>
+                                    )}
+                                    {formatWithCommas(inputTokenAmount)}
+                                  </div>
 
-                            <div className="modal-body">
-                              <div className="tx-progress-container">
-                                <div className="step-line">
-                                  <div
-                                    className={`step ${
-                                      txStatusForSwap === "initializing" ||
-                                      txStatusForSwap === "initiated" ||
-                                      txStatusForSwap === "Approving" ||
-                                      txStatusForSwap === "swap pending" ||
-                                      txStatusForSwap === "confirmed" ||
-                                      txStatusForSwap === "error"
-                                        ? "active"
-                                        : ""
-                                    }`}
-                                  >
-                                    <span className="dot" />
-                                    <span className="label">Initializing</span>
+                                  <div className="tableClaim">
+                                    {formatWithCommas(outputToken)}
                                   </div>
-                                  <div
-                                    className={`step ${
-                                      txStatusForSwap === "initiated" ||
-                                      txStatusForSwap === "Approving" ||
-                                      txStatusForSwap === "pending" ||
-                                      txStatusForSwap === "confirmed" ||
-                                      txStatusForSwap === "error"
-                                        ? "active"
-                                        : ""
-                                    }`}
-                                  >
-                                    <span className="dot" />
-                                    <span className="label">Initiated</span>
-                                  </div>
-                                  <div
-                                    className={`step ${
-                                      txStatusForSwap === "Approving" ||
-                                      txStatusForSwap === "pending" ||
-                                      txStatusForSwap === "confirmed" ||
-                                      txStatusForSwap === "error"
-                                        ? "active"
-                                        : ""
-                                    }`}
-                                  >
-                                    <span className="dot" />
-                                    <span className="label">Approving</span>
-                                  </div>
-                                  <div
-                                    className={`step ${
-                                      txStatusForSwap === "pending" ||
-                                      txStatusForSwap === "confirmed" ||
-                                      txStatusForSwap === "error"
-                                        ? "active"
-                                        : ""
-                                    }`}
-                                  >
-                                    <span className="dot" />
-                                    <span className="label">Swapping</span>
-                                  </div>
-                                  <div
-                                    className={`step ${
-                                      txStatusForSwap === "confirmed" ||
-                                      txStatusForSwap === "error"
-                                        ? "active"
-                                        : ""
-                                    }`}
-                                  >
-                                    <span className="dot" />
-                                    <span className="label">
-                                      {txStatusForSwap === "error"
-                                        ? "Error"
-                                        : "Confirmed"}
-                                    </span>
+                                </>
+                              )}
+                            </>
+                          )}
+                          <div className="d-flex align-items-center gap-2">
+                            <>
+                              {isReversing == "true" && (
+                                <button
+                                  onClick={() => SwapT()}
+                                  disabled={
+                                    userHasReverse == "true" ||
+                                    swappingStates[id] ||
+                                    outputToken <= "1"
+                                  }
+                                  className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
+                                >
+                                  {userHasReverse == "true"
+                                    ? "Reverse Swapped ✅"
+                                    : swappingStates[id]
+                                    ? "Swapping..."
+                                    : "Reverse Swap"}
+                                </button>
+                              )}
+
+                              {isReversing == "false" && (
+                                <button
+                                  onClick={() => SwapT()}
+                                  disabled={
+                                    userHasSwapped == "true" ||
+                                    swappingStates[id] ||
+                                    onlyInputAmount <= 0
+                                  }
+                                  className="btn btn-sm swap-btn btn-primary"
+                                >
+                                  {userHasSwapped == "true"
+                                    ? "Swapped ✅"
+                                    : swappingStates[id]
+                                    ? "Swapping..."
+                                    : buttonTextStates[id] || "Swap"}
+                                </button>
+                              )}
+                            </>
+                          </div>
+                        </div>
+                      </td>
+                      {errorPopup[id] && (
+                        <div className="popup-overlay2">
+                          <div className="popup-content2">
+                            <h4 className="popup-header2">
+                              Mint Additional DAV Tokens
+                            </h4>
+                            <p className="popup-para">
+                              You need to mint additional DAV tokens to claim
+                              extra.
+                            </p>
+                            <button
+                              onClick={() =>
+                                setErrorPopup((prev) => ({
+                                  ...prev,
+                                  [id]: false,
+                                }))
+                              }
+                              className="btn btn-secondary popup-button"
+                            >
+                              Close
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <td>
+                        Swap {formatWithCommas(outputToken)} tokens <br /> for{" "}
+                        {name} tokens on external DEX
+                      </td>
+                      <td>
+                        <a
+                          href="https://dex.9mm.pro/swap?chain=pulsechain"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            src={pulsex}
+                            alt="sDAV Logo"
+                            className="mb-1 "
+                            style={{
+                              background: "transparent",
+                              width: "20px",
+                              height: "20px",
+                              cursor: "pointer",
+                              marginLeft: "8px",
+                            }}
+                          />
+                        </a>
+                      </td>
+                      <td></td>
+                      {isPopupOpen && (
+                        <div
+                          className="modal d-flex align-items-center justify-content-center"
+                          style={{
+                            zIndex: 30000,
+                            background: "rgba(33, 37, 41, 0.1)",
+                            pointerEvents: isPopupOpen ? "auto" : "none",
+                          }}
+                        >
+                          <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content popup-content">
+                              <div className="modal-header border-0 text-center w-100 d-block">
+                                <h3 className="modal-title text-light">
+                                  Transaction Status
+                                </h3>
+                              </div>
+
+                              <div className="modal-body">
+                                <div className="tx-progress-container">
+                                  <div className="step-line">
+                                    <div
+                                      className={`step ${
+                                        txStatusForSwap === "initializing" ||
+                                        txStatusForSwap === "initiated" ||
+                                        txStatusForSwap === "Approving" ||
+                                        txStatusForSwap === "swap pending" ||
+                                        txStatusForSwap === "confirmed" ||
+                                        txStatusForSwap === "error"
+                                          ? "active"
+                                          : ""
+                                      }`}
+                                    >
+                                      <span className="dot" />
+                                      <span className="label">
+                                        Initializing
+                                      </span>
+                                    </div>
+                                    <div
+                                      className={`step ${
+                                        txStatusForSwap === "initiated" ||
+                                        txStatusForSwap === "Approving" ||
+                                        txStatusForSwap === "pending" ||
+                                        txStatusForSwap === "confirmed" ||
+                                        txStatusForSwap === "error"
+                                          ? "active"
+                                          : ""
+                                      }`}
+                                    >
+                                      <span className="dot" />
+                                      <span className="label">Initiated</span>
+                                    </div>
+                                    <div
+                                      className={`step ${
+                                        txStatusForSwap === "Approving" ||
+                                        txStatusForSwap === "pending" ||
+                                        txStatusForSwap === "confirmed" ||
+                                        txStatusForSwap === "error"
+                                          ? "active"
+                                          : ""
+                                      }`}
+                                    >
+                                      <span className="dot" />
+                                      <span className="label">Approving</span>
+                                    </div>
+                                    <div
+                                      className={`step ${
+                                        txStatusForSwap === "pending" ||
+                                        txStatusForSwap === "confirmed" ||
+                                        txStatusForSwap === "error"
+                                          ? "active"
+                                          : ""
+                                      }`}
+                                    >
+                                      <span className="dot" />
+                                      <span className="label">Swapping</span>
+                                    </div>
+                                    <div
+                                      className={`step ${
+                                        txStatusForSwap === "confirmed" ||
+                                        txStatusForSwap === "error"
+                                          ? "active"
+                                          : ""
+                                      }`}
+                                    >
+                                      <span className="dot" />
+                                      <span className="label">
+                                        {txStatusForSwap === "error"
+                                          ? "Error"
+                                          : "Confirmed"}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </tr>
-                )
-              )}
-          </tbody>
-        </table>
+                      )}
+                    </tr>
+                  )
+                )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   ) : isAddToken ? (

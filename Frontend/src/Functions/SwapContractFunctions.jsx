@@ -684,6 +684,7 @@ export const SwapContractProvider = ({ children }) => {
       fetchUserTokenAddresses,
       getInputAmount,
       getOutPutAmount,
+	  getCurrentAuctionCycle,
 	  getTokenRatio,
       getTokensBurned,
       getAirdropAmount,
@@ -697,7 +698,7 @@ export const SwapContractProvider = ({ children }) => {
       HasSwappedAucton,
       HasReverseSwappedAucton,
     ];
-    const pollingFunctions = [CheckIsAuctionActive, CheckIsReverse,getCurrentAuctionCycle];
+    const pollingFunctions = [CheckIsAuctionActive, CheckIsReverse];
 
     const runAll = async () => {
       const results = await Promise.allSettled(functions.map((fn) => fn()));
