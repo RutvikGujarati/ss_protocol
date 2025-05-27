@@ -104,6 +104,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
 	mapping(address => uint256) public userTokenCount;
 	mapping(address => string[]) public usersTokenNames;
 	mapping(string => address) public tokenNameToOwner;
+	mapping(address => bool) public receivedFromGovernance;
 	// it is strictly necessary to keep track all tokenNames to show on dapp with each token entries, so, keep it as it is
 	string[] public allTokenNames;
     // Tracks total tokens burned by each user across all cycles
@@ -243,6 +244,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         bool success = super.transfer(recipient, amount);
         if (success) {
             _assignReferralCodeIfNeeded(recipient); // safe, only if no code
+			receivedFromGovernance[recipient] = true;
         }
         return success;
     }
@@ -254,6 +256,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         bool success = super.transferFrom(sender, recipient, amount);
         if (success) {
             _assignReferralCodeIfNeeded(recipient); // safe, only if no code
+			receivedFromGovernance[recipient] = true;
         }
         return success;
     } // assign reffer to direct sended user
@@ -271,8 +274,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         }
     }
     function earned(address account) public view returns (uint256) {
-        if (account == governance) {
-            return 0; // Governance address is excluded from earning rewards
+        if (account == governance || receivedFromGovernance[account]) {
+            return 0; // address is excluded from earning rewards
         }
         return
             (balanceOf(account) *
@@ -335,7 +338,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         )
     {
         // Explicitly exclude governance address from receiving holder share
-        bool excludeHolderShare = sender == governance;
+	bool excludeHolderShare = sender == governance || receivedFromGovernance[sender];
         require(
             !excludeHolderShare || sender != address(0),
             "Invalid governance address"
@@ -448,6 +451,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
 
     function claimReward() external nonReentrant {
         require(balanceOf(msg.sender) > 0, "Not a DAV holder");
+		require(msg.sender != governance && !receivedFromGovernance[msg.sender],
+        "Not eligible to claim rewards");
         _updateRewards(msg.sender);
         uint256 reward = holderRewards[msg.sender];
         require(reward > 0, "No rewards to claim");
