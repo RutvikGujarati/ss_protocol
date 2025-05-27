@@ -74,6 +74,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     mapping(address => mapping(string => address)) public deployedTokensByUser;
 
     mapping(address => address) public pairAddresses; // token => pair address
+	mapping(address => bool) public usedPairAddresses;
     mapping(address => bool) public supportedTokens; // token => isSupported
     mapping(address => address) public tokenOwners; // token => owner
     mapping(address => address[]) public ownerToTokens;
@@ -189,11 +190,13 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         require(pairAddress != address(0), "Invalid pair address");
         require(pairAddress != token, "Invalid pair address");
         require(!supportedTokens[token], "Token already added");
+		require(!usedPairAddresses[pairAddress], "Pair address already used");
 
         supportedTokens[token] = true;
         tokenOwners[token] = _tokenOwner;
         pairAddresses[token] = pairAddress;
         ownerToTokens[_tokenOwner].push(token);
+		usedPairAddresses[pairAddress] = true;
 
         // Schedule auction at 22:30 Dubai time (UTC+4)
         uint256 auctionStart = _calculateDubaiAuctionStart();
