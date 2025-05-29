@@ -19,12 +19,11 @@ interface IPair {
 
     function token1() external view returns (address);
 }
-//NOTE: 1 DAV to participate in auction for test and mainet
-/*Mainnet - Auction cycles are every 50 days
-Mainnet - auctions is live for 24hours
-Mainnet - burn cycles is 35 days
-airdrops for GOV, DEV and Token owners is every 50 days on Mainnet
-50 days - interval */
+//NOTE: Mainnet deployment - 1 DAV to participate in auctions
+//NOTE: Mainnet deployment - Auction cycles = 50 days
+//NOTE: Mainnet deployment - Auctions duration is 24 hours
+//NOTE: Mainnet deployment - Buen cycle for market makers is 35 days
+//NOTE: Mainnet deployment - Airdrops cycle / Token creation is every 50 days
 contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     using SafeERC20 for IERC20;
     DAV_V2_2 public dav;
@@ -55,6 +54,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     uint256 constant TOKEN_OWNER_AIRDROP = 2500000 ether;
     uint256 constant GOV_OWNER_AIRDROP = 500000 ether;
     // Check if pair has enough STATE tokens (500 million)
+	//Burn LP pair PLS/STATE, and the pair must contain 500 million STATE tokens
     uint256 tokenAmount = 500000000 ether;
     uint256 StateDeposittokenAmount = 5000000 ether;
     uint256 constant PRECISION_FACTOR = 1e18;
@@ -443,13 +443,10 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     }
     /**
      * @notice Handles token swaps during normal and reverse auctions.
-     *
      * During reverse auctions, users burn `stateToken` to receive `inputToken`.
      * This contract must hold sufficient `inputToken` to support those swaps.
-     *
-     * Liquidity is provided via Token contract deployments and manual deposits through depositTokens.
+     * Liquidity is provided through token contract deployments and manual deposits via depositTokens to ensure the integrity of the liquidity pool ratio..
      */
-
     function swapTokens(address user, address inputToken) public nonReentrant {
         require(msg.sender == user, "Unauthorized swap initiator");
         require(supportedTokens[inputToken], "Unsupported token");
@@ -490,7 +487,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address tokenOut = isReverseActive ? inputToken : stateToken;
         uint256 TotalAmountIn = calculateAuctionEligibleAmount(inputToken);
         uint256 TotalAmountOut = getOutPutAmount(inputToken);
-
         uint256 amountIn = isReverseActive ? TotalAmountOut : TotalAmountIn;
         uint256 amountOut = isReverseActive ? TotalAmountIn : TotalAmountOut;
         require(
@@ -742,7 +738,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
     function getOutPutAmount(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
-        // @dev Hardcoded ratio of 1000 (1:1000 token-to-stateToken) for Pulsechain stability and only ffor testing
         uint256 currentRatio = getRatioPrice(inputToken);
         uint256 currentRatioNormalize = currentRatio / 1e18;
         require(currentRatioNormalize > 0, "Invalid ratio");

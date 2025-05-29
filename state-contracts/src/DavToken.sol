@@ -6,11 +6,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-//NOTE: not required of library use
-//NOTE: 10 million to add a token for mainnet for testing it is 2000
-//NOTE:the dav mint is 1000 PLS for test and 1000000 for mainnet
-//NOTE: 1 DAV required to add a token on testnet and mainnet
-//NOTE: 10 DAV to burn on testnet and mainnet
+//NOTE: Not required for library use
+//NOTE: Mainnet deployment - To add a token = 10 Million PLS
+//NOTE Mainet deployments - Mint 1 DAV = 1 Million PLS
+//NOTE: Mainet deployment - 1 DAV required to add a token
+//NOTE: Mainnet deployment - 10 DAV required to become a market maker
 contract DAV_V2_2 is
     ERC20,
     Ownable(msg.sender),
@@ -23,7 +23,7 @@ contract DAV_V2_2 is
     uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
     uint256 public constant TOKEN_COST = 1000 ether; // 1000000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
-    uint256 public constant LIQUIDITY_SHARE = 30; // 20% LIQUIDITY SHARE
+    uint256 public constant LIQUIDITY_SHARE = 30; // 30% LIQUIDITY SHARE
     uint256 public constant DEVELOPMENT_SHARE = 5; // 5% DEV SHARE
     uint256 public constant HOLDER_SHARE = 10; // 10% HOLDER SHARE
     uint256 public constant BASIS_POINTS = 10000;
@@ -54,14 +54,14 @@ contract DAV_V2_2 is
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
     uint256 public constant CLAIM_INTERVAL = 1 days; // 4 hour claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
-
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
     // @notice The governance address with special privileges, set at deployment
     // @dev Intentionally immutable to enforce a fixed governance structure; cannot be updated
-
     //Governance Privilage
-    /*This implementation introduces a ratio-based liquidity provisioning (LP) mechanism, which is currently in beta and undergoing testing. The design is experimental and aims to collect meaningful data to inform and refine the concept. Due to its early-stage nature, certain centralized elements remain in place to ensure flexibility during the testing phase. These will be reviewed and potentially decentralized as the model matures.*/
+    /*This implementation introduces a ratio-based liquidity provisioning (LP) mechanism, which is currently in beta and undergoing testing. 
+	The design is experimental and aims to collect meaningful data to inform and refine the concept. Due to its early-stage nature, certain centralized elements remain in place to ensure flexibility during the testing phase. 
+	These will be reviewed and potentially decentralized as the model matures.*/
 
 	//NOTE: Governance is using multi-sig method to ensure security of that wallet address.
     address public  governance;
@@ -85,8 +85,7 @@ contract DAV_V2_2 is
     enum TokenStatus {
         Pending,
         Processed
-    }
-	
+    }	
     /**
      * 🔒 Front-Running Protection Design:
      * - Token names are tracked *per user*, not globally.
@@ -95,16 +94,13 @@ contract DAV_V2_2 is
      * - Even if another user submits the same token name, it is independent and scoped to them.
      * - Users do not lose their processing fees due to front-running.
      */
-
     struct TokenEntry {
         address user;
         string tokenName;
         string emoji; // 🆕 Add this field
         TokenStatus status;
-    }
-   
+    }   
     // NOTE: Each user is limited to DAV_AMOUNT token entries, so this loop is bounded
-
 	mapping(address => mapping(string => TokenEntry)) public userTokenEntries;
 	mapping(address => uint256) public userTokenCount;
 	mapping(address => string[]) public usersTokenNames;
@@ -155,10 +151,8 @@ contract DAV_V2_2 is
 	mapping(string => bool) public isTokenNameUsed;
     event TokensBurned(address indexed user, uint256 amount, uint256 cycle);
     event RewardClaimed(address indexed user, uint256 amount, uint256 cycle);
- 
     event RewardsClaimed(address indexed user, uint256 amount);
     event HolderAdded(address indexed holder);
-
     event ReferralCodeGenerated(address indexed user, string referralCode);
     event TokenNameAdded(address indexed user, string name);
     event TokenStatusUpdated(
@@ -177,7 +171,6 @@ contract DAV_V2_2 is
 	uint256 holderShare,
     uint256 timestamp
 );
-
     constructor(
         address _liquidityWallet,
         address _developmentWallet,
@@ -616,7 +609,7 @@ contract DAV_V2_2 is
         emit TokenStatusUpdated(_owner, _tokenName, _status);
     }
 	//want to fetch all entries not perticular from start to end
-function getTokenEntries(uint256 start, uint256 limit) internal view returns (TokenEntry[] memory) {
+	function getTokenEntries(uint256 start, uint256 limit) internal view returns (TokenEntry[] memory) {
     uint256 end = start + limit > allTokenNames.length ? allTokenNames.length : start + limit;
     TokenEntry[] memory entries = new TokenEntry[](end - start);
     for (uint256 i = start; i < end; i++) {
@@ -627,13 +620,13 @@ function getTokenEntries(uint256 start, uint256 limit) internal view returns (To
     return entries;
 }
 
-function getAllTokenEntries() public view returns (TokenEntry[] memory) {
+	function getAllTokenEntries() public view returns (TokenEntry[] memory) {
     return getTokenEntries(0, allTokenNames.length);
 }
     // ------------------ Burn functions ------------------------------
     // Burn tokens and update cycle tracking
 	/// @notice Burns StateToken and logs user contribution for a cycle
-/// @param amount Amount of StateToken to burn
+	/// @param amount Amount of StateToken to burn
     function burnState(uint256 amount) external {
         require(balanceOf(msg.sender) >= MIN_DAV, "Need at least 10 DAV");
         require(amount > 0, "Burn amount must be > 0");
@@ -702,7 +695,7 @@ function getAllTokenEntries() public view returns (TokenEntry[] memory) {
         }
         return false;
     }
-    // Calculate total claimable PLS for a user
+   	 // Calculate total claimable PLS for a user
     function getClaimablePLS(address user) public view returns (uint256) {
         uint256 currentCycle = getCurrentCycle();
         uint256 totalClaimable = 0;
@@ -733,8 +726,8 @@ function getAllTokenEntries() public view returns (TokenEntry[] memory) {
         return totalClaimable;
     }
 	/// @notice Claims PLS rewards for a user across eligible cycles
-/// @dev Iterates over userUnclaimedCycles to calculate and distribute rewards
-/// required to iterate through all users unclaimed cycle that way user can't loose their funds so, no use of cycle arrays
+	/// @dev Iterates over userUnclaimedCycles to calculate and distribute rewards
+	/// required to iterate through all users unclaimed cycle that way user can't loose their funds so, no use of cycle arrays
   function claimPLS() external {
     address user = msg.sender;
     uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;

@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title STATE Token V2.1 with Ratio-Based Initial Supply Allocation
-/// @author
+/// @author owner of contract is author 
 /// @notice ERC20 token with 5/95 minting distribution between two addresses at deployment
 /// @dev Uses OpenZeppelin ERC20 and Ownable contracts
 

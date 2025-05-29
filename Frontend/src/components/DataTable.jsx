@@ -571,7 +571,7 @@ const DataTable = () => {
                 <th></th>
                 <th>Token Address</th>
                 <th>Pair Address</th>
-                <th>Amount</th>
+                <th>Conditions</th>
                 <th>Burn LP</th>
                 <th></th>
               </tr>

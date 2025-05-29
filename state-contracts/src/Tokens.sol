@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title Token - ERC20 token with initial distribution between governance and swap treasury
-/// @author
+/// @author owner of contract is author 
 /// @notice This contract mints a fixed maximum supply and distributes initial tokens to governance and swap treasury addresses.
 /// @dev The contract inherits from OpenZeppelin's ERC20 and Ownable contracts.
 contract TOKEN_V2_2  is ERC20, Ownable {
