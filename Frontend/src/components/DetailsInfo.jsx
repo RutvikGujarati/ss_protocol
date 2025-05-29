@@ -328,7 +328,7 @@ const DetailsInfo = ({ selectedToken }) => {
                                     token.tokenName === "DAV"
                                       ? "pDAV"
                                       : token.tokenName === "$TATE1"
-                                      ? "$TATE1"
+                                      ? "STATTE"
                                       : token.tokenName
                                   )
                                 }
