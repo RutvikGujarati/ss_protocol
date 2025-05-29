@@ -335,8 +335,8 @@ contract DAV_V2_2 is
             address referrer
         )
     {
-        // Explicitly exclude governance address from receiving holder share
-	bool excludeHolderShare = sender == governance || receivedFromGovernance[sender];
+   	     // Explicitly exclude governance address from receiving holder share
+		bool excludeHolderShare = sender == governance || receivedFromGovernance[sender];
         require(
             !excludeHolderShare || sender != address(0),
             "Invalid governance address"
@@ -365,11 +365,12 @@ contract DAV_V2_2 is
         require(distributed <= value, "Over-allocation");
         stateLPShare = value - distributed;
     }
- function mintDAV(uint256 amount, string memory referralCode) external payable nonReentrant {
+function mintDAV(uint256 amount, string memory referralCode) external payable nonReentrant {
     // Checks
     require(amount > 0, "Amount must be greater than zero");
     require(amount % 1 ether == 0, "Amount must be a whole number");
     require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
+	require(davHoldersCount < 10000, "Max number of users reached");
     uint256 cost = (amount * TOKEN_COST) / 1 ether;
     require(msg.value == cost, "Incorrect PLS amount sent");
     // Effects
@@ -401,10 +402,10 @@ contract DAV_V2_2 is
     cycleTreasuryAllocation[targetCycle] += totalCycleAllocation;
     cycleUnclaimedPLS[targetCycle] += totalCycleAllocation;
 	}
-  if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
+  	if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
         uint256 effectiveSupply = totalSupply() - balanceOf(governance);
-   uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
-	uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e18;
+   		uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
+		uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e18;
         newHolderFunds += usedHolderShare;
         newTotalRewardPerTokenStored += rewardPerToken;
     }
@@ -439,14 +440,12 @@ contract DAV_V2_2 is
         require(successDev, "Development transfer failed");
         totalDevelopmentAllocated += developmentShare;
     }
-
 	emit DistributionEvent(   msg.sender,    amount,    msg.value,    referrer,    referralShare,   liquidityShare,
     developmentShare,
 	holderShare,
     block.timestamp
 );
 }
-
     function claimReward() external nonReentrant {
         require(balanceOf(msg.sender) > 0, "Not a DAV holder");
 		require(msg.sender != governance && !receivedFromGovernance[msg.sender],

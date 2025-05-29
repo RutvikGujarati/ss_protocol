@@ -277,7 +277,7 @@ const DetailsInfo = ({ selectedToken }) => {
                           <div className="d-flex justify-content-center align-items-center gap-3">
                             <div className="d-flex flex-column align-items-center">
                               <a
-                                href={`https://midgard.wtf/address/${token.TokenAddress}`}
+                                href={`https://kekxplorer.avecdra.pro/address/${token.TokenAddress}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{ fontSize: "15px", color: "white" }}
