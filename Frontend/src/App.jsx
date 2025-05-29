@@ -78,6 +78,14 @@ const App = () => {
                 }
               />
               <Route
+                path="/burn-lp"
+                element={
+                  <>
+                    <DataTable />
+                  </>
+                }
+              />
+              <Route
                 path="/info"
                 element={
                   <>

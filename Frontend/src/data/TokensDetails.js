@@ -97,6 +97,7 @@ export const TokensDetails = () => {
 			isRenounced: swap.isTokenRenounce[token.name],
 			DavVault: swap.TokenBalance?.[key],
 			burned: swap.burnedAmount?.[key],
+			isDeposited: swap.StateDeposited?.[token.address],
 			isSupported:
 				token.name === "DAV"
 					? "true"

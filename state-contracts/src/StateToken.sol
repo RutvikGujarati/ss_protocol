@@ -11,7 +11,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @author
 /// @notice ERC20 token with 5/95 minting distribution between two addresses at deployment
 /// @dev Uses OpenZeppelin ERC20 and Ownable contracts
-contract STATE_Token_V2_1_Ratio_Swapping is ERC20, Ownable(msg.sender) {
+
+//-------------------------------Token name clarification----------------------------------
+//NOTE: Mainnet token name is pSTATE
+
+contract STATE_V2_2 is ERC20, Ownable(msg.sender) {
     /// @notice Maximum total supply of the token (1 quadrillion tokens, 18 decimals)
     uint256 public constant MAX_TOTAL_SUPPLY = 1000000000000000 ether;
     event InitialAllocation(

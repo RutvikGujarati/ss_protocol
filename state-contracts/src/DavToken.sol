@@ -7,7 +7,11 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 //NOTE: not required of library use
-contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
+//NOTE: 10 million to add a token for mainnet for testing it is 2000
+//NOTE:the dav mint is 1000 PLS for test and 1000000 for mainnet
+//NOTE: 1 DAV required to add a token on testnet and mainnet
+//NOTE: 10 DAV to burn on testnet and mainnet
+contract DAV_V2_2 is
     ERC20,
     Ownable(msg.sender),
     ReentrancyGuard // IERC20 initialization
@@ -30,6 +34,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     /// @dev Intentionally set to 100,000 tokens in full native unit (i.e., 100000 ether).
     ///      ⚠️ This is NOT a unit error — the fee is meant to be very high, either for testing,
     ///      access restriction, or deterrence. Adjust only if this is NOT the intended behavior.
+	
     uint256 public constant TOKEN_PROCESSING_FEE = 2000 ether;
     uint256 public totalReferralRewardsDistributed;
     uint256 public mintedSupply; // Total Minted DAV Tokens
@@ -47,7 +52,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // Used in DApp to display total burn statistics
     uint256 public totalStateBurned;
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
-    uint256 public constant CLAIM_INTERVAL = 4 days; // 4 hour claim timer
+    uint256 public constant CLAIM_INTERVAL = 1 days; // 4 hour claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
 
     address private constant BURN_ADDRESS =

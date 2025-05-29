@@ -48,6 +48,9 @@ export const SwapContractProvider = ({ children }) => {
   const [TokenBalance, setTokenbalance] = useState({});
   const [isReversed, setIsReverse] = useState({});
   const [IsAuctionActive, setisAuctionActive] = useState({});
+  const [StateDeposited, setIsStateDeposited] = useState({});
+  const [IsBurned, setIsBurned] = useState({});
+  const [IsEnoughState, setIsEnoughState] = useState({});
   const [isTokenRenounce, setRenonced] = useState({});
   const [tokenMap, setTokenMap] = useState({});
   const [TokenNames, setTokenNames] = useState({});
@@ -77,43 +80,68 @@ export const SwapContractProvider = ({ children }) => {
     formatFn = (v) => v.toString(),
     includeTestState = false,
     customContractInstance = null,
-    buildArgs, // 👈 new: function to build args per token
+    buildArgs,
+    useAddressAsKey = false, // New: Control whether to key results by address
   }) => {
     try {
       const results = {};
       const tokenMap = await ReturnfetchUserTokenAddresses();
+      console.log("tokenMap:", tokenMap); // Debug: Verify tokenMap structure
+
       const extendedMap = includeTestState
         ? { ...tokenMap, state: STATE_TESTNET }
         : tokenMap;
 
-      for (const [tokenName, TokenAddress] of Object.entries(extendedMap)) {
+      for (const [tokenName, tokenAddress] of Object.entries(extendedMap)) {
         try {
           const contract = customContractInstance
-            ? customContractInstance(TokenAddress)
+            ? customContractInstance(tokenAddress)
             : AllContracts.AuctionContract;
-
-          const args = buildArgs
-            ? buildArgs(TokenAddress, tokenName)
-            : [TokenAddress];
 
           if (!contract || typeof contract[contractMethod] !== "function") {
             throw new Error(`Method ${contractMethod} not found on contract`);
           }
 
+          const args = buildArgs
+            ? buildArgs(tokenAddress, tokenName)
+            : [tokenAddress];
+          console.log(
+            `Calling ${contractMethod} for ${tokenName} (${tokenAddress}) with args:`,
+            args
+          ); // Debug
+
           const rawResult = await contract[contractMethod](...args);
           const formattedResult = formatFn(rawResult);
 
-          results[tokenName] = formattedResult;
+          // Use tokenAddress as key for hasDeposited, tokenName for others
+          const key =
+            contractMethod === "hasDeposited" ||
+            contractMethod === "hasBurned" ||
+            useAddressAsKey
+              ? tokenAddress
+              : tokenName;
+          results[key] = formattedResult;
         } catch (err) {
           console.error(
-            `❌ Error calling ${contractMethod} for ${tokenName}:`,
+            `Error calling ${contractMethod} for ${tokenName} (${tokenAddress}):`,
             err
           );
-          results[tokenName] =
-      contractMethod === "getRatioPrice" ? "not listed" : "not started";
+          const key =
+            contractMethod === "hasDeposited" ||
+            contractMethod === "hasBurned" ||
+            useAddressAsKey
+              ? tokenAddress
+              : tokenName;
+          results[key] =
+            contractMethod === "hasDeposited" || contractMethod === "hasBurned"
+              ? "false"
+              : contractMethod === "getRatioPrice"
+              ? "not listed"
+              : "not started";
         }
       }
 
+      console.log("fetchTokenData results:", results); // Debug: Verify results
       setState(results);
       return results;
     } catch (err) {
@@ -339,6 +367,39 @@ export const SwapContractProvider = ({ children }) => {
     }
   };
 
+  const CheckIsDeposited = async () => {
+    try {
+      await fetchTokenData({
+        contractMethod: "hasDeposited",
+        setState: setIsStateDeposited,
+        formatFn: (v) => v.toString(), // Ensure boolean is converted to "true"/"false"
+      });
+    } catch (e) {
+      console.error("Error fetching hasDeposited:", e);
+    }
+  };
+  const CheckIsBurned = async () => {
+    try {
+      await fetchTokenData({
+        contractMethod: "hasBurned",
+        setState: setIsBurned,
+        formatFn: (v) => v.toString(), // Ensure boolean is converted to "true"/"false"
+      });
+    } catch (e) {
+      console.error("Error fetching hasBurned:", e);
+    }
+  };
+  const CheckEnoughState = async () => {
+    try {
+      await fetchTokenData({
+        contractMethod: "getAppearanceForBurn",
+        setState: setIsEnoughState,
+        formatFn: (v) => v.toString(), // Ensure boolean is converted to "true"/"false"
+      });
+    } catch (e) {
+      console.error("Error fetching getAppearanceForBurn:", e);
+    }
+  };
   const isRenounced = async () => {
     try {
       const results = {};
@@ -621,7 +682,7 @@ export const SwapContractProvider = ({ children }) => {
         tokenAddress
       );
       await tx.wait();
-	  await initializeClaimCountdowns();
+      await initializeClaimCountdowns();
       console.log("Reward claimed successfully");
     } catch (error) {
       console.error("Error claiming reward:", error);
@@ -637,17 +698,17 @@ export const SwapContractProvider = ({ children }) => {
     name
   ) => {
     if (!AllContracts?.AuctionContract || !address) return;
-	setTxStatusForAdding("initiated")
+    setTxStatusForAdding("initiated");
     try {
       // Replace these params if needed based on your contract's addToken function
-	  setTxStatusForAdding("Adding")
+      setTxStatusForAdding("Adding");
       const tx = await AllContracts.AuctionContract.addToken(
         TokenAddress,
         PairAddress,
         Owner
       );
       await tx.wait();
-	  setTxStatusForAdding("Status Updating")
+      setTxStatusForAdding("Status Updating");
       const tx2 = await AllContracts.davContract.updateTokenStatus(
         Owner,
         name,
@@ -656,49 +717,58 @@ export const SwapContractProvider = ({ children }) => {
       const receipt2 = await tx2.wait();
       if (receipt2.status === 1) {
         console.log("Transaction successful");
-		setTxStatusForAdding("confirmed")
+        setTxStatusForAdding("confirmed");
         await CheckIsAuctionActive();
         await isTokenSupporteed(); // Corrected function name
         console.log("Token added successfully!");
       } else {
         console.error("Transaction failed");
-		setTxStatusForAdding("error")
+        setTxStatusForAdding("error");
       }
-	  setTxStatusForAdding("confirmed")
+      setTxStatusForAdding("confirmed");
       console.log("Token added successfully!");
     } catch (error) {
       const errorMessage =
         error.reason || error.message || "Unknown error occurred";
       console.error("AddTokenIntoSwapContract failed:", error);
-	  setTxStatusForAdding("")
+      setTxStatusForAdding("");
       alert(`Failed to add token: ${errorMessage}`);
       console.error("AddTokenIntoSwapContract failed:", error?.reason || error);
-    }finally{
-		setTxStatusForAdding("confirmed")
-	}
+    } finally {
+      setTxStatusForAdding("confirmed");
+    }
   };
-  
+
   console.log("Is array:", Array.isArray(UsersSupportedTokens));
   useEffect(() => {
     const functions = [
       fetchUserTokenAddresses,
       getInputAmount,
       getOutPutAmount,
-	  getCurrentAuctionCycle,
-	  getTokenRatio,
+      getCurrentAuctionCycle,
+      getTokenRatio,
       getTokensBurned,
       getAirdropAmount,
       getTokenBalances,
       isAirdropClaimed,
       AddressesFromContract,
       isRenounced,
+      CheckIsDeposited,
+      CheckIsBurned,
+      CheckEnoughState,
       getTokenNamesForUser,
       isTokenSupporteed,
       getTokenNamesByUser,
       HasSwappedAucton,
       HasReverseSwappedAucton,
     ];
-    const pollingFunctions = [CheckIsAuctionActive, CheckIsReverse];
+    const pollingFunctions = [
+      CheckIsAuctionActive,
+      CheckIsReverse,
+      CheckEnoughState,
+      CheckIsBurned,
+      CheckIsDeposited,
+    ];
 
     const runAll = async () => {
       const results = await Promise.allSettled(functions.map((fn) => fn()));
@@ -711,8 +781,10 @@ export const SwapContractProvider = ({ children }) => {
         }
       });
     };
-	 const pollData = async () => {
-      const results = await Promise.allSettled(pollingFunctions.map((fn) => fn()));
+    const pollData = async () => {
+      const results = await Promise.allSettled(
+        pollingFunctions.map((fn) => fn())
+      );
       results.forEach((result, index) => {
         if (result.status === "rejected") {
           console.error(
@@ -724,13 +796,12 @@ export const SwapContractProvider = ({ children }) => {
     };
 
     runAll();
-	  const pollingInterval = setInterval(pollData, 2000); // Poll every 2 seconds
+    const pollingInterval = setInterval(pollData, 2000); // Poll every 2 seconds
 
     // Cleanup interval on component unmount
     return () => clearInterval(pollingInterval);
   }, [AllContracts, address]);
   // Adjust based on when you want it to run
-
 
   const ERC20_ABI = [
     "function approve(address spender, uint256 amount) external returns (bool)",
@@ -1023,13 +1094,16 @@ export const SwapContractProvider = ({ children }) => {
         getInputAmount,
         TokenNames,
         getOutPutAmount,
-		txStatusForAdding,
-		setTxStatusForAdding,
+        txStatusForAdding,
+        setTxStatusForAdding,
         TimeLeftClaim,
         renounceTokenContract,
+        IsEnoughState,
+        StateDeposited,
+        IsBurned,
         tokenMap,
         IsAuctionActive,
-		TokenRatio,
+        TokenRatio,
       }}
     >
       {children}

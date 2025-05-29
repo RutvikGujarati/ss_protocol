@@ -26,6 +26,7 @@ const DetailsInfo = ({ selectedToken }) => {
     setDavAndStateIntoSwap,
     handleAddToken,
     DavAddress,
+    StateDeposited,
   } = useSwapContract();
   const { totalStateBurned } = useDAvContract();
   const [localSearchQuery, setLocalSearchQuery] = useState("");
@@ -54,22 +55,6 @@ const DetailsInfo = ({ selectedToken }) => {
   }, []);
 
   const targetRatio = 0.03;
-
-  const getVaultIndicator = (token) => {
-    if (token.tokenName === "DAV" || token.tokenName === "$TATE1") return null;
-
-    const value = (500000000000 - token.DavVault) / token.DavVault;
-    const isBuy = value <= targetRatio;
-
-    return (
-      <span
-        className="ms-2"
-        style={{ color: isBuy ? "green" : "red", cursor: "pointer" }}
-      >
-        ●
-      </span>
-    );
-  };
 
   useEffect(() => {
     const tooltipTriggerList = document.querySelectorAll(
@@ -154,6 +139,28 @@ const DetailsInfo = ({ selectedToken }) => {
   const staticTokens = filteredTokens.filter(
     (token) => token.tokenName === "DAV" || token.tokenName === "STATE"
   );
+  // Step 1: Select top 5 tokens (excluding DAV and STATE) with best vault ratios
+  const greenDotEligibleTokens = (loading ? staticTokens : sortedTokens)
+    .filter(
+      (token) =>
+        token.isSupported &&
+        token.tokenName !== "DAV" &&
+        token.tokenName !== "$TATE1" &&
+        getVaultRatio(token) !== null
+    )
+    .sort((a, b) => {
+      const aRatio = getVaultRatio(a);
+      const bRatio = getVaultRatio(b);
+
+      const aIsRed = aRatio > targetRatio;
+      const bIsRed = bRatio > targetRatio;
+
+      // Prefer green (not red), then lower ratio
+      if (aIsRed !== bIsRed) return aIsRed ? 1 : -1;
+      return aRatio - bRatio;
+    })
+    .slice(0, 5)
+    .map((token) => token.tokenName); // Use tokenName for identification
 
   return (
     <div className="container mt-3 p-0">
@@ -215,149 +222,174 @@ const DetailsInfo = ({ selectedToken }) => {
 
                     return aIsRed === bIsRed ? 0 : aIsRed ? -1 : 1;
                   })
-                  .map((token) => (
-                    <tr key={token.tokenName}>
-                      <td className="text-center align-middle">
-                        <div className="d-flex flex-column align-items-center">
-                          <span style={{ fontSize: "1rem", lineHeight: "1" }}>
-                            {token.emoji}
-                          </span>
-                          <span>{token.tokenName}</span>
-                        </div>
-                      </td>
-                      <td className="text-center">
-                        <div className="mx-2">
-                          {token.tokenName === "DAV" ||
-                          token.tokenName === "$TATE1"
-                            ? "------"
-                            : `1:${token.ratio}`}
-                        </div>
-                      </td>
-                      <td className="text-center">
-                        <div className="mx-4">
-                          {token.tokenName === "DAV" ||
-                          token.tokenName === "$TATE1"
-                            ? "-----"
-                            : `${token.Cycle}/21`}
-                        </div>
-                      </td>
-                      <td className="text-center">
-                        <div className="mx-4">
-                          {token.tokenName === "DAV"
-                            ? "-----"
-                            : `${formatWithCommas(token.DavVault)}`}
-                        </div>
-                      </td>
-                      <td className="text-center">
-                        <div className="mx-4">
-                          {token.tokenName === "DAV"
-                            ? "-----"
-                            : token.tokenName === "$TATE1"
-                            ? formatWithCommas(
-                                Number(token.burned || 0) +
-                                  Number(totalStateBurned)
-                              )
-                            : formatWithCommas(token.burned || 0)}
-                        </div>
-                      </td>
-                      <td className="text-center">
-                        <div className="d-flex justify-content-center align-items-center gap-3">
+                  .map((token) => {
+                    const showDot = greenDotEligibleTokens.includes(
+                      token.tokenName
+                    );
+                    const ratio = getVaultRatio(token);
+                    const isRed = ratio !== null && ratio > targetRatio;
+                    return (
+                      <tr key={token.tokenName}>
+                        <td className="text-center align-middle">
                           <div className="d-flex flex-column align-items-center">
-                            <a
-                              href={`https://midgard.wtf/address/${token.TokenAddress}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={{ fontSize: "15px", color: "white" }}
-                            >
-                              <i className="bi bi-box-arrow-up-right"></i>
-                            </a>
+                            <span style={{ fontSize: "1rem", lineHeight: "1" }}>
+                              {token.emoji}
+                            </span>
+                            <span>{token.tokenName}</span>
                           </div>
-                          <div
-                            className="d-flex flex-column align-items-center"
-                            style={{ cursor: "pointer" }}
-                          >
-                            <i
-                              className="fa-solid fa-copy"
-                              onClick={() => {
-                                navigator.clipboard.writeText(
-                                  token.TokenAddress
-                                );
-                                toast.success(
-                                  `${token.tokenName} Address copied to clipboard!`,
-                                  {
-                                    position: "top-center",
-                                    autoClose: 2000,
-                                    hideProgressBar: true,
-                                    closeOnClick: true,
-                                    pauseOnHover: false,
-                                    draggable: false,
-                                    theme: "dark",
-                                  }
-                                );
-                              }}
-                              title="Copy Address"
-                              style={{
-                                fontSize: "15px",
-                                color: "white",
-                                cursor: "pointer",
-                              }}
-                            ></i>
+                        </td>
+                        <td className="text-center">
+                          <div className="mx-2">
+                            {token.tokenName === "DAV" ||
+                            token.tokenName === "$TATE1"
+                              ? "------"
+                              : `1:${token.ratio}`}
                           </div>
-                          <div
-                            className="d-flex align-items-center"
-                            style={{ marginRight: "-10px" }}
-                          >
-                            <img
-                              src={MetaMaskIcon}
-                              onClick={() =>
-                                handleAddToken(
-                                  token.TokenAddress,
-                                  token.tokenName === "DAV"
-                                    ? "pDAV"
-                                    : token.tokenName === "$TATE1"
-                                    ? "$TATE1"
-                                    : token.tokenName
+                        </td>
+                        <td className="text-center">
+                          <div className="mx-4">
+                            {token.tokenName === "DAV" ||
+                            token.tokenName === "$TATE1"
+                              ? "-----"
+                              : `${token.Cycle}/21`}
+                          </div>
+                        </td>
+                        <td className="text-center">
+                          <div className="mx-4">
+                            {token.tokenName === "DAV"
+                              ? "-----"
+                              : `${formatWithCommas(token.DavVault)}`}
+                          </div>
+                        </td>
+                        <td className="text-center">
+                          <div className="mx-4">
+                            {token.tokenName === "DAV"
+                              ? "-----"
+                              : token.tokenName === "$TATE1"
+                              ? formatWithCommas(
+                                  Number(token.burned || 0) +
+                                    Number(totalStateBurned)
                                 )
-                              }
-                              alt="MetaMask"
-                              style={{
-                                width: "20px",
-                                height: "20px",
-                                cursor: "pointer",
-                              }}
-                            />
+                              : formatWithCommas(token.burned || 0)}
                           </div>
-                          <div
-                            className="d-flex flex-column align-items-center"
-                            style={{ minWidth: "80px" }}
-                          >
-                            {token.tokenName === "DAV" ? (
-                              "-------"
-                            ) : token.tokenName === "$TATE1" ? (
-                              DavAddress ===
-                              "0x0000000000000000000000000000000000000000" ? (
-                                <button
-                                  className="btn btn-sm swap-btn btn-primary"
-                                  onClick={() => setDavAndStateIntoSwap()}
-                                >
-                                  Add
-                                </button>
+                        </td>
+                        <td className="text-center">
+                          <div className="d-flex justify-content-center align-items-center gap-3">
+                            <div className="d-flex flex-column align-items-center">
+                              <a
+                                href={`https://midgard.wtf/address/${token.TokenAddress}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ fontSize: "15px", color: "white" }}
+                              >
+                                <i className="bi bi-box-arrow-up-right"></i>
+                              </a>
+                            </div>
+                            <div
+                              className="d-flex flex-column align-items-center"
+                              style={{ cursor: "pointer" }}
+                            >
+                              <i
+                                className="fa-solid fa-copy"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(
+                                    token.TokenAddress
+                                  );
+                                  toast.success(
+                                    `${token.tokenName} Address copied to clipboard!`,
+                                    {
+                                      position: "top-center",
+                                      autoClose: 2000,
+                                      hideProgressBar: true,
+                                      closeOnClick: true,
+                                      pauseOnHover: false,
+                                      draggable: false,
+                                      theme: "dark",
+                                    }
+                                  );
+                                }}
+                                title="Copy Address"
+                                style={{
+                                  fontSize: "15px",
+                                  color: "white",
+                                  cursor: "pointer",
+                                }}
+                              ></i>
+                            </div>
+                            <div
+                              className="d-flex align-items-center"
+                              style={{ marginRight: "-10px" }}
+                            >
+                              <img
+                                src={MetaMaskIcon}
+                                onClick={() =>
+                                  handleAddToken(
+                                    token.TokenAddress,
+                                    token.tokenName === "DAV"
+                                      ? "pDAV"
+                                      : token.tokenName === "$TATE1"
+                                      ? "$TATE1"
+                                      : token.tokenName
+                                  )
+                                }
+                                alt="MetaMask"
+                                style={{
+                                  width: "20px",
+                                  height: "20px",
+                                  cursor: "pointer",
+                                }}
+                              />
+                            </div>
+                            <div
+                              className="d-flex flex-column align-items-center"
+                              style={{ minWidth: "80px" }}
+                            >
+                              {token.tokenName === "DAV" ? (
+                                "-------"
+                              ) : token.tokenName === "$TATE1" ? (
+                                DavAddress ===
+                                "0x0000000000000000000000000000000000000000" ? (
+                                  <button
+                                    className="btn btn-sm swap-btn btn-primary"
+                                    onClick={() => setDavAndStateIntoSwap()}
+                                  >
+                                    Add
+                                  </button>
+                                ) : (
+                                  <span>ADDED</span>
+                                )
+                              ) : token.isRenounced === "true" ? (
+                                <span>Renounced</span>
                               ) : (
-                                <span>ADDED</span>
-                              )
-                            ) : token.isRenounced === "true" ? (
-                              <span>Renounced</span>
-                            ) : (
-                              <span>-------</span>
-                            )}
+                                <span>-------</span>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td></td>
-                      <td>{getVaultIndicator(token)}</td>
-                      <td></td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td></td>
+                        <td>
+                          {showDot && (
+                            <span
+                              style={{
+                                marginLeft: "6px",
+                                width: "10px",
+                                height: "10px",
+                                borderRadius: "50%",
+                                display: "inline-block",
+                                backgroundColor: isRed ? "red" : "green",
+                              }}
+                            ></span>
+                          )}
+                          <span className="mx-2">
+                            {StateDeposited?.[token.TokenAddress] == "true" && (
+                              <>🏳️</>
+                            )}
+                          </span>
+                        </td>
+                        <td></td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
             {loading && staticTokens.length > 0 && (

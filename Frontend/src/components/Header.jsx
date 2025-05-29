@@ -22,8 +22,7 @@ const Header = () => {
           <NavLink className="navbar-brand text-light pb-0 mb-0" to="/">
             <label
               className="uppercase fs-2 fw-bolder"
-			  style={{ fontFamily: "Satoshi, sans-serif" }}
-
+              style={{ fontFamily: "Satoshi, sans-serif" }}
             >
               STATE DEX
             </label>
@@ -54,7 +53,7 @@ const Header = () => {
                   {/* <span className="active-dot"></span> */}
                 </NavLink>
               </li>
-              <li className="nav-item mx-2">
+              <li className="nav-item mx-2 position-relative custom-dropdown">
                 <NavLink
                   className={({ isActive }) =>
                     isActive
@@ -65,6 +64,15 @@ const Header = () => {
                 >
                   Add Token
                 </NavLink>
+                <div className="dropdown-content bg-dark">
+                  <NavLink
+                    to="/burn-lp"
+                    className="dropdown-item text-light px-3 py-2 d-block"
+                    style={{ whiteSpace: "nowrap" }}
+                  >
+                    Burn LP
+                  </NavLink>
+                </div>
               </li>
 
               <li className="nav-item mx-2">
@@ -159,6 +167,15 @@ const Header = () => {
           }
         >
           <i className="bi bi-plus-circle"></i> <div>Add Token</div>
+          <div className="dropdown-content bg-dark">
+            <NavLink
+              to="/burn-lp"
+              className="dropdown-item text-light px-3 py-2 d-block"
+              style={{ whiteSpace: "nowrap" }}
+            >
+              Burn LP
+            </NavLink>
+          </div>
         </NavLink>
         <NavLink
           to="/MarketMaker"

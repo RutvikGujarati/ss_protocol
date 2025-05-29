@@ -14,8 +14,14 @@ import pulsex from "../assets/ninemm.png";
 
 import IOSpinner from "../Constants/Spinner";
 const DataTable = () => {
-  const { davHolds, deployWithMetaMask, isProcessing, pendingToken } =
-    useDAvContract();
+  const {
+    davHolds,
+    deployWithMetaMask,
+    isProcessing,
+    pendingToken,
+    DepositStateBack,
+    BurnPairStateTokens,
+  } = useDAvContract();
   const { address, isConnected } = useAccount();
   const {
     DavRequiredAmount,
@@ -33,6 +39,7 @@ const DataTable = () => {
     CheckMintBalance,
     isCliamProcessing,
     fetchUserTokenAddresses,
+    IsEnoughState,
     handleAddToken,
     tokenMap,
     giveRewardForAirdrop,
@@ -46,6 +53,7 @@ const DataTable = () => {
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
   const isAddToken = location.pathname === "/AddToken";
+  const isBurnLP = location.pathname === "/burn-lp";
 
   const [errorPopup, setErrorPopup] = useState({});
   const [processingToken, setProcessingToken] = useState(null);
@@ -206,7 +214,7 @@ const DataTable = () => {
                 <th></th>
                 <th>Auction Timer</th>
                 <th className="text-center">
-                 <span className="mx-3"> Ratio Swapping Auction</span>
+                  <span className="mx-3"> Ratio Swapping Auction</span>
                   <a
                     href={`https://midgard.wtf/address/${Auction_TESTNET}`}
                     target="_blank"
@@ -252,6 +260,7 @@ const DataTable = () => {
                       // AuctionStatus,
                       TimeLeft,
                       inputTokenAmount,
+                      hasDeposited,
                       onlyInputAmount,
                       // handleAddToken,
                       outputToken,
@@ -261,7 +270,20 @@ const DataTable = () => {
                     <tr className="small-font-row" key={index}>
                       <td></td>
                       <td>{emoji}</td>
-                      <td className="justify-content-center">{`${name}`}</td>
+                      <td className="justify-content-center">
+                        {`${name}`}
+                        {hasDeposited == "true" && (
+                          <>
+                            <span
+                              style={{
+                                marginLeft: "8px",
+                              }}
+                            >
+                              🏳️
+                            </span>
+                          </>
+                        )}
+                      </td>
                       <td style={{ position: "relative" }}>
                         <button
                           onClick={() => Checking(id, ContractName)}
@@ -535,6 +557,111 @@ const DataTable = () => {
         </div>
       </div>
     </div>
+  ) : isBurnLP ? (
+    <>
+      <div className="mt-4 container  datatablemarginbottom">
+        <div className="table-responsive">
+          <table className="table table-dark">
+            <thead>
+              <tr>
+                <th>Emoticon</th>
+                <th>Token Name</th>
+
+                {/* <th>Liquidity</th> */}
+                <th></th>
+                <th>Token Address</th>
+                <th>Pair Address</th>
+                <th>Amount</th>
+                <th>Burn LP</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {OwnersTokens.filter(
+                ({ name }) => IsEnoughState?.[name] != "true"
+              ).map(
+                (
+                  { name, address, pairAddress, Emojis, isDeposited, isBurned },
+                  index
+                ) => (
+                  <tr key={index}>
+                    <td>{Emojis}</td>
+                    <td className="justify-content-center">
+                      {`${name}`}
+                      {isDeposited == "true" && (
+                        <>
+                          <span
+                            style={{
+                              marginLeft: "8px",
+                            }}
+                          >
+                            🏳️
+                          </span>
+                        </>
+                      )}
+                      {isBurned == "true" && (
+                        <>
+                          <span
+                            style={{
+                              marginLeft: "8px",
+                            }}
+                          >
+                            🔥
+                          </span>
+                        </>
+                      )}
+                    </td>{" "}
+                    <td></td>
+                    <td
+                      onClick={() => {
+                        if (address) {
+                          navigator.clipboard.writeText(address);
+                          alert("Address copied to clipboard!");
+                        }
+                      }}
+                      className={address ? "clickable-address" : ""}
+                      title={address ? "Click to copy full address" : ""}
+                    >
+                      {address
+                        ? `${address.slice(0, 6)}...${address.slice(-4)}`
+                        : "N/A"}
+                    </td>
+                    <td
+                      onClick={() => {
+                        if (pairAddress) {
+                          navigator.clipboard.writeText(pairAddress);
+                          alert("Address copied to clipboard!");
+                        }
+                      }}
+                      className={pairAddress ? "clickable-pairAddress" : ""}
+                      title={
+                        pairAddress ? "Click to copy full pairAddress" : ""
+                      }
+                    >
+                      {pairAddress
+                        ? `${pairAddress.slice(0, 6)}...${pairAddress.slice(
+                            -4
+                          )}`
+                        : "N/A"}
+                    </td>
+                    <td>500 Million</td>
+                    <td>
+                      <button
+                        className="btn btn-sm swap-btn btn-primary"
+                        onClick={() => BurnPairStateTokens(pairAddress)}
+                      >
+                        Burn
+                      </button>
+                    </td>
+                    <td></td>
+                  </tr>
+                )
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
   ) : isAddToken ? (
     // addTokensLoading ? (
     //   <div className="container text-center mt-5">
@@ -564,7 +691,6 @@ const DataTable = () => {
                 <tr>
                   <th>Emoticon</th>
                   <th>Token Name</th>
-                  <th>Supply</th>
 
                   {/* <th>Liquidity</th> */}
                   <th></th>
@@ -573,6 +699,7 @@ const DataTable = () => {
                   <th>Amount</th>
                   <th>Time To claim</th>
                   <th>Airdrop</th>
+                  <th>Deposit State</th>
                   <th></th>
                 </tr>
               )}
@@ -871,13 +998,32 @@ const DataTable = () => {
                   )}
                   {OwnersTokens.map(
                     (
-                      { name, address, pairAddress, Emojis, nextClaimTime },
+                      {
+                        name,
+                        address,
+                        pairAddress,
+                        Emojis,
+                        nextClaimTime,
+                        isDeposited,
+                      },
                       index
                     ) => (
                       <tr key={index}>
                         <td>{Emojis}</td>
-                        <td>{`${name}`}</td>
-                        <td>500 Billion</td>
+                        <td className="justify-content-center">
+                          {`${name}`}
+                          {isDeposited == "true" && (
+                            <>
+                              <span
+                                style={{
+                                  marginLeft: "8px",
+                                }}
+                              >
+                                🏳️
+                              </span>
+                            </>
+                          )}
+                        </td>{" "}
                         <td></td>
                         <td
                           onClick={() => {
@@ -893,7 +1039,6 @@ const DataTable = () => {
                             ? `${address.slice(0, 6)}...${address.slice(-4)}`
                             : "N/A"}
                         </td>
-
                         <td
                           onClick={() => {
                             if (pairAddress) {
@@ -925,6 +1070,15 @@ const DataTable = () => {
                             {isCliamProcessing == address
                               ? "Processing..."
                               : "Claim"}
+                          </button>
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-sm swap-btn btn-primary"
+                            onClick={() => DepositStateBack(address)}
+                            disabled={isDeposited == "true"}
+                          >
+                            500 million
                           </button>
                         </td>
                         <td></td>

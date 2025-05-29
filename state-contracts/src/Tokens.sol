@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 /// @author
 /// @notice This contract mints a fixed maximum supply and distributes initial tokens to governance and swap treasury addresses.
 /// @dev The contract inherits from OpenZeppelin's ERC20 and Ownable contracts.
-contract Token is ERC20, Ownable {
+contract TOKEN_V2_2  is ERC20, Ownable {
     /// @notice The maximum total supply of tokens (500 billion tokens with 18 decimals)
     uint256 public constant MAX_SUPPLY = 500000000000 ether; // 500 billion
     uint256 public constant ONE_PERCENT = (MAX_SUPPLY * 1) / 100;

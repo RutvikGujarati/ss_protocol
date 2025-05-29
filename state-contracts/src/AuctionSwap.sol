@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {Decentralized_Autonomous_Vaults_DAV_V2_1} from "./DavToken.sol";
-import {Token} from "./Tokens.sol";
+import {DAV_V2_2} from "./DavToken.sol";
+import {TOKEN_V2_2} from "./Tokens.sol";
 
 interface IPair {
     function getReserves()
@@ -19,10 +19,15 @@ interface IPair {
 
     function token1() external view returns (address);
 }
-
+//NOTE: 1 DAV to participate in auction for test and mainet
+/*Mainnet - Auction cycles are every 50 days
+Mainnet - auctions is live for 24hours
+Mainnet - burn cycles is 35 days
+airdrops for GOV, DEV and Token owners is every 50 days on Mainnet
+50 days - interval */
 contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     using SafeERC20 for IERC20;
-    Decentralized_Autonomous_Vaults_DAV_V2_1 public dav;
+    DAV_V2_2 public dav;
 
     struct AuctionCycle {
         uint256 firstAuctionStart;
@@ -49,7 +54,9 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     uint256 constant AIRDROP_AMOUNT = 10000 ether;
     uint256 constant TOKEN_OWNER_AIRDROP = 2500000 ether;
     uint256 constant GOV_OWNER_AIRDROP = 500000 ether;
-
+    // Check if pair has enough STATE tokens (500 million)
+    uint256 tokenAmount = 500000000 ether;
+    uint256 StateDeposittokenAmount = 5000000 ether;
     uint256 constant PRECISION_FACTOR = 1e18;
     uint256 public constant percentage = 1;
     //it is used for pulsechain and it is standered burn address
@@ -74,7 +81,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     mapping(address => mapping(string => address)) public deployedTokensByUser;
 
     mapping(address => address) public pairAddresses; // token => pair address
-	mapping(address => bool) public usedPairAddresses;
+    mapping(address => bool) public usedPairAddresses;
     mapping(address => bool) public supportedTokens; // token => isSupported
     mapping(address => address) public tokenOwners; // token => owner
     mapping(address => address[]) public ownerToTokens;
@@ -82,7 +89,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
     mapping(address => mapping(address => uint256)) public lastClaimTime;
     mapping(string => string) public tokenNameToEmoji;
-
+    mapping(address => bool) public hasDeposited;
+    mapping(address => bool) public hasBurned;
     event TokenDeployed(string name, address tokenAddress);
 
     mapping(address => mapping(address => mapping(address => mapping(uint256 => UserSwapInfo))))
@@ -164,7 +172,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             "Token address should not be zero"
         );
 
-        Token token = new Token(name, symbol, _One, _swap, _owner);
+        TOKEN_V2_2 token = new TOKEN_V2_2(name, symbol, _One, _swap, _owner);
         deployedTokensByUser[msg.sender][name] = address(token);
         userToTokenNames[msg.sender].push(name);
         isTokenNameUsed[name] = true;
@@ -172,6 +180,74 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
         emit TokenDeployed(name, address(token));
         return address(token);
+    }
+    function depositStateForTokenOwner(address token) public nonReentrant {
+        require(!hasDeposited[token], "Already deposited");
+        hasDeposited[token] = true;
+        IERC20(stateToken).safeTransferFrom(
+            msg.sender,
+            address(this),
+            StateDeposittokenAmount
+        );
+    }
+    function BurnStateTokens(address token) public nonReentrant {
+        require(!hasBurned[token], "Already Burned for this token");
+        IPair pair = IPair(pairAddresses[token]);
+        require(
+            (pair.token0() == token && pair.token1() == stateToken) ||
+                (pair.token1() == token && pair.token0() == stateToken),
+            "Pair must contain stateToken"
+        );
+        // Check that the pair has more than 500 million state tokens
+        require(
+            IERC20(stateToken).balanceOf(address(pair)) >= tokenAmount,
+            "Not enough STATE in pair"
+        );
+        require(
+            IERC20(stateToken).allowance(pairAddresses[token], address(this)) >=
+                tokenAmount,
+            "Insufficient allowance"
+        );
+        // Check that the pair has more than 0 ETH
+        require(address(pair).balance > 0, "No ETH in pair");
+        hasBurned[token] = true;
+
+        IERC20(stateToken).safeTransferFrom(
+            pairAddresses[token],
+            BURN_ADDRESS,
+            tokenAmount
+        );
+    }
+    function getAppearanceForBurn(address token) public view returns (bool) {
+        // Check if token has already been burned
+        if (hasBurned[token]) {
+            return false;
+        }
+        // Get the pair for the token
+        IPair pair = IPair(pairAddresses[token]);
+        // Check if pair contains stateToken
+        if (
+            !(pair.token0() == token && pair.token1() == stateToken) &&
+            !(pair.token1() == token && pair.token0() == stateToken)
+        ) {
+            return false;
+        }
+        if (IERC20(stateToken).balanceOf(address(pair)) < tokenAmount) {
+            return false;
+        }
+        // Check if allowance is sufficient
+        if (
+            IERC20(stateToken).allowance(pairAddresses[token], address(this)) <
+            tokenAmount
+        ) {
+            return false;
+        }
+        // Check if pair has ETH
+        if (address(pair).balance == 0) {
+            return false;
+        }
+        // All conditions passed
+        return true;
     }
     // Add and start Auction
     function addToken(
@@ -190,13 +266,13 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         require(pairAddress != address(0), "Invalid pair address");
         require(pairAddress != token, "Invalid pair address");
         require(!supportedTokens[token], "Token already added");
-		require(!usedPairAddresses[pairAddress], "Pair address already used");
+        require(!usedPairAddresses[pairAddress], "Pair address already used");
 
         supportedTokens[token] = true;
         tokenOwners[token] = _tokenOwner;
         pairAddresses[token] = pairAddress;
         ownerToTokens[_tokenOwner].push(token);
-		usedPairAddresses[pairAddress] = true;
+        usedPairAddresses[pairAddress] = true;
 
         // Schedule auction at 22:30 Dubai time (UTC+4)
         uint256 auctionStart = _calculateDubaiAuctionStart();
@@ -228,7 +304,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     function _calculateDubaiAuctionStart() internal view returns (uint256) {
         uint256 dubaiOffset = 4 hours;
         uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 17;
+        uint256 targetDubaiHour = 12;
         uint256 targetDubaiMinute = 0;
         // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;
@@ -455,18 +531,14 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address _dav
     ) external onlyGovernance {
         require(stateToken == address(0), "State token already set");
-        require(
-            dav ==
-                Decentralized_Autonomous_Vaults_DAV_V2_1(payable(address(0))),
-            "DAV already set"
-        );
+        require(dav == DAV_V2_2(payable(address(0))), "DAV already set");
 
         require(_state != address(0), "Invalid state address");
         require(_dav != address(0), "Invalid dav address");
 
         supportedTokens[_state] = true;
         supportedTokens[_dav] = true;
-        dav = Decentralized_Autonomous_Vaults_DAV_V2_1(payable(_dav));
+        dav = DAV_V2_2(payable(_dav));
         stateToken = _state;
     }
 
