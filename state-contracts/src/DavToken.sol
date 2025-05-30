@@ -21,6 +21,7 @@ contract DAV_V2_2 is
     //Global unit256 Variables
     // DAV TOken
     uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
+    uint256 public constant MAX_USER = 10000; 
     uint256 public constant TOKEN_COST = 1000 ether; // 1000000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
     uint256 public constant LIQUIDITY_SHARE = 30; // 30% LIQUIDITY SHARE
@@ -52,7 +53,7 @@ contract DAV_V2_2 is
     // Used in DApp to display total burn statistics
     uint256 public totalStateBurned;
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
-    uint256 public constant CLAIM_INTERVAL = 1 days; // 4 hour claim timer
+    uint256 public constant CLAIM_INTERVAL = 1 days; // 4 days claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
@@ -370,7 +371,7 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
     require(amount > 0, "Amount must be greater than zero");
     require(amount % 1 ether == 0, "Amount must be a whole number");
     require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
-	require(davHoldersCount < 10000, "Max number of users reached");
+	require(davHoldersCount < MAX_USER, "Max number of users reached");
     uint256 cost = (amount * TOKEN_COST) / 1 ether;
     require(msg.value == cost, "Incorrect PLS amount sent");
     // Effects

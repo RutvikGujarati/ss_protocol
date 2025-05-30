@@ -64,15 +64,6 @@ const Header = () => {
                 >
                   Add Token
                 </NavLink>
-                <div className="dropdown-content bg-dark">
-                  <NavLink
-                    to="/burn-lp"
-                    className="dropdown-item text-light px-3 py-2 d-block"
-                    style={{ whiteSpace: "nowrap" }}
-                  >
-                    Burn LP
-                  </NavLink>
-                </div>
               </li>
 
               <li className="nav-item mx-2">
@@ -167,15 +158,6 @@ const Header = () => {
           }
         >
           <i className="bi bi-plus-circle"></i> <div>Add Token</div>
-          <div className="dropdown-content bg-dark">
-            <NavLink
-              to="/burn-lp"
-              className="dropdown-item text-light px-3 py-2 d-block"
-              style={{ whiteSpace: "nowrap" }}
-            >
-              Burn LP
-            </NavLink>
-          </div>
         </NavLink>
         <NavLink
           to="/MarketMaker"

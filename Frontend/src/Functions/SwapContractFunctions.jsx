@@ -50,7 +50,6 @@ export const SwapContractProvider = ({ children }) => {
   const [IsAuctionActive, setisAuctionActive] = useState({});
   const [StateDeposited, setIsStateDeposited] = useState({});
   const [IsBurned, setIsBurned] = useState({});
-  const [IsEnoughState, setIsEnoughState] = useState({});
   const [isTokenRenounce, setRenonced] = useState({});
   const [tokenMap, setTokenMap] = useState({});
   const [TokenNames, setTokenNames] = useState({});
@@ -389,41 +388,50 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching hasBurned:", e);
     }
   };
-  const CheckEnoughState = async () => {
-    try {
-      await fetchTokenData({
-        contractMethod: "getAppearanceForBurn",
-        setState: setIsEnoughState,
-        formatFn: (v) => v.toString(), // Ensure boolean is converted to "true"/"false"
-      });
-    } catch (e) {
-      console.error("Error fetching getAppearanceForBurn:", e);
-    }
-  };
+
   const isRenounced = async () => {
     try {
       const results = {};
-      const tokenMap = await ReturnfetchUserTokenAddresses();
-      console.log("Starting loop over Addresses in renounce:", tokenMap);
 
-      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        console.log(`Fetching renouncing for ${tokenName} at ${TokenAddress}`);
+      const tokenMap = await ReturnfetchUserTokenAddresses();
+      const extendedMap = { ...tokenMap, state: STATE_TESTNET };
+
+      console.log("Starting loop over Addresses in renounce:", extendedMap);
+
+      for (const [tokenName, TokenAddress] of Object.entries(extendedMap)) {
+        console.log(
+          `Checking renounce status for ${tokenName} at ${TokenAddress}`
+        );
 
         const renouncing = await AllContracts.AuctionContract.isTokenRenounced(
           TokenAddress
         );
+        const renouncingString = renouncing.toString();
 
-        const renouncingString = renouncing.toString(); // 👈 convert to string
+        // Additional check for "state" token: verify owner is zero address
+        let isOwnerZero = false;
+        if (tokenName === "$TATE1") {
+          const owner = await AllContracts.AuctionContract.tokenOwner(
+            TokenAddress
+          );
+          isOwnerZero =
+            owner.toLowerCase() ===
+            "0x0000000000000000000000000000000000000000";
+          console.log(`State token owner is zero address: ${isOwnerZero}`);
+        }
 
-        console.log(`renounce Active for ${tokenName}:`, renouncingString);
+        results[tokenName] =
+          tokenName === "$TATE1"
+            ? renouncingString === "true" && isOwnerZero
+            : renouncingString;
 
-        results[tokenName] = renouncingString;
+        console.log(`Renounce status for ${tokenName}:`, results[tokenName]);
       }
 
-      console.log("Final renouncing:", results);
+      console.log("Final renouncing status:", results);
       setRenonced(results);
     } catch (e) {
-      console.error("Error fetching renounce Active:", e);
+      console.error("Error fetching renounce status:", e);
     }
   };
 
@@ -755,7 +763,6 @@ export const SwapContractProvider = ({ children }) => {
       isRenounced,
       CheckIsDeposited,
       CheckIsBurned,
-      CheckEnoughState,
       getTokenNamesForUser,
       isTokenSupporteed,
       getTokenNamesByUser,
@@ -765,7 +772,6 @@ export const SwapContractProvider = ({ children }) => {
     const pollingFunctions = [
       CheckIsAuctionActive,
       CheckIsReverse,
-      CheckEnoughState,
       CheckIsBurned,
       CheckIsDeposited,
     ];
@@ -1098,7 +1104,6 @@ export const SwapContractProvider = ({ children }) => {
         setTxStatusForAdding,
         TimeLeftClaim,
         renounceTokenContract,
-        IsEnoughState,
         StateDeposited,
         IsBurned,
         tokenMap,

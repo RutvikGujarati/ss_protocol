@@ -20,7 +20,6 @@ const DataTable = () => {
     isProcessing,
     pendingToken,
     DepositStateBack,
-    BurnPairStateTokens,
   } = useDAvContract();
   const { address, isConnected } = useAccount();
   const {
@@ -39,7 +38,6 @@ const DataTable = () => {
     CheckMintBalance,
     isCliamProcessing,
     fetchUserTokenAddresses,
-    IsEnoughState,
     handleAddToken,
     tokenMap,
     giveRewardForAirdrop,
@@ -53,7 +51,6 @@ const DataTable = () => {
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
   const isAddToken = location.pathname === "/AddToken";
-  const isBurnLP = location.pathname === "/burn-lp";
 
   const [errorPopup, setErrorPopup] = useState({});
   const [processingToken, setProcessingToken] = useState(null);
@@ -231,18 +228,18 @@ const DataTable = () => {
             </thead>
             <tbody>
               {tokens
-                  .filter(({ name, isReversing, AuctionStatus }) => {
-                    console.log(`Filter Conditions: ${name}`, {
-                      isReversing,
-                      AuctionStatus,
-                    });
+                .filter(({ name, isReversing, AuctionStatus }) => {
+                  console.log(`Filter Conditions: ${name}`, {
+                    isReversing,
+                    AuctionStatus,
+                  });
 
-                    const isAuctionActive = AuctionStatus === "true";
-                    const isReverseAuction =
-                      AuctionStatus === "false" && isReversing === "true";
+                  const isAuctionActive = AuctionStatus === "true";
+                  const isReverseAuction =
+                    AuctionStatus === "false" && isReversing === "true";
 
-                    return isAuctionActive || isReverseAuction;
-                  })
+                  return isAuctionActive || isReverseAuction;
+                })
                 .map(
                   (
                     {
@@ -557,111 +554,6 @@ const DataTable = () => {
         </div>
       </div>
     </div>
-  ) : isBurnLP ? (
-    <>
-      <div className="mt-4 container  datatablemarginbottom">
-        <div className="table-responsive">
-          <table className="table table-dark">
-            <thead>
-              <tr>
-                <th>Emoticon</th>
-                <th>Token Name</th>
-
-                {/* <th>Liquidity</th> */}
-                <th></th>
-                <th>Token Address</th>
-                <th>Pair Address</th>
-                <th>Conditions</th>
-                <th>Burn LP</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {OwnersTokens.filter(
-                ({ name }) => IsEnoughState?.[name] != "true"
-              ).map(
-                (
-                  { name, address, pairAddress, Emojis, isDeposited, isBurned },
-                  index
-                ) => (
-                  <tr key={index}>
-                    <td>{Emojis}</td>
-                    <td className="justify-content-center">
-                      {`${name}`}
-                      {isDeposited == "true" && (
-                        <>
-                          <span
-                            style={{
-                              marginLeft: "8px",
-                            }}
-                          >
-                            🏳️
-                          </span>
-                        </>
-                      )}
-                      {isBurned == "true" && (
-                        <>
-                          <span
-                            style={{
-                              marginLeft: "8px",
-                            }}
-                          >
-                            🔥
-                          </span>
-                        </>
-                      )}
-                    </td>{" "}
-                    <td></td>
-                    <td
-                      onClick={() => {
-                        if (address) {
-                          navigator.clipboard.writeText(address);
-                          alert("Address copied to clipboard!");
-                        }
-                      }}
-                      className={address ? "clickable-address" : ""}
-                      title={address ? "Click to copy full address" : ""}
-                    >
-                      {address
-                        ? `${address.slice(0, 6)}...${address.slice(-4)}`
-                        : "N/A"}
-                    </td>
-                    <td
-                      onClick={() => {
-                        if (pairAddress) {
-                          navigator.clipboard.writeText(pairAddress);
-                          alert("Address copied to clipboard!");
-                        }
-                      }}
-                      className={pairAddress ? "clickable-pairAddress" : ""}
-                      title={
-                        pairAddress ? "Click to copy full pairAddress" : ""
-                      }
-                    >
-                      {pairAddress
-                        ? `${pairAddress.slice(0, 6)}...${pairAddress.slice(
-                            -4
-                          )}`
-                        : "N/A"}
-                    </td>
-                    <td>500 Million</td>
-                    <td>
-                      <button
-                        className="btn btn-sm swap-btn btn-primary"
-                        onClick={() => BurnPairStateTokens(pairAddress)}
-                      >
-                        Burn
-                      </button>
-                    </td>
-                    <td></td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </>
   ) : isAddToken ? (
     // addTokensLoading ? (
     //   <div className="container text-center mt-5">

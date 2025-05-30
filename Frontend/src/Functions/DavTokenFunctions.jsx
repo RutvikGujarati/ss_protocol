@@ -512,98 +512,7 @@ export const DavProvider = ({ children }) => {
       setButtonTextStates("");
     }
   };
-  const BurnPairStateTokens = async (PairAddress) => {
-    if (!AllContracts?.AuctionContract || !signer) {
-      toast.error("Contract or signer not initialized", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-      return;
-    }
-
-    try {
-      setButtonTextStates("initiated");
-      setClicked(true);
-
-      // Validate PairAddress
-      if (!ethers.isAddress(PairAddress)) {
-        throw new Error("Invalid PairAddress");
-      }
-
-      const weiAmount = ethers.parseUnits("500000000", 18);
-      const tokenContract = new ethers.Contract(PairAddress, ERC20_ABI, signer);
-
-      // Check if PairAddress is a contract
-      const code = await signer.provider.getCode(PairAddress);
-      if (code === "0x") {
-        throw new Error("PairAddress is not a contract");
-      }
-
-      // Approve tokens
-      setButtonTextStates("Approving");
-      const approveTx = await tokenContract.approve(Auction_TESTNET, weiAmount);
-      await approveTx.wait();
-
-      // Call BurnStateTokens with PairAddress
-      setButtonTextStates("Pending");
-      const burnTx = await AllContracts.AuctionContract.BurnStateTokens(
-        PairAddress
-      );
-      await burnTx.wait();
-
-      setButtonTextStates("confirmed");
-      setClicked(false);
-      toast.success("Tokens burned successfully", {
-        position: "top-center",
-        autoClose: 12000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-
-      await fetchData();
-      await fetchTimeUntilNextClaim();
-    } catch (err) {
-      console.error("Burn error:", err);
-      setButtonTextStates("error");
-
-      let errorMessage = "An error occurred during burn.";
-      if (err?.reason) {
-        errorMessage = err.reason;
-      } else if (err?.data?.message) {
-        errorMessage = err.data.message;
-      } else if (err?.message) {
-        errorMessage = err.message;
-      }
-
-      // Handle specific errors
-      if (errorMessage.includes("External transactions to internal accounts")) {
-        errorMessage =
-          "Invalid transaction: Cannot send data to this address. Check network or contract configuration.";
-      } else if (errorMessage.includes("execution reverted")) {
-        errorMessage =
-          "Transaction reverted: Check state token balance or pair configuration.";
-      }
-
-      toast.error(errorMessage, {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-
-      setClicked(false);
-    } finally {
-      setButtonTextStates("");
-    }
-  };
+ 
 
   DavProvider.propTypes = {
     children: PropTypes.node.isRequired,
@@ -625,7 +534,6 @@ export const DavProvider = ({ children }) => {
         fetchData,
         deployWithMetaMask,
         DepositStateBack,
-        BurnPairStateTokens,
         users,
         isProcessingToken,
         names,

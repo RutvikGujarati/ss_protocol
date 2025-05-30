@@ -53,7 +53,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     uint256 constant GOV_OWNER_AIRDROP = 500000 ether;
     // Check if pair has enough STATE tokens (500 million)
     //Burn LP pair PLS/STATE, and the pair must contain 500 million STATE tokens
-    uint256 tokenAmount = 5000000 ether;
     uint256 StateDeposittokenAmount = 5000000 ether;
     uint256 constant PRECISION_FACTOR = 1e18;
     uint256 public constant percentage = 1;
@@ -88,7 +87,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     mapping(address => mapping(address => uint256)) public lastClaimTime;
     mapping(string => string) public tokenNameToEmoji;
     mapping(address => bool) public hasDeposited;
-    mapping(address => bool) public hasBurned;
     event TokenDeployed(string name, address tokenAddress);
 
     mapping(address => mapping(address => mapping(address => mapping(uint256 => UserSwapInfo))))
@@ -187,51 +185,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             address(this),
             StateDeposittokenAmount
         );
-    }
-    function BurnStateTokens(address token) public nonReentrant {
-        require(!hasBurned[token], "Already Burned for this token");
-        IPair pair = IPair(pairAddresses[token]);
-        require(
-            (pair.token0() == token && pair.token1() == stateToken) ||
-                (pair.token1() == token && pair.token0() == stateToken),
-            "Pair must contain stateToken"
-        );
-        // Check that the pair has more than 500 million state tokens
-        require(
-            IERC20(stateToken).balanceOf(address(pair)) >= tokenAmount,
-            "Not enough STATE in pair"
-        );
-        require(
-            IERC20(stateToken).allowance(pairAddresses[token], address(this)) >=
-                tokenAmount,
-            "Insufficient allowance"
-        );
-        hasBurned[token] = true;
-        IERC20(stateToken).safeTransferFrom(
-            pairAddresses[token],
-            BURN_ADDRESS,
-            tokenAmount
-        );
-    }
-    function getAppearanceForBurn(address token) public view returns (bool) {
-        // Check if token has already been burned
-        if (hasBurned[token]) {
-            return false;
-        }
-        // Get the pair for the token
-        IPair pair = IPair(pairAddresses[token]);
-        // Check if pair contains stateToken
-        if (
-            !(pair.token0() == token && pair.token1() == stateToken) &&
-            !(pair.token1() == token && pair.token0() == stateToken)
-        ) {
-            return false;
-        }
-        if (IERC20(stateToken).balanceOf(address(pair)) < tokenAmount) {
-            return false;
-        }
-        // All conditions passed
-        return true;
     }
     // Add and start Auction
     function addToken(
@@ -458,7 +411,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         require(amountOut > 0, "Output amount must be greater than zero");
         userSwapInfo.cycle = currentAuctionCycle;
         /** @dev This check ensures that internal token tracking is aligned with actual contract holdings.
-         * Tokens sent manually (e.g., via MetaMask and through token sc), so we can't assume tracking alone is sufficient.
+         *Tokens in the Swap contract will be sufficient as the airdrop is limited to 10% of the supply, leaving a large amount of tokens in the swap contract.
          *  Especially important for auction logic or any logic that sends tokens out.*/
         //placed correctly require statments before if-else condition
         require(

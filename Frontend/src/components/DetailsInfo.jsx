@@ -355,6 +355,8 @@ const DetailsInfo = ({ selectedToken }) => {
                                   >
                                     Add
                                   </button>
+                                ) : token.isRenounced === "true" ? (
+                                  <span>Renounced</span>
                                 ) : (
                                   <span>ADDED</span>
                                 )
