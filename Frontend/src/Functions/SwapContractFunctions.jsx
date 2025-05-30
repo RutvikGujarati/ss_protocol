@@ -394,7 +394,11 @@ export const SwapContractProvider = ({ children }) => {
       const results = {};
 
       const tokenMap = await ReturnfetchUserTokenAddresses();
-      const extendedMap = { ...tokenMap, state: STATE_TESTNET };
+      const extendedMap = {
+        ...tokenMap,
+        STATE: STATE_TESTNET,
+        DAV: DAV_TESTNET,
+      };
 
       console.log("Starting loop over Addresses in renounce:", extendedMap);
 
@@ -410,10 +414,14 @@ export const SwapContractProvider = ({ children }) => {
 
         // Additional check for "state" token: verify owner is zero address
         let isOwnerZero = false;
-        if (tokenName === "$TATE1") {
-          const owner = await AllContracts.AuctionContract.tokenOwner(
-            TokenAddress
-          );
+        if (tokenName === "STATE") {
+          const owner = await AllContracts.stateContract.owner();
+          isOwnerZero =
+            owner.toLowerCase() ===
+            "0x0000000000000000000000000000000000000000";
+          console.log(`State token owner is zero address: ${isOwnerZero}`);
+        } else if (tokenName === "DAV") {
+          const owner = await AllContracts.davContract.owner();
           isOwnerZero =
             owner.toLowerCase() ===
             "0x0000000000000000000000000000000000000000";
@@ -421,7 +429,9 @@ export const SwapContractProvider = ({ children }) => {
         }
 
         results[tokenName] =
-          tokenName === "$TATE1"
+          tokenName === "STATE"
+            ? renouncingString === "true" && isOwnerZero
+            : tokenName === "DAV"
             ? renouncingString === "true" && isOwnerZero
             : renouncingString;
 

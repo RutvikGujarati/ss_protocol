@@ -115,7 +115,7 @@ const DetailsInfo = ({ selectedToken }) => {
   const sortedTokens = tokens
     .filter((token) => token.isSupported)
     .sort((a, b) => {
-      const order = { DAV: 0, $TATE1: 1 };
+      const order = { DAV: 0, STATE: 1 };
 
       // Prioritize DAV and STATE
       if (
@@ -145,7 +145,7 @@ const DetailsInfo = ({ selectedToken }) => {
       (token) =>
         token.isSupported &&
         token.tokenName !== "DAV" &&
-        token.tokenName !== "$TATE1" &&
+        token.tokenName !== "STATE" &&
         getVaultRatio(token) !== null
     )
     .sort((a, b) => {
@@ -241,7 +241,7 @@ const DetailsInfo = ({ selectedToken }) => {
                         <td className="text-center">
                           <div className="mx-2">
                             {token.tokenName === "DAV" ||
-                            token.tokenName === "$TATE1"
+                            token.tokenName === "STATE"
                               ? "------"
                               : `1:${token.ratio}`}
                           </div>
@@ -249,7 +249,7 @@ const DetailsInfo = ({ selectedToken }) => {
                         <td className="text-center">
                           <div className="mx-4">
                             {token.tokenName === "DAV" ||
-                            token.tokenName === "$TATE1"
+                            token.tokenName === "STATE"
                               ? "-----"
                               : `${token.Cycle}/21`}
                           </div>
@@ -265,7 +265,7 @@ const DetailsInfo = ({ selectedToken }) => {
                           <div className="mx-4">
                             {token.tokenName === "DAV"
                               ? "-----"
-                              : token.tokenName === "$TATE1"
+                              : token.tokenName === "STATE"
                               ? formatWithCommas(
                                   Number(token.burned || 0) +
                                     Number(totalStateBurned)
@@ -327,7 +327,7 @@ const DetailsInfo = ({ selectedToken }) => {
                                     token.TokenAddress,
                                     token.tokenName === "DAV"
                                       ? "pDAV"
-                                      : token.tokenName === "$TATE1"
+                                      : token.tokenName === "STATE"
                                       ? "STATTE"
                                       : token.tokenName
                                   )
@@ -345,8 +345,10 @@ const DetailsInfo = ({ selectedToken }) => {
                               style={{ minWidth: "80px" }}
                             >
                               {token.tokenName === "DAV" ? (
-                                "-------"
-                              ) : token.tokenName === "$TATE1" ? (
+                                token.isRenounced === true && (
+                                  <span>Renounced</span>
+                                )
+                              ) : token.tokenName === "STATE" ? (
                                 DavAddress ===
                                 "0x0000000000000000000000000000000000000000" ? (
                                   <button
@@ -355,7 +357,7 @@ const DetailsInfo = ({ selectedToken }) => {
                                   >
                                     Add
                                   </button>
-                                ) : token.isRenounced === "true" ? (
+                                ) : token.isRenounced === true ? (
                                   <span>Renounced</span>
                                 ) : (
                                   <span>ADDED</span>
