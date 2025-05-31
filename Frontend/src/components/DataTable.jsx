@@ -14,12 +14,8 @@ import pulsex from "../assets/ninemm.png";
 
 import IOSpinner from "../Constants/Spinner";
 const DataTable = () => {
-  const {
-    davHolds,
-    deployWithMetaMask,
-    isProcessing,
-    pendingToken,
-  } = useDAvContract();
+  const { davHolds, deployWithMetaMask, isProcessing, pendingToken } =
+    useDAvContract();
   const { address, isConnected } = useAccount();
   const {
     DavRequiredAmount,
@@ -207,7 +203,7 @@ const DataTable = () => {
             <thead>
               <tr>
                 <th></th>
-                <th>Emoticon</th>
+                <th></th>
                 <th>Token Name</th>
                 <th>Claim Airdrop</th>
                 <th></th>
@@ -230,18 +226,18 @@ const DataTable = () => {
             </thead>
             <tbody>
               {tokens
-                // .filter(({ name, isReversing, AuctionStatus }) => {
-                //   console.log(`Filter Conditions: ${name}`, {
-                //     isReversing,
-                //     AuctionStatus,
-                //   });
+                .filter(({ name, isReversing, AuctionStatus }) => {
+                  console.log(`Filter Conditions: ${name}`, {
+                    isReversing,
+                    AuctionStatus,
+                  });
 
-                //   const isAuctionActive = AuctionStatus === "true";
-                //   const isReverseAuction =
-                //     AuctionStatus === "false" && isReversing === "true";
+                  const isAuctionActive = AuctionStatus === "true";
+                  const isReverseAuction =
+                    AuctionStatus === "false" && isReversing === "true";
 
-                //   return isAuctionActive || isReverseAuction;
-                // })
+                  return isAuctionActive || isReverseAuction;
+                })
                 .map(
                   (
                     {
@@ -581,7 +577,7 @@ const DataTable = () => {
               {authorized ? (
                 <tr>
                   {/* <th></th> */}
-                  <th>Logo</th>
+                  <th></th>
                   <th>Token Name</th>
                   <th>Deploy</th>
                   <th>Token Address/Pair</th>
@@ -656,17 +652,15 @@ const DataTable = () => {
                     ) => (
                       <tr key={index}>
                         <td>
-                          <h5>
-                            {isImageUrl(Emojis) ? (
-                              <img
-                                src={Emojis}
-                                alt="token visual"
-                                style={{ width: "30px", height: "30px" }}
-                              />
-                            ) : (
-                              <span style={{ fontSize: "20px" }}>{Emojis}</span>
-                            )}
-                          </h5>
+                          {isImageUrl(Emojis) ? (
+                            <img
+                              src={Emojis}
+                              alt="token visual"
+                              style={{ width: "30px", height: "30px" }}
+                            />
+                          ) : (
+                            <span style={{ fontSize: "20px" }}>{Emojis}</span>
+                          )}
                         </td>
                         <td>{name}</td>
                         <td>

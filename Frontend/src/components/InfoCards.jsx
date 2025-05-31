@@ -914,8 +914,9 @@ const InfoCards = () => {
                   style={{ minHeight: "260px" }}
                 >
                   <div className="p-2 pt-3 pb-2">
+                    <p className="mb-2 detailText ">ADD TOKEN NAME</p>
                     {/* <p className="mb-2 detailText ">Token Name</p> */}
-                    <div className="mb-2 mt-3 d-flex align-items-center gap-2">
+                    <div className="mb-2  d-flex align-items-center gap-2">
                       <div
                         className="floating-input-container"
                         style={{ maxWidth: "300px" }}
@@ -973,23 +974,28 @@ const InfoCards = () => {
                         </label>
                       </div>
                     </div>
+                    <h6 className="mt-4">
+                      <ul
+                        style={{
+                          listStyleType: "disc",
+                          textAlign: "left",
+                          paddingLeft: "20px",
+                          fontSize: "14px",
+                        }}
+                      >
+                        <li>Choose the image or an emoji. </li>
+                        <li>You can only select one </li>
+                        <li>Emoji is free</li>
+                      </ul>
+                    </h6>
                   </div>
-                  <h6
-                    className="detailText mt-2"
-                    style={{
-                      fontSize: "14px",
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    Windows key + . (period)
-                  </h6>
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100">
-                  <div className="p-2 pt-3 pb-2 mt-4">
+                  <div className="p-2 pt-3 pb-2 ">
                     {/* Heading */}
-                    <h5 className=" detailText mb-3">Upload Image</h5>
+                    <p className="mb-2 detailText ">Upload Image</p>
 
                     {/* File Input */}
                     <div className="d-flex align-items-center gap-2">
@@ -1007,8 +1013,7 @@ const InfoCards = () => {
                         />
                       </div>
                     </div>
-                    <h6 className="mt-4">
-                      Accepted image files: PNG or JPG format only
+                    <h6 className="mt-5 mx-5">
                       <ul
                         style={{
                           listStyleType: "disc",
@@ -1053,6 +1058,19 @@ const InfoCards = () => {
                       )}
                     </button>
                   </div>
+                  <h6 className="mt-4">
+                    <ul
+                      style={{
+                        listStyleType: "disc",
+                        textAlign: "left",
+                        paddingLeft: "20px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <li>Market Maker + Emoji Fee - 10 Mil PLS </li>
+                      <li>Market Maker + Image Fee - 15 Mil PLS </li>
+                    </ul>
+                  </h6>
                 </div>
               </div>
             </div>

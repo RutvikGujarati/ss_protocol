@@ -75,7 +75,7 @@ export const useAuctionTokens = () => {
 			SwapT: () => SwapTokens(id, contract),
 			onlyInputAmount: InputAmount[contract],
 			inputTokenAmount: `${InputAmount[contract] || 0} ${id}`,
-			outputToken: `${OutPutAmount?.[contract] || 0} State`,
+			outputToken: `${OutPutAmount?.[contract] || 0} STATE`,
 		};
 	});
 
