@@ -94,11 +94,10 @@ export const useAddTokens = () => {
 
 
 export const useUsersOwnerTokens = () => {
-	const { UsersSupportedTokens, StateDeposited, IsBurned } = useSwapContract();
+	const { UsersSupportedTokens, IsBurned } = useSwapContract();
 	const { names, Emojies } = useDAvContract();
 	console.log("names", names)
 	console.log("Raw UsersSupportedTokens:", UsersSupportedTokens);
-	console.log("Raw :", StateDeposited);
 
 	// Create name → Emojies map
 	const emojiesMap = names.reduce((acc, name, index) => {
@@ -156,7 +155,6 @@ export const useUsersOwnerTokens = () => {
 			pairAddress: pairAddress,
 			nextClaimTime: nextClaimTime,
 			Emojis: emojis,
-			isDeposited: StateDeposited?.[actualAddress],
 			isBurned: IsBurned?.[actualAddress],
 		};
 

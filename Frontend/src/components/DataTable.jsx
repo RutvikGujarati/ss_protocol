@@ -19,7 +19,6 @@ const DataTable = () => {
     deployWithMetaMask,
     isProcessing,
     pendingToken,
-    DepositStateBack,
   } = useDAvContract();
   const { address, isConnected } = useAccount();
   const {
@@ -100,6 +99,9 @@ const DataTable = () => {
       ...prev,
       [tokenName]: value, // store pairAddress directly
     }));
+  };
+  const isImageUrl = (str) => {
+    return typeof str === "string" && str.includes("mypinata.cloud/ipfs/");
   };
 
   // Handle Add button click (calls AddTokenIntoSwapContract)
@@ -228,18 +230,18 @@ const DataTable = () => {
             </thead>
             <tbody>
               {tokens
-                .filter(({ name, isReversing, AuctionStatus }) => {
-                  console.log(`Filter Conditions: ${name}`, {
-                    isReversing,
-                    AuctionStatus,
-                  });
+                // .filter(({ name, isReversing, AuctionStatus }) => {
+                //   console.log(`Filter Conditions: ${name}`, {
+                //     isReversing,
+                //     AuctionStatus,
+                //   });
 
-                  const isAuctionActive = AuctionStatus === "true";
-                  const isReverseAuction =
-                    AuctionStatus === "false" && isReversing === "true";
+                //   const isAuctionActive = AuctionStatus === "true";
+                //   const isReverseAuction =
+                //     AuctionStatus === "false" && isReversing === "true";
 
-                  return isAuctionActive || isReverseAuction;
-                })
+                //   return isAuctionActive || isReverseAuction;
+                // })
                 .map(
                   (
                     {
@@ -266,7 +268,17 @@ const DataTable = () => {
                   ) => (
                     <tr className="small-font-row" key={index}>
                       <td></td>
-                      <td>{emoji}</td>
+                      <td>
+                        {isImageUrl(emoji) ? (
+                          <img
+                            src={emoji}
+                            alt="token visual"
+                            style={{ width: "30px", height: "30px" }}
+                          />
+                        ) : (
+                          <span style={{ fontSize: "20px" }}>{emoji}</span>
+                        )}
+                      </td>
                       <td className="justify-content-center">
                         {`${name}`}
                         {hasDeposited == "true" && (
@@ -591,7 +603,6 @@ const DataTable = () => {
                   <th>Amount</th>
                   <th>Time To claim</th>
                   <th>Airdrop</th>
-                  <th>Deposit State</th>
                   <th></th>
                 </tr>
               )}
@@ -645,7 +656,17 @@ const DataTable = () => {
                     ) => (
                       <tr key={index}>
                         <td>
-                          <h5>{Emojis}</h5>
+                          <h5>
+                            {isImageUrl(Emojis) ? (
+                              <img
+                                src={Emojis}
+                                alt="token visual"
+                                style={{ width: "30px", height: "30px" }}
+                              />
+                            ) : (
+                              <span style={{ fontSize: "20px" }}>{Emojis}</span>
+                            )}
+                          </h5>
                         </td>
                         <td>{name}</td>
                         <td>
@@ -890,32 +911,22 @@ const DataTable = () => {
                   )}
                   {OwnersTokens.map(
                     (
-                      {
-                        name,
-                        address,
-                        pairAddress,
-                        Emojis,
-                        nextClaimTime,
-                        isDeposited,
-                      },
+                      { name, address, pairAddress, Emojis, nextClaimTime },
                       index
                     ) => (
                       <tr key={index}>
-                        <td>{Emojis}</td>
-                        <td className="justify-content-center">
-                          {`${name}`}
-                          {isDeposited == "true" && (
-                            <>
-                              <span
-                                style={{
-                                  marginLeft: "8px",
-                                }}
-                              >
-                                🏳️
-                              </span>
-                            </>
+                        <td>
+                          {isImageUrl(Emojis) ? (
+                            <img
+                              src={Emojis}
+                              alt="token visual"
+                              style={{ width: "30px", height: "30px" }}
+                            />
+                          ) : (
+                            <span style={{ fontSize: "20px" }}>{Emojis}</span>
                           )}
-                        </td>{" "}
+                        </td>
+                        <td className="justify-content-center">{`${name}`}</td>{" "}
                         <td></td>
                         <td
                           onClick={() => {
@@ -962,15 +973,6 @@ const DataTable = () => {
                             {isCliamProcessing == address
                               ? "Processing..."
                               : "Claim"}
-                          </button>
-                        </td>
-                        <td>
-                          <button
-                            className="btn btn-sm swap-btn btn-primary"
-                            onClick={() => DepositStateBack(address)}
-                            disabled={isDeposited == "true"}
-                          >
-                            500 million
                           </button>
                         </td>
                         <td></td>

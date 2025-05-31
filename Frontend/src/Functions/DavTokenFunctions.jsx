@@ -47,6 +47,9 @@ export const DavProvider = ({ children }) => {
     ReferralCodeOfUser: "0.0",
     ReferralAMount: "0.0",
     totalStateBurned: "0.0",
+    TokenProcessing: "0.0",
+    TokenWithImageProcessing: "0.0",
+    DavMintFee: "0.0",
     pendingToken: "0.0",
     claimableAmount: "0.0",
     currentBurnCycle: "0.0",
@@ -121,6 +124,13 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("totalStateBurned", () =>
           AllContracts.davContract.totalStateBurned()
         ),
+        fetchAndSet("TokenProcessing", () =>
+          AllContracts.davContract.TOKEN_PROCESSING_FEE()
+        ),
+        fetchAndSet("TokenWithImageProcessing", () =>
+          AllContracts.davContract.TOKEN_WITHIMAGE_PROCESS()
+        ),
+        fetchAndSet("DavMintFee", () => AllContracts.davContract.TOKEN_COST()),
         fetchAndSet("davHolds", () =>
           AllContracts.davContract.balanceOf(address)
         ),
@@ -162,6 +172,7 @@ export const DavProvider = ({ children }) => {
   }, [AllContracts, address]);
 
   console.log("dav entries", data.tokenEntries);
+
   const fetchAndStoreTokenEntries = async () => {
     try {
       // Fetch token entries from the contract
@@ -294,17 +305,18 @@ export const DavProvider = ({ children }) => {
     }
   };
 
-  const AddYourToken = async (amount, Emoji) => {
+  const AddYourToken = async (amount, Emoji, isImage = false) => {
     if (!AllContracts?.davContract) return;
 
-    const cost = ethers.parseEther((chainId === 146 ? 100 : 2000).toString());
-
+    const cost = ethers.parseEther(
+      (chainId === 146 ? 100 : isImage ? data.TokenWithImageProcessing : data.TokenProcessing).toString()
+    );
     let toastId = null;
 
     try {
       setProcessToken(true);
 
-      // Wait for user confirmation (this is where rejection happens)
+      // Wait for user confirmation
       const tx =
         address == import.meta.env.VITE_AUTH_ADDRESS
           ? await AllContracts.davContract.processYourToken(amount, Emoji)
@@ -312,23 +324,69 @@ export const DavProvider = ({ children }) => {
               value: cost,
             });
 
-      // 🟡 Only show toast *after* MetaMask confirmation
-      toastId = toast.loading(`Processing token: ${amount} ${Emoji}`, {
-        position: "top-center",
-      });
+      toastId = toast.loading(
+        isImage ? (
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <img
+              src={Emoji}
+              alt="token"
+              style={{ width: 24, height: 24, borderRadius: 4 }}
+            />
+            <span>Processing token: {amount}</span>
+          </div>
+        ) : (
+          `Processing token: ${amount} ${Emoji}`
+        ),
+        {
+          position: "top-center",
+        }
+      );
 
       await tx.wait();
       toast.dismiss(toastId);
-      toast.success(`Token listed: ${amount} ${Emoji}`, {
-        position: "top-center",
-        autoClose: 5000,
-      });
+      toast.success(
+        isImage ? (
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <img
+              src={Emoji}
+              alt="token"
+              style={{ width: 24, height: 24, borderRadius: 4 }}
+            />
+            <span>Token listed: {amount}</span>
+          </div>
+        ) : (
+          `Token listed: ${amount} ${Emoji}`
+        ),
+        {
+          position: "top-center",
+          autoClose: 5000,
+        }
+      );
+
       await fetchData();
 
       return tx;
     } catch (error) {
-      console.error("Token listing error:", error);
+      console.error("Token listing error:", error, {
+        reason: error.reason,
+        data: error.data,
+        message: error.message,
+      });
 
+      // Extract the contract error reason
+      let errorMessage = "Transaction failed";
+      if (error.reason) {
+        errorMessage = error.reason; // Contract revert reason
+      } else if (error.data?.message) {
+        errorMessage = error.data.message; // Fallback to data.message
+      } else if (error.message.includes("user rejected")) {
+        errorMessage = "Transaction rejected by user";
+      }
+
+      // Show error in alert
+      alert(`Error: ${errorMessage}`);
+
+      // Update toast notification
       toast.dismiss(toastId);
       if (!toastId) {
         toast.info("❌ Transaction rejected by user", {
@@ -337,7 +395,7 @@ export const DavProvider = ({ children }) => {
         });
       } else {
         toast.update(toastId, {
-          render: `❌ Error: ${error.message || "Transaction failed"}`,
+          render: `❌ Error: ${errorMessage}`,
           type: "error",
           isLoading: false,
           autoClose: 5000,
@@ -512,7 +570,6 @@ export const DavProvider = ({ children }) => {
       setButtonTextStates("");
     }
   };
- 
 
   DavProvider.propTypes = {
     children: PropTypes.node.isRequired,
@@ -536,6 +593,7 @@ export const DavProvider = ({ children }) => {
         DepositStateBack,
         users,
         isProcessingToken,
+        setProcessToken,
         names,
         Emojies,
         TokenStatus,

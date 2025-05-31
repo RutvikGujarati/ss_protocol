@@ -17,11 +17,14 @@ import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
 import toast from "react-hot-toast";
 import IOSpinner from "../Constants/Spinner";
+import axios from "axios";
 const InfoCards = () => {
   const chainId = useChainId();
 
   const [copied, setCopied] = useState(false);
   const [copiedCode, setCopiedCode] = useState("");
+  const [fileUploaded, setFileUploaded] = useState(null);
+  const [isFileUploaded, setIsFileUploaded] = useState(false);
 
   const {
     mintDAV,
@@ -37,10 +40,12 @@ const InfoCards = () => {
     BurnClicked,
     Claiming,
     ContractPls,
+    TokenProcessing,
+    TokenWithImageProcessing,
+    DavMintFee,
     userBurnedAmount,
     claimBurnAmount,
     txStatus,
-    expectedClaim,
     // AllUserPercentage,
     TimeUntilNextClaim,
     UserPercentage,
@@ -63,6 +68,164 @@ const InfoCards = () => {
       console.error("Burn failed:", error);
     }
   };
+  const [isUploadingToPinata, setIsUploadingToPinata] = useState(false);
+  const uploadingToastIdRef = useRef(null);
+  useEffect(() => {
+    if (isUploadingToPinata) {
+      // Show toast if not already shown
+      if (!uploadingToastIdRef.current) {
+        uploadingToastIdRef.current = toast.loading(
+          "Uploading image to Pinata...",
+          {
+            position: "top-center",
+            autoClose: false,
+          }
+        );
+      }
+    } else {
+      // Dismiss toast if upload finished
+      if (uploadingToastIdRef.current) {
+        toast.dismiss(uploadingToastIdRef.current);
+        uploadingToastIdRef.current = null;
+      }
+    }
+  }, [isUploadingToPinata]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const uploadToPinata = async (file) => {
+    const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
+    const gateway = import.meta.env.VITE_PINATA_GATEWAY;
+
+    // Debugging: Log environment variable
+    console.log("VITE_PINATA_GATEWAY:", gateway);
+
+    if (!gateway) {
+      console.error("VITE_PINATA_GATEWAY is not defined in .env");
+      throw new Error("Pinata gateway URL is not configured");
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("pinataMetadata", JSON.stringify({ name: file.name }));
+    formData.append("pinataOptions", JSON.stringify({ cidVersion: 1 }));
+
+    try {
+      const res = await axios.post(url, formData, {
+        maxBodyLength: Infinity,
+        headers: {
+          pinata_api_key: import.meta.env.VITE_PINATA_API_KEY,
+          pinata_secret_api_key: import.meta.env.VITE_PINATA_SECRET_API_KEY,
+        },
+      });
+
+      const ipfsHash = res.data.IpfsHash;
+      // Ensure no double slashes by normalizing the URL
+      const pinataURL = `${
+        gateway.endsWith("/") ? gateway.slice(0, -1) : gateway
+      }/${ipfsHash}`;
+      console.log("Generated Pinata URL:", pinataURL);
+      return pinataURL;
+    } catch (err) {
+      console.error("Pinata upload failed:", err.response?.data || err.message);
+      throw new Error("Failed to upload image to Pinata");
+    }
+  };
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      setSelectedFile(null);
+      setFileUploaded(null);
+      return;
+    }
+    setIsFileUploaded(true);
+    const validTypes = ["image/png", "image/jpeg"];
+    const maxSize = 2 * 1024 * 1024;
+
+    if (!validTypes.includes(file.type)) {
+      alert("Only PNG or JPG images are allowed.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size < 1 || file.size > maxSize) {
+      alert("File size must be between 1 byte and 2 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+
+    img.onload = () => {
+      const { width, height } = img;
+      if (width < 30 || height < 30) {
+        alert("Image dimensions must be at least 30x30 pixels.");
+        e.target.value = "";
+        return;
+      }
+      if (width !== height) {
+        alert("Image must be square.");
+        e.target.value = "";
+        return;
+      }
+
+      setSelectedFile(file); // Store the raw file only
+      setFileUploaded(null); // Reset any previous uploaded URL
+    };
+
+    img.onerror = () => {
+      alert("Failed to load image.");
+      setIsFileUploaded(false);
+      e.target.value = "";
+    };
+  };
+  const handleTokenProcess = async () => {
+    try {
+      if (!TokenName || (!Emoji && !selectedFile)) {
+        alert("Please enter an emoji or select an image.");
+        return;
+      }
+
+      let tokenMedia = Emoji;
+      let isImage = false;
+
+      if (selectedFile) {
+        if (!fileUploaded) {
+          setIsUploadingToPinata(true);
+          try {
+            const pinataURL = await uploadToPinata(selectedFile);
+            setFileUploaded(pinataURL);
+            tokenMedia = pinataURL;
+            isImage = true;
+          } catch (uploadErr) {
+            console.error("Pinata upload failed:", uploadErr);
+            alert("Image upload failed.");
+            setIsUploadingToPinata(false);
+            return;
+          }
+          setIsUploadingToPinata(false);
+        } else {
+          tokenMedia = fileUploaded;
+          isImage = true;
+        }
+      }
+
+      await AddYourToken(TokenName, tokenMedia, isImage);
+
+      // Reset form
+      setTokenName("");
+      setEmoji("");
+      setFileUploaded(null);
+      setSelectedFile(null);
+    } catch (err) {
+      console.error("Error processing token:", err);
+    }
+  };
+
+  console.log("file upload url", fileUploaded);
+  console.log("Pinata Gateway:", import.meta.env.VITE_PINATA_GATEWAY);
+  const adjustedTokenProcessing = isFileUploaded
+    ? Math.floor(TokenWithImageProcessing)
+    : Math.floor(TokenProcessing);
 
   console.log("Connected Chain ID:", chainId);
   const setBackLogo = () => {
@@ -262,7 +425,9 @@ const InfoCards = () => {
                     </div>
                   </div>
 
-                  <h5 className="detailAmount">1 DAV TOKEN = 1,000,000 PLS</h5>
+                  <h5 className="detailAmount">
+                    1 DAV TOKEN = {formatWithCommas(Math.floor(DavMintFee))} PLS
+                  </h5>
                   <h5 className="detailAmount mb-4">
                     {TotalCost
                       ? formatNumber(ethers.formatUnits(TotalCost, 18))
@@ -624,7 +789,7 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      %  BURNED BY YOU - {UserPercentage}%
+                      % BURNED BY YOU - {UserPercentage}%
                     </h6>
                     <h6
                       className="detailText mb-0"
@@ -633,8 +798,7 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                       BURNED BY YOU -{" "}
-                      {formatWithCommas(userBurnedAmount)}
+                      BURNED BY YOU - {formatWithCommas(userBurnedAmount)}
                     </h6>
                     <h6
                       className="detailText mb-0"
@@ -643,7 +807,7 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                       TOTAL BURNED - CURRENT CYCLE-{" "}
+                      TOTAL BURNED - CURRENT CYCLE-{" "}
                       {formatWithCommas(userBurnedAmountInCycle)}
                     </h6>
                   </div>
@@ -746,46 +910,9 @@ const InfoCards = () => {
             <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
               <div className="col-md-4 p-0 m-2 cards">
                 <div
-                  className="card bg-dark text-light border-light p-3 d-flex w-100"
+                  className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 "
                   style={{ minHeight: "260px" }}
                 >
-                  <div>
-                    <div className="carddetaildiv  d-flex justify-content-between align-items-center">
-                      <div className="carddetails2 ">
-                        <h6 className="detailText">LISTING A TOKEN</h6>
-                        <ul className="mb-1" style={{ paddingLeft: "20px" }}>
-                          <li className="detailText2">
-                            Market-making service for 21 auctions / 3 years
-                          </li>
-                          <li className="detailText2">
-                            Free liquidity pool tokens paired with the STATE
-                            token
-                          </li>
-                          <li className="detailText2">
-                            Token creators receive periodic airdrops / 2.5
-                            million tokens
-                          </li>
-                          <li className="detailText2">
-                            Airdrops every 50 days
-                          </li>
-                          <li className="detailText2">
-                            Token name characters are limited to 11{" "}
-                          </li>
-                          <li className="detailText2">
-                            Add your Emoticon (Emoji).
-                          </li>
-                          <li className="detailText2">Cost - 10 Million PLS</li>
-                          <li className="detailText2">
-                            Token listed within 24-48 hrs
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-4 p-0 m-2 cards">
-                <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
                   <div className="p-2 pt-3 pb-2">
                     {/* <p className="mb-2 detailText ">Token Name</p> */}
                     <div className="mb-2 mt-3 d-flex align-items-center gap-2">
@@ -829,10 +956,13 @@ const InfoCards = () => {
                           }`}
                           style={{ "--placeholder-color": "#6c757d" }}
                           value={Emoji}
-                          disabled={isProcessingToken}
-                          onChange={(e) =>
-                            handleInputChangeForEmoji(e.target.value)
-                          }
+                          disabled={isProcessingToken || !!selectedFile}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setFileUploaded(null);
+                            setIsFileUploaded(false);
+                            handleInputChangeForEmoji(value);
+                          }}
                           inputMode="text"
                         />
                         <label
@@ -856,31 +986,67 @@ const InfoCards = () => {
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
+                <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100">
+                  <div className="p-2 pt-3 pb-2 mt-4">
+                    {/* Heading */}
+                    <h5 className=" detailText mb-3">Upload Image</h5>
+
+                    {/* File Input */}
+                    <div className="d-flex align-items-center gap-2">
+                      <div
+                        className="floating-input-container"
+                        style={{ maxWidth: "300px" }}
+                      >
+                        <input
+                          type="file"
+                          className="form-control text-center fw-bold"
+                          style={{ "--placeholder-color": "#6c757d" }}
+                          disabled={isProcessingToken || !!Emoji}
+                          onChange={handleFileUpload}
+                          accept="image/*"
+                        />
+                      </div>
+                    </div>
+                    <h6 className="mt-4">
+                      Accepted image files: PNG or JPG format only
+                      <ul
+                        style={{
+                          listStyleType: "disc",
+                          textAlign: "left",
+                          paddingLeft: "20px",
+                          fontSize: "14px",
+                        }}
+                      >
+                        <li>Minimum 30px dimension</li>
+                        <li>Square with 1:1 aspect ratio</li>
+                        <li>Minimum 1 byte file size</li>
+                        <li>Maximum 2 MB file size</li>
+                      </ul>
+                    </h6>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
                   <div className="p-2 pt-3 pb-2">
                     <p className="mb-2 detailText ">Market Maker Fee</p>
-                    <h6 className="text-center  mt-3">10,000,000 PLS</h6>
+                    <h6 className="text-center  mt-3">
+                      {formatWithCommas(adjustedTokenProcessing)} PLS
+                    </h6>
 
                     <button
-                      onClick={async () => {
-                        setTimeout(async () => {
-                          try {
-                            await AddYourToken(TokenName, Emoji);
-                            setTokenName("");
-                            setEmoji("");
-                          } catch (err) {
-                            console.error("Error processing token:", err);
-                          }
-                        }, 100); // Allow UI to re-render before tx.wait blocks
-                      }}
+                      onClick={handleTokenProcess}
                       style={{ width: customWidth }}
                       className="btn btn-primary mx-5 mt-4 btn-sm d-flex justify-content-center align-items-center"
-                      disabled={isProcessingToken}
+                      disabled={isProcessingToken || isUploadingToPinata}
                     >
-                      {isProcessingToken ? (
+                      {isProcessingToken || isUploadingToPinata ? (
                         <>
                           <IOSpinner className="me-2" />
-                          Processing...
+                          {isUploadingToPinata
+                            ? "Uploading..."
+                            : "Processing..."}
                         </>
                       ) : (
                         "Process Listing"

@@ -37,6 +37,7 @@ contract DAV_V2_2 is
     ///      access restriction, or deterrence. Adjust only if this is NOT the intended behavior.
 	
     uint256 public constant TOKEN_PROCESSING_FEE = 2000 ether;
+    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 2500 ether;
     uint256 public totalReferralRewardsDistributed;
     uint256 public mintedSupply; // Total Minted DAV Tokens
     uint256 public stateLpTotalShare;
@@ -492,60 +493,80 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
      *      Each user can process tokens up to the number of DAV they hold.
      *      Governance is trusted to operate transparently and verifiably.
      */
-    function processYourToken(
-        string memory _tokenName,
-        string memory _emoji
-    ) public payable {
-        require(bytes(_tokenName).length > 0, "Please provide tokenName");
-		// no commit-reveal scheme or time lock require to unique token name. it will not front run
-		  require(!isTokenNameUsed[_tokenName], "Token name already used");
-		  require(userTokenEntries[msg.sender][_tokenName].user == address(0), "Token name already used by user");
-        require(
-            _utfStringLength(_emoji) <= 10,
-            "Max 10 UTF-8 characters allowed"
-        );
-        // ⚖️ Token entry limit is indirectly enforced via DAV balance
-        // Each user can process one token per DAV they hold. This means the number of tokens they can process is limited by their DAV balance.
-        uint256 userTokenBalance = balanceOf(msg.sender); // The amount of DAV the user holds
-      uint256 tokensSubmitted = userTokenCount[msg.sender]; // Number of tokens the user has already processed
-        // Ensure that the user has enough DAV to process a new token
-        require(
-            userTokenBalance > tokensSubmitted,
-            "You need more DAV to process new token"
-        );
-        // If not the governance, ensure the user sends the required PLS amount
-        if (msg.sender != governance) {
-            //it is  100,000 Ether not in wei form
-            require(
-                msg.value == TOKEN_PROCESSING_FEE,
-                "Please send exactly 100,000 PLS"
-            );
-            // Allocate funds to State LP cycle similar to mintDAV logic
-            uint256 stateLPShare = msg.value;
-            uint256 currentCycle = (block.timestamp - deployTime) /
-                CLAIM_INTERVAL;
-            uint256 cycleAllocation = (stateLPShare *
-                TREASURY_CLAIM_PERCENTAGE) / 100;
-            // Allocate to each cycle over the defined number of periods
-            for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
-                uint256 targetCycle = currentCycle + i;
-                cycleTreasuryAllocation[targetCycle] += cycleAllocation;
-                cycleUnclaimedPLS[targetCycle] += cycleAllocation;
-            }        }
-        // Add the user's token name to their list and mark it as used
-        usersTokenNames[msg.sender].push(_tokenName);
-		tokenNameToOwner[_tokenName] = msg.sender;
-        isTokenNameUsed[_tokenName] = true;
-        userTokenCount[msg.sender]++;
-        allTokenNames.push(_tokenName);
-        userTokenEntries[msg.sender][_tokenName] = TokenEntry(
-            msg.sender,
-            _tokenName,
-            _emoji,
-            TokenStatus.Pending
-        );
-        emit TokenNameAdded(msg.sender, _tokenName);
+   function processYourToken(
+    string memory _tokenName,
+    string memory _emojiOrImage
+		) public payable {
+    require(bytes(_tokenName).length > 0, "Please provide tokenName");
+    require(!isTokenNameUsed[_tokenName], "Token name already used");
+    require(userTokenEntries[msg.sender][_tokenName].user == address(0), "Token name already used by user");
+
+    // Detect if input is an image (Pinata IPFS link)
+   bool isImage = _isImageURL(_emojiOrImage);
+
+    // Emoji check if not image
+    if (!isImage) {
+        require(_utfStringLength(_emojiOrImage) <= 10, "Max 10 UTF-8 characters allowed");
     }
+    uint256 userTokenBalance = balanceOf(msg.sender);
+    uint256 tokensSubmitted = userTokenCount[msg.sender];
+    require(userTokenBalance > tokensSubmitted, "You need more DAV to process new token");
+
+    // Fee logic
+    if (msg.sender != governance) {
+        uint256 requiredFee = isImage ? TOKEN_WITHIMAGE_PROCESS : TOKEN_PROCESSING_FEE;
+        require(msg.value == requiredFee, isImage ? "Please send exact image fee" : "Please send exactly 100,000 PLS");
+
+        // Treasury logic
+        uint256 stateLPShare = msg.value;
+        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+        uint256 cycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) / 100;
+
+        for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
+            uint256 targetCycle = currentCycle + i;
+            cycleTreasuryAllocation[targetCycle] += cycleAllocation;
+            cycleUnclaimedPLS[targetCycle] += cycleAllocation;
+        }
+    }
+	  usersTokenNames[msg.sender].push(_tokenName);
+    tokenNameToOwner[_tokenName] = msg.sender;
+    isTokenNameUsed[_tokenName] = true;
+    userTokenCount[msg.sender]++;
+    allTokenNames.push(_tokenName);
+    userTokenEntries[msg.sender][_tokenName] = TokenEntry(
+        msg.sender,
+        _tokenName,
+        _emojiOrImage,
+        TokenStatus.Pending
+    );
+
+    emit TokenNameAdded(msg.sender, _tokenName);
+}
+function _contains(string memory str, string memory substr) internal pure returns (bool) {
+    bytes memory strBytes = bytes(str);
+    bytes memory substrBytes = bytes(substr);
+
+    if (substrBytes.length == 0 || substrBytes.length > strBytes.length) return false;
+
+    for (uint256 i = 0; i <= strBytes.length - substrBytes.length; i++) {
+        bool matchFound = true;
+        for (uint256 j = 0; j < substrBytes.length; j++) {
+            if (strBytes[i + j] != substrBytes[j]) {
+                matchFound = false;
+                break;
+            }
+        }
+        if (matchFound) return true;
+    }
+
+    return false;
+}
+
+function _isImageURL(string memory str) internal pure returns (bool) {
+    return _contains(str, "mypinata.cloud/ipfs/");
+}
+
+
     /// @notice Counts the number of UTF-8 characters in a string
     /// @dev Each emoji can be 1–4 bytes. This counts actual characters, not bytes.
     function _utfStringLength(

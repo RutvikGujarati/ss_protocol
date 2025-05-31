@@ -26,7 +26,6 @@ const DetailsInfo = ({ selectedToken }) => {
     setDavAndStateIntoSwap,
     handleAddToken,
     DavAddress,
-    StateDeposited,
   } = useSwapContract();
   const { totalStateBurned } = useDAvContract();
   const [localSearchQuery, setLocalSearchQuery] = useState("");
@@ -65,53 +64,29 @@ const DetailsInfo = ({ selectedToken }) => {
     });
   }, []);
 
-  const formatPrice = (price) => {
-    if (!price || isNaN(price)) return "0.0000";
-
-    const formattedPrice = parseFloat(price).toFixed(10);
-    const [integerPart, decimalPart] = formattedPrice.split(".");
-
-    const leadingZerosMatch = decimalPart.match(/^0+(.)/);
-    if (leadingZerosMatch) {
-      const leadingZeros = leadingZerosMatch[0].slice(0, -1);
-      const firstSignificantDigit = leadingZerosMatch[1];
-      const zeroCount = leadingZeros.length;
-      if (zeroCount < 4) {
-        return `${integerPart}.${"0".repeat(
-          zeroCount
-        )}${firstSignificantDigit}${decimalPart
-          .slice(zeroCount + 1)
-          .slice(0, 3)}`;
-      } else {
-        return (
-          <>
-            {integerPart}.<span>0</span>
-            <sub>{zeroCount}</sub>
-            {firstSignificantDigit}
-            {decimalPart.slice(zeroCount + 1).slice(0, 3)}
-          </>
-        );
-      }
-    }
-
-    return `${parseFloat(price).toFixed(7)}`;
-  };
-
   const handleSearch = (e) => {
-    const query = e.target.value;
+    const query = e.target.value.trim(); // Trim to remove leading/trailing spaces
     setLocalSearchQuery(query);
   };
 
-  const filteredTokens = tokens.filter(
-    (item) =>
-      item.tokenName.toLowerCase().includes(localSearchQuery.toLowerCase()) ||
-      item.emoji.includes(localSearchQuery)
+  // Filter tokens by tokenName only
+  const filteredTokens = tokens.filter((item) =>
+    item.tokenName.toLowerCase().includes(localSearchQuery.toLowerCase())
   );
+
+  const isImageUrl = (url) => {
+    return (
+      typeof url === "string" &&
+      url.startsWith("https://") &&
+      url.includes("ipfs")
+    );
+  };
 
   const getVaultRatio = (token) => {
     if (token.tokenName === "DAV" || token.tokenName === "STATE") return null;
     return (500000000000 - token.DavVault) / token.DavVault;
   };
+
   const sortedTokens = tokens
     .filter((token) => token.isSupported)
     .sort((a, b) => {
@@ -131,15 +106,17 @@ const DetailsInfo = ({ selectedToken }) => {
       return bRatio - aRatio; // Descending order
     });
 
+  // Determine data to show: prioritize selectedToken, fallback to first filtered token, or null if no matches
   const dataToShow = selectedToken
     ? tokens.find((token) => token.tokenName === selectedToken.name)
-    : filteredTokens[0] || tokens[0];
+    : filteredTokens[0] || null;
 
   // Filter static tokens (DAV and STATE) for display during loading
   const staticTokens = filteredTokens.filter(
     (token) => token.tokenName === "DAV" || token.tokenName === "STATE"
   );
-  // Step 1: Select top 5 tokens (excluding DAV and STATE) with best vault ratios
+
+  // Select top 5 tokens (excluding DAV and STATE) with best vault ratios
   const greenDotEligibleTokens = (loading ? staticTokens : sortedTokens)
     .filter(
       (token) =>
@@ -188,19 +165,11 @@ const DetailsInfo = ({ selectedToken }) => {
                   <th className="text-center">Info</th>
                   <th></th>
                   <th className="text-center">Market Maker</th>
-                  {dataToShow.tokenName !== "DAV" ? (
-                    <th className="fw-bold text-uppercase text-end col-auto">
-                      <button className="swap-btn py-1 mx-3 btn btn-primary btn-sm">
-                        Price: ${formatPrice(dataToShow.Price)}
-                      </button>
-                    </th>
-                  ) : (
-                    <th className="col-auto"></th>
-                  )}
+                  <th className="col-auto"></th>
                 </tr>
               </thead>
               <tbody>
-                {(loading ? staticTokens : sortedTokens)
+                {(loading ? staticTokens : filteredTokens) // Use filteredTokens instead of sortedTokens to reflect search
                   .filter((token) => token.isSupported)
                   .sort((a, b) => {
                     const order = { DAV: 0, STATE: 1 };
@@ -233,7 +202,16 @@ const DetailsInfo = ({ selectedToken }) => {
                         <td className="text-center align-middle">
                           <div className="d-flex flex-column align-items-center">
                             <span style={{ fontSize: "1rem", lineHeight: "1" }}>
-                              {token.emoji}
+                              {isImageUrl(token.emoji) ? (
+                                <img
+                                  src={token.emoji}
+                                  style={{ width: "30px", height: "30px" }}
+                                />
+                              ) : (
+                                <span style={{ fontSize: "20px" }}>
+                                  {token.emoji}
+                                </span>
+                              )}
                             </span>
                             <span>{token.tokenName}</span>
                           </div>
@@ -384,11 +362,6 @@ const DetailsInfo = ({ selectedToken }) => {
                               }}
                             ></span>
                           )}
-                          <span className="mx-2">
-                            {StateDeposited?.[token.TokenAddress] == "true" && (
-                              <>🏳️</>
-                            )}
-                          </span>
                         </td>
                         <td></td>
                       </tr>
@@ -403,11 +376,15 @@ const DetailsInfo = ({ selectedToken }) => {
                 </p>
               </div>
             )}
+            {!loading && filteredTokens.length === 0 && (
+              <div className="alert alert-warning text-center" role="alert">
+                No tokens found matching the search query.
+              </div>
+            )}
           </>
         ) : (
           <div className="alert alert-warning text-center" role="alert">
-            Currently No detailed information is available for the selected
-            token.
+            No tokens available to display.
           </div>
         )}
       </div>

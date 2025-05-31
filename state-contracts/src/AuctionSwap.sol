@@ -86,7 +86,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
     mapping(address => mapping(address => uint256)) public lastClaimTime;
     mapping(string => string) public tokenNameToEmoji;
-    mapping(address => bool) public hasDeposited;
     event TokenDeployed(string name, address tokenAddress);
 
     mapping(address => mapping(address => mapping(address => mapping(uint256 => UserSwapInfo))))
@@ -176,15 +175,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
         emit TokenDeployed(name, address(token));
         return address(token);
-    }
-    function depositStateForTokenOwner(address token) public nonReentrant {
-        require(!hasDeposited[token], "Already deposited");
-        hasDeposited[token] = true;
-        IERC20(stateToken).safeTransferFrom(
-            msg.sender,
-            address(this),
-            StateDeposittokenAmount
-        );
     }
     // Add and start Auction
     function addToken(

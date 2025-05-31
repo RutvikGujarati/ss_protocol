@@ -29,7 +29,7 @@ export const SwapContractProvider = ({ children }) => {
   const chainId = useChainId();
   const { loading, provider, signer, AllContracts } =
     useContext(ContractContext);
-  const { fetchData } = useDAvContract();
+  const { fetchData, DavMintFee } = useDAvContract();
   const { address } = useAccount();
 
   const [claiming, setClaiming] = useState(false);
@@ -48,8 +48,6 @@ export const SwapContractProvider = ({ children }) => {
   const [TokenBalance, setTokenbalance] = useState({});
   const [isReversed, setIsReverse] = useState({});
   const [IsAuctionActive, setisAuctionActive] = useState({});
-  const [StateDeposited, setIsStateDeposited] = useState({});
-  const [IsBurned, setIsBurned] = useState({});
   const [isTokenRenounce, setRenonced] = useState({});
   const [tokenMap, setTokenMap] = useState({});
   const [TokenNames, setTokenNames] = useState({});
@@ -70,7 +68,7 @@ export const SwapContractProvider = ({ children }) => {
     if (chainId == 146) {
       setTotalCost(ethers.parseEther((amount * 100).toString()));
     } else {
-      setTotalCost(ethers.parseEther((amount * 1000000).toString()));
+      setTotalCost(ethers.parseEther((amount * DavMintFee).toString()));
     }
   };
   const fetchTokenData = async ({
@@ -363,29 +361,6 @@ export const SwapContractProvider = ({ children }) => {
       });
     } catch (e) {
       console.error("Error fetching Auction Active:", e);
-    }
-  };
-
-  const CheckIsDeposited = async () => {
-    try {
-      await fetchTokenData({
-        contractMethod: "hasDeposited",
-        setState: setIsStateDeposited,
-        formatFn: (v) => v.toString(), // Ensure boolean is converted to "true"/"false"
-      });
-    } catch (e) {
-      console.error("Error fetching hasDeposited:", e);
-    }
-  };
-  const CheckIsBurned = async () => {
-    try {
-      await fetchTokenData({
-        contractMethod: "hasBurned",
-        setState: setIsBurned,
-        formatFn: (v) => v.toString(), // Ensure boolean is converted to "true"/"false"
-      });
-    } catch (e) {
-      console.error("Error fetching hasBurned:", e);
     }
   };
 
@@ -771,20 +746,14 @@ export const SwapContractProvider = ({ children }) => {
       isAirdropClaimed,
       AddressesFromContract,
       isRenounced,
-      CheckIsDeposited,
-      CheckIsBurned,
+
       getTokenNamesForUser,
       isTokenSupporteed,
       getTokenNamesByUser,
       HasSwappedAucton,
       HasReverseSwappedAucton,
     ];
-    const pollingFunctions = [
-      CheckIsAuctionActive,
-      CheckIsReverse,
-      CheckIsBurned,
-      CheckIsDeposited,
-    ];
+    const pollingFunctions = [CheckIsAuctionActive, CheckIsReverse];
 
     const runAll = async () => {
       const results = await Promise.allSettled(functions.map((fn) => fn()));
@@ -1114,8 +1083,6 @@ export const SwapContractProvider = ({ children }) => {
         setTxStatusForAdding,
         TimeLeftClaim,
         renounceTokenContract,
-        StateDeposited,
-        IsBurned,
         tokenMap,
         IsAuctionActive,
         TokenRatio,
