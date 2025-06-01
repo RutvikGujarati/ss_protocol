@@ -1,4 +1,4 @@
-[
+ [
 		{
 			"type": "constructor",
 			"inputs": [
@@ -40,19 +40,6 @@
 				}
 			],
 			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "BurnStateTokens",
-			"inputs": [
-				{
-					"name": "token",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [],
-			"stateMutability": "nonpayable"
 		},
 		{
 			"type": "function",
@@ -386,19 +373,6 @@
 		},
 		{
 			"type": "function",
-			"name": "depositStateForTokenOwner",
-			"inputs": [
-				{
-					"name": "token",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
 			"name": "depositTokens",
 			"inputs": [
 				{
@@ -435,7 +409,7 @@
 		},
 		{
 			"type": "function",
-			"name": "getAppearanceForBurn",
+			"name": "flamLiquidity",
 			"inputs": [
 				{
 					"name": "token",
@@ -443,14 +417,8 @@
 					"internalType": "address"
 				}
 			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "bool",
-					"internalType": "bool"
-				}
-			],
-			"stateMutability": "view"
+			"outputs": [],
+			"stateMutability": "nonpayable"
 		},
 		{
 			"type": "function",
@@ -805,25 +773,6 @@
 		},
 		{
 			"type": "function",
-			"name": "hasBurned",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "bool",
-					"internalType": "bool"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
 			"name": "hasClaimed",
 			"inputs": [
 				{
@@ -848,10 +797,10 @@
 		},
 		{
 			"type": "function",
-			"name": "hasDeposited",
+			"name": "isAuctionActive",
 			"inputs": [
 				{
-					"name": "",
+					"name": "inputToken",
 					"type": "address",
 					"internalType": "address"
 				}
@@ -867,10 +816,10 @@
 		},
 		{
 			"type": "function",
-			"name": "isAuctionActive",
+			"name": "isFlammed",
 			"inputs": [
 				{
-					"name": "inputToken",
+					"name": "",
 					"type": "address",
 					"internalType": "address"
 				}

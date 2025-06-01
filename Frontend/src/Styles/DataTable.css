@@ -290,3 +290,15 @@ table.table-dark tbody tr:last-child td:last-child {
 .small-font-row * {
   font-size: 13px !important;
 }
+
+.box-tick {
+  width: 30px;
+  height: 30px;
+  border: 2px solid green;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: green;
+  font-size: 1.2rem;
+}

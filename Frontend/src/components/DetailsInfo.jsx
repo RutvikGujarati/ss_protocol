@@ -213,7 +213,10 @@ const DetailsInfo = ({ selectedToken }) => {
                                 </span>
                               )}
                             </span>
-                            <span>{token.tokenName}</span>
+                            <span>
+                              {token.tokenName}
+                              {token.isFlammed == "true" && <>🔥</>}
+                            </span>
                           </div>
                         </td>
                         <td className="text-center">

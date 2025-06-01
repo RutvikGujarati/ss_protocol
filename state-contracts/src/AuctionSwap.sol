@@ -83,6 +83,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     mapping(address => address) public tokenOwners; // token => owner
     mapping(address => address[]) public ownerToTokens;
     mapping(string => bool) public isTokenNameUsed;
+    mapping(address => bool) public isFlammed;
 
     mapping(address => mapping(address => uint256)) public lastClaimTime;
     mapping(string => string) public tokenNameToEmoji;
@@ -134,6 +135,11 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         emit GovernanceUpdateProposed(newGov, governanceUpdateTimestamp);
     }
 
+    function flamLiquidity(address token) public onlyGovernance {
+        require(!isFlammed[token], "already got flamme");
+        isFlammed[token] = true;
+    }
+
     function confirmGovernanceUpdate() external onlyGovernance {
         require(
             block.timestamp >= governanceUpdateTimestamp,
@@ -182,12 +188,12 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address pairAddress,
         address _tokenOwner
     ) external onlyGovernance {
-        IPair pair = IPair(pairAddress);
-        require(
-            (pair.token0() == token && pair.token1() == stateToken) ||
-                (pair.token1() == token && pair.token0() == stateToken),
-            "Pair must contain stateToken"
-        );
+        // IPair pair = IPair(pairAddress);
+        // require(
+        //     (pair.token0() == token && pair.token1() == stateToken) ||
+        //         (pair.token1() == token && pair.token0() == stateToken),
+        //     "Pair must contain stateToken"
+        // );
         require(token != address(0), "Invalid token address");
         require(stateToken != address(0), "State token not initialized");
         require(pairAddress != address(0), "Invalid pair address");

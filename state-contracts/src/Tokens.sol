@@ -5,15 +5,26 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title Token - ERC20 token with initial distribution between governance and swap treasury
-/// @author owner of contract is author 
+/// @author System State Protocol
 /// @notice This contract mints a fixed maximum supply and distributes initial tokens to governance and swap treasury addresses.
 /// @dev The contract inherits from OpenZeppelin's ERC20 and Ownable contracts.
-contract TOKEN_V2_2  is ERC20, Ownable {
+contract TOKEN_V2_2 is ERC20, Ownable {
     /// @notice The maximum total supply of tokens (500 billion tokens with 18 decimals)
     uint256 public constant MAX_SUPPLY = 500000000000 ether; // 500 billion
-    uint256 public constant ONE_PERCENT = (MAX_SUPPLY * 1) / 100;
-    uint256 public constant NINETY_NINE_PERCENT = MAX_SUPPLY - ONE_PERCENT;
-	event InitialDistribution(address indexed gov, address indexed treasury, uint256 govAmount, uint256 treasuryAmount);
+    uint256 public constant ONE_PERCENT = 5000000000 ether;
+    uint256 public constant NINETY_NINE_PERCENT = 495000000000 ether;
+    bool private _mintingFinalized = false; // Flag to prevent re-minting after initial distribution
+
+    modifier onlyDuringConstructor() {
+        require(!_mintingFinalized, "Minting has already been finalized");
+        _;
+    }
+    event InitialDistribution(
+        address indexed gov,
+        address indexed treasury,
+        uint256 govAmount,
+        uint256 treasuryAmount
+    );
 
     /**
      * @notice Constructs the Token contract and mints initial tokens
@@ -35,12 +46,18 @@ contract TOKEN_V2_2  is ERC20, Ownable {
         require(
             _gov != address(0) &&
                 _swapTreasury != address(0) &&
+                _gov != _swapTreasury &&
                 _owner != address(0),
             "Invalid address"
         );
-
+        _mintingFinalized = true; // Set flag to prevent further minting
         _mint(_gov, ONE_PERCENT);
         _mint(_swapTreasury, NINETY_NINE_PERCENT);
-		emit InitialDistribution(_gov, _swapTreasury, ONE_PERCENT, NINETY_NINE_PERCENT);
+        emit InitialDistribution(
+            _gov,
+            _swapTreasury,
+            ONE_PERCENT,
+            NINETY_NINE_PERCENT
+        );
     }
 }

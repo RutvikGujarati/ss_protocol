@@ -36,6 +36,7 @@ const DataTable = () => {
     handleAddToken,
     tokenMap,
     giveRewardForAirdrop,
+    TickMarkToken,
   } = useSwapContract();
 
   const { tokens } = useAuctionTokens();
@@ -186,6 +187,20 @@ const DataTable = () => {
     return () => clearTimeout(timer);
   }, [txStatusForSwap]);
 
+  const [loadingMap, setLoadingMap] = useState({});
+
+  const handleTick = async (TokenAddress) => {
+    setLoadingMap((prev) => ({ ...prev, [TokenAddress]: true }));
+    try {
+      await TickMarkToken(TokenAddress);
+    } catch (err) {
+      console.log(err);
+      alert("Transaction failed.");
+    } finally {
+      setLoadingMap((prev) => ({ ...prev, [TokenAddress]: false }));
+    }
+  };
+
   return !isConnected || !address ? (
     <div className="container text-center mt-5">
       <p className="text-light">Please connect your wallet.</p>
@@ -205,6 +220,7 @@ const DataTable = () => {
                 <th></th>
                 <th></th>
                 <th>Token Name</th>
+				<th></th>
                 <th>Claim Airdrop</th>
                 <th></th>
                 <th>Auction Timer</th>
@@ -254,8 +270,8 @@ const DataTable = () => {
                       userHasReverse,
                       // AuctionStatus,
                       TimeLeft,
+                      flammed,
                       inputTokenAmount,
-                      hasDeposited,
                       onlyInputAmount,
                       // handleAddToken,
                       outputToken,
@@ -275,20 +291,9 @@ const DataTable = () => {
                           <span style={{ fontSize: "20px" }}>{emoji}</span>
                         )}
                       </td>
-                      <td className="justify-content-center">
-                        {`${name}`}
-                        {hasDeposited == "true" && (
-                          <>
-                            <span
-                              style={{
-                                marginLeft: "8px",
-                              }}
-                            >
-                              🏳️
-                            </span>
-                          </>
-                        )}
-                      </td>
+                      <td className="justify-content-center">{`${name}`}</td>
+                      <td> {flammed == "true" && <>🔥</>}</td>
+
                       <td style={{ position: "relative" }}>
                         <button
                           onClick={() => Checking(id, ContractName)}
@@ -586,6 +591,7 @@ const DataTable = () => {
                   <th>Time To claim</th>
                   <th>Amount</th>
                   <th>Airdrop</th>
+                  <th></th>
                 </tr>
               ) : (
                 <tr>
@@ -647,6 +653,7 @@ const DataTable = () => {
                         isDeployed,
                         isRenounceToken,
                         TokenAddress,
+                        isFlammed,
                       },
                       index
                     ) => (
@@ -662,7 +669,10 @@ const DataTable = () => {
                             <span style={{ fontSize: "20px" }}>{Emojis}</span>
                           )}
                         </td>
-                        <td>{name}</td>
+                        <td>
+                          {name}
+                          {isFlammed == "true" && <>🔥 </>}
+                        </td>
                         <td>
                           {isDeployed ? (
                             <span
@@ -801,6 +811,32 @@ const DataTable = () => {
                               ? "Processing..."
                               : "Claim"}
                           </button>
+                        </td>
+                        <td>
+                          {isFlammed == "false" ? (
+                            <div className="box-tick">✓</div>
+                          ) : (
+                            <button
+                              className="btn btn-outline-success btn-sm"
+                              onClick={() => handleTick(TokenAddress)}
+                              disabled={loadingMap[TokenAddress]}
+                              style={{
+                                width: "30px",
+                                height: "30px",
+                                padding: 0,
+                                fontSize: "1.2rem",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              {loadingMap[TokenAddress] ? (
+                                <span className="spinner-border spinner-border-sm" />
+                              ) : (
+                                "☐"
+                              )}
+                            </button>
+                          )}
                         </td>
                         {isAddingPopupOpen && (
                           <div

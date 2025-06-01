@@ -178,6 +178,16 @@ const InfoCards = () => {
       e.target.value = "";
     };
   };
+  const handleWithDelay = (fn, delay = 100) => {
+    setTimeout(async () => {
+      try {
+        await fn();
+      } catch (err) {
+        console.error("Async function failed:", err);
+      }
+    }, delay);
+  };
+
   const handleTokenProcess = async () => {
     try {
       if (!TokenName || (!Emoji && !selectedFile)) {
@@ -1041,7 +1051,7 @@ const InfoCards = () => {
                     </h6>
 
                     <button
-                      onClick={handleTokenProcess}
+                      onClick={() => handleWithDelay(handleTokenProcess)}
                       style={{ width: customWidth }}
                       className="btn btn-primary mx-5 mt-4 btn-sm d-flex justify-content-center align-items-center"
                       disabled={isProcessingToken || isUploadingToPinata}
@@ -1067,8 +1077,8 @@ const InfoCards = () => {
                         fontSize: "14px",
                       }}
                     >
-                      <li>Market Maker + Emoji Fee - 10 Mil PLS </li>
-                      <li>Market Maker + Image Fee - 15 Mil PLS </li>
+                      <li>Market Maker + Emoji Fee - 10 Million PLS </li>
+                      <li>Market Maker + Image Fee - 15 Million PLS </li>
                     </ul>
                   </h6>
                 </div>

@@ -48,6 +48,7 @@ export const SwapContractProvider = ({ children }) => {
   const [TokenBalance, setTokenbalance] = useState({});
   const [isReversed, setIsReverse] = useState({});
   const [IsAuctionActive, setisAuctionActive] = useState({});
+  const [isGotFlammed, setIsFlammed] = useState({});
   const [isTokenRenounce, setRenonced] = useState({});
   const [tokenMap, setTokenMap] = useState({});
   const [TokenNames, setTokenNames] = useState({});
@@ -111,30 +112,16 @@ export const SwapContractProvider = ({ children }) => {
           const formattedResult = formatFn(rawResult);
 
           // Use tokenAddress as key for hasDeposited, tokenName for others
-          const key =
-            contractMethod === "hasDeposited" ||
-            contractMethod === "hasBurned" ||
-            useAddressAsKey
-              ? tokenAddress
-              : tokenName;
+          const key = useAddressAsKey ? tokenAddress : tokenName;
           results[key] = formattedResult;
         } catch (err) {
           console.error(
             `Error calling ${contractMethod} for ${tokenName} (${tokenAddress}):`,
             err
           );
-          const key =
-            contractMethod === "hasDeposited" ||
-            contractMethod === "hasBurned" ||
-            useAddressAsKey
-              ? tokenAddress
-              : tokenName;
+          const key = useAddressAsKey ? tokenAddress : tokenName;
           results[key] =
-            contractMethod === "hasDeposited" || contractMethod === "hasBurned"
-              ? "false"
-              : contractMethod === "getRatioPrice"
-              ? "not listed"
-              : "not started";
+            contractMethod === "getRatioPrice" ? "not listed" : "not started";
         }
       }
 
@@ -363,7 +350,17 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching Auction Active:", e);
     }
   };
-
+  const isFlammed = async () => {
+    try {
+      await fetchTokenData({
+        contractMethod: "isFlammed",
+        setState: setIsFlammed,
+      });
+    } catch (e) {
+      console.error("Error fetching isFlammed:", e);
+    }
+  };''
+console.log("got flammed",isGotFlammed["TEST2"])
   const isRenounced = async () => {
     try {
       const results = {};
@@ -746,14 +743,14 @@ export const SwapContractProvider = ({ children }) => {
       isAirdropClaimed,
       AddressesFromContract,
       isRenounced,
-
+      isFlammed,
       getTokenNamesForUser,
       isTokenSupporteed,
       getTokenNamesByUser,
       HasSwappedAucton,
       HasReverseSwappedAucton,
     ];
-    const pollingFunctions = [CheckIsAuctionActive, CheckIsReverse];
+    const pollingFunctions = [isFlammed, CheckIsAuctionActive, CheckIsReverse];
 
     const runAll = async () => {
       const results = await Promise.allSettled(functions.map((fn) => fn()));
@@ -977,6 +974,16 @@ export const SwapContractProvider = ({ children }) => {
       throw e;
     }
   };
+  const TickMarkToken = async (TokenAddress) => {
+    try {
+      const tx = await AllContracts.AuctionContract.flamLiquidity(TokenAddress);
+      await tx.wait();
+      await isFlammed();
+    } catch (e) {
+      console.error("Error claiming tokens:", e);
+      throw e;
+    }
+  };
 
   const handleAddToken = async (
     tokenAddress,
@@ -1086,6 +1093,8 @@ export const SwapContractProvider = ({ children }) => {
         tokenMap,
         IsAuctionActive,
         TokenRatio,
+        TickMarkToken,
+        isGotFlammed,
       }}
     >
       {children}

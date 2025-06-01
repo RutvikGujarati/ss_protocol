@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 // ✅ 1. First hook: for general token config
 export const useAddTokens = () => {
 	const { names, users, Emojies, isUsed } = useDAvContract();
-	const { tokenMap, TimeLeftClaim, supportedToken, isTokenRenounce } = useSwapContract();
+	const { tokenMap, TimeLeftClaim, supportedToken, isTokenRenounce,isGotFlammed } = useSwapContract();
 	const [AuthLoading, setAuthLoading] = useState(true);
 
 	useEffect(() => {
@@ -53,6 +53,7 @@ export const useAddTokens = () => {
 		const isDeployed = isUsedMap[name] ?? false;
 		const isRenounceToken = isTokenRenounce?.[name] ?? false;
 		const isAdded = supportedToken?.[name] ?? false;
+		const isFlammed = isGotFlammed?.[name] ?? false;
 		const Emojis = Emojies[index] || "❓";
 		const tokenAddress = tokenMap?.[name] || "0x0000000000000000000000000000000000000000";
 		const timeLeft = TimeLeftClaim?.[name] || "0";
@@ -61,6 +62,7 @@ export const useAddTokens = () => {
 			name,
 			Emojis,
 			isDeployed,
+			isFlammed,
 			isAdded,
 			isRenounceToken,
 			contract: name || user,
@@ -75,6 +77,7 @@ export const useAddTokens = () => {
 			id: config.user,
 			user: config.user,
 			name: config.name,
+			isFlammed: config.isFlammed,
 			isDeployed: config.isDeployed,
 			Emojis: config.Emojis,
 			isRenounceToken: config.isRenounceToken,
@@ -94,7 +97,7 @@ export const useAddTokens = () => {
 
 
 export const useUsersOwnerTokens = () => {
-	const { UsersSupportedTokens, IsBurned } = useSwapContract();
+	const { UsersSupportedTokens, isGotFlammed } = useSwapContract();
 	const { names, Emojies } = useDAvContract();
 	console.log("names", names)
 	console.log("Raw UsersSupportedTokens:", UsersSupportedTokens);
@@ -155,7 +158,7 @@ export const useUsersOwnerTokens = () => {
 			pairAddress: pairAddress,
 			nextClaimTime: nextClaimTime,
 			Emojis: emojis,
-			isBurned: IsBurned?.[actualAddress],
+			isFlammed: isGotFlammed?.[tokenName],
 		};
 
 		console.log("Token entry:", tokenEntry);

@@ -27,7 +27,7 @@ const Header = () => {
               STATE DEX
             </label>
             <p className="detailAmount mb-0" style={{ fontSize: "0.8rem" }}>
-              Not just a swap — it’s your new job
+              Not just a swap — it’s VOLUME
             </p>
           </NavLink>
 
