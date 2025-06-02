@@ -993,7 +993,7 @@ const InfoCards = () => {
                           fontSize: "14px",
                         }}
                       >
-                        <li>Choose the image or an emoji. </li>
+                        <li>Choose an image or an emoji. </li>
                         <li>You can only select one </li>
                         <li>Emoji is free</li>
                       </ul>

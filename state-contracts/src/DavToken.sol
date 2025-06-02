@@ -56,6 +56,7 @@ contract DAV_V2_2 is
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
     uint256 public constant CLAIM_INTERVAL = 1 days; // 4 days claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
+	uint256 userBalance = balanceOf(msg.sender);
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
     // @notice The governance address with special privileges, set at deployment
@@ -449,7 +450,7 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
 );
 }
     function claimReward() external nonReentrant {
-        require(balanceOf(msg.sender) > 0, "Not a DAV holder");
+        require(userBalance > 0, "Not a DAV holder");
 		require(msg.sender != governance && !receivedFromGovernance[msg.sender],
         "Not eligible to claim rewards");
         _updateRewards(msg.sender);
@@ -498,6 +499,7 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
     string memory _emojiOrImage
 		) public payable {
     require(bytes(_tokenName).length > 0, "Please provide tokenName");
+	require(bytes(_emojiOrImage).length <= 10000, "input too long");
     require(!isTokenNameUsed[_tokenName], "Token name already used");
     require(userTokenEntries[msg.sender][_tokenName].user == address(0), "Token name already used by user");
 
@@ -508,7 +510,7 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
     if (!isImage) {
         require(_utfStringLength(_emojiOrImage) <= 10, "Max 10 UTF-8 characters allowed");
     }
-    uint256 userTokenBalance = balanceOf(msg.sender);
+    uint256 userTokenBalance = userBalance;
     uint256 tokensSubmitted = userTokenCount[msg.sender];
     require(userTokenBalance > tokensSubmitted, "You need more DAV to process new token");
 
@@ -585,14 +587,18 @@ function _isImageURL(string memory str) internal pure returns (bool) {
             length++;
         }
     }
-    // allTokenEntries is implicitly bounded by each user's DAV balance.
-    // Each user can only submit one token per DAV they hold, and DAV itself is capped.
-    // This natural upper bound eliminates the need for a hardcoded limit like 1,000 entries.
-    /// @notice Returns the list of pending token names for a user.
-    /// @dev This function is intended for off-chain use only. It may consume too much gas if called on-chain for users with many entries.
+    // allTokenEntries are implicitly limited by the user's DAV token balance.
+    // A user can only submit one token per DAV they own, and since the total DAV supply is capped,
+    // this naturally restricts the number of entries per user.
+    // Therefore, we do not need pagination or arbitrary hard limits like 1,000 entries.
+    /// @notice Returns the list of pending token names for a given user.
+    /// @dev This function is meant for off-chain access only.
+    /// Calling this on-chain may be expensive for users with many entries,
+    /// but due to the natural upper bound explained above, pagination is not required.
+
     function getPendingTokenNames(address user) public view returns (string[] memory) {
     string[] memory all = usersTokenNames[user];
-    uint256 limit = all.length > 50 ? 50 : all.length; // hardcoded limit
+    uint256 limit = all.length > 100 ? 100 : all.length; // hardcoded limit
     string[] memory temp = new string[](limit);
     uint256 count = 0;
     for (uint256 i = 0; i < limit; i++) {
@@ -649,7 +655,11 @@ function _isImageURL(string memory str) internal pure returns (bool) {
 	/// @notice Burns StateToken and logs user contribution for a cycle
 	/// @param amount Amount of StateToken to burn
     function burnState(uint256 amount) external {
-        require(balanceOf(msg.sender) >= MIN_DAV, "Need at least 10 DAV");
+        require(userBalance >= MIN_DAV, "Need at least 10 DAV");
+		require(
+			StateToken.balanceOf(msg.sender) >= amount,
+			"Insufficient StateToken balance"
+		);
         require(amount > 0, "Burn amount must be > 0");
         require(
             StateToken.allowance(msg.sender, address(this)) >= amount,
