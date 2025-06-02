@@ -211,16 +211,16 @@ const DataTable = () => {
     //     <IOSpinner />
     //   </div>
     // ) :
-    <div className="container  datatablemarginbottom">
-      <div className="table-responsive">
-        <div style={{ maxHeight: "190px", overflowY: "auto" }}>
+    <div className="container  container flex-grow-1 d-flex flex-column justify-content-between">
+      <div className="table-responsive ">
+        <div style={{ overflowX: "auto" }}>
           <table className="table table-dark">
             <thead>
               <tr>
                 <th></th>
                 <th></th>
                 <th>Token Name</th>
-				<th></th>
+                <th></th>
                 <th>Claim Airdrop</th>
                 <th></th>
                 <th>Auction Timer</th>
@@ -575,8 +575,9 @@ const DataTable = () => {
     //   </div>
     // ) :
     <>
-      <div className="container  datatablemarginbottom">
-        <div className="table-responsive">
+      <div className="container  container flex-grow-1 d-flex flex-column justify-content-between">
+      <div className="table-responsive ">
+        <div style={{ overflowX: "auto" }}>
           <table className="table table-dark">
             <thead>
               {authorized ? (
@@ -1015,6 +1016,7 @@ const DataTable = () => {
           </table>
         </div>
       </div>
+	  </div>
     </>
   ) : (
     <></>

@@ -45,6 +45,7 @@ const DetailsInfo = ({ selectedToken }) => {
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
+  const isInfoPage = location.pathname === "/info";
 
   useEffect(() => {
     const nameCells = document.querySelectorAll(".name-cell");
@@ -151,7 +152,7 @@ const DetailsInfo = ({ selectedToken }) => {
           style={{ maxWidth: "300%", "--placeholder-color": "#6c757d" }}
         />
       </div>
-      <div className="table-responsive">
+      <div className={`table-responsive ${isInfoPage ? "info-page" : ""}`}>
         {dataToShow ? (
           <>
             <table className="table table-dark">
