@@ -56,7 +56,6 @@ contract DAV_V2_2 is
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
     uint256 public constant CLAIM_INTERVAL = 1 days; // 4 days claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
-	uint256 userBalance = balanceOf(msg.sender);
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
     // @notice The governance address with special privileges, set at deployment
@@ -369,14 +368,14 @@ contract DAV_V2_2 is
         stateLPShare = value - distributed;
     }
 function mintDAV(uint256 amount, string memory referralCode) external payable nonReentrant {
-    // Checks
+    //     ----------------------------    CHECKS   ----------------------------           //
     require(amount > 0, "Amount must be greater than zero");
     require(amount % 1 ether == 0, "Amount must be a whole number");
     require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
-	require(davHoldersCount < MAX_USER, "Max number of users reached");
+    require(davHoldersCount < MAX_USER, "Max number of users reached");
     uint256 cost = (amount * TOKEN_COST) / 1 ether;
     require(msg.value == cost, "Incorrect PLS amount sent");
-    // Effects
+    //     -------------------------- CALCULATE DISTRIBUTIONS ---------------------------  //
     (
         uint256 holderShare,
         uint256 liquidityShare,
@@ -385,36 +384,41 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
         uint256 stateLPShare,
         address referrer
     ) = _calculateETHDistribution(msg.value, msg.sender, referralCode);
-	// temp store of values to ensure original values
-    uint256 newStateLpTotalShare = stateLpTotalShare + stateLPShare;
-	uint256 newHolderFunds = holderFunds;
-    uint256 newTotalRewardPerTokenStored = totalRewardPerTokenStored;
+    // Prepare values before state changes
+    uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+    uint256 totalCycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) / 100;
+    //     ----------------------------    EFFECTS   ----------------------------           //
+    // Mint tracking and referral code logic
     mintedSupply += amount;
-	userMintedAmount[msg.sender] += amount;
+    userMintedAmount[msg.sender] += amount;
     lastMintTimestamp[msg.sender] = block.timestamp;
+
     if (bytes(userReferralCode[msg.sender]).length == 0) {
         string memory newReferralCode = _generateReferralCode(msg.sender);
         userReferralCode[msg.sender] = newReferralCode;
         referralCodeToUser[newReferralCode] = msg.sender;
         emit ReferralCodeGenerated(msg.sender, newReferralCode);
-    }    
-    uint256 totalCycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) / 100;
-	uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
-	for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
-    uint256 targetCycle = currentCycle + i;
-    cycleTreasuryAllocation[targetCycle] += totalCycleAllocation;
-    cycleUnclaimedPLS[targetCycle] += totalCycleAllocation;
-	}
-  	if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
+    }
+    // Update cycle treasury allocations
+    for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
+        uint256 targetCycle = currentCycle + i;
+        cycleTreasuryAllocation[targetCycle] += totalCycleAllocation;
+        cycleUnclaimedPLS[targetCycle] += totalCycleAllocation;
+    }
+    // Update holder rewards if needed
+    uint256 newHolderFunds = holderFunds;
+    uint256 newTotalRewardPerTokenStored = totalRewardPerTokenStored;
+    if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
         uint256 effectiveSupply = totalSupply() - balanceOf(governance);
-   		uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
-		uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e18;
+        uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
+        uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e18;
         newHolderFunds += usedHolderShare;
         newTotalRewardPerTokenStored += rewardPerToken;
     }
-    stateLpTotalShare = newStateLpTotalShare;
-    holderFunds = newHolderFunds;
+	 holderFunds = newHolderFunds;
     totalRewardPerTokenStored = newTotalRewardPerTokenStored;
+    stateLpTotalShare += stateLPShare;
+    // Update user holder status
     if (!isDAVHolder[msg.sender] && msg.sender != governance) {
         isDAVHolder[msg.sender] = true;
         davHoldersCount += 1;
@@ -423,33 +427,35 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
     _updateRewards(msg.sender);
     _mint(msg.sender, amount);
     _updateRewards(msg.sender);
-    // Interactions (safe to do last)
+    //     ----------------------------    INTERACTIONS   ----------------------------           //
+    emit DistributionEvent(msg.sender, amount,msg.value,referrer,referralShare,liquidityShare,
+        developmentShare,holderShare,block.timestamp );
+    // Referral reward transfer
     if (referrer != address(0) && referralShare > 0) {
-		  require(address(referrer).code.length == 0, "Referrer is a contract");
+        require(address(referrer).code.length == 0, "Referrer is a contract");
         referralRewards[referrer] += referralShare;
         totalReferralRewardsDistributed += referralShare;
         (bool successRef, ) = referrer.call{value: referralShare}("");
         require(successRef, "Referral transfer failed");
     }
+    // Liquidity share transfer
     if (liquidityShare > 0) {
-		 require(address(liquidityWallet).code.length == 0, "Liquidity wallet is a contract");
+        require(address(liquidityWallet).code.length == 0, "Liquidity wallet is a contract");
+        totalLiquidityAllocated += liquidityShare;
         (bool successLiquidity, ) = liquidityWallet.call{value: liquidityShare}("");
         require(successLiquidity, "Liquidity transfer failed");
-        totalLiquidityAllocated += liquidityShare;
     }
+    // Development share transfer
     if (developmentShare > 0) {
-	   require(address(developmentWallet).code.length == 0, "development Wallet is a contract");
+        require(address(developmentWallet).code.length == 0, "Development wallet is a contract");
+        totalDevelopmentAllocated += developmentShare;
         (bool successDev, ) = developmentWallet.call{value: developmentShare}("");
         require(successDev, "Development transfer failed");
-        totalDevelopmentAllocated += developmentShare;
     }
-	emit DistributionEvent(   msg.sender,    amount,    msg.value,    referrer,    referralShare,   liquidityShare,
-    developmentShare,
-	holderShare,
-    block.timestamp
-);
 }
+
     function claimReward() external nonReentrant {
+		uint256 userBalance = balanceOf(msg.sender);
         require(userBalance > 0, "Not a DAV holder");
 		require(msg.sender != governance && !receivedFromGovernance[msg.sender],
         "Not eligible to claim rewards");
@@ -494,46 +500,62 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
      *      Each user can process tokens up to the number of DAV they hold.
      *      Governance is trusted to operate transparently and verifiably.
      */
-   function processYourToken(
+function processYourToken(
     string memory _tokenName,
     string memory _emojiOrImage
-		) public payable {
+) public payable {
+    // Basic input checks
+	// allow users to pass fancy name so, no token name checks required
     require(bytes(_tokenName).length > 0, "Please provide tokenName");
-	require(bytes(_emojiOrImage).length <= 10000, "input too long");
+    require(bytes(_emojiOrImage).length <= 10000, "input too long");
+    // Token name must not already be globally used
     require(!isTokenNameUsed[_tokenName], "Token name already used");
+    // Token name must not already be submitted by the user
     require(userTokenEntries[msg.sender][_tokenName].user == address(0), "Token name already used by user");
-
-    // Detect if input is an image (Pinata IPFS link)
-   bool isImage = _isImageURL(_emojiOrImage);
-
-    // Emoji check if not image
+    // Determine whether the input is an image (IPFS link or emoji string)
+    bool isImage = _isImageURL(_emojiOrImage);
+    // If not an image, restrict emoji string to max 10 UTF-8 characters
     if (!isImage) {
         require(_utfStringLength(_emojiOrImage) <= 10, "Max 10 UTF-8 characters allowed");
     }
-    uint256 userTokenBalance = userBalance;
+    // Ensure user has DAV balance left to submit another token
+    uint256 userTokenBalance = balanceOf(msg.sender);
     uint256 tokensSubmitted = userTokenCount[msg.sender];
     require(userTokenBalance > tokensSubmitted, "You need more DAV to process new token");
-
-    // Fee logic
+    // Require fee only if user is not governance
     if (msg.sender != governance) {
         uint256 requiredFee = isImage ? TOKEN_WITHIMAGE_PROCESS : TOKEN_PROCESSING_FEE;
         require(msg.value == requiredFee, isImage ? "Please send exact image fee" : "Please send exactly 100,000 PLS");
-
-        // Treasury logic
+        // Allocate fee across future cycles for rewards
         uint256 stateLPShare = msg.value;
         uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
         uint256 cycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) / 100;
-
         for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
             uint256 targetCycle = currentCycle + i;
             cycleTreasuryAllocation[targetCycle] += cycleAllocation;
             cycleUnclaimedPLS[targetCycle] += cycleAllocation;
         }
     }
-	  usersTokenNames[msg.sender].push(_tokenName);
+    // -------------------
+    // ⚠️ FRONT-RUNNING RISK ACKNOWLEDGED
+    // -------------------
+    // We acknowledge that this function is susceptible to MEV front-running, where a miner or 
+    // bot could observe a pending transaction and submit the same `_tokenName` with higher gas.
+    // ➤ We currently do NOT use a commit-reveal scheme or on-chain randomness.
+    // ➤ We accept this trade-off because token names are public and not highly valuable assets.
+    // ➤ We mitigate economic loss by:
+    //   - Rejecting duplicate token names immediately.
+    //   - Not allowing re-submission of already-claimed names.
+    //   - Requiring exact fees to prevent accidental overpayment in front-run attacks.
+    // ➤ This is similar to ENS name registrations pre-commitment model; future updates may include a commit-reveal phase.
+    // ➤ Users are encouraged to submit important token names during low gas periods or through private RPCs.
+    // This design is a known compromise between UX and perfect MEV resistance.
+    // Track submitted token name
+    usersTokenNames[msg.sender].push(_tokenName);
     tokenNameToOwner[_tokenName] = msg.sender;
     isTokenNameUsed[_tokenName] = true;
     userTokenCount[msg.sender]++;
+    // Track token in global list and user entry map
     allTokenNames.push(_tokenName);
     userTokenEntries[msg.sender][_tokenName] = TokenEntry(
         msg.sender,
@@ -541,9 +563,9 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
         _emojiOrImage,
         TokenStatus.Pending
     );
-
     emit TokenNameAdded(msg.sender, _tokenName);
 }
+
 function _contains(string memory str, string memory substr) internal pure returns (bool) {
     bytes memory strBytes = bytes(str);
     bytes memory substrBytes = bytes(substr);
@@ -595,7 +617,6 @@ function _isImageURL(string memory str) internal pure returns (bool) {
     /// @dev This function is meant for off-chain access only.
     /// Calling this on-chain may be expensive for users with many entries,
     /// but due to the natural upper bound explained above, pagination is not required.
-
     function getPendingTokenNames(address user) public view returns (string[] memory) {
     string[] memory all = usersTokenNames[user];
     uint256 limit = all.length > 100 ? 100 : all.length; // hardcoded limit
@@ -611,10 +632,8 @@ function _isImageURL(string memory str) internal pure returns (bool) {
     for (uint256 j = 0; j < count; j++) {
         result[j] = temp[j];
     }
-
     return result;
 }
-
     /// @notice Updates the status of a specific token owned by a user.
     /// @dev This function loops through `allTokenEntries`, which could grow indefinitely.
     ///      To prevent excessive gas usage:
@@ -635,7 +654,7 @@ function _isImageURL(string memory str) internal pure returns (bool) {
         userTokenEntries[_owner][_tokenName].status = _status;
         emit TokenStatusUpdated(_owner, _tokenName, _status);
     }
-	//want to fetch all entries not perticular from start to end
+	//require to fetch all entries not perticular from start to end (not with pagination - it stops at some amount of limits)
 	function getTokenEntries(uint256 start, uint256 limit) internal view returns (TokenEntry[] memory) {
     uint256 end = start + limit > allTokenNames.length ? allTokenNames.length : start + limit;
     TokenEntry[] memory entries = new TokenEntry[](end - start);
@@ -654,62 +673,50 @@ function _isImageURL(string memory str) internal pure returns (bool) {
     // Burn tokens and update cycle tracking
 	/// @notice Burns StateToken and logs user contribution for a cycle
 	/// @param amount Amount of StateToken to burn
-    function burnState(uint256 amount) external {
-        require(userBalance >= MIN_DAV, "Need at least 10 DAV");
-		require(
-			StateToken.balanceOf(msg.sender) >= amount,
-			"Insufficient StateToken balance"
-		);
-        require(amount > 0, "Burn amount must be > 0");
-        require(
-            StateToken.allowance(msg.sender, address(this)) >= amount,
-            "Insufficient allowance"
-        );
-        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
-        // Ensure user has no unclaimed rewards before burning
-        // Simplifies state management by enforcing claim-before-burn
-        require(
-            !canClaim(msg.sender),
-            "Must claim previous rewards before burning"
-        );
-        // Update burn tracking mappings for DApp display
-        totalStateBurned += amount; // Global burn total
-        userBurnedAmount[msg.sender] += amount; // User total burn
-        userCycleBurned[msg.sender][currentCycle] += amount; // User cycle burn
-        cycleTotalBurned[currentCycle] += amount; // Cycle total burn
-        // Calculate user share for this cycle (in 1e18 precision)
-        uint256 userShare = cycleTotalBurned[currentCycle] > 0
-            ? (userCycleBurned[msg.sender][currentCycle] * 1e18) /
-                cycleTotalBurned[currentCycle]
-            : 1e18; // 100% if first burner in cycle
-        // NEW: Add cycle to userUnclaimedCycles if not already present
-        // Ensures claimPLS() only checks relevant cycles
-        bool cycleExists = false;
-        for (uint256 i = 0; i < userUnclaimedCycles[msg.sender].length; i++) {
-            if (userUnclaimedCycles[msg.sender][i] == currentCycle) {
-                cycleExists = true;
-                break;
-            }
+  function burnState(uint256 amount) external {
+    require(balanceOf(msg.sender) >= MIN_DAV, "Need at least 10 DAV");
+    require(StateToken.balanceOf(msg.sender) >= amount, "Insufficient StateToken balance");
+    require(amount > 0, "Burn amount must be > 0");
+    require(StateToken.allowance(msg.sender, address(this)) >= amount, "Insufficient allowance");
+    uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+    // Enforce claiming old rewards before burning again — helps keep state simple
+    require(!canClaim(msg.sender), "Must claim previous rewards before burning");
+    // ⚠️ Transfer & burn FIRST before mutating any state — ensures atomic behavior
+    // If transfer fails, no state is changed
+    StateToken.safeTransferFrom(msg.sender, BURN_ADDRESS, amount);
+    // --- Burn tracking state updates ---
+    totalStateBurned += amount;                           // Global total burned
+    userBurnedAmount[msg.sender] += amount;               // Total burned by user
+    userCycleBurned[msg.sender][currentCycle] += amount;  // Burned in current cycle by user
+    cycleTotalBurned[currentCycle] += amount;             // Total burned in current cycle
+    // --- Calculate user share at time of burn (1e18 precision for fixed point math) ---
+    uint256 userShare = (userCycleBurned[msg.sender][currentCycle] * 1e18) / cycleTotalBurned[currentCycle];
+    // --- Ensure current cycle is registered for this user for later claiming ---
+    bool cycleExists = false;
+    for (uint256 i = 0; i < userUnclaimedCycles[msg.sender].length; i++) {
+        if (userUnclaimedCycles[msg.sender][i] == currentCycle) {
+            cycleExists = true;
+            break;
         }
-        if (!cycleExists) {
-            userUnclaimedCycles[msg.sender].push(currentCycle);
-        }
-        // Log burn in history for DApp display
-        burnHistory[msg.sender].push(
-            UserBurn({
-                amount: amount,
-                totalAtTime: cycleTotalBurned[currentCycle],
-                timestamp: block.timestamp,
-                cycleNumber: currentCycle,
-                userShare: userShare,
-                claimed: false
-            })
-        );
-        lastBurnCycle[msg.sender] = currentCycle;
-        // Transfer and burn tokens
-        StateToken.safeTransferFrom(msg.sender, BURN_ADDRESS, amount);
-        emit TokensBurned(msg.sender, amount, currentCycle);
     }
+    if (!cycleExists) {
+        userUnclaimedCycles[msg.sender].push(currentCycle);
+    }
+    // --- Save burn history for frontend display / analytics ---
+    burnHistory[msg.sender].push(
+        UserBurn({
+            amount: amount,
+            totalAtTime: cycleTotalBurned[currentCycle],
+            timestamp: block.timestamp,
+            cycleNumber: currentCycle,
+            userShare: userShare,
+            claimed: false
+        })
+    );
+    lastBurnCycle[msg.sender] = currentCycle;
+    emit TokensBurned(msg.sender, amount, currentCycle);
+}
+
     // Check if a user has claimable rewards
     function canClaim(address user) public view returns (bool) {
         uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
@@ -759,68 +766,71 @@ function _isImageURL(string memory str) internal pure returns (bool) {
 	/// @notice Claims PLS rewards for a user across eligible cycles
 	/// @dev Iterates over userUnclaimedCycles to calculate and distribute rewards
 	/// required to iterate through all users unclaimed cycle that way user can't loose their funds so, no use of cycle arrays
-  function claimPLS() external {
+function claimPLS() external {
     address user = msg.sender;
     uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
     require(currentCycle > 0, "Claim period not started");
     uint256 totalReward = 0;
     uint256 unclaimedLength = userUnclaimedCycles[user].length;
     uint256 keepCount = 0;
-    uint256[] memory newUnclaimed = new uint256[](unclaimedLength); // Pre-allocate array
-
-    // Single loop to process unclaimed cycles
+    uint256[] memory newUnclaimed = new uint256[](unclaimedLength); // Pre-allocate memory to avoid resizing cost
+    // PROCESS UNCLAIMED CYCLES
+    // This loop processes each cycle the user hasn't claimed from.
+    // The number of entries in userUnclaimedCycles[user] is controlled at burn time,
+    // and grows linearly per cycle — NOT per interaction — and is expected to stay within gas-safe bounds.
     for (uint256 i = 0; i < unclaimedLength; i++) {
         uint256 cycle = userUnclaimedCycles[user][i];
+        // Skip invalid or future cycles
         if (
             cycle >= currentCycle ||
             cycleTreasuryAllocation[cycle] == 0 ||
             hasClaimedCycle[user][cycle]
-        ) {
-            newUnclaimed[keepCount++] = cycle; // Keep invalid or future cycles
+        ) {            newUnclaimed[keepCount++] = cycle;
             continue;
         }
+        // Check burn validity
         uint256 userBurn = userCycleBurned[user][cycle];
         uint256 totalBurn = cycleTotalBurned[cycle];
         if (userBurn == 0 || totalBurn == 0) {
-            newUnclaimed[keepCount++] = cycle; // Keep if no valid burn
+            newUnclaimed[keepCount++] = cycle;
             continue;
-        }
-        // Calculate reward
+        }        // Calculate reward
         uint256 reward = (cycleTreasuryAllocation[cycle] * userBurn) / totalBurn;
+        // Skip if insufficient funds left in treasury
         if (cycleUnclaimedPLS[cycle] < reward) {
-            newUnclaimed[keepCount++] = cycle; // Keep if insufficient funds
+            newUnclaimed[keepCount++] = cycle;
             continue;
         }
+        // Apply reward and update state
         cycleUnclaimedPLS[cycle] -= reward;
         totalReward += reward;
-        // Update state
         hasClaimedCycle[user][cycle] = true;
         userBurnClaimed[user][cycle] = true;
-    }
-
-    // Update burnHistory in a single pass
+    }    // UPDATE BURN HISTORY
+    // This loop marks any relevant historical burns as claimed.
+    // burnHistory[user] is only appended to when the user burns,
+    // so this loop also remains bounded to user activity, not total system state.
     for (uint256 j = 0; j < burnHistory[user].length; j++) {
-        if (!burnHistory[user][j].claimed && hasClaimedCycle[user][burnHistory[user][j].cycleNumber]) {
-            burnHistory[user][j].claimed = true;
-        }
+        if (
+            !burnHistory[user][j].claimed &&
+            hasClaimedCycle[user][burnHistory[user][j].cycleNumber]
+        ) {            burnHistory[user][j].claimed = true;        }
     }
-
-    // Update userUnclaimedCycles efficiently
+    // SHRINK THE UNCLAIMED CYCLE ARRAY
+    // We remove processed cycles and retain future/unclaimable ones
     if (keepCount < unclaimedLength) {
         assembly {
-            mstore(newUnclaimed, keepCount) // Resize array in-place
-        }
-        userUnclaimedCycles[user] = newUnclaimed;
+            mstore(newUnclaimed, keepCount) // Resize the memory array in-place
+        }        userUnclaimedCycles[user] = newUnclaimed;
     }
-
+    // FINAL REWARD TRANSFER
     require(totalReward > 0, "Nothing to claim");
     require((address(this).balance - holderFunds) >= totalReward, "Insufficient contract balance");
-
-    // Transfer rewards
     (bool success, ) = payable(user).call{value: totalReward}("");
     require(success, "PLS transfer failed");
     emit RewardClaimed(user, totalReward, currentCycle);
 }
+
     function getCurrentCycle() public view returns (uint256) {
         return (block.timestamp - deployTime) / CLAIM_INTERVAL;
     }
