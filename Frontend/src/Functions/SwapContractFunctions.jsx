@@ -29,7 +29,7 @@ export const SwapContractProvider = ({ children }) => {
   const chainId = useChainId();
   const { loading, provider, signer, AllContracts } =
     useContext(ContractContext);
-  const { fetchData, DavMintFee } = useDAvContract();
+  const { fetchData } = useDAvContract();
   const { address } = useAccount();
 
   const [claiming, setClaiming] = useState(false);
@@ -48,7 +48,6 @@ export const SwapContractProvider = ({ children }) => {
   const [TokenBalance, setTokenbalance] = useState({});
   const [isReversed, setIsReverse] = useState({});
   const [IsAuctionActive, setisAuctionActive] = useState({});
-  const [isGotFlammed, setIsFlammed] = useState({});
   const [isTokenRenounce, setRenonced] = useState({});
   const [tokenMap, setTokenMap] = useState({});
   const [TokenNames, setTokenNames] = useState({});
@@ -69,7 +68,7 @@ export const SwapContractProvider = ({ children }) => {
     if (chainId == 146) {
       setTotalCost(ethers.parseEther((amount * 100).toString()));
     } else {
-      setTotalCost(ethers.parseEther((amount * DavMintFee).toString()));
+      setTotalCost(ethers.parseEther((amount * 1000000).toString()));
     }
   };
   const fetchTokenData = async ({
@@ -78,54 +77,43 @@ export const SwapContractProvider = ({ children }) => {
     formatFn = (v) => v.toString(),
     includeTestState = false,
     customContractInstance = null,
-    buildArgs,
-    useAddressAsKey = false, // New: Control whether to key results by address
+    buildArgs, // 👈 new: function to build args per token
   }) => {
     try {
       const results = {};
       const tokenMap = await ReturnfetchUserTokenAddresses();
-      console.log("tokenMap:", tokenMap); // Debug: Verify tokenMap structure
-
       const extendedMap = includeTestState
         ? { ...tokenMap, state: STATE_TESTNET }
         : tokenMap;
 
-      for (const [tokenName, tokenAddress] of Object.entries(extendedMap)) {
+      for (const [tokenName, TokenAddress] of Object.entries(extendedMap)) {
         try {
           const contract = customContractInstance
-            ? customContractInstance(tokenAddress)
+            ? customContractInstance(TokenAddress)
             : AllContracts.AuctionContract;
+
+          const args = buildArgs
+            ? buildArgs(TokenAddress, tokenName)
+            : [TokenAddress];
 
           if (!contract || typeof contract[contractMethod] !== "function") {
             throw new Error(`Method ${contractMethod} not found on contract`);
           }
 
-          const args = buildArgs
-            ? buildArgs(tokenAddress, tokenName)
-            : [tokenAddress];
-          console.log(
-            `Calling ${contractMethod} for ${tokenName} (${tokenAddress}) with args:`,
-            args
-          ); // Debug
-
           const rawResult = await contract[contractMethod](...args);
           const formattedResult = formatFn(rawResult);
 
-          // Use tokenAddress as key for hasDeposited, tokenName for others
-          const key = useAddressAsKey ? tokenAddress : tokenName;
-          results[key] = formattedResult;
+          results[tokenName] = formattedResult;
         } catch (err) {
           console.error(
-            `Error calling ${contractMethod} for ${tokenName} (${tokenAddress}):`,
+            `❌ Error calling ${contractMethod} for ${tokenName}:`,
             err
           );
-          const key = useAddressAsKey ? tokenAddress : tokenName;
-          results[key] =
-            contractMethod === "getRatioPrice" ? "not listed" : "not started";
+          results[tokenName] =
+      contractMethod === "getRatioPrice" ? "not listed" : "not started";
         }
       }
 
-      console.log("fetchTokenData results:", results); // Debug: Verify results
       setState(results);
       return results;
     } catch (err) {
@@ -350,70 +338,31 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching Auction Active:", e);
     }
   };
-  const isFlammed = async () => {
-    try {
-      await fetchTokenData({
-        contractMethod: "isFlammed",
-        setState: setIsFlammed,
-      });
-    } catch (e) {
-      console.error("Error fetching isFlammed:", e);
-    }
-  };''
-console.log("got flammed",isGotFlammed["TEST2"])
+
   const isRenounced = async () => {
     try {
       const results = {};
-
       const tokenMap = await ReturnfetchUserTokenAddresses();
-      const extendedMap = {
-        ...tokenMap,
-        STATE: STATE_TESTNET,
-        DAV: DAV_TESTNET,
-      };
+      console.log("Starting loop over Addresses in renounce:", tokenMap);
 
-      console.log("Starting loop over Addresses in renounce:", extendedMap);
-
-      for (const [tokenName, TokenAddress] of Object.entries(extendedMap)) {
-        console.log(
-          `Checking renounce status for ${tokenName} at ${TokenAddress}`
-        );
+      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
+        console.log(`Fetching renouncing for ${tokenName} at ${TokenAddress}`);
 
         const renouncing = await AllContracts.AuctionContract.isTokenRenounced(
           TokenAddress
         );
-        const renouncingString = renouncing.toString();
 
-        // Additional check for "state" token: verify owner is zero address
-        let isOwnerZero = false;
-        if (tokenName === "STATE") {
-          const owner = await AllContracts.stateContract.owner();
-          isOwnerZero =
-            owner.toLowerCase() ===
-            "0x0000000000000000000000000000000000000000";
-          console.log(`State token owner is zero address: ${isOwnerZero}`);
-        } else if (tokenName === "DAV") {
-          const owner = await AllContracts.davContract.owner();
-          isOwnerZero =
-            owner.toLowerCase() ===
-            "0x0000000000000000000000000000000000000000";
-          console.log(`State token owner is zero address: ${isOwnerZero}`);
-        }
+        const renouncingString = renouncing.toString(); // 👈 convert to string
 
-        results[tokenName] =
-          tokenName === "STATE"
-            ? renouncingString === "true" && isOwnerZero
-            : tokenName === "DAV"
-            ? renouncingString === "true" && isOwnerZero
-            : renouncingString;
+        console.log(`renounce Active for ${tokenName}:`, renouncingString);
 
-        console.log(`Renounce status for ${tokenName}:`, results[tokenName]);
+        results[tokenName] = renouncingString;
       }
 
-      console.log("Final renouncing status:", results);
+      console.log("Final renouncing:", results);
       setRenonced(results);
     } catch (e) {
-      console.error("Error fetching renounce status:", e);
+      console.error("Error fetching renounce Active:", e);
     }
   };
 
@@ -672,7 +621,7 @@ console.log("got flammed",isGotFlammed["TEST2"])
         tokenAddress
       );
       await tx.wait();
-      await initializeClaimCountdowns();
+	  await initializeClaimCountdowns();
       console.log("Reward claimed successfully");
     } catch (error) {
       console.error("Error claiming reward:", error);
@@ -688,17 +637,17 @@ console.log("got flammed",isGotFlammed["TEST2"])
     name
   ) => {
     if (!AllContracts?.AuctionContract || !address) return;
-    setTxStatusForAdding("initiated");
+	setTxStatusForAdding("initiated")
     try {
       // Replace these params if needed based on your contract's addToken function
-      setTxStatusForAdding("Adding");
+	  setTxStatusForAdding("Adding")
       const tx = await AllContracts.AuctionContract.addToken(
         TokenAddress,
         PairAddress,
         Owner
       );
       await tx.wait();
-      setTxStatusForAdding("Status Updating");
+	  setTxStatusForAdding("Status Updating")
       const tx2 = await AllContracts.davContract.updateTokenStatus(
         Owner,
         name,
@@ -707,50 +656,49 @@ console.log("got flammed",isGotFlammed["TEST2"])
       const receipt2 = await tx2.wait();
       if (receipt2.status === 1) {
         console.log("Transaction successful");
-        setTxStatusForAdding("confirmed");
+		setTxStatusForAdding("confirmed")
         await CheckIsAuctionActive();
         await isTokenSupporteed(); // Corrected function name
         console.log("Token added successfully!");
       } else {
         console.error("Transaction failed");
-        setTxStatusForAdding("error");
+		setTxStatusForAdding("error")
       }
-      setTxStatusForAdding("confirmed");
+	  setTxStatusForAdding("confirmed")
       console.log("Token added successfully!");
     } catch (error) {
       const errorMessage =
         error.reason || error.message || "Unknown error occurred";
       console.error("AddTokenIntoSwapContract failed:", error);
-      setTxStatusForAdding("");
+	  setTxStatusForAdding("")
       alert(`Failed to add token: ${errorMessage}`);
       console.error("AddTokenIntoSwapContract failed:", error?.reason || error);
-    } finally {
-      setTxStatusForAdding("confirmed");
-    }
+    }finally{
+		setTxStatusForAdding("confirmed")
+	}
   };
-
+  
   console.log("Is array:", Array.isArray(UsersSupportedTokens));
   useEffect(() => {
     const functions = [
       fetchUserTokenAddresses,
       getInputAmount,
       getOutPutAmount,
-      getCurrentAuctionCycle,
-      getTokenRatio,
+	  getCurrentAuctionCycle,
+	  getTokenRatio,
       getTokensBurned,
       getAirdropAmount,
       getTokenBalances,
       isAirdropClaimed,
       AddressesFromContract,
       isRenounced,
-      isFlammed,
       getTokenNamesForUser,
       isTokenSupporteed,
       getTokenNamesByUser,
       HasSwappedAucton,
       HasReverseSwappedAucton,
     ];
-    const pollingFunctions = [isFlammed, CheckIsAuctionActive, CheckIsReverse];
+    const pollingFunctions = [CheckIsAuctionActive, CheckIsReverse];
 
     const runAll = async () => {
       const results = await Promise.allSettled(functions.map((fn) => fn()));
@@ -763,10 +711,8 @@ console.log("got flammed",isGotFlammed["TEST2"])
         }
       });
     };
-    const pollData = async () => {
-      const results = await Promise.allSettled(
-        pollingFunctions.map((fn) => fn())
-      );
+	 const pollData = async () => {
+      const results = await Promise.allSettled(pollingFunctions.map((fn) => fn()));
       results.forEach((result, index) => {
         if (result.status === "rejected") {
           console.error(
@@ -778,12 +724,13 @@ console.log("got flammed",isGotFlammed["TEST2"])
     };
 
     runAll();
-    const pollingInterval = setInterval(pollData, 2000); // Poll every 2 seconds
+	  const pollingInterval = setInterval(pollData, 2000); // Poll every 2 seconds
 
     // Cleanup interval on component unmount
     return () => clearInterval(pollingInterval);
   }, [AllContracts, address]);
   // Adjust based on when you want it to run
+
 
   const ERC20_ABI = [
     "function approve(address spender, uint256 amount) external returns (bool)",
@@ -974,16 +921,6 @@ console.log("got flammed",isGotFlammed["TEST2"])
       throw e;
     }
   };
-  const TickMarkToken = async (TokenAddress) => {
-    try {
-      const tx = await AllContracts.AuctionContract.flamLiquidity(TokenAddress);
-      await tx.wait();
-      await isFlammed();
-    } catch (e) {
-      console.error("Error claiming tokens:", e);
-      throw e;
-    }
-  };
 
   const handleAddToken = async (
     tokenAddress,
@@ -1086,15 +1023,13 @@ console.log("got flammed",isGotFlammed["TEST2"])
         getInputAmount,
         TokenNames,
         getOutPutAmount,
-        txStatusForAdding,
-        setTxStatusForAdding,
+		txStatusForAdding,
+		setTxStatusForAdding,
         TimeLeftClaim,
         renounceTokenContract,
         tokenMap,
         IsAuctionActive,
-        TokenRatio,
-        TickMarkToken,
-        isGotFlammed,
+		TokenRatio,
       }}
     >
       {children}

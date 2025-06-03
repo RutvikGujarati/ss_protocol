@@ -12,6 +12,5 @@ docs/
 
 # Dotenv file
 .env
-logs
 makefile
-/deployed.txt
+logs

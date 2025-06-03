@@ -6,9 +6,8 @@ import { useEffect, useState } from "react";
 
 const Footer = () => {
   const messages = [
-    "Your swap shapes the market.",
+    "Your swaps shape the market.",
     "Refresh when minting more DAV tokens.",
-	"The protocol is limited to 10,000 wallets minting DAV tokens.",
   ];
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   useEffect(() => {

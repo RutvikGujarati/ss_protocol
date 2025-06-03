@@ -151,7 +151,22 @@
   margin-left: 10px;
 }
 
-tate up/down */ .rotate-up .dropdown-arrow-icon {
+/* Arrow wrapper */
+.dropdown-arrow-wrapper {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  transition: transform 0.3s ease;
+}
+
+/* Arrow icon itself */
+.dropdown-arrow-icon {
+  transition: transform 0.3s ease;
+  color: #f8f9fa;
+}
+
+/* Rotate up/down */
+.rotate-up .dropdown-arrow-icon {
   transform: rotate(180deg);
 }
 
@@ -159,3 +174,47 @@ tate up/down */ .rotate-up .dropdown-arrow-icon {
   transform: rotate(0deg);
 }
 
+/* Improve dropdown animation & styling */
+/* Dropdown menu styling remains the same */
+.dropdown-menu {
+  display: block;
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  top: 110%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background-color: #212529;
+  border-radius: 20px;
+  padding: 4px 0;
+  min-width: 120px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+  z-index: 1000;
+}
+
+/* Active dropdown */
+.dropdown-menu.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Dropdown item styles */
+.dropdown-menu .dropdown-item {
+  padding: 10px 16px;
+  color: #f8f9fa;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.25s ease-in-out;
+  border-radius: 12px; /* Increased rounded corners */
+  margin: 4px 15px; /* Adds spacing between items */
+  position: relative;
+  overflow: hidden;
+}
+
+.dropdown-menu .dropdown-item:hover {
+  background-color: transparent;
+  color: #ffffff;
+  box-shadow: none;
+}

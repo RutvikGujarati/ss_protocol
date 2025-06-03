@@ -6,25 +6,23 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {DAV_V2_2} from "./DavToken.sol";
-import {TOKEN_V2_2} from "./Tokens.sol";
+import {Decentralized_Autonomous_Vaults_DAV_V2_1} from "./DavToken.sol";
+import {Token} from "./Tokens.sol";
 
 interface IPair {
     function getReserves()
         external
         view
         returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
+
     function token0() external view returns (address);
+
     function token1() external view returns (address);
 }
-//NOTE: Mainnet deployment - 1 DAV to participate in auctions
-//NOTE: Mainnet deployment - Auction cycles = 50 days
-//NOTE: Mainnet deployment - Auctions duration is 24 hours
-//NOTE: Mainnet deployment - Buen cycle for market makers is 35 days
-//NOTE: Mainnet deployment - Airdrops cycle / Token creation is every 50 days
+
 contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     using SafeERC20 for IERC20;
-    DAV_V2_2 public dav;
+    Decentralized_Autonomous_Vaults_DAV_V2_1 public dav;
 
     struct AuctionCycle {
         uint256 firstAuctionStart;
@@ -51,9 +49,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     uint256 constant AIRDROP_AMOUNT = 10000 ether;
     uint256 constant TOKEN_OWNER_AIRDROP = 2500000 ether;
     uint256 constant GOV_OWNER_AIRDROP = 500000 ether;
-    // Check if pair has enough STATE tokens (500 million)
-    //Burn LP pair PLS/STATE, and the pair must contain 500 million STATE tokens
-    uint256 StateDeposittokenAmount = 5000000 ether;
+
     uint256 constant PRECISION_FACTOR = 1e18;
     uint256 public constant percentage = 1;
     //it is used for pulsechain and it is standered burn address
@@ -78,15 +74,15 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     mapping(address => mapping(string => address)) public deployedTokensByUser;
 
     mapping(address => address) public pairAddresses; // token => pair address
-    mapping(address => bool) public usedPairAddresses;
+	mapping(address => bool) public usedPairAddresses;
     mapping(address => bool) public supportedTokens; // token => isSupported
     mapping(address => address) public tokenOwners; // token => owner
     mapping(address => address[]) public ownerToTokens;
     mapping(string => bool) public isTokenNameUsed;
-    mapping(address => bool) public isFlammed;
 
     mapping(address => mapping(address => uint256)) public lastClaimTime;
     mapping(string => string) public tokenNameToEmoji;
+
     event TokenDeployed(string name, address tokenAddress);
 
     mapping(address => mapping(address => mapping(address => mapping(uint256 => UserSwapInfo))))
@@ -135,11 +131,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         emit GovernanceUpdateProposed(newGov, governanceUpdateTimestamp);
     }
 
-    function flamLiquidity(address token) public onlyGovernance {
-        require(!isFlammed[token], "already got flamme");
-        isFlammed[token] = true;
-    }
-
     function confirmGovernanceUpdate() external onlyGovernance {
         require(
             block.timestamp >= governanceUpdateTimestamp,
@@ -173,7 +164,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             "Token address should not be zero"
         );
 
-        TOKEN_V2_2 token = new TOKEN_V2_2(name, symbol, _One, _swap, _owner);
+        Token token = new Token(name, symbol, _One, _swap, _owner);
         deployedTokensByUser[msg.sender][name] = address(token);
         userToTokenNames[msg.sender].push(name);
         isTokenNameUsed[name] = true;
@@ -188,31 +179,34 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address pairAddress,
         address _tokenOwner
     ) external onlyGovernance {
-        // IPair pair = IPair(pairAddress);
-        // require(
-        //     (pair.token0() == token && pair.token1() == stateToken) ||
-        //         (pair.token1() == token && pair.token0() == stateToken),
-        //     "Pair must contain stateToken"
-        // );
+        IPair pair = IPair(pairAddress);
+        require(
+            (pair.token0() == token && pair.token1() == stateToken) ||
+                (pair.token1() == token && pair.token0() == stateToken),
+            "Pair must contain stateToken"
+        );
         require(token != address(0), "Invalid token address");
         require(stateToken != address(0), "State token not initialized");
         require(pairAddress != address(0), "Invalid pair address");
         require(pairAddress != token, "Invalid pair address");
         require(!supportedTokens[token], "Token already added");
-        require(!usedPairAddresses[pairAddress], "Pair address already used");
+		require(!usedPairAddresses[pairAddress], "Pair address already used");
 
         supportedTokens[token] = true;
         tokenOwners[token] = _tokenOwner;
         pairAddresses[token] = pairAddress;
         ownerToTokens[_tokenOwner].push(token);
-        usedPairAddresses[pairAddress] = true;
+		usedPairAddresses[pairAddress] = true;
+
         // Schedule auction at 22:30 Dubai time (UTC+4)
         uint256 auctionStart = _calculateDubaiAuctionStart();
+
         // Initialize auction cycle for token → stateToken
         AuctionCycle storage forwardCycle = auctionCycles[token][stateToken];
         forwardCycle.firstAuctionStart = auctionStart;
         forwardCycle.isInitialized = true;
         forwardCycle.auctionCount = 0;
+
         // Initialize auction cycle for stateToken → token
         AuctionCycle memory reverseCycle = AuctionCycle({
             firstAuctionStart: auctionStart,
@@ -220,6 +214,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             auctionCount: 0
         });
         auctionCycles[stateToken][token] = reverseCycle;
+
         emit TokenAdded(token, pairAddress);
         emit AuctionStarted(
             auctionStart,
@@ -233,7 +228,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     function _calculateDubaiAuctionStart() internal view returns (uint256) {
         uint256 dubaiOffset = 4 hours;
         uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 12;
+        uint256 targetDubaiHour = 17;
         uint256 targetDubaiMinute = 0;
         // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;
@@ -291,6 +286,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         } else {
             revert("Invalid pair");
         }
+
         return ratio; // retains 18 decimals
     }
 
@@ -305,20 +301,26 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         require(user != address(0), "Invalid user address");
         require(supportedTokens[inputToken], "Unsupported token");
         require(msg.sender == user, "Invalid sender");
+
         uint256 currentDavHolding = dav.balanceOf(user);
         uint256 lastHolding = lastDavHolding[user][inputToken];
         uint256 newDavContributed = currentDavHolding > lastHolding
             ? currentDavHolding - lastHolding
             : 0;
         require(newDavContributed > 0, "No new DAV holdings for this token");
+
         // **Effects**
+
         uint256 reward = (newDavContributed * AIRDROP_AMOUNT) /
             PRECISION_FACTOR;
+
         cumulativeDavHoldings[user][inputToken] += newDavContributed;
         lastDavHolding[user][inputToken] = currentDavHolding;
         hasClaimed[user][inputToken] = true;
+
         // **Interactions**
         IERC20(inputToken).safeTransfer(msg.sender, reward);
+
         emit RewardDistributed(user, reward);
     }
 
@@ -326,9 +328,11 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         // Check if the token has a registered owner
         address owner = tokenOwners[token];
         require(owner != address(0), "Token has no registered owner");
+
         // Determine claimant and reward amount
         address claimant;
         uint256 rewardAmount;
+
         if (msg.sender == governanceAddress) {
             claimant = DevAddress;
             rewardAmount = GOV_OWNER_AIRDROP;
@@ -344,25 +348,32 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             claimant = owner;
             rewardAmount = TOKEN_OWNER_AIRDROP;
         }
+
         // Enforce claim interval
         uint256 lastClaim = lastClaimTime[claimant][token];
         require(
             block.timestamp >= lastClaim + CLAIM_INTERVAL,
             "Claim not available yet"
         );
+
         // Update last claim time for the claimant
         lastClaimTime[claimant][token] = block.timestamp;
+
         // Transfer reward tokens to claimant
         IERC20(token).safeTransfer(claimant, rewardAmount);
+
         // Emit event for reward distribution
         emit RewardDistributed(claimant, rewardAmount);
     }
     /**
      * @notice Handles token swaps during normal and reverse auctions.
+     *
      * During reverse auctions, users burn `stateToken` to receive `inputToken`.
      * This contract must hold sufficient `inputToken` to support those swaps.
-     * Liquidity is provided through token contract deployments and manual deposits via depositTokens to ensure the integrity of the liquidity pool ratio..
+     *
+     * Liquidity is provided via Token contract deployments and manual deposits through depositTokens.
      */
+
     function swapTokens(address user, address inputToken) public nonReentrant {
         require(msg.sender == user, "Unauthorized swap initiator");
         require(supportedTokens[inputToken], "Unsupported token");
@@ -371,12 +382,15 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             dav.balanceOf(user) >= 1 * 10 ** 18,
             "Required enough DAV to participate"
         );
+
         uint256 currentAuctionCycle = getCurrentAuctionCycle(inputToken);
         require(currentAuctionCycle < MAX_AUCTIONS, "Maximum auctions reached");
+
         UserSwapInfo storage userSwapInfo = userSwapTotalInfo[user][inputToken][
             stateToken
         ][currentAuctionCycle];
         bool isReverseActive = isReverseAuctionActive(inputToken);
+
         if (isReverseActive) {
             require(isReverseActive, "No active reverse auction for this pair");
             require(
@@ -393,11 +407,14 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
                 "User already swapped in normal auction for this cycle"
             );
         }
+
         require(user != address(0), "Sender cannot be null");
+
         address tokenIn = isReverseActive ? stateToken : inputToken;
         address tokenOut = isReverseActive ? inputToken : stateToken;
         uint256 TotalAmountIn = calculateAuctionEligibleAmount(inputToken);
         uint256 TotalAmountOut = getOutPutAmount(inputToken);
+
         uint256 amountIn = isReverseActive ? TotalAmountOut : TotalAmountIn;
         uint256 amountOut = isReverseActive ? TotalAmountIn : TotalAmountOut;
         require(
@@ -405,10 +422,13 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             "Not enough balance in user wallet of input token"
         );
         require(amountOut > 0, "Output amount must be greater than zero");
+
         userSwapInfo.cycle = currentAuctionCycle;
-        /** @dev This check ensures that internal token tracking is aligned with actual contract holdings.
-         *Tokens in the Swap contract will be sufficient as the airdrop is limited to 10% of the supply, leaving a large amount of tokens in the swap contract.
-         *  Especially important for auction logic or any logic that sends tokens out.*/
+        /**
+         * @dev This check ensures that internal token tracking is aligned with actual contract holdings.
+         * Tokens sent manually (e.g., via MetaMask and through token sc), so we can't assume tracking alone is sufficient.
+         *  Especially important for auction logic or any logic that sends tokens out.
+         */
         //placed correctly require statments before if-else condition
         require(
             IERC20(tokenOut).balanceOf(address(this)) >= amountOut,
@@ -427,6 +447,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             IERC20(tokenIn).safeTransferFrom(user, BURN_ADDRESS, amountIn);
             IERC20(tokenOut).safeTransfer(user, amountOut);
         }
+
         emit TokensSwapped(user, tokenIn, tokenOut, amountIn, amountOut);
     }
     function setTokenAddress(
@@ -434,12 +455,18 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address _dav
     ) external onlyGovernance {
         require(stateToken == address(0), "State token already set");
-        require(dav == DAV_V2_2(payable(address(0))), "DAV already set");
+        require(
+            dav ==
+                Decentralized_Autonomous_Vaults_DAV_V2_1(payable(address(0))),
+            "DAV already set"
+        );
+
         require(_state != address(0), "Invalid state address");
         require(_dav != address(0), "Invalid dav address");
+
         supportedTokens[_state] = true;
         supportedTokens[_dav] = true;
-        dav = DAV_V2_2(payable(_dav));
+        dav = Decentralized_Autonomous_Vaults_DAV_V2_1(payable(_dav));
         stateToken = _state;
     }
 
@@ -487,10 +514,13 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         )
     {
         AuctionCycle memory cycle = auctionCycles[inputToken][stateToken];
+
         initialized = cycle.isInitialized;
         firstAuctionStart = cycle.firstAuctionStart;
+
         currentTime = block.timestamp;
         fullCycleLength = AUCTION_DURATION + AUCTION_INTERVAL;
+
         if (!initialized || currentTime < firstAuctionStart) {
             isValidCycle = false;
             return (
@@ -502,6 +532,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
                 isValidCycle
             );
         }
+
         uint256 timeSinceStart = currentTime - firstAuctionStart;
         cycleNumber = timeSinceStart / fullCycleLength;
         isValidCycle = cycleNumber < MAX_AUCTIONS;
@@ -509,6 +540,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
     function isAuctionActive(address inputToken) public view returns (bool) {
         require(supportedTokens[inputToken], "Unsupported token");
+
         (
             bool initialized,
             uint256 currentTime,
@@ -519,13 +551,16 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         ) = _getAuctionCycleData(inputToken);
 
         if (!initialized || !isValidCycle) return false;
+
         // Skip every 4th cycle (4,8,12...)
         bool isFourthCycle = ((cycleNumber + 1) % 4 == 0);
         if (isFourthCycle) return false;
+
         uint256 currentCycleStart = firstAuctionStart +
             cycleNumber *
             fullCycleLength;
         uint256 auctionEndTime = currentCycleStart + AUCTION_DURATION;
+
         return currentTime >= currentCycleStart && currentTime < auctionEndTime;
     }
 
@@ -533,6 +568,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address inputToken
     ) public view returns (bool) {
         require(supportedTokens[inputToken], "Unsupported token");
+
         (
             bool initialized,
             uint256 currentTime,
@@ -541,14 +577,18 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             uint256 cycleNumber,
             bool isValidCycle
         ) = _getAuctionCycleData(inputToken);
+
         if (!initialized || !isValidCycle) return false;
+
         // Only every 4th cycle (4,8,12...) is reverse auction
         bool isFourthCycle = ((cycleNumber + 1) % 4 == 0);
         if (!isFourthCycle) return false;
+
         uint256 currentCycleStart = firstAuctionStart +
             cycleNumber *
             fullCycleLength;
         uint256 auctionEndTime = currentCycleStart + AUCTION_DURATION;
+
         return currentTime >= currentCycleStart && currentTime < auctionEndTime;
     }
     function getCurrentAuctionCycle(
@@ -556,15 +596,20 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     ) public view returns (uint256) {
         AuctionCycle memory cycle = auctionCycles[inputToken][stateToken];
         if (!cycle.isInitialized) return 0;
+
         uint256 fullCycleLength = AUCTION_DURATION + AUCTION_INTERVAL;
         uint256 currentTime = block.timestamp;
+
         // If auction hasn't started yet, cycle is 0
         if (currentTime < cycle.firstAuctionStart) return 0;
+
         uint256 timeSinceStart = currentTime - cycle.firstAuctionStart;
         uint256 cycleNumber = timeSinceStart / fullCycleLength;
+
         if (cycleNumber >= MAX_AUCTIONS) {
             return MAX_AUCTIONS;
         }
+
         return cycleNumber;
     }
 
@@ -572,20 +617,26 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address inputToken
     ) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
+
         AuctionCycle memory cycle = auctionCycles[inputToken][stateToken];
         if (!cycle.isInitialized) return 0;
+
         uint256 fullCycleLength = AUCTION_DURATION + AUCTION_INTERVAL;
         uint256 currentTime = block.timestamp;
+
         uint256 timeSinceStart = currentTime - cycle.firstAuctionStart;
         uint256 cycleNumber = timeSinceStart / fullCycleLength;
         if (cycleNumber >= MAX_AUCTIONS) return 0;
+
         uint256 currentCycleStart = cycle.firstAuctionStart +
             cycleNumber *
             fullCycleLength;
         uint256 auctionEndTime = currentCycleStart + AUCTION_DURATION;
+
         if (currentTime >= currentCycleStart && currentTime < auctionEndTime) {
             return auctionEndTime - currentTime;
         }
+
         return 0;
     }
     // No need of use safeMath as solidity new versions are taking care of that
@@ -594,15 +645,19 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address inputToken
     ) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
+
         uint256 currentCycle = getCurrentAuctionCycle(inputToken);
         if (currentCycle >= MAX_AUCTIONS) {
             return 0;
         }
+
         uint256 davbalance = dav.balanceOf(msg.sender);
         if (davbalance == 0) {
             return 0;
         }
+
         bool isReverse = isReverseAuctionActive(inputToken);
+
         // Adjust calculation to avoid truncation
         uint256 firstCal = (MAX_SUPPLY * percentage * PRECISION_FACTOR) / 100;
         uint256 secondCalWithDavMax = (firstCal / DAV_FACTOR) * davbalance;
@@ -615,6 +670,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
     function getOutPutAmount(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
+        // @dev Hardcoded ratio of 1000 (1:1000 token-to-stateToken) for Pulsechain stability and only ffor testing
         uint256 currentRatio = getRatioPrice(inputToken);
         uint256 currentRatioNormalize = currentRatio / 1e18;
         require(currentRatioNormalize > 0, "Invalid ratio");
@@ -627,12 +683,14 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         bool isReverseActive = isReverseAuctionActive(inputToken);
         uint256 onePercent = calculateAuctionEligibleAmount(inputToken);
         require(onePercent > 0, "Invalid one percent balance");
+
         uint256 multiplications;
         if (isReverseActive) {
             multiplications = (onePercent * currentRatioNormalize) / 2;
         } else {
             multiplications = (onePercent * currentRatioNormalize) * 2;
         }
+
         return multiplications;
     }
 
@@ -642,14 +700,17 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address inputToken
     ) public view returns (uint256) {
         require(user != address(0), "Invalid user address");
+
         uint256 currentDavHolding = dav.balanceOf(user);
         uint256 lastHolding = lastDavHolding[user][inputToken];
         uint256 newDavContributed = currentDavHolding > lastHolding
             ? currentDavHolding - lastHolding
             : 0;
+
         // Calculate reward as in distributeReward
         uint256 reward = (newDavContributed * AIRDROP_AMOUNT) /
             PRECISION_FACTOR;
+
         return reward;
     }
     function getNextClaimTime(
@@ -657,8 +718,11 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     ) public view returns (uint256 timeLeftInSeconds) {
         address owner = tokenOwners[token];
         require(owner != address(0), "Token has no registered owner");
+
         address claimant = msg.sender == governanceAddress ? DevAddress : owner;
+
         uint256 lastClaim = lastClaimTime[claimant][token];
+
         if (block.timestamp >= lastClaim + CLAIM_INTERVAL) {
             return 0;
         } else {
@@ -670,12 +734,15 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address inputToken
     ) public view returns (bool) {
         require(user != address(0), "Invalid user address");
+
         uint256 currentDavHolding = dav.balanceOf(user);
         uint256 lastHolding = lastDavHolding[user][inputToken];
+
         // If user has claimed and no new DAV is added, return true
         if (hasClaimed[user][inputToken] && currentDavHolding <= lastHolding) {
             return true;
         }
+
         // Otherwise, either they haven't claimed, or they have new DAV, so return false
         return false;
     }

@@ -1,2004 +1,1953 @@
- [
-		{
-			"type": "constructor",
-			"inputs": [
-				{
-					"name": "_liquidityWallet",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "_developmentWallet",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "_stateToken",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "_gov",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "tokenName",
-					"type": "string",
-					"internalType": "string"
-				},
-				{
-					"name": "tokenSymbol",
-					"type": "string",
-					"internalType": "string"
-				}
-			],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "fallback",
-			"stateMutability": "payable"
-		},
-		{
-			"type": "receive",
-			"stateMutability": "payable"
-		},
-		{
-			"type": "function",
-			"name": "BASIS_POINTS",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "CLAIM_INTERVAL",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "CYCLE_ALLOCATION_COUNT",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "DEVELOPMENT_SHARE",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "HOLDER_SHARE",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "INITIAL_GOV_MINT",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "LIQUIDITY_SHARE",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "MAX_SUPPLY",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "MAX_USER",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "MIN_DAV",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "REFERRAL_BONUS",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "StateToken",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "contract IERC20"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "TOKEN_COST",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "TOKEN_PROCESSING_FEE",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "TOKEN_WITHIMAGE_PROCESS",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "TREASURY_CLAIM_PERCENTAGE",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "allTokenNames",
-			"inputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "string",
-					"internalType": "string"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "allowance",
-			"inputs": [
-				{
-					"name": "owner",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "spender",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "approve",
-			"inputs": [
-				{
-					"name": "spender",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "amount",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "bool",
-					"internalType": "bool"
-				}
-			],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "balanceOf",
-			"inputs": [
-				{
-					"name": "account",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "burnHistory",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "amount",
-					"type": "uint256",
-					"internalType": "uint256"
-				},
-				{
-					"name": "totalAtTime",
-					"type": "uint256",
-					"internalType": "uint256"
-				},
-				{
-					"name": "timestamp",
-					"type": "uint256",
-					"internalType": "uint256"
-				},
-				{
-					"name": "cycleNumber",
-					"type": "uint256",
-					"internalType": "uint256"
-				},
-				{
-					"name": "userShare",
-					"type": "uint256",
-					"internalType": "uint256"
-				},
-				{
-					"name": "claimed",
-					"type": "bool",
-					"internalType": "bool"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "burnState",
-			"inputs": [
-				{
-					"name": "amount",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "canClaim",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "bool",
-					"internalType": "bool"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "claimPLS",
-			"inputs": [],
-			"outputs": [],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "claimReward",
-			"inputs": [],
-			"outputs": [],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "cycleTotalBurned",
-			"inputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "cycleTreasuryAllocation",
-			"inputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "cycleUnclaimedPLS",
-			"inputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "davHoldersCount",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "decimals",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint8",
-					"internalType": "uint8"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "deployTime",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "developmentWallet",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "earned",
-			"inputs": [
-				{
-					"name": "account",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "getAllTokenEntries",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "tuple[]",
-					"internalType": "struct DAV_V2_2.TokenEntry[]",
-					"components": [
-						{
-							"name": "user",
-							"type": "address",
-							"internalType": "address"
-						},
-						{
-							"name": "tokenName",
-							"type": "string",
-							"internalType": "string"
-						},
-						{
-							"name": "emoji",
-							"type": "string",
-							"internalType": "string"
-						},
-						{
-							"name": "status",
-							"type": "uint8",
-							"internalType": "enum DAV_V2_2.TokenStatus"
-						}
-					]
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "getAvailableCycleFunds",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "getClaimablePLS",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "getContractPLSBalance",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "getCurrentCycle",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "getDAVHoldersCount",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "getPendingTokenNames",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "string[]",
-					"internalType": "string[]"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "getTimeUntilNextClaim",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "getUserHoldingPercentage",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "getUserMintedAmount",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "getUserReferralCode",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "string",
-					"internalType": "string"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "getUserSharePercentage",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "governance",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "hasClaimedCycle",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "bool",
-					"internalType": "bool"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "holderFunds",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "holderRewards",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "isTokenNameUsed",
-			"inputs": [
-				{
-					"name": "",
-					"type": "string",
-					"internalType": "string"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "bool",
-					"internalType": "bool"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "lastBurnCycle",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "lastMintTimestamp",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "liquidityWallet",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "mintDAV",
-			"inputs": [
-				{
-					"name": "amount",
-					"type": "uint256",
-					"internalType": "uint256"
-				},
-				{
-					"name": "referralCode",
-					"type": "string",
-					"internalType": "string"
-				}
-			],
-			"outputs": [],
-			"stateMutability": "payable"
-		},
-		{
-			"type": "function",
-			"name": "mintedSupply",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "name",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "string",
-					"internalType": "string"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "owner",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "processYourToken",
-			"inputs": [
-				{
-					"name": "_tokenName",
-					"type": "string",
-					"internalType": "string"
-				},
-				{
-					"name": "_emojiOrImage",
-					"type": "string",
-					"internalType": "string"
-				}
-			],
-			"outputs": [],
-			"stateMutability": "payable"
-		},
-		{
-			"type": "function",
-			"name": "receivedFromGovernance",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "bool",
-					"internalType": "bool"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "referralCodeToUser",
-			"inputs": [
-				{
-					"name": "",
-					"type": "string",
-					"internalType": "string"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "referralRewards",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "renounceOwnership",
-			"inputs": [],
-			"outputs": [],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "stateLpTotalShare",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "stateToken",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "symbol",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "string",
-					"internalType": "string"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "tokenNameToOwner",
-			"inputs": [
-				{
-					"name": "",
-					"type": "string",
-					"internalType": "string"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "totalDevelopmentAllocated",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "totalLiquidityAllocated",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "totalReferralRewardsDistributed",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "totalRewardPerTokenStored",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "totalStateBurned",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "totalSupply",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "transfer",
-			"inputs": [
-				{
-					"name": "recipient",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "amount",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "bool",
-					"internalType": "bool"
-				}
-			],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "transferFrom",
-			"inputs": [
-				{
-					"name": "sender",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "recipient",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "amount",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "bool",
-					"internalType": "bool"
-				}
-			],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "transferGovernance",
-			"inputs": [
-				{
-					"name": "newGovernance",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "transferOwnership",
-			"inputs": [
-				{
-					"name": "newOwner",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "transfersPaused",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "bool",
-					"internalType": "bool"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "updateDevelopmentWallet",
-			"inputs": [
-				{
-					"name": "_newDevelopmentWallet",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "updateLiquidityWallet",
-			"inputs": [
-				{
-					"name": "_newLiquidityWallet",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "updateTokenStatus",
-			"inputs": [
-				{
-					"name": "_owner",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "_tokenName",
-					"type": "string",
-					"internalType": "string"
-				},
-				{
-					"name": "_status",
-					"type": "uint8",
-					"internalType": "enum DAV_V2_2.TokenStatus"
-				}
-			],
-			"outputs": [],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "userBurnClaimed",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "bool",
-					"internalType": "bool"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "userBurnedAmount",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "userCycleBurned",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "userCycleRewards",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "userMintedAmount",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "userReferralCode",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "string",
-					"internalType": "string"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "userRewardPerTokenPaid",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "userTokenCount",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "userTokenEntries",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "",
-					"type": "string",
-					"internalType": "string"
-				}
-			],
-			"outputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "tokenName",
-					"type": "string",
-					"internalType": "string"
-				},
-				{
-					"name": "emoji",
-					"type": "string",
-					"internalType": "string"
-				},
-				{
-					"name": "status",
-					"type": "uint8",
-					"internalType": "enum DAV_V2_2.TokenStatus"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "userUnclaimedCycles",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "usersTokenNames",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "string",
-					"internalType": "string"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "viewLastMintTimeStamp",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "event",
-			"name": "Approval",
-			"inputs": [
-				{
-					"name": "owner",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				},
-				{
-					"name": "spender",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				},
-				{
-					"name": "value",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				}
-			],
-			"anonymous": false
-		},
-		{
-			"type": "event",
-			"name": "DistributionEvent",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				},
-				{
-					"name": "amountMinted",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				},
-				{
-					"name": "amountPaid",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				},
-				{
-					"name": "referrer",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				},
-				{
-					"name": "referralShare",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				},
-				{
-					"name": "liquidityShare",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				},
-				{
-					"name": "developmentShare",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				},
-				{
-					"name": "holderShare",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				},
-				{
-					"name": "timestamp",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				}
-			],
-			"anonymous": false
-		},
-		{
-			"type": "event",
-			"name": "HolderAdded",
-			"inputs": [
-				{
-					"name": "holder",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				}
-			],
-			"anonymous": false
-		},
-		{
-			"type": "event",
-			"name": "OwnershipTransferred",
-			"inputs": [
-				{
-					"name": "previousOwner",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				},
-				{
-					"name": "newOwner",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				}
-			],
-			"anonymous": false
-		},
-		{
-			"type": "event",
-			"name": "ReferralCodeGenerated",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				},
-				{
-					"name": "referralCode",
-					"type": "string",
-					"indexed": false,
-					"internalType": "string"
-				}
-			],
-			"anonymous": false
-		},
-		{
-			"type": "event",
-			"name": "RewardClaimed",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				},
-				{
-					"name": "amount",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				},
-				{
-					"name": "cycle",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				}
-			],
-			"anonymous": false
-		},
-		{
-			"type": "event",
-			"name": "RewardsClaimed",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				},
-				{
-					"name": "amount",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				}
-			],
-			"anonymous": false
-		},
-		{
-			"type": "event",
-			"name": "TokenNameAdded",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				},
-				{
-					"name": "name",
-					"type": "string",
-					"indexed": false,
-					"internalType": "string"
-				}
-			],
-			"anonymous": false
-		},
-		{
-			"type": "event",
-			"name": "TokenStatusUpdated",
-			"inputs": [
-				{
-					"name": "owner",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				},
-				{
-					"name": "tokenName",
-					"type": "string",
-					"indexed": false,
-					"internalType": "string"
-				},
-				{
-					"name": "status",
-					"type": "uint8",
-					"indexed": false,
-					"internalType": "enum DAV_V2_2.TokenStatus"
-				}
-			],
-			"anonymous": false
-		},
-		{
-			"type": "event",
-			"name": "TokensBurned",
-			"inputs": [
-				{
-					"name": "user",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				},
-				{
-					"name": "amount",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				},
-				{
-					"name": "cycle",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				}
-			],
-			"anonymous": false
-		},
-		{
-			"type": "event",
-			"name": "Transfer",
-			"inputs": [
-				{
-					"name": "from",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				},
-				{
-					"name": "to",
-					"type": "address",
-					"indexed": true,
-					"internalType": "address"
-				},
-				{
-					"name": "value",
-					"type": "uint256",
-					"indexed": false,
-					"internalType": "uint256"
-				}
-			],
-			"anonymous": false
-		},
-		{
-			"type": "error",
-			"name": "ERC20InsufficientAllowance",
-			"inputs": [
-				{
-					"name": "spender",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "allowance",
-					"type": "uint256",
-					"internalType": "uint256"
-				},
-				{
-					"name": "needed",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			]
-		},
-		{
-			"type": "error",
-			"name": "ERC20InsufficientBalance",
-			"inputs": [
-				{
-					"name": "sender",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "balance",
-					"type": "uint256",
-					"internalType": "uint256"
-				},
-				{
-					"name": "needed",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			]
-		},
-		{
-			"type": "error",
-			"name": "ERC20InvalidApprover",
-			"inputs": [
-				{
-					"name": "approver",
-					"type": "address",
-					"internalType": "address"
-				}
-			]
-		},
-		{
-			"type": "error",
-			"name": "ERC20InvalidReceiver",
-			"inputs": [
-				{
-					"name": "receiver",
-					"type": "address",
-					"internalType": "address"
-				}
-			]
-		},
-		{
-			"type": "error",
-			"name": "ERC20InvalidSender",
-			"inputs": [
-				{
-					"name": "sender",
-					"type": "address",
-					"internalType": "address"
-				}
-			]
-		},
-		{
-			"type": "error",
-			"name": "ERC20InvalidSpender",
-			"inputs": [
-				{
-					"name": "spender",
-					"type": "address",
-					"internalType": "address"
-				}
-			]
-		},
-		{
-			"type": "error",
-			"name": "OwnableInvalidOwner",
-			"inputs": [
-				{
-					"name": "owner",
-					"type": "address",
-					"internalType": "address"
-				}
-			]
-		},
-		{
-			"type": "error",
-			"name": "OwnableUnauthorizedAccount",
-			"inputs": [
-				{
-					"name": "account",
-					"type": "address",
-					"internalType": "address"
-				}
-			]
-		},
-		{
-			"type": "error",
-			"name": "ReentrancyGuardReentrantCall",
-			"inputs": []
-		},
-		{
-			"type": "error",
-			"name": "SafeERC20FailedOperation",
-			"inputs": [
-				{
-					"name": "token",
-					"type": "address",
-					"internalType": "address"
-				}
-			]
-		}
-	]
+[
+	{
+		"type": "constructor",
+		"inputs": [
+			{
+				"name": "_liquidityWallet",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "_developmentWallet",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "_stateToken",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "_gov",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "tokenName",
+				"type": "string",
+				"internalType": "string"
+			},
+			{
+				"name": "tokenSymbol",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "fallback",
+		"stateMutability": "payable"
+	},
+	{
+		"type": "receive",
+		"stateMutability": "payable"
+	},
+	{
+		"type": "function",
+		"name": "BASIS_POINTS",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "CLAIM_INTERVAL",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "CYCLE_ALLOCATION_COUNT",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "DEVELOPMENT_SHARE",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "HOLDER_SHARE",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "LIQUIDITY_SHARE",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "MAX_SUPPLY",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "MIN_DAV",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "REFERRAL_BONUS",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "StateToken",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "contract IERC20"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "TOKEN_COST",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "TOKEN_PROCESSING_FEE",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "TREASURY_CLAIM_PERCENTAGE",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "allTokenNames",
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "allowance",
+		"inputs": [
+			{
+				"name": "owner",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "spender",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "approve",
+		"inputs": [
+			{
+				"name": "spender",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "balanceOf",
+		"inputs": [
+			{
+				"name": "account",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "burnHistory",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "amount",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "totalAtTime",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "timestamp",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "cycleNumber",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "userShare",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "claimed",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "burnState",
+		"inputs": [
+			{
+				"name": "amount",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "canClaim",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "claimPLS",
+		"inputs": [],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "claimReward",
+		"inputs": [],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "cycleTotalBurned",
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "cycleTreasuryAllocation",
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "cycleUnclaimedPLS",
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "davHoldersCount",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "decimals",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint8",
+				"internalType": "uint8"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "deployTime",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "developmentWallet",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "earned",
+		"inputs": [
+			{
+				"name": "account",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getAllTokenEntries",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "tuple[]",
+				"internalType": "struct Decentralized_Autonomous_Vaults_DAV_V2_1.TokenEntry[]",
+				"components": [
+					{
+						"name": "user",
+						"type": "address",
+						"internalType": "address"
+					},
+					{
+						"name": "tokenName",
+						"type": "string",
+						"internalType": "string"
+					},
+					{
+						"name": "emoji",
+						"type": "string",
+						"internalType": "string"
+					},
+					{
+						"name": "status",
+						"type": "uint8",
+						"internalType": "enum Decentralized_Autonomous_Vaults_DAV_V2_1.TokenStatus"
+					}
+				]
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getAvailableCycleFunds",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getClaimablePLS",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getContractPLSBalance",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getCurrentCycle",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getDAVHoldersCount",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getPendingTokenNames",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "string[]",
+				"internalType": "string[]"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getTimeUntilNextClaim",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getUserHoldingPercentage",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getUserMintedAmount",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getUserReferralCode",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "getUserSharePercentage",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "governance",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "hasClaimedCycle",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "holderFunds",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "holderRewards",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "isTokenNameUsed",
+		"inputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "lastBurnCycle",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "lastMintTimestamp",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "liquidityWallet",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "mintDAV",
+		"inputs": [
+			{
+				"name": "amount",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "referralCode",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "payable"
+	},
+	{
+		"type": "function",
+		"name": "mintedSupply",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "name",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "owner",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "processYourToken",
+		"inputs": [
+			{
+				"name": "_tokenName",
+				"type": "string",
+				"internalType": "string"
+			},
+			{
+				"name": "_emoji",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "payable"
+	},
+	{
+		"type": "function",
+		"name": "referralCodeToUser",
+		"inputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "referralRewards",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "renounceOwnership",
+		"inputs": [],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "stateLpTotalShare",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "stateToken",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "symbol",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "tokenNameToOwner",
+		"inputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "totalDevelopmentAllocated",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "totalLiquidityAllocated",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "totalReferralRewardsDistributed",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "totalRewardPerTokenStored",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "totalStateBurned",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "totalSupply",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "transfer",
+		"inputs": [
+			{
+				"name": "recipient",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "transferFrom",
+		"inputs": [
+			{
+				"name": "sender",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "recipient",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "transferOwnership",
+		"inputs": [
+			{
+				"name": "newOwner",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "transfersPaused",
+		"inputs": [],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "updateDevelopmentWallet",
+		"inputs": [
+			{
+				"name": "_newDevelopmentWallet",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "updateLiquidityWallet",
+		"inputs": [
+			{
+				"name": "_newLiquidityWallet",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "updateTokenStatus",
+		"inputs": [
+			{
+				"name": "_owner",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "_tokenName",
+				"type": "string",
+				"internalType": "string"
+			},
+			{
+				"name": "_status",
+				"type": "uint8",
+				"internalType": "enum Decentralized_Autonomous_Vaults_DAV_V2_1.TokenStatus"
+			}
+		],
+		"outputs": [],
+		"stateMutability": "nonpayable"
+	},
+	{
+		"type": "function",
+		"name": "userBurnClaimed",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool",
+				"internalType": "bool"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "userBurnedAmount",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "userCycleBurned",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "userCycleRewards",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "userMintedAmount",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "userReferralCode",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "userRewardPerTokenPaid",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "userTokenCount",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "userTokenEntries",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"outputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "tokenName",
+				"type": "string",
+				"internalType": "string"
+			},
+			{
+				"name": "emoji",
+				"type": "string",
+				"internalType": "string"
+			},
+			{
+				"name": "status",
+				"type": "uint8",
+				"internalType": "enum Decentralized_Autonomous_Vaults_DAV_V2_1.TokenStatus"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "userUnclaimedCycles",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "usersTokenNames",
+		"inputs": [
+			{
+				"name": "",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "string",
+				"internalType": "string"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
+		"name": "viewLastMintTimeStamp",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "event",
+		"name": "Approval",
+		"inputs": [
+			{
+				"name": "owner",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "spender",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "value",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "FundsWithdrawn",
+		"inputs": [
+			{
+				"name": "fundType",
+				"type": "string",
+				"indexed": false,
+				"internalType": "string"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "timestamp",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "HolderAdded",
+		"inputs": [
+			{
+				"name": "holder",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "OwnershipTransferred",
+		"inputs": [
+			{
+				"name": "previousOwner",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "newOwner",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "ReferralBonusPaid",
+		"inputs": [
+			{
+				"name": "referrer",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "referee",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "referralCode",
+				"type": "string",
+				"indexed": false,
+				"internalType": "string"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "ReferralCodeGenerated",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "referralCode",
+				"type": "string",
+				"indexed": false,
+				"internalType": "string"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "RewardClaimed",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "cycle",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "RewardsClaimed",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "TokenNameAdded",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "name",
+				"type": "string",
+				"indexed": false,
+				"internalType": "string"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "TokenStatusUpdated",
+		"inputs": [
+			{
+				"name": "owner",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "tokenName",
+				"type": "string",
+				"indexed": false,
+				"internalType": "string"
+			},
+			{
+				"name": "status",
+				"type": "uint8",
+				"indexed": false,
+				"internalType": "enum Decentralized_Autonomous_Vaults_DAV_V2_1.TokenStatus"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "TokensBurned",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "cycle",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "TokensMinted",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "davAmount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "stateAmount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "Transfer",
+		"inputs": [
+			{
+				"name": "from",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "to",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "value",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "error",
+		"name": "ERC20InsufficientAllowance",
+		"inputs": [
+			{
+				"name": "spender",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "allowance",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "needed",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "ERC20InsufficientBalance",
+		"inputs": [
+			{
+				"name": "sender",
+				"type": "address",
+				"internalType": "address"
+			},
+			{
+				"name": "balance",
+				"type": "uint256",
+				"internalType": "uint256"
+			},
+			{
+				"name": "needed",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "ERC20InvalidApprover",
+		"inputs": [
+			{
+				"name": "approver",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "ERC20InvalidReceiver",
+		"inputs": [
+			{
+				"name": "receiver",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "ERC20InvalidSender",
+		"inputs": [
+			{
+				"name": "sender",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "ERC20InvalidSpender",
+		"inputs": [
+			{
+				"name": "spender",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "OwnableInvalidOwner",
+		"inputs": [
+			{
+				"name": "owner",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "OwnableUnauthorizedAccount",
+		"inputs": [
+			{
+				"name": "account",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
+	},
+	{
+		"type": "error",
+		"name": "ReentrancyGuardReentrantCall",
+		"inputs": []
+	},
+	{
+		"type": "error",
+		"name": "SafeERC20FailedOperation",
+		"inputs": [
+			{
+				"name": "token",
+				"type": "address",
+				"internalType": "address"
+			}
+		]
+	}
+]
