@@ -22,13 +22,12 @@ const Header = () => {
           <NavLink className="navbar-brand text-light pb-0 mb-0" to="/">
             <label
               className="uppercase fs-2 fw-bolder"
-			  style={{ fontFamily: "Satoshi, sans-serif" }}
-
+              style={{ fontFamily: "Satoshi, sans-serif" }}
             >
               STATE DEX
             </label>
             <p className="detailAmount mb-0" style={{ fontSize: "0.8rem" }}>
-              Not just a swap — it’s your new job
+              Not just a swap — it’s VOLUME
             </p>
           </NavLink>
 
@@ -54,7 +53,7 @@ const Header = () => {
                   {/* <span className="active-dot"></span> */}
                 </NavLink>
               </li>
-              <li className="nav-item mx-2">
+              <li className="nav-item mx-2 position-relative custom-dropdown">
                 <NavLink
                   className={({ isActive }) =>
                     isActive

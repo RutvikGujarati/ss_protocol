@@ -2,25 +2,25 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
-import {Decentralized_Autonomous_Vaults_DAV_V2_1} from "../src/DavToken.sol";
+import {DAV_V2_2} from "../src/DavToken.sol";
 
 contract ScriptDAV is Script {
     function run() external {
         vm.startBroadcast();
+        //NOTE: add correct wallets for Gov and Dev
+        address liquidity = 0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483;
+        address DAVWallet = 0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483;
+        address state = 0xc9d636eC96dc4EDcf3275Dbe10EF62dA23E1a987;
+        address Governanace = 0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483;
 
-        address liquidity = 0xBAaB2913ec979d9d21785063a0e4141e5B787D28;
-        address DAVWallet = 0x5E19e86F1D10c59Ed9290cb986e587D2541e942C;
-		address state = 0xac1fa93b8a8d34C605CB8128D045638f5fbA90D5;
-        address Governanace = 0xBAaB2913ec979d9d21785063a0e4141e5B787D28;
-
-        Decentralized_Autonomous_Vaults_DAV_V2_1 dav = new Decentralized_Autonomous_Vaults_DAV_V2_1(
-                liquidity,
-                DAVWallet,
-                state,
-				Governanace,
-                "pDAV",
-                "pDAV"
-            );
+        DAV_V2_2 dav = new DAV_V2_2(
+            liquidity,
+            DAVWallet,
+            state,
+            Governanace,
+            "pDAV",
+            "pDAV"
+        );
 
         console.log("Contract deployed at:", address(dav));
 

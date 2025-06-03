@@ -6,8 +6,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-//NOTE: not required of library use
-contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
+//NOTE: Not required for library use
+//NOTE: Mainnet deployment - To add a token = 10 Million PLS
+//NOTE Mainet deployments - Mint 1 DAV = 1 Million PLS
+//NOTE: Mainet deployment - 1 DAV required to add a token
+//NOTE: Mainnet deployment - 10 DAV required to become a market maker
+contract DAV_V2_2 is
     ERC20,
     Ownable(msg.sender),
     ReentrancyGuard // IERC20 initialization
@@ -17,9 +21,10 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     //Global unit256 Variables
     // DAV TOken
     uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
+    uint256 public constant MAX_USER = 10000; 
     uint256 public constant TOKEN_COST = 1000 ether; // 1000000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
-    uint256 public constant LIQUIDITY_SHARE = 30; // 20% LIQUIDITY SHARE
+    uint256 public constant LIQUIDITY_SHARE = 30; // 30% LIQUIDITY SHARE
     uint256 public constant DEVELOPMENT_SHARE = 5; // 5% DEV SHARE
     uint256 public constant HOLDER_SHARE = 10; // 10% HOLDER SHARE
     uint256 public constant BASIS_POINTS = 10000;
@@ -30,7 +35,9 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     /// @dev Intentionally set to 100,000 tokens in full native unit (i.e., 100000 ether).
     ///      ⚠️ This is NOT a unit error — the fee is meant to be very high, either for testing,
     ///      access restriction, or deterrence. Adjust only if this is NOT the intended behavior.
+	
     uint256 public constant TOKEN_PROCESSING_FEE = 2000 ether;
+    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 2500 ether;
     uint256 public totalReferralRewardsDistributed;
     uint256 public mintedSupply; // Total Minted DAV Tokens
     uint256 public stateLpTotalShare;
@@ -47,16 +54,16 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     // Used in DApp to display total burn statistics
     uint256 public totalStateBurned;
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
-    uint256 public constant CLAIM_INTERVAL = 4 days; // 4 hour claim timer
+    uint256 public constant CLAIM_INTERVAL = 1 days; // 4 days claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
-
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
     // @notice The governance address with special privileges, set at deployment
     // @dev Intentionally immutable to enforce a fixed governance structure; cannot be updated
-
     //Governance Privilage
-    /*This implementation introduces a ratio-based liquidity provisioning (LP) mechanism, which is currently in beta and undergoing testing. The design is experimental and aims to collect meaningful data to inform and refine the concept. Due to its early-stage nature, certain centralized elements remain in place to ensure flexibility during the testing phase. These will be reviewed and potentially decentralized as the model matures.*/
+    /*This implementation introduces a ratio-based liquidity provisioning (LP) mechanism, which is currently in beta and undergoing testing. 
+	The design is experimental and aims to collect meaningful data to inform and refine the concept. Due to its early-stage nature, certain centralized elements remain in place to ensure flexibility during the testing phase. 
+	These will be reviewed and potentially decentralized as the model matures.*/
 
 	//NOTE: Governance is using multi-sig method to ensure security of that wallet address.
     address public  governance;
@@ -80,8 +87,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     enum TokenStatus {
         Pending,
         Processed
-    }
-	
+    }	
     /**
      * 🔒 Front-Running Protection Design:
      * - Token names are tracked *per user*, not globally.
@@ -90,16 +96,13 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
      * - Even if another user submits the same token name, it is independent and scoped to them.
      * - Users do not lose their processing fees due to front-running.
      */
-
     struct TokenEntry {
         address user;
         string tokenName;
         string emoji; // 🆕 Add this field
         TokenStatus status;
-    }
-   
+    }   
     // NOTE: Each user is limited to DAV_AMOUNT token entries, so this loop is bounded
-
 	mapping(address => mapping(string => TokenEntry)) public userTokenEntries;
 	mapping(address => uint256) public userTokenCount;
 	mapping(address => string[]) public usersTokenNames;
@@ -150,10 +153,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
 	mapping(string => bool) public isTokenNameUsed;
     event TokensBurned(address indexed user, uint256 amount, uint256 cycle);
     event RewardClaimed(address indexed user, uint256 amount, uint256 cycle);
- 
     event RewardsClaimed(address indexed user, uint256 amount);
     event HolderAdded(address indexed holder);
-
     event ReferralCodeGenerated(address indexed user, string referralCode);
     event TokenNameAdded(address indexed user, string name);
     event TokenStatusUpdated(
@@ -172,7 +173,6 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
 	uint256 holderShare,
     uint256 timestamp
 );
-
     constructor(
         address _liquidityWallet,
         address _developmentWallet,
@@ -337,8 +337,8 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
             address referrer
         )
     {
-        // Explicitly exclude governance address from receiving holder share
-	bool excludeHolderShare = sender == governance || receivedFromGovernance[sender];
+   	     // Explicitly exclude governance address from receiving holder share
+		bool excludeHolderShare = sender == governance || receivedFromGovernance[sender];
         require(
             !excludeHolderShare || sender != address(0),
             "Invalid governance address"
@@ -367,11 +367,12 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         require(distributed <= value, "Over-allocation");
         stateLPShare = value - distributed;
     }
- function mintDAV(uint256 amount, string memory referralCode) external payable nonReentrant {
+function mintDAV(uint256 amount, string memory referralCode) external payable nonReentrant {
     // Checks
     require(amount > 0, "Amount must be greater than zero");
     require(amount % 1 ether == 0, "Amount must be a whole number");
     require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
+	require(davHoldersCount < MAX_USER, "Max number of users reached");
     uint256 cost = (amount * TOKEN_COST) / 1 ether;
     require(msg.value == cost, "Incorrect PLS amount sent");
     // Effects
@@ -403,10 +404,10 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
     cycleTreasuryAllocation[targetCycle] += totalCycleAllocation;
     cycleUnclaimedPLS[targetCycle] += totalCycleAllocation;
 	}
-  if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
+  	if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
         uint256 effectiveSupply = totalSupply() - balanceOf(governance);
-   uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
-	uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e18;
+   		uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
+		uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e18;
         newHolderFunds += usedHolderShare;
         newTotalRewardPerTokenStored += rewardPerToken;
     }
@@ -441,14 +442,12 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         require(successDev, "Development transfer failed");
         totalDevelopmentAllocated += developmentShare;
     }
-
 	emit DistributionEvent(   msg.sender,    amount,    msg.value,    referrer,    referralShare,   liquidityShare,
     developmentShare,
 	holderShare,
     block.timestamp
 );
 }
-
     function claimReward() external nonReentrant {
         require(balanceOf(msg.sender) > 0, "Not a DAV holder");
 		require(msg.sender != governance && !receivedFromGovernance[msg.sender],
@@ -494,60 +493,80 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
      *      Each user can process tokens up to the number of DAV they hold.
      *      Governance is trusted to operate transparently and verifiably.
      */
-    function processYourToken(
-        string memory _tokenName,
-        string memory _emoji
-    ) public payable {
-        require(bytes(_tokenName).length > 0, "Please provide tokenName");
-		// no commit-reveal scheme or time lock require to unique token name. it will not front run
-		  require(!isTokenNameUsed[_tokenName], "Token name already used");
-		  require(userTokenEntries[msg.sender][_tokenName].user == address(0), "Token name already used by user");
-        require(
-            _utfStringLength(_emoji) <= 10,
-            "Max 10 UTF-8 characters allowed"
-        );
-        // ⚖️ Token entry limit is indirectly enforced via DAV balance
-        // Each user can process one token per DAV they hold. This means the number of tokens they can process is limited by their DAV balance.
-        uint256 userTokenBalance = balanceOf(msg.sender); // The amount of DAV the user holds
-      uint256 tokensSubmitted = userTokenCount[msg.sender]; // Number of tokens the user has already processed
-        // Ensure that the user has enough DAV to process a new token
-        require(
-            userTokenBalance > tokensSubmitted,
-            "You need more DAV to process new token"
-        );
-        // If not the governance, ensure the user sends the required PLS amount
-        if (msg.sender != governance) {
-            //it is  100,000 Ether not in wei form
-            require(
-                msg.value == TOKEN_PROCESSING_FEE,
-                "Please send exactly 100,000 PLS"
-            );
-            // Allocate funds to State LP cycle similar to mintDAV logic
-            uint256 stateLPShare = msg.value;
-            uint256 currentCycle = (block.timestamp - deployTime) /
-                CLAIM_INTERVAL;
-            uint256 cycleAllocation = (stateLPShare *
-                TREASURY_CLAIM_PERCENTAGE) / 100;
-            // Allocate to each cycle over the defined number of periods
-            for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
-                uint256 targetCycle = currentCycle + i;
-                cycleTreasuryAllocation[targetCycle] += cycleAllocation;
-                cycleUnclaimedPLS[targetCycle] += cycleAllocation;
-            }        }
-        // Add the user's token name to their list and mark it as used
-        usersTokenNames[msg.sender].push(_tokenName);
-		tokenNameToOwner[_tokenName] = msg.sender;
-        isTokenNameUsed[_tokenName] = true;
-        userTokenCount[msg.sender]++;
-        allTokenNames.push(_tokenName);
-        userTokenEntries[msg.sender][_tokenName] = TokenEntry(
-            msg.sender,
-            _tokenName,
-            _emoji,
-            TokenStatus.Pending
-        );
-        emit TokenNameAdded(msg.sender, _tokenName);
+   function processYourToken(
+    string memory _tokenName,
+    string memory _emojiOrImage
+		) public payable {
+    require(bytes(_tokenName).length > 0, "Please provide tokenName");
+    require(!isTokenNameUsed[_tokenName], "Token name already used");
+    require(userTokenEntries[msg.sender][_tokenName].user == address(0), "Token name already used by user");
+
+    // Detect if input is an image (Pinata IPFS link)
+   bool isImage = _isImageURL(_emojiOrImage);
+
+    // Emoji check if not image
+    if (!isImage) {
+        require(_utfStringLength(_emojiOrImage) <= 10, "Max 10 UTF-8 characters allowed");
     }
+    uint256 userTokenBalance = balanceOf(msg.sender);
+    uint256 tokensSubmitted = userTokenCount[msg.sender];
+    require(userTokenBalance > tokensSubmitted, "You need more DAV to process new token");
+
+    // Fee logic
+    if (msg.sender != governance) {
+        uint256 requiredFee = isImage ? TOKEN_WITHIMAGE_PROCESS : TOKEN_PROCESSING_FEE;
+        require(msg.value == requiredFee, isImage ? "Please send exact image fee" : "Please send exactly 100,000 PLS");
+
+        // Treasury logic
+        uint256 stateLPShare = msg.value;
+        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+        uint256 cycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) / 100;
+
+        for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
+            uint256 targetCycle = currentCycle + i;
+            cycleTreasuryAllocation[targetCycle] += cycleAllocation;
+            cycleUnclaimedPLS[targetCycle] += cycleAllocation;
+        }
+    }
+	  usersTokenNames[msg.sender].push(_tokenName);
+    tokenNameToOwner[_tokenName] = msg.sender;
+    isTokenNameUsed[_tokenName] = true;
+    userTokenCount[msg.sender]++;
+    allTokenNames.push(_tokenName);
+    userTokenEntries[msg.sender][_tokenName] = TokenEntry(
+        msg.sender,
+        _tokenName,
+        _emojiOrImage,
+        TokenStatus.Pending
+    );
+
+    emit TokenNameAdded(msg.sender, _tokenName);
+}
+function _contains(string memory str, string memory substr) internal pure returns (bool) {
+    bytes memory strBytes = bytes(str);
+    bytes memory substrBytes = bytes(substr);
+
+    if (substrBytes.length == 0 || substrBytes.length > strBytes.length) return false;
+
+    for (uint256 i = 0; i <= strBytes.length - substrBytes.length; i++) {
+        bool matchFound = true;
+        for (uint256 j = 0; j < substrBytes.length; j++) {
+            if (strBytes[i + j] != substrBytes[j]) {
+                matchFound = false;
+                break;
+            }
+        }
+        if (matchFound) return true;
+    }
+
+    return false;
+}
+
+function _isImageURL(string memory str) internal pure returns (bool) {
+    return _contains(str, "mypinata.cloud/ipfs/");
+}
+
+
     /// @notice Counts the number of UTF-8 characters in a string
     /// @dev Each emoji can be 1–4 bytes. This counts actual characters, not bytes.
     function _utfStringLength(
@@ -611,7 +630,7 @@ contract Decentralized_Autonomous_Vaults_DAV_V2_1 is
         emit TokenStatusUpdated(_owner, _tokenName, _status);
     }
 	//want to fetch all entries not perticular from start to end
-function getTokenEntries(uint256 start, uint256 limit) internal view returns (TokenEntry[] memory) {
+	function getTokenEntries(uint256 start, uint256 limit) internal view returns (TokenEntry[] memory) {
     uint256 end = start + limit > allTokenNames.length ? allTokenNames.length : start + limit;
     TokenEntry[] memory entries = new TokenEntry[](end - start);
     for (uint256 i = start; i < end; i++) {
@@ -622,13 +641,13 @@ function getTokenEntries(uint256 start, uint256 limit) internal view returns (To
     return entries;
 }
 
-function getAllTokenEntries() public view returns (TokenEntry[] memory) {
+	function getAllTokenEntries() public view returns (TokenEntry[] memory) {
     return getTokenEntries(0, allTokenNames.length);
 }
     // ------------------ Burn functions ------------------------------
     // Burn tokens and update cycle tracking
 	/// @notice Burns StateToken and logs user contribution for a cycle
-/// @param amount Amount of StateToken to burn
+	/// @param amount Amount of StateToken to burn
     function burnState(uint256 amount) external {
         require(balanceOf(msg.sender) >= MIN_DAV, "Need at least 10 DAV");
         require(amount > 0, "Burn amount must be > 0");
@@ -697,7 +716,7 @@ function getAllTokenEntries() public view returns (TokenEntry[] memory) {
         }
         return false;
     }
-    // Calculate total claimable PLS for a user
+   	 // Calculate total claimable PLS for a user
     function getClaimablePLS(address user) public view returns (uint256) {
         uint256 currentCycle = getCurrentCycle();
         uint256 totalClaimable = 0;
@@ -728,8 +747,8 @@ function getAllTokenEntries() public view returns (TokenEntry[] memory) {
         return totalClaimable;
     }
 	/// @notice Claims PLS rewards for a user across eligible cycles
-/// @dev Iterates over userUnclaimedCycles to calculate and distribute rewards
-/// required to iterate through all users unclaimed cycle that way user can't loose their funds so, no use of cycle arrays
+	/// @dev Iterates over userUnclaimedCycles to calculate and distribute rewards
+	/// required to iterate through all users unclaimed cycle that way user can't loose their funds so, no use of cycle arrays
   function claimPLS() external {
     address user = msg.sender;
     uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;

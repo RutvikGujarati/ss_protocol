@@ -8,22 +8,25 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title STATE Token V2.1 with Ratio-Based Initial Supply Allocation
-/// @author
+/// @author System State Protocol
 /// @notice ERC20 token with 5/95 minting distribution between two addresses at deployment
 /// @dev Uses OpenZeppelin ERC20 and Ownable contracts
-contract STATE_Token_V2_1_Ratio_Swapping is ERC20, Ownable(msg.sender) {
+
+//-------------------------------Token name clarification----------------------------------
+//NOTE: Mainnet token name is pSTATE
+
+contract STATE_V2_2 is ERC20, Ownable(msg.sender) {
     /// @notice Maximum total supply of the token (1 quadrillion tokens, 18 decimals)
-    uint256 public constant MAX_TOTAL_SUPPLY = 1000000000000000 ether;
     event InitialAllocation(
         address indexed fivePercentRecipient,
         address indexed ninetyFivePercentRecipient,
         uint256 fivePercentAmount,
         uint256 ninetyFivePercentAmount
     );
-    uint256 public constant FIVE_PERCENT_ALLOCATION =
-        (MAX_TOTAL_SUPPLY * 5) / 100;
+    uint256 public constant FIVE_PERCENT_ALLOCATION = 50000000000000 ether; // 5% of total supply (50 trillion tokens)
+    /// @notice 95% of total supply (950 trillion tokens)
     uint256 public constant NINETY_FIVE_PERCENT_ALLOCATION =
-        MAX_TOTAL_SUPPLY - FIVE_PERCENT_ALLOCATION;
+        950000000000000 ether;
     /// @param tokenName The name of the token
     /// @param tokenSymbol The symbol of the token
     /// @param recipientFivePercent Address receiving 5% of total supply

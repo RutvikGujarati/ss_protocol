@@ -17,10 +17,25 @@ export const useAuctionTokens = () => {
 		OutPutAmount,
 		AirdropClaimed,
 		TokenNames,
+		isGotFlammed,
 		tokenMap,
 	} = useSwapContract();
-	const { Emojies } = useDAvContract();
-	const [loading, setLoading] = useState(true); // Add loading state
+	const { Emojies, names } = useDAvContract(); // Add names from useDAvContract
+	const [loading, setLoading] = useState(true);
+
+	// Create a name-to-emoji mapping
+	const nameToEmoji = Array.isArray(names) && Array.isArray(Emojies) && names.length === Emojies.length
+		? names.reduce((acc, name, index) => {
+			acc[name.toLowerCase()] = Emojies[index] || "🔹";
+			return acc;
+		}, {})
+		: {};
+
+	// Log for debugging
+	console.log("nameToEmoji:", nameToEmoji);
+	console.log("TokenNames:", TokenNames);
+	console.log("Emojies:", Emojies);
+	console.log("names from useDAvContract:", names);
 
 	const dynamicTokenNames = Array.from(TokenNames || []).filter(
 		(name) => name !== "DAV" && name !== "STATE"
@@ -30,16 +45,20 @@ export const useAuctionTokens = () => {
 		second: () => { }, // Replace with actual handler if exists
 	};
 
-	const tokenConfigs = dynamicTokenNames.map((contract, index) => {
+	const tokenConfigs = dynamicTokenNames.map((contract) => {
 		const id = contract;
 		const handleAddToken = handleAddMap[contract] || (() => { });
 		const address =
 			tokenMap?.[contract] || "0x0000000000000000000000000000000000000000";
+		const emoji = nameToEmoji[contract.toLowerCase()];
+		if (!emoji && contract !== "DAV" && contract !== "STATE") {
+			console.warn(`No emoji found for token: ${contract}`);
+		}
 
 		return {
 			id,
 			name: id,
-			emoji: Emojies?.[index] || "🔹",
+			emoji: emoji || "🔹",
 			ContractName: contract,
 			token: address,
 			handleAddToken,
@@ -52,18 +71,18 @@ export const useAuctionTokens = () => {
 			Price: prices?.[`${contract}UsdPrice`],
 			address,
 			AuctionStatus: IsAuctionActive?.[contract],
+			flammed: isGotFlammed?.[contract],
 			userHasSwapped: userHashSwapped?.[contract],
 			userHasReverse: userHasReverseSwapped?.[contract],
 			SwapT: () => SwapTokens(id, contract),
 			onlyInputAmount: InputAmount[contract],
 			inputTokenAmount: `${InputAmount[contract] || 0} ${id}`,
-			outputToken: `${OutPutAmount?.[contract] || 0} State`,
+			outputToken: `${OutPutAmount?.[contract] || 0} STATE`,
 		};
 	});
 
 	useEffect(() => {
 		const checkDataFetched = () => {
-			// Ensure all required arrays/objects are non-empty and defined
 			const isDataReady =
 				TokenNames?.length > 0 &&
 				AuctionTime &&
@@ -72,26 +91,26 @@ export const useAuctionTokens = () => {
 				IsAuctionActive &&
 				userHashSwapped &&
 				userHasReverseSwapped &&
+				isGotFlammed &&
 				InputAmount &&
 				OutPutAmount &&
-				AirdropClaimed;
+				AirdropClaimed &&
+				names?.length > 0 &&
+				Emojies?.length > 0;
 
-			if (isDataReady) {
-				setLoading(false); 
-			} else {
-				setLoading(true); 
-			}
+			setLoading(!isDataReady);
 		};
 
 		checkDataFetched();
-
 	}, [
 		TokenNames,
 		AuctionTime,
 		tokenMap,
 		Emojies,
+		names,
 		isReversed,
 		IsAuctionActive,
+		isGotFlammed,
 		userHashSwapped,
 		userHasReverseSwapped,
 		InputAmount,
@@ -99,5 +118,7 @@ export const useAuctionTokens = () => {
 		AirdropClaimed,
 	]);
 
-	return { tokens: tokenConfigs, loading }; // Return loading state
+	console.log("tokenConfigs:", tokenConfigs);
+
+	return { tokens: tokenConfigs, loading };
 };

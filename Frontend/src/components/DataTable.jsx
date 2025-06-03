@@ -36,6 +36,7 @@ const DataTable = () => {
     handleAddToken,
     tokenMap,
     giveRewardForAirdrop,
+    TickMarkToken,
   } = useSwapContract();
 
   const { tokens } = useAuctionTokens();
@@ -95,6 +96,9 @@ const DataTable = () => {
       ...prev,
       [tokenName]: value, // store pairAddress directly
     }));
+  };
+  const isImageUrl = (str) => {
+    return typeof str === "string" && str.includes("mypinata.cloud/ipfs/");
   };
 
   // Handle Add button click (calls AddTokenIntoSwapContract)
@@ -183,6 +187,20 @@ const DataTable = () => {
     return () => clearTimeout(timer);
   }, [txStatusForSwap]);
 
+  const [loadingMap, setLoadingMap] = useState({});
+
+  const handleTick = async (TokenAddress) => {
+    setLoadingMap((prev) => ({ ...prev, [TokenAddress]: true }));
+    try {
+      await TickMarkToken(TokenAddress);
+    } catch (err) {
+      console.log(err);
+      alert("Transaction failed.");
+    } finally {
+      setLoadingMap((prev) => ({ ...prev, [TokenAddress]: false }));
+    }
+  };
+
   return !isConnected || !address ? (
     <div className="container text-center mt-5">
       <p className="text-light">Please connect your wallet.</p>
@@ -193,22 +211,23 @@ const DataTable = () => {
     //     <IOSpinner />
     //   </div>
     // ) :
-    <div className="container  datatablemarginbottom">
-      <div className="table-responsive">
-        <div style={{ maxHeight: "190px", overflowY: "auto" }}>
+    <div className="container  container flex-grow-1 d-flex flex-column justify-content-between">
+      <div className="table-responsive ">
+        <div style={{ overflowX: "auto" }}>
           <table className="table table-dark">
             <thead>
               <tr>
                 <th></th>
-                <th>Emoticon</th>
+                <th></th>
                 <th>Token Name</th>
+                <th></th>
                 <th>Claim Airdrop</th>
                 <th></th>
                 <th>Auction Timer</th>
                 <th className="text-center">
-                 <span className="mx-3"> Ratio Swapping Auction</span>
+                  <span className="mx-3"> Ratio Swapping Auction</span>
                   <a
-                    href={`https://midgard.wtf/address/${Auction_TESTNET}`}
+                    href={`https://kekxplorer.avecdra.pro/address/${Auction_TESTNET}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ fontSize: "15px", color: "white" }}
@@ -223,18 +242,18 @@ const DataTable = () => {
             </thead>
             <tbody>
               {tokens
-                  .filter(({ name, isReversing, AuctionStatus }) => {
-                    console.log(`Filter Conditions: ${name}`, {
-                      isReversing,
-                      AuctionStatus,
-                    });
+                .filter(({ name, isReversing, AuctionStatus }) => {
+                  console.log(`Filter Conditions: ${name}`, {
+                    isReversing,
+                    AuctionStatus,
+                  });
 
-                    const isAuctionActive = AuctionStatus === "true";
-                    const isReverseAuction =
-                      AuctionStatus === "false" && isReversing === "true";
+                  const isAuctionActive = AuctionStatus === "true";
+                  const isReverseAuction =
+                    AuctionStatus === "false" && isReversing === "true";
 
-                    return isAuctionActive || isReverseAuction;
-                  })
+                  return isAuctionActive || isReverseAuction;
+                })
                 .map(
                   (
                     {
@@ -251,6 +270,7 @@ const DataTable = () => {
                       userHasReverse,
                       // AuctionStatus,
                       TimeLeft,
+                      flammed,
                       inputTokenAmount,
                       onlyInputAmount,
                       // handleAddToken,
@@ -260,8 +280,20 @@ const DataTable = () => {
                   ) => (
                     <tr className="small-font-row" key={index}>
                       <td></td>
-                      <td>{emoji}</td>
+                      <td>
+                        {isImageUrl(emoji) ? (
+                          <img
+                            src={emoji}
+                            alt="token visual"
+                            style={{ width: "30px", height: "30px" }}
+                          />
+                        ) : (
+                          <span style={{ fontSize: "20px" }}>{emoji}</span>
+                        )}
+                      </td>
                       <td className="justify-content-center">{`${name}`}</td>
+                      <td> {flammed == "true" && <>🔥</>}</td>
+
                       <td style={{ position: "relative" }}>
                         <button
                           onClick={() => Checking(id, ContractName)}
@@ -543,14 +575,15 @@ const DataTable = () => {
     //   </div>
     // ) :
     <>
-      <div className="container  datatablemarginbottom">
-        <div className="table-responsive">
+      <div className="container  container flex-grow-1 d-flex flex-column justify-content-between">
+      <div className="table-responsive ">
+        <div style={{ overflowX: "auto" }}>
           <table className="table table-dark">
             <thead>
               {authorized ? (
                 <tr>
                   {/* <th></th> */}
-                  <th>Logo</th>
+                  <th></th>
                   <th>Token Name</th>
                   <th>Deploy</th>
                   <th>Token Address/Pair</th>
@@ -559,12 +592,12 @@ const DataTable = () => {
                   <th>Time To claim</th>
                   <th>Amount</th>
                   <th>Airdrop</th>
+                  <th></th>
                 </tr>
               ) : (
                 <tr>
                   <th>Emoticon</th>
                   <th>Token Name</th>
-                  <th>Supply</th>
 
                   {/* <th>Liquidity</th> */}
                   <th></th>
@@ -621,14 +654,26 @@ const DataTable = () => {
                         isDeployed,
                         isRenounceToken,
                         TokenAddress,
+                        isFlammed,
                       },
                       index
                     ) => (
                       <tr key={index}>
                         <td>
-                          <h5>{Emojis}</h5>
+                          {isImageUrl(Emojis) ? (
+                            <img
+                              src={Emojis}
+                              alt="token visual"
+                              style={{ width: "30px", height: "30px" }}
+                            />
+                          ) : (
+                            <span style={{ fontSize: "20px" }}>{Emojis}</span>
+                          )}
                         </td>
-                        <td>{name}</td>
+                        <td>
+                          {name}
+                          {isFlammed == "true" && <>🔥 </>}
+                        </td>
                         <td>
                           {isDeployed ? (
                             <span
@@ -768,6 +813,32 @@ const DataTable = () => {
                               : "Claim"}
                           </button>
                         </td>
+                        <td>
+                          {isFlammed == "false" ? (
+                            <div className="box-tick">✓</div>
+                          ) : (
+                            <button
+                              className="btn btn-outline-success btn-sm"
+                              onClick={() => handleTick(TokenAddress)}
+                              disabled={loadingMap[TokenAddress]}
+                              style={{
+                                width: "30px",
+                                height: "30px",
+                                padding: 0,
+                                fontSize: "1.2rem",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              {loadingMap[TokenAddress] ? (
+                                <span className="spinner-border spinner-border-sm" />
+                              ) : (
+                                "☐"
+                              )}
+                            </button>
+                          )}
+                        </td>
                         {isAddingPopupOpen && (
                           <div
                             className="modal d-flex align-items-center justify-content-center"
@@ -875,9 +946,18 @@ const DataTable = () => {
                       index
                     ) => (
                       <tr key={index}>
-                        <td>{Emojis}</td>
-                        <td>{`${name}`}</td>
-                        <td>500 Billion</td>
+                        <td>
+                          {isImageUrl(Emojis) ? (
+                            <img
+                              src={Emojis}
+                              alt="token visual"
+                              style={{ width: "30px", height: "30px" }}
+                            />
+                          ) : (
+                            <span style={{ fontSize: "20px" }}>{Emojis}</span>
+                          )}
+                        </td>
+                        <td className="justify-content-center">{`${name}`}</td>{" "}
                         <td></td>
                         <td
                           onClick={() => {
@@ -893,7 +973,6 @@ const DataTable = () => {
                             ? `${address.slice(0, 6)}...${address.slice(-4)}`
                             : "N/A"}
                         </td>
-
                         <td
                           onClick={() => {
                             if (pairAddress) {
@@ -937,6 +1016,7 @@ const DataTable = () => {
           </table>
         </div>
       </div>
+	  </div>
     </>
   ) : (
     <></>
