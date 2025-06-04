@@ -974,16 +974,6 @@ console.log("got flammed",isGotFlammed["TEST2"])
       throw e;
     }
   };
-  const TickMarkToken = async (TokenAddress) => {
-    try {
-      const tx = await AllContracts.AuctionContract.flamLiquidity(TokenAddress);
-      await tx.wait();
-      await isFlammed();
-    } catch (e) {
-      console.error("Error claiming tokens:", e);
-      throw e;
-    }
-  };
 
   const handleAddToken = async (
     tokenAddress,
@@ -1093,7 +1083,6 @@ console.log("got flammed",isGotFlammed["TEST2"])
         tokenMap,
         IsAuctionActive,
         TokenRatio,
-        TickMarkToken,
         isGotFlammed,
       }}
     >

@@ -36,7 +36,6 @@ const DataTable = () => {
     handleAddToken,
     tokenMap,
     giveRewardForAirdrop,
-    TickMarkToken,
   } = useSwapContract();
 
   const { tokens } = useAuctionTokens();
@@ -186,20 +185,6 @@ const DataTable = () => {
 
     return () => clearTimeout(timer);
   }, [txStatusForSwap]);
-
-  const [loadingMap, setLoadingMap] = useState({});
-
-  const handleTick = async (TokenAddress) => {
-    setLoadingMap((prev) => ({ ...prev, [TokenAddress]: true }));
-    try {
-      await TickMarkToken(TokenAddress);
-    } catch (err) {
-      console.log(err);
-      alert("Transaction failed.");
-    } finally {
-      setLoadingMap((prev) => ({ ...prev, [TokenAddress]: false }));
-    }
-  };
 
   return !isConnected || !address ? (
     <div className="container text-center mt-5">
@@ -591,7 +576,6 @@ const DataTable = () => {
                   <th>Time To claim</th>
                   <th>Amount</th>
                   <th>Airdrop</th>
-                  <th></th>
                 </tr>
               ) : (
                 <tr>
@@ -812,32 +796,7 @@ const DataTable = () => {
                               : "Claim"}
                           </button>
                         </td>
-                        <td>
-                          {isFlammed == "false" ? (
-                            <div className="box-tick">✓</div>
-                          ) : (
-                            <button
-                              className="btn btn-outline-success btn-sm"
-                              onClick={() => handleTick(TokenAddress)}
-                              disabled={loadingMap[TokenAddress]}
-                              style={{
-                                width: "30px",
-                                height: "30px",
-                                padding: 0,
-                                fontSize: "1.2rem",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              {loadingMap[TokenAddress] ? (
-                                <span className="spinner-border spinner-border-sm" />
-                              ) : (
-                                "☐"
-                              )}
-                            </button>
-                          )}
-                        </td>
+
                         {isAddingPopupOpen && (
                           <div
                             className="modal d-flex align-items-center justify-content-center"
