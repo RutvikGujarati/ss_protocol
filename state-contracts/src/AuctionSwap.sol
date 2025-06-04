@@ -168,6 +168,10 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address _owner
     ) external onlyGovernance returns (address) {
         require(!isTokenNameUsed[name], "Token name already used");
+		require(    _One != address(0) &&    _swap != address(0) &&    _owner != address(0),
+   		 "Invalid addresses");
+		require(    bytes(name).length > 0 &&    bytes(symbol).length > 0,    "Invalid token metadata");
+
         require(
             deployedTokensByUser[msg.sender][name] == address(0),
             "Token address should not be zero"
@@ -312,8 +316,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             : 0;
         require(newDavContributed > 0, "No new DAV holdings for this token");
         // **Effects**
-        uint256 reward = (newDavContributed * AIRDROP_AMOUNT) /
-            PRECISION_FACTOR;
+        uint256 reward = (newDavContributed * AIRDROP_AMOUNT + PRECISION_FACTOR - 1) / PRECISION_FACTOR;
+		require(reward > 0, "Reward too small");
         cumulativeDavHoldings[user][inputToken] += newDavContributed;
         lastDavHolding[user][inputToken] = currentDavHolding;
         hasClaimed[user][inputToken] = true;

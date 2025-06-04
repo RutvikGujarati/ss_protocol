@@ -593,7 +593,7 @@ function _isImageURL(string memory str) internal pure returns (bool) {
     /// @notice Returns the list of pending token names for a user.
     /// @dev This function is intended for off-chain use only. It may consume too much gas if called on-chain for users with many entries.
     function getPendingTokenNames(address user) public view returns (string[] memory) {
-	require(userTokenCount[msg.sender] < MAX_TOKENS_PER_USER, "Token limit exceeded");
+	require(userTokenCount[msg.sender] < MAX_TOKEN_PER_USER, "Token limit exceeded");
     string[] memory all = usersTokenNames[user];
     uint256 limit = all.length > 50 ? 50 : all.length; // hardcoded limit
     string[] memory temp = new string[](limit);
