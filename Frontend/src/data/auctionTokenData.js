@@ -1,10 +1,8 @@
-import { useContext, useState, useEffect } from "react";
-import { PriceContext } from "../api/StatePrice";
+import { useState, useEffect } from "react";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 
 export const useAuctionTokens = () => {
-	const prices = useContext(PriceContext);
 	const {
 		SwapTokens,
 		isReversed,
@@ -31,11 +29,6 @@ export const useAuctionTokens = () => {
 		}, {})
 		: {};
 
-	// Log for debugging
-	console.log("nameToEmoji:", nameToEmoji);
-	console.log("TokenNames:", TokenNames);
-	console.log("Emojies:", Emojies);
-	console.log("names from useDAvContract:", names);
 
 	const dynamicTokenNames = Array.from(TokenNames || []).filter(
 		(name) => name !== "DAV" && name !== "STATE"
@@ -68,7 +61,6 @@ export const useAuctionTokens = () => {
 			AirdropClaimedForToken: AirdropClaimed?.[contract],
 			isReversing: isReversed?.[contract],
 			RatioTargetToken: RatioTargetsofTokens?.[contract] || 0,
-			Price: prices?.[`${contract}UsdPrice`],
 			address,
 			AuctionStatus: IsAuctionActive?.[contract],
 			flammed: isGotFlammed?.[contract],
@@ -118,7 +110,6 @@ export const useAuctionTokens = () => {
 		AirdropClaimed,
 	]);
 
-	console.log("tokenConfigs:", tokenConfigs);
 
 	return { tokens: tokenConfigs, loading };
 };

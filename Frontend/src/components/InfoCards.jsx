@@ -96,7 +96,6 @@ const InfoCards = () => {
     const gateway = import.meta.env.VITE_PINATA_GATEWAY;
 
     // Debugging: Log environment variable
-    console.log("VITE_PINATA_GATEWAY:", gateway);
 
     if (!gateway) {
       console.error("VITE_PINATA_GATEWAY is not defined in .env");
@@ -122,7 +121,6 @@ const InfoCards = () => {
       const pinataURL = `${
         gateway.endsWith("/") ? gateway.slice(0, -1) : gateway
       }/${ipfsHash}`;
-      console.log("Generated Pinata URL:", pinataURL);
       return pinataURL;
     } catch (err) {
       console.error("Pinata upload failed:", err.response?.data || err.message);
@@ -231,13 +229,10 @@ const InfoCards = () => {
     }
   };
 
-  console.log("file upload url", fileUploaded);
-  console.log("Pinata Gateway:", import.meta.env.VITE_PINATA_GATEWAY);
   const adjustedTokenProcessing = isFileUploaded
     ? Math.floor(TokenWithImageProcessing)
     : Math.floor(TokenProcessing);
 
-  console.log("Connected Chain ID:", chainId);
   const setBackLogo = () => {
     if (chainId === 369) {
       return PLSLogo; // PulseChain

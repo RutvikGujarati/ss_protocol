@@ -13,17 +13,7 @@ export const useAddTokens = () => {
 	const [AuthLoading, setAuthLoading] = useState(true);
 
 	useEffect(() => {
-		console.log("useAddTokens Dependencies:", {
-			names,
-			users,
-			Emojies,
-			isUsed,
-			tokenMap,
-			TimeLeftClaim,
-			supportedToken,
-			isTokenRenounce,
-		});
-
+	
 		const checkDataFetched = () => {
 			const isDataReady =
 				names?.length > 0 &&
@@ -36,7 +26,6 @@ export const useAddTokens = () => {
 				supportedToken &&
 				isTokenRenounce;
 
-			console.log("isDataReady:", isDataReady);
 			setAuthLoading(!isDataReady);
 		};
 
@@ -99,8 +88,6 @@ export const useAddTokens = () => {
 export const useUsersOwnerTokens = () => {
 	const { UsersSupportedTokens, isGotFlammed } = useSwapContract();
 	const { names, Emojies } = useDAvContract();
-	console.log("names", names)
-	console.log("Raw UsersSupportedTokens:", UsersSupportedTokens);
 
 	// Create name → Emojies map
 	const emojiesMap = names.reduce((acc, name, index) => {
@@ -125,7 +112,6 @@ export const useUsersOwnerTokens = () => {
 		}
 	}
 
-	console.log("Processed tokenList:", tokenList);
 
 	const result = tokenList.map((token, index) => {
 		let actualAddress = "0x0000000000000000000000000000000000000000";
@@ -161,7 +147,6 @@ export const useUsersOwnerTokens = () => {
 			isFlammed: isGotFlammed?.[tokenName],
 		};
 
-		console.log("Token entry:", tokenEntry);
 		return tokenEntry;
 	});
 

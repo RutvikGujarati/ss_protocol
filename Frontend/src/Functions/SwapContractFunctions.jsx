@@ -84,7 +84,6 @@ export const SwapContractProvider = ({ children }) => {
     try {
       const results = {};
       const tokenMap = await ReturnfetchUserTokenAddresses();
-      console.log("tokenMap:", tokenMap); // Debug: Verify tokenMap structure
 
       const extendedMap = includeTestState
         ? { ...tokenMap, state: STATE_TESTNET }
@@ -103,29 +102,35 @@ export const SwapContractProvider = ({ children }) => {
           const args = buildArgs
             ? buildArgs(tokenAddress, tokenName)
             : [tokenAddress];
-          console.log(
-            `Calling ${contractMethod} for ${tokenName} (${tokenAddress}) with args:`,
-            args
-          ); // Debug
-
           const rawResult = await contract[contractMethod](...args);
           const formattedResult = formatFn(rawResult);
 
-          // Use tokenAddress as key for hasDeposited, tokenName for others
           const key = useAddressAsKey ? tokenAddress : tokenName;
           results[key] = formattedResult;
         } catch (err) {
+          const reason =
+            err?.reason || // ethers v5 style
+            err?.shortMessage || // ethers v6 style
+            err?.error?.errorName ||
+            err?.message ||
+            "";
+
+          const unsupported = /unsupported token/i.test(reason);
+
+          const key = useAddressAsKey ? tokenAddress : tokenName;
+          if (unsupported) {
+            results[key] = "not listed";
+          } else {
+            results[key] = "not started";
+          }
+
           console.error(
             `Error calling ${contractMethod} for ${tokenName} (${tokenAddress}):`,
-            err
+            reason || err
           );
-          const key = useAddressAsKey ? tokenAddress : tokenName;
-          results[key] =
-            contractMethod === "getRatioPrice" ? "not listed" : "not started";
         }
       }
 
-      console.log("fetchTokenData results:", results); // Debug: Verify results
       setState(results);
       return results;
     } catch (err) {
@@ -282,12 +287,7 @@ export const SwapContractProvider = ({ children }) => {
         state: STATE_TESTNET,
       };
 
-      console.log("Starting loop over Addresses:", extendedMap);
-
       for (const [tokenName, TokenAddress] of Object.entries(extendedMap)) {
-        console.log(
-          `Fetching token amount for ${tokenName} at ${TokenAddress}`
-        );
         const tokenContract = new ethers.Contract(
           TokenAddress,
           ERC20_ABI,
@@ -303,7 +303,6 @@ export const SwapContractProvider = ({ children }) => {
         results[tokenName] = formattedBalance;
       }
 
-      console.log("Final balance amounts:", results);
       setTokenbalance(results);
     } catch (e) {
       console.error("Error fetching input amounts:", e);
@@ -333,7 +332,6 @@ export const SwapContractProvider = ({ children }) => {
       const tx = await tokenContract.renounceOwnership();
       await tx.wait();
 
-      console.log(`Renounced ownership for ${tokenName}`);
       await isRenounced();
     } catch (error) {
       console.error(`Error renouncing ownership for ${tokenName}:`, error);
@@ -359,8 +357,7 @@ export const SwapContractProvider = ({ children }) => {
     } catch (e) {
       console.error("Error fetching isFlammed:", e);
     }
-  };''
-console.log("got flammed",isGotFlammed["TEST2"])
+  };
   const isRenounced = async () => {
     try {
       const results = {};
@@ -372,13 +369,7 @@ console.log("got flammed",isGotFlammed["TEST2"])
         DAV: DAV_TESTNET,
       };
 
-      console.log("Starting loop over Addresses in renounce:", extendedMap);
-
       for (const [tokenName, TokenAddress] of Object.entries(extendedMap)) {
-        console.log(
-          `Checking renounce status for ${tokenName} at ${TokenAddress}`
-        );
-
         const renouncing = await AllContracts.AuctionContract.isTokenRenounced(
           TokenAddress
         );
@@ -391,13 +382,11 @@ console.log("got flammed",isGotFlammed["TEST2"])
           isOwnerZero =
             owner.toLowerCase() ===
             "0x0000000000000000000000000000000000000000";
-          console.log(`State token owner is zero address: ${isOwnerZero}`);
         } else if (tokenName === "DAV") {
           const owner = await AllContracts.davContract.owner();
           isOwnerZero =
             owner.toLowerCase() ===
             "0x0000000000000000000000000000000000000000";
-          console.log(`State token owner is zero address: ${isOwnerZero}`);
         }
 
         results[tokenName] =
@@ -406,11 +395,8 @@ console.log("got flammed",isGotFlammed["TEST2"])
             : tokenName === "DAV"
             ? renouncingString === "true" && isOwnerZero
             : renouncingString;
-
-        console.log(`Renounce status for ${tokenName}:`, results[tokenName]);
       }
 
-      console.log("Final renouncing status:", results);
       setRenonced(results);
     } catch (e) {
       console.error("Error fetching renounce status:", e);
@@ -454,9 +440,6 @@ console.log("got flammed",isGotFlammed["TEST2"])
       const davAddress = await AllContracts.AuctionContract.dav();
       const stateAddress = await AllContracts.AuctionContract.stateToken();
 
-      console.log("DAV:", davAddress);
-      console.log("State:", stateAddress);
-
       setDavAddress(davAddress);
       setStateAddress(stateAddress);
     } catch (error) {
@@ -475,7 +458,6 @@ console.log("got flammed",isGotFlammed["TEST2"])
       const proxyResult =
         await AllContracts.AuctionContract.getUserTokenNames();
       const tokenNames = Array.from(proxyResult);
-      console.log("Token Names:", tokenNames);
 
       const tokenAddresses = {};
 
@@ -485,8 +467,6 @@ console.log("got flammed",isGotFlammed["TEST2"])
           await AllContracts.AuctionContract.getUserTokenAddress(name);
         tokenAddresses[name] = TokenAddress;
       }
-
-      console.log("Token Addresses:", tokenAddresses);
 
       // Optionally set to state
       setTokenMap(tokenAddresses); // You need to define `tokenMap` with `useState({})`
@@ -505,7 +485,6 @@ console.log("got flammed",isGotFlammed["TEST2"])
       const proxyResult =
         await AllContracts.AuctionContract.getUserTokenNames();
       const tokenNames = Array.from(proxyResult);
-      console.log("Token Names:", tokenNames);
 
       const tokenAddresses = {};
 
@@ -516,7 +495,6 @@ console.log("got flammed",isGotFlammed["TEST2"])
         tokenAddresses[name] = TokenAddress;
       }
 
-      console.log("Token Addresses:", tokenAddresses);
       return tokenAddresses; // 🔁 return result directly
     } catch (error) {
       console.error("Error fetching token data:", error);
@@ -548,10 +526,6 @@ console.log("got flammed",isGotFlammed["TEST2"])
 
     try {
       for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        console.log(
-          `Fetching token support status for ${tokenName} at ${TokenAddress}`
-        );
-
         // Fetch support status (expecting a boolean or address)
         const isSupported = await AllContracts.AuctionContract.isTokenSupported(
           TokenAddress
@@ -594,8 +568,6 @@ console.log("got flammed",isGotFlammed["TEST2"])
         ? [...result]
         : Object.values(result);
 
-      console.log("User's Token Addresses", tokenAddresses);
-
       const tokenData = await Promise.all(
         tokenAddresses.map(async (tokenAddr) => {
           try {
@@ -612,7 +584,6 @@ console.log("got flammed",isGotFlammed["TEST2"])
             const nextClaimTime =
               await AllContracts.AuctionContract.getNextClaimTime(tokenAddr);
 
-            console.log("pair addresses", pairAddress);
             return {
               address: tokenAddr,
               name,
@@ -631,7 +602,6 @@ console.log("got flammed",isGotFlammed["TEST2"])
         })
       );
 
-      console.log("Token Info with Pair Address:", tokenData);
       setUsersSupportedTokens(tokenData); // [{ address, name, pairAddress }]
     } catch (error) {
       console.error("Error fetching token names or pair addresses:", error);
@@ -664,16 +634,12 @@ console.log("got flammed",isGotFlammed["TEST2"])
     }
     try {
       setIsCllaimProccessing(tokenAddress);
-      console.log(
-        "Calling giveRewardToTokenOwner with tokenAddress:",
-        tokenAddress
-      );
+
       const tx = await AllContracts.AuctionContract.giveRewardToTokenOwner(
         tokenAddress
       );
       await tx.wait();
       await initializeClaimCountdowns();
-      console.log("Reward claimed successfully");
     } catch (error) {
       console.error("Error claiming reward:", error);
     } finally {
@@ -706,17 +672,14 @@ console.log("got flammed",isGotFlammed["TEST2"])
       );
       const receipt2 = await tx2.wait();
       if (receipt2.status === 1) {
-        console.log("Transaction successful");
         setTxStatusForAdding("confirmed");
         await CheckIsAuctionActive();
         await isTokenSupporteed(); // Corrected function name
-        console.log("Token added successfully!");
       } else {
         console.error("Transaction failed");
         setTxStatusForAdding("error");
       }
       setTxStatusForAdding("confirmed");
-      console.log("Token added successfully!");
     } catch (error) {
       const errorMessage =
         error.reason || error.message || "Unknown error occurred";
@@ -729,7 +692,6 @@ console.log("got flammed",isGotFlammed["TEST2"])
     }
   };
 
-  console.log("Is array:", Array.isArray(UsersSupportedTokens));
   useEffect(() => {
     const functions = [
       fetchUserTokenAddresses,
@@ -805,15 +767,8 @@ console.log("got flammed",isGotFlammed["TEST2"])
 
       const ContractAddressToUse = Auction_TESTNET;
 
-      console.log("output amount:", OutAmountsMapping);
-      console.log("reverse from swap", isReversed);
-      console.log("input amount:", InAmountMapping);
-
-      const amountInWei = ethers.parseUnits(OutAmountsMapping.toString(), 18);
-
       let approvalAmount;
       const tokenAddress = tokenMap[ContractName];
-      console.log("rps", isReversed[ContractName]);
 
       let selectedContract;
       if (isReversed[ContractName] == "true") {
@@ -823,31 +778,18 @@ console.log("got flammed",isGotFlammed["TEST2"])
           signer
         );
         approvalAmount = ethers.parseUnits(OutAmountsMapping.toString(), 18);
-        console.log("firs condition");
-        console.log(
-          "Reversed swap, approving OutBalance:",
-          approvalAmount.toString()
-        );
       } else {
-        console.log("second condition");
         selectedContract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
         approvalAmount = ethers.parseUnits(InAmountMapping.toString(), 18);
-        console.log(
-          "Normal swap, approving OnePBalance:",
-          approvalAmount.toString()
-        );
       }
 
       approvalAmount = approvalAmount + ethers.parseUnits("100", 18); // Add extra amount
-      console.log("Amount in wei:", amountInWei.toString());
-      console.log("Approval Amount:", approvalAmount.toString());
 
       // Check current allowance
       const allowance = await selectedContract.allowance(
         address,
         ContractAddressToUse
       );
-      console.log("Current allowance:", ethers.formatUnits(allowance, 18));
 
       if (allowance < approvalAmount) {
         setButtonTextStates((prev) => ({

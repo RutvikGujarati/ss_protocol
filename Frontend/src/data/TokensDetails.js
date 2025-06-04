@@ -1,11 +1,10 @@
-import { useContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
 	DAV_TESTNET,
 	DAV_TOKEN_SONIC_ADDRESS,
 	STATE_TESTNET,
 	STATE_TOKEN_SONIC_ADDRESS,
 } from "../Constants/ContractAddresses";
-import { PriceContext } from "../api/StatePrice";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useChainId } from "wagmi";
@@ -14,7 +13,6 @@ export const shortenAddress = (addr) =>
 	addr ? `${addr.slice(0, 6)}...${addr.slice(-6)}` : "";
 
 export const TokensDetails = () => {
-	const prices = useContext(PriceContext);
 	const swap = useSwapContract();
 	const { Emojies, names } = useDAvContract(); // Add names from useDAvContract
 	const chainId = useChainId();
@@ -29,10 +27,7 @@ export const TokensDetails = () => {
 		: {};
 
 	// Log for debugging
-	console.log("nameToEmoji:", nameToEmoji);
-	console.log("TokenNames:", swap.TokenNames);
-	console.log("Emojies:", Emojies);
-	console.log("names from useDAvContract:", names);
+
 
 	const staticTokens = [
 		{
@@ -50,7 +45,6 @@ export const TokensDetails = () => {
 			name: "STATE",
 			key: "state",
 			address: STATE_TESTNET,
-			price: prices.stateUsdPrice,
 		},
 	];
 
@@ -119,7 +113,7 @@ export const TokensDetails = () => {
 						? "true"
 						: swap.supportedToken?.[key],
 			TokenAddress: token.address,
-			isFlammed:swap.isGotFlammed?.[token.name],
+			isFlammed: swap.isGotFlammed?.[token.name],
 			Cycle:
 				swap.CurrentCycleCount?.[key] === "not started"
 					? "Not Started"
@@ -144,11 +138,11 @@ export const TokensDetails = () => {
 				swap.TokenBalance &&
 				swap.burnedAmount &&
 				swap.supportedToken &&
-				swap.CurrentCycleCount &&
-				prices;
+				swap.CurrentCycleCount;
 
-			setLoading(!isDataReady);
+			setLoading(!isDataReady); // Now it's using isDataReady correctly
 		};
+
 
 		checkDataFetched();
 	}, [
@@ -161,11 +155,9 @@ export const TokensDetails = () => {
 		swap.burnedAmount,
 		swap.supportedToken,
 		swap.CurrentCycleCount,
-		prices,
 		dynamicTokens.length,
 	]);
 
-	console.log("Tokens:", tokens);
 
 	return { tokens, loading };
 };

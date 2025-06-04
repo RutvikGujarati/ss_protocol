@@ -19,7 +19,6 @@ export const ContractProvider = ({ children }) => {
   const chainId = useChainId(); // Get chainId from Wagmi
   const { isConnected, address } = useAccount(); // ✅ this is the key
 
-  console.log("Current Chain ID:", chainId);
 
   useEffect(() => {
     if (!isConnected || !address || !chainId) return;

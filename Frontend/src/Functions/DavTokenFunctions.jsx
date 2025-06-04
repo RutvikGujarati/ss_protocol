@@ -183,7 +183,6 @@ export const DavProvider = ({ children }) => {
       const tokenNames = tokenEntries.map((entry) => entry.tokenName);
       const tokenEmojis = tokenEntries.map((entry) => entry.emoji);
       const tokenStatus = tokenEntries.map((entry) => entry.TokenStatus);
-      console.log("token status:,", tokenEntries);
       // Update state
       setUsers(addresses);
       setNames(tokenNames);
@@ -212,8 +211,7 @@ export const DavProvider = ({ children }) => {
   }, [address, AllContracts?.davContract]);
 
   isTokenDeployed();
-  console.log("from entry", users); // e.g., "0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483"
-  console.log("from entry", names[0]);
+
 
   const fetchTimeUntilNextClaim = useCallback(async () => {
     if (!AllContracts?.davContract || !address) return;
@@ -258,14 +256,12 @@ export const DavProvider = ({ children }) => {
   }, [fetchTimeUntilNextClaim, AllContracts?.davContract, address]);
 
   useEffect(() => {
-    console.log("tim left:", data.TimeUntilNextClaim);
     if (data.TimeUntilNextClaim === 0) {
       fetchData();
     }
   }, [data.TimeUntilNextClaim]);
 
-  console.log("user percentage", data.UserPercentage);
-  console.log("all user percentage", data.AllUserPercentage);
+
   useEffect(() => {
     if (isConnected && AllContracts?.davContract) {
       fetchData();

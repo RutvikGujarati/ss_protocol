@@ -18,8 +18,6 @@ const DataTable = () => {
     useDAvContract();
   const { address, isConnected } = useAccount();
   const {
-    DavRequiredAmount,
-    DavBalanceRequire,
     swappingStates,
     buttonTextStates,
     AirDropAmount,
@@ -41,7 +39,6 @@ const DataTable = () => {
   const { tokens } = useAuctionTokens();
   const { tokens: Addtokens } = useAddTokens();
   const OwnersTokens = useUsersOwnerTokens();
-  console.log("obj tokens", tokens);
 
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
@@ -63,8 +60,6 @@ const DataTable = () => {
     }
 
     setAuthorized(AuthAddress === address);
-
-    console.log("comparing auth address", address);
   };
   useEffect(() => {
     handleSetAddress();
@@ -114,8 +109,6 @@ const DataTable = () => {
     }
   };
 
-  console.log("required dav amount", DavRequiredAmount);
-
   const Checking = async (id, ContractName) => {
     setCheckingStates((prev) => ({ ...prev, [id]: true }));
     try {
@@ -125,7 +118,6 @@ const DataTable = () => {
         throw new Error(`Token address not found for ${ContractName}`);
       }
 
-      console.log("Address fetched from tokenMap:", AddressMapping);
       await CheckMintBalance(AddressMapping);
     } catch (e) {
       if (
@@ -142,8 +134,6 @@ const DataTable = () => {
     }
     setCheckingStates((prev) => ({ ...prev, [id]: false }));
   };
-
-  console.log("db required for Auction", DavBalanceRequire);
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isAddingPopupOpen, setIsAddingPopUpOpen] = useState(false);
@@ -227,12 +217,7 @@ const DataTable = () => {
             </thead>
             <tbody>
               {tokens
-                .filter(({ name, isReversing, AuctionStatus }) => {
-                  console.log(`Filter Conditions: ${name}`, {
-                    isReversing,
-                    AuctionStatus,
-                  });
-
+                .filter(({ isReversing, AuctionStatus }) => {
                   const isAuctionActive = AuctionStatus === "true";
                   const isReverseAuction =
                     AuctionStatus === "false" && isReversing === "true";
