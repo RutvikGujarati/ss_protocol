@@ -29,6 +29,7 @@ contract DAV_V2_2 is
     uint256 public constant HOLDER_SHARE = 10; // 10% HOLDER SHARE
     uint256 public constant BASIS_POINTS = 10000;
 	uint256 public constant INITIAL_GOV_MINT = 1000 ether;
+	uint256 public constant MAX_TOKEN_PER_USER = 100;
     //cycle assinging to 10. not want to update or configure later
     uint256 public constant CYCLE_ALLOCATION_COUNT = 10;
     /// @notice Token processing fee required to execute certain operations.
@@ -56,6 +57,7 @@ contract DAV_V2_2 is
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
     uint256 public constant CLAIM_INTERVAL = 1 days; // 4 days claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
+	uint256 public constant PRECISION = 1e18;
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
     // @notice The governance address with special privileges, set at deployment
@@ -151,7 +153,7 @@ contract DAV_V2_2 is
     mapping(address => uint256[]) public userUnclaimedCycles;
 	//to keep track unique name of each tokens. so, not conflict in protocol.
 	mapping(string => bool) public isTokenNameUsed;
-    event TokensBurned(address indexed user, uint256 amount, uint256 cycle);
+    event TokensBurned(address indexed user, uint256 indexed amount, uint256 cycle);
     event RewardClaimed(address indexed user, uint256 amount, uint256 cycle);
     event RewardsClaimed(address indexed user, uint256 amount);
     event HolderAdded(address indexed holder);
@@ -344,7 +346,7 @@ contract DAV_V2_2 is
             "Invalid governance address"
         );
         // Set holder share to 0 for governance address
-        holderShare = excludeHolderShare ? 0 : (value * HOLDER_SHARE) / 100;
+        holderShare = excludeHolderShare ? 0 :(value * HOLDER_SHARE * PRECISION) / (100 * PRECISION);
         liquidityShare = (value * LIQUIDITY_SHARE) / 100;
         developmentShare = (value * DEVELOPMENT_SHARE) / 100;
         referralShare = 0;
@@ -591,6 +593,7 @@ function _isImageURL(string memory str) internal pure returns (bool) {
     /// @notice Returns the list of pending token names for a user.
     /// @dev This function is intended for off-chain use only. It may consume too much gas if called on-chain for users with many entries.
     function getPendingTokenNames(address user) public view returns (string[] memory) {
+	require(userTokenCount[msg.sender] < MAX_TOKENS_PER_USER, "Token limit exceeded");
     string[] memory all = usersTokenNames[user];
     uint256 limit = all.length > 50 ? 50 : all.length; // hardcoded limit
     string[] memory temp = new string[](limit);
