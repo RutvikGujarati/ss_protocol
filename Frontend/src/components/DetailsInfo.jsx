@@ -10,6 +10,8 @@ import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { Tooltip } from "bootstrap";
 import IOSpinner from "../Constants/Spinner";
 import toast from "react-hot-toast";
+import dav from "../assets/davlogo.png";
+import state from "../assets/statelogo.png";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -45,6 +47,7 @@ const DetailsInfo = ({ selectedToken }) => {
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
+
   const isInfoPage = location.pathname === "/info";
 
   useEffect(() => {
@@ -70,7 +73,7 @@ const DetailsInfo = ({ selectedToken }) => {
     setLocalSearchQuery(query);
   };
 
-  // Filter tokens by tokenName only
+  // Filter tokens by tokenName based on search query
   const filteredTokens = tokens.filter((item) =>
     item.tokenName.toLowerCase().includes(localSearchQuery.toLowerCase())
   );
@@ -83,62 +86,80 @@ const DetailsInfo = ({ selectedToken }) => {
     );
   };
 
-  const getVaultRatio = (token) => {
-    if (token.tokenName === "DAV" || token.tokenName === "STATE") return null;
-    return (500000000000 - token.DavVault) / token.DavVault;
+  // Define order for priority tokens (DAV and STATE)
+  const order = { DAV: 0, STATE: 1 };
+
+  // Get supported tokens
+  const supportedTokens = tokens.filter((token) => token.isSupported);
+
+  // Helper function to sort tokens for display
+  const getSortedTokens = (tokensToSort) => {
+    // Step 1: Extract and sort DAV and STATE to ensure they appear at the top
+    const priorityTokens = tokensToSort
+      .filter((t) => order[t.tokenName] !== undefined)
+      .sort((a, b) => (order[a.tokenName] ?? 99) - (order[b.tokenName] ?? 99));
+
+    // Step 2: Get top 5 tokens (excluding DAV and STATE) with highest ratios
+    const topFiveTokens = tokensToSort
+      .filter(
+        (t) =>
+          order[t.tokenName] === undefined && t.ratio != null && t.isSupported
+      )
+      .sort((a, b) => {
+        const aRatio = a.ratio ?? -Infinity;
+        const bRatio = b.ratio ?? -Infinity;
+        return bRatio - aRatio; // Sort by token.ratio descending
+      })
+      .slice(0, 5);
+
+    // Step 3: Get remaining tokens (excluding DAV, STATE, and top 5)
+    const remainingTokens = tokensToSort
+      .filter(
+        (t) =>
+          order[t.tokenName] === undefined &&
+          !topFiveTokens.some((top) => top.tokenName === t.tokenName) &&
+          t.isSupported
+      )
+      .sort((a, b) => {
+        const aRatio = a.ratio ?? -Infinity;
+        const bRatio = b.ratio ?? -Infinity;
+        return bRatio - aRatio; // Sort by token.ratio descending
+      });
+
+    // Combine: DAV/STATE first, then top 5 tokens, then remaining tokens
+    return [...priorityTokens, ...topFiveTokens, ...remainingTokens];
   };
 
-  const sortedTokens = tokens
-    .filter((token) => token.isSupported)
-    .sort((a, b) => {
-      const order = { DAV: 0, STATE: 1 };
-
-      // Prioritize DAV and STATE
-      if (
-        order[a.tokenName] !== undefined ||
-        order[b.tokenName] !== undefined
-      ) {
-        return (order[a.tokenName] ?? 99) - (order[b.tokenName] ?? 99);
-      }
-
-      // Sort by ratio in descending order for other tokens
-      const aRatio = a.ratio ?? -Infinity; // Handle null/undefined ratios
-      const bRatio = b.ratio ?? -Infinity;
-      return bRatio - aRatio; // Descending order
-    });
-
-  // Determine data to show: prioritize selectedToken, fallback to first filtered token, or null if no matches
-  const dataToShow = selectedToken
-    ? tokens.find((token) => token.tokenName === selectedToken.name)
-    : filteredTokens[0] || null;
-
-  // Filter static tokens (DAV and STATE) for display during loading
-  const staticTokens = filteredTokens.filter(
-    (token) => token.tokenName === "DAV" || token.tokenName === "STATE"
+  // Apply sorting to filtered tokens (search results) or all supported tokens
+  const sortedTokens = getSortedTokens(
+    localSearchQuery ? filteredTokens : supportedTokens
   );
 
-  // Select top 5 tokens (excluding DAV and STATE) with best vault ratios
-  const greenDotEligibleTokens = (loading ? staticTokens : sortedTokens)
+  // Determine data to show: prioritize selectedToken, fallback to first sorted token, or null
+  const dataToShow = selectedToken
+    ? tokens.find((token) => token.tokenName === selectedToken.name)
+    : sortedTokens[0] || null;
+
+  // Select top 5 tokens (excluding DAV and STATE) with best ratios for green/red dot
+  const greenDotEligibleTokens = (loading ? filteredTokens : supportedTokens)
     .filter(
       (token) =>
         token.isSupported &&
         token.tokenName !== "DAV" &&
         token.tokenName !== "STATE" &&
-        getVaultRatio(token) !== null
+        token.ratio != null
     )
     .sort((a, b) => {
-      const aRatio = getVaultRatio(a);
-      const bRatio = getVaultRatio(b);
-
+      const aRatio = a.ratio ?? -Infinity;
+      const bRatio = b.ratio ?? -Infinity;
       const aIsRed = aRatio > targetRatio;
       const bIsRed = bRatio > targetRatio;
-
       // Prefer green (not red), then lower ratio
       if (aIsRed !== bIsRed) return aIsRed ? 1 : -1;
       return aRatio - bRatio;
     })
     .slice(0, 5)
-    .map((token) => token.tokenName); // Use tokenName for identification
+    .map((token) => token.tokenName);
 
   return (
     <div className="container mt-3 p-0">
@@ -170,210 +191,201 @@ const DetailsInfo = ({ selectedToken }) => {
                 </tr>
               </thead>
               <tbody>
-                {(loading ? staticTokens : filteredTokens) // Use filteredTokens instead of sortedTokens to reflect search
-                  .filter((token) => token.isSupported)
-                  .sort((a, b) => {
-                    const order = { DAV: 0, STATE: 1 };
-
-                    if (
-                      order[a.tokenName] !== undefined ||
-                      order[b.tokenName] !== undefined
-                    ) {
-                      return (
-                        (order[a.tokenName] ?? 99) - (order[b.tokenName] ?? 99)
-                      );
-                    }
-
-                    const aRatio = getVaultRatio(a);
-                    const bRatio = getVaultRatio(b);
-
-                    const aIsRed = aRatio !== null && aRatio > targetRatio;
-                    const bIsRed = bRatio !== null && bRatio > targetRatio;
-
-                    return aIsRed === bIsRed ? 0 : aIsRed ? -1 : 1;
-                  })
-                  .map((token) => {
-                    const showDot = greenDotEligibleTokens.includes(
-                      token.tokenName
-                    );
-                    const ratio = getVaultRatio(token);
-                    const isRed = ratio !== null && ratio > targetRatio;
-                    return (
-                      <tr key={token.tokenName}>
-                        <td className="text-center align-middle">
-                          <div className="d-flex flex-column align-items-center">
-                            <span style={{ fontSize: "1rem", lineHeight: "1" }}>
-                              {isImageUrl(token.emoji) ? (
-                                <img
-                                  src={token.emoji}
-                                  style={{ width: "30px", height: "30px" }}
-                                />
-                              ) : (
-                                <span style={{ fontSize: "20px" }}>
-                                  {token.emoji}
-                                </span>
-                              )}
-                            </span>
-                            <span>
-                              {token.tokenName}
-                              {token.isFlammed == "true" && <>🔥</>}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="text-center">
-                          <div className="mx-2">
-                            {token.tokenName === "DAV" ||
-                            token.tokenName === "STATE"
-                              ? "------"
-                              : `1:${token.ratio}`}
-                          </div>
-                        </td>
-                        <td className="text-center">
-                          <div className="mx-4">
-                            {token.tokenName === "DAV" ||
-                            token.tokenName === "STATE"
-                              ? "-----"
-                              : `${token.Cycle}/21`}
-                          </div>
-                        </td>
-                        <td className="text-center">
-                          <div className="mx-4">
-                            {token.tokenName === "DAV"
-                              ? "-----"
-                              : `${formatWithCommas(token.DavVault)}`}
-                          </div>
-                        </td>
-                        <td className="text-center">
-                          <div className="mx-4">
-                            {token.tokenName === "DAV"
-                              ? "-----"
-                              : token.tokenName === "STATE"
-                              ? formatWithCommas(
-                                  Number(token.burned || 0) +
-                                    Number(totalStateBurned)
-                                )
-                              : formatWithCommas(token.burned || 0)}
-                          </div>
-                        </td>
-                        <td className="text-center">
-                          <div className="d-flex justify-content-center align-items-center gap-3">
-                            <div className="d-flex flex-column align-items-center">
-                              <a
-                                href={`https://kekxplorer.avecdra.pro/address/${token.TokenAddress}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{ fontSize: "15px", color: "white" }}
-                              >
-                                <i className="bi bi-box-arrow-up-right"></i>
-                              </a>
-                            </div>
-                            <div
-                              className="d-flex flex-column align-items-center"
-                              style={{ cursor: "pointer" }}
-                            >
-                              <i
-                                className="fa-solid fa-copy"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(
-                                    token.TokenAddress
-                                  );
-                                  toast.success(
-                                    `${token.tokenName} Address copied to clipboard!`,
-                                    {
-                                      position: "top-center",
-                                      autoClose: 2000,
-                                      hideProgressBar: true,
-                                      closeOnClick: true,
-                                      pauseOnHover: false,
-                                      draggable: false,
-                                      theme: "dark",
-                                    }
-                                  );
-                                }}
-                                title="Copy Address"
-                                style={{
-                                  fontSize: "15px",
-                                  color: "white",
-                                  cursor: "pointer",
-                                }}
-                              ></i>
-                            </div>
-                            <div
-                              className="d-flex align-items-center"
-                              style={{ marginRight: "-10px" }}
-                            >
+                {sortedTokens.map((token) => {
+                  const showDot = greenDotEligibleTokens.includes(
+                    token.tokenName
+                  );
+                  const ratio = Number(token.ratio);
+                  const isRed = ratio != null && ratio > targetRatio;
+                  return (
+                    <tr key={token.tokenName}>
+                      <td className="text-center align-middle">
+                        <div className="d-flex flex-column align-items-center">
+                          <span style={{ fontSize: "1rem", lineHeight: "1" }}>
+                            {token.tokenName === "DAV" ? (
                               <img
-                                src={MetaMaskIcon}
-                                onClick={() =>
-                                  handleAddToken(
-                                    token.TokenAddress,
-                                    token.tokenName === "DAV"
-                                      ? "pDAV"
-                                      : token.tokenName === "STATE"
-                                      ? "STATTE"
-                                      : token.tokenName
-                                  )
-                                }
-                                alt="MetaMask"
-                                style={{
-                                  width: "20px",
-                                  height: "20px",
-                                  cursor: "pointer",
-                                }}
+                                src={dav} // Replace with actual path
+                                style={{ width: "30px", height: "30px" }}
+                                alt="DAV logo"
                               />
-                            </div>
-                            <div
-                              className="d-flex flex-column align-items-center"
-                              style={{ minWidth: "80px" }}
+                            ) : token.tokenName === "STATE" ? (
+                              <img
+                                src={state} // Replace with actual path
+                                style={{ width: "30px", height: "30px" }}
+                                alt="STATE logo"
+                              />
+                            ) : isImageUrl(token.emoji) ? (
+                              <img
+                                src={token.emoji}
+                                style={{ width: "30px", height: "30px" }}
+                                alt={`${token.tokenName} emoji`}
+                              />
+                            ) : (
+                              <span style={{ fontSize: "20px" }}>
+                                {token.emoji}
+                              </span>
+                            )}
+                          </span>
+                          <span>
+                            {token.tokenName}
+                            {token.isFlammed === "true" && <>🔥</>}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="text-center">
+                        <div className="mx-2">
+                          {token.tokenName === "DAV" ||
+                          token.tokenName === "STATE"
+                            ? "------"
+                            : `1:${formatWithCommas(token.ratio)}`}
+                        </div>
+                      </td>
+                      <td className="text-center">
+                        <div className="mx-4">
+                          {token.tokenName === "DAV" ||
+                          token.tokenName === "STATE"
+                            ? "-----"
+                            : `${token.Cycle}/21`}
+                        </div>
+                      </td>
+                      <td className="text-center">
+                        <div className="mx-4">
+                          {token.tokenName === "DAV"
+                            ? "-----"
+                            : `${formatWithCommas(token.DavVault)}`}
+                        </div>
+                      </td>
+                      <td className="text-center">
+                        <div className="mx-4">
+                          {token.tokenName === "DAV"
+                            ? "-----"
+                            : token.tokenName === "STATE"
+                            ? formatWithCommas(
+                                Number(token.burned || 0) +
+                                  Number(totalStateBurned)
+                              )
+                            : formatWithCommas(token.burned || 0)}
+                        </div>
+                      </td>
+                      <td className="text-center">
+                        <div className="d-flex justify-content-center align-items-center gap-3">
+                          <div className="d-flex flex-column align-items-center">
+                            <a
+                              href={`https://kekxplorer.avecdra.pro/address/${token.TokenAddress}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ fontSize: "15px", color: "white" }}
                             >
-                              {token.tokenName === "DAV" ? (
-                                token.isRenounced === true && (
-                                  <span>Renounced</span>
+                              <i className="bi bi-box-arrow-up-right"></i>
+                            </a>
+                          </div>
+                          <div
+                            className="d-flex flex-column align-items-center"
+                            style={{ cursor: "pointer" }}
+                          >
+                            <i
+                              className="fa-solid fa-copy"
+                              onClick={() => {
+                                navigator.clipboard.writeText(
+                                  token.TokenAddress
+                                );
+                                toast.success(
+                                  `${token.tokenName} Address copied to clipboard!`,
+                                  {
+                                    position: "top-center",
+                                    autoClose: 2000,
+                                    hideProgressBar: true,
+                                    closeOnClick: true,
+                                    pauseOnHover: false,
+                                    draggable: false,
+                                    theme: "dark",
+                                  }
+                                );
+                              }}
+                              title="Copy Address"
+                              style={{
+                                fontSize: "15px",
+                                color: "white",
+                                cursor: "pointer",
+                              }}
+                            ></i>
+                          </div>
+                          <div
+                            className="d-flex align-items-center"
+                            style={{ marginRight: "-10px" }}
+                          >
+                            <img
+                              src={MetaMaskIcon}
+                              onClick={() =>
+                                handleAddToken(
+                                  token.TokenAddress,
+                                  token.tokenName === "DAV"
+                                    ? "pDAV"
+                                    : token.tokenName === "STATE"
+                                    ? "STATTE"
+                                    : token.tokenName
                                 )
-                              ) : token.tokenName === "STATE" ? (
-                                DavAddress ===
-                                "0x0000000000000000000000000000000000000000" ? (
-                                  <button
-                                    className="btn btn-sm swap-btn btn-primary"
-                                    onClick={() => setDavAndStateIntoSwap()}
-                                  >
-                                    Add
-                                  </button>
-                                ) : token.isRenounced === true ? (
-                                  <span>Renounced</span>
-                                ) : (
-                                  <span>ADDED</span>
-                                )
-                              ) : token.isRenounced === "true" ? (
+                              }
+                              alt="MetaMask"
+                              style={{
+                                width: "20px",
+                                height: "20px",
+                                cursor: "pointer",
+                              }}
+                            />
+                          </div>
+                          <div
+                            className="d-flex flex-column align-items-center"
+                            style={{ minWidth: "80px" }}
+                          >
+                            {token.tokenName === "DAV" ? (
+                              token.isRenounced === true && (
+                                <span>Renounced</span>
+                              )
+                            ) : token.tokenName === "STATE" ? (
+                              DavAddress ===
+                              "0x0000000000000000000000000000000000000000" ? (
+                                <button
+                                  className="btn btn-sm swap-btn btn-primary"
+                                  onClick={() => setDavAndStateIntoSwap()}
+                                >
+                                  Add
+                                </button>
+                              ) : token.isRenounced === true ? (
                                 <span>Renounced</span>
                               ) : (
-                                <span>-------</span>
-                              )}
-                            </div>
+                                <span>ADDED</span>
+                              )
+                            ) : token.isRenounced === "true" ? (
+                              <span>Renounced</span>
+                            ) : (
+                              <span>-------</span>
+                            )}
                           </div>
-                        </td>
-                        <td></td>
-                        <td>
-                          {showDot && (
-                            <span
-                              style={{
-                                marginLeft: "6px",
-                                width: "10px",
-                                height: "10px",
-                                borderRadius: "50%",
-                                display: "inline-block",
-                                backgroundColor: isRed ? "red" : "green",
-                              }}
-                            ></span>
-                          )}
-                        </td>
-                        <td></td>
-                      </tr>
-                    );
-                  })}
+                        </div>
+                      </td>
+                      <td></td>
+                      <td>
+                        {showDot && (
+                          <span
+                            style={{
+                              marginLeft: "6px",
+                              width: "10px",
+                              height: "10px",
+                              borderRadius: "50%",
+                              display: "inline-block",
+                              backgroundColor: isRed ? "green" : "green",
+                            }}
+                          ></span>
+                        )}
+                      </td>
+                      <td></td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
-            {loading && staticTokens.length > 0 && (
+            {loading && filteredTokens.length > 0 && (
               <div className="container text-center mt-5">
                 <p className="funny-loading-text">
                   <IOSpinner /> Fetching..
