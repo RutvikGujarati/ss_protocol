@@ -159,6 +159,9 @@ contract DAV_V2_2 is
     event HolderAdded(address indexed holder);
     event ReferralCodeGenerated(address indexed user, string referralCode);
     event TokenNameAdded(address indexed user, string name);
+	event GovernanceUpdated(address oldGovernance, address newGovernance);
+	event LiquidityWalletUpdated(address newWallet);
+	event DevelopmentWalletUpdated(address newWallet);
     event TokenStatusUpdated(
         address indexed owner,
         string tokenName,
@@ -205,6 +208,7 @@ contract DAV_V2_2 is
 	function transferGovernance(address newGovernance) external onlyGovernance {
     require(newGovernance != address(0), "Invalid governance address");
     governance = newGovernance;
+	emit GovernanceUpdated(governance,newGovernance);
 }
     function updateLiquidityWallet(
         address _newLiquidityWallet
@@ -214,6 +218,7 @@ contract DAV_V2_2 is
             "Liquidity wallet cannot be zero"
         );
         liquidityWallet = _newLiquidityWallet;
+		emit LiquidityWalletUpdated(_newLiquidityWallet);
     }
     // Update function for developmentWallet
     function updateDevelopmentWallet(
@@ -224,6 +229,7 @@ contract DAV_V2_2 is
             "Development wallet cannot be zero"
         );
         developmentWallet = _newDevelopmentWallet;
+		emit DevelopmentWalletUpdated(_newDevelopmentWallet);
     }
     // Restriction of transffering
     modifier whenTransfersAllowed() {
@@ -269,12 +275,14 @@ contract DAV_V2_2 is
             emit ReferralCodeGenerated(user, code);
         }
     }
-    function _updateRewards(address account) internal {
-        if (account != address(0) && account != governance) {
-            holderRewards[account] = earned(account);
-            userRewardPerTokenPaid[account] = totalRewardPerTokenStored;
-        }
+   function _updateRewards(address account) internal {
+    if (account == address(0) || account == governance) return;
+    uint256 reward = earned(account);
+    if (reward > 0) {
+        holderRewards[account] = reward;
+        userRewardPerTokenPaid[account] = totalRewardPerTokenStored;
     }
+}
     function earned(address account) public view returns (uint256) {
         if (account == governance || receivedFromGovernance[account]) {
             return 0; // address is excluded from earning rewards
@@ -407,12 +415,14 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
     cycleUnclaimedPLS[targetCycle] += totalCycleAllocation;
 	}
   	if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
-        uint256 effectiveSupply = totalSupply() - balanceOf(governance);
-   		uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
-		uint256 usedHolderShare = (rewardPerToken * effectiveSupply) / 1e18;
-        newHolderFunds += usedHolderShare;
-        newTotalRewardPerTokenStored += rewardPerToken;
-    }
+    uint256 effectiveSupply = totalSupply() - balanceOf(governance);
+    uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
+    newHolderFunds += (rewardPerToken * effectiveSupply) / 1e18;
+    newTotalRewardPerTokenStored += rewardPerToken;
+	} else {
+    liquidityShare += holderShare; // Redirect explicitly
+    holderShare = 0;
+	}
     stateLpTotalShare = newStateLpTotalShare;
     holderFunds = newHolderFunds;
     totalRewardPerTokenStored = newTotalRewardPerTokenStored;
@@ -495,53 +505,60 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
      *      Each user can process tokens up to the number of DAV they hold.
      *      Governance is trusted to operate transparently and verifiably.
      */
-   function processYourToken(
+function processYourToken(
     string memory _tokenName,
     string memory _emojiOrImage
-		) public payable {
+) public payable {
+    // Validate input: Ensure token name is not empty
     require(bytes(_tokenName).length > 0, "Please provide tokenName");
+    // Check if token name is already used globally
     require(!isTokenNameUsed[_tokenName], "Token name already used");
+    // Check if user has already used this token name
     require(userTokenEntries[msg.sender][_tokenName].user == address(0), "Token name already used by user");
-
-    // Detect if input is an image (Pinata IPFS link)
-   bool isImage = _isImageURL(_emojiOrImage);
-
-    // Emoji check if not image
+    // Lock token name immediately to prevent front-running
+    // Assign ownership and mark as used to ensure the first submitter secures the name
+    isTokenNameUsed[_tokenName] = true;
+    tokenNameToOwner[_tokenName] = msg.sender;
+    // Check if the provided emoji/image is a valid IPFS link (Pinata)
+    bool isImage = _isImageURL(_emojiOrImage);
+    // Validate emoji length if not an image (max 10 UTF-8 characters)
     if (!isImage) {
         require(_utfStringLength(_emojiOrImage) <= 10, "Max 10 UTF-8 characters allowed");
-    }
+    }else{
+		require(bytes(_emojiOrImage).length <= 256, "URL too long");
+	}
+    // Verify user has sufficient token balance to process a new token
     uint256 userTokenBalance = balanceOf(msg.sender);
     uint256 tokensSubmitted = userTokenCount[msg.sender];
     require(userTokenBalance > tokensSubmitted, "You need more DAV to process new token");
-
-    // Fee logic
+    // Handle fee logic for non-governance users
     if (msg.sender != governance) {
+        // Determine required fee based on whether an image is used
         uint256 requiredFee = isImage ? TOKEN_WITHIMAGE_PROCESS : TOKEN_PROCESSING_FEE;
         require(msg.value == requiredFee, isImage ? "Please send exact image fee" : "Please send exactly 100,000 PLS");
-
-        // Treasury logic
+        // Distribute fee to treasury across multiple cycles
         uint256 stateLPShare = msg.value;
         uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
         uint256 cycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) / 100;
-
+        // Allocate fee to future cycles for treasury claims
         for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
             uint256 targetCycle = currentCycle + i;
             cycleTreasuryAllocation[targetCycle] += cycleAllocation;
             cycleUnclaimedPLS[targetCycle] += cycleAllocation;
         }
     }
-	  usersTokenNames[msg.sender].push(_tokenName);
-    tokenNameToOwner[_tokenName] = msg.sender;
-    isTokenNameUsed[_tokenName] = true;
+    // Store token details for the user
+    usersTokenNames[msg.sender].push(_tokenName);
     userTokenCount[msg.sender]++;
     allTokenNames.push(_tokenName);
+    // Create and store token entry with pending status
     userTokenEntries[msg.sender][_tokenName] = TokenEntry(
         msg.sender,
         _tokenName,
         _emojiOrImage,
         TokenStatus.Pending
     );
-
+    // Emit event to signal successful token name addition
     emit TokenNameAdded(msg.sender, _tokenName);
 }
 function _contains(string memory str, string memory substr) internal pure returns (bool) {
@@ -592,23 +609,27 @@ function _isImageURL(string memory str) internal pure returns (bool) {
     // This natural upper bound eliminates the need for a hardcoded limit like 1,000 entries.
     /// @notice Returns the list of pending token names for a user.
     /// @dev This function is intended for off-chain use only. It may consume too much gas if called on-chain for users with many entries.
-    function getPendingTokenNames(address user) public view returns (string[] memory) {
-	require(userTokenCount[msg.sender] < MAX_TOKEN_PER_USER, "Token limit exceeded");
-    string[] memory all = usersTokenNames[user];
-    uint256 limit = all.length > 50 ? 50 : all.length; // hardcoded limit
-    string[] memory temp = new string[](limit);
+function getPendingTokenNames(address user) public view returns (string[] memory) {
+    // Ensure user has not exceeded the maximum token limit
+    require(userTokenCount[user] <= MAX_TOKEN_PER_USER, "Token limit exceeded");
+    // Get the user's token names array
+    string[] memory allTokens = usersTokenNames[user];
+    uint256 totalTokens = allTokens.length;
+    // Pre-allocate result array with maximum possible size (bounded by MAX_TOKEN_PER_USER)
+    string[] memory temp = new string[](totalTokens);
     uint256 count = 0;
-    for (uint256 i = 0; i < limit; i++) {
-        if (userTokenEntries[user][all[i]].status == TokenStatus.Pending) {
-            temp[count] = all[i];
+    // Single loop to collect pending token names
+    for (uint256 i = 0; i < totalTokens; i++) {
+        // Check if the token has a pending status
+        if (userTokenEntries[user][allTokens[i]].status == TokenStatus.Pending) {
+            temp[count] = allTokens[i];
             count++;
         }
-    }
+    }    // Create final result array with exact size to avoid wasting gas
     string[] memory result = new string[](count);
     for (uint256 j = 0; j < count; j++) {
         result[j] = temp[j];
     }
-
     return result;
 }
 
@@ -752,66 +773,73 @@ function _isImageURL(string memory str) internal pure returns (bool) {
 	/// @notice Claims PLS rewards for a user across eligible cycles
 	/// @dev Iterates over userUnclaimedCycles to calculate and distribute rewards
 	/// required to iterate through all users unclaimed cycle that way user can't loose their funds so, no use of cycle arrays
-  function claimPLS() external {
+function claimPLS() external {
+    // Initialize variables
     address user = msg.sender;
     uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+    // Ensure claim period has started
     require(currentCycle > 0, "Claim period not started");
     uint256 totalReward = 0;
     uint256 unclaimedLength = userUnclaimedCycles[user].length;
     uint256 keepCount = 0;
-    uint256[] memory newUnclaimed = new uint256[](unclaimedLength); // Pre-allocate array
-
-    // Single loop to process unclaimed cycles
+    uint256[] memory newUnclaimed = new uint256[](unclaimedLength); // Pre-allocate array for unclaimed cycles
+    // Set a gas limit threshold to prevent out-of-gas errors (e.g., 90% of block gas limit)
+    uint256 gasThreshold = (block.gaslimit * 90) / 100;
+    // Process unclaimed cycles in a single loop
     for (uint256 i = 0; i < unclaimedLength; i++) {
+        // Check remaining gas to avoid out-of-gas errors
+        if (gasleft() < gasThreshold) {
+            break; // Exit loop to prevent transaction failure
+        }        
         uint256 cycle = userUnclaimedCycles[user][i];
+        // Skip cycles that are in the future, have no allocation, or are already claimed
         if (
             cycle >= currentCycle ||
             cycleTreasuryAllocation[cycle] == 0 ||
             hasClaimedCycle[user][cycle]
         ) {
-            newUnclaimed[keepCount++] = cycle; // Keep invalid or future cycles
+            newUnclaimed[keepCount++] = cycle; // Retain invalid or future cycles
             continue;
-        }
+        }        
+        // Verify user and total burn for the cycle
         uint256 userBurn = userCycleBurned[user][cycle];
         uint256 totalBurn = cycleTotalBurned[cycle];
         if (userBurn == 0 || totalBurn == 0) {
-            newUnclaimed[keepCount++] = cycle; // Keep if no valid burn
+            newUnclaimed[keepCount++] = cycle; // Retain if no valid burn
             continue;
-        }
-        // Calculate reward
+        }       
+        // Calculate reward for the cycle
         uint256 reward = (cycleTreasuryAllocation[cycle] * userBurn) / totalBurn;
         if (cycleUnclaimedPLS[cycle] < reward) {
-            newUnclaimed[keepCount++] = cycle; // Keep if insufficient funds
+            newUnclaimed[keepCount++] = cycle; // Retain if insufficient funds
             continue;
-        }
+        }        
+        // Update cycle state and accumulate reward
         cycleUnclaimedPLS[cycle] -= reward;
         totalReward += reward;
-        // Update state
         hasClaimedCycle[user][cycle] = true;
         userBurnClaimed[user][cycle] = true;
     }
-
     // Update burnHistory in a single pass
     for (uint256 j = 0; j < burnHistory[user].length; j++) {
-        if (!burnHistory[user][j].claimed && hasClaimedCycle[user][burnHistory[user][j].cycleNumber]) {
-            burnHistory[user][j].claimed = true;
-        }
+        // Mark burn history as claimed if corresponding cycle is claimed
+        if (!burnHistory[user][j].claimed && hasClaimedCycle[user][burnHistory[user][j].cycleNumber]) {            burnHistory[user][j].claimed = true;        }
     }
-
-    // Update userUnclaimedCycles efficiently
+    // Efficiently update userUnclaimedCycles if some cycles were processed
     if (keepCount < unclaimedLength) {
         assembly {
-            mstore(newUnclaimed, keepCount) // Resize array in-place
+            mstore(newUnclaimed, keepCount) // Resize array in-place to save gas
         }
         userUnclaimedCycles[user] = newUnclaimed;
     }
-
+    // Ensure there are rewards to claim
     require(totalReward > 0, "Nothing to claim");
+    // Verify contract has sufficient balance for rewards
     require((address(this).balance - holderFunds) >= totalReward, "Insufficient contract balance");
-
-    // Transfer rewards
+    // Transfer rewards to user
     (bool success, ) = payable(user).call{value: totalReward}("");
     require(success, "PLS transfer failed");
+    // Emit event for successful reward claim
     emit RewardClaimed(user, totalReward, currentCycle);
 }
     function getCurrentCycle() public view returns (uint256) {
