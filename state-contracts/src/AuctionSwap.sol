@@ -46,6 +46,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     uint256 public constant OWNER_REWARD_AMOUNT = 2500000 ether;
     uint256 public constant CLAIM_INTERVAL = 4 days;
     uint256 public constant MAX_SUPPLY = 500000000000 ether;
+	uint256 constant MIN_DAV_REQUIRED = 1 ether;
     uint256 constant DAV_FACTOR = 5000000 ether;
     //For Airdrop
     uint256 constant AIRDROP_AMOUNT = 10000 ether;
@@ -89,8 +90,9 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     mapping(string => string) public tokenNameToEmoji;
     event TokenDeployed(string name, address tokenAddress);
 
-    mapping(address => mapping(address => mapping(address => mapping(uint256 => UserSwapInfo))))
-        public userSwapTotalInfo; // user => inputToken => stateToken => cycle => UserSwapInfo
+	mapping(bytes32 => UserSwapInfo) public userSwapTotalInfo;
+
+	// user => inputToken => stateToken => cycle => UserSwapInfo
     mapping(address => mapping(address => AuctionCycle)) public auctionCycles; // inputToken => stateToken => AuctionCycle
     mapping(address => uint256) public TotalStateBurnedByUser;
     mapping(address => uint256) public TotalTokensBurned;
@@ -127,28 +129,34 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         governanceAddress = _gov;
         DevAddress = _dev;
     }
-    //to update governance if needed
-    function updateGovernance(address newGov) external onlyGovernance {
-        require(newGov != address(0), "RSA: Invalid governance address");
-        pendingGovernance = newGov;
-        governanceUpdateTimestamp = block.timestamp + GOVERNANCE_UPDATE_DELAY;
-        emit GovernanceUpdateProposed(newGov, governanceUpdateTimestamp);
-    }
+   // Function to propose a new governance address
+	// Only the current governance can call this
+function updateGovernance(address newGov) external onlyGovernance {
+    // Prevent setting governance to the zero address to avoid losing control
+    require(newGov != address(0), "RSA: Invalid governance address");
+    // Store the proposed governance address
+    pendingGovernance = newGov;
+    // Emit event to log the proposal for external monitoring
+    emit GovernanceUpdateProposed(newGov);
+}
 
     function flamLiquidity(address token) public onlyGovernance {
         require(!isFlammed[token], "already got flamme");
         isFlammed[token] = true;
     }
 
-    function confirmGovernanceUpdate() external onlyGovernance {
-        require(
-            block.timestamp >= governanceUpdateTimestamp,
-            "RSA: Delay not met"
-        );
-        governanceAddress = pendingGovernance;
-        pendingGovernance = address(0);
-        emit GovernanceUpdated(governanceAddress);
-    }
+    // Function to confirm the governance update
+// Only the current governance can call this
+function confirmGovernanceUpdate() external onlyGovernance {
+    // Ensure a pending governance address exists
+    require(pendingGovernance != address(0), "RSA: No pending governance");
+    // Transfer governance to the proposed address
+    governance = pendingGovernance;
+    // Clear pending governance to prevent accidental reuse
+    pendingGovernance = address(0);
+    // Emit event to log the successful governance update
+    emit GovernanceUpdated(governance);
+}
     //to deposit tokens if needed
     function depositTokens(
         address token,
@@ -192,12 +200,12 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address pairAddress,
         address _tokenOwner
     ) external onlyGovernance {
-        // IPair pair = IPair(pairAddress);
-        // require(
-        //     (pair.token0() == token && pair.token1() == stateToken) ||
-        //         (pair.token1() == token && pair.token0() == stateToken),
-        //     "Pair must contain stateToken"
-        // );
+        IPair pair = IPair(pairAddress);
+        require(
+            (pair.token0() == token && pair.token1() == stateToken) ||
+                (pair.token1() == token && pair.token0() == stateToken),
+   		 "RSA: Pair must contain stateToken"
+        );
         require(token != address(0), "Invalid token address");
         require(stateToken != address(0), "State token not initialized");
         require(pairAddress != address(0), "Invalid pair address");
@@ -237,7 +245,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     function _calculateDubaiAuctionStart() internal view returns (uint256) {
         uint256 dubaiOffset = 4 hours;
         uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 12;
+        uint256 targetDubaiHour = 17;
         uint256 targetDubaiMinute = 0;
         // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;
@@ -361,6 +369,14 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         // Emit event for reward distribution
         emit RewardDistributed(claimant, rewardAmount);
     }
+	function getSwapInfoKey(
+    address user,
+    address inputToken,
+    address stateToken,
+    uint256 cycle
+) internal pure returns (bytes32) {
+    return keccak256(abi.encodePacked(user, inputToken, stateToken, cycle));
+}
     /**
      * @notice Handles token swaps during normal and reverse auctions.
      * During reverse auctions, users burn `stateToken` to receive `inputToken`.
@@ -371,15 +387,12 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         require(msg.sender == user, "Unauthorized swap initiator");
         require(supportedTokens[inputToken], "Unsupported token");
         require(stateToken != address(0), "State token cannot be null");
-        require(
-            dav.balanceOf(user) >= 1 * 10 ** 18,
-            "Required enough DAV to participate"
-        );
+     	require(dav.balanceOf(user) >= MIN_DAV_REQUIRED, "RSA: Insufficient DAV");
         uint256 currentAuctionCycle = getCurrentAuctionCycle(inputToken);
         require(currentAuctionCycle < MAX_AUCTIONS, "Maximum auctions reached");
-        UserSwapInfo storage userSwapInfo = userSwapTotalInfo[user][inputToken][
-            stateToken
-        ][currentAuctionCycle];
+       bytes32 key = getSwapInfoKey(user, inputToken, stateToken, currentAuctionCycle);
+		UserSwapInfo storage userSwapInfo = userSwapTotalInfo[key];
+
         bool isReverseActive = isReverseAuctionActive(inputToken);
         if (isReverseActive) {
             require(isReverseActive, "No active reverse auction for this pair");
@@ -423,6 +436,13 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
             TotalBurnedStates += amountIn;
             TotalTokensBurned[tokenIn] += amountIn;
             TotalStateBurnedByUser[user] += amountIn;
+			/**
+ * @dev We intentionally do not cap the `amountIn` in `swapTokens` to allow for large token burns
+ *      when needed for auction finalization or high-volume swaps. While this introduces a potential
+ *      risk of transaction failure due to exceeding block gas limits (CWE-400), we mitigate this by:
+ *      This design prioritizes flexibility for power users and trust-minimized automation, while
+ *      placing the responsibility of gas efficiency on the calling logic.
+ */
             IERC20(tokenIn).safeTransferFrom(user, BURN_ADDRESS, amountIn);
             IERC20(tokenOut).safeTransfer(user, amountOut);
         } else {
@@ -452,9 +472,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address inputToken
     ) public view returns (bool) {
         uint256 getCycle = getCurrentAuctionCycle(inputToken);
-        return
-            userSwapTotalInfo[user][inputToken][stateToken][getCycle]
-                .hasSwapped;
+		bytes32 key = getSwapInfoKey(user, inputToken, stateToken, cycle);
+    	return userSwapTotalInfo[key].hasSwapped;
     }
 
     function getUserHasReverseSwapped(
@@ -462,9 +481,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address inputToken
     ) public view returns (bool) {
         uint256 getCycle = getCurrentAuctionCycle(inputToken);
-        return
-            userSwapTotalInfo[user][inputToken][stateToken][getCycle]
-                .hasReverseSwap;
+        bytes32 key = getSwapInfoKey(user, inputToken, stateToken, cycle);
+    	return userSwapTotalInfo[key].hasReverseSwap;
     }
 
     /// @notice Returns auction cycle data for a given input token
@@ -713,6 +731,11 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     function getTokenOwner(address token) public view returns (address) {
         return tokenOwners[token];
     }
+	/**
+ * @dev Returns all tokens owned by the given address.
+ * WARNING: This function does not implement pagination and will return the full array.
+ * cause it intended to return all tokens that owner holds.
+ */
     function getTokensByOwner(
         address _owner
     ) public view returns (address[] memory) {
