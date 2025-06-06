@@ -48,6 +48,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     uint256 public constant MAX_SUPPLY = 500000000000 ether;
 	uint256 constant MIN_DAV_REQUIRED = 1 ether;
     uint256 constant DAV_FACTOR = 5000000 ether;
+	uint256 constant MAX_BURN_AMOUNT = 500000000000 ether;
     //For Airdrop
     uint256 constant AIRDROP_AMOUNT = 10000 ether;
     uint256 constant TOKEN_OWNER_AIRDROP = 2500000 ether;
@@ -68,6 +69,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     uint256 public constant GOVERNANCE_UPDATE_DELAY = 1 days;
     address public pendingGovernance;
     uint256 public governanceUpdateTimestamp;
+	bool public paused = false;
 
     mapping(address => mapping(address => uint256)) public lastDavHolding; // user => token => last DAV holding
     mapping(address => mapping(address => uint256))
@@ -87,8 +89,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
 
     mapping(address => mapping(address => uint256)) public lastClaimTime;
     mapping(string => string) public tokenNameToEmoji;
-    event TokenDeployed(string name, address tokenAddress);
-
 	mapping(bytes32 => UserSwapInfo) public userSwapTotalInfo;
 
 	// user => inputToken => stateToken => cycle => UserSwapInfo
@@ -103,7 +103,7 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         address inputToken,
         address stateToken
     );
-    event TokenDeployed(address tokenAddress);
+	event TokenDeployed(string name, address tokenAddress) ;
     event TokensDeposited(address indexed token, uint256 amount);
     event RewardDistributed(address indexed user, uint256 amount);
     event TokensSwapped(
@@ -116,6 +116,8 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     event TokenAdded(address indexed token, address pairAddress);
     event GovernanceUpdateProposed(address newGov, uint256 timestamp);
     event GovernanceUpdated(address newGov);
+	event ContractPaused(address by);
+	event ContractUnpaused(address by);
     // Custom Errors are not required
     modifier onlyGovernance() {
         require(
@@ -124,6 +126,26 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
         );
         _;
     }
+	modifier onlyTokenOwnerOrGovernance(address token) {
+    require(
+        msg.sender == tokenOwners[token] || msg.sender == governanceAddress,
+        "Unauthorized: Only token owner or governance allowed"
+    );
+    _;
+}
+modifier whenNotPaused() {
+    require(!paused, "Contract is paused");
+    _;
+}
+function pause() external onlyGovernance {
+    paused = true;
+    emit ContractPaused(msg.sender);
+}
+
+function unpause() external onlyGovernance {
+    paused = false;
+    emit ContractUnpaused(msg.sender);
+}
     constructor(address _gov, address _dev) {
         governanceAddress = _gov;
         DevAddress = _dev;
@@ -135,6 +157,7 @@ function updateGovernance(address newGov) external onlyGovernance {
     require(newGov != address(0), "RSA: Invalid governance address");
     // Store the proposed governance address
     pendingGovernance = newGov;
+	governanceUpdateTimestamp = block.timestamp + GOVERNANCE_UPDATE_DELAY; // set delay
     // Emit event to log the proposal for external monitoring
     emit GovernanceUpdateProposed(newGov,block.timestamp);
 }
@@ -144,10 +167,12 @@ function updateGovernance(address newGov) external onlyGovernance {
 function confirmGovernanceUpdate() external onlyGovernance {
     // Ensure a pending governance address exists
     require(pendingGovernance != address(0), "RSA: No pending governance");
+	require(block.timestamp >= governanceUpdateTimestamp, "RSA: Timelock not expired");
     // Transfer governance to the proposed address
     governanceAddress = pendingGovernance;
     // Clear pending governance to prevent accidental reuse
     pendingGovernance = address(0);
+	 governanceUpdateTimestamp = 0;
     // Emit event to log the successful governance update
     emit GovernanceUpdated(governanceAddress);
 }
@@ -277,8 +302,18 @@ function confirmGovernanceUpdate() external onlyGovernance {
         return finalTimestamp;
     }
 
-    //used for only mainnet
-    ///NOTE: flash loans might be issue but as users are not putting any input of amounts he just get tokens through dav holdings and protocol calculation so, if ratio goes high or less unconditionally user can't impact on input values.(they need to mint more dav tokens)
+ /**
+ * @notice Returns the spot price ratio between the input token and state token based on DEX reserves.
+ * @dev This function intentionally uses live on-chain reserves instead of TWAP or oracle feeds.
+ *      Rationale:
+ * - The protocol computes `amountIn` internally (users do not input it), mitigating manipulation risk.
+ * - Each user can swap only once per auction cycle (enforced via userSwapInfo flags).
+ * - Auctions are time-limited, and reverse/normal swaps are auction-based, making flash loan attacks ineffective.
+ * - Additional checks (e.g., DAV balance, cycle tracking, vault balance) ensure security and fairness.
+ * - TWAP adds unnecessary complexity and delay, while spot pricing keeps the system responsive.
+ * @param inputToken The ERC20 token whose price ratio with the stateToken is to be calculated.
+ * @return ratio The spot price ratio (scaled by PRECISION_FACTOR, typically 1e18).
+ */
     function getRatioPrice(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
         IPair pair = IPair(pairAddresses[inputToken]);
@@ -300,13 +335,13 @@ function confirmGovernanceUpdate() external onlyGovernance {
         return ratio; // retains 18 decimals
     }
 
-    /**
-     * @dev Distribute reward for a user's DAV holdings.
-     */
+   /// @notice Distributes airdrop rewards based on new DAV holdings.
+/// @param user The user claiming rewards.
+/// @param inputToken The token for reward calculation.
     function distributeReward(
         address user,
         address inputToken
-    ) external nonReentrant {
+    ) external nonReentrant whenNotPaused{
         // **Checks**
         require(user != address(0), "Invalid user address");
         require(supportedTokens[inputToken], "Unsupported token");
@@ -328,7 +363,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         emit RewardDistributed(user, reward);
     }
 
-    function giveRewardToTokenOwner(address token) public nonReentrant {
+    function giveRewardToTokenOwner(address token) public nonReentrant onlyTokenOwnerOrGovernance(token) {
         // Check if the token has a registered owner
         address owner = tokenOwners[token];
         require(owner != address(0), "Token has no registered owner");
@@ -336,9 +371,12 @@ function confirmGovernanceUpdate() external onlyGovernance {
         address claimant;
         uint256 rewardAmount;
         if (msg.sender == governanceAddress) {
+		// If called by governance, reward goes to DevAddress with GOV_OWNER_AIRDROP amount
             claimant = DevAddress;
             rewardAmount = GOV_OWNER_AIRDROP;
         } else {
+		// If called by anyone else, must be the token owner
+        // Ensure msg.sender is the token owner - prevents unauthorized claims
             require(
                 msg.sender == owner,
                 "Only token owner or governance can claim"
@@ -371,19 +409,25 @@ function confirmGovernanceUpdate() external onlyGovernance {
 ) internal pure returns (bytes32) {
     return keccak256(abi.encodePacked(user, inputToken, _stateToken, cycle));
 }
+
     /**
      * @notice Handles token swaps during normal and reverse auctions.
      * During reverse auctions, users burn `stateToken` to receive `inputToken`.
      * This contract must hold sufficient `inputToken` to support those swaps.
      * Liquidity is provided through token contract deployments and manual deposits via depositTokens to ensure the integrity of the liquidity pool ratio..
      */
-    function swapTokens(address user, address inputToken) public nonReentrant {
+	 // No explicit limit on burn amount to allow full flexibility in auction finalization.
+	// Large burns may risk higher gas usage but are necessary to prevent partial burns locking user funds.
+	// Users and integrators should be aware of gas implications when submitting very large burns.
+    function swapTokens(address user, address inputToken) public nonReentrant whenNotPaused{
         require(msg.sender == user, "Unauthorized swap initiator");
+		require(user != address(0), "Sender cannot be null");
         require(supportedTokens[inputToken], "Unsupported token");
         require(stateToken != address(0), "State token cannot be null");
      	require(dav.getActiveBalance(user) >= MIN_DAV_REQUIRED, "RSA: Insufficient DAV");
         uint256 currentAuctionCycle = getCurrentAuctionCycle(inputToken);
         require(currentAuctionCycle < MAX_AUCTIONS, "Maximum auctions reached");
+
        bytes32 key = getSwapInfoKey(user, inputToken, stateToken, currentAuctionCycle);
 		UserSwapInfo storage userSwapInfo = userSwapTotalInfo[key];
 
@@ -404,7 +448,6 @@ function confirmGovernanceUpdate() external onlyGovernance {
                 "User already swapped in normal auction for this cycle"
             );
         }
-        require(user != address(0), "Sender cannot be null");
         address tokenIn = isReverseActive ? stateToken : inputToken;
         address tokenOut = isReverseActive ? inputToken : stateToken;
         uint256 TotalAmountIn = calculateAuctionEligibleAmount(inputToken);
@@ -415,6 +458,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
             amountIn > 0,
             "Not enough balance in user wallet of input token"
         );
+		require(amountIn <= MAX_BURN_AMOUNT, "RSA: Burn amount exceeds limit");
         require(amountOut > 0, "Output amount must be greater than zero");
         userSwapInfo.cycle = currentAuctionCycle;
         /** @dev This check ensures that internal token tracking is aligned with actual contract holdings.
@@ -436,10 +480,12 @@ function confirmGovernanceUpdate() external onlyGovernance {
  *      risk of transaction failure due to exceeding block gas limits (CWE-400), we mitigate this by:
  *      This design prioritizes flexibility for power users and trust-minimized automation, while
  *      placing the responsibility of gas efficiency on the calling logic.
+ * @dev No cap on amountIn for flexibility in auction finalization.
  */
             IERC20(tokenIn).safeTransferFrom(user, BURN_ADDRESS, amountIn);
             IERC20(tokenOut).safeTransfer(user, amountOut);
         } else {
+			// Mark normal swap done
             userSwapInfo.hasSwapped = true;
             TotalTokensBurned[tokenIn] += amountIn;
             IERC20(tokenIn).safeTransferFrom(user, BURN_ADDRESS, amountIn);
@@ -632,8 +678,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
     function getOutPutAmount(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
         uint256 currentRatio = getRatioPrice(inputToken);
-        uint256 currentRatioNormalize = currentRatio / 1e18;
-        require(currentRatioNormalize > 0, "Invalid ratio");
+        require(currentRatio > 0, "Invalid ratio");
 
         uint256 userBalance = dav.getActiveBalance(msg.sender);
         if (userBalance == 0) {
@@ -645,9 +690,9 @@ function confirmGovernanceUpdate() external onlyGovernance {
         require(onePercent > 0, "Invalid one percent balance");
         uint256 multiplications;
         if (isReverseActive) {
-            multiplications = (onePercent * currentRatioNormalize) / 2;
+        multiplications = (onePercent * currentRatio) / (2 * 1e18);
         } else {
-            multiplications = (onePercent * currentRatioNormalize) * 2;
+        multiplications = (onePercent * currentRatio * 2) / 1e18;
         }
         return multiplications;
     }
@@ -713,9 +758,17 @@ function confirmGovernanceUpdate() external onlyGovernance {
     }
 
     // Getter for deployed token by name
-    function getUserTokenNames() external view returns (string[] memory) {
-        return userToTokenNames[governanceAddress];
-    }
+  /**
+ * @notice Returns the full list of token names owned by the governance address.
+ * @dev This function returns the entire array stored in `userToTokenNames` for the governance address.
+ *Because it returns the complete array, it may consume a large amount of gas if the array is very large.
+ * @return An array of all token names owned by the governance address.
+ * it requires to get all list without pagination and limits to show on dapp
+ */
+function getUserTokenNames() external view returns (string[] memory) {
+    return userToTokenNames[governanceAddress];
+}
+
 
     function getUserTokenAddress(
         string memory name
