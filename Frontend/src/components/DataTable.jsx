@@ -202,7 +202,7 @@ const DataTable = () => {
                 <th className="text-center">
                   <span className="mx-3"> Ratio Swapping Auction</span>
                   <a
-                    href={`https://kekxplorer.avecdra.pro/address/${Auction_TESTNET}`}
+                    href={`https://scan.9mm.pro/address/${Auction_TESTNET}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ fontSize: "15px", color: "white" }}

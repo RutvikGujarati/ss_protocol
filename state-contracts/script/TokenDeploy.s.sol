@@ -7,10 +7,10 @@ import "../src/StateToken.sol";
 contract DeployState is Script {
     function run() external {
         vm.startBroadcast();
-        address Five = 0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483;
-        address swap = 0x65C8cfC46A87d54f1e4ED6895eA46B9c3A57b28a;
+        address Five = 0xBAaB2913ec979d9d21785063a0e4141e5B787D28;
+        address Swap = 0x5A617938B65EA894C59a83d11e2Bd0B5bcfd13b7;
         //NOTE: Mainnet token name is pSTATE
-        STATE_V2_2 state = new STATE_V2_2("STATTE", "STATTE", Five, swap);
+        STATE_V2_2 state = new STATE_V2_2("STATTE", "STATTE", Five, Swap);
 
         console.log("rievaollar deployed at:", address(state));
 

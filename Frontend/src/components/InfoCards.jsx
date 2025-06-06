@@ -50,7 +50,7 @@ const InfoCards = () => {
     TimeUntilNextClaim,
     UserPercentage,
     davHolds,
-	davExpireHolds,
+    davExpireHolds,
     buttonTextStates,
     AddYourToken,
     // AddDavintoLP,
@@ -537,7 +537,8 @@ const InfoCards = () => {
                         </div>
                         <div className="d-flex">
                           <h5 className="">
-                            {isLoading ? <DotAnimation /> : davHolds} / {davExpireHolds}
+                            {isLoading ? <DotAnimation /> : davHolds} /{" "}
+                            {isLoading ? <DotAnimation /> : davExpireHolds}
                           </h5>
                         </div>
                       </div>
@@ -989,7 +990,7 @@ const InfoCards = () => {
                           fontSize: "14px",
                         }}
                       >
-                        <li>Choose the image or an emoji. </li>
+                        <li>Choose an image or an emoji. </li>
                         <li>You can only select one </li>
                         <li>Emoji is free</li>
                       </ul>
