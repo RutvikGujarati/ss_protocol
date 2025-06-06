@@ -50,6 +50,7 @@ const InfoCards = () => {
     TimeUntilNextClaim,
     UserPercentage,
     davHolds,
+	davExpireHolds,
     buttonTextStates,
     AddYourToken,
     // AddDavintoLP,
@@ -532,11 +533,11 @@ const InfoCards = () => {
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
                       <div className="carddetails2">
                         <div className="d-flex">
-                          <p className="mb-1 detailText">Dav holdings </p>
+                          <p className="mb-1 detailText">Dav MINTS / EXPIRE </p>
                         </div>
                         <div className="d-flex">
                           <h5 className="">
-                            {isLoading ? <DotAnimation /> : davHolds}
+                            {isLoading ? <DotAnimation /> : davHolds} / {davExpireHolds}
                           </h5>
                         </div>
                       </div>

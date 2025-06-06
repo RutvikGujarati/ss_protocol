@@ -65,6 +65,7 @@ export const DavProvider = ({ children }) => {
     stateHoldingOfSwapContract: "0.0",
     ContractPls: "0.0",
     davHolds: "0.0",
+    davExpireHolds: "0.0",
     davPercentage: "0.0",
   });
 
@@ -132,7 +133,10 @@ export const DavProvider = ({ children }) => {
         ),
         fetchAndSet("DavMintFee", () => AllContracts.davContract.TOKEN_COST()),
         fetchAndSet("davHolds", () =>
-          AllContracts.davContract.balanceOf(address)
+          AllContracts.davContract.getActiveBalance(address)
+        ),
+        fetchAndSet("davExpireHolds", () =>
+          AllContracts.davContract.getExpiredTokenCount(address)
         ),
         fetchAndSet(
           "pendingToken",

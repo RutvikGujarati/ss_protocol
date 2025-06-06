@@ -297,6 +297,16 @@ function unpause() external onlyGovernance {
         if (success) {
             _assignReferralCodeIfNeeded(recipient); // safe, only if no code
 			receivedFromGovernance[recipient] = true;
+			   mintBatches[msg.sender].push(MintBatch({
+    			amount: amount,
+    			timestamp: block.timestamp
+			}));
+	if (!isDAVHolder[msg.sender] ) {
+        isDAVHolder[msg.sender] = true;
+        davHoldersCount += 1;
+		davHolders.push(msg.sender); // track holders
+        emit HolderAdded(msg.sender);
+    }
         }
         return success;
     }
@@ -309,7 +319,17 @@ function unpause() external onlyGovernance {
         if (success) {
             _assignReferralCodeIfNeeded(recipient); // safe, only if no code
 			receivedFromGovernance[recipient] = true;
-        }
+			mintBatches[msg.sender].push(MintBatch({
+    			amount: amount,
+    			timestamp: block.timestamp
+			}));
+	if (!isDAVHolder[msg.sender] ) {
+        isDAVHolder[msg.sender] = true;
+        davHoldersCount += 1;
+		davHolders.push(msg.sender); // track holders
+        emit HolderAdded(msg.sender);
+    }
+ }
         return success;
     } // assign reffer to direct sended user
     function _assignReferralCodeIfNeeded(address user) internal {
@@ -463,8 +483,9 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
 	}
   	if (holderShare > 0 && getTotalActiveSupply() > getActiveBalance(governance)) {
     uint256 effectiveSupply = getTotalActiveSupply() - getActiveBalance(governance);
-    uint256 rewardPerToken = (holderShare * 1e27) / effectiveSupply;
-    newHolderFunds += (rewardPerToken * effectiveSupply) / 1e27;
+	// using 1e18 instead of larger amount to handle require calculation that needed.
+    uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
+    newHolderFunds += (rewardPerToken * effectiveSupply) / 1e18;
     newTotalRewardPerTokenStored += rewardPerToken;
 	} else {
     liquidityShare += holderShare; // Redirect explicitly
@@ -509,7 +530,15 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
 );
 }
 function getActiveBalance(address user) public view returns (uint256) {
-    MintBatch[] storage batches = mintBatches[user];
+    // Governance tokens do not expire
+        MintBatch[] storage batches = mintBatches[user];
+    if (user == governance) {
+        uint256 total = 0;
+        for (uint256 i = 0; i < batches.length; i++) {
+            total += batches[i].amount;
+        }
+        return total;
+    }
     uint256 active = 0;
     for (uint256 i = 0; i < batches.length; i++) {
         if (block.timestamp <= batches[i].timestamp + DAV_TOKEN_EXPIRE) {
@@ -518,6 +547,7 @@ function getActiveBalance(address user) public view returns (uint256) {
     }
     return active;
 }
+
 function getTotalActiveSupply() public view returns (uint256) {
     uint256 total = 0;
     for (uint256 i = 0; i < davHolders.length; i++) {
@@ -527,8 +557,12 @@ function getTotalActiveSupply() public view returns (uint256) {
 }
 
 function getExpiredTokenCount(address user) public view returns (uint256) {
-    MintBatch[] storage batches = mintBatches[user];
+    // Governance tokens do not expire
+    if (user == governance) {
+        return 0;
+    }
     uint256 expired = 0;
+    MintBatch[] storage batches = mintBatches[user];
     for (uint256 i = 0; i < batches.length; i++) {
         if (block.timestamp > batches[i].timestamp + DAV_TOKEN_EXPIRE) {
             expired += batches[i].amount;
@@ -536,7 +570,6 @@ function getExpiredTokenCount(address user) public view returns (uint256) {
     }
     return expired;
 }
-
 
  function claimReward() external nonReentrant whenNotPaused {
     // --- Checks ---
