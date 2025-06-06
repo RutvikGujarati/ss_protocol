@@ -297,15 +297,15 @@ function unpause() external onlyGovernance {
         if (success) {
             _assignReferralCodeIfNeeded(recipient); // safe, only if no code
 			receivedFromGovernance[recipient] = true;
-			   mintBatches[msg.sender].push(MintBatch({
+			   mintBatches[recipient].push(MintBatch({
     			amount: amount,
     			timestamp: block.timestamp
 			}));
-	if (!isDAVHolder[msg.sender] ) {
-        isDAVHolder[msg.sender] = true;
+	if (!isDAVHolder[recipient] ) {
+        isDAVHolder[recipient] = true;
         davHoldersCount += 1;
-		davHolders.push(msg.sender); // track holders
-        emit HolderAdded(msg.sender);
+		davHolders.push(recipient); // track holders
+        emit HolderAdded(recipient);
     }
         }
         return success;
@@ -319,15 +319,15 @@ function unpause() external onlyGovernance {
         if (success) {
             _assignReferralCodeIfNeeded(recipient); // safe, only if no code
 			receivedFromGovernance[recipient] = true;
-			mintBatches[msg.sender].push(MintBatch({
+			mintBatches[recipient].push(MintBatch({
     			amount: amount,
     			timestamp: block.timestamp
 			}));
-	if (!isDAVHolder[msg.sender] ) {
-        isDAVHolder[msg.sender] = true;
+	if (!isDAVHolder[recipient] ) {
+        isDAVHolder[recipient] = true;
         davHoldersCount += 1;
-		davHolders.push(msg.sender); // track holders
-        emit HolderAdded(msg.sender);
+		davHolders.push(recipient); // track holders
+        emit HolderAdded(recipient);
     }
  }
         return success;
@@ -481,8 +481,8 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
     cycleTreasuryAllocation[targetCycle] += totalCycleAllocation;
     cycleUnclaimedPLS[targetCycle] += totalCycleAllocation;
 	}
-  	if (holderShare > 0 && getTotalActiveSupply() > getActiveBalance(governance)) {
-    uint256 effectiveSupply = getTotalActiveSupply() - getActiveBalance(governance);
+  	if (holderShare > 0) {
+    uint256 effectiveSupply = getTotalActiveSupply();
 	// using 1e18 instead of larger amount to handle require calculation that needed.
     uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
     newHolderFunds += (rewardPerToken * effectiveSupply) / 1e18;
@@ -531,14 +531,7 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
 }
 function getActiveBalance(address user) public view returns (uint256) {
     // Governance tokens do not expire
-        MintBatch[] storage batches = mintBatches[user];
-    if (user == governance) {
-        uint256 total = 0;
-        for (uint256 i = 0; i < batches.length; i++) {
-            total += batches[i].amount;
-        }
-        return total;
-    }
+    MintBatch[] storage batches = mintBatches[user];
     uint256 active = 0;
     for (uint256 i = 0; i < batches.length; i++) {
         if (block.timestamp <= batches[i].timestamp + DAV_TOKEN_EXPIRE) {
