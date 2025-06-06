@@ -84,7 +84,6 @@ contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
     mapping(address => address) public tokenOwners; // token => owner
     mapping(address => address[]) public ownerToTokens;
     mapping(string => bool) public isTokenNameUsed;
-    mapping(address => bool) public isFlammed;
 
     mapping(address => mapping(address => uint256)) public lastClaimTime;
     mapping(string => string) public tokenNameToEmoji;
@@ -137,25 +136,20 @@ function updateGovernance(address newGov) external onlyGovernance {
     // Store the proposed governance address
     pendingGovernance = newGov;
     // Emit event to log the proposal for external monitoring
-    emit GovernanceUpdateProposed(newGov);
+    emit GovernanceUpdateProposed(newGov,block.timestamp);
 }
 
-    function flamLiquidity(address token) public onlyGovernance {
-        require(!isFlammed[token], "already got flamme");
-        isFlammed[token] = true;
-    }
-
-    // Function to confirm the governance update
+// Function to confirm the governance update
 // Only the current governance can call this
 function confirmGovernanceUpdate() external onlyGovernance {
     // Ensure a pending governance address exists
     require(pendingGovernance != address(0), "RSA: No pending governance");
     // Transfer governance to the proposed address
-    governance = pendingGovernance;
+    governanceAddress = pendingGovernance;
     // Clear pending governance to prevent accidental reuse
     pendingGovernance = address(0);
     // Emit event to log the successful governance update
-    emit GovernanceUpdated(governance);
+    emit GovernanceUpdated(governanceAddress);
 }
     //to deposit tokens if needed
     function depositTokens(
@@ -317,7 +311,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         require(user != address(0), "Invalid user address");
         require(supportedTokens[inputToken], "Unsupported token");
         require(msg.sender == user, "Invalid sender");
-        uint256 currentDavHolding = dav.balanceOf(user);
+        uint256 currentDavHolding = dav.getActiveBalance(user);
         uint256 lastHolding = lastDavHolding[user][inputToken];
         uint256 newDavContributed = currentDavHolding > lastHolding
             ? currentDavHolding - lastHolding
@@ -350,7 +344,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
                 "Only token owner or governance can claim"
             );
             require(
-                dav.balanceOf(owner) >= PRECISION_FACTOR,
+                dav.getActiveBalance(owner) >= PRECISION_FACTOR,
                 "Owner must hold at least 1 DAV"
             );
             claimant = owner;
@@ -372,10 +366,10 @@ function confirmGovernanceUpdate() external onlyGovernance {
 	function getSwapInfoKey(
     address user,
     address inputToken,
-    address stateToken,
+    address _stateToken,
     uint256 cycle
 ) internal pure returns (bytes32) {
-    return keccak256(abi.encodePacked(user, inputToken, stateToken, cycle));
+    return keccak256(abi.encodePacked(user, inputToken, _stateToken, cycle));
 }
     /**
      * @notice Handles token swaps during normal and reverse auctions.
@@ -387,7 +381,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         require(msg.sender == user, "Unauthorized swap initiator");
         require(supportedTokens[inputToken], "Unsupported token");
         require(stateToken != address(0), "State token cannot be null");
-     	require(dav.balanceOf(user) >= MIN_DAV_REQUIRED, "RSA: Insufficient DAV");
+     	require(dav.getActiveBalance(user) >= MIN_DAV_REQUIRED, "RSA: Insufficient DAV");
         uint256 currentAuctionCycle = getCurrentAuctionCycle(inputToken);
         require(currentAuctionCycle < MAX_AUCTIONS, "Maximum auctions reached");
        bytes32 key = getSwapInfoKey(user, inputToken, stateToken, currentAuctionCycle);
@@ -472,7 +466,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         address inputToken
     ) public view returns (bool) {
         uint256 getCycle = getCurrentAuctionCycle(inputToken);
-		bytes32 key = getSwapInfoKey(user, inputToken, stateToken, cycle);
+		bytes32 key = getSwapInfoKey(user, inputToken, stateToken, getCycle);
     	return userSwapTotalInfo[key].hasSwapped;
     }
 
@@ -481,7 +475,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         address inputToken
     ) public view returns (bool) {
         uint256 getCycle = getCurrentAuctionCycle(inputToken);
-        bytes32 key = getSwapInfoKey(user, inputToken, stateToken, cycle);
+        bytes32 key = getSwapInfoKey(user, inputToken, stateToken, getCycle);
     	return userSwapTotalInfo[key].hasReverseSwap;
     }
 
@@ -620,7 +614,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         if (currentCycle >= MAX_AUCTIONS) {
             return 0;
         }
-        uint256 davbalance = dav.balanceOf(msg.sender);
+        uint256 davbalance = dav.getActiveBalance(msg.sender);
         if (davbalance == 0) {
             return 0;
         }
@@ -641,7 +635,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         uint256 currentRatioNormalize = currentRatio / 1e18;
         require(currentRatioNormalize > 0, "Invalid ratio");
 
-        uint256 userBalance = dav.balanceOf(msg.sender);
+        uint256 userBalance = dav.getActiveBalance(msg.sender);
         if (userBalance == 0) {
             return 0;
         }
@@ -664,7 +658,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         address inputToken
     ) public view returns (uint256) {
         require(user != address(0), "Invalid user address");
-        uint256 currentDavHolding = dav.balanceOf(user);
+        uint256 currentDavHolding = dav.getActiveBalance(user);
         uint256 lastHolding = lastDavHolding[user][inputToken];
         uint256 newDavContributed = currentDavHolding > lastHolding
             ? currentDavHolding - lastHolding
@@ -692,7 +686,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         address inputToken
     ) public view returns (bool) {
         require(user != address(0), "Invalid user address");
-        uint256 currentDavHolding = dav.balanceOf(user);
+        uint256 currentDavHolding = dav.getActiveBalance(user);
         uint256 lastHolding = lastDavHolding[user][inputToken];
         // If user has claimed and no new DAV is added, return true
         if (hasClaimed[user][inputToken] && currentDavHolding <= lastHolding) {

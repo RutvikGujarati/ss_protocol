@@ -30,6 +30,8 @@ contract DAV_V2_2 is
     uint256 public constant BASIS_POINTS = 10000;
 	uint256 public constant INITIAL_GOV_MINT = 1000 ether;
 	uint256 public constant MAX_TOKEN_PER_USER = 100;
+	uint256 public constant DAV_TOKEN_EXPIRE = 100 days;
+
     //cycle assinging to 10. not want to update or configure later
     uint256 public constant CYCLE_ALLOCATION_COUNT = 10;
     /// @notice Token processing fee required to execute certain operations.
@@ -75,6 +77,8 @@ contract DAV_V2_2 is
     // @notice Transfers are permanently paused for non-governance addresses to enforce a no-transfer policy
     // @dev This is an intentional design choice to restrict token transfers and ensure the integrity of the airdrop mechanism.
     bool public transfersPaused = true;
+	bool public paused = false;
+
     // @notice Mapping to track nonce for each user to ensure unique referral code generation
     // @dev Incremented each time a referral code is generated for a user
     mapping(address => uint256) private userNonce;
@@ -86,6 +90,12 @@ contract DAV_V2_2 is
         uint256 userShare; // User's share percentage at burn time (scaled by 1e18)
         bool claimed; // Tracks if this burn's reward has been claimed
     }
+	struct GovernanceProposal {
+    address newGovernance;
+    uint256 proposedAt;
+}
+	GovernanceProposal public pendingGovernance;
+
     enum TokenStatus {
         Pending,
         Processed
@@ -120,7 +130,12 @@ contract DAV_V2_2 is
     mapping(address => string) public userReferralCode; // User's own referral code
     mapping(string => address) public referralCodeToUser; // Referral code to user address
     mapping(address => uint256) public referralRewards; // Tracks referral rewards earned
-    mapping(address => uint256) public lastMintTimestamp;
+struct MintBatch {
+    uint256 amount;
+    uint256 timestamp; // mint time
+}
+
+mapping(address => MintBatch[]) public mintBatches;
     // @notice Tracks whether an address is a DAV holder
     // @dev Set to true when a user mints tokens and never unset, as transfers are disabled, preventing users from exiting the holder system
     mapping(address => bool) private isDAVHolder;
@@ -128,7 +143,6 @@ contract DAV_V2_2 is
     // Mapping to track allocated rewards per cycle per user
     mapping(address => mapping(uint256 => uint256)) public userCycleRewards;
     mapping(address => uint256) public userRewardPerTokenPaid;
-    mapping(address => uint256) public userMintedAmount;
     mapping(address => uint256) public lastBurnCycle;
     // Tracks whether a user has claimed burns for a specific cycle
     // Used for consistency in burn history
@@ -153,6 +167,7 @@ contract DAV_V2_2 is
     mapping(address => uint256[]) public userUnclaimedCycles;
 	//to keep track unique name of each tokens. so, not conflict in protocol.
 	mapping(string => bool) public isTokenNameUsed;
+	address[] public davHolders;
     event TokensBurned(address indexed user, uint256 indexed amount, uint256 cycle);
     event RewardClaimed(address indexed user, uint256 amount, uint256 cycle);
     event RewardsClaimed(address indexed user, uint256 amount);
@@ -162,6 +177,8 @@ contract DAV_V2_2 is
 	event GovernanceUpdated(address oldGovernance, address newGovernance);
 	event LiquidityWalletUpdated(address newWallet);
 	event DevelopmentWalletUpdated(address newWallet);
+	event ContractPaused(address by);
+	event ContractUnpaused(address by);
     event TokenStatusUpdated(
         address indexed owner,
         string tokenName,
@@ -205,10 +222,24 @@ contract DAV_V2_2 is
         require(msg.sender == governance, "Caller is not governance");
         _;
     }
-	function transferGovernance(address newGovernance) external onlyGovernance {
+// Step 1: Propose a new governance with timelock
+function proposeGovernance(address newGovernance) external onlyGovernance {
     require(newGovernance != address(0), "Invalid governance address");
-    governance = newGovernance;
-	emit GovernanceUpdated(governance,newGovernance);
+    pendingGovernance = GovernanceProposal(newGovernance, block.timestamp + 7 days);
+}
+
+// Step 2: Confirm governance after timelock expires
+function confirmGovernance() external onlyGovernance {
+    require(pendingGovernance.newGovernance != address(0), "No pending proposal");
+    require(block.timestamp >= pendingGovernance.proposedAt, "Timelock not expired");
+    
+    address oldGovernance = governance;
+    governance = pendingGovernance.newGovernance;
+    
+    // Clear pending
+    delete pendingGovernance;
+    
+    emit GovernanceUpdated(oldGovernance, governance);
 }
     function updateLiquidityWallet(
         address _newLiquidityWallet
@@ -239,6 +270,19 @@ contract DAV_V2_2 is
         );
         _;
     }
+modifier whenNotPaused() {
+    require(!paused, "Contract is paused");
+    _;
+}
+function pause() external onlyGovernance {
+    paused = true;
+    emit ContractPaused(msg.sender);
+}
+
+function unpause() external onlyGovernance {
+    paused = false;
+    emit ContractUnpaused(msg.sender);
+}
     function approve(
         address spender,
         uint256 amount
@@ -288,7 +332,7 @@ contract DAV_V2_2 is
             return 0; // address is excluded from earning rewards
         }
         return
-            (balanceOf(account) *
+            (getActiveBalance(account) *
                 (totalRewardPerTokenStored - userRewardPerTokenPaid[account])) /
             1e18 +
             holderRewards[account];
@@ -366,7 +410,7 @@ contract DAV_V2_2 is
                 referrer = _referrer;
             }
         } // If no holders or total supply is 0, redirect holder share to liquidity
-        if (davHoldersCount == 0 || totalSupply() == 0) {
+        if (davHoldersCount == 0 || getTotalActiveSupply() == 0) {
             liquidityShare += holderShare;
             holderShare = 0;
         } // Ensure total distribution does not exceed value
@@ -377,7 +421,7 @@ contract DAV_V2_2 is
         require(distributed <= value, "Over-allocation");
         stateLPShare = value - distributed;
     }
-function mintDAV(uint256 amount, string memory referralCode) external payable nonReentrant {
+function mintDAV(uint256 amount, string memory referralCode) external payable nonReentrant whenNotPaused {
     // Checks
     require(amount > 0, "Amount must be greater than zero");
     require(amount % 1 ether == 0, "Amount must be a whole number");
@@ -399,8 +443,11 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
 	uint256 newHolderFunds = holderFunds;
     uint256 newTotalRewardPerTokenStored = totalRewardPerTokenStored;
     mintedSupply += amount;
-	userMintedAmount[msg.sender] += amount;
-    lastMintTimestamp[msg.sender] = block.timestamp;
+   mintBatches[msg.sender].push(MintBatch({
+    amount: amount,
+    timestamp: block.timestamp
+}));
+
     if (bytes(userReferralCode[msg.sender]).length == 0) {
         string memory newReferralCode = _generateReferralCode(msg.sender);
         userReferralCode[msg.sender] = newReferralCode;
@@ -414,10 +461,10 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
     cycleTreasuryAllocation[targetCycle] += totalCycleAllocation;
     cycleUnclaimedPLS[targetCycle] += totalCycleAllocation;
 	}
-  	if (holderShare > 0 && totalSupply() > balanceOf(governance)) {
-    uint256 effectiveSupply = totalSupply() - balanceOf(governance);
-    uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
-    newHolderFunds += (rewardPerToken * effectiveSupply) / 1e18;
+  	if (holderShare > 0 && getTotalActiveSupply() > getActiveBalance(governance)) {
+    uint256 effectiveSupply = getTotalActiveSupply() - getActiveBalance(governance);
+    uint256 rewardPerToken = (holderShare * 1e27) / effectiveSupply;
+    newHolderFunds += (rewardPerToken * effectiveSupply) / 1e27;
     newTotalRewardPerTokenStored += rewardPerToken;
 	} else {
     liquidityShare += holderShare; // Redirect explicitly
@@ -429,6 +476,7 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
     if (!isDAVHolder[msg.sender] && msg.sender != governance) {
         isDAVHolder[msg.sender] = true;
         davHoldersCount += 1;
+		davHolders.push(msg.sender); // track holders
         emit HolderAdded(msg.sender);
     }
     _updateRewards(msg.sender);
@@ -444,15 +492,15 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
     }
     if (liquidityShare > 0) {
 		 require(address(liquidityWallet).code.length == 0, "Liquidity wallet is a contract");
+        totalLiquidityAllocated += liquidityShare;
         (bool successLiquidity, ) = liquidityWallet.call{value: liquidityShare}("");
         require(successLiquidity, "Liquidity transfer failed");
-        totalLiquidityAllocated += liquidityShare;
     }
     if (developmentShare > 0) {
 	   require(address(developmentWallet).code.length == 0, "development Wallet is a contract");
+        totalDevelopmentAllocated += developmentShare;
         (bool successDev, ) = developmentWallet.call{value: developmentShare}("");
         require(successDev, "Development transfer failed");
-        totalDevelopmentAllocated += developmentShare;
     }
 	emit DistributionEvent(   msg.sender,    amount,    msg.value,    referrer,    referralShare,   liquidityShare,
     developmentShare,
@@ -460,41 +508,62 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
     block.timestamp
 );
 }
-    function claimReward() external nonReentrant {
-        require(balanceOf(msg.sender) > 0, "Not a DAV holder");
-		require(msg.sender != governance && !receivedFromGovernance[msg.sender],
-        "Not eligible to claim rewards");
-        _updateRewards(msg.sender);
-        uint256 reward = holderRewards[msg.sender];
-        require(reward > 0, "No rewards to claim");
-        holderRewards[msg.sender] = 0;
-        holderFunds -= reward;
-        (bool success, ) = msg.sender.call{value: reward}("");
-        require(success, "Reward transfer failed");
+function getActiveBalance(address user) public view returns (uint256) {
+    MintBatch[] storage batches = mintBatches[user];
+    uint256 active = 0;
+    for (uint256 i = 0; i < batches.length; i++) {
+        if (block.timestamp <= batches[i].timestamp + DAV_TOKEN_EXPIRE) {
+            active += batches[i].amount;
+        }
     }
+    return active;
+}
+function getTotalActiveSupply() public view returns (uint256) {
+    uint256 total = 0;
+    for (uint256 i = 0; i < davHolders.length; i++) {
+        total += getActiveBalance(davHolders[i]);
+    }
+    return total;
+}
+
+function getExpiredTokenCount(address user) public view returns (uint256) {
+    MintBatch[] storage batches = mintBatches[user];
+    uint256 expired = 0;
+    for (uint256 i = 0; i < batches.length; i++) {
+        if (block.timestamp > batches[i].timestamp + DAV_TOKEN_EXPIRE) {
+            expired += batches[i].amount;
+        }
+    }
+    return expired;
+}
+
+
+ function claimReward() external nonReentrant whenNotPaused {
+    // --- Checks ---
+    require(getActiveBalance(msg.sender) > 0, "Not a DAV holder or Tokens are expired");
+    require(msg.sender != governance && !receivedFromGovernance[msg.sender],
+        "Not eligible to claim rewards");
+    // --- Effects ---
+    _updateRewards(msg.sender);
+    uint256 reward = holderRewards[msg.sender];
+    require(reward > 0, "No rewards to claim");
+    // Zero out reward and update funds before external call
+	//nonReentrancy guard prevents re-entrancy attacks
+    holderRewards[msg.sender] = 0;
+    holderFunds -= reward;
+    // --- Interaction (external call) ---
+    (bool success, ) = msg.sender.call{value: reward}("");
+    require(success, "Reward transfer failed");
+}
+
     function getDAVHoldersCount() external view returns (uint256) {
         return davHoldersCount;
     }
-    function getUserMintedAmount(address user) external view returns (uint256) {
-        return userMintedAmount[user];
-    }
-    function getUserHoldingPercentage(
-        address user
-    ) public view returns (uint256) {
-        uint256 userBalance = balanceOf(user);
-        uint256 totalSupply = totalSupply();
-        if (totalSupply == 0) {
-            return 0;
-        }
-        return (userBalance * 1e18) / totalSupply;
-    }
+   
     function getUserReferralCode(
         address user
     ) external view returns (string memory) {
         return userReferralCode[user];
-    }
-    function viewLastMintTimeStamp(address user) public view returns (uint256) {
-        return lastMintTimestamp[user];
     }
     // ------------------ Gettting Token data info functions ------------------------------
     /**
@@ -508,11 +577,14 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
 function processYourToken(
     string memory _tokenName,
     string memory _emojiOrImage
-) public payable {
+) public payable whenNotPaused {
     // Validate input: Ensure token name is not empty
     require(bytes(_tokenName).length > 0, "Please provide tokenName");
-    // Check if token name is already used globally
-    require(!isTokenNameUsed[_tokenName], "Token name already used");
+// Lock token name immediately to ensure it's reserved for the user.
+// This prevents front-running because the name is marked as used
+// *before* any further execution or external interaction.
+// Even if the transaction reverts later, the token name won't be lost to another user.    
+	require(!isTokenNameUsed[_tokenName], "Token name already used");
     // Check if user has already used this token name
     require(userTokenEntries[msg.sender][_tokenName].user == address(0), "Token name already used by user");
     // Lock token name immediately to prevent front-running
@@ -528,7 +600,7 @@ function processYourToken(
 		require(bytes(_emojiOrImage).length <= 256, "URL too long");
 	}
     // Verify user has sufficient token balance to process a new token
-    uint256 userTokenBalance = balanceOf(msg.sender);
+    uint256 userTokenBalance = getActiveBalance(msg.sender);
     uint256 tokensSubmitted = userTokenCount[msg.sender];
     require(userTokenBalance > tokensSubmitted, "You need more DAV to process new token");
     // Handle fee logic for non-governance users
@@ -672,8 +744,8 @@ function getPendingTokenNames(address user) public view returns (string[] memory
     // Burn tokens and update cycle tracking
 	/// @notice Burns StateToken and logs user contribution for a cycle
 	/// @param amount Amount of StateToken to burn
-    function burnState(uint256 amount) external {
-        require(balanceOf(msg.sender) >= MIN_DAV, "Need at least 10 DAV");
+    function burnState(uint256 amount) external whenNotPaused {
+        require(getActiveBalance(msg.sender) >= MIN_DAV, "Need at least 10 DAV (maybe you have expired tokens)");
         require(amount > 0, "Burn amount must be > 0");
         require(
             StateToken.allowance(msg.sender, address(this)) >= amount,
@@ -747,6 +819,11 @@ function getPendingTokenNames(address user) public view returns (string[] memory
         // Iterate over user's unclaimed cycles
         for (uint256 i = 0; i < userUnclaimedCycles[user].length; i++) {
             uint256 cycle = userUnclaimedCycles[user][i];
+			 // --- Invariant Checks ---
+        // Ensure the mappings aren't out of sync
+      	  assert(userCycleBurned[user][cycle] > 0 || hasClaimedCycle[user][cycle]); // either burned or already claimed
+        	assert(cycle <= currentCycle); // never from the future
+        // ------------------------
             if (
                 cycle >= currentCycle ||
                 cycleTreasuryAllocation[cycle] == 0 ||
@@ -772,76 +849,60 @@ function getPendingTokenNames(address user) public view returns (string[] memory
     }
 	/// @notice Claims PLS rewards for a user across eligible cycles
 	/// @dev Iterates over userUnclaimedCycles to calculate and distribute rewards
-	/// required to iterate through all users unclaimed cycle that way user can't loose their funds so, no use of cycle arrays
-function claimPLS() external {
-    // Initialize variables
+	/// @dev Requires that the claim period has started (current cycle > 0).
+/// @dev Reverts if there are no rewards to claim or if the contract balance is insufficient.
+/// @custom:security non-reentrant and used pagination of 10 previous cycle
+
+function claimPLS() external whenNotPaused {
     address user = msg.sender;
     uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
-    // Ensure claim period has started
+		// Checks: require checks for user eligibility and claim period
     require(currentCycle > 0, "Claim period not started");
     uint256 totalReward = 0;
-    uint256 unclaimedLength = userUnclaimedCycles[user].length;
-    uint256 keepCount = 0;
-    uint256[] memory newUnclaimed = new uint256[](unclaimedLength); // Pre-allocate array for unclaimed cycles
-    // Set a gas limit threshold to prevent out-of-gas errors (e.g., 90% of block gas limit)
     uint256 gasThreshold = (block.gaslimit * 90) / 100;
-    // Process unclaimed cycles in a single loop
-    for (uint256 i = 0; i < unclaimedLength; i++) {
-        // Check remaining gas to avoid out-of-gas errors
-        if (gasleft() < gasThreshold) {
-            break; // Exit loop to prevent transaction failure
-        }        
-        uint256 cycle = userUnclaimedCycles[user][i];
-        // Skip cycles that are in the future, have no allocation, or are already claimed
+    uint256 startCycle = currentCycle > 10 ? currentCycle - 10 : 0;
+	    // Effects: accumulate rewards and update state before external call
+    for (uint256 cycle = startCycle; cycle < currentCycle; cycle++) {
+        if (gasleft() < gasThreshold) break;
         if (
-            cycle >= currentCycle ||
             cycleTreasuryAllocation[cycle] == 0 ||
             hasClaimedCycle[user][cycle]
-        ) {
-            newUnclaimed[keepCount++] = cycle; // Retain invalid or future cycles
-            continue;
-        }        
-        // Verify user and total burn for the cycle
+        ) continue;
         uint256 userBurn = userCycleBurned[user][cycle];
         uint256 totalBurn = cycleTotalBurned[cycle];
-        if (userBurn == 0 || totalBurn == 0) {
-            newUnclaimed[keepCount++] = cycle; // Retain if no valid burn
-            continue;
-        }       
-        // Calculate reward for the cycle
+        if (userBurn == 0 || totalBurn == 0) continue;
         uint256 reward = (cycleTreasuryAllocation[cycle] * userBurn) / totalBurn;
-        if (cycleUnclaimedPLS[cycle] < reward) {
-            newUnclaimed[keepCount++] = cycle; // Retain if insufficient funds
-            continue;
-        }        
-        // Update cycle state and accumulate reward
+        if (cycleUnclaimedPLS[cycle] < reward) continue;
         cycleUnclaimedPLS[cycle] -= reward;
-        totalReward += reward;
         hasClaimedCycle[user][cycle] = true;
         userBurnClaimed[user][cycle] = true;
+        totalReward += reward;
+		  // Invariant check: unclaimed must never exceed allocated
+        require(
+            cycleUnclaimedPLS[cycle] <= cycleTreasuryAllocation[cycle],
+            "Invariant failed: cycleUnclaimed > treasuryAllocation"
+        );
     }
-    // Update burnHistory in a single pass
+    // Update burnHistory
     for (uint256 j = 0; j < burnHistory[user].length; j++) {
-        // Mark burn history as claimed if corresponding cycle is claimed
-        if (!burnHistory[user][j].claimed && hasClaimedCycle[user][burnHistory[user][j].cycleNumber]) {            burnHistory[user][j].claimed = true;        }
-    }
-    // Efficiently update userUnclaimedCycles if some cycles were processed
-    if (keepCount < unclaimedLength) {
-        assembly {
-            mstore(newUnclaimed, keepCount) // Resize array in-place to save gas
+		        uint256 cycleNum = burnHistory[user][j].cycleNumber;
+        if (!burnHistory[user][j].claimed && hasClaimedCycle[user][burnHistory[user][j].cycleNumber]) {
+            burnHistory[user][j].claimed = true;
         }
-        userUnclaimedCycles[user] = newUnclaimed;
+		   // Invariant check: burnHistory must reflect claimed mapping
+        require(
+            burnHistory[user][j].claimed == hasClaimedCycle[user][cycleNum],
+            "Invariant failed: burnHistory.claimed != hasClaimedCycle"
+        );
     }
-    // Ensure there are rewards to claim
     require(totalReward > 0, "Nothing to claim");
-    // Verify contract has sufficient balance for rewards
     require((address(this).balance - holderFunds) >= totalReward, "Insufficient contract balance");
-    // Transfer rewards to user
+	// Interaction: external call last to transfer PLS to user
     (bool success, ) = payable(user).call{value: totalReward}("");
     require(success, "PLS transfer failed");
-    // Emit event for successful reward claim
     emit RewardClaimed(user, totalReward, currentCycle);
 }
+
     function getCurrentCycle() public view returns (uint256) {
         return (block.timestamp - deployTime) / CLAIM_INTERVAL;
     }
