@@ -12,7 +12,7 @@ import sonic from "../assets/S_token.svg";
 import { formatWithCommas } from "./DetailsInfo";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import DotAnimation from "../Animations/Animation";
-import { useChainId } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
 import toast from "react-hot-toast";
@@ -25,7 +25,7 @@ const InfoCards = () => {
   const [copiedCode, setCopiedCode] = useState("");
   const [fileUploaded, setFileUploaded] = useState(null);
   const [isFileUploaded, setIsFileUploaded] = useState(false);
-
+  const { address } = useAccount();
   const {
     mintDAV,
     claimableAmount,
@@ -56,6 +56,7 @@ const InfoCards = () => {
     // AddDavintoLP,
     stateHolding,
     ReferralCodeOfUser,
+    davGovernanceHolds,
     isProcessingToken,
   } = useDAvContract();
 
@@ -376,6 +377,7 @@ const InfoCards = () => {
     };
   }, []);
   const customWidth = "180px";
+  const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
 
   return (
     <>
@@ -537,8 +539,12 @@ const InfoCards = () => {
                         </div>
                         <div className="d-flex">
                           <h5 className="">
-                            {isLoading ? <DotAnimation /> : davHolds} /{" "}
-                            {isLoading ? <DotAnimation /> : davExpireHolds}
+                            {address == AuthAddress ? (
+                              <>{isLoading ? <DotAnimation /> :davGovernanceHolds}</>
+                            ) : (
+                              <>{isLoading ? <DotAnimation /> : davHolds}</>
+                            )}
+                            / {isLoading ? <DotAnimation /> : davExpireHolds}
                           </h5>
                         </div>
                       </div>

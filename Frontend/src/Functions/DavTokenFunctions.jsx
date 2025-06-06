@@ -135,6 +135,9 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("davHolds", () =>
           AllContracts.davContract.getActiveBalance(address)
         ),
+        fetchAndSet("davGovernanceHolds", () =>
+          AllContracts.davContract.balanceOf(address)
+        ),
         fetchAndSet("davExpireHolds", () =>
           AllContracts.davContract.getExpiredTokenCount(address)
         ),
