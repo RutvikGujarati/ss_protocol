@@ -30,7 +30,7 @@ contract DAV_V2_2 is
     uint256 public constant BASIS_POINTS = 10000;
 	uint256 public constant INITIAL_GOV_MINT = 1000 ether;
 	uint256 public constant MAX_TOKEN_PER_USER = 100;
-	uint256 public constant DAV_TOKEN_EXPIRE = 5 minutes;
+	uint256 public constant DAV_TOKEN_EXPIRE = 100 days; // 100 days for mainnet
 
     //cycle assinging to 10. not want to update or configure later
     uint256 public constant CYCLE_ALLOCATION_COUNT = 10;
@@ -339,6 +339,14 @@ function unpause() external onlyGovernance {
             emit ReferralCodeGenerated(user, code);
         }
     }
+	/**
+ * @notice Updates the DAV holder status for a given account based on their active balance.
+ * @dev 
+ * - Adds the account to `davHolders` if they have an active balance and aren't already registered.
+ * - Removes the account from `davHolders` if they no longer have an active balance.
+ * - Skips updating if the account is the governance address.
+ * @param account The address of the user whose holder status is being updated.
+ */
      function _updateHolderStatus(address account) internal {
         bool hasActiveBalance = getActiveBalance(account) > 0;
         if (hasActiveBalance && !isDAVHolder[account] && account != governance) {
@@ -364,7 +372,6 @@ function unpause() external onlyGovernance {
         }
         return holderRewards[account];
     }
-
     /**
      * @notice Generates a unique referral code for a given user
      * @dev Uses internal entropy and a nonce to prevent collisions
@@ -398,11 +405,10 @@ function unpause() external onlyGovernance {
         }
         return string(result);
     }
-/// @notice Distributes ETH contributions across holders, liquidity, development, and referrals
-/// @param value Amount of ETH to distribute
+/// @notice Calculates ETH distribution for minting
+/// @param value ETH amount to distribute
 /// @param sender Sender of the ETH
-/// @param referralCode Optional referral code for bonus allocation
-
+/// @param referralCode Optional referral code
     function _calculateETHDistribution(
         uint256 value,
         address sender,
@@ -449,7 +455,46 @@ function unpause() external onlyGovernance {
             "Over-allocation"
         );
     }
-
+	function _distributeHolderShare(uint256 holderShare) internal {
+    // Distribute holderShare to active holders proportionally based on their balance.
+    // This loop is gas-intensive but essential for direct, on-chain reward distribution
+    // to ensure transparency and immediate allocation to holders. The protocol limits
+    // the number of users to MAX_USER (10,000), capping the loop size and keeping gas
+    // costs within acceptable bounds for the expected user base. We avoid complex
+    // alternatives like cumulative reward tracking to maintain clear, auditable logic,
+    // accepting the gas cost as a trade-off for simplicity and directness.
+    if (holderShare > 0) {
+        uint256 totalActiveSupply = getTotalActiveSupply();
+        if (totalActiveSupply > 0) {
+            for (uint256 i = 0; i < davHolders.length; i++) {
+                address holder = davHolders[i];
+                if (holder != governance && getActiveBalance(holder) > 0) {
+                    uint256 holderBalance = getActiveBalance(holder);
+                    uint256 holderPortion = (holderShare * holderBalance * 1e27) / (totalActiveSupply * 1e27);
+                    holderRewards[holder] += holderPortion;
+                }
+            }
+            holderFunds += holderShare;
+        }
+    }
+}
+function _distributeCycleAllocations(uint256 stateLPShare, uint256 currentCycle, uint256 treasuryClaimPercentage) internal {
+    // Calculate allocation per cycle based on stateLPShare and treasury percentage
+    uint256 cycleAllocation = (stateLPShare * treasuryClaimPercentage) / 100;
+    // Distribute allocations across CYCLE_ALLOCATION_COUNT (10) cycles.
+    // This loop is necessary to spread the treasury allocation across multiple
+    // future cycles to align with the protocol's treasury claiming mechanism.
+    // With CYCLE_ALLOCATION_COUNT fixed at 10, the gas cost is bounded and
+    // acceptable, as each iteration performs two storage writes. We avoid
+    // complex optimizations like single-cycle aggregation or off-chain calculations
+    // to maintain clear, predictable logic that ensures funds are distributed
+    // across the intended cycles, as required by the protocol.
+    for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
+        uint256 targetCycle = currentCycle + i;
+        cycleTreasuryAllocation[targetCycle] += cycleAllocation;
+        cycleUnclaimedPLS[targetCycle] += cycleAllocation;
+    }
+}
     function mintDAV(uint256 amount, string memory referralCode) 
         external 
         payable 
@@ -487,33 +532,13 @@ function unpause() external onlyGovernance {
             referralCodeToUser[newReferralCode] = msg.sender;
             emit ReferralCodeGenerated(msg.sender, newReferralCode);
         }
-         // Distribute holderShare to active holders
-        if (holderShare > 0) {
-            uint256 totalActiveSupply = getTotalActiveSupply();
-            if (totalActiveSupply > 0) {
-                for (uint256 i = 0; i < davHolders.length; i++) {
-                    address holder = davHolders[i];
-                    if (holder != governance) {
-                        uint256 holderBalance = getActiveBalance(holder);
-                        if (holderBalance > 0) {
-                            uint256 holderPortion = (holderShare * holderBalance) / totalActiveSupply;
-                            holderRewards[holder] += holderPortion;
-                        }
-                    }
-                }
-            }
-            holderFunds += holderShare;
-        }
+      // Distribute holder rewards
+   	 _distributeHolderShare(holderShare);
         // Update holder status
         _updateHolderStatus(msg.sender);
         // Handle cycle allocations
-        uint256 totalCycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) / 100;
-        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
-        for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
-            uint256 targetCycle = currentCycle + i;
-            cycleTreasuryAllocation[targetCycle] += totalCycleAllocation;
-            cycleUnclaimedPLS[targetCycle] += totalCycleAllocation;
-        }
+    	uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+    	_distributeCycleAllocations(stateLPShare, currentCycle, TREASURY_CLAIM_PERCENTAGE);
         stateLpTotalShare += stateLPShare;
         // Mint tokens
         _mint(msg.sender, amount);
@@ -555,6 +580,8 @@ function getActiveBalance(address user) public view returns (uint256) {
 }
 
 function getTotalActiveSupply() public view returns (uint256) {
+	 /*  Iterate over all DAV holders to calculate the total active supply.This loop is gas-intensive but necessary for accurate, real-time calculation of active token balances. The protocol limits the number of users to MAX_USER (10,000), which constrains the array size and keeps gas costs manageable for the expected user base. We avoid complex optimizations like
+   caching or snapshots to maintain clear, straightforward logic, accepting the gas cost as a trade-off for simplicity and transparency. */
     uint256 total = 0;
     for (uint256 i = 0; i < davHolders.length; i++) {
         total += getActiveBalance(davHolders[i]);
@@ -627,15 +654,20 @@ function processYourToken(
 ) public payable whenNotPaused {
     // Validate input: Ensure token name is not empty
     require(bytes(_tokenName).length > 0, "Please provide tokenName");
-// Lock token name immediately to ensure it's reserved for the user.
-// This prevents front-running because the name is marked as used
-// *before* any further execution or external interaction.
-// Even if the transaction reverts later, the token name won't be lost to another user.    
+	require(bytes(_tokenName).length <= 64, "Token name too long");
+  // Lock token name immediately to reserve it for the user.
+    // This check ensures the token name hasn't been claimed by another user.
+    // By setting isTokenNameUsed[_tokenName] = true early, we minimize the window
+    // for front-running within the transaction execution. However, front-running
+    // a competing transaction with higher gas fees. We acknowledge this as a
+    // UX trade-off, opting for simplicity over a commit-reveal scheme to avoid
+    // requiring users to submit two transactions.    
 	require(!isTokenNameUsed[_tokenName], "Token name already used");
-    // Check if user has already used this token name
+    // Ensure the user hasn't already claimed this token name
     require(userTokenEntries[msg.sender][_tokenName].user == address(0), "Token name already used by user");
-    // Lock token name immediately to prevent front-running
-    // Assign ownership and mark as used to ensure the first submitter secures the name
+   // Assign ownership and mark the token name as used to secure it for the user.
+    // This immediate assignment ensures the first valid transaction to execute
+    // claims the name, reducing the risk of name sniping within the transaction.
     isTokenNameUsed[_tokenName] = true;
     tokenNameToOwner[_tokenName] = msg.sender;
     // Check if the provided emoji/image is a valid IPFS link (Pinata)
@@ -657,14 +689,8 @@ function processYourToken(
         require(msg.value == requiredFee, isImage ? "Please send exact image fee" : "Please send exactly 100,000 PLS");
         // Distribute fee to treasury across multiple cycles
         uint256 stateLPShare = msg.value;
-        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
-        uint256 cycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) / 100;
-        // Allocate fee to future cycles for treasury claims
-        for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
-            uint256 targetCycle = currentCycle + i;
-            cycleTreasuryAllocation[targetCycle] += cycleAllocation;
-            cycleUnclaimedPLS[targetCycle] += cycleAllocation;
-        }
+   		uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+        _distributeCycleAllocations(stateLPShare, currentCycle, TREASURY_CLAIM_PERCENTAGE);
     }
     // Store token details for the user
     usersTokenNames[msg.sender].push(_tokenName);
