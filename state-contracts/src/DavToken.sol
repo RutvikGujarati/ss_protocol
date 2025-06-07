@@ -30,7 +30,7 @@ contract DAV_V2_2 is
     uint256 public constant BASIS_POINTS = 10000;
 	uint256 public constant INITIAL_GOV_MINT = 1000 ether;
 	uint256 public constant MAX_TOKEN_PER_USER = 100;
-	uint256 public constant DAV_TOKEN_EXPIRE = 8 hours;
+	uint256 public constant DAV_TOKEN_EXPIRE = 5 minutes;
 
     //cycle assinging to 10. not want to update or configure later
     uint256 public constant CYCLE_ALLOCATION_COUNT = 10;
@@ -339,24 +339,32 @@ function unpause() external onlyGovernance {
             emit ReferralCodeGenerated(user, code);
         }
     }
-   function _updateRewards(address account) internal {
-    if (account == address(0) || account == governance) return;
-    uint256 reward = earned(account);
-    if (reward > 0) {
-        holderRewards[account] = reward;
-        userRewardPerTokenPaid[account] = totalRewardPerTokenStored;
-    }
-}
-    function earned(address account) public view returns (uint256) {
-        if (account == governance || receivedFromGovernance[account]) {
-            return 0; // address is excluded from earning rewards
+     function _updateHolderStatus(address account) internal {
+        bool hasActiveBalance = getActiveBalance(account) > 0;
+        if (hasActiveBalance && !isDAVHolder[account] && account != governance) {
+            isDAVHolder[account] = true;
+            davHoldersCount += 1;
+            davHolders.push(account);
+            emit HolderAdded(account);
+        } else if (!hasActiveBalance && isDAVHolder[account]) {
+            isDAVHolder[account] = false;
+            davHoldersCount -= 1;
+            for (uint256 i = 0; i < davHolders.length; i++) {
+                if (davHolders[i] == account) {
+                    davHolders[i] = davHolders[davHolders.length - 1];
+                    davHolders.pop();
+                    break;
+                }
+            }
         }
-        return
-            (getActiveBalance(account) *
-                (totalRewardPerTokenStored - userRewardPerTokenPaid[account])) /
-            1e18 +
-            holderRewards[account];
     }
+      function earned(address account) public view returns (uint256) {
+        if (account == governance) {
+            return 0;
+        }
+        return holderRewards[account];
+    }
+
     /**
      * @notice Generates a unique referral code for a given user
      * @dev Uses internal entropy and a nonce to prevent collisions
@@ -411,14 +419,12 @@ function unpause() external onlyGovernance {
             address referrer
         )
     {
-   	     // Explicitly exclude governance address from receiving holder share
-		bool excludeHolderShare = sender == governance || receivedFromGovernance[sender];
-        require(
-            !excludeHolderShare || sender != address(0),
-            "Invalid governance address"
-        );
-        // Set holder share to 0 for governance address
-        holderShare = excludeHolderShare ? 0 :(value * HOLDER_SHARE * PRECISION) / (100 * PRECISION);
+        // Exclude governance address from receiving holder share
+        bool excludeHolderShare = sender == governance || receivedFromGovernance[sender];
+        require(!excludeHolderShare || sender != address(0), "Invalid governance address");
+
+        // Calculate shares as percentages of value
+        holderShare = excludeHolderShare ? 0 : (value * HOLDER_SHARE) / 100;
         liquidityShare = (value * LIQUIDITY_SHARE) / 100;
         developmentShare = (value * DEVELOPMENT_SHARE) / 100;
         referralShare = 0;
@@ -429,89 +435,99 @@ function unpause() external onlyGovernance {
                 referralShare = (value * REFERRAL_BONUS) / 100;
                 referrer = _referrer;
             }
-        } // If no holders or total supply is 0, redirect holder share to liquidity
+        }
+        // If no holders or total supply is 0, redirect holder share to stateLPShare
         if (davHoldersCount == 0 || getTotalActiveSupply() == 0) {
-            liquidityShare += holderShare;
+            stateLPShare = holderShare;
             holderShare = 0;
-        } // Ensure total distribution does not exceed value
-        uint256 distributed = holderShare +
-            liquidityShare +
-            developmentShare +
-            referralShare;
-        require(distributed <= value, "Over-allocation");
-        stateLPShare = value - distributed;
+        } else {
+            stateLPShare = value - (holderShare + liquidityShare + developmentShare + referralShare);
+        }
+        // Ensure total distribution does not exceed value
+        require(
+            holderShare + liquidityShare + developmentShare + referralShare + stateLPShare <= value,
+            "Over-allocation"
+        );
     }
-function mintDAV(uint256 amount, string memory referralCode) external payable nonReentrant whenNotPaused {
-    // Checks
-    require(amount > 0, "Amount must be greater than zero");
-    require(amount % 1 ether == 0, "Amount must be a whole number");
-    require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
-	require(davHoldersCount < MAX_USER, "Max number of users reached");
-    uint256 cost = (amount * TOKEN_COST) / 1 ether;
-    require(msg.value == cost, "Incorrect PLS amount sent");
-    // Effects
-    (
-        uint256 holderShare,
-        uint256 liquidityShare,
-        uint256 developmentShare,
-        uint256 referralShare,
-        uint256 stateLPShare,
-        address referrer
-    ) = _calculateETHDistribution(msg.value, msg.sender, referralCode);
-	// temp store of values to ensure original values
-    uint256 newStateLpTotalShare = stateLpTotalShare + stateLPShare;
-	uint256 newHolderFunds = holderFunds;
-    uint256 newTotalRewardPerTokenStored = totalRewardPerTokenStored;
-    mintedSupply += amount;
-   mintBatches[msg.sender].push(MintBatch({
-    amount: amount,
-    timestamp: block.timestamp
-}));
 
-    if (bytes(userReferralCode[msg.sender]).length == 0) {
-        string memory newReferralCode = _generateReferralCode(msg.sender);
-        userReferralCode[msg.sender] = newReferralCode;
-        referralCodeToUser[newReferralCode] = msg.sender;
-        emit ReferralCodeGenerated(msg.sender, newReferralCode);
-    }    
-    uint256 totalCycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) / 100;
-	uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
-	for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
-    uint256 targetCycle = currentCycle + i;
-    cycleTreasuryAllocation[targetCycle] += totalCycleAllocation;
-    cycleUnclaimedPLS[targetCycle] += totalCycleAllocation;
-	}
-  	if (holderShare > 0) {
-    uint256 effectiveSupply = getTotalActiveSupply();
-	// using 1e18 instead of larger amount to handle require calculation that needed.
-    uint256 rewardPerToken = (holderShare * 1e18) / effectiveSupply;
-    newHolderFunds += (rewardPerToken * effectiveSupply) / 1e18;
-    newTotalRewardPerTokenStored += rewardPerToken;
-	} else {
-    liquidityShare += holderShare; // Redirect explicitly
-    holderShare = 0;
-	}
-    stateLpTotalShare = newStateLpTotalShare;
-    holderFunds = newHolderFunds;
-    totalRewardPerTokenStored = newTotalRewardPerTokenStored;
-    if (!isDAVHolder[msg.sender] && msg.sender != governance) {
-        isDAVHolder[msg.sender] = true;
-        davHoldersCount += 1;
-		davHolders.push(msg.sender); // track holders
-        emit HolderAdded(msg.sender);
-    }
-    _updateRewards(msg.sender);
-    _mint(msg.sender, amount);
-    _updateRewards(msg.sender);
-    // Interactions (safe to do last)
-    if (referrer != address(0) && referralShare > 0) {
-		  require(address(referrer).code.length == 0, "Referrer is a contract");
-        referralRewards[referrer] += referralShare;
-        totalReferralRewardsDistributed += referralShare;
-        (bool successRef, ) = referrer.call{value: referralShare}("");
-        require(successRef, "Referral transfer failed");
-    }
-    if (liquidityShare > 0) {
+    function mintDAV(uint256 amount, string memory referralCode) 
+        external 
+        payable 
+        nonReentrant 
+        whenNotPaused 
+    {
+        // Checks
+        require(amount > 0, "Amount must be greater than zero");
+        require(amount % 1 ether == 0, "Amount must be a whole number");
+        require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
+        require(davHoldersCount < MAX_USER, "Max number of users reached");
+        uint256 cost = (amount * TOKEN_COST) / 1 ether;
+        require(msg.value == cost, "Incorrect PLS amount sent");
+
+        // Calculate distribution
+        (
+            uint256 holderShare,
+            uint256 liquidityShare,
+            uint256 developmentShare,
+            uint256 referralShare,
+            uint256 stateLPShare,
+            address referrer
+        ) = _calculateETHDistribution(msg.value, msg.sender, referralCode);
+
+        // Effects
+        mintedSupply += amount;
+        mintBatches[msg.sender].push(MintBatch({
+            amount: amount,
+            timestamp: block.timestamp
+        }));
+        // Generate referral code if not already set
+        if (bytes(userReferralCode[msg.sender]).length == 0) {
+            string memory newReferralCode = _generateReferralCode(msg.sender);
+            userReferralCode[msg.sender] = newReferralCode;
+            referralCodeToUser[newReferralCode] = msg.sender;
+            emit ReferralCodeGenerated(msg.sender, newReferralCode);
+        }
+         // Distribute holderShare to active holders
+        if (holderShare > 0) {
+            uint256 totalActiveSupply = getTotalActiveSupply();
+            if (totalActiveSupply > 0) {
+                for (uint256 i = 0; i < davHolders.length; i++) {
+                    address holder = davHolders[i];
+                    if (holder != governance) {
+                        uint256 holderBalance = getActiveBalance(holder);
+                        if (holderBalance > 0) {
+                            uint256 holderPortion = (holderShare * holderBalance) / totalActiveSupply;
+                            holderRewards[holder] += holderPortion;
+                        }
+                    }
+                }
+            }
+            holderFunds += holderShare;
+        }
+        // Update holder status
+        _updateHolderStatus(msg.sender);
+        // Handle cycle allocations
+        uint256 totalCycleAllocation = (stateLPShare * TREASURY_CLAIM_PERCENTAGE) / 100;
+        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+        for (uint256 i = 0; i < CYCLE_ALLOCATION_COUNT; i++) {
+            uint256 targetCycle = currentCycle + i;
+            cycleTreasuryAllocation[targetCycle] += totalCycleAllocation;
+            cycleUnclaimedPLS[targetCycle] += totalCycleAllocation;
+        }
+        stateLpTotalShare += stateLPShare;
+        // Mint tokens
+        _mint(msg.sender, amount);
+
+        // Interactions
+        if (referrer != address(0) && referralShare > 0) {
+            require(address(referrer).code.length == 0, "Referrer is a contract");
+            referralRewards[referrer] += referralShare;
+            totalReferralRewardsDistributed += referralShare;
+            (bool successRef, ) = referrer.call{value: referralShare}("");
+            require(successRef, "Referral transfer failed");
+        }
+
+       if (liquidityShare > 0) {
 		 require(address(liquidityWallet).code.length == 0, "Liquidity wallet is a contract");
         totalLiquidityAllocated += liquidityShare;
         (bool successLiquidity, ) = liquidityWallet.call{value: liquidityShare}("");
@@ -523,10 +539,7 @@ function mintDAV(uint256 amount, string memory referralCode) external payable no
         (bool successDev, ) = developmentWallet.call{value: developmentShare}("");
         require(successDev, "Development transfer failed");
     }
-	emit DistributionEvent(   msg.sender,    amount,    msg.value,    referrer,    referralShare,   liquidityShare,
-    developmentShare,
-	holderShare,
-    block.timestamp
+	emit DistributionEvent(   msg.sender,    amount,    msg.value,    referrer,    referralShare,   liquidityShare,    developmentShare,	holderShare,    block.timestamp
 );
 }
 function getActiveBalance(address user) public view returns (uint256) {
@@ -564,23 +577,31 @@ function getExpiredTokenCount(address user) public view returns (uint256) {
     return expired;
 }
 
- function claimReward() external nonReentrant whenNotPaused {
-    // --- Checks ---
-    require(getActiveBalance(msg.sender) > 0, "Not a DAV holder or Tokens are expired");
-    require(msg.sender != governance && !receivedFromGovernance[msg.sender],
-        "Not eligible to claim rewards");
-    // --- Effects ---
-    _updateRewards(msg.sender);
-    uint256 reward = holderRewards[msg.sender];
-    require(reward > 0, "No rewards to claim");
-    // Zero out reward and update funds before external call
-	//nonReentrancy guard prevents re-entrancy attacks
-    holderRewards[msg.sender] = 0;
-    holderFunds -= reward;
-    // --- Interaction (external call) ---
-    (bool success, ) = msg.sender.call{value: reward}("");
-    require(success, "Reward transfer failed");
-}
+ function claimReward() external
+		payable
+        nonReentrant
+        whenNotPaused
+    {
+		address user = msg.sender;
+        require(user != address(0), "Invalid user");
+        require(
+            msg.sender != governance && !receivedFromGovernance[msg.sender],
+            "Not eligible to claim rewards"
+        );
+        // Update holder status to check for expiration
+        _updateHolderStatus(msg.sender);
+        // Calculate claimable reward
+        uint256 reward = earned(msg.sender);
+        require(reward > 0, "No rewards to claim");
+        require(holderFunds >= reward, "Insufficient holder funds");
+        // Update state
+        holderRewards[msg.sender] = 0;
+        holderFunds -= reward;
+        // Transfer reward
+        (bool success, ) = user.call{value: reward, gas: 30000}("");
+        require(success, "Reward transfer failed");
+        emit RewardsClaimed(msg.sender, reward);
+    }
 
     function getDAVHoldersCount() external view returns (uint256) {
         return davHoldersCount;
@@ -662,9 +683,7 @@ function processYourToken(
 function _contains(string memory str, string memory substr) internal pure returns (bool) {
     bytes memory strBytes = bytes(str);
     bytes memory substrBytes = bytes(substr);
-
     if (substrBytes.length == 0 || substrBytes.length > strBytes.length) return false;
-
     for (uint256 i = 0; i <= strBytes.length - substrBytes.length; i++) {
         bool matchFound = true;
         for (uint256 j = 0; j < substrBytes.length; j++) {
@@ -682,8 +701,6 @@ function _contains(string memory str, string memory substr) internal pure return
 function _isImageURL(string memory str) internal pure returns (bool) {
     return _contains(str, "mypinata.cloud/ipfs/");
 }
-
-
     /// @notice Counts the number of UTF-8 characters in a string
     /// @dev Each emoji can be 1–4 bytes. This counts actual characters, not bytes.
     function _utfStringLength(

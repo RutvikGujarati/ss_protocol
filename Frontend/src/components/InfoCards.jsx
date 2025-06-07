@@ -664,7 +664,11 @@ const InfoCards = () => {
                       </div>
                       <div className="d-flex  justify-content-center">
                         <h5 className="">
-                          {isLoading ? <DotAnimation /> : davHolds}
+                          {address == AuthAddress ? (
+                              <>{isLoading ? <DotAnimation /> :davGovernanceHolds}</>
+                            ) : (
+                              <>{isLoading ? <DotAnimation /> : davHolds}</>
+                            )}
                         </h5>
                       </div>
                     </div>

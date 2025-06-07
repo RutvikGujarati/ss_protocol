@@ -66,7 +66,6 @@ export const DavProvider = ({ children }) => {
     ContractPls: "0.0",
     davHolds: "0.0",
     davExpireHolds: "0.0",
-    davPercentage: "0.0",
   });
 
   const fetchAndSet = async (label, fn, format = true, fixed = 2) => {
@@ -138,19 +137,13 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("davGovernanceHolds", () =>
           AllContracts.davContract.balanceOf(address)
         ),
-        fetchAndSet("davExpireHolds", () =>
-          AllContracts.davContract.getExpiredTokenCount(address)
-        ),
+      
         fetchAndSet(
           "pendingToken",
           () => AllContracts.davContract.getPendingTokenNames(address),
           false
         ),
-        fetchAndSet(
-          "davPercentage",
-          () => AllContracts.davContract.getUserHoldingPercentage(address),
-          false
-        ),
+        
         fetchAndSet("stateHolding", () =>
           AllContracts.stateContract.balanceOf(address)
         ),
@@ -234,6 +227,12 @@ export const DavProvider = ({ children }) => {
       ),
         fetchAndSet("usableTreasury", () =>
           AllContracts.davContract.getAvailableCycleFunds()
+        ),
+		  fetchAndSet("davExpireHolds", () =>
+          AllContracts.davContract.getExpiredTokenCount(address)
+        ),
+		  fetchAndSet("davHolds", () =>
+          AllContracts.davContract.getActiveBalance(address)
         ),
         fetchAndSet("ContractPls", () =>
           AllContracts.davContract.getContractPLSBalance()
