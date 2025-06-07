@@ -22,7 +22,7 @@ interface IPair {
 //NOTE: Mainnet deployment - Auctions duration is 24 hours
 //NOTE: Mainnet deployment - Buen cycle for market makers is 35 days
 //NOTE: Mainnet deployment - Airdrops cycle / Token creation is every 50 days
-contract Ratio_Swapping_Auctions_V2_1 is Ownable(msg.sender), ReentrancyGuard {
+contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     using SafeERC20 for IERC20;
     DAV_V2_2 public dav;
 
@@ -346,7 +346,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         require(user != address(0), "Invalid user address");
         require(supportedTokens[inputToken], "Unsupported token");
         require(msg.sender == user, "Invalid sender");
-        uint256 currentDavHolding = dav.getActiveBalance(user);
+        uint256 currentDavHolding = getDavBalance(user);
         uint256 lastHolding = lastDavHolding[user][inputToken];
         uint256 newDavContributed = currentDavHolding > lastHolding
             ? currentDavHolding - lastHolding
@@ -382,7 +382,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
                 "Only token owner or governance can claim"
             );
             require(
-                dav.getActiveBalance(owner) >= PRECISION_FACTOR,
+                getDavBalance(owner) >= PRECISION_FACTOR,
                 "Owner must hold at least 1 DAV"
             );
             claimant = owner;
@@ -424,12 +424,13 @@ function confirmGovernanceUpdate() external onlyGovernance {
 		require(user != address(0), "Sender cannot be null");
         require(supportedTokens[inputToken], "Unsupported token");
         require(stateToken != address(0), "State token cannot be null");
-     	require(dav.getActiveBalance(user) >= MIN_DAV_REQUIRED, "RSA: Insufficient DAV");
+     	require(getDavBalance(user) >= MIN_DAV_REQUIRED, "RSA: Insufficient DAV");
         uint256 currentAuctionCycle = getCurrentAuctionCycle(inputToken);
         require(currentAuctionCycle < MAX_AUCTIONS, "Maximum auctions reached");
 
        bytes32 key = getSwapInfoKey(user, inputToken, stateToken, currentAuctionCycle);
 		UserSwapInfo storage userSwapInfo = userSwapTotalInfo[key];
+        userSwapInfo.cycle = currentAuctionCycle;
 
         bool isReverseActive = isReverseAuctionActive(inputToken);
         if (isReverseActive) {
@@ -456,11 +457,10 @@ function confirmGovernanceUpdate() external onlyGovernance {
         uint256 amountOut = isReverseActive ? TotalAmountIn : TotalAmountOut;
         require(
             amountIn > 0,
-            "Not enough balance in user wallet of input token"
+           "RSA: Insufficient calculated input amount"
         );
 		require(amountIn <= MAX_BURN_AMOUNT, "RSA: Burn amount exceeds limit");
         require(amountOut > 0, "Output amount must be greater than zero");
-        userSwapInfo.cycle = currentAuctionCycle;
         /** @dev This check ensures that internal token tracking is aligned with actual contract holdings.
          *Tokens in the Swap contract will be sufficient as the airdrop is limited to 10% of the supply, leaving a large amount of tokens in the swap contract.
          *  Especially important for auction logic or any logic that sends tokens out.*/
@@ -660,7 +660,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         if (currentCycle >= MAX_AUCTIONS) {
             return 0;
         }
-        uint256 davbalance = dav.getActiveBalance(msg.sender);
+        uint256 davbalance = getDavBalance(msg.sender);
         if (davbalance == 0) {
             return 0;
         }
@@ -680,7 +680,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         uint256 currentRatio = getRatioPrice(inputToken);
         require(currentRatio > 0, "Invalid ratio");
 
-        uint256 userBalance = dav.getActiveBalance(msg.sender);
+        uint256 userBalance = getDavBalance(msg.sender);
         if (userBalance == 0) {
             return 0;
         }
@@ -703,7 +703,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         address inputToken
     ) public view returns (uint256) {
         require(user != address(0), "Invalid user address");
-        uint256 currentDavHolding = dav.getActiveBalance(user);
+        uint256 currentDavHolding = getDavBalance(user);
         uint256 lastHolding = lastDavHolding[user][inputToken];
         uint256 newDavContributed = currentDavHolding > lastHolding
             ? currentDavHolding - lastHolding
@@ -731,7 +731,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         address inputToken
     ) public view returns (bool) {
         require(user != address(0), "Invalid user address");
-        uint256 currentDavHolding = dav.getActiveBalance(user);
+        uint256 currentDavHolding = getDavBalance(user);
         uint256 lastHolding = lastDavHolding[user][inputToken];
         // If user has claimed and no new DAV is added, return true
         if (hasClaimed[user][inputToken] && currentDavHolding <= lastHolding) {
@@ -758,18 +758,28 @@ function confirmGovernanceUpdate() external onlyGovernance {
     }
 
     // Getter for deployed token by name
-  /**
+/**
  * @notice Returns the full list of token names owned by the governance address.
  * @dev This function returns the entire array stored in `userToTokenNames` for the governance address.
- *Because it returns the complete array, it may consume a large amount of gas if the array is very large.
+ *      It is designed to meet the DApp's requirement to display all token names at once without
+ *      pagination or limits. The protocol limits the number of users to MAX_USER (10,000) and
+ *      controls token creation, ensuring the array size remains manageable and gas costs are within
+ *      acceptable bounds for the expected use case. We avoid pagination to maintain simple, clear
+ *      logic and align with the DApp's need for complete data retrieval in a single call. The gas
+ *      cost is acknowledged as a trade-off for usability, and the function is optimized for view-only
+ *      access to minimize on-chain impact.
  * @return An array of all token names owned by the governance address.
- * it requires to get all list without pagination and limits to show on dapp
  */
 function getUserTokenNames() external view returns (string[] memory) {
     return userToTokenNames[governanceAddress];
 }
-
-
+function getDavBalance(address user) internal view returns (uint256) {
+    try dav.getActiveBalance(user) returns (uint256 balance) {
+        return balance;
+    } catch {
+        return dav.balanceOf(user);
+    }
+}
     function getUserTokenAddress(
         string memory name
     ) external view returns (address) {
@@ -778,10 +788,18 @@ function getUserTokenNames() external view returns (string[] memory) {
     function getTokenOwner(address token) public view returns (address) {
         return tokenOwners[token];
     }
-	/**
- * @dev Returns all tokens owned by the given address.
- * WARNING: This function does not implement pagination and will return the full array.
- * cause it intended to return all tokens that owner holds.
+/**
+ * @notice Returns the full list of token entries owned by a specified address.
+ * @dev This function returns all token entries stored in `userTokenEntries` for the given owner.
+ *      It is designed to meet the DApp's requirement to display all token details (name, emoji/image,
+ *      and status) at once without pagination or limits. The protocol limits the number of users to
+ *      MAX_USER (10,000) and enforces a maximum number of tokens per user, ensuring the array size
+ *      remains manageable and gas costs are within acceptable bounds. We avoid pagination to maintain
+ *      simple, clear logic and align with the DApp's need for complete data retrieval in a single call.
+ *      The gas cost is acknowledged as a trade-off for usability, and the function is optimized for
+ *      view-only access to minimize on-chain impact.
+ * @param owner The address whose token entries are to be retrieved.
+ * @return An array of TokenEntry structs containing token details for the specified owner.
  */
     function getTokensByOwner(
         address _owner
