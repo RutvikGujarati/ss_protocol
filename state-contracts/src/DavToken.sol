@@ -669,11 +669,11 @@ function processYourToken(
     // Verify user has sufficient token balance to process a new token
     uint256 userTokenBalance = getActiveBalance(msg.sender);
     uint256 tokensSubmitted = userTokenCount[msg.sender];
-    require(userTokenBalance > tokensSubmitted, "You need more DAV to process new token");
     // Handle fee logic for non-governance users
     if (msg.sender != governance) {
         // Determine required fee based on whether an image is used
         uint256 requiredFee = isImage ? TOKEN_WITHIMAGE_PROCESS : TOKEN_PROCESSING_FEE;
+   		require(userTokenBalance > tokensSubmitted, "You need more DAV to process new token");
         require(msg.value == requiredFee, isImage ? "Please send exact image fee" : "Please send exactly 100,000 PLS");
         // Distribute fee to treasury across multiple cycles
         uint256 stateLPShare = msg.value;
