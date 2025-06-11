@@ -323,9 +323,9 @@
 }
 
 .info-logo {
-  background-color: transparent !important;
-  width: 20px;
-  height: 20px;
+  background-color: #2d3237;
+  width: 25px;
+  height: 25px;
   cursor: pointer;
   margin-left: 18px;
   border-radius: 20%;

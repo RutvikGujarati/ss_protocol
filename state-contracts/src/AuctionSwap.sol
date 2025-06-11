@@ -264,7 +264,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
     function _calculateDubaiAuctionStart() internal view returns (uint256) {
         uint256 dubaiOffset = 4 hours;
         uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 18;
+        uint256 targetDubaiHour = 21;
         uint256 targetDubaiMinute = 0;
         // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;
@@ -690,13 +690,15 @@ function confirmGovernanceUpdate() external onlyGovernance {
         require(onePercent > 0, "Invalid one percent balance");
         uint256 multiplications;
         if (isReverseActive) {
-        multiplications = (onePercent * currentRatio) / (2 * 1e18);
+			// multiply with 1e18 on mainnet
+        // multiplications = (onePercent * currentRatio) / (2 * 1e18);
+        multiplications = (onePercent * currentRatio) / (2 );
         } else {
-        multiplications = (onePercent * currentRatio * 2) / 1e18;
+        // multiplications = (onePercent * currentRatio * 2) / 1e18;
+        multiplications = (onePercent * currentRatio * 2);
         }
         return multiplications;
-    }
-
+	}
     //Airdrop getter functions
     function getClaimableReward(
         address user,
@@ -774,6 +776,9 @@ function getUserTokenNames() external view returns (string[] memory) {
     return userToTokenNames[governanceAddress];
 }
 function getDavBalance(address user) internal view returns (uint256) {
+	  if (user == governanceAddress) {
+        return dav.balanceOf(user);
+    }
     try dav.getActiveBalance(user) returns (uint256 balance) {
         return balance;
     } catch {

@@ -147,6 +147,14 @@ export const SwapContractProvider = ({ children }) => {
     });
   };
 
+  const getOutPutAmount = async () => {
+    await fetchTokenData({
+      contractMethod: "getOutPutAmount",
+      setState: setOutputAmount,
+      formatFn: (v) => Math.floor(Number(ethers.formatEther(v))),
+    });
+  };
+
   const getAirdropAmount = async () => {
     await fetchTokenData({
       contractMethod: "getClaimableReward",
@@ -203,13 +211,6 @@ export const SwapContractProvider = ({ children }) => {
     });
   };
 
-  const getOutPutAmount = async () => {
-    await fetchTokenData({
-      contractMethod: "getOutPutAmount",
-      setState: setOutputAmount,
-      formatFn: (v) => Math.floor(Number(ethers.formatEther(v))),
-    });
-  };
   const getTokenRatio = async () => {
     await fetchTokenData({
       contractMethod: "getRatioPrice",

@@ -626,7 +626,7 @@ const InfoCards = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="mt-5 ">
+                    <div className="mt-5 d-flex justify-content-center align-items-center">
                       <a
                         href="https://dex.9mm.pro/swap?chain=pulsechain"
                         target="_blank"
@@ -635,7 +635,7 @@ const InfoCards = () => {
                         <img
                           src={nine}
                           alt="sDAV Logo"
-                          className="mb-1 info-logo"
+                          className="mb-1 info-logo "
                         />
                       </a>
                       <a

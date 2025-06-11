@@ -802,8 +802,12 @@ function getPendingTokenNames(address user) public view returns (string[] memory
 	/// @notice Burns StateToken and logs user contribution for a cycle
 	/// @param amount Amount of StateToken to burn
     function burnState(uint256 amount) external whenNotPaused {
-        require(getActiveBalance(msg.sender) >= MIN_DAV, "Need at least 10 DAV (maybe you have expired tokens)");
-        require(amount > 0, "Burn amount must be > 0");
+ 	if (msg.sender != governance) {
+        require(
+            getActiveBalance(msg.sender) >= MIN_DAV,
+            "Need at least 10 DAV (maybe you have expired tokens)"
+        );
+    }        require(amount > 0, "Burn amount must be > 0");
         require(
             StateToken.allowance(msg.sender, address(this)) >= amount,
             "Insufficient allowance"
