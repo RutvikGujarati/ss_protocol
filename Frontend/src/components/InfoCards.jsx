@@ -17,6 +17,10 @@ import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
 import toast from "react-hot-toast";
 import IOSpinner from "../Constants/Spinner";
+import nine from "../assets/ninemm.png";
+import puslex from "../assets/pulsex.png";
+import nineinch from "../assets/nineinch.png";
+
 import axios from "axios";
 const InfoCards = () => {
   const chainId = useChainId();
@@ -621,6 +625,41 @@ const InfoCards = () => {
                           </button>
                         </p>
                       </div>
+                    </div>
+                    <div className="mt-5 ">
+                      <a
+                        href="https://dex.9mm.pro/swap?chain=pulsechain"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src={nine}
+                          alt="sDAV Logo"
+                          className="mb-1 info-logo"
+                        />
+                      </a>
+                      <a
+                        href="https://pulsex.com/brand"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src={puslex}
+                          alt="sDAV Logo"
+                          className="mb-1 info-logo"
+                        />
+                      </a>
+                      <a
+                        href="https://app.9inch.io/?chain=pulse"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src={nineinch}
+                          alt="sDAV Logo"
+                          className="mb-1 info-logo"
+                        />
+                      </a>
                     </div>
                   </div>
                 </div>

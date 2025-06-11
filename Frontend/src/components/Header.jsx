@@ -4,14 +4,11 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import WalletConnector from "../WalletComps/WalletConnect";
 import { NavLink } from "react-router-dom";
 import pulsex from "../assets/ninemm.png";
-import shadow from "../assets/shadow.jpeg";
 
-import { useChainId } from "wagmi";
 // import { Tooltip } from "bootstrap";
 // import { useDAVToken } from "../Context/DavTokenContext";
 
 const Header = () => {
-  const chainId = useChainId();
 
   return (
     <>
@@ -97,29 +94,7 @@ const Header = () => {
             <div className="">
               <WalletConnector />
             </div>
-            <div className="ms-4">
-              <NavLink
-                className={({ isActive }) =>
-                  isActive
-                    ? "nav-link active-link text-light"
-                    : "nav-link text-light"
-                }
-                to={
-                  chainId === 146
-                    ? "https://www.shadow.so/trade"
-                    : "https://dex.9mm.pro/swap?chain=pulsechain"
-                }
-                target="_blank"
-              >
-                <img
-                  src={chainId === 146 ? shadow : pulsex}
-                  alt={chainId === 146 ? "Sonic" : "PulseX"}
-                  width="30"
-                  height="30"
-                  style={{ borderRadius: "50%", background: "transparent" }}
-                />
-              </NavLink>
-            </div>
+           
           </div>
         </div>
       </nav>

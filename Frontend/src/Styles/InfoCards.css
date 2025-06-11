@@ -321,3 +321,12 @@
     opacity: 0.3;
   }
 }
+
+.info-logo {
+  background-color: transparent !important;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  margin-left: 18px;
+  border-radius: 20%;
+}

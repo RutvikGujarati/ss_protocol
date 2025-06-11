@@ -301,12 +301,6 @@ function unpause() external onlyGovernance {
     			amount: amount,
     			timestamp: block.timestamp
 			}));
-	if (!isDAVHolder[recipient] ) {
-        isDAVHolder[recipient] = true;
-        davHoldersCount += 1;
-		davHolders.push(recipient); // track holders
-        emit HolderAdded(recipient);
-    }
         }
         return success;
     }
@@ -323,12 +317,6 @@ function unpause() external onlyGovernance {
     			amount: amount,
     			timestamp: block.timestamp
 			}));
-	if (!isDAVHolder[recipient] ) {
-        isDAVHolder[recipient] = true;
-        davHoldersCount += 1;
-		davHolders.push(recipient); // track holders
-        emit HolderAdded(recipient);
-    }
  }
         return success;
     } // assign reffer to direct sended user
@@ -349,7 +337,7 @@ function unpause() external onlyGovernance {
  */
      function _updateHolderStatus(address account) internal {
         bool hasActiveBalance = getActiveBalance(account) > 0;
-        if (hasActiveBalance && !isDAVHolder[account] && account != governance) {
+        if (hasActiveBalance && !isDAVHolder[account] && account != governance || !receivedFromGovernance[account]) {
             isDAVHolder[account] = true;
             davHoldersCount += 1;
             davHolders.push(account);
@@ -367,7 +355,7 @@ function unpause() external onlyGovernance {
         }
     }
       function earned(address account) public view returns (uint256) {
-        if (account == governance) {
+        if (account == governance || receivedFromGovernance[account]) {
             return 0;
         }
         return holderRewards[account];
