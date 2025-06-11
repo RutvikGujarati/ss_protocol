@@ -56,6 +56,7 @@ export const DavProvider = ({ children }) => {
     userBurnedAmountInCycle: "0.0",
     usableTreasury: "0.0",
     tokenEntries: null,
+	receivedFromGovernance:"false",
     expectedClaim: "0.0",
     CanClaimNow: "false",
     claimableAmountForBurn: "0.0",
@@ -68,28 +69,30 @@ export const DavProvider = ({ children }) => {
     davExpireHolds: "0.0",
   });
 
-  const fetchAndSet = async (label, fn, format = true, fixed = 2) => {
-    try {
-      const res = await fn();
-      let value;
-
-      if (label === "UserPercentage") {
-        value = (Number(res) / 100).toFixed(fixed);
-      } else {
-        value = format
-          ? parseFloat(ethers.formatUnits(res, 18)).toFixed(fixed)
-          : res.toString();
-      }
-
-      setData((prev) => ({
-        ...prev,
-        [label]: value,
-      }));
-    } catch (err) {
-      console.error(`Error fetching ${label}:`, err);
-    }
+  const fetchAndSet = async (label, fn, format = true, fixed = 2, type = "number") => {
+	try {
+	  const res = await fn();
+	  let value;
+  
+	  if (type === "boolean") {
+		value = res ? "true" : "false"; // Convert to string explicitly
+	  } else if (label === "UserPercentage") {
+		value = (Number(res) / 100).toFixed(fixed);
+	  } else {
+		value = format
+		  ? parseFloat(ethers.formatUnits(res, 18)).toFixed(fixed)
+		  : res.toString();
+	  }
+  
+	  setData((prev) => ({
+		...prev,
+		[label]: value,
+	  }));
+	} catch (err) {
+	  console.error(`Error fetching ${label}:`, err);
+	}
   };
-
+  
   const fetchData = useCallback(async () => {
     if (!AllContracts?.davContract || !address) return;
 
@@ -137,13 +140,20 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("davGovernanceHolds", () =>
           AllContracts.davContract.balanceOf(address)
         ),
-      
+        fetchAndSet(
+          "receivedFromGovernance",
+          () => AllContracts.davContract.receivedFromGovernance(address),
+          false,
+          2,
+          "boolean"
+        ),
+
         fetchAndSet(
           "pendingToken",
           () => AllContracts.davContract.getPendingTokenNames(address),
           false
         ),
-        
+
         fetchAndSet("stateHolding", () =>
           AllContracts.stateContract.balanceOf(address)
         ),
@@ -212,7 +222,6 @@ export const DavProvider = ({ children }) => {
 
   isTokenDeployed();
 
-
   const fetchTimeUntilNextClaim = useCallback(async () => {
     if (!AllContracts?.davContract || !address) return;
     try {
@@ -228,10 +237,10 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("usableTreasury", () =>
           AllContracts.davContract.getAvailableCycleFunds()
         ),
-		  fetchAndSet("davExpireHolds", () =>
+        fetchAndSet("davExpireHolds", () =>
           AllContracts.davContract.getExpiredTokenCount(address)
         ),
-		  fetchAndSet("davHolds", () =>
+        fetchAndSet("davHolds", () =>
           AllContracts.davContract.getActiveBalance(address)
         ),
         fetchAndSet("ContractPls", () =>
@@ -266,7 +275,6 @@ export const DavProvider = ({ children }) => {
       fetchData();
     }
   }, [data.TimeUntilNextClaim]);
-
 
   useEffect(() => {
     if (isConnected && AllContracts?.davContract) {
@@ -311,7 +319,12 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract) return;
 
     const cost = ethers.parseEther(
-      (chainId === 146 ? 100 : isImage ? data.TokenWithImageProcessing : data.TokenProcessing).toString()
+      (chainId === 146
+        ? 100
+        : isImage
+        ? data.TokenWithImageProcessing
+        : data.TokenProcessing
+      ).toString()
     );
     let toastId = null;
 
