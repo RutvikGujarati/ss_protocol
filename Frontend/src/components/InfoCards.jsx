@@ -639,7 +639,7 @@ const InfoCards = () => {
                         />
                       </a>
                       <a
-                        href="https://pulsex.com/brand"
+                        href="https://app.pulsex.com/"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
