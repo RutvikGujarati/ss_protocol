@@ -386,7 +386,10 @@ const InfoCards = () => {
           <div className="container mt-4">
             <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
               <div className="col-md-4 p-0 m-2 cards">
-                <div className="card bg-dark text-light border-light p-3 text-center w-100">
+                <div
+                  className="card bg-dark text-light border-light p-3 text-center w-100"
+                  style={{ minHeight: "260px" }}
+                >
                   <div className=" mb-2 d-flex justify-content-center align-items-center gap-2">
                     <div
                       className="floating-input-container"
@@ -503,16 +506,6 @@ const InfoCards = () => {
                       </button>
                     </div>
                   )}
-
-                  <h6
-                    className="detailText mb-0 mt-2"
-                    style={{
-                      fontSize: "14px",
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    Transferring DAV tokens is not allowed after minting
-                  </h6>
                 </div>
               </div>
               <div className="col-md-4 p-0 m-2 cards">
@@ -540,7 +533,13 @@ const InfoCards = () => {
                         <div className="d-flex">
                           <h5 className="">
                             {address == AuthAddress ? (
-                              <>{isLoading ? <DotAnimation /> :davGovernanceHolds}</>
+                              <>
+                                {isLoading ? (
+                                  <DotAnimation />
+                                ) : (
+                                  davGovernanceHolds
+                                )}
+                              </>
                             ) : (
                               <>{isLoading ? <DotAnimation /> : davHolds}</>
                             )}
@@ -618,17 +617,6 @@ const InfoCards = () => {
                         </p>
                       </div>
                     </div>
-                    <h6
-                      className="detailText mb-0 m px-3"
-                      style={{
-                        fontSize: "14px",
-                        textTransform: "capitalize",
-                        marginTop: "3rem", // or whatever spacing you want
-                      }}
-                    >
-                      Referrers receive their commission directly in their
-                      wallet
-                    </h6>
                   </div>
                 </div>
               </div>
@@ -665,10 +653,16 @@ const InfoCards = () => {
                       <div className="d-flex  justify-content-center">
                         <h5 className="">
                           {address == AuthAddress ? (
-                              <>{isLoading ? <DotAnimation /> :davGovernanceHolds}</>
-                            ) : (
-                              <>{isLoading ? <DotAnimation /> : davHolds}</>
-                            )}
+                            <>
+                              {isLoading ? (
+                                <DotAnimation />
+                              ) : (
+                                davGovernanceHolds
+                              )}
+                            </>
+                          ) : (
+                            <>{isLoading ? <DotAnimation /> : davHolds}</>
+                          )}
                         </h5>
                       </div>
                     </div>

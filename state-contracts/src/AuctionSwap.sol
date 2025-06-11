@@ -264,7 +264,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
     function _calculateDubaiAuctionStart() internal view returns (uint256) {
         uint256 dubaiOffset = 4 hours;
         uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 16;
+        uint256 targetDubaiHour = 12;
         uint256 targetDubaiMinute = 0;
         // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;
@@ -798,7 +798,6 @@ function getDavBalance(address user) internal view returns (uint256) {
  *      simple, clear logic and align with the DApp's need for complete data retrieval in a single call.
  *      The gas cost is acknowledged as a trade-off for usability, and the function is optimized for
  *      view-only access to minimize on-chain impact.
- * @param owner The address whose token entries are to be retrieved.
  * @return An array of TokenEntry structs containing token details for the specified owner.
  */
     function getTokensByOwner(

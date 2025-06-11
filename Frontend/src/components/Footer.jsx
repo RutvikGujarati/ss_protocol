@@ -9,6 +9,8 @@ const Footer = () => {
     "Your swap shapes the market.",
     "Refresh when minting more DAV tokens.",
 	"The protocol is limited to 10,000 wallets minting DAV tokens.",
+	"Transferring DAV tokens is not allowed after minting",
+	"Referrers receive their commission directly in their wallet",
   ];
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   useEffect(() => {
