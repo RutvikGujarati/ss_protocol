@@ -323,7 +323,7 @@
 }
 
 .info-logo {
-  background-color: #2d3237;
+  background-color: transparent !important;
   width: 25px;
   height: 25px;
   cursor: pointer;

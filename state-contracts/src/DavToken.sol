@@ -30,7 +30,7 @@ contract DAV_V2_2 is
     uint256 public constant BASIS_POINTS = 10000;
 	uint256 public constant INITIAL_GOV_MINT = 1000 ether;
 	uint256 public constant MAX_TOKEN_PER_USER = 100;
-	uint256 public constant DAV_TOKEN_EXPIRE = 8 hours; // 100 days for mainnet
+	uint256 public constant DAV_TOKEN_EXPIRE = 18 minutes; // 100 days for mainnet
 
     //cycle assinging to 10. not want to update or configure later
     uint256 public constant CYCLE_ALLOCATION_COUNT = 10;
@@ -57,7 +57,7 @@ contract DAV_V2_2 is
     // Used in DApp to display total burn statistics
     uint256 public totalStateBurned;
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
-    uint256 public constant CLAIM_INTERVAL = 4 hours; // 4 days claim timer
+    uint256 public constant CLAIM_INTERVAL = 4 minutes; // 4 days claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
 	uint256 public constant PRECISION = 1e18;
     address private constant BURN_ADDRESS =
@@ -430,18 +430,17 @@ function unpause() external onlyGovernance {
                 referrer = _referrer;
             }
         }
-        // If no holders or total supply is 0, redirect holder share to stateLPShare
+        // If no holders or total supply is 0, redirect holder share to liquidityShare
         if (davHoldersCount == 0 || getTotalActiveSupply() == 0) {
-            stateLPShare = holderShare;
+            liquidityShare += holderShare;
             holderShare = 0;
-        } else {
-            stateLPShare = value - (holderShare + liquidityShare + developmentShare + referralShare);
-        }
-        // Ensure total distribution does not exceed value
-        require(
-            holderShare + liquidityShare + developmentShare + referralShare + stateLPShare <= value,
-            "Over-allocation"
-        );
+        } // Ensure total distribution does not exceed value
+        uint256 distributed = holderShare +
+            liquidityShare +
+            developmentShare +
+            referralShare;
+        require(distributed <= value, "Over-allocation");
+        stateLPShare = value - distributed;
     }
 	function _distributeHolderShare(uint256 holderShare) internal {
     // Distribute holderShare to active holders proportionally based on their balance.
@@ -920,11 +919,9 @@ function claimPLS() external whenNotPaused {
 		// Checks: require checks for user eligibility and claim period
     require(currentCycle > 0, "Claim period not started");
     uint256 totalReward = 0;
-    uint256 gasThreshold = (block.gaslimit * 90) / 100;
     uint256 startCycle = currentCycle > 10 ? currentCycle - 10 : 0;
 	    // Effects: accumulate rewards and update state before external call
     for (uint256 cycle = startCycle; cycle < currentCycle; cycle++) {
-        if (gasleft() < gasThreshold) break;
         if (
             cycleTreasuryAllocation[cycle] == 0 ||
             hasClaimedCycle[user][cycle]
