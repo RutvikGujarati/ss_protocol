@@ -30,7 +30,7 @@ contract DAV_V2_2 is
     uint256 public constant BASIS_POINTS = 10000;
 	uint256 public constant INITIAL_GOV_MINT = 1000 ether;
 	uint256 public constant MAX_TOKEN_PER_USER = 100;
-	uint256 public constant DAV_TOKEN_EXPIRE = 18 minutes; // 100 days for mainnet
+	uint256 public constant DAV_TOKEN_EXPIRE = 8 hours; // 100 days for mainnet
 
     //cycle assinging to 10. not want to update or configure later
     uint256 public constant CYCLE_ALLOCATION_COUNT = 10;
@@ -57,7 +57,7 @@ contract DAV_V2_2 is
     // Used in DApp to display total burn statistics
     uint256 public totalStateBurned;
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
-    uint256 public constant CLAIM_INTERVAL = 4 minutes; // 4 days claim timer
+    uint256 public constant CLAIM_INTERVAL = 4 hours; // 4 days claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
 	uint256 public constant PRECISION = 1e18;
     address private constant BURN_ADDRESS =
