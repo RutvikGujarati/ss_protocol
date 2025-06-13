@@ -14,7 +14,7 @@ import pulsex from "../assets/ninemm.png";
 
 import IOSpinner from "../Constants/Spinner";
 const DataTable = () => {
-  const { davHolds, deployWithMetaMask, isProcessing, pendingToken } =
+  const { davHolds,davGovernanceHolds, deployWithMetaMask, isProcessing, pendingToken } =
     useDAvContract();
   const { address, isConnected } = useAccount();
   const {
@@ -268,7 +268,7 @@ const DataTable = () => {
                         <button
                           onClick={() => Checking(id, ContractName)}
                           className="btn btn-primary btn-sm swap-btn"
-                          disabled={checkingStates[id] || davHolds == 0}
+                          disabled={checkingStates[id] || (authorized ? davGovernanceHolds : davHolds) == 0}
                         >
                           {checkingStates[id]
                             ? ` AIRDROPPING...`

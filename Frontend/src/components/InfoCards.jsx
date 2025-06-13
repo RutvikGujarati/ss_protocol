@@ -57,7 +57,6 @@ const InfoCards = () => {
     davExpireHolds,
     buttonTextStates,
     AddYourToken,
-    receivedFromGovernance,
     // AddDavintoLP,
     stateHolding,
     ReferralCodeOfUser,
@@ -564,11 +563,7 @@ const InfoCards = () => {
                         {chainId == 146 ? "SONIC - SWAP LEVY" : "SWAP LEVY"}
                       </h6>
                       <h5 className="">
-                        {receivedFromGovernance == "true" ? (
-                          <>0.00 PLS</>
-                        ) : (
-                          <> {formatWithCommas(claimableAmount)} PLS</>
-                        )}
+                        <> {formatWithCommas(claimableAmount)} PLS</>
                       </h5>
                       <div className="d-flex justify-content-center ">
                         <button

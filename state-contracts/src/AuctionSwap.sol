@@ -264,7 +264,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
     function _calculateDubaiAuctionStart() internal view returns (uint256) {
         uint256 dubaiOffset = 4 hours;
         uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 13;
+        uint256 targetDubaiHour = 15;
         uint256 targetDubaiMinute = 0;
         // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;

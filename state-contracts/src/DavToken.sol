@@ -119,7 +119,6 @@ contract DAV_V2_2 is
 	mapping(address => uint256) public userTokenCount;
 	mapping(address => string[]) public usersTokenNames;
 	mapping(string => address) public tokenNameToOwner;
-	mapping(address => bool) public receivedFromGovernance;
 	// it is strictly necessary to keep track all tokenNames to show on dapp with each token entries, so, keep it as it is
 	string[] public allTokenNames;
     // Tracks total tokens burned by each user across all cycles
@@ -133,6 +132,7 @@ contract DAV_V2_2 is
 struct MintBatch {
     uint256 amount;
     uint256 timestamp; // mint time
+	bool fromGovernance; // true = disqualified from rewards
 }
 
 mapping(address => MintBatch[]) public mintBatches;
@@ -296,10 +296,10 @@ function unpause() external onlyGovernance {
         bool success = super.transfer(recipient, amount);
         if (success) {
             _assignReferralCodeIfNeeded(recipient); // safe, only if no code
-			receivedFromGovernance[recipient] = true;
 			   mintBatches[recipient].push(MintBatch({
     			amount: amount,
-    			timestamp: block.timestamp
+    			timestamp: block.timestamp,
+				fromGovernance: true
 			}));
         }
         return success;
@@ -312,10 +312,10 @@ function unpause() external onlyGovernance {
         bool success = super.transferFrom(sender, recipient, amount);
         if (success) {
             _assignReferralCodeIfNeeded(recipient); // safe, only if no code
-			receivedFromGovernance[recipient] = true;
 			mintBatches[recipient].push(MintBatch({
     			amount: amount,
-    			timestamp: block.timestamp
+    			timestamp: block.timestamp,
+				fromGovernance: true
 			}));
  }
         return success;
@@ -335,27 +335,43 @@ function unpause() external onlyGovernance {
  * - Skips updating if the account is the governance address.
  * @param account The address of the user whose holder status is being updated.
  */
-     function _updateHolderStatus(address account) internal {
-        bool hasActiveBalance = getActiveBalance(account) > 0;
-        if (hasActiveBalance && !isDAVHolder[account] && account != governance || !receivedFromGovernance[account]) {
+  function _updateHolderStatus(address account) internal {
+    bool hasActiveBalance = getActiveBalance(account) > 0;
+    // If should be added
+    if (
+        hasActiveBalance &&
+        account != governance     ) {
+        if (!isDAVHolder[account]) {
             isDAVHolder[account] = true;
             davHoldersCount += 1;
-            davHolders.push(account);
-            emit HolderAdded(account);
-        } else if (!hasActiveBalance && isDAVHolder[account]) {
-            isDAVHolder[account] = false;
-            davHoldersCount -= 1;
+            // FINAL GUARD: prevent duplicate
+            bool alreadyExists = false;
             for (uint256 i = 0; i < davHolders.length; i++) {
                 if (davHolders[i] == account) {
-                    davHolders[i] = davHolders[davHolders.length - 1];
-                    davHolders.pop();
+                    alreadyExists = true;
                     break;
                 }
             }
+            if (!alreadyExists) {
+                davHolders.push(account);
+                emit HolderAdded(account);
+            }
+        }
+    }    // If should be removed
+    else if (!hasActiveBalance && isDAVHolder[account]) {
+        isDAVHolder[account] = false;
+        davHoldersCount -= 1;
+        for (uint256 i = 0; i < davHolders.length; i++) {
+            if (davHolders[i] == account) {
+                davHolders[i] = davHolders[davHolders.length - 1];
+                davHolders.pop();
+                break;
+            }
         }
     }
+}
       function earned(address account) public view returns (uint256) {
-        if (account == governance || receivedFromGovernance[account]) {
+        if (account == governance) {
             return 0;
         }
         return holderRewards[account];
@@ -414,7 +430,7 @@ function unpause() external onlyGovernance {
         )
     {
         // Exclude governance address from receiving holder share
-        bool excludeHolderShare = sender == governance || receivedFromGovernance[sender];
+        bool excludeHolderShare = sender == governance;
         require(!excludeHolderShare || sender != address(0), "Invalid governance address");
 
         // Calculate shares as percentages of value
@@ -455,8 +471,8 @@ function unpause() external onlyGovernance {
         if (totalActiveSupply > 0) {
             for (uint256 i = 0; i < davHolders.length; i++) {
                 address holder = davHolders[i];
-                if (holder != governance && getActiveBalance(holder) > 0) {
-                    uint256 holderBalance = getActiveBalance(holder);
+                if (holder != governance && getActiveMintedBalance(holder) > 0) {
+                    uint256 holderBalance = getActiveMintedBalance(holder);
                     uint256 holderPortion = (holderShare * holderBalance * 1e27) / (totalActiveSupply * 1e27);
                     holderRewards[holder] += holderPortion;
                 }
@@ -510,7 +526,8 @@ function _distributeCycleAllocations(uint256 stateLPShare, uint256 currentCycle,
         mintedSupply += amount;
         mintBatches[msg.sender].push(MintBatch({
             amount: amount,
-            timestamp: block.timestamp
+            timestamp: block.timestamp,
+			fromGovernance: false
         }));
         // Generate referral code if not already set
         if (bytes(userReferralCode[msg.sender]).length == 0) {
@@ -565,6 +582,36 @@ function getActiveBalance(address user) public view returns (uint256) {
     }
     return active;
 }
+function getActiveMintedBalance(address account) public view returns (uint256) {
+    MintBatch[] storage batches = mintBatches[account];
+    uint256 active = 0;
+
+    for (uint256 i = 0; i < batches.length; i++) {
+        if (
+            !batches[i].fromGovernance &&
+            block.timestamp <= batches[i].timestamp + DAV_TOKEN_EXPIRE
+        ) {
+            active += batches[i].amount;
+        }
+    }
+
+    return active;
+}
+
+function getMintTimestamps(address user) external view returns (uint256[] memory mintTimes, uint256[] memory expireTimes) {
+    MintBatch[] storage batches = mintBatches[user];
+    uint256 len = batches.length;
+
+    mintTimes = new uint256[](len);
+    expireTimes = new uint256[](len);
+
+    for (uint256 i = 0; i < len; i++) {
+        mintTimes[i] = batches[i].timestamp;
+        expireTimes[i] = batches[i].timestamp + DAV_TOKEN_EXPIRE;
+    }
+
+    return (mintTimes, expireTimes);
+}
 
 function getTotalActiveSupply() public view returns (uint256) {
 	 /*  Iterate over all DAV holders to calculate the total active supply.This loop is gas-intensive but necessary for accurate, real-time calculation of active token balances. The protocol limits the number of users to MAX_USER (10,000), which constrains the array size and keeps gas costs manageable for the expected user base. We avoid complex optimizations like
@@ -599,7 +646,7 @@ function getExpiredTokenCount(address user) public view returns (uint256) {
 		address user = msg.sender;
         require(user != address(0), "Invalid user");
         require(
-            msg.sender != governance && !receivedFromGovernance[msg.sender],
+            msg.sender != governance,
             "Not eligible to claim rewards"
         );
         // Update holder status to check for expiration

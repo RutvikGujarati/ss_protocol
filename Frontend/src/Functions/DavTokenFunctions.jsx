@@ -56,7 +56,6 @@ export const DavProvider = ({ children }) => {
     userBurnedAmountInCycle: "0.0",
     usableTreasury: "0.0",
     tokenEntries: null,
-	receivedFromGovernance:"false",
     expectedClaim: "0.0",
     CanClaimNow: "false",
     claimableAmountForBurn: "0.0",
@@ -140,14 +139,6 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("davGovernanceHolds", () =>
           AllContracts.davContract.balanceOf(address)
         ),
-        fetchAndSet(
-          "receivedFromGovernance",
-          () => AllContracts.davContract.receivedFromGovernance(address),
-          false,
-          2,
-          "boolean"
-        ),
-
         fetchAndSet(
           "pendingToken",
           () => AllContracts.davContract.getPendingTokenNames(address),
