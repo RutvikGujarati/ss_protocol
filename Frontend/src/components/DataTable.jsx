@@ -14,8 +14,13 @@ import pulsex from "../assets/ninemm.png";
 
 import IOSpinner from "../Constants/Spinner";
 const DataTable = () => {
-  const { davHolds,davGovernanceHolds, deployWithMetaMask, isProcessing, pendingToken } =
-    useDAvContract();
+  const {
+    davHolds,
+    davGovernanceHolds,
+    deployWithMetaMask,
+    isProcessing,
+    pendingToken,
+  } = useDAvContract();
   const { address, isConnected } = useAccount();
   const {
     swappingStates,
@@ -268,7 +273,10 @@ const DataTable = () => {
                         <button
                           onClick={() => Checking(id, ContractName)}
                           className="btn btn-primary btn-sm swap-btn"
-                          disabled={checkingStates[id] || (authorized ? davGovernanceHolds : davHolds) == 0}
+                          disabled={
+                            checkingStates[id] ||
+                            (authorized ? davGovernanceHolds : davHolds) == 0
+                          }
                         >
                           {checkingStates[id]
                             ? ` AIRDROPPING...`
@@ -389,7 +397,7 @@ const DataTable = () => {
                             </h4>
                             <p className="popup-para">
                               You need to mint additional DAV tokens to claim
-                              extra.
+                              extra airdrops.
                             </p>
                             <button
                               onClick={() =>
@@ -405,31 +413,39 @@ const DataTable = () => {
                           </div>
                         </div>
                       )}
-
-                      <td>
-                        Swap {formatWithCommas(outputToken)} tokens <br /> for{" "}
-                        {name} tokens on external DEX
-                      </td>
-                      <td>
-                        <a
-                          href="https://dex.9mm.pro/swap?chain=pulsechain"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <img
-                            src={pulsex}
-                            alt="sDAV Logo"
-                            className="mb-1 "
-                            style={{
-                              background: "transparent",
-                              width: "20px",
-                              height: "20px",
-                              cursor: "pointer",
-                              marginLeft: "8px",
-                            }}
-                          />
-                        </a>
-                      </td>
+                      {isReversing == "true" ? (
+                        <>
+                          <td>--------------</td>
+                          <td></td>
+                        </>
+                      ) : (
+                        <>
+                          <td>
+                            Swap {formatWithCommas(outputToken)} tokens <br />{" "}
+                            for {name} tokens on external DEX
+                          </td>
+                          <td>
+                            <a
+                              href="https://dex.9mm.pro/swap?chain=pulsechain"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <img
+                                src={pulsex}
+                                alt="sDAV Logo"
+                                className="mb-1 "
+                                style={{
+                                  background: "transparent",
+                                  width: "20px",
+                                  height: "20px",
+                                  cursor: "pointer",
+                                  marginLeft: "8px",
+                                }}
+                              />
+                            </a>
+                          </td>
+                        </>
+                      )}
                       <td></td>
                       {isPopupOpen && (
                         <div
