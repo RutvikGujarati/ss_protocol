@@ -460,33 +460,43 @@ function unpause() external onlyGovernance {
     }
 function _distributeHolderShare(uint256 holderShare) internal {
     if (holderShare == 0) return;
-
-    // First, calculate total active minted balance only
     uint256 totalActiveMintedSupply = 0;
+    address[] memory eligibleHolders = new address[](davHolders.length);
+    uint256 count = 0;
+    // First pass: calculate total eligible supply
     for (uint256 i = 0; i < davHolders.length; i++) {
         address holder = davHolders[i];
         if (holder != governance) {
-            uint256 activeMinted = getActiveMintedBalance(holder);
-            if (activeMinted > 0) {
-                totalActiveMintedSupply += activeMinted;
+            uint256 active = getActiveMintedBalance(holder);
+            if (active > 0) {
+                eligibleHolders[count++] = holder;
+                totalActiveMintedSupply += active;
             }
         }
     }
-    // Skip distribution if no eligible holders
     if (totalActiveMintedSupply == 0) return;
-    // Then, distribute proportionally
-    for (uint256 i = 0; i < davHolders.length; i++) {
-        address holder = davHolders[i];
-        if (holder != governance) {
-            uint256 holderBalance = getActiveMintedBalance(holder);
-            if (holderBalance > 0) {
-                uint256 holderPortion = (holderShare * holderBalance) / totalActiveMintedSupply;
-                holderRewards[holder] += holderPortion;
-            }
+    uint256 totalDistributed = 0;
+    address lastEligible;
+    // Second pass: distribute
+    for (uint256 i = 0; i < count; i++) {
+        address holder = eligibleHolders[i];
+        uint256 balance = getActiveMintedBalance(holder);
+        if (balance > 0) {
+            uint256 portion = (holderShare * balance) / totalActiveMintedSupply;
+            holderRewards[holder] += portion;
+            totalDistributed += portion;
+            lastEligible = holder;
         }
     }
-    holderFunds += holderShare;
+    // Remainder: send to last holder
+    if (totalDistributed < holderShare && lastEligible != address(0)) {
+        uint256 remainder = holderShare - totalDistributed;
+        holderRewards[lastEligible] += remainder;
+        totalDistributed += remainder;
+    }
+    holderFunds += totalDistributed;
 }
+
 
 function _distributeCycleAllocations(uint256 stateLPShare, uint256 currentCycle, uint256 treasuryClaimPercentage) internal {
     // Calculate allocation per cycle based on stateLPShare and treasury percentage
