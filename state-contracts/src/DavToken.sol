@@ -458,29 +458,36 @@ function unpause() external onlyGovernance {
         require(distributed <= value, "Over-allocation");
         stateLPShare = value - distributed;
     }
-	function _distributeHolderShare(uint256 holderShare) internal {
-    // Distribute holderShare to active holders proportionally based on their balance.
-    // This loop is gas-intensive but essential for direct, on-chain reward distribution
-    // to ensure transparency and immediate allocation to holders. The protocol limits
-    // the number of users to MAX_USER (10,000), capping the loop size and keeping gas
-    // costs within acceptable bounds for the expected user base. We avoid complex
-    // alternatives like cumulative reward tracking to maintain clear, auditable logic,
-    // accepting the gas cost as a trade-off for simplicity and directness.
-    if (holderShare > 0) {
-        uint256 totalActiveSupply = getTotalActiveSupply();
-        if (totalActiveSupply > 0) {
-            for (uint256 i = 0; i < davHolders.length; i++) {
-                address holder = davHolders[i];
-                if (holder != governance && getActiveMintedBalance(holder) > 0) {
-                    uint256 holderBalance = getActiveMintedBalance(holder);
-                    uint256 holderPortion = (holderShare * holderBalance * 1e27) / (totalActiveSupply * 1e27);
-                    holderRewards[holder] += holderPortion;
-                }
+function _distributeHolderShare(uint256 holderShare) internal {
+    if (holderShare == 0) return;
+
+    // First, calculate total active minted balance only
+    uint256 totalActiveMintedSupply = 0;
+    for (uint256 i = 0; i < davHolders.length; i++) {
+        address holder = davHolders[i];
+        if (holder != governance) {
+            uint256 activeMinted = getActiveMintedBalance(holder);
+            if (activeMinted > 0) {
+                totalActiveMintedSupply += activeMinted;
             }
-            holderFunds += holderShare;
         }
     }
+    // Skip distribution if no eligible holders
+    if (totalActiveMintedSupply == 0) return;
+    // Then, distribute proportionally
+    for (uint256 i = 0; i < davHolders.length; i++) {
+        address holder = davHolders[i];
+        if (holder != governance) {
+            uint256 holderBalance = getActiveMintedBalance(holder);
+            if (holderBalance > 0) {
+                uint256 holderPortion = (holderShare * holderBalance) / totalActiveMintedSupply;
+                holderRewards[holder] += holderPortion;
+            }
+        }
+    }
+    holderFunds += holderShare;
 }
+
 function _distributeCycleAllocations(uint256 stateLPShare, uint256 currentCycle, uint256 treasuryClaimPercentage) internal {
     // Calculate allocation per cycle based on stateLPShare and treasury percentage
     uint256 cycleAllocation = (stateLPShare * treasuryClaimPercentage) / 100;
@@ -536,10 +543,10 @@ function _distributeCycleAllocations(uint256 stateLPShare, uint256 currentCycle,
             referralCodeToUser[newReferralCode] = msg.sender;
             emit ReferralCodeGenerated(msg.sender, newReferralCode);
         }
-      // Distribute holder rewards
-   	 _distributeHolderShare(holderShare);
-        // Update holder status
+		// Update holder  before distributing
         _updateHolderStatus(msg.sender);
+      	// Distribute holder rewards
+   	 	_distributeHolderShare(holderShare);
         // Handle cycle allocations
     	uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
     	_distributeCycleAllocations(stateLPShare, currentCycle, TREASURY_CLAIM_PERCENTAGE);
