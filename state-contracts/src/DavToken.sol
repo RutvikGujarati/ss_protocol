@@ -21,7 +21,7 @@ contract DAV_V2_2 is
     //Global unit256 Variables
     // DAV TOken
     uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
-    uint256 public constant MAX_USER = 10000; 
+    uint256 public constant MAX_USER = 15000; 
     uint256 public constant TOKEN_COST = 1000 ether; // 1000000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
     uint256 public constant LIQUIDITY_SHARE = 30; // 30% LIQUIDITY SHARE
@@ -241,6 +241,8 @@ function confirmGovernance() external onlyGovernance {
     
     emit GovernanceUpdated(oldGovernance, governance);
 }
+// This is intentional to allow efficient upgrades and emergency control.
+// Multisig or DAO-based governance may be implemented in future versions if needed.
     function updateLiquidityWallet(
         address _newLiquidityWallet
     ) external onlyGovernance {
@@ -458,6 +460,9 @@ function unpause() external onlyGovernance {
         require(distributed <= value, "Over-allocation");
         stateLPShare = value - distributed;
     }
+// Assumption: davHolders is capped to a maximum of 15,000 addresses
+// This loop is safe under typical block gas limits (~30 million gas)
+// Each iteration is lightweight and avoids nested expensive operations
 function _distributeHolderShare(uint256 holderShare) internal {
     if (holderShare == 0) return;
     uint256 totalActiveMintedSupply = 0;
@@ -515,6 +520,9 @@ function _distributeCycleAllocations(uint256 stateLPShare, uint256 currentCycle,
         cycleUnclaimedPLS[targetCycle] += cycleAllocation;
     }
 }
+/// @notice Mints DAV tokens and distributes ETH to stakeholders.
+/// @param amount Tokens to mint (in wei).
+/// @param referralCode Optional referrer code for rewards.
     function mintDAV(uint256 amount, string memory referralCode) 
         external 
         payable 

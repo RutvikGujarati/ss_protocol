@@ -237,8 +237,8 @@ const DetailsInfo = ({ selectedToken }) => {
                           {token.tokenName === "DAV" ||
                           token.tokenName === "STATE"
                             ? "------"
-                            // : `1:${formatWithCommas(token.ratio)}`}
-                            : `1:1000`}
+                            : `1:${formatWithCommas(token.ratio)}`}
+                            {/* // : `1:1000`} */}
                         </div>
                       </td>
                       <td className="text-center">

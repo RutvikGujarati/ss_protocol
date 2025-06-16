@@ -219,12 +219,12 @@ function confirmGovernanceUpdate() external onlyGovernance {
         address pairAddress,
         address _tokenOwner
     ) external onlyGovernance {
-        // IPair pair = IPair(pairAddress);
-        // require(
-        //     (pair.token0() == token && pair.token1() == stateToken) ||
-        //         (pair.token1() == token && pair.token0() == stateToken),
-   		//  "RSA: Pair must contain stateToken"
-        // );
+        IPair pair = IPair(pairAddress);
+        require(
+            (pair.token0() == token && pair.token1() == stateToken) ||
+                (pair.token1() == token && pair.token0() == stateToken),
+   		 "RSA: Pair must contain stateToken"
+        );
         require(token != address(0), "Invalid token address");
         require(stateToken != address(0), "State token not initialized");
         require(pairAddress != address(0), "Invalid pair address");
@@ -677,7 +677,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
 
     function getOutPutAmount(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
-        uint256 currentRatio = 1000;
+        uint256 currentRatio = getRatioPrice(inputToken);
         require(currentRatio > 0, "Invalid ratio");
 
         uint256 userBalance = getDavBalance(msg.sender);
@@ -691,11 +691,9 @@ function confirmGovernanceUpdate() external onlyGovernance {
         uint256 multiplications;
         if (isReverseActive) {
 			// multiply with 1e18 on mainnet
-        // multiplications = (onePercent * currentRatio) / (2 * 1e18);
-        multiplications = (onePercent * currentRatio) / (2 );
+        multiplications = (onePercent * currentRatio) / (2 * 1e18);
         } else {
-        // multiplications = (onePercent * currentRatio * 2) / 1e18;
-        multiplications = (onePercent * currentRatio * 2);
+        multiplications = (onePercent * currentRatio * 2) / 1e18;
         }
         return multiplications;
 	}
