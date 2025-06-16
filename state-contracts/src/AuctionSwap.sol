@@ -231,7 +231,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
         require(pairAddress != token, "Invalid pair address");
         require(!supportedTokens[token], "Token already added");
         require(!usedPairAddresses[pairAddress], "Pair address already used");
-
+		require(_tokenOwner != address(0), "Invalid token owner");
         supportedTokens[token] = true;
         tokenOwners[token] = _tokenOwner;
         pairAddresses[token] = pairAddress;
@@ -317,6 +317,13 @@ function confirmGovernanceUpdate() external onlyGovernance {
     function getRatioPrice(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
         IPair pair = IPair(pairAddresses[inputToken]);
+		/// @notice Returns the price ratio of a supported input token to the state token.
+		/// @dev Calls `getReserves()` on trusted LP contracts only.
+		///      External call is safe because:
+		///      - `pairAddresses` is populated only with audited or whitelisted contracts.
+		///      - `getReserves()` is known to revert cleanly or return valid values.
+		///      - Additional internal checks ensure reserves > 0 and token pair is valid.
+		///   ⚠️ No try/catch is used intentionally to reduce gas; caller must trust registered LPs.
         (uint112 reserve0, uint112 reserve1, ) = pair.getReserves();
         address token0 = pair.token0();
         address token1 = pair.token1();
@@ -691,9 +698,9 @@ function confirmGovernanceUpdate() external onlyGovernance {
         uint256 multiplications;
         if (isReverseActive) {
 			// multiply with 1e18 on mainnet
-        multiplications = (onePercent * currentRatio) / (2 * 1e18);
+        multiplications = (onePercent * currentRatio) / (2 * PRECISION_FACTOR);
         } else {
-        multiplications = (onePercent * currentRatio * 2) / 1e18;
+        multiplications = (onePercent * currentRatio * 2) / PRECISION_FACTOR;
         }
         return multiplications;
 	}
@@ -758,22 +765,20 @@ function confirmGovernanceUpdate() external onlyGovernance {
     }
 
     // Getter for deployed token by name
-/**
- * @notice Returns the full list of token names owned by the governance address.
- * @dev This function returns the entire array stored in `userToTokenNames` for the governance address.
- *      It is designed to meet the DApp's requirement to display all token names at once without
- *      pagination or limits. The protocol limits the number of users to MAX_USER (10,000) and
- *      controls token creation, ensuring the array size remains manageable and gas costs are within
- *      acceptable bounds for the expected use case. We avoid pagination to maintain simple, clear
- *      logic and align with the DApp's need for complete data retrieval in a single call. The gas
- *      cost is acknowledged as a trade-off for usability, and the function is optimized for view-only
- *      access to minimize on-chain impact.
- * @return An array of all token names owned by the governance address.
- */
+/// @notice Returns the full list of token names owned by the governance address.
+/// @dev This function intentionally returns the entire `userToTokenNames` array for the governance address.
+///      Pagination is not implemented because:
+///      - The DApp requires full data for display purposes (e.g., dropdowns, dashboards).
+///      - Token creation is strictly controlled, and the protocol limits users to MAX_USER (15,000),
+///        ensuring the array size stays within safe gas limits.
+///      - This function is `view` only, with no on-chain gas cost unless called via another contract.
+///      The gas usage is an acceptable trade-off for improved frontend simplicity and developer experience.
 function getUserTokenNames() external view returns (string[] memory) {
     return userToTokenNames[governanceAddress];
 }
 function getDavBalance(address user) internal view returns (uint256) {
+	//check for dav contract is deployed and added or not
+	require(address(dav).code.length > 0, "DAV contract not deployed");
 	  if (user == governanceAddress) {
         return dav.balanceOf(user);
     }
