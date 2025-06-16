@@ -8,7 +8,7 @@ const Footer = () => {
   const messages = [
     "Your swap shapes the market.",
     "Refresh when minting more DAV tokens.",
-	"The protocol is limited to 10,000 wallets minting DAV tokens.",
+	"The protocol is limited to 15,000 wallets minting DAV tokens.",
 	"Transferring DAV tokens is not allowed after minting",
 	"Referrers receive their commission directly in their wallet",
   ];

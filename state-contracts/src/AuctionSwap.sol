@@ -53,9 +53,6 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     uint256 constant AIRDROP_AMOUNT = 10000 ether;
     uint256 constant TOKEN_OWNER_AIRDROP = 2500000 ether;
     uint256 constant GOV_OWNER_AIRDROP = 500000 ether;
-    // Check if pair has enough STATE tokens (500 million)
-    //Burn LP pair PLS/STATE, and the pair must contain 500 million STATE tokens
-    uint256 StateDeposittokenAmount = 5000000 ether;
     uint256 constant PRECISION_FACTOR = 1e18;
     uint256 public constant percentage = 1;
     //it is used for pulsechain and it is standered burn address
