@@ -453,7 +453,6 @@ function unpause() external onlyGovernance {
         require(distributed <= value, "Over-allocation");
         stateLPShare = value - distributed;
     }
-// Assumption: davHolders is capped to a maximum of 15,000 addresses
 // This loop is safe under typical block gas limits (~30 million gas)
 // Each iteration is lightweight and avoids nested expensive operations
 function _distributeHolderShare(uint256 holderShare) internal {
