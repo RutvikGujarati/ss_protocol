@@ -17,11 +17,6 @@ interface IPair {
     function token0() external view returns (address);
     function token1() external view returns (address);
 }
-//NOTE: Mainnet deployment - 1 DAV to participate in auctions
-//NOTE: Mainnet deployment - Auction cycles = 50 days
-//NOTE: Mainnet deployment - Auctions duration is 24 hours
-//NOTE: Mainnet deployment - Buen cycle for market makers is 35 days
-//NOTE: Mainnet deployment - Airdrops cycle / Token creation is every 50 days
 contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     using SafeERC20 for IERC20;
     DAV_V2_2 public dav;

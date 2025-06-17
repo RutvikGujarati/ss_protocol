@@ -6,11 +6,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-//NOTE: Not required for library use
-//NOTE: Mainnet deployment - To add a token = 10 Million PLS
-//NOTE Mainet deployments - Mint 1 DAV = 1 Million PLS
-//NOTE: Mainet deployment - 1 DAV required to add a token
-//NOTE: Mainnet deployment - 10 DAV required to become a market maker
 contract DAV_V2_2 is
     ERC20,
     Ownable(msg.sender),
@@ -20,7 +15,7 @@ contract DAV_V2_2 is
     IERC20 public StateToken;
     //Global unit256 Variables
     // DAV TOken
-	// NOTE: million pls here used to assigns for pulsechain (pls) so, it is not too much amount according to pls value.
+	// NOTE: // This contract is intended for PulseChain, not Ethereum.
     uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
     uint256 public constant MAX_USER = 15000; 
     uint256 public constant TOKEN_COST = 1000000 ether; // 1000000 org
@@ -39,7 +34,8 @@ contract DAV_V2_2 is
     /// @dev Intentionally set to 100,000 tokens in full native unit (i.e., 100000 ether).
     ///      ⚠️ This is NOT a unit error — the fee is meant to be very high, either for testing,
     ///      access restriction, or deterrence. Adjust only if this is NOT the intended behavior.
-	// it's for pulsechain not for ethereum. so, pls value is much lower compare to eth so, understans 10 million and 5 million ether as pls value.
+	// Please note that the value of PLS is significantly lower compared to ETH,
+	// so amounts like 10 million or 5 million should be understood in terms of PLS value, not ETH
     uint256 public constant TOKEN_PROCESSING_FEE = 10000000 ether;
     uint256 public constant TOKEN_WITHIMAGE_PROCESS = 5000000 ether;
     uint256 public totalReferralRewardsDistributed;
