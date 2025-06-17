@@ -31,14 +31,13 @@ contract DAV_V2_2 is
     //cycle assinging to 10. not want to update or configure later
     uint256 public constant CYCLE_ALLOCATION_COUNT = 10;
     /// @notice Token processing fee required to execute certain operations.
-    /// @dev Intentionally set to 100,000 tokens in full native unit (i.e., 100000 ether).
+    /// @dev Intentionally set to 100000 tokens in full native unit (i.e., 100000 ether).
     ///      ⚠️ This is NOT a unit error — the fee is meant to be very high, either for testing,
     ///      access restriction, or deterrence. Adjust only if this is NOT the intended behavior.
 	// This contract is intended for PulseChain, not Ethereum.
 	// Please note that the value of PLS is significantly lower compared to ETH,
-	// so amounts like 10 million or 5 million should be understood in terms of PLS value, not ETH.
-    uint256 public constant TOKEN_PROCESSING_FEE = 10000000 ether;
-    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 5000000 ether;
+    uint256 public constant TOKEN_PROCESSING_FEE = 100000 ether;
+    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 50000 ether;
     uint256 public totalReferralRewardsDistributed;
     uint256 public mintedSupply; // Total Minted DAV Tokens
     uint256 public stateLpTotalShare;
