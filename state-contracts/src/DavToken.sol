@@ -740,7 +740,7 @@ function processYourToken(
     // Handle fee logic for non-governance users
     if (msg.sender != governance) {
         // Determine required fee based on whether an image is used
-        uint256 requiredFee = isImage ? TOKEN_WITHIMAGE_PROCESS : TOKEN_PROCESSING_FEE;
+        uint256 requiredFee = getTokenProcessingFee(isImage);
    		require(userTokenBalance > tokensSubmitted, "You need more DAV to process new token");
         require(msg.value == requiredFee, isImage ? "Please send exact image fee" : "Please send exactly 100,000 PLS");
         // Distribute fee to treasury across multiple cycles
@@ -761,6 +761,9 @@ function processYourToken(
     );
     // Emit event to signal successful token name addition
     emit TokenNameAdded(msg.sender, _tokenName);
+}
+function getTokenProcessingFee(bool isImage) public pure returns (uint256) {
+    return isImage ? TOKEN_WITHIMAGE_PROCESS : TOKEN_PROCESSING_FEE;
 }
 function _contains(string memory str, string memory substr) internal pure returns (bool) {
     bytes memory strBytes = bytes(str);
