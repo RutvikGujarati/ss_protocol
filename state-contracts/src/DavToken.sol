@@ -68,7 +68,6 @@ contract DAV_V2_2 is
     address public  governance;
     address public liquidityWallet;
     address public developmentWallet;
-    address public stateToken;
     // @notice Transfers are permanently paused for non-governance addresses to enforce a no-transfer policy
     // @dev This is an intentional design choice to restrict token transfers and ensure the integrity of the airdrop mechanism.
     bool public transfersPaused = true;
@@ -203,7 +202,6 @@ mapping(address => MintBatch[]) public mintBatches;
         );
         liquidityWallet = _liquidityWallet;
         developmentWallet = _developmentWallet;
-        stateToken = _stateToken;
         governance = _gov;
         _mint(_gov, INITIAL_GOV_MINT);
         mintedSupply += INITIAL_GOV_MINT;
@@ -277,10 +275,14 @@ function unpause() external onlyGovernance {
     paused = false;
     emit ContractUnpaused(msg.sender);
 }
+// - Restricts approval unless transfers are allowed or the caller is governance
     function approve(
         address spender,
         uint256 amount
     ) public override whenTransfersAllowed returns (bool) {
+	 if (msg.sender != governance) {
+        revert("Transfers not allowed");
+    }
         return super.approve(spender, amount);
     }
     function transfer(
