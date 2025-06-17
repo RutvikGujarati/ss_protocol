@@ -17,7 +17,6 @@ contract DAV_V2_2 is
     // DAV TOken
 	// NOTE: // This contract is intended for PulseChain, not Ethereum.
     uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
-    uint256 public constant MAX_USER = 15000; 
     uint256 public constant TOKEN_COST = 1000000 ether; // 1000000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
     uint256 public constant LIQUIDITY_SHARE = 30; // 30% LIQUIDITY SHARE
@@ -526,7 +525,6 @@ function _distributeCycleAllocations(uint256 stateLPShare, uint256 currentCycle,
         require(amount > 0, "Amount must be greater than zero");
         require(amount % 1 ether == 0, "Amount must be a whole number");
         require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
-        require(davHoldersCount < MAX_USER, "Max number of users reached");
         uint256 cost = (amount * TOKEN_COST) / 1 ether;
         require(msg.value == cost, "Incorrect PLS amount sent");
 
@@ -635,7 +633,7 @@ function getMintTimestamps(address user) external view returns (uint256[] memory
 }
 
 function getTotalActiveSupply() public view returns (uint256) {
-	 /*  Iterate over all DAV holders to calculate the total active supply.This loop is gas-intensive but necessary for accurate, real-time calculation of active token balances. The protocol limits the number of users to MAX_USER (10,000), which constrains the array size and keeps gas costs manageable for the expected user base. We avoid complex optimizations like
+	 /*  Iterate over all DAV holders to calculate the total active supply.This loop is gas-intensive but necessary for accurate, real-time calculation of active token balances. which constrains the array size and keeps gas costs manageable for the expected user base. We avoid complex optimizations like
    caching or snapshots to maintain clear, straightforward logic, accepting the gas cost as a trade-off for simplicity and transparency. */
     uint256 total = 0;
     for (uint256 i = 0; i < davHolders.length; i++) {
