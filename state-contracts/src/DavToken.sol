@@ -39,7 +39,6 @@ contract DAV_V2_2 is
     uint256 public constant TOKEN_WITHIMAGE_PROCESS = 50000 ether;
     uint256 public totalReferralRewardsDistributed;
     uint256 public mintedSupply; // Total Minted DAV Tokens
-    uint256 public stateLpTotalShare;
     uint256 public holderFunds; // Tracks ETH allocated for holder rewards
     uint256 public deployTime;
     uint256 public totalLiquidityAllocated;
@@ -561,7 +560,6 @@ function _distributeCycleAllocations(uint256 stateLPShare, uint256 currentCycle,
         // Handle cycle allocations
     	uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
     	_distributeCycleAllocations(stateLPShare, currentCycle, TREASURY_CLAIM_PERCENTAGE);
-        stateLpTotalShare += stateLPShare;
         // Mint tokens
         _mint(msg.sender, amount);
 
