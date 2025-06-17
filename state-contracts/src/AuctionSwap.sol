@@ -43,7 +43,6 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     uint256 public constant MAX_SUPPLY = 500000000000 ether;
 	uint256 constant MIN_DAV_REQUIRED = 1 ether;
     uint256 constant DAV_FACTOR = 5000000 ether;
-	uint256 constant MAX_BURN_AMOUNT = 500000000000 ether;
     //For Airdrop
     uint256 constant AIRDROP_AMOUNT = 10000 ether;
     uint256 constant TOKEN_OWNER_AIRDROP = 2500000 ether;
@@ -316,12 +315,11 @@ function confirmGovernanceUpdate() external onlyGovernance {
 		///      - `getReserves()` is known to revert cleanly or return valid values.
 		///      - Additional internal checks ensure reserves > 0 and token pair is valid.
 		///   ⚠️ No try/catch is used intentionally to reduce gas; caller must trust registered LPs.
-        (uint112 reserve0, uint112 reserve1, ) = pair.getReserves();
+       try pair.getReserves() returns (uint112 reserve0, uint112 reserve1, uint32) {
         address token0 = pair.token0();
         address token1 = pair.token1();
 
-        // Ensures no division by zero
-        require(reserve0 > 0 && reserve1 > 0, "RSA: Invalid reserves");
+        require(reserve0 > 0 && reserve1 > 0, "Invalid reserves");
 
         uint256 ratio;
         if (token0 == inputToken && token1 == stateToken) {
@@ -331,7 +329,11 @@ function confirmGovernanceUpdate() external onlyGovernance {
         } else {
             revert("Invalid pair");
         }
-        return ratio; // retains 18 decimals
+
+        return ratio;// retains 18 decimals
+   		 } catch {
+        revert("Failed to fetch reserves");
+    	} 
     }
 
    /// @notice Distributes airdrop rewards based on new DAV holdings.
@@ -458,7 +460,6 @@ function confirmGovernanceUpdate() external onlyGovernance {
             amountIn > 0,
            "RSA: Insufficient calculated input amount"
         );
-		require(amountIn <= MAX_BURN_AMOUNT, "RSA: Burn amount exceeds limit");
         require(amountOut > 0, "Output amount must be greater than zero");
         /** @dev This check ensures that internal token tracking is aligned with actual contract holdings.
          *Tokens in the Swap contract will be sufficient as the airdrop is limited to 10% of the supply, leaving a large amount of tokens in the swap contract.
