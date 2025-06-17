@@ -34,8 +34,9 @@ contract DAV_V2_2 is
     /// @dev Intentionally set to 100,000 tokens in full native unit (i.e., 100000 ether).
     ///      ⚠️ This is NOT a unit error — the fee is meant to be very high, either for testing,
     ///      access restriction, or deterrence. Adjust only if this is NOT the intended behavior.
+	// This contract is intended for PulseChain, not Ethereum.
 	// Please note that the value of PLS is significantly lower compared to ETH,
-	// so amounts like 10 million or 5 million should be understood in terms of PLS value, not ETH
+	// so amounts like 10 million or 5 million should be understood in terms of PLS value, not ETH.
     uint256 public constant TOKEN_PROCESSING_FEE = 10000000 ether;
     uint256 public constant TOKEN_WITHIMAGE_PROCESS = 5000000 ether;
     uint256 public totalReferralRewardsDistributed;
