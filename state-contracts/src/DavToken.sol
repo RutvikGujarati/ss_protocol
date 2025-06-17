@@ -127,6 +127,14 @@ struct MintBatch {
     uint256 timestamp; // mint time
 	bool fromGovernance; // true = disqualified from rewards
 }
+struct WalletUpdateProposal {
+    address newWallet;
+    uint256 proposedAt;
+}
+
+WalletUpdateProposal public pendingLiquidityWallet;
+WalletUpdateProposal public pendingDevelopmentWallet;
+
 
 mapping(address => MintBatch[]) public mintBatches;
     // @notice Tracks whether an address is a DAV holder
@@ -230,29 +238,30 @@ function confirmGovernance() external onlyGovernance {
     
     emit GovernanceUpdated(oldGovernance, governance);
 }
-// This is intentional to allow efficient upgrades and emergency control.
-// Multisig or DAO-based governance may be implemented in future versions if needed.
-    function updateLiquidityWallet(
-        address _newLiquidityWallet
-    ) external onlyGovernance {
-        require(
-            _newLiquidityWallet != address(0),
-            "Liquidity wallet cannot be zero"
-        );
-        liquidityWallet = _newLiquidityWallet;
-		emit LiquidityWalletUpdated(_newLiquidityWallet);
-    }
-    // Update function for developmentWallet
-    function updateDevelopmentWallet(
-        address _newDevelopmentWallet
-    ) external onlyGovernance {
-        require(
-            _newDevelopmentWallet != address(0),
-            "Development wallet cannot be zero"
-        );
-        developmentWallet = _newDevelopmentWallet;
-		emit DevelopmentWalletUpdated(_newDevelopmentWallet);
-    }
+function proposeLiquidityWallet(address _newLiquidityWallet) external onlyGovernance {
+    require(_newLiquidityWallet != address(0), "Invalid wallet address");
+    pendingLiquidityWallet = WalletUpdateProposal(_newLiquidityWallet, block.timestamp + 7 days); 
+}
+
+function confirmLiquidityWallet() external onlyGovernance {
+    require(pendingLiquidityWallet.newWallet != address(0), "No pending proposal");
+    require(block.timestamp >= pendingLiquidityWallet.proposedAt, "Timelock not expired");
+    liquidityWallet = pendingLiquidityWallet.newWallet;
+    delete pendingLiquidityWallet;
+    emit LiquidityWalletUpdated(liquidityWallet);
+}
+function proposeDevelopmentWallet(address _newDevelopmentWallet) external onlyGovernance {
+    require(_newDevelopmentWallet != address(0), "Invalid wallet address");
+    pendingDevelopmentWallet = WalletUpdateProposal(_newDevelopmentWallet, block.timestamp + 7 days);
+}
+
+function confirmDevelopmentWallet() external onlyGovernance {
+    require(pendingDevelopmentWallet.newWallet != address(0), "No pending proposal");
+    require(block.timestamp >= pendingDevelopmentWallet.proposedAt, "Timelock not expired");
+    developmentWallet = pendingDevelopmentWallet.newWallet;
+    delete pendingDevelopmentWallet;
+    emit DevelopmentWalletUpdated(developmentWallet);
+}
     // Restriction of transffering
     modifier whenTransfersAllowed() {
         require(
@@ -523,6 +532,7 @@ function _distributeCycleAllocations(uint256 stateLPShare, uint256 currentCycle,
     {
         // Checks
         require(amount > 0, "Amount must be greater than zero");
+		require(msg.sender != governance, "Governance cannot mint");
         require(amount % 1 ether == 0, "Amount must be a whole number");
         require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
         uint256 cost = (amount * TOKEN_COST) / 1 ether;
