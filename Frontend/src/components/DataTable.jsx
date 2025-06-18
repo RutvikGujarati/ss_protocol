@@ -223,13 +223,13 @@ const DataTable = () => {
             </thead>
             <tbody>
               {tokens
-                // .filter(({ isReversing, AuctionStatus }) => {
-                //   const isAuctionActive = AuctionStatus === "true";
-                //   const isReverseAuction =
-                //     AuctionStatus === "false" && isReversing === "true";
+                .filter(({ isReversing, AuctionStatus }) => {
+                  const isAuctionActive = AuctionStatus === "true";
+                  const isReverseAuction =
+                    AuctionStatus === "false" && isReversing === "true";
 
-                //   return isAuctionActive || isReverseAuction;
-                // })
+                  return isAuctionActive || isReverseAuction;
+                })
                 .map(
                   (
                     {
