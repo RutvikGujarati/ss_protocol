@@ -650,7 +650,7 @@ const InfoCards = () => {
 
                     <div className="carddetails2 ">
                       <div className="d-flex justify-content-center ">
-                        <p className="mb-1 detailText"> Dav Token holdings </p>
+                        <p className="mb-1 detailText"> ACTIVE DAV </p>
                       </div>
                       <div className="d-flex  justify-content-center">
                         <h5 className="">

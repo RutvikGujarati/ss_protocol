@@ -53,7 +53,8 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
     uint256 public TotalBurnedStates;
-
+	uint256 public constant MAX_USER_AIRDROP = 50000000 ether;
+	uint256 public constant MAX_GOV_AIRDROP = 10000000 ether;
     address public stateToken;
     address public governanceAddress;
     address public DevAddress;
@@ -87,6 +88,9 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     mapping(address => uint256) public TotalStateBurnedByUser;
     mapping(address => uint256) public TotalTokensBurned;
     mapping(address => mapping(address => bool)) public hasClaimed; // user => token => has claimed
+	mapping(address => uint256) public totalClaimedByUser;
+	mapping(address => uint256) public totalClaimedByGovernance;
+
 
     event AuctionStarted(
         uint256 startTime,
@@ -255,7 +259,7 @@ function confirmGovernanceUpdate() external onlyGovernance {
     function _calculateDubaiAuctionStart() internal view returns (uint256) {
         uint256 dubaiOffset = 4 hours;
         uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 17; // 5 PM Dubai time
+        uint256 targetDubaiHour = 18; // 6 PM Dubai time
         uint256 targetDubaiMinute = 0;
         // Get current UTC timestamp
         uint256 nowUTC = block.timestamp;
@@ -375,6 +379,11 @@ function confirmGovernanceUpdate() external onlyGovernance {
 		// If called by governance, reward goes to DevAddress with GOV_OWNER_AIRDROP amount
             claimant = DevAddress;
             rewardAmount = GOV_OWNER_AIRDROP;
+			  // Enforce governance airdrop cap
+        require(
+            totalClaimedByGovernance[claimant] + rewardAmount <= MAX_GOV_AIRDROP,
+            "Governance airdrop limit reached"
+        );
         } else {
 		// If called by anyone else, must be the token owner
         // Ensure msg.sender is the token owner - prevents unauthorized claims
@@ -388,6 +397,11 @@ function confirmGovernanceUpdate() external onlyGovernance {
             );
             claimant = owner;
             rewardAmount = TOKEN_OWNER_AIRDROP;
+			   // Enforce user airdrop cap
+        require(
+            totalClaimedByUser[claimant] + rewardAmount <= MAX_USER_AIRDROP,
+            "User airdrop limit reached"
+        );
         }
         // Enforce claim interval
         uint256 lastClaim = lastClaimTime[claimant][token];
@@ -397,6 +411,12 @@ function confirmGovernanceUpdate() external onlyGovernance {
         );
         // Update last claim time for the claimant
         lastClaimTime[claimant][token] = block.timestamp;
+		 // Update total claimed amounts
+    if (msg.sender == governanceAddress) {
+        totalClaimedByGovernance[claimant] += rewardAmount;
+    } else {
+        totalClaimedByUser[claimant] += rewardAmount;
+    }
         // Transfer reward tokens to claimant
         IERC20(token).safeTransfer(claimant, rewardAmount);
         // Emit event for reward distribution
