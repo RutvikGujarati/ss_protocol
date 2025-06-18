@@ -10,8 +10,9 @@ import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useAccount } from "wagmi";
 import { useAddTokens, useUsersOwnerTokens } from "../data/AddTokens";
 import { Auction_TESTNET } from "../Constants/ContractAddresses";
-import pulsex from "../assets/ninemm.png";
-
+import nine from "../assets/ninemm.png";
+import puslex from "../assets/pulsex.png";
+import nineinch from "../assets/nineinch.png";
 import IOSpinner from "../Constants/Spinner";
 const DataTable = () => {
   const {
@@ -222,13 +223,13 @@ const DataTable = () => {
             </thead>
             <tbody>
               {tokens
-                .filter(({ isReversing, AuctionStatus }) => {
-                  const isAuctionActive = AuctionStatus === "true";
-                  const isReverseAuction =
-                    AuctionStatus === "false" && isReversing === "true";
+                // .filter(({ isReversing, AuctionStatus }) => {
+                //   const isAuctionActive = AuctionStatus === "true";
+                //   const isReverseAuction =
+                //     AuctionStatus === "false" && isReversing === "true";
 
-                  return isAuctionActive || isReverseAuction;
-                })
+                //   return isAuctionActive || isReverseAuction;
+                // })
                 .map(
                   (
                     {
@@ -431,16 +432,31 @@ const DataTable = () => {
                               rel="noopener noreferrer"
                             >
                               <img
-                                src={pulsex}
+                                src={nine}
                                 alt="sDAV Logo"
-                                className="mb-1 "
-                                style={{
-                                  background: "transparent",
-                                  width: "20px",
-                                  height: "20px",
-                                  cursor: "pointer",
-                                  marginLeft: "8px",
-                                }}
+                                className="mb-1 info-logo "
+                              />
+                            </a>
+                            <a
+                              href="https://app.pulsex.com/"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <img
+                                src={puslex}
+                                alt="sDAV Logo"
+                                className="mb-1 info-logo"
+                              />
+                            </a>
+                            <a
+                              href="https://app.9inch.io/?chain=pulse"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <img
+                                src={nineinch}
+                                alt="sDAV Logo"
+                                className="mb-1 info-logo"
                               />
                             </a>
                           </td>
