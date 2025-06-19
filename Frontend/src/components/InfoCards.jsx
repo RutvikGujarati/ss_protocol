@@ -687,7 +687,7 @@ const InfoCards = () => {
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100">
                   <div className="p-2 pt-3 pb-2">
-                    <p className="mb-2 detailText">$TATE1 TOKENS BURN</p>
+                    <p className="mb-2 detailText">STATE TOKENS BURN</p>
 
                     <div className="d-flex align-items-center gap-2">
                       <input

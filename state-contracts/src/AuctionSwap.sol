@@ -58,7 +58,7 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     address public stateToken;
     address public governanceAddress;
     address public DevAddress;
-    uint256 public constant GOVERNANCE_UPDATE_DELAY = 1 days;
+    uint256 public constant GOVERNANCE_UPDATE_DELAY = 7 days;
     address public pendingGovernance;
     uint256 public governanceUpdateTimestamp;
 	bool public paused = false;
