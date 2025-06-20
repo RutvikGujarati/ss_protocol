@@ -8,8 +8,8 @@ const Footer = () => {
   const messages = [
     "Your swap shapes the market.",
     "Refresh when minting more DAV tokens.",
-	"Transferring DAV tokens is not allowed after minting",
-	"Referrers receive their commission directly in their wallet",
+    "Transferring DAV tokens is not allowed after minting",
+    "Referrers receive their commission directly in their wallet",
   ];
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   useEffect(() => {
@@ -22,7 +22,15 @@ const Footer = () => {
     return () => clearInterval(interval);
   }, [messages.length]);
   return (
-    <footer className="bg-dark py-1 mt-auto d-none d-md-block">
+    <footer
+      className="bg-dark py-1 d-none d-md-block"
+      style={{
+        position: "fixed",
+        bottom: 0,
+        width: "100%",
+        zIndex: 1000,
+      }}
+    >
       <div className="container">
         <div className="d-flex justify-content-between align-items-center">
           {/* Left side - social icons */}

@@ -558,7 +558,7 @@ const InfoCards = () => {
                           textTransform: "capitalize",
                         }}
                       >
-                        {chainId == 146 ? "SONIC - SWAP LEVY" : "SWAP LEVY"}
+                        {chainId == 146 ? "SONIC - SWAP LEVY" : "GAS SWAP LEVY"}
                       </h6>
                       <h5 className="">
                         <> {formatWithCommas(claimableAmount)} PLS</>

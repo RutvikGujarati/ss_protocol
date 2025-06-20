@@ -17,9 +17,9 @@ contract DAV_V2_2 is
     // DAV TOken
 	// NOTE: // This contract is intended for PulseChain, not Ethereum.
     uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
-    uint256 public constant TOKEN_COST = 1000 ether; // 1000000 org
+    uint256 public constant TOKEN_COST = 1000000 ether; // 1000000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
-    uint256 public constant LIQUIDITY_SHARE = 30; // 30% LIQUIDITY SHARE
+    uint256 public constant LIQUIDITY_SHARE = 40; // 40% LIQUIDITY SHARE
     uint256 public constant DEVELOPMENT_SHARE = 5; // 5% DEV SHARE
     uint256 public constant HOLDER_SHARE = 10; // 10% HOLDER SHARE
     uint256 public constant BASIS_POINTS = 10000;
@@ -35,8 +35,8 @@ contract DAV_V2_2 is
     ///      access restriction, or deterrence. Adjust only if this is NOT the intended behavior.
 	// This contract is intended for PulseChain, not Ethereum.
 	// Please note that the value of PLS is significantly lower compared to ETH,
-    uint256 public constant TOKEN_PROCESSING_FEE = 2000 ether;
-    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 3000 ether;
+    uint256 public constant TOKEN_PROCESSING_FEE = 10000000 ether;
+    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 15000000 ether;
     uint256 public totalReferralRewardsDistributed;
     uint256 public mintedSupply; // Total Minted DAV Tokens
     uint256 public holderFunds; // Tracks ETH allocated for holder rewards

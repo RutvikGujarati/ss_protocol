@@ -202,21 +202,56 @@ const DataTable = () => {
                 <th></th>
                 <th>Token Name</th>
                 <th></th>
-                <th>Claim Airdrop</th>
+                <th
+                  style={{
+                    paddingTop: "4px",
+                    paddingBottom: "20px",
+                  }}
+                >
+                  <div style={{ fontSize: "13px", lineHeight: "1" }}>1</div>
+                  <div>Claim Airdrop</div>
+                </th>
+
                 <th></th>
                 <th>Auction Timer</th>
-                <th className="text-center">
-                  <span className="mx-3"> Ratio Swapping Auction</span>
-                  <a
-                    href={`https://kekxplorer.avecdra.pro/address/${Auction_TESTNET}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ fontSize: "15px", color: "white" }}
+                <th
+                  style={{
+                    paddingTop: "4px",
+                    paddingBottom: "20px",
+                  }}
+                >
+                  <div style={{ fontSize: "13px", lineHeight: "1" }}>2</div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   >
-                    <i className="bi bi-box-arrow-up-right"></i>
-                  </a>
+                    Ratio Swapping Auction
+                    <a
+                      href={`https://kekxplorer.avecdra.pro/address/${Auction_TESTNET}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontSize: "13px",
+                        color: "white",
+                        marginLeft: "6px",
+                      }}
+                    >
+                      <i className="bi bi-box-arrow-up-right"></i>
+                    </a>
+                  </div>
                 </th>
-                <th>Market Maker Instructions</th>
+				<th
+                  style={{
+                    paddingTop: "4px",
+                    paddingBottom: "20px",
+                  }}
+                >
+                  <div style={{ fontSize: "13px", lineHeight: "1" }}>3</div>
+                  <div>Market Maker Instructions</div>
+                </th>
                 <th></th>
                 <th></th>
               </tr>
