@@ -162,7 +162,7 @@ const DetailsInfo = ({ selectedToken }) => {
     .map((token) => token.tokenName);
 
   return (
-    <div className="container mt-3 p-0">
+    <div className="container mt-3 p-0 pb-4 mb-5">
       <div className="mb-3 d-flex justify-content-center">
         <input
           type="text"
@@ -238,7 +238,7 @@ const DetailsInfo = ({ selectedToken }) => {
                           token.tokenName === "STATE"
                             ? "------"
                             : `1:${formatWithCommas(token.ratio)}`}
-                            {/* // : `1:1000`} */}
+                          {/* // : `1:1000`} */}
                         </div>
                       </td>
                       <td className="text-center">
