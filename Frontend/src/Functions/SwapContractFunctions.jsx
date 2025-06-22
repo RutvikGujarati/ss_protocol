@@ -692,7 +692,17 @@ export const SwapContractProvider = ({ children }) => {
       setTxStatusForAdding("confirmed");
     }
   };
-
+  useEffect(() => {
+	if (!AllContracts || !address) return;
+  
+	const runAuctionChecks = async () => {
+	  await CheckIsAuctionActive();
+	  await CheckIsReverse();
+	};
+  
+	runAuctionChecks();
+  }, [AllContracts, address]);
+  
   useEffect(() => {
     const functions = [
       fetchUserTokenAddresses,
@@ -713,7 +723,7 @@ export const SwapContractProvider = ({ children }) => {
       HasSwappedAucton,
       HasReverseSwappedAucton,
     ];
-    const pollingFunctions = [isFlammed, CheckIsAuctionActive, CheckIsReverse];
+    const pollingFunctions = [isFlammed];
 
     const runAll = async () => {
       const results = await Promise.allSettled(functions.map((fn) => fn()));
