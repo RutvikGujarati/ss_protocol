@@ -19,7 +19,7 @@ contract DAV_V2_2 is
     uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
     uint256 public constant TOKEN_COST = 1000000 ether; // 1000000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
-    uint256 public constant LIQUIDITY_SHARE = 40; // 40% LIQUIDITY SHARE
+    uint256 public constant LIQUIDITY_SHARE = 50; // 50% LIQUIDITY SHARE
     uint256 public constant DEVELOPMENT_SHARE = 5; // 5% DEV SHARE
     uint256 public constant HOLDER_SHARE = 10; // 10% HOLDER SHARE
     uint256 public constant BASIS_POINTS = 10000;

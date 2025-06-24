@@ -45,16 +45,16 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     uint256 constant DAV_FACTOR = 5000000 ether;
     //For Airdrop
     uint256 constant AIRDROP_AMOUNT = 10000 ether;
-    uint256 constant TOKEN_OWNER_AIRDROP = 2500000 ether;
-    uint256 constant GOV_OWNER_AIRDROP = 500000 ether;
+    uint256 constant TOKEN_OWNER_AIRDROP = 1500000 ether;
+    uint256 constant GOV_OWNER_AIRDROP = 150000 ether;
     uint256 constant PRECISION_FACTOR = 1e18;
     uint256 public constant percentage = 1;
     //it is used for pulsechain and it is standered burn address
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
     uint256 public TotalBurnedStates;
-	uint256 public constant MAX_USER_AIRDROP = 50000000 ether;
-	uint256 public constant MAX_GOV_AIRDROP = 10000000 ether;
+	uint256 public constant MAX_USER_AIRDROP = 30000000 ether;
+	uint256 public constant MAX_GOV_AIRDROP = 3000000 ether;
     address public stateToken;
     address public governanceAddress;
     address public DevAddress;
