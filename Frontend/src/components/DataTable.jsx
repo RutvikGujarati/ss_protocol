@@ -182,6 +182,13 @@ const DataTable = () => {
     return () => clearTimeout(timer);
   }, [txStatusForSwap]);
 
+  const filteredTokens = tokens.filter(({ isReversing, AuctionStatus }) => {
+    const isAuctionActive = AuctionStatus === "true";
+    const isReverseAuction =
+      AuctionStatus === "false" && isReversing === "true";
+    return isAuctionActive || isReverseAuction;
+  });
+
   return !isConnected || !address ? (
     <div className="container text-center mt-5">
       <p className="text-light">Please connect your wallet.</p>
@@ -243,7 +250,7 @@ const DataTable = () => {
                     </a>
                   </div>
                 </th>
-				<th
+                <th
                   style={{
                     paddingTop: "4px",
                     paddingBottom: "20px",
@@ -257,15 +264,14 @@ const DataTable = () => {
               </tr>
             </thead>
             <tbody>
-              {tokens
-                .filter(({ isReversing, AuctionStatus }) => {
-                  const isAuctionActive = AuctionStatus === "true";
-                  const isReverseAuction =
-                    AuctionStatus === "false" && isReversing === "true";
-
-                  return isAuctionActive || isReverseAuction;
-                })
-                .map(
+              {filteredTokens.length === 0 ? (
+                <tr>
+                  <td colSpan="100%" className="text-center py-4">
+                    No Ratio Swapping Auction Today
+                  </td>
+                </tr>
+              ) : (
+                filteredTokens.map(
                   (
                     {
                       id,
@@ -451,7 +457,7 @@ const DataTable = () => {
                       )}
                       {isReversing == "true" ? (
                         <>
-                          <td>Provide Liquidity with  your tokens</td>
+                          <td>Provide Liquidity with your tokens</td>
                           <td></td>
                         </>
                       ) : (
@@ -598,7 +604,8 @@ const DataTable = () => {
                       )}
                     </tr>
                   )
-                )}
+                )
+              )}
             </tbody>
           </table>
         </div>
