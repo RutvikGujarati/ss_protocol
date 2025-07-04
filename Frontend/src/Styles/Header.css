@@ -159,3 +159,18 @@ tate up/down */ .rotate-up .dropdown-arrow-icon {
   transform: rotate(0deg);
 }
 
+.dropdown-menu {
+  background-color: #212529; /* Matches bg-dark */
+  border: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-item {
+  color: #ffffff;
+  padding: 8px 16px;
+}
+
+.dropdown-item:hover {
+  background-color: #343a40;
+  color: #ffffff;
+}

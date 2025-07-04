@@ -55,7 +55,6 @@ const Header = () => {
                   Add Token
                 </NavLink>
               </li>
-
               <li className="nav-item mx-2">
                 <NavLink
                   className={({ isActive }) =>
@@ -68,7 +67,7 @@ const Header = () => {
                   Market Makers
                 </NavLink>
               </li>
-              <li className="nav-item mx-2">
+              <li className="nav-item mx-2 position-relative custom-dropdown">
                 <NavLink
                   className={({ isActive }) =>
                     isActive
@@ -79,9 +78,18 @@ const Header = () => {
                 >
                   DAV Vault
                 </NavLink>
+                <ul className="dropdown-menu bg-dark border-0 shadow">
+                  <li>
+                    <NavLink
+                      className="dropdown-item text-light"
+                      to="/dav-history"
+                    >
+                      DAV History
+                    </NavLink>
+                  </li>
+                </ul>
               </li>
-
-              <li className="nav-item mx-2 "></li>
+              <li className="nav-item mx-2"></li>
             </ul>
             {/* Wallet Connector Button */}
             <div className="">
@@ -135,9 +143,8 @@ const Header = () => {
           }
         >
           <i className="bi bi-graph-up"></i>
-          <div> Market Makers</div>
+          <div>Market Makers</div>
         </NavLink>
-
         <NavLink
           to="/info"
           className={({ isActive }) =>
@@ -161,7 +168,7 @@ const Header = () => {
           <i className="bi bi-file-earmark-text"></i>
           <div>Docs</div>
         </NavLink>
-        <div className="mt-2 ">
+        <div className="mt-2">
           <NavLink
             className={({ isActive }) =>
               isActive
