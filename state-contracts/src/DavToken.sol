@@ -17,7 +17,7 @@ contract DAV_V2_2 is
     // DAV TOken
 	// NOTE: // This contract is intended for PulseChain, not Ethereum.
     uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
-    uint256 public constant TOKEN_COST = 1000000 ether; // 1000000 org
+    uint256 public constant TOKEN_COST = 1000 ether; // 1000000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
     uint256 public constant LIQUIDITY_SHARE = 50; // 50% LIQUIDITY SHARE
     uint256 public constant DEVELOPMENT_SHARE = 5; // 5% DEV SHARE
@@ -40,7 +40,7 @@ contract DAV_V2_2 is
     uint256 public totalReferralRewardsDistributed;
     uint256 public mintedSupply; // Total Minted DAV Tokens
     uint256 public holderFunds; // Tracks ETH allocated for holder rewards
-    uint256 public deployTime;
+    uint256 public claimStartTime;
     uint256 public totalLiquidityAllocated;
     uint256 public totalDevelopmentAllocated;
     // @notice Tracks the number of DAV token holders
@@ -51,7 +51,7 @@ contract DAV_V2_2 is
     // Used in DApp to display total burn statistics
     uint256 public totalStateBurned;
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
-    uint256 public constant CLAIM_INTERVAL = 36 days; // 36 days claim timer
+    uint256 public constant CLAIM_INTERVAL = 5 minutes; // 36 days claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
 	uint256 public constant PRECISION = 1e18;
     address private constant BURN_ADDRESS =
@@ -213,7 +213,47 @@ mapping(address => MintBatch[]) public mintBatches;
         _mint(_gov, INITIAL_GOV_MINT);
         mintedSupply += INITIAL_GOV_MINT;
         StateToken = IERC20(_stateToken);
-        deployTime = block.timestamp;
+        claimStartTime = _calculateClaimStart();
+    }
+	 function _calculateClaimStart() internal view returns (uint256) {
+        uint256 dubaiOffset = 4 hours;
+        uint256 secondsInDay = 86400;
+        uint256 targetDubaiHour = 14; // 5 PM Dubai time
+        uint256 targetDubaiMinute = 5;
+        // Get current UTC timestamp
+        uint256 nowUTC = block.timestamp;
+        uint256 nowDubai;
+        unchecked {
+            // ✅ Safe: 4 hours addition will never overflow
+            nowDubai = nowUTC + dubaiOffset;
+        }
+        uint256 todayStartDubai;
+        unchecked {
+            // ✅ Safe: all values are well within bounds
+            todayStartDubai = (nowDubai / secondsInDay) * secondsInDay;
+        }
+        uint256 targetTimeDubai;
+        unchecked {
+            // ✅ Safe: all constants are within time bounds
+            targetTimeDubai =
+                todayStartDubai +
+                targetDubaiHour *
+                1 hours +
+                targetDubaiMinute *
+                1 minutes;
+        }
+        if (nowDubai >= targetTimeDubai) {
+            unchecked {
+                // ✅ Safe: adding one day is always within range
+                targetTimeDubai += secondsInDay;
+            }
+        }
+        uint256 finalTimestamp;
+        unchecked {
+            // ✅ Safe: nowDubai >= nowUTC, so subtraction won't underflow
+            finalTimestamp = targetTimeDubai - dubaiOffset;
+        }
+        return finalTimestamp;
     }
     modifier onlyGovernance() {
         require(msg.sender == governance, "Caller is not governance");
@@ -567,7 +607,7 @@ function _distributeCycleAllocations(uint256 stateLPShare, uint256 currentCycle,
       	// Distribute holder rewards
    	 	_distributeHolderShare(holderShare);
         // Handle cycle allocations
-    	uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+    	uint256 currentCycle = getCurrentClaimCycle();
     	_distributeCycleAllocations(stateLPShare, currentCycle, TREASURY_CLAIM_PERCENTAGE);
         // Mint tokens
         _mint(msg.sender, amount);
@@ -751,7 +791,7 @@ function processYourToken(
         require(msg.value == requiredFee, isImage ? "Please send exact image fee" : "Please send exactly 100,000 PLS");
         // Distribute fee to treasury across multiple cycles
         uint256 stateLPShare = msg.value;
-   		uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+   		uint256 currentCycle = getCurrentClaimCycle();
         _distributeCycleAllocations(stateLPShare, currentCycle, TREASURY_CLAIM_PERCENTAGE);
     }
     // Store token details for the user
@@ -884,12 +924,14 @@ function getPendingTokenNames(address user) public view returns (string[] memory
             getActiveBalance(msg.sender) >= MIN_DAV,
             "Need at least 10 DAV (maybe you have expired tokens)"
         );
-    }        require(amount > 0, "Burn amount must be > 0");
+    }    
+		require(amount > 0, "Burn amount must be > 0");
+		require(block.timestamp >= claimStartTime, "Burning not allowed yet. Timer hasn't started.");
         require(
             StateToken.allowance(msg.sender, address(this)) >= amount,
             "Insufficient allowance"
         );
-        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+        uint256 currentCycle = getCurrentClaimCycle();
         // Ensure user has no unclaimed rewards before burning
         // Simplifies state management by enforcing claim-before-burn
         require(
@@ -936,7 +978,7 @@ function getPendingTokenNames(address user) public view returns (string[] memory
     }
     // Check if a user has claimable rewards
     function canClaim(address user) public view returns (bool) {
-        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+        uint256 currentCycle = getCurrentClaimCycle();
         for (uint256 i = 0; i < userUnclaimedCycles[user].length; i++) {
             uint256 cycle = userUnclaimedCycles[user][i];
             if (cycle >= currentCycle) continue; // Skip current or future cycles
@@ -952,7 +994,7 @@ function getPendingTokenNames(address user) public view returns (string[] memory
     }
    	 // Calculate total claimable PLS for a user
     function getClaimablePLS(address user) public view returns (uint256) {
-        uint256 currentCycle = getCurrentCycle();
+        uint256 currentCycle = getCurrentClaimCycle();
         uint256 totalClaimable = 0;
         // Iterate over user's unclaimed cycles
         for (uint256 i = 0; i < userUnclaimedCycles[user].length; i++) {
@@ -993,7 +1035,7 @@ function getPendingTokenNames(address user) public view returns (string[] memory
 
 function claimPLS() external whenNotPaused {
     address user = msg.sender;
-    uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+    uint256 currentCycle = getCurrentClaimCycle();
 		// Checks: require checks for user eligibility and claim period
     require(currentCycle > 0, "Claim period not started");
     uint256 totalReward = 0;
@@ -1039,11 +1081,12 @@ function claimPLS() external whenNotPaused {
     emit RewardClaimed(user, totalReward, currentCycle);
 }
 
-    function getCurrentCycle() public view returns (uint256) {
-        return (block.timestamp - deployTime) / CLAIM_INTERVAL;
-    }
+  function getCurrentClaimCycle() public view returns (uint256) {
+    return (block.timestamp - claimStartTime) / CLAIM_INTERVAL;
+}
+
     function getAvailableCycleFunds() public view returns (uint256) {
-        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
+        uint256 currentCycle = getCurrentClaimCycle();
         require(currentCycle > 0, "No previous cycle exists");
         uint256 previousCycle = currentCycle - 1;
         uint256 unclaimed = cycleUnclaimedPLS[previousCycle];
@@ -1053,46 +1096,54 @@ function claimPLS() external whenNotPaused {
                 ? unclaimed
                 : cycleUnclaimedPLS[previousCycle];
     }
-    function getTimeUntilNextClaim() public view returns (uint256) {
-        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
-        uint256 nextClaimableAt = deployTime +
-            (currentCycle + 1) *
-            CLAIM_INTERVAL;
-        return
-            nextClaimableAt > block.timestamp
-                ? nextClaimableAt - block.timestamp
-                : 0;
+   function getTimeUntilNextClaim() public view returns (uint256) {
+    if (block.timestamp < claimStartTime + CLAIM_INTERVAL) {
+        return (claimStartTime + CLAIM_INTERVAL) - block.timestamp;
     }
+
+    uint256 currentCycle = getCurrentClaimCycle();
+    uint256 nextClaimableAt = claimStartTime + (currentCycle + 1) * CLAIM_INTERVAL;
+    return
+        nextClaimableAt > block.timestamp
+            ? nextClaimableAt - block.timestamp
+            : 0;
+}
+function hasClaimingStarted() public view returns (bool) {
+    return block.timestamp >= claimStartTime;
+}
+
     function getContractPLSBalance() external view returns (uint256) {
         return address(this).balance - holderFunds;
     }
-    function getUserSharePercentage(
-        address user
-    ) external view returns (uint256) {
-        uint256 currentCycle = (block.timestamp - deployTime) / CLAIM_INTERVAL;
-        // Check if current time is still inside this cycle
-        if (
-            block.timestamp < deployTime + (currentCycle + 1) * CLAIM_INTERVAL
-        ) {
-            // We're inside the current cycle – show live percentage
-            uint256 userBurn = userCycleBurned[user][currentCycle];
-            uint256 totalBurn = cycleTotalBurned[currentCycle];
-            if (totalBurn == 0 || userBurn == 0) return 0;
-            return (userBurn * BASIS_POINTS) / totalBurn; // basis points (10000 = 100.00%)
-        } else {
-            // Cycle has ended – show percentage from the previous cycle, if not yet claimed
-            if (currentCycle == 0) return 0; // No previous cycle
-            uint256 previousCycle = currentCycle - 1;
-            if (
-                userBurnClaimed[user][previousCycle] ||
-                cycleTotalBurned[previousCycle] == 0
-            ) {                return 0;            }
-            uint256 userBurn = userCycleBurned[user][previousCycle];
-            uint256 totalBurn = cycleTotalBurned[previousCycle];
-            if (totalBurn == 0 || userBurn == 0) return 0;
-            return (userBurn * BASIS_POINTS) / totalBurn;
-        }
+   function getUserSharePercentage(address user) external view returns (uint256) {
+    uint256 currentCycle = getCurrentClaimCycle();
+
+    // Determine cycle end time
+    uint256 currentCycleEnd = claimStartTime + (currentCycle + 1) * CLAIM_INTERVAL;
+
+    // Case 1: We're still inside the current cycle
+    if (block.timestamp < currentCycleEnd) {
+        uint256 userBurn = userCycleBurned[user][currentCycle];
+        uint256 totalBurn = cycleTotalBurned[currentCycle];
+        if (userBurn == 0 || totalBurn == 0) return 0;
+        return (userBurn * BASIS_POINTS) / totalBurn;
     }
+
+    // Case 2: Current cycle is over, show previous if not claimed
+    if (currentCycle == 0) return 0; // No previous cycle
+    uint256 previousCycle = currentCycle - 1;
+
+    if (
+        userBurnClaimed[user][previousCycle] ||
+        userCycleBurned[user][previousCycle] == 0 ||
+        cycleTotalBurned[previousCycle] == 0
+    ) {
+        return 0;
+    }
+
+    return (userCycleBurned[user][previousCycle] * BASIS_POINTS) / cycleTotalBurned[previousCycle];
+}
+
     receive() external payable {        revert("Direct ETH transfers not allowed");    }
     fallback() external payable {        revert("Invalid call");    }
 }

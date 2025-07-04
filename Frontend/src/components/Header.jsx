@@ -9,7 +9,6 @@ import pulsex from "../assets/ninemm.png";
 // import { useDAVToken } from "../Context/DavTokenContext";
 
 const Header = () => {
-
   return (
     <>
       {/* Top Navbar for Desktop */}
@@ -32,12 +31,7 @@ const Header = () => {
           <div className="d-flex align-items-center">
             {/* Navigation Links */}
             <ul className="navbar-nav d-flex flex-row align-items-center me-4">
-              <li
-                className="nav-item mx-2"
-                // data-bs-toggle="tooltip"
-                // data-bs-placement="left"
-                // title="Auction is running"
-              >
+              <li className="nav-item mx-2">
                 <NavLink
                   className={({ isActive }) =>
                     isActive
@@ -47,7 +41,6 @@ const Header = () => {
                   to="/auction"
                 >
                   Auction
-                  {/* <span className="active-dot"></span> */}
                 </NavLink>
               </li>
               <li className="nav-item mx-2 position-relative custom-dropdown">
@@ -94,7 +87,6 @@ const Header = () => {
             <div className="">
               <WalletConnector />
             </div>
-           
           </div>
         </div>
       </nav>

@@ -340,33 +340,47 @@ function confirmGovernanceUpdate() external onlyGovernance {
     	} 
     }
 
-   /// @notice Distributes airdrop rewards based on new DAV holdings.
-/// @param user The user claiming rewards.
-/// @param inputToken The token for reward calculation.
-    function distributeReward(
-        address user,
-        address inputToken
-    ) external nonReentrant whenNotPaused{
-        // **Checks**
-        require(user != address(0), "Invalid user address");
-        require(supportedTokens[inputToken], "Unsupported token");
-        require(msg.sender == user, "Invalid sender");
-        uint256 currentDavHolding = getDavBalance(user);
-        uint256 lastHolding = lastDavHolding[user][inputToken];
-        uint256 newDavContributed = currentDavHolding > lastHolding
-            ? currentDavHolding - lastHolding
-            : 0;
-        require(newDavContributed > 0, "No new DAV holdings for this token");
-        // **Effects**
-        uint256 reward = (newDavContributed * AIRDROP_AMOUNT + PRECISION_FACTOR - 1) / PRECISION_FACTOR;
-		require(reward > 0, "Reward too small");
-        cumulativeDavHoldings[user][inputToken] += newDavContributed;
-        lastDavHolding[user][inputToken] = currentDavHolding;
-        hasClaimed[user][inputToken] = true;
-        // **Interactions**
-        IERC20(inputToken).safeTransfer(msg.sender, reward);
-        emit RewardDistributed(user, reward);
-    }
+   	/// @notice Distributes airdrop rewards based on new DAV holdings.
+	/// @param user The user claiming rewards.
+	/// @param inputToken The token for reward calculation.
+   function distributeReward(
+    address user,
+    address inputToken
+) external nonReentrant whenNotPaused {
+    // **Checks**
+    require(user != address(0), "Invalid user address");
+    require(supportedTokens[inputToken], "Unsupported token");
+    require(msg.sender == user, "Invalid sender");
+    require(isAuctionActive(inputToken), "Auction is not active yet for this token");
+
+    uint256 currentDavHolding = getDavBalance(user);
+    uint256 lastHolding = lastDavHolding[user][inputToken];
+    uint256 newDavContributed = currentDavHolding > lastHolding
+        ? currentDavHolding - lastHolding
+        : 0;
+    require(newDavContributed > 0, "No new DAV holdings for this token");
+
+    // Get current auction cycle
+    uint256 cycle = getCurrentAuctionCycle(inputToken);
+
+    // Calculate reduction percent
+    uint256 skipped = (cycle + 1) / 4; // Every 4th starting from cycle 3
+    uint256 reducedCycles = cycle - skipped;
+    uint256 reductionPercent = reducedCycles * 5 >= 95 ? 5 : 100 - (reducedCycles * 5);
+
+    // **Effects**
+    uint256 adjustedAirdropAmount = (AIRDROP_AMOUNT * reductionPercent) / 100;
+    uint256 reward = (newDavContributed * adjustedAirdropAmount + PRECISION_FACTOR - 1) / PRECISION_FACTOR;
+    require(reward > 0, "Reward too small");
+
+    cumulativeDavHoldings[user][inputToken] += newDavContributed;
+    lastDavHolding[user][inputToken] = currentDavHolding;
+    hasClaimed[user][inputToken] = true;
+
+    // **Interactions**
+    IERC20(inputToken).safeTransfer(msg.sender, reward);
+    emit RewardDistributed(user, reward);
+}
 
     function giveRewardToTokenOwner(address token) public nonReentrant onlyTokenOwnerOrGovernance(token) {
         // Check if the token has a registered owner

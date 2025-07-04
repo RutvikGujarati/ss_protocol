@@ -1,4 +1,4 @@
- [
+[
 		{
 			"type": "constructor",
 			"inputs": [
@@ -163,19 +163,6 @@
 		{
 			"type": "function",
 			"name": "MAX_TOKEN_PER_USER",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "MAX_USER",
 			"inputs": [],
 			"outputs": [
 				{
@@ -473,7 +460,34 @@
 		},
 		{
 			"type": "function",
+			"name": "claimStartTime",
+			"inputs": [],
+			"outputs": [
+				{
+					"name": "",
+					"type": "uint256",
+					"internalType": "uint256"
+				}
+			],
+			"stateMutability": "view"
+		},
+		{
+			"type": "function",
+			"name": "confirmDevelopmentWallet",
+			"inputs": [],
+			"outputs": [],
+			"stateMutability": "nonpayable"
+		},
+		{
+			"type": "function",
 			"name": "confirmGovernance",
+			"inputs": [],
+			"outputs": [],
+			"stateMutability": "nonpayable"
+		},
+		{
+			"type": "function",
+			"name": "confirmLiquidityWallet",
 			"inputs": [],
 			"outputs": [],
 			"stateMutability": "nonpayable"
@@ -576,19 +590,6 @@
 					"name": "",
 					"type": "uint8",
 					"internalType": "uint8"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "deployTime",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
 				}
 			],
 			"stateMutability": "view"
@@ -745,7 +746,7 @@
 		},
 		{
 			"type": "function",
-			"name": "getCurrentCycle",
+			"name": "getCurrentClaimCycle",
 			"inputs": [],
 			"outputs": [
 				{
@@ -846,6 +847,25 @@
 		},
 		{
 			"type": "function",
+			"name": "getTokenProcessingFee",
+			"inputs": [
+				{
+					"name": "isImage",
+					"type": "bool",
+					"internalType": "bool"
+				}
+			],
+			"outputs": [
+				{
+					"name": "",
+					"type": "uint256",
+					"internalType": "uint256"
+				}
+			],
+			"stateMutability": "pure"
+		},
+		{
+			"type": "function",
 			"name": "getTotalActiveSupply",
 			"inputs": [],
 			"outputs": [
@@ -923,6 +943,19 @@
 					"internalType": "uint256"
 				}
 			],
+			"outputs": [
+				{
+					"name": "",
+					"type": "bool",
+					"internalType": "bool"
+				}
+			],
+			"stateMutability": "view"
+		},
+		{
+			"type": "function",
+			"name": "hasClaimingStarted",
+			"inputs": [],
 			"outputs": [
 				{
 					"name": "",
@@ -1128,11 +1161,47 @@
 		},
 		{
 			"type": "function",
+			"name": "pendingDevelopmentWallet",
+			"inputs": [],
+			"outputs": [
+				{
+					"name": "newWallet",
+					"type": "address",
+					"internalType": "address"
+				},
+				{
+					"name": "proposedAt",
+					"type": "uint256",
+					"internalType": "uint256"
+				}
+			],
+			"stateMutability": "view"
+		},
+		{
+			"type": "function",
 			"name": "pendingGovernance",
 			"inputs": [],
 			"outputs": [
 				{
 					"name": "newGovernance",
+					"type": "address",
+					"internalType": "address"
+				},
+				{
+					"name": "proposedAt",
+					"type": "uint256",
+					"internalType": "uint256"
+				}
+			],
+			"stateMutability": "view"
+		},
+		{
+			"type": "function",
+			"name": "pendingLiquidityWallet",
+			"inputs": [],
+			"outputs": [
+				{
+					"name": "newWallet",
 					"type": "address",
 					"internalType": "address"
 				},
@@ -1164,10 +1233,36 @@
 		},
 		{
 			"type": "function",
+			"name": "proposeDevelopmentWallet",
+			"inputs": [
+				{
+					"name": "_newDevelopmentWallet",
+					"type": "address",
+					"internalType": "address"
+				}
+			],
+			"outputs": [],
+			"stateMutability": "nonpayable"
+		},
+		{
+			"type": "function",
 			"name": "proposeGovernance",
 			"inputs": [
 				{
 					"name": "newGovernance",
+					"type": "address",
+					"internalType": "address"
+				}
+			],
+			"outputs": [],
+			"stateMutability": "nonpayable"
+		},
+		{
+			"type": "function",
+			"name": "proposeLiquidityWallet",
+			"inputs": [
+				{
+					"name": "_newLiquidityWallet",
 					"type": "address",
 					"internalType": "address"
 				}
@@ -1219,32 +1314,6 @@
 			"inputs": [],
 			"outputs": [],
 			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "stateLpTotalShare",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "stateToken",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"stateMutability": "view"
 		},
 		{
 			"type": "function",
@@ -1307,19 +1376,6 @@
 		{
 			"type": "function",
 			"name": "totalReferralRewardsDistributed",
-			"inputs": [],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "totalRewardPerTokenStored",
 			"inputs": [],
 			"outputs": [
 				{
@@ -1444,32 +1500,6 @@
 		},
 		{
 			"type": "function",
-			"name": "updateDevelopmentWallet",
-			"inputs": [
-				{
-					"name": "_newDevelopmentWallet",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
-			"name": "updateLiquidityWallet",
-			"inputs": [
-				{
-					"name": "_newLiquidityWallet",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [],
-			"stateMutability": "nonpayable"
-		},
-		{
-			"type": "function",
 			"name": "updateTokenStatus",
 			"inputs": [
 				{
@@ -1560,30 +1590,6 @@
 		},
 		{
 			"type": "function",
-			"name": "userCycleRewards",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				},
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
 			"name": "userReferralCode",
 			"inputs": [
 				{
@@ -1597,25 +1603,6 @@
 					"name": "",
 					"type": "string",
 					"internalType": "string"
-				}
-			],
-			"stateMutability": "view"
-		},
-		{
-			"type": "function",
-			"name": "userRewardPerTokenPaid",
-			"inputs": [
-				{
-					"name": "",
-					"type": "address",
-					"internalType": "address"
-				}
-			],
-			"outputs": [
-				{
-					"name": "",
-					"type": "uint256",
-					"internalType": "uint256"
 				}
 			],
 			"stateMutability": "view"

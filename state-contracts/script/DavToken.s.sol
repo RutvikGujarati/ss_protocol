@@ -8,10 +8,10 @@ contract ScriptDAV is Script {
     function run() external {
         vm.startBroadcast();
         //NOTE: add correct wallets for Gov and Dev
-        address liquidity = 0x98b0379474Cf84Ab257bEe0b73dceb11051223A5;
-        address DAVWallet = 0x1262f7De33bA34C9373C20199fAb73CaCE13B5E9;
-		address state = 0x172fA90C49E4E475B9D8d3846115Cfc262A63aa1;
-        address Governanace = 0x98b0379474Cf84Ab257bEe0b73dceb11051223A5;
+        address liquidity = 0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483;
+        address DAVWallet = 0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483;
+		address state = 0x85705Af155fa3AC546f9098988AA5f24B1bb2f87;
+        address Governanace = 0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483;
 
         DAV_V2_2 dav = new DAV_V2_2(
             liquidity,

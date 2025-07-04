@@ -245,6 +245,14 @@ export const DavProvider = ({ children }) => {
               : "false",
           false
         );
+        fetchAndSet(
+          "hasClaimingStarted",
+          async () =>
+            (await AllContracts.davContract.hasClaimingStarted())
+              ? "true"
+              : "false",
+          false
+        );
     } catch (error) {
       console.error("Error fetching time until next claim:", error);
     }
@@ -279,7 +287,7 @@ export const DavProvider = ({ children }) => {
     if (!AllContracts?.davContract) return;
     const ethAmount = ethers.parseEther(amount.toString());
     const cost = ethers.parseEther(
-      (amount * (chainId === 146 ? 100 : 1000000)).toString()
+      (amount * (chainId === 146 ? 100 : 1000)).toString()
     );
     const referral = ref.trim() || "0x0000000000000000000000000000000000000000";
 

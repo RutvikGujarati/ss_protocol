@@ -18,7 +18,6 @@ import { faCopy } from "@fortawesome/free-regular-svg-icons";
 import toast from "react-hot-toast";
 import IOSpinner from "../Constants/Spinner";
 
-
 import axios from "axios";
 const InfoCards = () => {
   const chainId = useChainId();
@@ -50,6 +49,7 @@ const InfoCards = () => {
     txStatus,
     // AllUserPercentage,
     TimeUntilNextClaim,
+    hasClaimingStarted,
     UserPercentage,
     davHolds,
     davExpireHolds,
@@ -61,7 +61,7 @@ const InfoCards = () => {
     davGovernanceHolds,
     isProcessingToken,
   } = useDAvContract();
-
+  console.log("mint fee", DavMintFee);
   const handleBurnClick = async () => {
     const amountToBurn = rawAmount.trim() === "" ? stateHolding : rawAmount;
 
@@ -530,7 +530,9 @@ const InfoCards = () => {
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
                       <div className="carddetails2">
                         <div className="d-flex">
-                          <p className="mb-1 detailText">ACTIVE DAV / EXPIRED DAV</p>
+                          <p className="mb-1 detailText">
+                            ACTIVE DAV / EXPIRED DAV
+                          </p>
                         </div>
                         <div className="d-flex">
                           <h5 className="">
@@ -891,14 +893,20 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      {Math.floor(TimeUntilNextClaim / 86400)}
-                      <span style={{ textTransform: "none" }}>d</span>{" "}
-                      {Math.floor((TimeUntilNextClaim % 86400) / 3600)}
-                      <span style={{ textTransform: "none" }}>h</span>{" "}
-                      {Math.floor((TimeUntilNextClaim % 3600) / 60)}
-                      <span style={{ textTransform: "none" }}>m</span>{" "}
-                      {TimeUntilNextClaim % 60}
-                      <span style={{ textTransform: "none" }}>s</span>
+                      {hasClaimingStarted == "false" ? (
+                        "Not started"
+                      ) : (
+                        <>
+                          {Math.floor(TimeUntilNextClaim / 86400)}
+                          <span style={{ textTransform: "none" }}>d</span>{" "}
+                          {Math.floor((TimeUntilNextClaim % 86400) / 3600)}
+                          <span style={{ textTransform: "none" }}>h</span>{" "}
+                          {Math.floor((TimeUntilNextClaim % 3600) / 60)}
+                          <span style={{ textTransform: "none" }}>m</span>{" "}
+                          {TimeUntilNextClaim % 60}
+                          <span style={{ textTransform: "none" }}>s</span>
+                        </>
+                      )}
                     </h6>
 
                     <h6
