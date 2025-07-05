@@ -35,7 +35,7 @@ contract DAV_V2_2 is
     // DAV TOken
     // NOTE: // This contract is intended for PulseChain, not Ethereum.
     uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
-    uint256 public constant TOKEN_COST = 1000000 ether; // 1000000 org
+    uint256 public constant TOKEN_COST = 1000 ether; // 1000000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
     uint256 public constant LIQUIDITY_SHARE = 50; // 50% LIQUIDITY SHARE
     uint256 public constant DEVELOPMENT_SHARE = 5; // 5% DEV SHARE
@@ -43,7 +43,7 @@ contract DAV_V2_2 is
     uint256 public constant BASIS_POINTS = 10000;
     uint256 public constant INITIAL_GOV_MINT = 1000 ether;
     uint256 public constant MAX_TOKEN_PER_USER = 100;
-    uint256 public constant DAV_TOKEN_EXPIRE = 50 days; // 50 days for mainnet
+    uint256 public constant DAV_TOKEN_EXPIRE = 8 hours; // 50 days for mainnet
 
     //cycle assinging to 10. not want to update or configure later
     uint256 public constant CYCLE_ALLOCATION_COUNT = 10;
@@ -53,8 +53,8 @@ contract DAV_V2_2 is
     ///      access restriction, or deterrence. Adjust only if this is NOT the intended behavior.
     // This contract is intended for PulseChain, not Ethereum.
     // Please note that the value of PLS is significantly lower compared to ETH,
-    uint256 public constant TOKEN_PROCESSING_FEE = 10000000 ether;
-    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 15000000 ether;
+    uint256 public constant TOKEN_PROCESSING_FEE = 2000 ether;
+    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 2500 ether;
     uint256 public totalReferralRewardsDistributed;
     uint256 public mintedSupply; // Total Minted DAV Tokens
     uint256 public claimStartTime;
@@ -65,7 +65,7 @@ contract DAV_V2_2 is
     // Used in DApp to display total burn statistics
     uint256 public totalStateBurned;
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
-    uint256 public constant CLAIM_INTERVAL = 36 days; // 36 days claim timer
+    uint256 public constant CLAIM_INTERVAL = 4 hours; // 36 days claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
     uint256 public constant PRECISION = 1e18;
     address private constant BURN_ADDRESS =
