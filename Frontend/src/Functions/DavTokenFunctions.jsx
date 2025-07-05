@@ -68,61 +68,64 @@ export const DavProvider = ({ children }) => {
     davExpireHolds: "0.0",
   });
 
-  const fetchAndSet = async (label, fn, format = true, fixed = 2, type = "number") => {
-	try {
-	  const res = await fn();
-	  let value;
-  
-	  if (type === "boolean") {
-		value = res ? "true" : "false"; // Convert to string explicitly
-	  } else if (label === "UserPercentage") {
-		value = (Number(res) / 100).toFixed(fixed);
-	  } else {
-		value = format
-		  ? parseFloat(ethers.formatUnits(res, 18)).toFixed(fixed)
-		  : res.toString();
-	  }
-  
-	  setData((prev) => ({
-		...prev,
-		[label]: value,
-	  }));
-	} catch (err) {
-	  console.error(`Error fetching ${label}:`, err);
-	}
+  const fetchAndSet = async (
+    label,
+    fn,
+    format = true,
+    fixed = 2,
+    type = "number"
+  ) => {
+    try {
+      const res = await fn();
+      let value;
+
+      if (type === "boolean") {
+        value = res ? "true" : "false"; // Convert to string explicitly
+      } else if (label === "UserPercentage") {
+        value = (Number(res) / 100).toFixed(fixed);
+      } else {
+        value = format
+          ? parseFloat(ethers.formatUnits(res, 18)).toFixed(fixed)
+          : res.toString();
+      }
+
+      setData((prev) => ({
+        ...prev,
+        [label]: value,
+      }));
+    } catch (err) {
+      console.error(`Error fetching ${label}:`, err);
+    }
   };
-  
+
   const fetchData = useCallback(async () => {
     if (!AllContracts?.davContract || !address) return;
 
     setLoading(true);
     try {
-      // First, get currentBurnCycle and update it
-      const currentCycleRaw = await AllContracts.davContract.getCurrentCycle();
+      const currentCycleRaw =
+        await AllContracts.davContract.getCurrentClaimCycle();
       const currentCycle = parseInt(currentCycleRaw.toString());
 
       setData((prev) => ({
         ...prev,
-        currentBurnCycle: currentCycle.toString(), // or format as needed
+        currentBurnCycle: currentCycle.toString(),
       }));
 
-      await Promise.all([
+      await Promise.allSettled([
         fetchAndSet("Supply", () => AllContracts.davContract.totalSupply()),
         fetchAndSet("claimableAmount", () =>
           AllContracts.davContract.earned(address)
         ),
         fetchAndSet("userBurnedAmount", () =>
-          AllContracts.davContract.userBurnedAmount(address)
+          AllContracts.davContract.getUserBurnedAmount(address)
         ),
-
         fetchAndSet("userBurnedAmountInCycle", () =>
           AllContracts.davContract.cycleTotalBurned(currentCycle)
         ),
-
         fetchAndSet("UserPercentage", () =>
           AllContracts.davContract.getUserSharePercentage(address)
         ),
-
         fetchAndSet("totalStateBurned", () =>
           AllContracts.davContract.totalStateBurned()
         ),
@@ -144,7 +147,6 @@ export const DavProvider = ({ children }) => {
           () => AllContracts.davContract.getPendingTokenNames(address),
           false
         ),
-
         fetchAndSet("stateHolding", () =>
           AllContracts.stateContract.balanceOf(address)
         ),
@@ -172,7 +174,7 @@ export const DavProvider = ({ children }) => {
     }
   }, [AllContracts, address]);
 
-  console.log("dav entries", data.tokenEntries);
+  console.log("dav entries", data.DavMintFee);
 
   const fetchAndStoreTokenEntries = async () => {
     try {
@@ -182,7 +184,7 @@ export const DavProvider = ({ children }) => {
       // Extract addresses and token names
       const addresses = tokenEntries.map((entry) => entry.user);
       const tokenNames = tokenEntries.map((entry) => entry.tokenName);
-      const tokenEmojis = tokenEntries.map((entry) => entry.emoji);
+const tokenEmojis = tokenEntries.map((entry) => entry.emojiOrImage);
       const tokenStatus = tokenEntries.map((entry) => entry.TokenStatus);
       // Update state
       setUsers(addresses);
@@ -216,15 +218,16 @@ export const DavProvider = ({ children }) => {
   const fetchTimeUntilNextClaim = useCallback(async () => {
     if (!AllContracts?.davContract || !address) return;
     try {
-      await fetchAndSet(
-        "TimeUntilNextClaim",
-        () => AllContracts.davContract.getTimeUntilNextClaim(),
-        false,
-        0
-      );
-      fetchAndSet("claimableAmountForBurn", () =>
-        AllContracts.davContract.getClaimablePLS(address)
-      ),
+      await Promise.allSettled([
+        fetchAndSet(
+          "TimeUntilNextClaim",
+          () => AllContracts.davContract.getTimeUntilNextClaim(),
+          false,
+          0
+        ),
+        fetchAndSet("claimableAmountForBurn", () =>
+          AllContracts.davContract.getClaimablePLS(address)
+        ),
         fetchAndSet("usableTreasury", () =>
           AllContracts.davContract.getAvailableCycleFunds()
         ),
@@ -239,20 +242,15 @@ export const DavProvider = ({ children }) => {
         ),
         fetchAndSet(
           "CanClaimNow",
-          async () =>
-            (await AllContracts.davContract.canClaim(address))
-              ? "true"
-              : "false",
+          () => AllContracts.davContract.canClaim(address),
           false
-        );
+        ),
         fetchAndSet(
           "hasClaimingStarted",
-          async () =>
-            (await AllContracts.davContract.hasClaimingStarted())
-              ? "true"
-              : "false",
+          () => AllContracts.davContract.hasClaimingStarted(),
           false
-        );
+        ),
+      ]);
     } catch (error) {
       console.error("Error fetching time until next claim:", error);
     }

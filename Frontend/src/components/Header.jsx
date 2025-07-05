@@ -5,9 +5,6 @@ import WalletConnector from "../WalletComps/WalletConnect";
 import { NavLink } from "react-router-dom";
 import pulsex from "../assets/ninemm.png";
 
-// import { Tooltip } from "bootstrap";
-// import { useDAVToken } from "../Context/DavTokenContext";
-
 const Header = () => {
   return (
     <>
@@ -43,7 +40,7 @@ const Header = () => {
                   Auction
                 </NavLink>
               </li>
-              <li className="nav-item mx-2 position-relative custom-dropdown">
+              <li className="nav-item mx-2">
                 <NavLink
                   className={({ isActive }) =>
                     isActive
@@ -67,12 +64,12 @@ const Header = () => {
                   Market Makers
                 </NavLink>
               </li>
-              <li className="nav-item mx-2 position-relative custom-dropdown">
+              <li className="nav-item mx-2 dropdown">
                 <NavLink
                   className={({ isActive }) =>
                     isActive
-                      ? "nav-link active-link text-light"
-                      : "nav-link text-light"
+                      ? "nav-link active-link text-light dropdown-toggle"
+                      : "nav-link text-light dropdown-toggle"
                   }
                   to="/info"
                 >

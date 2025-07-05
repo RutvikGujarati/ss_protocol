@@ -159,18 +159,22 @@ tate up/down */ .rotate-up .dropdown-arrow-icon {
   transform: rotate(0deg);
 }
 
+/* Ensure the dropdown menu appears on hover */
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+/* Optional: Adjust dropdown positioning and styling */
 .dropdown-menu {
-  background-color: #212529; /* Matches bg-dark */
-  border: none;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  margin: 0;
 }
 
-.dropdown-item {
-  color: #ffffff;
-  padding: 8px 16px;
-}
-
+/* Ensure dropdown items are styled consistently */
 .dropdown-item:hover {
-  background-color: #343a40;
+  background-color: #343a40; /* Darker shade for hover effect */
   color: #ffffff;
 }

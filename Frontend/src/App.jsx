@@ -14,6 +14,7 @@ import {
 } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Footer from "./components/Footer";
+import DavHistory from "./components/DavHistory";
 
 const App = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -82,6 +83,14 @@ const App = () => {
                 element={
                   <>
                     <DetailsInfo />
+                  </>
+                }
+              />
+              <Route
+                path="/dav-history"
+                element={
+                  <>
+                    <DavHistory />
                   </>
                 }
               />

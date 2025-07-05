@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {DAV_V2_2} from "./DavToken.sol";
 import {TOKEN_V2_2} from "./Tokens.sol";
+import "./libraries/TimeUtilsLib.sol";
+import "./libraries/AuctionLib.sol";
 
 interface IPair {
     function getReserves()
@@ -19,13 +21,9 @@ interface IPair {
 }
 contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     using SafeERC20 for IERC20;
+    using TimeUtilsLib for uint256;
+    using AuctionLib for AuctionLib.AuctionCycle;
     DAV_V2_2 public dav;
-
-    struct AuctionCycle {
-        uint256 firstAuctionStart;
-        bool isInitialized;
-        uint256 auctionCount;
-    }
 
     struct UserSwapInfo {
         bool hasSwapped;
@@ -34,10 +32,7 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     }
 
     //For Airdrop
-    uint256 public constant AUCTION_INTERVAL = 50 days;
-    uint256 public constant AUCTION_DURATION = 24 hours;
-    uint256 public constant REVERSE_DURATION = 24 hours;
-    uint256 public constant MAX_AUCTIONS = 20;
+
     uint256 public constant OWNER_REWARD_AMOUNT = 2500000 ether;
     uint256 public constant CLAIM_INTERVAL = 50 days;
     uint256 public constant MAX_SUPPLY = 500000000000 ether;
@@ -84,7 +79,8 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     mapping(bytes32 => UserSwapInfo) public userSwapTotalInfo;
 
     // user => inputToken => stateToken => cycle => UserSwapInfo
-    mapping(address => mapping(address => AuctionCycle)) public auctionCycles; // inputToken => stateToken => AuctionCycle
+    mapping(address => mapping(address => AuctionLib.AuctionCycle))
+        public auctionCycles;
     mapping(address => uint256) public TotalStateBurnedByUser;
     mapping(address => uint256) public TotalTokensBurned;
     mapping(address => mapping(address => bool)) public hasClaimed; // user => token => has claimed
@@ -240,14 +236,18 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
         ownerToTokens[_tokenOwner].push(token);
         usedPairAddresses[pairAddress] = true;
         // Schedule auction at 22:30 Dubai time (UTC+4)
-        uint256 auctionStart = _calculateDubaiAuctionStart();
+        uint256 auctionStart = TimeUtilsLib.calculateNextClaimStartDubai(
+            block.timestamp
+        );
         // Initialize auction cycle for token → stateToken
-        AuctionCycle storage forwardCycle = auctionCycles[token][stateToken];
+        AuctionLib.AuctionCycle storage forwardCycle = auctionCycles[token][
+            stateToken
+        ];
         forwardCycle.firstAuctionStart = auctionStart;
         forwardCycle.isInitialized = true;
         forwardCycle.auctionCount = 0;
         // Initialize auction cycle for stateToken → token
-        AuctionCycle memory reverseCycle = AuctionCycle({
+        AuctionLib.AuctionCycle memory reverseCycle = AuctionLib.AuctionCycle({
             firstAuctionStart: auctionStart,
             isInitialized: true,
             auctionCount: 0
@@ -256,54 +256,11 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
         emit TokenAdded(token, pairAddress);
         emit AuctionStarted(
             auctionStart,
-            auctionStart + AUCTION_DURATION,
+            auctionStart + AuctionLib.AUCTION_DURATION,
             token,
             stateToken
         );
     }
-    /// @notice Calculates the next Dubai auction start time in UTC
-    /// @dev Target time is 17:00 Dubai time (UTC+4). Uses `unchecked` for safe, gas-efficient arithmetic.
-    function _calculateDubaiAuctionStart() internal view returns (uint256) {
-        uint256 dubaiOffset = 4 hours;
-        uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 17; // 5 PM Dubai time
-        uint256 targetDubaiMinute = 0;
-        // Get current UTC timestamp
-        uint256 nowUTC = block.timestamp;
-        uint256 nowDubai;
-        unchecked {
-            // ✅ Safe: 4 hours addition will never overflow
-            nowDubai = nowUTC + dubaiOffset;
-        }
-        uint256 todayStartDubai;
-        unchecked {
-            // ✅ Safe: all values are well within bounds
-            todayStartDubai = (nowDubai / secondsInDay) * secondsInDay;
-        }
-        uint256 targetTimeDubai;
-        unchecked {
-            // ✅ Safe: all constants are within time bounds
-            targetTimeDubai =
-                todayStartDubai +
-                targetDubaiHour *
-                1 hours +
-                targetDubaiMinute *
-                1 minutes;
-        }
-        if (nowDubai >= targetTimeDubai) {
-            unchecked {
-                // ✅ Safe: adding one day is always within range
-                targetTimeDubai += secondsInDay;
-            }
-        }
-        uint256 finalTimestamp;
-        unchecked {
-            // ✅ Safe: nowDubai >= nowUTC, so subtraction won't underflow
-            finalTimestamp = targetTimeDubai - dubaiOffset;
-        }
-        return finalTimestamp;
-    }
-
     /**
      * @notice Returns the spot price ratio between the input token and state token based on DEX reserves.
      * @dev This function intentionally uses live on-chain reserves instead of TWAP or oracle feeds.
@@ -495,7 +452,7 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
             "RSA: Insufficient DAV"
         );
         uint256 currentAuctionCycle = getCurrentAuctionCycle(inputToken);
-        require(currentAuctionCycle < MAX_AUCTIONS, "Maximum auctions reached");
+        require(currentAuctionCycle < AuctionLib.MAX_AUCTIONS, "Maximum auctions reached");
 
         bytes32 key = getSwapInfoKey(
             user,
@@ -595,130 +552,38 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
         return userSwapTotalInfo[key].hasReverseSwap;
     }
 
-    /// @notice Returns auction cycle data for a given input token
-    /// @dev Caches auctionCycles[inputToken][stateToken] in memory to reduce SLOAD gas costs
-    /// @param inputToken The ERC20 token address being auctioned
-    /// @return initialized Whether the auction cycle has started
-    /// @return currentTime Current block timestamp
-    /// @return fullCycleLength Sum of auction duration and interval
-    /// @return firstAuctionStart Timestamp of the first auction start
-    /// @return cycleNumber Which auction cycle we're in
-    /// @return isValidCycle Whether the current cycle is active and valid
-    function _getAuctionCycleData(
-        address inputToken
-    )
-        internal
-        view
-        returns (
-            bool initialized,
-            uint256 currentTime,
-            uint256 fullCycleLength,
-            uint256 firstAuctionStart,
-            uint256 cycleNumber,
-            bool isValidCycle
-        )
-    {
-        AuctionCycle memory cycle = auctionCycles[inputToken][stateToken];
-        initialized = cycle.isInitialized;
-        firstAuctionStart = cycle.firstAuctionStart;
-        currentTime = block.timestamp;
-        fullCycleLength = AUCTION_DURATION + AUCTION_INTERVAL;
-        if (!initialized || currentTime < firstAuctionStart) {
-            isValidCycle = false;
-            return (
-                initialized,
-                currentTime,
-                fullCycleLength,
-                firstAuctionStart,
-                0,
-                isValidCycle
-            );
-        }
-        uint256 timeSinceStart = currentTime - firstAuctionStart;
-        cycleNumber = timeSinceStart / fullCycleLength;
-        isValidCycle = cycleNumber < MAX_AUCTIONS;
-    }
-
     function isAuctionActive(address inputToken) public view returns (bool) {
         require(supportedTokens[inputToken], "Unsupported token");
-        (
-            bool initialized,
-            uint256 currentTime,
-            uint256 fullCycleLength,
-            uint256 firstAuctionStart,
-            uint256 cycleNumber,
-            bool isValidCycle
-        ) = _getAuctionCycleData(inputToken);
-
-        if (!initialized || !isValidCycle) return false;
-        // Skip every 4th cycle (4,8,12...)
-        bool isFourthCycle = ((cycleNumber + 1) % 4 == 0);
-        if (isFourthCycle) return false;
-        uint256 currentCycleStart = firstAuctionStart +
-            cycleNumber *
-            fullCycleLength;
-        uint256 auctionEndTime = currentCycleStart + AUCTION_DURATION;
-        return currentTime >= currentCycleStart && currentTime < auctionEndTime;
+        return
+            AuctionLib.isAuctionActive(auctionCycles[inputToken][stateToken]);
     }
 
     function isReverseAuctionActive(
         address inputToken
     ) public view returns (bool) {
         require(supportedTokens[inputToken], "Unsupported token");
-        (
-            bool initialized,
-            uint256 currentTime,
-            uint256 fullCycleLength,
-            uint256 firstAuctionStart,
-            uint256 cycleNumber,
-            bool isValidCycle
-        ) = _getAuctionCycleData(inputToken);
-        if (!initialized || !isValidCycle) return false;
-        // Only every 4th cycle (4,8,12...) is reverse auction
-        bool isFourthCycle = ((cycleNumber + 1) % 4 == 0);
-        if (!isFourthCycle) return false;
-        uint256 currentCycleStart = firstAuctionStart +
-            cycleNumber *
-            fullCycleLength;
-        uint256 auctionEndTime = currentCycleStart + AUCTION_DURATION;
-        return currentTime >= currentCycleStart && currentTime < auctionEndTime;
+        return
+            AuctionLib.isReverseAuctionActive(
+                auctionCycles[inputToken][stateToken]
+            );
     }
     function getCurrentAuctionCycle(
         address inputToken
     ) public view returns (uint256) {
-        AuctionCycle memory cycle = auctionCycles[inputToken][stateToken];
-        if (!cycle.isInitialized) return 0;
-        uint256 fullCycleLength = AUCTION_DURATION + AUCTION_INTERVAL;
-        uint256 currentTime = block.timestamp;
-        // If auction hasn't started yet, cycle is 0
-        if (currentTime < cycle.firstAuctionStart) return 0;
-        uint256 timeSinceStart = currentTime - cycle.firstAuctionStart;
-        uint256 cycleNumber = timeSinceStart / fullCycleLength;
-        if (cycleNumber >= MAX_AUCTIONS) {
-            return MAX_AUCTIONS;
-        }
-        return cycleNumber;
+        return
+            AuctionLib.getCurrentAuctionCycle(
+                auctionCycles[inputToken][stateToken]
+            );
     }
 
     function getAuctionTimeLeft(
         address inputToken
     ) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
-        AuctionCycle memory cycle = auctionCycles[inputToken][stateToken];
-        if (!cycle.isInitialized) return 0;
-        uint256 fullCycleLength = AUCTION_DURATION + AUCTION_INTERVAL;
-        uint256 currentTime = block.timestamp;
-        uint256 timeSinceStart = currentTime - cycle.firstAuctionStart;
-        uint256 cycleNumber = timeSinceStart / fullCycleLength;
-        if (cycleNumber >= MAX_AUCTIONS) return 0;
-        uint256 currentCycleStart = cycle.firstAuctionStart +
-            cycleNumber *
-            fullCycleLength;
-        uint256 auctionEndTime = currentCycleStart + AUCTION_DURATION;
-        if (currentTime >= currentCycleStart && currentTime < auctionEndTime) {
-            return auctionEndTime - currentTime;
-        }
-        return 0;
+        return
+            AuctionLib.getAuctionTimeLeft(
+                auctionCycles[inputToken][stateToken]
+            );
     }
     // No need of use safeMath as solidity new versions are taking care of that
 
@@ -727,7 +592,7 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     ) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
         uint256 currentCycle = getCurrentAuctionCycle(inputToken);
-        if (currentCycle >= MAX_AUCTIONS) {
+        if (currentCycle >= AuctionLib.MAX_AUCTIONS) {
             return 0;
         }
         uint256 davbalance = getDavBalance(msg.sender);

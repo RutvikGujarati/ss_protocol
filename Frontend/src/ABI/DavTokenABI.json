@@ -279,25 +279,6 @@
 	},
 	{
 		"type": "function",
-		"name": "allTokenNames",
-		"inputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "string",
-				"internalType": "string"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
 		"name": "allowance",
 		"inputs": [
 			{
@@ -359,55 +340,6 @@
 				"name": "",
 				"type": "uint256",
 				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "burnHistory",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			},
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"outputs": [
-			{
-				"name": "amount",
-				"type": "uint256",
-				"internalType": "uint256"
-			},
-			{
-				"name": "totalAtTime",
-				"type": "uint256",
-				"internalType": "uint256"
-			},
-			{
-				"name": "timestamp",
-				"type": "uint256",
-				"internalType": "uint256"
-			},
-			{
-				"name": "cycleNumber",
-				"type": "uint256",
-				"internalType": "uint256"
-			},
-			{
-				"name": "userShare",
-				"type": "uint256",
-				"internalType": "uint256"
-			},
-			{
-				"name": "claimed",
-				"type": "bool",
-				"internalType": "bool"
 			}
 		],
 		"stateMutability": "view"
@@ -497,81 +429,11 @@
 		"name": "cycleTotalBurned",
 		"inputs": [
 			{
-				"name": "",
+				"name": "cycle",
 				"type": "uint256",
 				"internalType": "uint256"
 			}
 		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "cycleTreasuryAllocation",
-		"inputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "cycleUnclaimedPLS",
-		"inputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "davHolders",
-		"inputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "davHoldersCount",
-		"inputs": [],
 		"outputs": [
 			{
 				"name": "",
@@ -672,7 +534,7 @@
 			{
 				"name": "",
 				"type": "tuple[]",
-				"internalType": "struct DAV_V2_2.TokenEntry[]",
+				"internalType": "struct TokenRegistryLib.TokenEntry[]",
 				"components": [
 					{
 						"name": "user",
@@ -685,14 +547,14 @@
 						"internalType": "string"
 					},
 					{
-						"name": "emoji",
+						"name": "emojiOrImage",
 						"type": "string",
 						"internalType": "string"
 					},
 					{
 						"name": "status",
 						"type": "uint8",
-						"internalType": "enum DAV_V2_2.TokenStatus"
+						"internalType": "enum TokenRegistryLib.TokenStatus"
 					}
 				]
 			}
@@ -809,6 +671,11 @@
 				"name": "expireTimes",
 				"type": "uint256[]",
 				"internalType": "uint256[]"
+			},
+			{
+				"name": "amounts",
+				"type": "uint256[]",
+				"internalType": "uint256[]"
 			}
 		],
 		"stateMutability": "view"
@@ -879,6 +746,25 @@
 	},
 	{
 		"type": "function",
+		"name": "getUserBurnedAmount",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"internalType": "address"
+			}
+		],
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256",
+				"internalType": "uint256"
+			}
+		],
+		"stateMutability": "view"
+	},
+	{
+		"type": "function",
 		"name": "getUserReferralCode",
 		"inputs": [
 			{
@@ -930,30 +816,6 @@
 	},
 	{
 		"type": "function",
-		"name": "hasClaimedCycle",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			},
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool",
-				"internalType": "bool"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
 		"name": "hasClaimingStarted",
 		"inputs": [],
 		"outputs": [
@@ -961,38 +823,6 @@
 				"name": "",
 				"type": "bool",
 				"internalType": "bool"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "holderFunds",
-		"inputs": [],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "holderRewards",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
 			}
 		],
 		"stateMutability": "view"
@@ -1012,25 +842,6 @@
 				"name": "",
 				"type": "bool",
 				"internalType": "bool"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "lastBurnCycle",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
 			}
 		],
 		"stateMutability": "view"
@@ -1272,25 +1083,6 @@
 	},
 	{
 		"type": "function",
-		"name": "referralCodeToUser",
-		"inputs": [
-			{
-				"name": "",
-				"type": "string",
-				"internalType": "string"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
 		"name": "referralRewards",
 		"inputs": [
 			{
@@ -1324,25 +1116,6 @@
 				"name": "",
 				"type": "string",
 				"internalType": "string"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "tokenNameToOwner",
-		"inputs": [
-			{
-				"name": "",
-				"type": "string",
-				"internalType": "string"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
 			}
 		],
 		"stateMutability": "view"
@@ -1515,78 +1288,11 @@
 			{
 				"name": "_status",
 				"type": "uint8",
-				"internalType": "enum DAV_V2_2.TokenStatus"
+				"internalType": "enum TokenRegistryLib.TokenStatus"
 			}
 		],
 		"outputs": [],
 		"stateMutability": "nonpayable"
-	},
-	{
-		"type": "function",
-		"name": "userBurnClaimed",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			},
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "bool",
-				"internalType": "bool"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "userBurnedAmount",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "userCycleBurned",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			},
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
 	},
 	{
 		"type": "function",
@@ -1596,112 +1302,6 @@
 				"name": "",
 				"type": "address",
 				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "string",
-				"internalType": "string"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "userTokenCount",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "userTokenEntries",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			},
-			{
-				"name": "",
-				"type": "string",
-				"internalType": "string"
-			}
-		],
-		"outputs": [
-			{
-				"name": "user",
-				"type": "address",
-				"internalType": "address"
-			},
-			{
-				"name": "tokenName",
-				"type": "string",
-				"internalType": "string"
-			},
-			{
-				"name": "emoji",
-				"type": "string",
-				"internalType": "string"
-			},
-			{
-				"name": "status",
-				"type": "uint8",
-				"internalType": "enum DAV_V2_2.TokenStatus"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "userUnclaimedCycles",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			},
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"outputs": [
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
-			}
-		],
-		"stateMutability": "view"
-	},
-	{
-		"type": "function",
-		"name": "usersTokenNames",
-		"inputs": [
-			{
-				"name": "",
-				"type": "address",
-				"internalType": "address"
-			},
-			{
-				"name": "",
-				"type": "uint256",
-				"internalType": "uint256"
 			}
 		],
 		"outputs": [
@@ -1872,6 +1472,19 @@
 	},
 	{
 		"type": "event",
+		"name": "HolderAdded",
+		"inputs": [
+			{
+				"name": "account",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
 		"name": "LiquidityWalletUpdated",
 		"inputs": [
 			{
@@ -1917,6 +1530,50 @@
 				"type": "string",
 				"indexed": false,
 				"internalType": "string"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "ReferralCodeGenerated",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "code",
+				"type": "string",
+				"indexed": false,
+				"internalType": "string"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "RewardClaimed",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
+			},
+			{
+				"name": "cycle",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
 			}
 		],
 		"anonymous": false
@@ -2004,7 +1661,32 @@
 				"name": "status",
 				"type": "uint8",
 				"indexed": false,
-				"internalType": "enum DAV_V2_2.TokenStatus"
+				"internalType": "enum TokenRegistryLib.TokenStatus"
+			}
+		],
+		"anonymous": false
+	},
+	{
+		"type": "event",
+		"name": "TokensBurned",
+		"inputs": [
+			{
+				"name": "user",
+				"type": "address",
+				"indexed": true,
+				"internalType": "address"
+			},
+			{
+				"name": "amount",
+				"type": "uint256",
+				"indexed": true,
+				"internalType": "uint256"
+			},
+			{
+				"name": "cycle",
+				"type": "uint256",
+				"indexed": false,
+				"internalType": "uint256"
 			}
 		],
 		"anonymous": false
