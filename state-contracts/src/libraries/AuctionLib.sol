@@ -2,12 +2,18 @@
 pragma solidity ^0.8.20;
 
 library AuctionLib {
+	/**
+	 * @notice Represents the auction cycle data for a token
+	 * @param firstAuctionStart Timestamp of the first auction start
+	 * @param isInitialized Whether the auction cycle has been initialized
+	 * @param auctionCount Number of auctions that have occurred in this cycle
+	 */
     struct AuctionCycle {
         uint256 firstAuctionStart;
         bool isInitialized;
         uint256 auctionCount;
     }
-
+	// Constants for auction cycles
     uint256 public constant AUCTION_INTERVAL = 50 days;
     uint256 public constant AUCTION_DURATION = 24 hours;
     uint256 public constant REVERSE_DURATION = 24 hours;
@@ -57,11 +63,11 @@ library AuctionLib {
         isValidCycle = cycleNumber < MAX_AUCTIONS;
     }
 
-    /**
-     * @notice Checks if a normal auction is active for a given token
-     * @param cycle The auction cycle data
-     * @return bool Whether the auction is active
-     */
+	/**
+	 * @notice Checks if an auction is currently active for a given token
+	 * @param cycle The auction cycle data
+	 * @return bool Whether the auction is active
+	 */
     function isAuctionActive(
         AuctionCycle storage cycle
     ) internal view returns (bool) {

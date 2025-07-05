@@ -545,7 +545,7 @@ const InfoCards = () => {
                                 )}
                               </>
                             ) : (
-                              <>{isLoading ? <DotAnimation /> : <><span className="detailText">Mint/Promo </span>{davHolds}</>}</>
+                              <>{isLoading ? <DotAnimation /> : davHolds}</>
                             )}
                             / {isLoading ? <DotAnimation /> : davExpireHolds}
                           </h5>

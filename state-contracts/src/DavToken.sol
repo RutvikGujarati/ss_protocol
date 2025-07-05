@@ -16,6 +16,9 @@ contract DAV_V2_2 is
     Ownable(msg.sender),
     ReentrancyGuard // IERC20 initialization
 {
+    //NOTE: some Functions uses loops to get values which can be gas-intensive, but necessary for accurate, real-time calculation of active token balances.
+    //NOTE: This contract is intended for EVM based chains.
+    //NOTE: High ether costs are added for some required chains which has low token values like pulsechain. 1 pls ~ 0.00000396 ETH.
     using SafeERC20 for IERC20;
     using TimeUtilsLib for uint256;
     using ReferralCodeLib for ReferralCodeLib.ReferralData;
@@ -32,7 +35,7 @@ contract DAV_V2_2 is
     // DAV TOken
     // NOTE: // This contract is intended for PulseChain, not Ethereum.
     uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
-    uint256 public constant TOKEN_COST = 1000000  ether; // 1000000 org
+    uint256 public constant TOKEN_COST = 1000000 ether; // 1000000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
     uint256 public constant LIQUIDITY_SHARE = 50; // 50% LIQUIDITY SHARE
     uint256 public constant DEVELOPMENT_SHARE = 5; // 5% DEV SHARE
@@ -40,7 +43,7 @@ contract DAV_V2_2 is
     uint256 public constant BASIS_POINTS = 10000;
     uint256 public constant INITIAL_GOV_MINT = 1000 ether;
     uint256 public constant MAX_TOKEN_PER_USER = 100;
-    uint256 public constant DAV_TOKEN_EXPIRE = 10 minutes; // 50 days for mainnet
+    uint256 public constant DAV_TOKEN_EXPIRE = 50 days; // 50 days for mainnet
 
     //cycle assinging to 10. not want to update or configure later
     uint256 public constant CYCLE_ALLOCATION_COUNT = 10;
@@ -62,7 +65,7 @@ contract DAV_V2_2 is
     // Used in DApp to display total burn statistics
     uint256 public totalStateBurned;
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
-    uint256 public constant CLAIM_INTERVAL = 5 minutes; // 36 days claim timer
+    uint256 public constant CLAIM_INTERVAL = 36 days; // 36 days claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
     uint256 public constant PRECISION = 1e18;
     address private constant BURN_ADDRESS =
@@ -100,10 +103,6 @@ contract DAV_V2_2 is
     }
     GovernanceProposal public pendingGovernance;
 
-    enum TokenStatus {
-        Pending,
-        Processed
-    }
     mapping(address => string) public userReferralCode; // User's own referral code
     mapping(address => uint256) public referralRewards; // Tracks referral rewards earned
     struct MintBatch {
@@ -120,16 +119,8 @@ contract DAV_V2_2 is
     WalletUpdateProposal public pendingDevelopmentWallet;
 
     mapping(address => MintBatch[]) public mintBatches;
-    //to keep track unique name of each tokens. so, not conflict in protocol.
-    mapping(string => bool) public isTokenNameUsed;
-    event TokensBurned(
-        address indexed user,
-        uint256 indexed amount,
-        uint256 cycle
-    );
-    event RewardClaimed(address indexed user, uint256 amount, uint256 cycle);
+
     event RewardsClaimed(address indexed user, uint256 amount);
-    event HolderAdded(address indexed holder);
     event ReferralCodeGenerated(address indexed user, string referralCode);
     event TokenNameAdded(address indexed user, string name);
     event GovernanceUpdated(address oldGovernance, address newGovernance);
@@ -173,7 +164,7 @@ contract DAV_V2_2 is
         _mint(_gov, INITIAL_GOV_MINT);
         mintedSupply += INITIAL_GOV_MINT;
         StateToken = IERC20(_stateToken);
-        claimStartTime = TimeUtilsLib.calculateNextClaimStartDubai(
+        claimStartTime = TimeUtilsLib.calculateNextClaimStartGMT(
             block.timestamp
         );
     }
@@ -481,6 +472,17 @@ contract DAV_V2_2 is
 
         return active;
     }
+    // ℹ️ Note on Token Expiration Tracking:
+    // We intentionally retain all mint batches, including expired ones,
+    // to allow users to view their complete mint and expiration history.
+    // This historical data is essential for transparency and user experience,
+    // enabling interfaces to display past mint events, expirations, and timing.
+    // ⚠️ While this increases on-chain storage and logic complexity,
+    // we consider it necessary and do not perform batch cleanup or pruning.
+    /**
+     * @notice Tracks each user's mint batches and expiration timestamps.
+     * @dev Expired batches are preserved to support full history visibility for users.
+     */
     function getMintTimestamps(
         address user
     )
@@ -489,7 +491,8 @@ contract DAV_V2_2 is
         returns (
             uint256[] memory mintTimes,
             uint256[] memory expireTimes,
-            uint256[] memory amounts
+            uint256[] memory amounts,
+            bool[] memory fromGovernance
         )
     {
         MintBatch[] storage batches = mintBatches[user];
@@ -498,19 +501,20 @@ contract DAV_V2_2 is
         mintTimes = new uint256[](len);
         expireTimes = new uint256[](len);
         amounts = new uint256[](len);
+        fromGovernance = new bool[](len);
 
         for (uint256 i = 0; i < len; i++) {
             mintTimes[i] = batches[i].timestamp;
             expireTimes[i] = batches[i].timestamp + DAV_TOKEN_EXPIRE;
             amounts[i] = batches[i].amount;
+            fromGovernance[i] = batches[i].fromGovernance;
         }
 
-        return (mintTimes, expireTimes, amounts);
+        return (mintTimes, expireTimes, amounts, fromGovernance);
     }
 
     function getTotalActiveSupply() public view returns (uint256) {
-        /*  Iterate over all DAV holders to calculate the total active supply.This loop is gas-intensive but necessary for accurate, real-time calculation of active token balances. which constrains the array size and keeps gas costs manageable for the expected user base. We avoid complex optimizations like
-   caching or snapshots to maintain clear, straightforward logic, accepting the gas cost as a trade-off for simplicity and transparency. */
+        /*  Iterate over all DAV holders to calculate the total active supply.This loop is gas-intensive but necessary for accurate, real-time calculation of active token balances. which constrains the array size and keeps gas costs manageable for the expected user base. We avoid complex optimizations like caching or snapshots to maintain clear, straightforward logic, accepting the gas cost as a trade-off for simplicity and transparency. */
         uint256 holdersLength = holderState._holderLength();
         uint256 total = 0;
         for (uint256 i = 0; i < holdersLength; i++) {

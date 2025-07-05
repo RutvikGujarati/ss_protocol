@@ -2,12 +2,13 @@
 pragma solidity ^0.8.20;
 
 library TokenRegistryLib {
+	// Enum to represent the status of a token
     enum TokenStatus {
         Pending,
         Approved,
         Rejected
     }
-
+	// Struct to represent a token entry in the registry
     struct TokenEntry {
         address user;
         string tokenName;
@@ -23,7 +24,7 @@ library TokenRegistryLib {
         string[] allTokenNames;
         mapping(address => uint256) userTokenCount;
     }
-
+	
     function contains(
         string memory str,
         string memory substr
@@ -71,6 +72,7 @@ library TokenRegistryLib {
         }
     }
 
+	
     function addTokenEntry(
         TokenRegistry storage registry,
         address sender,

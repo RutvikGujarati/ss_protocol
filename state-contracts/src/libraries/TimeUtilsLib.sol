@@ -2,43 +2,27 @@
 pragma solidity ^0.8.20;
 
 library TimeUtilsLib {
-    function calculateNextClaimStartDubai(
+    uint256 internal constant SECONDS_IN_DAY = 86400;
+    uint256 internal constant TARGET_GMT_HOUR = 8; // 1:00 PM GMT
+    uint256 internal constant TARGET_GMT_MINUTE = 30;
+
+    /**
+     * @notice Calculates the next claim start time based on GMT.
+     * @param blockTimestamp The current block timestamp in seconds.
+     * @return finalTimestamp The next 1:25 PM GMT claim time.
+     */
+    function calculateNextClaimStartGMT(
         uint256 blockTimestamp
-    ) internal pure returns (uint256) {
-        uint256 dubaiOffset = 4 hours;
-        uint256 secondsInDay = 86400;
-        uint256 targetDubaiHour = 9; // 2 PM UTC == 6 PM Dubai
-        uint256 targetDubaiMinute = 25;
+    ) internal pure returns (uint256 finalTimestamp) {
+        uint256 todayStart = (blockTimestamp / SECONDS_IN_DAY) * SECONDS_IN_DAY;
+        uint256 targetTime = todayStart +
+            (TARGET_GMT_HOUR * 1 hours) +
+            (TARGET_GMT_MINUTE * 1 minutes);
 
-        uint256 nowDubai;
-        unchecked {
-            nowDubai = blockTimestamp + dubaiOffset;
+        if (blockTimestamp >= targetTime) {
+            targetTime += SECONDS_IN_DAY;
         }
 
-        uint256 todayStartDubai;
-        unchecked {
-            todayStartDubai = (nowDubai / secondsInDay) * secondsInDay;
-        }
-
-        uint256 targetTimeDubai;
-        unchecked {
-            targetTimeDubai =
-                todayStartDubai +
-                (targetDubaiHour * 1 hours) +
-                (targetDubaiMinute * 1 minutes);
-        }
-
-        if (nowDubai >= targetTimeDubai) {
-            unchecked {
-                targetTimeDubai += secondsInDay;
-            }
-        }
-
-        uint256 finalTimestamp;
-        unchecked {
-            finalTimestamp = targetTimeDubai - dubaiOffset;
-        }
-
-        return finalTimestamp;
+        finalTimestamp = targetTime;
     }
 }

@@ -35,13 +35,14 @@ const DavHistory = () => {
 
       setIsLoading(true);
       try {
-        const [mintTimes, expireTimes, amounts] =
+        const [mintTimes, expireTimes, amounts,fromGovernance] =
           await AllContracts.davContract.getMintTimestamps(address);
 
         const formatted = mintTimes.map((mint, i) => ({
           mintedAt: formatTimestamp(mint),
           expiresAt: formatTimestamp(expireTimes[i]),
           amount: ethers.formatEther(amounts[i]),
+          fromGovernance: fromGovernance[i],
         }));
 
         setMintBatches(formatted);
@@ -62,9 +63,10 @@ const DavHistory = () => {
   return (
     <div className="container mt-4">
       <div className="table-responsive">
-        <table className="table table-dark table-hover">
+        <table className="table table-dark ">
           <thead>
             <tr>
+              <th scope="col">Mint/Promo</th>
               <th scope="col">Mint Amount (DAV)</th>
               <th scope="col">Minted At</th>
               <th scope="col">Expires At</th>
@@ -73,13 +75,14 @@ const DavHistory = () => {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan="3" className="text-center">
+                <td colSpan="5" className="text-center">
                   Loading...
                 </td>
               </tr>
             ) : mintBatches && mintBatches.length > 0 ? (
               mintBatches.map((entry, idx) => (
                 <tr key={idx}>
+                  <td>{entry.fromGovernance ? "Promotion":"Minted"}</td>
                   <td>{entry.amount}</td>
                   <td>{entry.mintedAt}</td>
                   <td>{entry.expiresAt}</td>
@@ -87,7 +90,7 @@ const DavHistory = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="3" className="text-center">
+                <td colSpan="5" className="text-center">
                   No minting history available
                 </td>
               </tr>

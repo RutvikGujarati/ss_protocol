@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 library BurnLibrary {
     using SafeERC20 for IERC20;
+	// Constants for burn and claim
 
     struct BurnAndClaimState {
         mapping(address => uint256) userBurnedAmount;
@@ -34,6 +35,20 @@ library BurnLibrary {
     );
     event RewardClaimed(address indexed user, uint256 amount, uint256 cycle);
 
+	/**
+	 * @notice Burns a specified amount of tokens from a user and updates the burn state.
+	 * @param state The BurnAndClaimState storage reference.
+	 * @param user The address of the user burning tokens.
+	 * @param amount The amount of tokens to burn.
+	 * @param StateToken The token being burned.
+	 * @param governance The governance address, which is exempt from minimum balance checks.
+	 * @param MIN_DAV Minimum active balance required for users other than governance.
+	 * @param claimStartTime The timestamp when claiming rewards starts.
+	 * @param CLAIM_INTERVAL The interval between claimable cycles.
+	 * @param BURN_ADDRESS The address where tokens are burned.
+	 * @param getActiveBalance Function to get the user's active balance.
+	 * @param cycleTreasuryAllocation Mapping of cycle allocations for treasury.
+	 */
     function burnState(
         BurnAndClaimState storage state,
         address user,
@@ -105,6 +120,7 @@ library BurnLibrary {
         emit TokensBurned(user, amount, currentCycle);
     }
 
+	
     function canClaim(
         BurnAndClaimState storage state,
         address user,

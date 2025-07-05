@@ -21,6 +21,7 @@ interface IPair {
 }
 contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     using SafeERC20 for IERC20;
+    //NOTE: contract uses safeMath by default solidity version.
     using TimeUtilsLib for uint256;
     using AuctionLib for AuctionLib.AuctionCycle;
     DAV_V2_2 public dav;
@@ -59,8 +60,6 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     bool public paused = false;
 
     mapping(address => mapping(address => uint256)) public lastDavHolding; // user => token => last DAV holding
-    mapping(address => mapping(address => uint256))
-        public cumulativeDavHoldings;
     // Map user => array of deployed token names
     mapping(address => string[]) public userToTokenNames;
 
@@ -236,7 +235,7 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
         ownerToTokens[_tokenOwner].push(token);
         usedPairAddresses[pairAddress] = true;
         // Schedule auction at 22:30 Dubai time (UTC+4)
-        uint256 auctionStart = TimeUtilsLib.calculateNextClaimStartDubai(
+        uint256 auctionStart = TimeUtilsLib.calculateNextClaimStartGMT(
             block.timestamp
         );
         // Initialize auction cycle for token → stateToken
@@ -290,7 +289,8 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
         ) {
             address token0 = pair.token0();
             address token1 = pair.token1();
-
+            /// @warning Uses spot reserves, which are sensitive to temporary manipulation.
+			/// @dev Assumes reserves are always > 0 for valid pairs.
             require(reserve0 > 0 && reserve1 > 0, "Invalid reserves");
 
             uint256 ratio;
@@ -353,8 +353,6 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
             PRECISION_FACTOR -
             1) / PRECISION_FACTOR;
         require(reward > 0, "Reward too small");
-
-        cumulativeDavHoldings[user][inputToken] += newDavContributed;
         lastDavHolding[user][inputToken] = currentDavHolding;
         hasClaimed[user][inputToken] = true;
 
@@ -436,9 +434,12 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
      * This contract must hold sufficient `inputToken` to support those swaps.
      * Liquidity is provided through token contract deployments and manual deposits via depositTokens to ensure the integrity of the liquidity pool ratio..
      */
-    // No explicit limit on burn amount to allow full flexibility in auction finalization.
-    // Large burns may risk higher gas usage but are necessary to prevent partial burns locking user funds.
-    // Users and integrators should be aware of gas implications when submitting very large burns.
+    //NOTE: No explicit limit on burn amount to allow full flexibility in auction finalization.
+    //NOTE: Large burns may risk higher gas usage but are necessary to prevent partial burns locking user funds. Users and integrators should be aware of gas implications when submitting very large burns.
+    // ⚠️ Slippage Protection Intentionally Omitted:
+    // This swap function does not use `minAmountOut` to enforce slippage protection.
+    // The output is determined solely by the current auction pricing logic, which is considered final.
+    //NOTE: commit-revel creates high complexity and gas costs for users, especially in high-volume swaps. that's why it is omitted.
     function swapTokens(
         address user,
         address inputToken
@@ -452,7 +453,10 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
             "RSA: Insufficient DAV"
         );
         uint256 currentAuctionCycle = getCurrentAuctionCycle(inputToken);
-        require(currentAuctionCycle < AuctionLib.MAX_AUCTIONS, "Maximum auctions reached");
+        require(
+            currentAuctionCycle < AuctionLib.MAX_AUCTIONS,
+            "Maximum auctions reached"
+        );
 
         bytes32 key = getSwapInfoKey(
             user,

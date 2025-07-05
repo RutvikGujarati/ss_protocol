@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 library Distribution {
+    // Constants for distribution shares
     struct HolderState {
         mapping(address => bool) isDAVHolder;
         address[] davHolders;
@@ -60,6 +61,14 @@ library Distribution {
     }
     // This loop is safe under typical block gas limits (~30 million gas)
     // Each iteration is lightweight and avoids nested expensive operations
+    // Note: This loop is safe under expected davHolders lengths.
+    /**
+     * @notice Distributes the holder share among eligible DAV holders based on their active minted balance.
+     * @param state The HolderState storage reference.
+     * @param holderShare The total share to be distributed among holders.
+     * @param governance The address of the governance account, which is excluded from rewards.
+     * @param getActiveMintedBalance A function to retrieve the active minted balance of a holder.
+     */
     function distributeHolderShare(
         HolderState storage state,
         uint256 holderShare,
@@ -101,16 +110,25 @@ library Distribution {
                 lastEligible = holder;
             }
         }
-
+        // 🔒 Precision Dust Handling:
+        // Due to integer division, small amounts (dust) may remain undistributed.
+        // These are added to the `lastEligible` holder to ensure no tokens are lost.
         if (totalDistributed < holderShare && lastEligible != address(0)) {
             uint256 remainder = holderShare - totalDistributed;
             state.holderRewards[lastEligible] += remainder;
             totalDistributed += remainder;
         }
-
+        // ✅ This guarantees full distribution of `holderShare` with no loss due to division rounding.
         state.holderFunds += totalDistributed;
     }
-
+    /**
+     * @notice Distributes cycle allocations to the treasury and unclaimed PLS for future cycles.
+     * @param state The HolderState storage reference.
+     * @param stateLPShare The share of LP tokens allocated to the state.
+     * @param currentCycle The current cycle number.
+     * @param treasuryClaimPercentage The percentage of the LP share allocated to the treasury.
+     * @param cycleCount The number of cycles to distribute the allocation across.
+     */
     function distributeCycleAllocations(
         HolderState storage state,
         uint256 stateLPShare,
