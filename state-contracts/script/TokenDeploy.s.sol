@@ -8,7 +8,7 @@ contract DeployState is Script {
     function run() external {
         vm.startBroadcast();
         address Five = 0xBAaB2913ec979d9d21785063a0e4141e5B787D28;
-        address Swap = 0xcca40415F0ff81acEF22202A442F7cB28869261A;
+        address Swap = 0x7F1DaF1a2b99e2B74Bf39509E044Dde4B1Fb0E55;
         //NOTE: Mainnet token name is pSTATE
         STATE_V2_2 state = new STATE_V2_2("pSTATE", "pSTATE", Five, Swap);
 

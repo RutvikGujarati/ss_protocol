@@ -492,7 +492,8 @@ contract DAV_V2_2 is
             uint256[] memory mintTimes,
             uint256[] memory expireTimes,
             uint256[] memory amounts,
-            bool[] memory fromGovernance
+            bool[] memory fromGovernance,
+            bool[] memory isExpired
         )
     {
         MintBatch[] storage batches = mintBatches[user];
@@ -502,15 +503,20 @@ contract DAV_V2_2 is
         expireTimes = new uint256[](len);
         amounts = new uint256[](len);
         fromGovernance = new bool[](len);
+        isExpired = new bool[](len);
 
         for (uint256 i = 0; i < len; i++) {
-            mintTimes[i] = batches[i].timestamp;
-            expireTimes[i] = batches[i].timestamp + DAV_TOKEN_EXPIRE;
+            uint256 mintTime = batches[i].timestamp;
+            uint256 expireTime = mintTime + DAV_TOKEN_EXPIRE;
+
+            mintTimes[i] = mintTime;
+            expireTimes[i] = expireTime;
             amounts[i] = batches[i].amount;
             fromGovernance[i] = batches[i].fromGovernance;
+            isExpired[i] = block.timestamp > expireTime;
         }
 
-        return (mintTimes, expireTimes, amounts, fromGovernance);
+        return (mintTimes, expireTimes, amounts, fromGovernance, isExpired);
     }
 
     function getTotalActiveSupply() public view returns (uint256) {

@@ -841,7 +841,7 @@ const DataTable = () => {
                         <td className="timer-cell">
                           {formatTimeVerbose(TimeLeft)}
                         </td>
-                        <td>500,000</td>
+                        <td>150,000</td>
                         <td>
                           <button
                             className="btn btn-sm swap-btn btn-primary"
@@ -1008,7 +1008,7 @@ const DataTable = () => {
                               )}`
                             : "N/A"}
                         </td>
-                        <td>2,500,000</td>
+                        <td>1,500,000</td>
                         <td>{formatTimeVerbose(nextClaimTime)}</td>
                         <td>
                           <button

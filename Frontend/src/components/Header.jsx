@@ -75,7 +75,7 @@ const Header = () => {
                 >
                   DAV Vault
                 </NavLink>
-                <ul className="dropdown-menu bg-dark border-0 shadow">
+                <ul className="dropdown-menu custom-dropdown-menu bg-dark border-0 shadow">
                   <li>
                     <NavLink
                       className="dropdown-item text-light"

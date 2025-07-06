@@ -11,7 +11,7 @@ const formatTimestamp = (timestamp) => {
         ? timestamp.toNumber()
         : Number(timestamp);
     const date = new Date(ts * 1000);
-    return date.toLocaleString(); // Fallback to browser format
+    return date.toLocaleString();
   } catch (error) {
     console.error("Error formatting timestamp:", error);
     return "Invalid Date";
@@ -35,17 +35,31 @@ const DavHistory = () => {
 
       setIsLoading(true);
       try {
-        const [mintTimes, expireTimes, amounts,fromGovernance] =
+        const [mintTimes, expireTimes, amounts, fromGovernance, isExpired] =
           await AllContracts.davContract.getMintTimestamps(address);
 
         const formatted = mintTimes.map((mint, i) => ({
           mintedAt: formatTimestamp(mint),
+          mintedAtRaw: Number(
+            typeof mint === "object" && "toNumber" in mint
+              ? mint.toNumber()
+              : mint
+          ),
           expiresAt: formatTimestamp(expireTimes[i]),
           amount: ethers.formatEther(amounts[i]),
-          fromGovernance: fromGovernance[i],
+          fromGovernance: Boolean(fromGovernance[i]), // Ensure boolean
+          isExpired: Boolean(isExpired[i]), // Ensure boolean
         }));
 
-        setMintBatches(formatted);
+        // Sort: unexpired by mintedAt desc, then expired by mintedAt desc
+        const sorted = formatted.sort((a, b) => {
+          if (a.isExpired !== b.isExpired) {
+            return a.isExpired ? 1 : -1; // Expired go to bottom
+          }
+          return b.mintedAtRaw - a.mintedAtRaw; // Recent first within same expiration status
+        });
+
+        setMintBatches(sorted);
       } catch (error) {
         console.error("Error fetching mint timestamps:", error);
         setMintBatches([]);
@@ -63,7 +77,7 @@ const DavHistory = () => {
   return (
     <div className="container mt-4">
       <div className="table-responsive">
-        <table className="table table-dark ">
+        <table className="table table-dark">
           <thead>
             <tr>
               <th scope="col">Mint/Promo</th>
@@ -82,10 +96,26 @@ const DavHistory = () => {
             ) : mintBatches && mintBatches.length > 0 ? (
               mintBatches.map((entry, idx) => (
                 <tr key={idx}>
-                  <td>{entry.fromGovernance ? "Promotion":"Minted"}</td>
-                  <td>{entry.amount}</td>
-                  <td>{entry.mintedAt}</td>
-                  <td>{entry.expiresAt}</td>
+                  <td
+                    className={entry.isExpired ? "text-danger" : "text-success"}
+                  >
+                    {entry.fromGovernance ? "Promotion" : "Minted"}
+                  </td>
+                  <td
+                    className={entry.isExpired ? "text-danger" : "text-success"}
+                  >
+                    {entry.amount}
+                  </td>
+                  <td
+                    className={entry.isExpired ? "text-danger" : "text-success"}
+                  >
+                    {entry.mintedAt}
+                  </td>
+                  <td
+                    className={entry.isExpired ? "text-danger" : "text-success"}
+                  >
+                    {entry.expiresAt}
+                  </td>
                 </tr>
               ))
             ) : (

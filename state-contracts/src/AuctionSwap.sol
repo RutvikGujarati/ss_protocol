@@ -290,7 +290,7 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
             address token0 = pair.token0();
             address token1 = pair.token1();
             /// @warning Uses spot reserves, which are sensitive to temporary manipulation.
-			/// @dev Assumes reserves are always > 0 for valid pairs.
+            /// @dev Assumes reserves are always > 0 for valid pairs.
             require(reserve0 > 0 && reserve1 > 0, "Invalid reserves");
 
             uint256 ratio;
@@ -647,16 +647,37 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
         address inputToken
     ) public view returns (uint256) {
         require(user != address(0), "Invalid user address");
+
         uint256 currentDavHolding = getDavBalance(user);
         uint256 lastHolding = lastDavHolding[user][inputToken];
         uint256 newDavContributed = currentDavHolding > lastHolding
             ? currentDavHolding - lastHolding
             : 0;
-        // Calculate reward as in distributeReward
-        uint256 reward = (newDavContributed * AIRDROP_AMOUNT) /
-            PRECISION_FACTOR;
+
+        if (newDavContributed == 0) return 0;
+
+        // Get current auction cycle
+        uint256 cycle = getCurrentAuctionCycle(inputToken);
+
+        // Calculate reduction percent (same as distributeReward)
+        uint256 skipped = (cycle + 1) / 4;
+        uint256 reducedCycles = cycle - skipped;
+        uint256 reductionPercent = reducedCycles * 5 >= 95
+            ? 5
+            : 100 - (reducedCycles * 5);
+
+        uint256 adjustedAirdropAmount = (AIRDROP_AMOUNT * reductionPercent) /
+            100;
+
+        // Reward calculation with rounding up
+        uint256 reward = (newDavContributed *
+            adjustedAirdropAmount +
+            PRECISION_FACTOR -
+            1) / PRECISION_FACTOR;
+
         return reward;
     }
+
     function getNextClaimTime(
         address token
     ) public view returns (uint256 timeLeftInSeconds) {
