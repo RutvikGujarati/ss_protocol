@@ -141,22 +141,22 @@ const DetailsInfo = ({ selectedToken }) => {
     : sortedTokens[0] || null;
 
   // Select top 5 tokens (excluding DAV and STATE) with best ratios for green/red dot
- // Select top 5 tokens (excluding DAV and STATE) with best ratios for green dot
-const greenDotEligibleTokens = (loading ? filteredTokens : supportedTokens)
-.filter(
-  (token) =>
-	token.isSupported &&
-	token.tokenName !== "DAV" &&
-	token.tokenName !== "STATE" &&
-	token.ratio != null
-)
-.sort((a, b) => {
-  const aRatio = a.ratio ?? -Infinity;
-  const bRatio = b.ratio ?? -Infinity;
-  return bRatio - aRatio; // Sort by ratio descending
-})
-.slice(0, 5)
-.map((token) => token.tokenName);
+  // Select top 5 tokens (excluding DAV and STATE) with best ratios for green dot
+  const greenDotEligibleTokens = (loading ? filteredTokens : supportedTokens)
+    .filter(
+      (token) =>
+        token.isSupported &&
+        token.tokenName !== "DAV" &&
+        token.tokenName !== "STATE" &&
+        token.ratio != null
+    )
+    .sort((a, b) => {
+      const aRatio = a.ratio ?? -Infinity;
+      const bRatio = b.ratio ?? -Infinity;
+      return bRatio - aRatio; // Sort by ratio descending
+    })
+    .slice(0, 5)
+    .map((token) => token.tokenName);
 
   return (
     <div className="container mt-3 p-0 pb-4 mb-5">
@@ -234,8 +234,8 @@ const greenDotEligibleTokens = (loading ? filteredTokens : supportedTokens)
                           {token.tokenName === "DAV" ||
                           token.tokenName === "STATE"
                             ? "------"
-                            : `1:${formatWithCommas(token.ratio)}`}
-                          {/* // : `1:1000`} */}
+                            : // : `1:${formatWithCommas(token.ratio)}`}
+                              "1:1000"}
                         </div>
                       </td>
                       <td className="text-center">

@@ -103,7 +103,6 @@ contract DAV_V2_2 is
     }
     GovernanceProposal public pendingGovernance;
 
-    mapping(address => string) public userReferralCode; // User's own referral code
     mapping(address => uint256) public referralRewards; // Tracks referral rewards earned
     struct MintBatch {
         uint256 amount;
@@ -366,11 +365,11 @@ contract DAV_V2_2 is
             })
         );
         // Generate referral code if not already set
-        if (bytes(userReferralCode[msg.sender]).length == 0) {
+        if (bytes(referralData.userReferralCode[msg.sender]).length == 0) {
             string memory newReferralCode = referralData.generateReferralCode(
                 msg.sender
             );
-            userReferralCode[msg.sender] = newReferralCode;
+            referralData.userReferralCode[msg.sender] = newReferralCode;
             emit ReferralCodeGenerated(msg.sender, newReferralCode);
         }
 
@@ -573,7 +572,7 @@ contract DAV_V2_2 is
     function getUserReferralCode(
         address user
     ) external view returns (string memory) {
-        return userReferralCode[user];
+        return referralData.userReferralCode[user];
     }
     // ------------------ Gettting Token data info functions ------------------------------
     /**

@@ -324,7 +324,7 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
         require(supportedTokens[inputToken], "Unsupported token");
         require(msg.sender == user, "Invalid sender");
         require(
-            isAuctionActive(inputToken),
+            isAuctionActive(inputToken) || isReverseAuctionActive(inputToken),
             "Auction is not active yet for this token"
         );
 
@@ -338,12 +338,8 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
         // Get current auction cycle
         uint256 cycle = getCurrentAuctionCycle(inputToken);
 
-        // Calculate reduction percent
-        uint256 skipped = (cycle + 1) / 4; // Every 4th starting from cycle 3
-        uint256 reducedCycles = cycle - skipped;
-        uint256 reductionPercent = reducedCycles * 5 >= 95
-            ? 5
-            : 100 - (reducedCycles * 5);
+        // Calculate reduction percent: 5% reduction per cycle, capped at 100%
+        uint256 reductionPercent = cycle * 5 >= 100 ? 0 : 100 - (cycle * 5);
 
         // **Effects**
         uint256 adjustedAirdropAmount = (AIRDROP_AMOUNT * reductionPercent) /
@@ -659,12 +655,7 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
         // Get current auction cycle
         uint256 cycle = getCurrentAuctionCycle(inputToken);
 
-        // Calculate reduction percent (same as distributeReward)
-        uint256 skipped = (cycle + 1) / 4;
-        uint256 reducedCycles = cycle - skipped;
-        uint256 reductionPercent = reducedCycles * 5 >= 95
-            ? 5
-            : 100 - (reducedCycles * 5);
+        uint256 reductionPercent = cycle * 5 >= 100 ? 0 : 100 - (cycle * 5);
 
         uint256 adjustedAirdropAmount = (AIRDROP_AMOUNT * reductionPercent) /
             100;
