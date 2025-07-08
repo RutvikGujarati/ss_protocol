@@ -3,8 +3,8 @@ pragma solidity ^0.8.20;
 
 library TimeUtilsLib {
     uint256 internal constant SECONDS_IN_DAY = 86400;
-    uint256 internal constant TARGET_GMT_HOUR = 10; // 1:00 PM GMT
-    uint256 internal constant TARGET_GMT_MINUTE = 55;
+    uint256 internal constant TARGET_GMT_HOUR = 16; // 1:00 PM GMT
+    uint256 internal constant TARGET_GMT_MINUTE = 0;
 
     /**
      * @notice Calculates the next claim start time based on GMT.
