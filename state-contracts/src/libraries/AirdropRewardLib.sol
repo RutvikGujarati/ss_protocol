@@ -31,6 +31,17 @@ library RewardDistributionLib {
         bool isGovernance;
     }
 
+    struct RewardSettings {
+        address governanceAddress;
+        address devAddress;
+        uint256 govAirdrop;
+        uint256 userAirdrop;
+        uint256 maxGovAirdrop;
+        uint256 maxUserAirdrop;
+        uint256 claimInterval;
+        uint256 minDavRequired; // e.g. 1 DAV = 1e18
+    }
+
     event RewardDistributed(address indexed user, uint256 reward);
 
     /**
@@ -313,5 +324,67 @@ library RewardDistributionLib {
     function transferReward(IERC20 token, address to, uint256 amount) internal {
         require(amount > 0, "Reward too small");
         token.safeTransfer(to, amount);
+    }
+
+    //Token Owner and governance airdrop
+    function giveRewardToTokenOwner(
+        address token,
+        address msgSender,
+        mapping(address => address) storage tokenOwners,
+        mapping(address => uint256) storage totalClaimedByGovernance,
+        mapping(address => uint256) storage totalClaimedByUser,
+        mapping(address => mapping(address => uint256)) storage lastClaimTime,
+        RewardSettings memory settings,
+        uint256 getDavBalance,
+        IERC20 rewardToken
+    ) internal {
+        address owner = tokenOwners[token];
+        require(owner != address(0), "Token has no registered owner");
+
+        address claimant;
+        uint256 rewardAmount;
+
+        if (msgSender == settings.governanceAddress) {
+            claimant = settings.devAddress;
+            rewardAmount = settings.govAirdrop;
+            require(
+                totalClaimedByGovernance[claimant] + rewardAmount <=
+                    settings.maxGovAirdrop,
+                "Governance airdrop limit reached"
+            );
+        } else {
+            require(
+                msgSender == owner,
+                "Only token owner or governance can claim"
+            );
+            require(
+                getDavBalance >= settings.minDavRequired,
+                "Owner must hold at least 1 DAV"
+            );
+            claimant = owner;
+            rewardAmount = settings.userAirdrop;
+            require(
+                totalClaimedByUser[claimant] + rewardAmount <=
+                    settings.maxUserAirdrop,
+                "User airdrop limit reached"
+            );
+        }
+
+        uint256 lastClaim = lastClaimTime[claimant][token];
+        require(
+            block.timestamp >= lastClaim + settings.claimInterval,
+            "Claim not available yet"
+        );
+
+        lastClaimTime[claimant][token] = block.timestamp;
+
+        if (msgSender == settings.governanceAddress) {
+            totalClaimedByGovernance[claimant] += rewardAmount;
+        } else {
+            totalClaimedByUser[claimant] += rewardAmount;
+        }
+
+        rewardToken.safeTransfer(claimant, rewardAmount);
+        emit RewardDistributed(claimant, rewardAmount);
     }
 }

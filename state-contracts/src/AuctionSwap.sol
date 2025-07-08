@@ -411,59 +411,29 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     function giveRewardToTokenOwner(
         address token
     ) public nonReentrant onlyTokenOwnerOrGovernance(token) {
-        // Check if the token has a registered owner
-        address owner = tokenOwners[token];
-        require(owner != address(0), "Token has no registered owner");
-        // Determine claimant and reward amount
-        address claimant;
-        uint256 rewardAmount;
-        if (msg.sender == governanceAddress) {
-            // If called by governance, reward goes to DevAddress with GOV_OWNER_AIRDROP amount
-            claimant = DevAddress;
-            rewardAmount = GOV_OWNER_AIRDROP;
-            // Enforce governance airdrop cap
-            require(
-                totalClaimedByGovernance[claimant] + rewardAmount <=
-                    MAX_GOV_AIRDROP,
-                "Governance airdrop limit reached"
-            );
-        } else {
-            // If called by anyone else, must be the token owner
-            // Ensure msg.sender is the token owner - prevents unauthorized claims
-            require(
-                msg.sender == owner,
-                "Only token owner or governance can claim"
-            );
-            require(
-                getDavBalance(owner) >= PRECISION_FACTOR,
-                "Owner must hold at least 1 DAV"
-            );
-            claimant = owner;
-            rewardAmount = TOKEN_OWNER_AIRDROP;
-            // Enforce user airdrop cap
-            require(
-                totalClaimedByUser[claimant] + rewardAmount <= MAX_USER_AIRDROP,
-                "User airdrop limit reached"
-            );
-        }
-        // Enforce claim interval
-        uint256 lastClaim = lastClaimTime[claimant][token];
-        require(
-            block.timestamp >= lastClaim + CLAIM_INTERVAL,
-            "Claim not available yet"
+        RewardDistributionLib.RewardSettings
+            memory settings = RewardDistributionLib.RewardSettings({
+                governanceAddress: governanceAddress,
+                devAddress: DevAddress,
+                govAirdrop: GOV_OWNER_AIRDROP,
+                userAirdrop: TOKEN_OWNER_AIRDROP,
+                maxGovAirdrop: MAX_GOV_AIRDROP,
+                maxUserAirdrop: MAX_USER_AIRDROP,
+                claimInterval: CLAIM_INTERVAL,
+                minDavRequired: PRECISION_FACTOR
+            });
+
+        RewardDistributionLib.giveRewardToTokenOwner(
+            token,
+            msg.sender,
+            tokenOwners,
+            totalClaimedByGovernance,
+            totalClaimedByUser,
+            lastClaimTime,
+            settings,
+            getDavBalance(msg.sender),
+            IERC20(token)
         );
-        // Update last claim time for the claimant
-        lastClaimTime[claimant][token] = block.timestamp;
-        // Update total claimed amounts
-        if (msg.sender == governanceAddress) {
-            totalClaimedByGovernance[claimant] += rewardAmount;
-        } else {
-            totalClaimedByUser[claimant] += rewardAmount;
-        }
-        // Transfer reward tokens to claimant
-        IERC20(token).safeTransfer(claimant, rewardAmount);
-        // Emit event for reward distribution
-        emit RewardDistributed(claimant, rewardAmount);
     }
     function getSwapInfoKey(
         address user,
