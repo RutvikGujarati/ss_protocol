@@ -5,8 +5,8 @@ import "forge-std/Script.sol";
 import {SWAP_V2_2} from "../src/AuctionSwap.sol";
 contract AuctionSwapDeploy is Script {
     function run() external {
-        address governance = 0xBAaB2913ec979d9d21785063a0e4141e5B787D28;
-        address DAVWallet =  0x5E19e86F1D10c59Ed9290cb986e587D2541e942C;
+        address governance = 0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483;
+        address DAVWallet =  0x3Bdbb84B90aBAf52814aAB54B9622408F2dCA483;
 
         vm.startBroadcast();
 

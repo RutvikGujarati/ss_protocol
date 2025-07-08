@@ -72,7 +72,8 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     mapping(address => address) public tokenOwners; // token => owner
     mapping(address => address[]) public ownerToTokens;
     mapping(string => bool) public isTokenNameUsed;
-
+    mapping(address => mapping(address => mapping(uint256 => bool)))
+        public claimedBatches; // Track claimed batches: user => inputToken => batchIndex
     mapping(address => mapping(address => uint256)) public lastClaimTime;
     mapping(string => string) public tokenNameToEmoji;
     mapping(bytes32 => UserSwapInfo) public userSwapTotalInfo;
@@ -329,28 +330,88 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
         );
 
         uint256 currentDavHolding = getDavBalance(user);
-        uint256 lastHolding = lastDavHolding[user][inputToken];
-        uint256 newDavContributed = currentDavHolding > lastHolding
-            ? currentDavHolding - lastHolding
-            : 0;
-        require(newDavContributed > 0, "No new DAV holdings for this token");
+        uint256 newDavContributed = 0;
+
+        // Special case: governance user bypasses mintBatch logic
+        if (user == governanceAddress) {
+            uint256 lastHolding = lastDavHolding[user][inputToken];
+            newDavContributed = currentDavHolding > lastHolding
+                ? currentDavHolding - lastHolding
+                : 0;
+            require(
+                newDavContributed > 0,
+                "No new DAV holdings for this token"
+            );
+
+            lastDavHolding[user][inputToken] = currentDavHolding;
+            hasClaimed[user][inputToken] = true;
+        } else {
+            // Normal users: process using MintBatches with expiration and batch claiming
+            (uint256[] memory amounts, uint256[] memory timestamps) = dav
+                .getMintBatches(user);
+            uint256 lastHolding = lastDavHolding[user][inputToken];
+            uint256 expired = dav.getExpiredTokenCount(user);
+
+            if (expired >= lastHolding) {
+                lastDavHolding[user][inputToken] = 0;
+                lastHolding = 0;
+
+                // Clear claimed batch markers for expired batches
+                for (uint256 i = 0; i < timestamps.length; i++) {
+                    if (block.timestamp > timestamps[i] + dav.getExpireTime()) {
+                        claimedBatches[user][inputToken][i] = false;
+                    }
+                }
+            } else {
+                lastDavHolding[user][inputToken] -= expired;
+                lastHolding -= expired;
+            }
+
+            // Count unclaimed active batches
+            uint256[] memory claimedBatchIndices = new uint256[](
+                amounts.length
+            );
+            uint256 claimCount = 0;
+
+            for (uint256 i = 0; i < amounts.length; i++) {
+                if (
+                    block.timestamp <= timestamps[i] + dav.getExpireTime() &&
+                    !claimedBatches[user][inputToken][i]
+                ) {
+                    newDavContributed += amounts[i];
+                    claimedBatchIndices[claimCount] = i;
+                    claimCount++;
+                }
+            }
+
+            require(
+                newDavContributed > 0,
+                "No new DAV holdings for this token"
+            );
+
+            // Mark those batches as claimed
+            for (uint256 i = 0; i < claimCount; i++) {
+                claimedBatches[user][inputToken][claimedBatchIndices[i]] = true;
+            }
+
+            lastDavHolding[user][inputToken] = currentDavHolding;
+        }
 
         // Get current auction cycle
         uint256 cycle = getCurrentAuctionCycle(inputToken);
 
-        // Calculate reduction percent: 5% reduction per cycle, capped at 100%
+        // Calculate reduction percent: 5% per cycle, capped at 100%
         uint256 reductionPercent = cycle * 5 >= 100 ? 0 : 100 - (cycle * 5);
 
-        // **Effects**
         uint256 adjustedAirdropAmount = (AIRDROP_AMOUNT * reductionPercent) /
             100;
+
         uint256 reward = (newDavContributed *
             adjustedAirdropAmount +
             PRECISION_FACTOR -
             1) / PRECISION_FACTOR;
+
         require(reward > 0, "Reward too small");
-        lastDavHolding[user][inputToken] = currentDavHolding;
-        hasClaimed[user][inputToken] = true;
 
         // **Interactions**
         IERC20(inputToken).safeTransfer(msg.sender, reward);
@@ -644,29 +705,55 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     ) public view returns (uint256) {
         require(user != address(0), "Invalid user address");
 
+        // Governance: use simple balance diff logic
         uint256 currentDavHolding = getDavBalance(user);
         uint256 lastHolding = lastDavHolding[user][inputToken];
-        uint256 newDavContributed = currentDavHolding > lastHolding
-            ? currentDavHolding - lastHolding
-            : 0;
-
-        if (newDavContributed == 0) return 0;
-
-        // Get current auction cycle
         uint256 cycle = getCurrentAuctionCycle(inputToken);
-
         uint256 reductionPercent = cycle * 5 >= 100 ? 0 : 100 - (cycle * 5);
-
         uint256 adjustedAirdropAmount = (AIRDROP_AMOUNT * reductionPercent) /
             100;
+        if (user == governanceAddress) {
+            uint256 newDavContributed = currentDavHolding > lastHolding
+                ? currentDavHolding - lastHolding
+                : 0;
 
-        // Reward calculation with rounding up
-        uint256 reward = (newDavContributed *
-            adjustedAirdropAmount +
-            PRECISION_FACTOR -
-            1) / PRECISION_FACTOR;
+            if (newDavContributed == 0) return 0;
 
-        return reward;
+            return
+                (newDavContributed *
+                    adjustedAirdropAmount +
+                    PRECISION_FACTOR -
+                    1) / PRECISION_FACTOR;
+        } else {
+            // Non-governance logic
+            uint256 expired = dav.getExpiredTokenCount(user);
+            if (expired >= lastHolding) {
+                lastHolding = 0;
+            } else {
+                lastHolding -= expired;
+            }
+
+            uint256 newDavContributed = 0;
+            (uint256[] memory amounts, uint256[] memory timestamps) = dav
+                .getMintBatches(user);
+
+            for (uint256 i = 0; i < amounts.length; i++) {
+                if (
+                    block.timestamp <= timestamps[i] + dav.getExpireTime() &&
+                    !claimedBatches[user][inputToken][i]
+                ) {
+                    newDavContributed += amounts[i];
+                }
+            }
+
+            if (newDavContributed == 0) return 0;
+
+            return
+                (newDavContributed *
+                    adjustedAirdropAmount +
+                    PRECISION_FACTOR -
+                    1) / PRECISION_FACTOR;
+        }
     }
 
     function getNextClaimTime(
@@ -687,15 +774,31 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
         address inputToken
     ) public view returns (bool) {
         require(user != address(0), "Invalid user address");
+
         uint256 currentDavHolding = getDavBalance(user);
-        uint256 lastHolding = lastDavHolding[user][inputToken];
-        // If user has claimed and no new DAV is added, return true
-        if (hasClaimed[user][inputToken] && currentDavHolding <= lastHolding) {
-            return true;
+        if (currentDavHolding == 0) return false;
+
+        // Governance: use simple last vs current balance
+        if (user == governanceAddress) {
+            uint256 lastHolding = lastDavHolding[user][inputToken];
+            return currentDavHolding <= lastHolding;
         }
-        // Otherwise, either they haven't claimed, or they have new DAV, so return false
-        return false;
+
+        // Non-governance: check for unclaimed active batches
+        (uint256[] memory amounts, uint256[] memory timestamps) = dav
+            .getMintBatches(user);
+        for (uint256 i = 0; i < amounts.length; i++) {
+            if (
+                block.timestamp <= timestamps[i] + dav.getExpireTime() &&
+                !claimedBatches[user][inputToken][i]
+            ) {
+                return false;
+            }
+        }
+
+        return true;
     }
+
     //burned getter
     function getTotalStateBurned() public view returns (uint256) {
         return TotalBurnedStates;
