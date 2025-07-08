@@ -14,9 +14,9 @@ library AuctionLib {
         uint256 auctionCount;
     }
 	// Constants for auction cycles
-    uint256 public constant AUCTION_INTERVAL = 5 minutes;
-    uint256 public constant AUCTION_DURATION = 10 minutes;
-    uint256 public constant REVERSE_DURATION = 10 minutes;
+    uint256 public constant AUCTION_INTERVAL = 1 hours;
+    uint256 public constant AUCTION_DURATION = 1 hours;
+    uint256 public constant REVERSE_DURATION = 1 hours;
     uint256 public constant MAX_AUCTIONS = 20;
 
     /**
