@@ -34,6 +34,8 @@ library Distribution {
                 state.isDAVHolder[account] = true;
                 state.davHoldersCount++;
                 bool alreadyExists = false;
+                // This meant to run for all holders to push into array
+                // sync with latest dav holders
                 for (uint256 i = 0; i < state.davHolders.length; i++) {
                     if (state.davHolders[i] == account) {
                         alreadyExists = true;
@@ -136,6 +138,8 @@ library Distribution {
         uint256 treasuryClaimPercentage,
         uint256 cycleCount
     ) internal {
+        require(cycleCount > 0 && cycleCount <= 21, "Invalid cycle count");
+
         uint256 cycleAllocation = (stateLPShare * treasuryClaimPercentage) /
             100;
         // Distribute allocations across CYCLE_ALLOCATION_COUNT (10) cycles.

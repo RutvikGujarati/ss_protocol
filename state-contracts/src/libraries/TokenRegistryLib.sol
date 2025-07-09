@@ -24,7 +24,7 @@ library TokenRegistryLib {
         string[] allTokenNames;
         mapping(address => uint256) userTokenCount;
     }
-	
+
     function contains(
         string memory str,
         string memory substr
@@ -72,7 +72,6 @@ library TokenRegistryLib {
         }
     }
 
-	
     function addTokenEntry(
         TokenRegistry storage registry,
         address sender,
@@ -90,9 +89,10 @@ library TokenRegistryLib {
             !registry.isTokenNameUsed[_tokenName],
             "Token name already used"
         );
+        //This checks for users not having same names
         require(
             registry.userTokenEntries[sender][_tokenName].user == address(0),
-            "Token name already used by user"
+            "Token name is already used by user"
         );
 
         isImage = isImageURL(_emojiOrImage);
@@ -125,22 +125,22 @@ library TokenRegistryLib {
         address user,
         uint256 maxTokens
     ) internal view returns (string[] memory result) {
-        require(
-            registry.userTokenCount[user] <= maxTokens,
-            "Token limit exceeded"
-        );
         string[] memory allTokens = registry.usersTokenNames[user];
         uint256 totalTokens = allTokens.length;
         string[] memory temp = new string[](totalTokens);
         uint256 count = 0;
+        uint256 pendingCount = 0;
         for (uint256 i = 0; i < totalTokens; i++) {
             if (
                 registry.userTokenEntries[user][allTokens[i]].status ==
                 TokenStatus.Pending
             ) {
                 temp[count++] = allTokens[i];
+                pendingCount++;
             }
         }
+        require(pendingCount <= maxTokens, "Token limit exceeded for user");
+
         result = new string[](count);
         for (uint256 j = 0; j < count; j++) {
             result[j] = temp[j];

@@ -822,7 +822,7 @@ const InfoCards = () => {
                         textTransform: "capitalize",
                       }}
                     >
-                      TOTAL BURNED - CURRENT CYCLE-{" "}
+                      CURRENT CYCLE BURN
                       {formatWithCommas(userBurnedAmountInCycle)}
                     </h6>
                   </div>

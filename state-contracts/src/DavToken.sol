@@ -607,7 +607,7 @@ contract DAV_V2_2 is
     function processYourToken(
         string memory _tokenName,
         string memory _emojiOrImage
-    ) external payable {
+    ) external payable nonReentrant{
         bool isImage = registry.addTokenEntry(
             msg.sender,
             _tokenName,
@@ -666,7 +666,7 @@ contract DAV_V2_2 is
         address _owner,
         string memory _tokenName,
         TokenRegistryLib.TokenStatus _status
-    ) external onlyGovernance {
+    ) external onlyGovernance nonReentrant{
         registry.updateTokenStatus(_owner, _tokenName, _status);
         emit TokenStatusUpdated(_owner, _tokenName, _status);
     }
@@ -682,7 +682,7 @@ contract DAV_V2_2 is
     // Burn tokens and update cycle tracking
     /// @notice Burns StateToken and logs user contribution for a cycle
     /// @param amount Amount of StateToken to burn
-    function burnState(uint256 amount) external whenNotPaused {
+    function burnState(uint256 amount) external whenNotPaused nonReentrant {
         BurnAndClaimState.burnState(
             msg.sender,
             amount,
@@ -730,7 +730,7 @@ contract DAV_V2_2 is
     /// @dev Reverts if there are no rewards to claim or if the contract balance is insufficient.
     /// @custom:security non-reentrant and used pagination of 10 previous cycle
 
-    function claimPLS() external whenNotPaused {
+    function claimPLS() external whenNotPaused nonReentrant{
         BurnAndClaimState.claimPLS(
             msg.sender,
             claimStartTime,

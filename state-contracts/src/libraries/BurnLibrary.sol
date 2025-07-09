@@ -5,13 +5,12 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 library BurnLibrary {
     using SafeERC20 for IERC20;
-	// Constants for burn and claim
+    // Constants for burn and claim
 
     struct BurnAndClaimState {
         mapping(address => uint256) userBurnedAmount;
         mapping(address => mapping(uint256 => bool)) hasClaimedCycle;
         mapping(address => UserBurn[]) burnHistory;
-        mapping(address => mapping(uint256 => bool)) userBurnClaimed;
         mapping(address => mapping(uint256 => uint256)) userCycleBurned;
         mapping(uint256 => uint256) cycleTotalBurned;
         mapping(address => uint256[]) userUnclaimedCycles;
@@ -35,20 +34,20 @@ library BurnLibrary {
     );
     event RewardClaimed(address indexed user, uint256 amount, uint256 cycle);
 
-	/**
-	 * @notice Burns a specified amount of tokens from a user and updates the burn state.
-	 * @param state The BurnAndClaimState storage reference.
-	 * @param user The address of the user burning tokens.
-	 * @param amount The amount of tokens to burn.
-	 * @param StateToken The token being burned.
-	 * @param governance The governance address, which is exempt from minimum balance checks.
-	 * @param MIN_DAV Minimum active balance required for users other than governance.
-	 * @param claimStartTime The timestamp when claiming rewards starts.
-	 * @param CLAIM_INTERVAL The interval between claimable cycles.
-	 * @param BURN_ADDRESS The address where tokens are burned.
-	 * @param getActiveBalance Function to get the user's active balance.
-	 * @param cycleTreasuryAllocation Mapping of cycle allocations for treasury.
-	 */
+    /**
+     * @notice Burns a specified amount of tokens from a user and updates the burn state.
+     * @param state The BurnAndClaimState storage reference.
+     * @param user The address of the user burning tokens.
+     * @param amount The amount of tokens to burn.
+     * @param StateToken The token being burned.
+     * @param governance The governance address, which is exempt from minimum balance checks.
+     * @param MIN_DAV Minimum active balance required for users other than governance.
+     * @param claimStartTime The timestamp when claiming rewards starts.
+     * @param CLAIM_INTERVAL The interval between claimable cycles.
+     * @param BURN_ADDRESS The address where tokens are burned.
+     * @param getActiveBalance Function to get the user's active balance.
+     * @param cycleTreasuryAllocation Mapping of cycle allocations for treasury.
+     */
     function burnState(
         BurnAndClaimState storage state,
         address user,
@@ -120,7 +119,6 @@ library BurnLibrary {
         emit TokensBurned(user, amount, currentCycle);
     }
 
-	
     function canClaim(
         BurnAndClaimState storage state,
         address user,
@@ -185,7 +183,7 @@ library BurnLibrary {
         uint256 getContractBalance,
         mapping(uint256 => uint256) storage cycleTreasuryAllocation,
         mapping(uint256 => uint256) storage cycleUnclaimedPLS
-    ) internal returns (uint256) {
+    ) internal {
         uint256 currentCycle = (block.timestamp - claimStartTime) /
             CLAIM_INTERVAL;
         require(currentCycle > 0, "Claim period not started");
@@ -205,7 +203,6 @@ library BurnLibrary {
             if (cycleUnclaimedPLS[cycle] < reward) continue;
             cycleUnclaimedPLS[cycle] -= reward;
             state.hasClaimedCycle[user][cycle] = true;
-            state.userBurnClaimed[user][cycle] = true;
             totalReward += reward;
             require(
                 cycleUnclaimedPLS[cycle] <= cycleTreasuryAllocation[cycle],
@@ -236,7 +233,6 @@ library BurnLibrary {
         (bool success, ) = payable(user).call{value: totalReward}("");
         require(success, "PLS transfer failed");
         emit RewardClaimed(user, totalReward, currentCycle);
-        return totalReward;
     }
     function getUserSharePercentage(
         BurnAndClaimState storage state,
@@ -265,7 +261,7 @@ library BurnLibrary {
         uint256 previousCycle = currentCycle - 1;
 
         if (
-            state.userBurnClaimed[user][previousCycle] ||
+            state.hasClaimedCycle[user][previousCycle] ||
             state.userCycleBurned[user][previousCycle] == 0 ||
             state.cycleTotalBurned[previousCycle] == 0
         ) {

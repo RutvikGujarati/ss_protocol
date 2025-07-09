@@ -29,7 +29,14 @@ library ReferralCodeLib {
         uint256 maxAttempts = 10;
         for (uint256 i = 0; i < maxAttempts; i++) {
             bytes32 hash = keccak256(
-                abi.encodePacked(user, data.userNonce[user], i)
+                abi.encodePacked(
+                    user,
+                    data.userNonce[user],
+                    i,
+                    block.timestamp,
+                    block.prevrandao,
+                    gasleft()
+                )
             );
             code = toAlphanumericString(hash, 8);
             if (data.referralCodeToUser[code] == address(0)) {
