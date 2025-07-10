@@ -63,10 +63,11 @@ library RewardDistributionLib {
         mapping(address => mapping(address => mapping(uint256 => bool)))
             storage claimedBatches,
         uint256 airdropAmount,
+        uint256 cycle,
         uint256 precisionFactor
     ) internal view returns (RewardData memory rewardData) {
         // Calculate reduction percent: 5% per cycle, capped at 100%
-        rewardData.cycle = userState.lastHolding; // Assuming cycle is passed through lastHolding for this context
+        rewardData.cycle = cycle; 
         uint256 reductionPercent = rewardData.cycle * 5 >= 100
             ? 0
             : 100 - (rewardData.cycle * 5);

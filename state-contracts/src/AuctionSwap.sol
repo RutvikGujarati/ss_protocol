@@ -355,6 +355,7 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
                 timestamps: timestamps,
                 expireTime: dav.getExpireTime()
             });
+        uint256 cycle = getCurrentAuctionCycle(inputToken);
 
         // Calculate reward
         RewardDistributionLib.RewardData
@@ -365,23 +366,9 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
                 batchData,
                 claimedBatches,
                 AIRDROP_AMOUNT,
+                cycle,
                 PRECISION_FACTOR
             );
-
-        // Update reward data with current cycle
-        rewardData.cycle = getCurrentAuctionCycle(inputToken);
-        uint256 reductionPercent = rewardData.cycle * 5 >= 100
-            ? 0
-            : 100 - (rewardData.cycle * 5);
-        rewardData.adjustedAirdropAmount =
-            (AIRDROP_AMOUNT * reductionPercent) /
-            100;
-        rewardData.reward =
-            (rewardData.newDavContributed *
-                rewardData.adjustedAirdropAmount +
-                PRECISION_FACTOR -
-                1) /
-            PRECISION_FACTOR;
 
         require(
             rewardData.newDavContributed > 0,
