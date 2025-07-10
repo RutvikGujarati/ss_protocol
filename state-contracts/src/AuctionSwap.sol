@@ -38,7 +38,7 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     //For Airdrop
 
     uint256 public constant OWNER_REWARD_AMOUNT = 2500000 ether;
-    uint256 public constant CLAIM_INTERVAL = 8 hours;
+    uint256 public constant CLAIM_INTERVAL = 24 hours;
     uint256 public constant MAX_SUPPLY = 500000000000 ether;
     uint256 constant MIN_DAV_REQUIRED = 1 ether;
     uint256 constant DAV_FACTOR = 5000000 ether;
@@ -220,12 +220,12 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
         address pairAddress,
         address _tokenOwner
     ) external onlyGovernance {
-        // IPair pair = IPair(pairAddress);
-        // require(
-        //     (pair.token0() == token && pair.token1() == stateToken) ||
-        //         (pair.token1() == token && pair.token0() == stateToken),
-        //     "RSA: Pair must contain stateToken"
-        // );
+        IPair pair = IPair(pairAddress);
+        require(
+            (pair.token0() == token && pair.token1() == stateToken) ||
+                (pair.token1() == token && pair.token0() == stateToken),
+            "RSA: Pair must contain stateToken"
+        );
         require(token != address(0), "Invalid token address");
         require(stateToken != address(0), "State token not initialized");
         require(pairAddress != address(0), "Invalid pair address");
@@ -620,8 +620,7 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
 
     function getOutPutAmount(address inputToken) public view returns (uint256) {
         require(supportedTokens[inputToken], "Unsupported token");
-        // uint256 currentRatio = getRatioPrice(inputToken);
-        uint256 currentRatio = 1000 * PRECISION_FACTOR; // Placeholder for actual ratio calculation
+        uint256 currentRatio = getRatioPrice(inputToken);
         require(currentRatio > 0, "Invalid ratio");
 
         uint256 userBalance = getDavBalance(msg.sender);
