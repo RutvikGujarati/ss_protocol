@@ -138,7 +138,7 @@ library Distribution {
         uint256 treasuryClaimPercentage,
         uint256 cycleCount
     ) internal {
-        require(cycleCount > 0 && cycleCount <= 21, "Invalid cycle count");
+        require(cycleCount > 0 && cycleCount <= 10, "Invalid cycle count");
 
         uint256 cycleAllocation = (stateLPShare * treasuryClaimPercentage) /
             100;
