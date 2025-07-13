@@ -61,7 +61,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/MarketMaker"
+                path="/Deflation"
                 element={
                   <>
                     <InfoCards />

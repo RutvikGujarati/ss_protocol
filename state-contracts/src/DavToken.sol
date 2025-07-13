@@ -35,6 +35,7 @@ contract DAV_V2_2 is
     // DAV TOken
     // NOTE: // This contract is intended for PulseChain, not Ethereum.
     uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
+    uint256 public constant MAX_HOLDERS = 25000;
     uint256 public constant TOKEN_COST = 1000 ether; // 1000000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
     uint256 public constant LIQUIDITY_SHARE = 50; // 50% LIQUIDITY SHARE
@@ -61,9 +62,6 @@ contract DAV_V2_2 is
     uint256 public totalLiquidityAllocated;
     uint256 public totalDevelopmentAllocated;
     //-------------------------- State burn ---------------------------
-    // Global tracking of total tokens burned across all users and cycles
-    // Used in DApp to display total burn statistics
-    uint256 public totalStateBurned;
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
     uint256 public constant CLAIM_INTERVAL = 24 hours; // 36 days claim timer
     uint256 public constant MIN_DAV = 10 * 1e18;
@@ -326,6 +324,7 @@ contract DAV_V2_2 is
     ) external payable nonReentrant whenNotPaused {
         // Checks
         require(amount > 0, "Amount must be greater than zero");
+        require(getDAVHoldersCount() < MAX_HOLDERS, "Max holders reached");
         require(msg.sender != governance, "Governance cannot mint");
         require(amount % 1 ether == 0, "Amount must be a whole number");
         require(mintedSupply + amount <= MAX_SUPPLY, "Max supply reached");
@@ -787,6 +786,9 @@ contract DAV_V2_2 is
     }
     function cycleTotalBurned(uint256 cycle) public view returns (uint256) {
         return BurnAndClaimState.cycleTotalBurned[cycle];
+    }
+    function totalStateBurned() view public returns (uint256) {
+        return BurnAndClaimState.totalStateBurned;
     }
 
     receive() external payable {

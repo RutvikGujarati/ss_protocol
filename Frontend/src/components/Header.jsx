@@ -59,9 +59,9 @@ const Header = () => {
                       ? "nav-link active-link text-light"
                       : "nav-link text-light"
                   }
-                  to="/MarketMaker"
+                  to="/Deflation"
                 >
-                  Market Makers
+                  Deflation
                 </NavLink>
               </li>
               <li className="nav-item mx-2 dropdown">
@@ -132,7 +132,7 @@ const Header = () => {
           <i className="bi bi-plus-circle"></i> <div>Add Token</div>
         </NavLink>
         <NavLink
-          to="/MarketMaker"
+          to="/Deflation"
           className={({ isActive }) =>
             isActive
               ? "text-light active-link text-center"

@@ -333,7 +333,7 @@ const InfoCards = () => {
   }, [amount]);
 
   const location = useLocation();
-  const isBurn = location.pathname === "/MarketMaker";
+  const isBurn = location.pathname === "/Deflation";
   const isAuction = location.pathname === "/auction";
   const isAddToken = location.pathname === "/AddToken";
   const [amountOfInput, setAmountOfInput] = useState("");
@@ -679,8 +679,7 @@ const InfoCards = () => {
                           textTransform: "capitalize",
                         }}
                       >
-                        A MINIMUM OF 10 DAV TOKENS ARE REQUIRED TO CLAIM MARKET
-                        MAKER REWARDS
+                        A MINIMUM OF 10 DAV TOKENS ARE REQUIRED TO CLAIM REWARDS
                       </h6>
                     </div>
                   </div>
