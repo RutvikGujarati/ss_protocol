@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 library Distribution {
     // Constants for distribution shares
+	// Dav Holder array (davHolders) is limted to 25000. cause limit is seted inside main contract.so, it will run for only that holders.
     struct HolderState {
         mapping(address => bool) isDAVHolder;
         address[] davHolders;
