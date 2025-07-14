@@ -183,7 +183,7 @@ const DetailsInfo = ({ selectedToken }) => {
                   <th className="text-center">Burned</th>
                   <th className="text-center">Info</th>
                   <th></th>
-                  <th className="text-center">Market Maker</th>
+                  <th className="text-center">Highest Ratio</th>
                   <th className="col-auto"></th>
                 </tr>
               </thead>

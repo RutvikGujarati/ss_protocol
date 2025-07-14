@@ -547,7 +547,7 @@ const InfoCards = () => {
                             ) : (
                               <>{isLoading ? <DotAnimation /> : davHolds}</>
                             )}
-                            / {isLoading ? <DotAnimation /> : davExpireHolds}
+                            {" "}/ {isLoading ? <DotAnimation /> : davExpireHolds}
                           </h5>
                         </div>
                       </div>
@@ -1055,7 +1055,7 @@ const InfoCards = () => {
               <div className="col-md-4 p-0 m-2 cards">
                 <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 ">
                   <div className="p-2 pt-3 pb-2">
-                    <p className="mb-2 detailText ">Market Maker Fee</p>
+                    <p className="mb-2 detailText ">TOKEN Fee</p>
                     <h6 className="text-center  mt-3">
                       {formatWithCommas(adjustedTokenProcessing)} PLS
                     </h6>
@@ -1087,8 +1087,8 @@ const InfoCards = () => {
                         fontSize: "14px",
                       }}
                     >
-                      <li>Market Maker + Emoji Fee - 10 Million PLS </li>
-                      <li>Market Maker + Image Fee - 15 Million PLS </li>
+                      <li>Token Fee + Emoji Fee - 10 Million PLS </li>
+                      <li>Token Fee + Image Fee - 15 Million PLS </li>
                     </ul>
                   </h6>
                 </div>

@@ -257,7 +257,7 @@ const DataTable = () => {
                   }}
                 >
                   <div style={{ fontSize: "13px", lineHeight: "1" }}>3</div>
-                  <div>Market Maker Instructions</div>
+                  <div>Double Your Stash</div>
                 </th>
                 <th></th>
                 <th></th>
