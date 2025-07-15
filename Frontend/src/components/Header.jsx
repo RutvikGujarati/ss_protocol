@@ -172,12 +172,12 @@ const Header = () => {
                 ? "nav-link active-link text-light"
                 : "nav-link text-light"
             }
-            to="https://pulsex.mypinata.cloud/ipfs/bafybeibzu7nje2o2tufb3ifitjrto3n3xcwon7fghq2igtcupulfubnrim/"
+            to="https://dex.9mm.pro/swap?chain=pulsechain"
             target="_blank"
           >
             <img
               src={pulsex}
-              alt="PulseX"
+              alt="9mm Logo"
               width="30"
               height="30"
               style={{ borderRadius: "50%", background: "transparent" }}
