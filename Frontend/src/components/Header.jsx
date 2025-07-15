@@ -140,7 +140,7 @@ const Header = () => {
           }
         >
           <i className="bi bi-graph-up"></i>
-          <div>Market Makers</div>
+          <div>Deflation</div>
         </NavLink>
         <NavLink
           to="/info"
