@@ -29,6 +29,7 @@ const SwapComponent = () => {
   const [isAutoSlippage, setIsAutoSlippage] = useState(true);
   const [error, setError] = useState("");
   const [quoteData, setQuoteData] = useState(null);
+  const [estimatedGas, setEstimatedGas] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -43,6 +44,7 @@ const SwapComponent = () => {
   const [tokenPrices, setTokenPrices] = useState({});
   const [inputUsdValue, setInputUsdValue] = useState("");
   const [outputUsdValue, setOutputUsdValue] = useState("");
+  const [currentStep, setCurrentStep] = useState(""); // "approving", "swapping", ""
 
   const handleSwitchTokens = () => {
     setTokenIn(tokenOut);
@@ -88,6 +90,7 @@ const SwapComponent = () => {
 
   const handleApprove = async () => {
     setIsApproving(true);
+    setCurrentStep("approving");
     try {
       const tokenAddress = TOKENS[tokenIn].address;
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
@@ -96,9 +99,14 @@ const SwapComponent = () => {
       await tx.wait();
       setNeedsApproval(false);
       setError("");
+
+      // Automatically trigger swap after approval
+      setCurrentStep("swapping");
+      await handleSwap();
     } catch (err) {
       setError("Approval failed. Try again.");
       console.error("Approval error", err);
+      setCurrentStep("");
     } finally {
       setIsApproving(false);
     }
@@ -156,6 +164,7 @@ const SwapComponent = () => {
       if (!response.ok) throw new Error("Quote fetch failed.");
       const data = await response.json();
       setAmountOut(formatUnits(data.destAmount, TOKENS[tokenOut].decimals));
+      setEstimatedGas(data.gasUseEstimateUSD.toFixed(4));
       setQuoteData(data.methodParameters);
       setRouteDetails(data.route || { swaps: [] });
       setError("");
@@ -206,6 +215,7 @@ const SwapComponent = () => {
     }
 
     setIsSwapping(true);
+    setCurrentStep("swapping");
     try {
       const tx = await signer.sendTransaction({
         to: "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6",
@@ -213,11 +223,18 @@ const SwapComponent = () => {
         data: quoteData.calldata,
       });
       console.log("Transaction sent:", tx.hash);
+
+      // Wait for transaction confirmation
+      await tx.wait();
+      console.log("Transaction confirmed:", tx.hash);
+
       setError("");
       setShowConfirmation(true);
+      setCurrentStep("");
     } catch (err) {
       console.error("Swap failed", err);
       setError("Swap failed. Try again.");
+      setCurrentStep("");
     } finally {
       setIsSwapping(false);
     }
@@ -375,6 +392,25 @@ const SwapComponent = () => {
     }
   };
 
+  // Calculate price difference
+  const getPriceDifference = () => {
+    if (!inputUsdValue || !outputUsdValue) return null;
+
+    const inputUsd = parseFloat(inputUsdValue.replace('$', ''));
+    const outputUsd = parseFloat(outputUsdValue.replace('$', ''));
+
+    if (isNaN(inputUsd) || isNaN(outputUsd)) return null;
+
+    const difference = outputUsd - inputUsd;
+    const percentage = inputUsd > 0 ? (difference / inputUsd) * 100 : 0;
+
+    return {
+      value: difference,
+      percentage: percentage,
+      isPositive: difference > 0
+    };
+  };
+
   // Fetch prices on mount and when TOKENS change
   useEffect(() => {
     fetchTokenPrices();
@@ -387,21 +423,27 @@ const SwapComponent = () => {
 
   return (
     <div
-      className="d-flex justify-content-center mt-4 mb-5"
+      className="d-flex justify-content-center"
       style={{
         background: "linear-gradient(180deg, #0d1117 0%, #161b22 100%)",
         fontFamily: "Inter, sans-serif",
-        minHeight: "80vh",
+        minHeight: "100vh",
+        padding: "20px 0",
+        alignItems: "flex-start",
+        paddingTop: "60px",
       }}
     >
       <div
-        className="p-4 mb-5 shadow"
+        className="shadow"
         style={{
+          width: "100%",
           maxWidth: "500px",
           borderRadius: "20px",
           background: "#1e1e1e",
           color: "#fff",
           boxShadow: "0 0 15px rgba(0,0,0,0.2)",
+          padding: "24px",
+          margin: "0 16px",
         }}
       >
         <div className="d-flex justify-content-between align-items-center mb-4">
@@ -449,7 +491,7 @@ const SwapComponent = () => {
                   role="button"
                   title={copiedTokenIn ? "Copied!" : "Copy address"}
                   onClick={() => handleCopy(TOKENS[tokenIn].address, "in")}
-                  style={{ cursor: "pointer", marginLeft: 4, color: copiedTokenIn ? "#4caf50" : "#aaa", fontSize: 18 }}
+                  style={{ cursor: "pointer", marginLeft: 4, color: copiedTokenIn ? "#4caf50" : "#aaa", fontSize: 18, color: "#f6851b" }}
                 >
                   {copiedTokenIn ? "✔️" : <img src={copyIcon} alt="Copy" width="18" />}
                 </span>
@@ -534,15 +576,77 @@ const SwapComponent = () => {
         </div>
         {/* Output USD value display */}
         {outputUsdValue && (
-          <div className="d-flex justify-content-start mb-2">
+          <div className="d-flex justify-content-start align-items-center gap-2 mb-2">
             <small className="text-secondary">
               {outputUsdValue}
             </small>
+            {getPriceDifference() && (
+              <span
+                className="badge"
+                style={{
+                  backgroundColor: getPriceDifference().isPositive ? '#28a745' : '#dc3545',
+                  color: 'white',
+                  fontSize: '0.7rem',
+                  padding: '2px 6px'
+                }}
+              >
+                {getPriceDifference().isPositive ? '+' : ''}{getPriceDifference().value.toFixed(8)} ({getPriceDifference().isPositive ? '+' : ''}{getPriceDifference().percentage.toFixed(2)}%)
+              </span>
+            )}
           </div>
         )}
 
         {error && <div className="alert alert-danger py-2">{error}</div>}
 
+
+
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <small className="text-secondary">
+            Network Fee: {estimatedGas}
+          </small>
+        </div>
+        {/* Progress indicator */}
+        {currentStep && (
+          <div className="d-flex justify-content-center align-items-center mb-3">
+            <div className="d-flex align-items-center gap-3">
+              {/* Step 1: Approving */}
+              <div className="d-flex flex-column align-items-center">
+                <div
+                  className={`rounded-circle d-flex align-items-center justify-content-center ${currentStep === "approving" ? "bg-primary text-white" :
+                    currentStep === "swapping" ? "bg-success text-white" : "bg-secondary text-white"
+                    }`}
+                  style={{ width: "32px", height: "32px", fontSize: "14px" }}
+                >
+                  {currentStep === "swapping" ? "✓" : "1"}
+                </div>
+                <small className={`mt-1 ${currentStep === "approving" ? "text-primary" : currentStep === "swapping" ? "text-success" : "text-secondary"}`}>
+                  Approving
+                </small>
+              </div>
+
+              {/* Connecting line */}
+              <div
+                className={`border-top ${currentStep === "swapping" ? "border-success" : "border-secondary"}`}
+                style={{ width: "40px", height: "2px" }}
+              ></div>
+
+              {/* Step 2: Swapping */}
+              <div className="d-flex flex-column align-items-center">
+                <div
+                  className={`rounded-circle d-flex align-items-center justify-content-center ${currentStep === "swapping" ? "bg-primary text-white" :
+                    currentStep === "approving" ? "bg-secondary text-white" : "bg-success text-white"
+                    }`}
+                  style={{ width: "32px", height: "32px", fontSize: "14px" }}
+                >
+                  {currentStep === "swapping" ? "2" : currentStep === "approving" ? "2" : "✓"}
+                </div>
+                <small className={`mt-1 ${currentStep === "swapping" ? "text-primary" : currentStep === "approving" ? "text-secondary" : "text-success"}`}>
+                  Swapping
+                </small>
+              </div>
+            </div>
+          </div>
+        )}
         <RouteDetailsPopup
           routeDetails={routeDetails}
           showRoutePopup={showRoutePopup}
@@ -557,7 +661,7 @@ const SwapComponent = () => {
             <button
               className="btn btn-warning rounded-pill py-2"
               onClick={handleApprove}
-              disabled={isApproving}
+              disabled={isApproving || isSwapping}
             >
               {isApproving ? (
                 <>
@@ -598,7 +702,7 @@ const SwapComponent = () => {
         {showConfirmation && (
           <div
             className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-            style={{ backgroundColor: "rgba(0,0,0,0.7)", zIndex: 3000 }}
+            style={{ backgroundColor: "rgba(0,0,0,0.7)", zIndex: 3000, width: "100px" }}
           >
             <div
               className="bg-dark text-light rounded-4 p-4 shadow-lg text-center"

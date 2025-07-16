@@ -8,8 +8,9 @@ const RouteDetailsPopup = ({ routeDetails, showRoutePopup, setShowRoutePopup, ge
             onMouseEnter={() => setShowRoutePopup(true)}
             onMouseLeave={() => setShowRoutePopup(false)}
         >
-            <button className="btn btn-link text-danger fw-bold">
-                Show Route 📍
+            <button className="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1 mb-2">
+                <i className="fas fa-route me-1"></i>
+                Show Route Details
             </button>
 
             {showRoutePopup && (

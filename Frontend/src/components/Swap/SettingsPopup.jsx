@@ -17,7 +17,7 @@ const SettingsPopup = ({ show, slippage, isAutoSlippage, handleSlippageToggle, s
                 minWidth: 220,
                 maxWidth: 320,
                 width: "90vw",
-                marginTop: 200, // below the settings button
+                marginTop: 230, // below the settings button
                 marginRight: 500,
             }}
         >
