@@ -12,7 +12,7 @@ const Header = () => {
       <nav className="navbar navbar-expand-lg bg-dark py-2 d-none d-lg-flex">
         <div className="container d-flex justify-content-between align-items-center w-100">
           {/* Navbar Brand */}
-          <NavLink className="navbar-brand text-light pb-0 mb-0" to="/">
+          <NavLink className="navbar-brand text-light pb-0 mb-0" to="/Swap">
             <label
               className="uppercase fs-2 fw-bolder"
               style={{ fontFamily: "Satoshi, sans-serif" }}
@@ -99,7 +99,7 @@ const Header = () => {
       {/* Top Navbar for Mobile */}
       <nav className="navbar bg-dark d-lg-none justify-content-between align-items-center py-2">
         {/* Navbar Brand */}
-        <NavLink className="navbar-brand text-light small-text" to="/">
+        <NavLink className="navbar-brand text-light small-text" to="/Swap">
           <h5 className="uppercase fs-2 fw-bolder">STATE DEX</h5>
         </NavLink>
         {/* Wallet Connector */}

@@ -15,6 +15,7 @@ import {
 import { Toaster } from "react-hot-toast";
 import Footer from "./components/Footer";
 import DavHistory from "./components/DavHistory";
+import SwapComponent from "./components/Swap/SwapMedel";
 
 const App = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -51,6 +52,7 @@ const App = () => {
           <main className="flex-grow-1">
             <Routes>
               <Route path="/" element={<Navigate to="/auction" />} />
+              <Route path="/Swap" element={<SwapComponent />} />
               <Route
                 path="/auction"
                 element={

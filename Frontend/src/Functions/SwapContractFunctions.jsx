@@ -48,7 +48,6 @@ export const SwapContractProvider = ({ children }) => {
   const [TokenBalance, setTokenbalance] = useState({});
   const [isReversed, setIsReverse] = useState({});
   const [IsAuctionActive, setisAuctionActive] = useState({});
-  const [isGotFlammed, setIsFlammed] = useState({});
   const [isTokenRenounce, setRenonced] = useState({});
   const [tokenMap, setTokenMap] = useState({});
   const [TokenNames, setTokenNames] = useState({});
@@ -349,16 +348,7 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching Auction Active:", e);
     }
   };
-  const isFlammed = async () => {
-    try {
-      await fetchTokenData({
-        contractMethod: "isFlammed",
-        setState: setIsFlammed,
-      });
-    } catch (e) {
-      console.error("Error fetching isFlammed:", e);
-    }
-  };
+
   const isRenounced = async () => {
     try {
       const results = {};
@@ -693,16 +683,16 @@ export const SwapContractProvider = ({ children }) => {
     }
   };
   useEffect(() => {
-	if (!AllContracts || !address) return;
-  
-	const runAuctionChecks = async () => {
-	  await CheckIsAuctionActive();
-	  await CheckIsReverse();
-	};
-  
-	runAuctionChecks();
+    if (!AllContracts || !address) return;
+
+    const runAuctionChecks = async () => {
+      await CheckIsAuctionActive();
+      await CheckIsReverse();
+    };
+
+    runAuctionChecks();
   }, [AllContracts, address]);
-  
+
   useEffect(() => {
     const functions = [
       fetchUserTokenAddresses,
@@ -716,14 +706,12 @@ export const SwapContractProvider = ({ children }) => {
       isAirdropClaimed,
       AddressesFromContract,
       isRenounced,
-      isFlammed,
       getTokenNamesForUser,
       isTokenSupporteed,
       getTokenNamesByUser,
       HasSwappedAucton,
       HasReverseSwappedAucton,
     ];
-    const pollingFunctions = [isFlammed];
 
     const runAll = async () => {
       const results = await Promise.allSettled(functions.map((fn) => fn()));
@@ -736,25 +724,8 @@ export const SwapContractProvider = ({ children }) => {
         }
       });
     };
-    const pollData = async () => {
-      const results = await Promise.allSettled(
-        pollingFunctions.map((fn) => fn())
-      );
-      results.forEach((result, index) => {
-        if (result.status === "rejected") {
-          console.error(
-            `Polling function ${pollingFunctions[index].name} failed:`,
-            result.reason
-          );
-        }
-      });
-    };
 
     runAll();
-    const pollingInterval = setInterval(pollData, 2000); // Poll every 2 seconds
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(pollingInterval);
   }, [AllContracts, address]);
   // Adjust based on when you want it to run
 
@@ -1036,7 +1007,6 @@ export const SwapContractProvider = ({ children }) => {
         tokenMap,
         IsAuctionActive,
         TokenRatio,
-        isGotFlammed,
       }}
     >
       {children}

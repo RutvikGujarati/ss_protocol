@@ -174,7 +174,7 @@ export const DavProvider = ({ children }) => {
     }
   }, [AllContracts, address]);
 
-  console.log("dav entries", data.DavMintFee);
+//   console.log("dav entries", data.DavMintFee);
 
   const fetchAndStoreTokenEntries = async () => {
     try {
