@@ -7,9 +7,12 @@ import setting from "/setting.png";
 import { ContractContext } from "../../Functions/ContractInitialize";
 import { useAllTokens } from "./Tokens";
 import state from "../../assets/statelogo.png";
-import pulsechainLogo from "../../assets/pls1.png"; // Make sure this file exists!
-
+import pulsechainLogo from "../../assets/pls1.png";
 import { useAccount } from "wagmi";
+import SettingsPopup from "./SettingsPopup";
+import RouteDetailsPopup from "./RouteDetailsPopup";
+import copyIcon from "/copy.png";
+import metamaskIcon from "../../assets/metamask-icon.png";
 
 const SwapComponent = () => {
   const { signer } = useContext(ContractContext);
@@ -22,8 +25,8 @@ const SwapComponent = () => {
   const [isSwapping, setIsSwapping] = useState(false);
   const [amountIn, setAmountIn] = useState("");
   const [amountOut, setAmountOut] = useState("");
-  const [slippage, setSlippage] = useState(0.5); // Default to 0.5% for Auto
-  const [isAutoSlippage, setIsAutoSlippage] = useState(true); // New state for Auto/Custom toggle
+  const [slippage, setSlippage] = useState(0.5);
+  const [isAutoSlippage, setIsAutoSlippage] = useState(true);
   const [error, setError] = useState("");
   const [quoteData, setQuoteData] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,21 +37,30 @@ const SwapComponent = () => {
   const [showRoutePopup, setShowRoutePopup] = useState(false);
   const [needsApproval, setNeedsApproval] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
+  const [tokenBalance, setTokenBalance] = useState("");
+  const [copiedTokenIn, setCopiedTokenIn] = useState(false);
+  const [copiedTokenOut, setCopiedTokenOut] = useState(false);
+  const [tokenPrices, setTokenPrices] = useState({});
+  const [inputUsdValue, setInputUsdValue] = useState("");
+  const [outputUsdValue, setOutputUsdValue] = useState("");
 
   const handleSwitchTokens = () => {
     setTokenIn(tokenOut);
     setTokenOut(tokenIn);
     setAmountOut("");
   };
+
   const ERC20_ABI = [
     "function allowance(address owner, address spender) view returns (uint256)",
     "function approve(address spender, uint256 amount) returns (bool)"
   ];
+
   const SPECIAL_TOKEN_LOGOS = {
     STATE: state,
     pSTATE: state,
     PulseChain: pulsechainLogo,
   };
+
   const checkAllowance = async () => {
     if (tokenIn === "PLS") {
       setNeedsApproval(false);
@@ -57,7 +69,6 @@ const SwapComponent = () => {
     try {
       const tokenAddress = TOKENS[tokenIn].address;
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
-
       const allowance = await contract.allowance(address, "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6");
       const amount = parseUnits(amountIn || "0", TOKENS[tokenIn].decimals);
       setNeedsApproval(BigInt(allowance) < BigInt(amount));
@@ -66,6 +77,7 @@ const SwapComponent = () => {
       console.error("Error checking allowance", err);
     }
   };
+
   useEffect(() => {
     if (signer && amountIn && !isNaN(amountIn)) {
       checkAllowance();
@@ -84,8 +96,6 @@ const SwapComponent = () => {
       await tx.wait();
       setNeedsApproval(false);
       setError("");
-      // Optionally, trigger swap automatically after approval:
-      // await handleSwap();
     } catch (err) {
       setError("Approval failed. Try again.");
       console.error("Approval error", err);
@@ -93,7 +103,7 @@ const SwapComponent = () => {
       setIsApproving(false);
     }
   };
-  // Helper function
+
   const getTokenLogo = (symbol) => {
     if (SPECIAL_TOKEN_LOGOS[symbol]) {
       return <img src={SPECIAL_TOKEN_LOGOS[symbol]} alt={symbol} width="32" />;
@@ -106,6 +116,7 @@ const SwapComponent = () => {
     }
     return <img src="/default.png" alt={symbol} width="32" />;
   };
+
   const openModal = (type) => {
     setModalType(type);
     setIsModalOpen(true);
@@ -121,10 +132,12 @@ const SwapComponent = () => {
     else setTokenOut(key);
     closeModal();
   };
+
   function getApiTokenAddress(symbol) {
     if (symbol === "PLS") return "PLS";
     return TOKENS[symbol]?.address;
   }
+
   const fetchQuote = async () => {
     if (!amountIn || isNaN(amountIn)) {
       setAmountOut("");
@@ -138,13 +151,10 @@ const SwapComponent = () => {
       const amount = parseUnits(amountIn, TOKENS[tokenIn].decimals).toString();
       const tokenInAddress = getApiTokenAddress(tokenIn);
       const tokenOutAddress = getApiTokenAddress(tokenOut);
-
       const url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=${slippage}`;
       const response = await fetch(url);
       if (!response.ok) throw new Error("Quote fetch failed.");
-
       const data = await response.json();
-      console.log("response", data);
       setAmountOut(formatUnits(data.destAmount, TOKENS[tokenOut].decimals));
       setQuoteData(data.methodParameters);
       setRouteDetails(data.route || { swaps: [] });
@@ -158,9 +168,36 @@ const SwapComponent = () => {
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     fetchQuote();
   }, [amountIn, tokenIn, tokenOut]);
+
+  // Fetch token balance
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!signer || !address || !tokenIn || !TOKENS[tokenIn]) {
+        setTokenBalance("");
+        return;
+      }
+      try {
+        if (tokenIn === "PLS") {
+          // Native balance
+          const bal = await signer.provider.getBalance(address);
+          setTokenBalance(formatUnits(bal, 18));
+        } else {
+          // ERC20 balance
+          const tokenAddress = TOKENS[tokenIn].address;
+          const contract = new ethers.Contract(tokenAddress, ["function balanceOf(address) view returns (uint256)"], signer);
+          const bal = await contract.balanceOf(address);
+          setTokenBalance(formatUnits(bal, TOKENS[tokenIn].decimals));
+        }
+      } catch (err) {
+        setTokenBalance("");
+      }
+    };
+    fetchBalance();
+  }, [signer, address, tokenIn, TOKENS]);
 
   const handleSwap = async () => {
     if (!signer || !quoteData) {
@@ -175,7 +212,6 @@ const SwapComponent = () => {
         value: quoteData.value,
         data: quoteData.calldata,
       });
-
       console.log("Transaction sent:", tx.hash);
       setError("");
       setShowConfirmation(true);
@@ -190,9 +226,164 @@ const SwapComponent = () => {
   const handleSlippageToggle = (isAuto) => {
     setIsAutoSlippage(isAuto);
     if (isAuto) {
-      setSlippage(0.5); // Set to 0.5% when switching to Auto
+      setSlippage(0.5);
     }
   };
+
+  // Copy to clipboard handler
+  const handleCopy = (address, type) => {
+    if (!address) return;
+    navigator.clipboard.writeText(address);
+    if (type === "in") {
+      setCopiedTokenIn(true);
+      setTimeout(() => setCopiedTokenIn(false), 1200);
+    } else {
+      setCopiedTokenOut(true);
+      setTimeout(() => setCopiedTokenOut(false), 1200);
+    }
+  };
+
+  const handleAddToMetaMask = async (token) => {
+    if (!window.ethereum || !token?.address) return;
+    try {
+      let symbol = token.symbol;
+      if (symbol === "STATE" && token.address) {
+        symbol = "pSTATE";
+      }
+      await window.ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: token.address,
+            symbol: symbol,
+            decimals: token.decimals,
+            image: token.image || window.location.origin + '/default.png',
+          },
+        },
+      });
+    } catch (err) {
+      // Optionally handle error or show feedback
+      console.log("Error adding to MetaMask", err);
+    }
+  };
+
+  // Fetch token prices from CoinGecko
+  const fetchTokenPrices = async () => {
+    try {
+      const prices = {};
+
+      // Fetch price for tokenIn (if not PLS)
+      if (tokenIn !== "PLS" && TOKENS[tokenIn]?.address) {
+        try {
+          const response = await fetch(
+            `https://api.geckoterminal.com/api/v2/networks/pulsechain/tokens/${TOKENS[tokenIn].address}`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            prices[TOKENS[tokenIn].address.toLowerCase()] = data.data?.attributes?.price_usd || 0;
+            console.log(`Price for ${tokenIn}:`, data.data?.attributes?.price_usd);
+          }
+        } catch (err) {
+          console.error(`Error fetching price for ${tokenIn}:`, err);
+        }
+      }
+
+      // Fetch price for tokenOut (if not PLS and different from tokenIn)
+      if (tokenOut !== "PLS" && TOKENS[tokenOut]?.address && tokenOut !== tokenIn) {
+        try {
+          const response = await fetch(
+            `https://api.geckoterminal.com/api/v2/networks/pulsechain/tokens/${TOKENS[tokenOut].address}`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            prices[TOKENS[tokenOut].address.toLowerCase()] = data.data?.attributes?.price_usd || 0;
+            console.log(`Price for ${tokenOut}:`, data.data?.attributes?.price_usd);
+          }
+        } catch (err) {
+          console.error(`Error fetching price for ${tokenOut}:`, err);
+        }
+      }
+
+      // Add PLS price if either token is PLS
+      if (tokenIn === "PLS" || tokenOut === "PLS") {
+        try {
+          const plsResponse = await fetch(
+            'https://api.coingecko.com/api/v3/simple/price?ids=pulsechain&vs_currencies=usd'
+          );
+          const plsData = await plsResponse.json();
+          if (plsData.pulsechain) {
+            prices['pls'] = plsData.pulsechain.usd;
+            console.log("PLS price:", plsData.pulsechain.usd);
+          }
+        } catch (err) {
+          console.error("Error fetching PLS price:", err);
+        }
+      }
+
+      // Add fallback prices for tokens not on API
+      const fallbackPrices = {
+        // Example: '0x4208A56180C81De2da1765eE5b866C9Dec3b346E': 0.001, // STATE token
+      };
+
+      // Merge fallback prices
+      Object.keys(fallbackPrices).forEach(address => {
+        if (!prices[address.toLowerCase()]) {
+          prices[address.toLowerCase()] = fallbackPrices[address];
+        }
+      });
+
+      console.log("Final prices object:", prices);
+      setTokenPrices(prices);
+    } catch (err) {
+      console.error("Error fetching token prices:", err);
+    }
+  };
+
+  // Calculate USD values
+  const calculateUsdValues = () => {
+    if (!amountIn || isNaN(amountIn)) {
+      setInputUsdValue("");
+      setOutputUsdValue("");
+      return;
+    }
+
+    // Calculate input USD value
+    let inputPrice = 0;
+    if (tokenIn === "PLS") {
+      inputPrice = tokenPrices['pls'] || 0;
+    } else if (TOKENS[tokenIn]?.address) {
+      inputPrice = tokenPrices[TOKENS[tokenIn].address.toLowerCase()] || 0;
+    }
+
+    const inputUsd = parseFloat(amountIn) * inputPrice;
+    setInputUsdValue(inputUsd > 0 ? `$${inputUsd.toFixed(8)}` : "");
+
+    // Calculate output USD value
+    if (amountOut && !isNaN(amountOut)) {
+      let outputPrice = 0;
+      if (tokenOut === "PLS") {
+        outputPrice = tokenPrices['pls'] || 0;
+      } else if (TOKENS[tokenOut]?.address) {
+        outputPrice = tokenPrices[TOKENS[tokenOut].address.toLowerCase()] || 0;
+      }
+
+      const outputUsd = parseFloat(amountOut) * outputPrice;
+      setOutputUsdValue(outputUsd > 0 ? `$${outputUsd.toFixed(8)}` : "");
+    } else {
+      setOutputUsdValue("");
+    }
+  };
+
+  // Fetch prices on mount and when TOKENS change
+  useEffect(() => {
+    fetchTokenPrices();
+  }, [tokenIn, tokenOut]);
+
+  // Calculate USD values when amounts or prices change
+  useEffect(() => {
+    calculateUsdValues();
+  }, [amountIn, amountOut, tokenPrices, tokenIn, tokenOut]);
 
   return (
     <div
@@ -206,8 +397,7 @@ const SwapComponent = () => {
       <div
         className="p-4 mb-5 shadow"
         style={{
-          width: "100%",
-          maxWidth: "420px",
+          maxWidth: "500px",
           borderRadius: "20px",
           background: "#1e1e1e",
           color: "#fff",
@@ -220,63 +410,20 @@ const SwapComponent = () => {
             className="btn btn-link text-light"
             onClick={() => setShowSettings(!showSettings)}
           >
-            <img src={setting} width="24" height="24" alt="Settings" />{" "}
+            <img src={setting} width="24" height="24" alt="Settings" />
           </button>
         </div>
 
-        {showSettings && (
-          <div
-            className="position-absolute"
-            style={{
-              top: "250px",
-              left: "500px",
-              background: "#1e1e1e",
-              borderRadius: "10px",
-              padding: "10px",
-              boxShadow: "0 0 10px rgba(0,0,0,0.5)",
-              zIndex: 1000,
-            }}
-          >
-            <label className="text-light small mb-1">Max slippage</label>
-            <div className="input-group mb-2">
-              <input
-                type="text"
-                className="form-control border-0 bg-transparent text-light fs-5"
-                value={isAutoSlippage ? `${slippage}% (Auto)` : `${slippage}%`}
-                readOnly
-              />
-            </div>
-            <div className="d-flex justify-content-between align-items-center">
-              <button
-                className={`btn btn-sm ${isAutoSlippage ? "btn-primary" : "btn-outline-primary"
-                  } rounded-pill px-3`}
-                onClick={() => handleSlippageToggle(true)}
-              >
-                Auto
-              </button>
-              <button
-                className={`btn btn-sm ${!isAutoSlippage ? "btn-primary" : "btn-outline-primary"
-                  } rounded-pill px-3`}
-                onClick={() => handleSlippageToggle(false)}
-              >
-                Custom
-              </button>
-              {!isAutoSlippage && (
-                <input
-                  type="number"
-                  className="form-control bg-dark border-0 text-light rounded-pill shadow-sm w-25"
-                  value={slippage}
-                  onChange={(e) => setSlippage(e.target.value)}
-                  step="0.1"
-                  min="0"
-                />
-              )}
-            </div>
-          </div>
-        )}
-        {/* From */}
+        <SettingsPopup
+          show={showSettings}
+          slippage={slippage}
+          isAutoSlippage={isAutoSlippage}
+          handleSlippageToggle={handleSlippageToggle}
+          setSlippage={setSlippage}
+        />
+
         <label className="text-light small mb-1">From</label>
-        <div className="input-group mb-3 bg-dark rounded-pill shadow-sm p-2">
+        <div className="input-group mb-3 bg-dark rounded-pill shadow-sm p-2 align-items-center">
           <input
             type="number"
             className="form-control border-0 bg-transparent text-light fs-5"
@@ -286,37 +433,48 @@ const SwapComponent = () => {
             style={{ boxShadow: "none" }}
             disabled={isApproving || isSwapping}
           />
-          <button
-            className="btn btn-dark d-flex align-items-center gap-2 rounded-pill px-3"
-            onClick={() => openModal("in")}
-            disabled={isApproving || isSwapping}
-          >
-            {TOKENS[tokenIn]?.symbol === "STATE" ? (
-              <img
-                src={state}
-                alt="STATE"
-                style={{ width: "30px", height: "30px" }}
-              />
-            ) : TOKENS[tokenIn]?.image && TOKENS[tokenIn]?.image.startsWith('http') ? (
-              <img
-                src={TOKENS[tokenIn].image}
-                alt={TOKENS[tokenIn]?.symbol || tokenIn}
-                style={{ width: "30px", height: "30px" }}
-              />
-            ) : TOKENS[tokenIn]?.emoji ? (
-              <span style={{ fontSize: "24px" }}>{TOKENS[tokenIn].emoji}</span>
-            ) : (
-              <img
-                src="/default.png"
-                alt={tokenIn}
-                style={{ width: "30px", height: "30px" }}
-              />
+          <div className="d-flex align-items-center gap-1">
+            <button
+              className="btn btn-dark d-flex align-items-center gap-2 rounded-pill px-3"
+              onClick={() => openModal("in")}
+              disabled={isApproving || isSwapping}
+            >
+              {getTokenLogo(tokenIn)}
+              {TOKENS[tokenIn]?.symbol || tokenIn}
+            </button>
+            {/* Copy icon for input token (not PLS) */}
+            {tokenIn !== "PLS" && TOKENS[tokenIn]?.address && (
+              <>
+                <span
+                  role="button"
+                  title={copiedTokenIn ? "Copied!" : "Copy address"}
+                  onClick={() => handleCopy(TOKENS[tokenIn].address, "in")}
+                  style={{ cursor: "pointer", marginLeft: 4, color: copiedTokenIn ? "#4caf50" : "#aaa", fontSize: 18 }}
+                >
+                  {copiedTokenIn ? "✔️" : <img src={copyIcon} alt="Copy" width="18" />}
+                </span>
+                <span
+                  role="button"
+                  title="Add to MetaMask"
+                  onClick={() => handleAddToMetaMask(TOKENS[tokenIn], "in")}
+                  style={{ cursor: "pointer", marginLeft: 6, color: "#f6851b", fontSize: 18 }}
+                >
+                  <img src={metamaskIcon} alt="MetaMask" width="18" style={{ verticalAlign: 'middle' }} />
+                </span>
+              </>
             )}
-            {TOKENS[tokenIn]?.symbol || tokenIn}
-          </button>
+          </div>
+        </div>
+        {/* Token balance and USD value display */}
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <small className="text-secondary">
+            {inputUsdValue && <span>{inputUsdValue}</span>}
+          </small>
+          <small className="text-secondary">
+            Balance: {tokenBalance !== "" ? `${parseFloat(tokenBalance).toFixed(6)} ${TOKENS[tokenIn]?.symbol || tokenIn}` : "-"}
+          </small>
         </div>
 
-        {/* Switch */}
         <div className="text-center mb-3">
           <button
             className="btn btn-outline-primary btn-sm rounded-circle"
@@ -328,9 +486,8 @@ const SwapComponent = () => {
           </button>
         </div>
 
-        {/* To */}
         <label className="text-light small mb-1">To</label>
-        <div className="input-group mb-3 bg-dark rounded-pill shadow-sm p-2">
+        <div className="input-group mb-3 bg-dark rounded-pill shadow-sm p-2 align-items-center">
           <input
             type="text"
             className="form-control border-0 bg-transparent text-light fs-5"
@@ -343,225 +500,58 @@ const SwapComponent = () => {
             }
             readOnly
           />
-          <button
-            className="btn btn-dark d-flex align-items-center gap-2 rounded-pill px-3"
-            onClick={() => openModal("out")}
-            disabled={isApproving || isSwapping}
-          >
-            {TOKENS[tokenOut]?.symbol === "STATE" ? (
-              <img
-                src={state}
-                alt="STATE"
-                style={{ width: "30px", height: "30px" }}
-              />
-            ) : TOKENS[tokenOut]?.image && TOKENS[tokenOut]?.image.startsWith('http') ? (
-              <img
-                src={TOKENS[tokenOut].image}
-                alt={TOKENS[tokenOut]?.symbol || tokenOut}
-                style={{ width: "30px", height: "30px" }}
-              />
-            ) : TOKENS[tokenOut]?.emoji ? (
-              <span style={{ fontSize: "24px" }}>{TOKENS[tokenOut].emoji}</span>
-            ) : (
-              <img
-                src="/default.png"
-                alt={tokenOut}
-                style={{ width: "30px", height: "30px" }}
-              />
-            )}
-            {TOKENS[tokenOut]?.symbol || tokenOut}
-          </button>
-        </div>
-
-        {/* Error */}
-        {error && <div className="alert alert-danger py-2">{error}</div>}
-        {routeDetails && (
-          <div
-            className="text-center mt-3"
-            style={{ position: "relative" }} // <-- Add this line
-            onMouseEnter={() => setShowRoutePopup(true)}
-            onMouseLeave={() => setShowRoutePopup(false)}
-          >
-            <button className="btn btn-link text-danger fw-bold">
-              Show Route 📍
+          <div className="d-flex align-items-center gap-1">
+            <button
+              className="btn btn-dark d-flex align-items-center gap-2 rounded-pill px-3"
+              onClick={() => openModal("out")}
+              disabled={isApproving || isSwapping}
+            >
+              {getTokenLogo(tokenOut)}
+              {TOKENS[tokenOut]?.symbol || tokenOut}
             </button>
-
-            {showRoutePopup && (
-              <div
-                className="bg-dark text-light rounded-4 shadow-lg p-4"
-                style={{
-                  position: "absolute",
-                  left: "50%",
-                  bottom: "110%",
-                  transform: "translateX(-50%)",
-                  zIndex: 3000,
-                  minWidth: "320px",
-                  maxWidth: "95vw",
-                  width: "800px",
-                  boxSizing: "border-box",
-                }}
-              >
-                <h6 className="text-light mb-3">Route Details</h6>
-                <div
-                  style={{ borderTop: "1px solid #333", marginBottom: 16 }}
-                ></div>
-                <div className="d-flex flex-column gap-3">
-                  {routeDetails?.paths?.length > 0 &&
-                    routeDetails?.swaps?.length > 0 ? (
-                    routeDetails.paths.map((path, i) => (
-                      <div
-                        key={i}
-                        className="d-flex align-items-center gap-3 flex-wrap"
-                      >
-                        {/* Route percent and input token */}
-                        <div
-                          className="d-flex flex-column align-items-center"
-                          style={{ minWidth: 70 }}
-                        >
-                          {getTokenLogo(path[0]?.symbol)}
-                          <span className="badge bg-secondary mt-1">
-                            {(routeDetails.swaps[i]?.percent / 1000).toFixed(2)}
-                            %
-                          </span>
-                        </div>
-                        {/* Multi-hop path */}
-                        <div
-                          className="d-flex flex-row gap-3 flex-wrap align-items-center"
-                          style={{ flex: 1, minWidth: 0 }}
-                        >
-                          {/* Multi-hop path */}
-                          <div
-                            className="d-flex flex-row gap-3 flex-wrap align-items-center justify-content-center"
-                            style={{ flex: 1, minWidth: 0 }}
-                          >
-                            {path.map((token, idx) => {
-                              if (idx === path.length - 1) return null;
-                              const nextToken = path[idx + 1];
-                              const swap = routeDetails.swaps[i];
-                              const sub = swap?.subswaps?.[idx];
-                              const p = sub?.paths?.[0];
-                              const platform = p?.exchange || p?.poolName || "";
-                              const percent = p?.percent ? (p.percent / 1000).toFixed(2) : "100.00";
-                              return (
-                                <React.Fragment key={idx}>
-                                  <div
-                                    className="bg-secondary bg-opacity-10 border border-secondary rounded-3 px-1 py-1 d-flex flex-column align-items-center"
-                                    style={{
-                                      width: 120,
-                                      minWidth: 90,
-                                      maxWidth: 120,
-                                      flex: "1 1 68px",
-                                      boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-                                      marginBottom: 4,
-                                    }}
-                                  >
-                                    <div className="d-flex align-items-center mb-1" style={{ gap: 2, fontSize: "0.78rem" }}>
-                                      {TOKENS[token.symbol]?.symbol === "STATE" ? (
-                                        <img
-                                          src={state}
-                                          alt="STATE"
-                                          width="12"
-                                          height="12"
-                                          style={{ borderRadius: "50%" }}
-                                        />
-                                      ) : TOKENS[token.symbol]?.image && TOKENS[token.symbol]?.image.startsWith('http') ? (
-                                        <img
-                                          src={TOKENS[token.symbol].image}
-                                          alt={token.symbol}
-                                          width="12"
-                                          height="12"
-                                          style={{ borderRadius: "50%" }}
-                                        />
-                                      ) : TOKENS[token.symbol]?.emoji ? (
-                                        <span style={{ fontSize: "0.78em" }}>{TOKENS[token.symbol].emoji}</span>
-                                      ) : (
-                                        <img
-                                          src="/default.png"
-                                          alt={token.symbol}
-                                          width="12"
-                                          height="12"
-                                          style={{ borderRadius: "50%" }}
-                                        />
-                                      )}
-                                      <span className="fw-bold" style={{ fontSize: "0.78em" }}>{token.symbol}</span>
-                                      <span style={{ fontSize: "0.95rem", color: "#aaa" }}>→</span>
-                                      {TOKENS[nextToken.symbol]?.symbol === "STATE" ? (
-                                        <img
-                                          src={state}
-                                          alt="STATE"
-                                          width="12"
-                                          height="12"
-                                          style={{ borderRadius: "50%" }}
-                                        />
-                                      ) : TOKENS[nextToken.symbol]?.image && TOKENS[nextToken.symbol]?.image.startsWith('http') ? (
-                                        <img
-                                          src={TOKENS[nextToken.symbol].image}
-                                          alt={nextToken.symbol}
-                                          width="12"
-                                          height="12"
-                                          style={{ borderRadius: "50%" }}
-                                        />
-                                      ) : TOKENS[nextToken.symbol]?.emoji ? (
-                                        <span style={{ fontSize: "0.78em" }}>{TOKENS[nextToken.symbol].emoji}</span>
-                                      ) : (
-                                        <img
-                                          src="/default.png"
-                                          alt={nextToken.symbol}
-                                          width="12"
-                                          height="12"
-                                          style={{ borderRadius: "50%" }}
-                                        />
-                                      )}
-                                      <span className="fw-bold" style={{ fontSize: "0.78em" }}>{nextToken.symbol}</span>
-                                    </div>
-                                    <div className="small text-secondary" style={{ fontSize: "0.68em", lineHeight: 1 }}>{platform}</div>
-                                    <div className="small" style={{ fontSize: "0.68em", lineHeight: 1 }}>{percent}%</div>
-                                  </div>
-                                  {/* Dotted line/arrow between boxes, except after last box */}
-                                  {idx < path.length - 2 && (
-                                    <div
-                                      style={{
-                                        width: 10,
-                                        height: 2,
-                                        borderBottom: "2px dotted #555",
-                                        margin: "0 2px",
-                                      }}
-                                    ></div>
-                                  )}
-                                </React.Fragment>
-                              );
-                            })}
-                          </div>
-                        </div>
-                        {/* Output token */}
-                        <div
-                          className="d-flex flex-column align-items-center"
-                          style={{ minWidth: 70 }}
-                        >
-                          {getTokenLogo(path[path.length - 1]?.symbol)}
-
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center text-secondary">
-                      No route details available.
-                    </div>
-                  )}
-                </div>
-                <div
-                  style={{ borderTop: "1px solid #333", margin: "16px 0" }}
-                ></div>
-                <p className="text-light small mb-0">
-                  This route optimizes your total output by considering split
-                  routes, multi-hops, and the gas cost of each step.
-                </p>
-              </div>
+            {/* Copy icon for output token (not PLS) */}
+            {tokenOut !== "PLS" && TOKENS[tokenOut]?.address && (
+              <>
+                <span
+                  role="button"
+                  title={copiedTokenOut ? "Copied!" : "Copy address"}
+                  onClick={() => handleCopy(TOKENS[tokenOut].address, "out")}
+                  style={{ cursor: "pointer", marginLeft: 4, color: copiedTokenOut ? "#4caf50" : "#aaa", fontSize: 18 }}
+                >
+                  {copiedTokenOut ? "✔️" : <img src={copyIcon} alt="Copy" width="18" />}
+                </span>
+                <span
+                  role="button"
+                  title="Add to MetaMask"
+                  onClick={() => handleAddToMetaMask(TOKENS[tokenOut], "out")}
+                  style={{ cursor: "pointer", marginLeft: 6, color: "#f6851b", fontSize: 18 }}
+                >
+                  <img src={metamaskIcon} alt="MetaMask" width="18" style={{ verticalAlign: 'middle' }} />
+                </span>
+              </>
             )}
+          </div>
+        </div>
+        {/* Output USD value display */}
+        {outputUsdValue && (
+          <div className="d-flex justify-content-start mb-2">
+            <small className="text-secondary">
+              {outputUsdValue}
+            </small>
           </div>
         )}
 
-        {/* Swap Button */}
+        {error && <div className="alert alert-danger py-2">{error}</div>}
+
+        <RouteDetailsPopup
+          routeDetails={routeDetails}
+          showRoutePopup={showRoutePopup}
+          setShowRoutePopup={setShowRoutePopup}
+          getTokenLogo={getTokenLogo}
+          TOKENS={TOKENS}
+          state={state}
+        />
+
         <div className="d-grid">
           {needsApproval ? (
             <button
@@ -596,7 +586,6 @@ const SwapComponent = () => {
           )}
         </div>
 
-        {/* Token Selector */}
         {isModalOpen && (
           <TokenSearchModal
             tokens={TOKENS}
@@ -606,7 +595,6 @@ const SwapComponent = () => {
           />
         )}
 
-        {/* Confirmation Popup */}
         {showConfirmation && (
           <div
             className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
