@@ -1,13 +1,14 @@
 import { formatUnits, parseUnits } from "ethers";
 import { useState, useEffect, useContext } from "react";
 import TokenSearchModal from "./TokenSearchModal";
-import { TOKENS } from "./Tokens";
 import React from "react";
 import setting from "/setting.png";
 import { ContractContext } from "../../Functions/ContractInitialize";
+import { useAllTokens } from "./Tokens";
 
 const SwapComponent = () => {
   const { signer } = useContext(ContractContext);
+  const TOKENS = useAllTokens();
   const [tokenIn, setTokenIn] = useState("PLS");
   const [tokenOut, setTokenOut] = useState("pSTATE");
   const [isLoading, setIsLoading] = useState(false);
@@ -29,6 +30,9 @@ const SwapComponent = () => {
     setTokenIn(tokenOut);
     setTokenOut(tokenIn);
     setAmountOut("");
+  };
+  const isImageUrl = (str) => {
+    return typeof str === "string" && str.includes("mypinata.cloud/ipfs/");
   };
 
   const openModal = (type) => {
@@ -170,17 +174,15 @@ const SwapComponent = () => {
             </div>
             <div className="d-flex justify-content-between align-items-center">
               <button
-                className={`btn btn-sm ${
-                  isAutoSlippage ? "btn-primary" : "btn-outline-primary"
-                } rounded-pill px-3`}
+                className={`btn btn-sm ${isAutoSlippage ? "btn-primary" : "btn-outline-primary"
+                  } rounded-pill px-3`}
                 onClick={() => handleSlippageToggle(true)}
               >
                 Auto
               </button>
               <button
-                className={`btn btn-sm ${
-                  !isAutoSlippage ? "btn-primary" : "btn-outline-primary"
-                } rounded-pill px-3`}
+                className={`btn btn-sm ${!isAutoSlippage ? "btn-primary" : "btn-outline-primary"
+                  } rounded-pill px-3`}
                 onClick={() => handleSlippageToggle(false)}
               >
                 Custom
@@ -213,13 +215,15 @@ const SwapComponent = () => {
             className="btn btn-dark d-flex align-items-center gap-2 rounded-pill px-3"
             onClick={() => openModal("in")}
           >
-            <img
-              src={TOKENS[tokenIn].image}
-              alt={TOKENS[tokenIn].symbol}
-              width="24"
-              height="24"
-              className="rounded-circle"
-            />
+            {isImageUrl(TOKENS[tokenIn].image) ? (
+              <img
+                src={TOKENS[tokenIn].image}
+                alt="token visual"
+                style={{ width: "30px", height: "30px" }}
+              />
+            ) : (
+              <span style={{ fontSize: "20px" }}>{TOKENS[tokenIn].image}</span>
+            )}
             {TOKENS[tokenIn].symbol}
           </button>
         </div>
@@ -245,8 +249,8 @@ const SwapComponent = () => {
               isLoading
                 ? "Fetching..."
                 : amountOut
-                ? amountOut
-                : "Waiting for input..."
+                  ? amountOut
+                  : "Waiting for input..."
             }
             readOnly
           />
@@ -254,13 +258,16 @@ const SwapComponent = () => {
             className="btn btn-dark d-flex align-items-center gap-2 rounded-pill px-3"
             onClick={() => openModal("out")}
           >
-            <img
-              src={TOKENS[tokenOut].image}
-              alt={TOKENS[tokenOut].symbol}
-              width="24"
-              height="24"
-              className="rounded-circle"
-            />
+            {isImageUrl(TOKENS[tokenOut].image) ? (
+              <img
+                src={TOKENS[tokenOut].image}
+                alt="token visual"
+                style={{ width: "30px", height: "30px" }}
+              />
+            ) : (
+              <span style={{ fontSize: "20px" }}>{TOKENS[tokenOut].image}</span>
+            )}
+
             {TOKENS[tokenOut].symbol}
           </button>
         </div>
@@ -289,17 +296,17 @@ const SwapComponent = () => {
                   zIndex: 3000,
                   minWidth: "320px",
                   maxWidth: "95vw",
-                  width: "600px",
+                  width: "800px",
                   boxSizing: "border-box",
                 }}
               >
-                <h6 className="text-muted mb-3">Route Details</h6>
+                <h6 className="text-light mb-3">Route Details</h6>
                 <div
                   style={{ borderTop: "1px solid #333", marginBottom: 16 }}
                 ></div>
                 <div className="d-flex flex-column gap-3">
                   {routeDetails?.paths?.length > 0 &&
-                  routeDetails?.swaps?.length > 0 ? (
+                    routeDetails?.swaps?.length > 0 ? (
                     routeDetails.paths.map((path, i) => (
                       <div
                         key={i}
@@ -328,45 +335,69 @@ const SwapComponent = () => {
                           className="d-flex flex-row gap-3 flex-wrap align-items-center"
                           style={{ flex: 1, minWidth: 0 }}
                         >
-                          {path.map((token, idx) => (
-                            <React.Fragment key={idx}>
-                              <div className="d-flex flex-column align-items-center">
-                                <img
-                                  src={TOKENS[token.symbol]?.image}
-                                  alt={token.symbol}
-                                  width="28"
-                                  style={{
-                                    background: "#222",
-                                    borderRadius: "50%",
-                                  }}
-                                />
-                                <span className="small fw-bold mt-1">
-                                  {token.symbol}
-                                </span>
-                              </div>
-                              {/* Arrow and platform */}
-                              {idx < path.length - 1 && (
-                                <div className="d-flex flex-column align-items-center mx-2">
-                                  <span style={{ fontSize: "1.2rem" }}>→</span>
-                                  {/* Platform/Exchange name under the arrow */}
-                                  <span className="small text-secondary mt-1">
-                                    {
-                                      // Try to get the platform for this hop from swaps/subswaps
-                                      (() => {
-                                        // Find the corresponding swap/subswap for this hop
-                                        const swap = routeDetails.swaps[i];
-                                        // Find the subhop for this step
-                                        const sub = swap?.subswaps?.[idx];
-                                        // Find the path for this subhop
-                                        const p = sub?.paths?.[0];
-                                        return p?.exchange || p?.poolName || "";
-                                      })()
-                                    }
-                                  </span>
-                                </div>
-                              )}
-                            </React.Fragment>
-                          ))}
+                          {/* Multi-hop path */}
+                          <div
+                            className="d-flex flex-row gap-3 flex-wrap align-items-center justify-content-center"
+                            style={{ flex: 1, minWidth: 0 }}
+                          >
+                            {path.map((token, idx) => {
+                              if (idx === path.length - 1) return null;
+                              const nextToken = path[idx + 1];
+                              const swap = routeDetails.swaps[i];
+                              const sub = swap?.subswaps?.[idx];
+                              const p = sub?.paths?.[0];
+                              const platform = p?.exchange || p?.poolName || "";
+                              const percent = p?.percent ? (p.percent / 1000).toFixed(2) : "100.00";
+                              return (
+                                <React.Fragment key={idx}>
+                                  <div
+                                    className="bg-secondary bg-opacity-10 border border-secondary rounded-3 px-1 py-1 d-flex flex-column align-items-center"
+                                    style={{
+                                      width: 120,
+                                      minWidth: 90,
+                                      maxWidth: 120,
+                                      flex: "1 1 68px",
+                                      boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                                      marginBottom: 4,
+                                    }}
+                                  >
+                                    <div className="d-flex align-items-center mb-1" style={{ gap: 2, fontSize: "0.78rem" }}>
+                                      <img
+                                        src={TOKENS[token.symbol]?.image}
+                                        alt={token.symbol}
+                                        width="12"
+                                        height="12"
+                                        style={{ borderRadius: "50%" }}
+                                      />
+                                      <span className="fw-bold" style={{ fontSize: "0.78em" }}>{token.symbol}</span>
+                                      <span style={{ fontSize: "0.95rem", color: "#aaa" }}>→</span>
+                                      <img
+                                        src={TOKENS[nextToken.symbol]?.image}
+                                        alt={nextToken.symbol}
+                                        width="12"
+                                        height="12"
+                                        style={{ borderRadius: "50%" }}
+                                      />
+                                      <span className="fw-bold" style={{ fontSize: "0.78em" }}>{nextToken.symbol}</span>
+                                    </div>
+                                    <div className="small text-secondary" style={{ fontSize: "0.68em", lineHeight: 1 }}>{platform}</div>
+                                    <div className="small" style={{ fontSize: "0.68em", lineHeight: 1 }}>{percent}%</div>
+                                  </div>
+                                  {/* Dotted line/arrow between boxes, except after last box */}
+                                  {idx < path.length - 2 && (
+                                    <div
+                                      style={{
+                                        width: 10,
+                                        height: 2,
+                                        borderBottom: "2px dotted #555",
+                                        margin: "0 2px",
+                                      }}
+                                    ></div>
+                                  )}
+                                </React.Fragment>
+                              );
+                            })}
+                          </div>
                         </div>
                         {/* Output token */}
                         <div
@@ -393,7 +424,7 @@ const SwapComponent = () => {
                 <div
                   style={{ borderTop: "1px solid #333", margin: "16px 0" }}
                 ></div>
-                <p className="text-muted small mb-0">
+                <p className="text-light small mb-0">
                   This route optimizes your total output by considering split
                   routes, multi-hops, and the gas cost of each step.
                 </p>
