@@ -15,7 +15,7 @@ import {
 import { Toaster } from "react-hot-toast";
 import Footer from "./components/Footer";
 import DavHistory from "./components/DavHistory";
-import SwapComponent from "./components/Swap/SwapMedel";
+import SwapComponent from "./components/Swap/SwapModel";
 
 const App = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);

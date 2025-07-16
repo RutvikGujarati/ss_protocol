@@ -1,16 +1,23 @@
 import { formatUnits, parseUnits } from "ethers";
 import { useState, useEffect, useContext } from "react";
 import TokenSearchModal from "./TokenSearchModal";
+import { ethers } from "ethers";
 import React from "react";
 import setting from "/setting.png";
 import { ContractContext } from "../../Functions/ContractInitialize";
 import { useAllTokens } from "./Tokens";
+import state from "../../assets/statelogo.png";
+import pulsechainLogo from "../../assets/pls1.png"; // Make sure this file exists!
+
+import { useAccount } from "wagmi";
 
 const SwapComponent = () => {
   const { signer } = useContext(ContractContext);
   const TOKENS = useAllTokens();
+  const { address } = useAccount();
+
   const [tokenIn, setTokenIn] = useState("PLS");
-  const [tokenOut, setTokenOut] = useState("pSTATE");
+  const [tokenOut, setTokenOut] = useState("STATE");
   const [isLoading, setIsLoading] = useState(false);
   const [isSwapping, setIsSwapping] = useState(false);
   const [amountIn, setAmountIn] = useState("");
@@ -25,16 +32,80 @@ const SwapComponent = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [routeDetails, setRouteDetails] = useState(null);
   const [showRoutePopup, setShowRoutePopup] = useState(false);
+  const [needsApproval, setNeedsApproval] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
 
   const handleSwitchTokens = () => {
     setTokenIn(tokenOut);
     setTokenOut(tokenIn);
     setAmountOut("");
   };
-  const isImageUrl = (str) => {
-    return typeof str === "string" && str.includes("mypinata.cloud/ipfs/");
+  const ERC20_ABI = [
+    "function allowance(address owner, address spender) view returns (uint256)",
+    "function approve(address spender, uint256 amount) returns (bool)"
+  ];
+  const SPECIAL_TOKEN_LOGOS = {
+    STATE: state,
+    pSTATE: state,
+    PulseChain: pulsechainLogo,
   };
+  const checkAllowance = async () => {
+    if (tokenIn === "PLS") {
+      setNeedsApproval(false);
+      return;
+    }
+    try {
+      const tokenAddress = TOKENS[tokenIn].address;
+      const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
 
+      const allowance = await contract.allowance(address, "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6");
+      const amount = parseUnits(amountIn || "0", TOKENS[tokenIn].decimals);
+      setNeedsApproval(BigInt(allowance) < BigInt(amount));
+    } catch (err) {
+      setNeedsApproval(false);
+      console.error("Error checking allowance", err);
+    }
+  };
+  useEffect(() => {
+    if (signer && amountIn && !isNaN(amountIn)) {
+      checkAllowance();
+    } else {
+      setNeedsApproval(false);
+    }
+  }, [tokenIn, amountIn, signer]);
+
+  const handleApprove = async () => {
+    setIsApproving(true);
+    try {
+      const tokenAddress = TOKENS[tokenIn].address;
+      const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
+      const amount = parseUnits(amountIn, TOKENS[tokenIn].decimals);
+      const tx = await contract.approve("0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6", amount);
+      await tx.wait();
+      setNeedsApproval(false);
+      setError("");
+      // Optionally, trigger swap automatically after approval:
+      // await handleSwap();
+    } catch (err) {
+      setError("Approval failed. Try again.");
+      console.error("Approval error", err);
+    } finally {
+      setIsApproving(false);
+    }
+  };
+  // Helper function
+  const getTokenLogo = (symbol) => {
+    if (SPECIAL_TOKEN_LOGOS[symbol]) {
+      return <img src={SPECIAL_TOKEN_LOGOS[symbol]} alt={symbol} width="32" />;
+    }
+    if (TOKENS[symbol]?.image && (TOKENS[symbol].image.startsWith('http') || TOKENS[symbol].image.startsWith('/'))) {
+      return <img src={TOKENS[symbol].image} alt={symbol} width="32" />;
+    }
+    if (TOKENS[symbol]?.emoji) {
+      return <span style={{ fontSize: "1.1em" }}>{TOKENS[symbol].emoji}</span>;
+    }
+    return <img src="/default.png" alt={symbol} width="32" />;
+  };
   const openModal = (type) => {
     setModalType(type);
     setIsModalOpen(true);
@@ -50,7 +121,10 @@ const SwapComponent = () => {
     else setTokenOut(key);
     closeModal();
   };
-
+  function getApiTokenAddress(symbol) {
+    if (symbol === "PLS") return "PLS";
+    return TOKENS[symbol]?.address;
+  }
   const fetchQuote = async () => {
     if (!amountIn || isNaN(amountIn)) {
       setAmountOut("");
@@ -62,8 +136,8 @@ const SwapComponent = () => {
     try {
       setIsLoading(true);
       const amount = parseUnits(amountIn, TOKENS[tokenIn].decimals).toString();
-      const tokenInAddress = TOKENS[tokenIn].address;
-      const tokenOutAddress = TOKENS[tokenOut].address;
+      const tokenInAddress = getApiTokenAddress(tokenIn);
+      const tokenOutAddress = getApiTokenAddress(tokenOut);
 
       const url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=${slippage}`;
       const response = await fetch(url);
@@ -98,8 +172,8 @@ const SwapComponent = () => {
     try {
       const tx = await signer.sendTransaction({
         to: "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6",
+        value: quoteData.value,
         data: quoteData.calldata,
-        value: BigInt(quoteData.value),
       });
 
       console.log("Transaction sent:", tx.hash);
@@ -122,11 +196,11 @@ const SwapComponent = () => {
 
   return (
     <div
-      className="d-flex justify-content-center align-items-center mb-5"
+      className="d-flex justify-content-center mt-4 mb-5"
       style={{
         background: "linear-gradient(180deg, #0d1117 0%, #161b22 100%)",
         fontFamily: "Inter, sans-serif",
-        minHeight: "100vh",
+        minHeight: "80vh",
       }}
     >
       <div
@@ -210,21 +284,35 @@ const SwapComponent = () => {
             onChange={(e) => setAmountIn(e.target.value)}
             placeholder="0.0"
             style={{ boxShadow: "none" }}
+            disabled={isApproving || isSwapping}
           />
           <button
             className="btn btn-dark d-flex align-items-center gap-2 rounded-pill px-3"
             onClick={() => openModal("in")}
+            disabled={isApproving || isSwapping}
           >
-            {isImageUrl(TOKENS[tokenIn].image) ? (
+            {TOKENS[tokenIn]?.symbol === "STATE" ? (
               <img
-                src={TOKENS[tokenIn].image}
-                alt="token visual"
+                src={state}
+                alt="STATE"
                 style={{ width: "30px", height: "30px" }}
               />
+            ) : TOKENS[tokenIn]?.image && TOKENS[tokenIn]?.image.startsWith('http') ? (
+              <img
+                src={TOKENS[tokenIn].image}
+                alt={TOKENS[tokenIn]?.symbol || tokenIn}
+                style={{ width: "30px", height: "30px" }}
+              />
+            ) : TOKENS[tokenIn]?.emoji ? (
+              <span style={{ fontSize: "24px" }}>{TOKENS[tokenIn].emoji}</span>
             ) : (
-              <span style={{ fontSize: "20px" }}>{TOKENS[tokenIn].image}</span>
+              <img
+                src="/default.png"
+                alt={tokenIn}
+                style={{ width: "30px", height: "30px" }}
+              />
             )}
-            {TOKENS[tokenIn].symbol}
+            {TOKENS[tokenIn]?.symbol || tokenIn}
           </button>
         </div>
 
@@ -233,6 +321,7 @@ const SwapComponent = () => {
           <button
             className="btn btn-outline-primary btn-sm rounded-circle"
             onClick={handleSwitchTokens}
+            disabled={isApproving || isSwapping}
             style={{ width: "40px", height: "40px" }}
           >
             ⇅
@@ -257,18 +346,30 @@ const SwapComponent = () => {
           <button
             className="btn btn-dark d-flex align-items-center gap-2 rounded-pill px-3"
             onClick={() => openModal("out")}
+            disabled={isApproving || isSwapping}
           >
-            {isImageUrl(TOKENS[tokenOut].image) ? (
+            {TOKENS[tokenOut]?.symbol === "STATE" ? (
               <img
-                src={TOKENS[tokenOut].image}
-                alt="token visual"
+                src={state}
+                alt="STATE"
                 style={{ width: "30px", height: "30px" }}
               />
+            ) : TOKENS[tokenOut]?.image && TOKENS[tokenOut]?.image.startsWith('http') ? (
+              <img
+                src={TOKENS[tokenOut].image}
+                alt={TOKENS[tokenOut]?.symbol || tokenOut}
+                style={{ width: "30px", height: "30px" }}
+              />
+            ) : TOKENS[tokenOut]?.emoji ? (
+              <span style={{ fontSize: "24px" }}>{TOKENS[tokenOut].emoji}</span>
             ) : (
-              <span style={{ fontSize: "20px" }}>{TOKENS[tokenOut].image}</span>
+              <img
+                src="/default.png"
+                alt={tokenOut}
+                style={{ width: "30px", height: "30px" }}
+              />
             )}
-
-            {TOKENS[tokenOut].symbol}
+            {TOKENS[tokenOut]?.symbol || tokenOut}
           </button>
         </div>
 
@@ -317,14 +418,7 @@ const SwapComponent = () => {
                           className="d-flex flex-column align-items-center"
                           style={{ minWidth: 70 }}
                         >
-                          <img
-                            src={
-                              TOKENS[path[0]?.symbol]?.image ||
-                              TOKENS[tokenIn].image
-                            }
-                            alt={path[0]?.symbol}
-                            width="32"
-                          />
+                          {getTokenLogo(path[0]?.symbol)}
                           <span className="badge bg-secondary mt-1">
                             {(routeDetails.swaps[i]?.percent / 1000).toFixed(2)}
                             %
@@ -362,22 +456,62 @@ const SwapComponent = () => {
                                     }}
                                   >
                                     <div className="d-flex align-items-center mb-1" style={{ gap: 2, fontSize: "0.78rem" }}>
-                                      <img
-                                        src={TOKENS[token.symbol]?.image}
-                                        alt={token.symbol}
-                                        width="12"
-                                        height="12"
-                                        style={{ borderRadius: "50%" }}
-                                      />
+                                      {TOKENS[token.symbol]?.symbol === "STATE" ? (
+                                        <img
+                                          src={state}
+                                          alt="STATE"
+                                          width="12"
+                                          height="12"
+                                          style={{ borderRadius: "50%" }}
+                                        />
+                                      ) : TOKENS[token.symbol]?.image && TOKENS[token.symbol]?.image.startsWith('http') ? (
+                                        <img
+                                          src={TOKENS[token.symbol].image}
+                                          alt={token.symbol}
+                                          width="12"
+                                          height="12"
+                                          style={{ borderRadius: "50%" }}
+                                        />
+                                      ) : TOKENS[token.symbol]?.emoji ? (
+                                        <span style={{ fontSize: "0.78em" }}>{TOKENS[token.symbol].emoji}</span>
+                                      ) : (
+                                        <img
+                                          src="/default.png"
+                                          alt={token.symbol}
+                                          width="12"
+                                          height="12"
+                                          style={{ borderRadius: "50%" }}
+                                        />
+                                      )}
                                       <span className="fw-bold" style={{ fontSize: "0.78em" }}>{token.symbol}</span>
                                       <span style={{ fontSize: "0.95rem", color: "#aaa" }}>→</span>
-                                      <img
-                                        src={TOKENS[nextToken.symbol]?.image}
-                                        alt={nextToken.symbol}
-                                        width="12"
-                                        height="12"
-                                        style={{ borderRadius: "50%" }}
-                                      />
+                                      {TOKENS[nextToken.symbol]?.symbol === "STATE" ? (
+                                        <img
+                                          src={state}
+                                          alt="STATE"
+                                          width="12"
+                                          height="12"
+                                          style={{ borderRadius: "50%" }}
+                                        />
+                                      ) : TOKENS[nextToken.symbol]?.image && TOKENS[nextToken.symbol]?.image.startsWith('http') ? (
+                                        <img
+                                          src={TOKENS[nextToken.symbol].image}
+                                          alt={nextToken.symbol}
+                                          width="12"
+                                          height="12"
+                                          style={{ borderRadius: "50%" }}
+                                        />
+                                      ) : TOKENS[nextToken.symbol]?.emoji ? (
+                                        <span style={{ fontSize: "0.78em" }}>{TOKENS[nextToken.symbol].emoji}</span>
+                                      ) : (
+                                        <img
+                                          src="/default.png"
+                                          alt={nextToken.symbol}
+                                          width="12"
+                                          height="12"
+                                          style={{ borderRadius: "50%" }}
+                                        />
+                                      )}
                                       <span className="fw-bold" style={{ fontSize: "0.78em" }}>{nextToken.symbol}</span>
                                     </div>
                                     <div className="small text-secondary" style={{ fontSize: "0.68em", lineHeight: 1 }}>{platform}</div>
@@ -404,14 +538,8 @@ const SwapComponent = () => {
                           className="d-flex flex-column align-items-center"
                           style={{ minWidth: 70 }}
                         >
-                          <img
-                            src={
-                              TOKENS[path[path.length - 1]?.symbol]?.image ||
-                              TOKENS[tokenOut].image
-                            }
-                            alt={path[path.length - 1]?.symbol}
-                            width="32"
-                          />
+                          {getTokenLogo(path[path.length - 1]?.symbol)}
+
                         </div>
                       </div>
                     ))
@@ -435,23 +563,37 @@ const SwapComponent = () => {
 
         {/* Swap Button */}
         <div className="d-grid">
-          <button
-            className="btn btn-primary rounded-pill py-2"
-            onClick={handleSwap}
-            disabled={!quoteData || isSwapping}
-          >
-            {isSwapping ? (
-              <>
-                <span
-                  className="spinner-border spinner-border-sm me-2"
-                  role="status"
-                ></span>
-                Swapping...
-              </>
-            ) : (
-              "Swap Now"
-            )}
-          </button>
+          {needsApproval ? (
+            <button
+              className="btn btn-warning rounded-pill py-2"
+              onClick={handleApprove}
+              disabled={isApproving}
+            >
+              {isApproving ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                  Approving...
+                </>
+              ) : (
+                `Approve ${TOKENS[tokenIn]?.symbol || tokenIn}`
+              )}
+            </button>
+          ) : (
+            <button
+              className="btn btn-primary rounded-pill py-2"
+              onClick={handleSwap}
+              disabled={!quoteData || isSwapping}
+            >
+              {isSwapping ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                  Swapping...
+                </>
+              ) : (
+                "Swap Now"
+              )}
+            </button>
+          )}
         </div>
 
         {/* Token Selector */}

@@ -9,6 +9,7 @@ import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useChainId } from "wagmi";
 
+
 export const shortenAddress = (addr) =>
 	addr ? `${addr.slice(0, 6)}...${addr.slice(-6)}` : "";
 
@@ -89,12 +90,7 @@ export const TokensDetails = () => {
 
 	const tokens = data.map((token) => {
 		const key = token.key;
-		const emoji =
-			token.name === "DAV"
-				? "🧮"
-				: token.name === "STATE"
-					? "🧮"
-					: token.emoji || "🔹";
+		let emoji = token.emoji || "🔹";
 
 		return {
 			tokenName: token.name,

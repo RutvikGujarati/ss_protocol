@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import PropTypes from "prop-types";
+import state from "../../assets/statelogo.png";
 
 const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -11,7 +12,7 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
         tokens[key].symbol.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [searchTerm, excludeToken, tokens]);
-
+ 
   return (
     <div
       className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
@@ -66,13 +67,30 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                 }
               >
                 <div className="d-flex align-items-center gap-3">
-                  <img
-                    src={tokens[key].image}
-                    alt={tokens[key].symbol}
-                    width="36"
-                    height="36"
-                    className="rounded-circle border border-secondary"
-                  />
+                  {tokens[key]?.symbol === "STATE" ? (
+                    <img
+                      src={state}
+                      alt="STATE"
+                      style={{ width: "36px", height: "36px" }}
+                      className="rounded-circle border border-secondary"
+                    />
+                  ) : tokens[key]?.image && (tokens[key].image.startsWith('http') || tokens[key].image.startsWith('/')) ? (
+                    <img
+                      src={tokens[key].image}
+                      alt={tokens[key].symbol}
+                      style={{ width: "36px", height: "36px" }}
+                      className="rounded-circle border border-secondary"
+                    />
+                  ) : tokens[key]?.emoji ? (
+                    <span style={{ fontSize: "28px" }}>{tokens[key].emoji}</span>
+                  ) : (
+                    <img
+                      src="/default.png"
+                      alt={tokens[key]?.symbol || key}
+                      style={{ width: "36px", height: "36px" }}
+                      className="rounded-circle border border-secondary"
+                    />
+                  )}
                   <div className="d-flex flex-column">
                     <span className="fw-semibold fs-6">
                       {tokens[key].symbol}
