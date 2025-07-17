@@ -97,22 +97,22 @@ const DavHistory = () => {
               mintBatches.map((entry, idx) => (
                 <tr key={idx}>
                   <td
-                    className={entry.isExpired ? "text-danger" : "text-success"}
+                    className={entry.isExpired ? "text-pink" : "text-success"}
                   >
                     {entry.fromGovernance ? "Promotion" : "Minted"}
                   </td>
                   <td
-                    className={entry.isExpired ? "text-danger" : "text-success"}
+                    className={entry.isExpired ? "text-pink" : "text-success"}
                   >
                     {entry.amount}
                   </td>
                   <td
-                    className={entry.isExpired ? "text-danger" : "text-success"}
+                    className={entry.isExpired ? "text-pink" : "text-success"}
                   >
                     {entry.mintedAt}
                   </td>
                   <td
-                    className={entry.isExpired ? "text-danger" : "text-success"}
+                    className={entry.isExpired ? "text-pink" : "text-success"}
                   >
                     {entry.expiresAt}
                   </td>

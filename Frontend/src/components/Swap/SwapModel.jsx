@@ -13,19 +13,14 @@ import RouteDetailsPopup from "./RouteDetailsPopup";
 import copyIcon from "/copy.png";
 import metamaskIcon from "../../assets/metamask-icon.png";
 import useSwapData from "./useSwapData";
+import { useRef } from "react";
 import AuctionInfo from "./AuctionInfo";
-import { useAuctionTokens } from "../../data/auctionTokenData";
 
 const SwapComponent = () => {
   const { signer } = useContext(ContractContext);
   const TOKENS = useAllTokens();
   const { address } = useAccount();
-  const { tokens: auctionTokens } = useAuctionTokens();
-  const activeAuctions = auctionTokens.filter(
-    ({ isReversing, AuctionStatus }) =>
-      AuctionStatus === "true" ||
-      (AuctionStatus === "false" && isReversing === "true")
-  );
+
 
   const [tokenIn, setTokenIn] = useState("PLS");
   const [tokenOut, setTokenOut] = useState("STATE");
@@ -45,6 +40,8 @@ const SwapComponent = () => {
   const [copiedTokenIn, setCopiedTokenIn] = useState(false);
   const [copiedTokenOut, setCopiedTokenOut] = useState(false);
   const [currentStep, setCurrentStep] = useState("");
+  const swapCardRef = useRef(null);
+  const [swapCardHeight, setSwapCardHeight] = useState(null);
 
   const {
     amountOut,
@@ -282,9 +279,15 @@ const SwapComponent = () => {
     };
   };
 
+  useEffect(() => {
+    if (swapCardRef.current) {
+      setSwapCardHeight(swapCardRef.current.offsetHeight);
+    }
+  }, [amountIn, amountOut, isLoading, showSettings, showConfirmation, needsApproval, isApproving, isSwapping, tokenIn, tokenOut, TOKENS]);
+
   return (
     <div
-      className="d-flex justify-content-center mb-4"
+      className="d-flex justify-content-center"
       style={{
         background: "linear-gradient(180deg, #0d1117 0%, #161b22 100%)",
         fontFamily: "Inter, sans-serif",
@@ -296,36 +299,29 @@ const SwapComponent = () => {
         transition: "all 0.3s"
       }}
     >
-      <div className="d-flex flex-row flex-wrap justify-content-center w-100" style={{ minHeight: "80vh", gap: activeAuctions.length > 0 ? 32 : 0, maxWidth: "100%", alignItems: "flex-start" }}>
+      <div className="d-flex flex-row flex-wrap justify-content-center w-100" style={{ minHeight: "80vh", gap: 32, maxWidth: "100%", alignItems: "flex-start" }}>
         {/* Left info section for auction swap line */}
-        {activeAuctions.length > 0 && (
-          <div style={{ minWidth: 0, maxWidth: 380, flex: 1, width: "100%", marginTop: 25 }}>
-            <AuctionInfo />
-          </div>
-        )}
+        <AuctionInfo swapCardHeight={swapCardHeight} />
         {/* Main swap card */}
-        <div style={{ flex: 1, minWidth: 0, maxWidth: 500, width: "100%", marginTop: 25 }}>
+        <div className="card-container" ref={swapCardRef}>
           <div
-            className="shadow"
+            className="shadow-sm border border-secondary rounded-3 swap-card"
             style={{
-              width: "100%",
-              maxWidth: "500px",
-              borderRadius: "20px",
               background: "#212529",
               color: "#fff",
-              boxShadow: "0 0 15px rgba(0,0,0,0.2)",
+              borderRadius: "20px",
               padding: "24px",
               margin: 0,
               transition: "margin 0.3s"
             }}
           >
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <h3
+            <div className="d-flex text-primary justify-content-between  ">
+              <h5
                 className="fw-bolder"
                 style={{ fontFamily: "Satoshi, sans-serif" }}
               >
                 Swap Tokens
-              </h3>
+              </h5>
               <button
                 className="btn btn-link text-light"
                 onClick={() => setShowSettings(!showSettings)}
@@ -344,10 +340,11 @@ const SwapComponent = () => {
             />
 
             <label className="text-light small mb-1">From</label>
-            <div className="input-group mb-3  rounded-pill shadow-sm p-2 align-items-center" style={{ background: "#343a40" }}>
+
+            <div className="d-flex align-items-center gap-2">
               <input
                 type="number"
-                className="form-control border-0 bg-transparent text-light fs-5"
+                className="form-control text-light fw-bold"
                 value={amountIn}
                 onChange={(e) => setAmountIn(e.target.value)}
                 placeholder="0.0"
@@ -356,12 +353,17 @@ const SwapComponent = () => {
               />
               <div className="d-flex align-items-center gap-1">
                 <button
-                  className="btn btn-dark d-flex align ACTIVITY:edit_file-items-center gap-2 rounded-pill px-3"
+                  className="d-flex align-items-center justify-content-between gap-2 px-2 token-select-btn"
                   onClick={() => openModal("in")}
                   disabled={isApproving || isSwapping}
                 >
-                  {getTokenLogo(tokenIn)}
-                  {TOKENS[tokenIn]?.symbol || tokenIn}
+                  <span className="d-flex align-items-center gap-2">
+                    {getTokenLogo(tokenIn)}
+                    <span style={{ fontWeight: 700 }}>{TOKENS[tokenIn]?.symbol || tokenIn}</span>
+                  </span>
+                  <span className="ms-2 d-flex align-items-center">
+                    <i className="bi bi-chevron-down" style={{ fontSize: '1.1em' }}></i>
+                  </span>
                 </button>
                 {tokenIn !== "PLS" && TOKENS[tokenIn]?.address && (
                   <>
@@ -417,7 +419,7 @@ const SwapComponent = () => {
               </small>
             </div>
 
-            <div className="text-center mb-3">
+            <div className="text-center ">
               <button
                 className="btn btn-outline-primary btn-sm rounded-circle"
                 onClick={handleSwitchTokens}
@@ -429,10 +431,11 @@ const SwapComponent = () => {
             </div>
 
             <label className="text-light small mb-1">To</label>
-            <div className="input-group mb-3  rounded-pill shadow-sm p-2 align-items-center" style={{ background: "#343a40" }}>
+
+            <div className="d-flex align-items-center gap-2">
               <input
                 type="text"
-                className="form-control border-0 bg-transparent text-light fs-5"
+                className="form-control text-light fw-bold fs-6"
                 value={
                   isLoading
                     ? "Fetching..."
@@ -445,12 +448,17 @@ const SwapComponent = () => {
               />
               <div className="d-flex align-items-center gap-1">
                 <button
-                  className="btn btn-dark d-flex align-items-center gap-2 rounded-pill px-3"
+                  className="d-flex align-items-center justify-content-between gap-2 px-2 token-select-btn"
                   onClick={() => openModal("out")}
                   disabled={isApproving || isSwapping}
                 >
-                  {getTokenLogo(tokenOut)}
-                  {TOKENS[tokenOut]?.symbol || tokenOut}
+                  <span className="d-flex align-items-center gap-2">
+                    {getTokenLogo(tokenOut)}
+                    <span style={{ fontWeight: 700 }}>{TOKENS[tokenOut]?.symbol || tokenOut}</span>
+                  </span>
+                  <span className="ms-2 d-flex align-items-center">
+                    <i className="bi bi-chevron-down" style={{ fontSize: '1.1em' }}></i>
+                  </span>
                 </button>
                 {tokenOut !== "PLS" && TOKENS[tokenOut]?.address && (
                   <>

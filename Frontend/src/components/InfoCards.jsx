@@ -333,7 +333,6 @@ const InfoCards = () => {
   }, [amount]);
 
   const location = useLocation();
-  const isSwap = location.pathname === "/Swap";
   const isBurn = location.pathname === "/Deflation";
   const isAuction = location.pathname === "/auction";
   const isAddToken = location.pathname === "/AddToken";
@@ -628,37 +627,7 @@ const InfoCards = () => {
             </div>
           </div>
         </>
-      ) : isSwap ? (
-        <>
-          <div className="container mt-4">
-            <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
-              <div className="col-md-4 p-0 m-2 cards">
-                <div
-                  className="card bg-dark text-light border-light p-3 d-flex w-100"
-                  style={{ minHeight: "260px" }}
-                >
-                  <div>
-                    <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
-                      <div className="carddetails2 mb-4">
-                        <div className="d-flex justify-content-center ">
-                          {/* Auction swap line removed for migration to SwapModel */}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-4 p-0 m-2 cards">
-                <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100"></div>
-              </div>
-
-              <div className="col-md-4 p-0 m-2 cards">
-                <div className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 "></div>
-              </div>
-            </div>
-          </div>
-        </>
-      ) : isBurn ? (
+      ): isBurn ? (
         <>
           <div className="container mt-4">
             <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
