@@ -202,6 +202,7 @@ const SwapComponent = () => {
           setTokenBalance(formatUnits(bal, TOKENS[tokenIn].decimals));
         }
       } catch (err) {
+		console.error("Error fetching balance", err);
         setTokenBalance("");
       }
     };
@@ -423,7 +424,7 @@ const SwapComponent = () => {
 
   return (
     <div
-      className="d-flex justify-content-center"
+      className="d-flex justify-content-center mb-4"
       style={{
         background: "linear-gradient(180deg, #0d1117 0%, #161b22 100%)",
         fontFamily: "Inter, sans-serif",
@@ -462,6 +463,7 @@ const SwapComponent = () => {
           isAutoSlippage={isAutoSlippage}
           handleSlippageToggle={handleSlippageToggle}
           setSlippage={setSlippage}
+          onClose={() => setShowSettings(false)}
         />
 
         <label className="text-light small mb-1">From</label>
@@ -491,7 +493,7 @@ const SwapComponent = () => {
                   role="button"
                   title={copiedTokenIn ? "Copied!" : "Copy address"}
                   onClick={() => handleCopy(TOKENS[tokenIn].address, "in")}
-                  style={{ cursor: "pointer", marginLeft: 4, color: copiedTokenIn ? "#4caf50" : "#aaa", fontSize: 18, color: "#f6851b" }}
+                  style={{ cursor: "pointer", marginLeft: 4, color: copiedTokenIn ? "#4caf50" : "#ffffff", fontSize: 18 }}
                 >
                   {copiedTokenIn ? "✔️" : <img src={copyIcon} alt="Copy" width="18" />}
                 </span>
@@ -558,7 +560,7 @@ const SwapComponent = () => {
                   role="button"
                   title={copiedTokenOut ? "Copied!" : "Copy address"}
                   onClick={() => handleCopy(TOKENS[tokenOut].address, "out")}
-                  style={{ cursor: "pointer", marginLeft: 4, color: copiedTokenOut ? "#4caf50" : "#aaa", fontSize: 18 }}
+                  style={{ cursor: "pointer", marginLeft: 4, color: copiedTokenOut ? "#4caf50" : "#ffffff", fontSize: 18 }}
                 >
                   {copiedTokenOut ? "✔️" : <img src={copyIcon} alt="Copy" width="18" />}
                 </span>
