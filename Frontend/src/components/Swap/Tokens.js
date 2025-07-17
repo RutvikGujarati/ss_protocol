@@ -24,6 +24,7 @@ export function useAllTokens() {
 				});
 				setApiTokensObj(obj);
 			} catch (e) {
+				console.error(e);
 				setApiTokensObj({});
 			}
 		}

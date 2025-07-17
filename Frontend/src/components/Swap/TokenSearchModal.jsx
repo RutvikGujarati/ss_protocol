@@ -8,7 +8,7 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
 
   const filteredTokens = useMemo(() => {
     if (!searchTerm.trim()) {
-      return Object.keys(tokens).filter(key => key !== excludeToken);
+      return Object.keys(tokens).filter((key) => key !== excludeToken);
     }
 
     const searchLower = searchTerm.toLowerCase();
@@ -28,17 +28,17 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       switch (e.key) {
-        case 'Enter':
+        case "Enter":
           e.preventDefault();
           break;
-        case 'Escape':
+        case "Escape":
           onClose();
           break;
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
   // Auto-focus search input
@@ -60,7 +60,10 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
       );
     }
 
-    if (token.image && (token.image.startsWith('http') || token.image.startsWith('/'))) {
+    if (
+      token.image &&
+      (token.image.startsWith("http") || token.image.startsWith("/"))
+    ) {
       return (
         <img
           src={token.image}
@@ -95,30 +98,27 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
   const highlightSearchTerm = (text) => {
     if (!searchTerm.trim()) return text;
 
-    const regex = new RegExp(`(${searchTerm})`, 'gi');
+    const regex = new RegExp(`(${searchTerm})`, "gi");
     const parts = text.split(regex);
 
     return parts.map((part, index) =>
       regex.test(part) ? (
-        <mark key={index} className="bg-warning text-dark px-1 rounded">{part}</mark>
-      ) : part
+        <mark key={index} className="bg-warning text-dark px-1 rounded">
+          {part}
+        </mark>
+      ) : (
+        part
+      )
     );
   };
 
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="modal-backdrop fade show"
-        style={{ zIndex: 2040 }}
-      />
+      <div className="modal-backdrop fade show" style={{ zIndex: 2040 }} />
 
       {/* Modal */}
-      <div
-        className="modal d-block"
-        tabIndex="-1"
-        style={{ zIndex: 2050 }}
-      >
+      <div className="modal d-block" tabIndex="-1" style={{ zIndex: 2050 }}>
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content bg-dark text-light border border-secondary rounded-4 shadow-lg">
             {/* Header */}
@@ -177,7 +177,7 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                 style={{
                   maxHeight: "300px",
                   overflowY: "auto",
-                  scrollbarWidth: "thin"
+                  scrollbarWidth: "thin",
                 }}
               >
                 {filteredTokens.length > 0 ? (
@@ -187,15 +187,19 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                     return (
                       <div
                         key={key}
-                        className={`px-3 py-2 d-flex align-items-center justify-content-between cursor-pointer border-bottom border-secondary ${index === filteredTokens.length - 1 ? 'border-bottom-0' : ''
-                          }`}
+                        className={`px-3 py-2 d-flex align-items-center justify-content-between cursor-pointer border-bottom border-secondary ${
+                          index === filteredTokens.length - 1
+                            ? "border-bottom-0"
+                            : ""
+                        }`}
                         style={{
                           cursor: "pointer",
-                          transition: 'all 0.2s ease-in-out'
+                          transition: "all 0.2s ease-in-out",
                         }}
                         onClick={() => onSelect(key)}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = 'rgba(131, 110, 255, 0.1)';
+                          e.currentTarget.style.backgroundColor =
+                            "rgba(131, 110, 255, 0.1)";
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.backgroundColor = "transparent";
@@ -215,7 +219,9 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                               )}
                             </div>
                             <small className="text-light small font-monospace">
-                              {token.address.slice(0, 8) + '...' + token.address.slice(-6)}
+                              {token.address.slice(0, 8) +
+                                "..." +
+                                token.address.slice(-6)}
                             </small>
                           </div>
                         </div>
@@ -229,9 +235,12 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                 ) : (
                   <div className="p-3 text-center">
                     <i className="bi bi-search display-6 text-muted mb-2 d-block"></i>
-                    <p className="text-muted mb-1 small fw-medium">No tokens found</p>
+                    <p className="text-muted mb-1 small fw-medium">
+                      No tokens found
+                    </p>
                     <small className="text-muted small">
-                      Try searching with a different term or paste a contract address
+                      Try searching with a different term or paste a contract
+                      address
                     </small>
                   </div>
                 )}

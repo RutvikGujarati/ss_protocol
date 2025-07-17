@@ -2,7 +2,6 @@ import { formatUnits, parseUnits } from "ethers";
 import { useState, useEffect, useContext } from "react";
 import TokenSearchModal from "./TokenSearchModal";
 import { ethers } from "ethers";
-import React from "react";
 import setting from "/setting.png";
 import { ContractContext } from "../../Functions/ContractInitialize";
 import { useAllTokens } from "./Tokens";
@@ -54,7 +53,7 @@ const SwapComponent = () => {
 
   const ERC20_ABI = [
     "function allowance(address owner, address spender) view returns (uint256)",
-    "function approve(address spender, uint256 amount) returns (bool)"
+    "function approve(address spender, uint256 amount) returns (bool)",
   ];
 
   const SPECIAL_TOKEN_LOGOS = {
@@ -71,7 +70,10 @@ const SwapComponent = () => {
     try {
       const tokenAddress = TOKENS[tokenIn].address;
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
-      const allowance = await contract.allowance(address, "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6");
+      const allowance = await contract.allowance(
+        address,
+        "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6"
+      );
       const amount = parseUnits(amountIn || "0", TOKENS[tokenIn].decimals);
       setNeedsApproval(BigInt(allowance) < BigInt(amount));
     } catch (err) {
@@ -95,7 +97,10 @@ const SwapComponent = () => {
       const tokenAddress = TOKENS[tokenIn].address;
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
       const amount = parseUnits(amountIn, TOKENS[tokenIn].decimals);
-      const tx = await contract.approve("0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6", amount);
+      const tx = await contract.approve(
+        "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6",
+        amount
+      );
       await tx.wait();
       setNeedsApproval(false);
       setError("");
@@ -116,7 +121,11 @@ const SwapComponent = () => {
     if (SPECIAL_TOKEN_LOGOS[symbol]) {
       return <img src={SPECIAL_TOKEN_LOGOS[symbol]} alt={symbol} width="32" />;
     }
-    if (TOKENS[symbol]?.image && (TOKENS[symbol].image.startsWith('http') || TOKENS[symbol].image.startsWith('/'))) {
+    if (
+      TOKENS[symbol]?.image &&
+      (TOKENS[symbol].image.startsWith("http") ||
+        TOKENS[symbol].image.startsWith("/"))
+    ) {
       return <img src={TOKENS[symbol].image} alt={symbol} width="32" />;
     }
     if (TOKENS[symbol]?.emoji) {
@@ -197,12 +206,16 @@ const SwapComponent = () => {
         } else {
           // ERC20 balance
           const tokenAddress = TOKENS[tokenIn].address;
-          const contract = new ethers.Contract(tokenAddress, ["function balanceOf(address) view returns (uint256)"], signer);
+          const contract = new ethers.Contract(
+            tokenAddress,
+            ["function balanceOf(address) view returns (uint256)"],
+            signer
+          );
           const bal = await contract.balanceOf(address);
           setTokenBalance(formatUnits(bal, TOKENS[tokenIn].decimals));
         }
       } catch (err) {
-		console.error("Error fetching balance", err);
+        console.error("Error fetching balance", err);
         setTokenBalance("");
       }
     };
@@ -269,14 +282,14 @@ const SwapComponent = () => {
         symbol = "pSTATE";
       }
       await window.ethereum.request({
-        method: 'wallet_watchAsset',
+        method: "wallet_watchAsset",
         params: {
-          type: 'ERC20',
+          type: "ERC20",
           options: {
             address: token.address,
             symbol: symbol,
             decimals: token.decimals,
-            image: token.image || window.location.origin + '/default.png',
+            image: token.image || window.location.origin + "/default.png",
           },
         },
       });
@@ -299,8 +312,12 @@ const SwapComponent = () => {
           );
           if (response.ok) {
             const data = await response.json();
-            prices[TOKENS[tokenIn].address.toLowerCase()] = data.data?.attributes?.price_usd || 0;
-            console.log(`Price for ${tokenIn}:`, data.data?.attributes?.price_usd);
+            prices[TOKENS[tokenIn].address.toLowerCase()] =
+              data.data?.attributes?.price_usd || 0;
+            console.log(
+              `Price for ${tokenIn}:`,
+              data.data?.attributes?.price_usd
+            );
           }
         } catch (err) {
           console.error(`Error fetching price for ${tokenIn}:`, err);
@@ -308,15 +325,23 @@ const SwapComponent = () => {
       }
 
       // Fetch price for tokenOut (if not PLS and different from tokenIn)
-      if (tokenOut !== "PLS" && TOKENS[tokenOut]?.address && tokenOut !== tokenIn) {
+      if (
+        tokenOut !== "PLS" &&
+        TOKENS[tokenOut]?.address &&
+        tokenOut !== tokenIn
+      ) {
         try {
           const response = await fetch(
             `https://api.geckoterminal.com/api/v2/networks/pulsechain/tokens/${TOKENS[tokenOut].address}`
           );
           if (response.ok) {
             const data = await response.json();
-            prices[TOKENS[tokenOut].address.toLowerCase()] = data.data?.attributes?.price_usd || 0;
-            console.log(`Price for ${tokenOut}:`, data.data?.attributes?.price_usd);
+            prices[TOKENS[tokenOut].address.toLowerCase()] =
+              data.data?.attributes?.price_usd || 0;
+            console.log(
+              `Price for ${tokenOut}:`,
+              data.data?.attributes?.price_usd
+            );
           }
         } catch (err) {
           console.error(`Error fetching price for ${tokenOut}:`, err);
@@ -327,11 +352,11 @@ const SwapComponent = () => {
       if (tokenIn === "PLS" || tokenOut === "PLS") {
         try {
           const plsResponse = await fetch(
-            'https://api.coingecko.com/api/v3/simple/price?ids=pulsechain&vs_currencies=usd'
+            "https://api.coingecko.com/api/v3/simple/price?ids=pulsechain&vs_currencies=usd"
           );
           const plsData = await plsResponse.json();
           if (plsData.pulsechain) {
-            prices['pls'] = plsData.pulsechain.usd;
+            prices["pls"] = plsData.pulsechain.usd;
             console.log("PLS price:", plsData.pulsechain.usd);
           }
         } catch (err) {
@@ -345,7 +370,7 @@ const SwapComponent = () => {
       };
 
       // Merge fallback prices
-      Object.keys(fallbackPrices).forEach(address => {
+      Object.keys(fallbackPrices).forEach((address) => {
         if (!prices[address.toLowerCase()]) {
           prices[address.toLowerCase()] = fallbackPrices[address];
         }
@@ -369,7 +394,7 @@ const SwapComponent = () => {
     // Calculate input USD value
     let inputPrice = 0;
     if (tokenIn === "PLS") {
-      inputPrice = tokenPrices['pls'] || 0;
+      inputPrice = tokenPrices["pls"] || 0;
     } else if (TOKENS[tokenIn]?.address) {
       inputPrice = tokenPrices[TOKENS[tokenIn].address.toLowerCase()] || 0;
     }
@@ -381,7 +406,7 @@ const SwapComponent = () => {
     if (amountOut && !isNaN(amountOut)) {
       let outputPrice = 0;
       if (tokenOut === "PLS") {
-        outputPrice = tokenPrices['pls'] || 0;
+        outputPrice = tokenPrices["pls"] || 0;
       } else if (TOKENS[tokenOut]?.address) {
         outputPrice = tokenPrices[TOKENS[tokenOut].address.toLowerCase()] || 0;
       }
@@ -397,8 +422,8 @@ const SwapComponent = () => {
   const getPriceDifference = () => {
     if (!inputUsdValue || !outputUsdValue) return null;
 
-    const inputUsd = parseFloat(inputUsdValue.replace('$', ''));
-    const outputUsd = parseFloat(outputUsdValue.replace('$', ''));
+    const inputUsd = parseFloat(inputUsdValue.replace("$", ""));
+    const outputUsd = parseFloat(outputUsdValue.replace("$", ""));
 
     if (isNaN(inputUsd) || isNaN(outputUsd)) return null;
 
@@ -408,7 +433,7 @@ const SwapComponent = () => {
     return {
       value: difference,
       percentage: percentage,
-      isPositive: difference > 0
+      isPositive: difference > 0,
     };
   };
 
@@ -493,17 +518,36 @@ const SwapComponent = () => {
                   role="button"
                   title={copiedTokenIn ? "Copied!" : "Copy address"}
                   onClick={() => handleCopy(TOKENS[tokenIn].address, "in")}
-                  style={{ cursor: "pointer", marginLeft: 4, color: copiedTokenIn ? "#4caf50" : "#ffffff", fontSize: 18 }}
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: 4,
+                    color: copiedTokenIn ? "#4caf50" : "#ffffff",
+                    fontSize: 18,
+                  }}
                 >
-                  {copiedTokenIn ? "✔️" : <img src={copyIcon} alt="Copy" width="18" />}
+                  {copiedTokenIn ? (
+                    "✔️"
+                  ) : (
+                    <img src={copyIcon} alt="Copy" width="18" />
+                  )}
                 </span>
                 <span
                   role="button"
                   title="Add to MetaMask"
                   onClick={() => handleAddToMetaMask(TOKENS[tokenIn], "in")}
-                  style={{ cursor: "pointer", marginLeft: 6, color: "#f6851b", fontSize: 18 }}
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: 6,
+                    color: "#f6851b",
+                    fontSize: 18,
+                  }}
                 >
-                  <img src={metamaskIcon} alt="MetaMask" width="18" style={{ verticalAlign: 'middle' }} />
+                  <img
+                    src={metamaskIcon}
+                    alt="MetaMask"
+                    width="18"
+                    style={{ verticalAlign: "middle" }}
+                  />
                 </span>
               </>
             )}
@@ -515,7 +559,12 @@ const SwapComponent = () => {
             {inputUsdValue && <span>{inputUsdValue}</span>}
           </small>
           <small className="text-secondary">
-            Balance: {tokenBalance !== "" ? `${parseFloat(tokenBalance).toFixed(6)} ${TOKENS[tokenIn]?.symbol || tokenIn}` : "-"}
+            Balance:{" "}
+            {tokenBalance !== ""
+              ? `${parseFloat(tokenBalance).toFixed(6)} ${
+                  TOKENS[tokenIn]?.symbol || tokenIn
+                }`
+              : "-"}
           </small>
         </div>
 
@@ -539,8 +588,8 @@ const SwapComponent = () => {
               isLoading
                 ? "Fetching..."
                 : amountOut
-                  ? amountOut
-                  : "Waiting for input..."
+                ? amountOut
+                : "Waiting for input..."
             }
             readOnly
           />
@@ -560,17 +609,36 @@ const SwapComponent = () => {
                   role="button"
                   title={copiedTokenOut ? "Copied!" : "Copy address"}
                   onClick={() => handleCopy(TOKENS[tokenOut].address, "out")}
-                  style={{ cursor: "pointer", marginLeft: 4, color: copiedTokenOut ? "#4caf50" : "#ffffff", fontSize: 18 }}
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: 4,
+                    color: copiedTokenOut ? "#4caf50" : "#ffffff",
+                    fontSize: 18,
+                  }}
                 >
-                  {copiedTokenOut ? "✔️" : <img src={copyIcon} alt="Copy" width="18" />}
+                  {copiedTokenOut ? (
+                    "✔️"
+                  ) : (
+                    <img src={copyIcon} alt="Copy" width="18" />
+                  )}
                 </span>
                 <span
                   role="button"
                   title="Add to MetaMask"
                   onClick={() => handleAddToMetaMask(TOKENS[tokenOut], "out")}
-                  style={{ cursor: "pointer", marginLeft: 6, color: "#f6851b", fontSize: 18 }}
+                  style={{
+                    cursor: "pointer",
+                    marginLeft: 6,
+                    color: "#f6851b",
+                    fontSize: 18,
+                  }}
                 >
-                  <img src={metamaskIcon} alt="MetaMask" width="18" style={{ verticalAlign: 'middle' }} />
+                  <img
+                    src={metamaskIcon}
+                    alt="MetaMask"
+                    width="18"
+                    style={{ verticalAlign: "middle" }}
+                  />
                 </span>
               </>
             )}
@@ -579,20 +647,23 @@ const SwapComponent = () => {
         {/* Output USD value display */}
         {outputUsdValue && (
           <div className="d-flex justify-content-start align-items-center gap-2 mb-2">
-            <small className="text-secondary">
-              {outputUsdValue}
-            </small>
+            <small className="text-secondary">{outputUsdValue}</small>
             {getPriceDifference() && (
               <span
                 className="badge"
                 style={{
-                  backgroundColor: getPriceDifference().isPositive ? '#28a745' : '#dc3545',
-                  color: 'white',
-                  fontSize: '0.7rem',
-                  padding: '2px 6px'
+                  backgroundColor: getPriceDifference().isPositive
+                    ? "#28a745"
+                    : "#dc3545",
+                  color: "white",
+                  fontSize: "0.7rem",
+                  padding: "2px 6px",
                 }}
               >
-                {getPriceDifference().isPositive ? '+' : ''}{getPriceDifference().value.toFixed(8)} ({getPriceDifference().isPositive ? '+' : ''}{getPriceDifference().percentage.toFixed(2)}%)
+                {getPriceDifference().isPositive ? "+" : ""}
+                {getPriceDifference().value.toFixed(8)} (
+                {getPriceDifference().isPositive ? "+" : ""}
+                {getPriceDifference().percentage.toFixed(2)}%)
               </span>
             )}
           </div>
@@ -600,12 +671,8 @@ const SwapComponent = () => {
 
         {error && <div className="alert alert-danger py-2">{error}</div>}
 
-
-
         <div className="d-flex justify-content-between align-items-center mb-2">
-          <small className="text-secondary">
-            Network Fee: {estimatedGas}
-          </small>
+          <small className="text-secondary">Network Fee: {estimatedGas}</small>
         </div>
         {/* Progress indicator */}
         {currentStep && (
@@ -614,35 +681,67 @@ const SwapComponent = () => {
               {/* Step 1: Approving */}
               <div className="d-flex flex-column align-items-center">
                 <div
-                  className={`rounded-circle d-flex align-items-center justify-content-center ${currentStep === "approving" ? "bg-primary text-white" :
-                    currentStep === "swapping" ? "bg-success text-white" : "bg-secondary text-white"
-                    }`}
+                  className={`rounded-circle d-flex align-items-center justify-content-center ${
+                    currentStep === "approving"
+                      ? "bg-primary text-white"
+                      : currentStep === "swapping"
+                      ? "bg-success text-white"
+                      : "bg-secondary text-white"
+                  }`}
                   style={{ width: "32px", height: "32px", fontSize: "14px" }}
                 >
                   {currentStep === "swapping" ? "✓" : "1"}
                 </div>
-                <small className={`mt-1 ${currentStep === "approving" ? "text-primary" : currentStep === "swapping" ? "text-success" : "text-secondary"}`}>
+                <small
+                  className={`mt-1 ${
+                    currentStep === "approving"
+                      ? "text-primary"
+                      : currentStep === "swapping"
+                      ? "text-success"
+                      : "text-secondary"
+                  }`}
+                >
                   Approving
                 </small>
               </div>
 
               {/* Connecting line */}
               <div
-                className={`border-top ${currentStep === "swapping" ? "border-success" : "border-secondary"}`}
+                className={`border-top ${
+                  currentStep === "swapping"
+                    ? "border-success"
+                    : "border-secondary"
+                }`}
                 style={{ width: "40px", height: "2px" }}
               ></div>
 
               {/* Step 2: Swapping */}
               <div className="d-flex flex-column align-items-center">
                 <div
-                  className={`rounded-circle d-flex align-items-center justify-content-center ${currentStep === "swapping" ? "bg-primary text-white" :
-                    currentStep === "approving" ? "bg-secondary text-white" : "bg-success text-white"
-                    }`}
+                  className={`rounded-circle d-flex align-items-center justify-content-center ${
+                    currentStep === "swapping"
+                      ? "bg-primary text-white"
+                      : currentStep === "approving"
+                      ? "bg-secondary text-white"
+                      : "bg-success text-white"
+                  }`}
                   style={{ width: "32px", height: "32px", fontSize: "14px" }}
                 >
-                  {currentStep === "swapping" ? "2" : currentStep === "approving" ? "2" : "✓"}
+                  {currentStep === "swapping"
+                    ? "2"
+                    : currentStep === "approving"
+                    ? "2"
+                    : "✓"}
                 </div>
-                <small className={`mt-1 ${currentStep === "swapping" ? "text-primary" : currentStep === "approving" ? "text-secondary" : "text-success"}`}>
+                <small
+                  className={`mt-1 ${
+                    currentStep === "swapping"
+                      ? "text-primary"
+                      : currentStep === "approving"
+                      ? "text-secondary"
+                      : "text-success"
+                  }`}
+                >
                   Swapping
                 </small>
               </div>
@@ -667,7 +766,10 @@ const SwapComponent = () => {
             >
               {isApproving ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                  ></span>
                   Approving...
                 </>
               ) : (
@@ -682,7 +784,10 @@ const SwapComponent = () => {
             >
               {isSwapping ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                  ></span>
                   Swapping...
                 </>
               ) : (
@@ -704,7 +809,11 @@ const SwapComponent = () => {
         {showConfirmation && (
           <div
             className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-            style={{ backgroundColor: "rgba(0,0,0,0.7)", zIndex: 3000, width: "100px" }}
+            style={{
+              backgroundColor: "rgba(0,0,0,0.7)",
+              zIndex: 3000,
+              width: "100px",
+            }}
           >
             <div
               className="bg-dark text-light rounded-4 p-4 shadow-lg text-center"
