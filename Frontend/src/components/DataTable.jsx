@@ -464,7 +464,7 @@ const DataTable = () => {
                         <>
                           <td>
                             Swap {formatWithCommas(outputToken)} tokens <br />{" "}
-                            for {name} tokens on external DEX
+                            for {name} tokens on our DEX
                           </td>
                           <td></td>
                         </>
