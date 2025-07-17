@@ -250,16 +250,7 @@ const DataTable = () => {
                     </a>
                   </div>
                 </th>
-                <th
-                  style={{
-                    paddingTop: "4px",
-                    paddingBottom: "20px",
-                  }}
-                >
-                  <div style={{ fontSize: "13px", lineHeight: "1" }}>3</div>
-                  <div>Double Your Stash</div>
-                </th>
-                <th></th>
+               
                 <th></th>
               </tr>
             </thead>
@@ -455,54 +446,7 @@ const DataTable = () => {
                           </div>
                         </div>
                       )}
-                      {isReversing == "true" ? (
-                        <>
-                          <td>Provide Liquidity with your tokens</td>
-                          <td></td>
-                        </>
-                      ) : (
-                        <>
-                          <td>
-                            Swap {formatWithCommas(outputToken)} tokens <br />{" "}
-                            for {name} tokens on external DEX
-                          </td>
-                          <td>
-                            <a
-                              href="https://dex.9mm.pro/swap?chain=pulsechain"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <img
-                                src={nine}
-                                alt="sDAV Logo"
-                                className="mb-1 info-logo "
-                              />
-                            </a>
-                            <a
-                              href="https://app.pulsex.com/"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <img
-                                src={puslex}
-                                alt="sDAV Logo"
-                                className="mb-1 info-logo"
-                              />
-                            </a>
-                            <a
-                              href="https://app.9inch.io/?chain=pulse"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <img
-                                src={nineinch}
-                                alt="sDAV Logo"
-                                className="mb-1 info-logo"
-                              />
-                            </a>
-                          </td>
-                        </>
-                      )}
+                   
                       <td></td>
                       {isPopupOpen && (
                         <div

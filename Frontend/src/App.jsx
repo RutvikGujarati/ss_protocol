@@ -52,7 +52,7 @@ const App = () => {
           <main className="flex-grow-1">
             <Routes>
               <Route path="/" element={<Navigate to="/auction" />} />
-              <Route path="/Swap" element={<SwapComponent />} />
+              <Route path="/Swap" element={<><SwapComponent /></>} />
               <Route
                 path="/auction"
                 element={

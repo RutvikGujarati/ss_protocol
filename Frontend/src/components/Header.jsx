@@ -47,6 +47,18 @@ const Header = () => {
                       ? "nav-link active-link text-light"
                       : "nav-link text-light"
                   }
+                  to="/Swap"
+                >
+                  Dex
+                </NavLink>
+              </li>
+              <li className="nav-item mx-2">
+                <NavLink
+                  className={({ isActive }) =>
+                    isActive
+                      ? "nav-link active-link text-light"
+                      : "nav-link text-light"
+                  }
                   to="/AddToken"
                 >
                   Add Token

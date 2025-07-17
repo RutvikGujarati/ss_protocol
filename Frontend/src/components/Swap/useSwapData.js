@@ -1,0 +1,165 @@
+import { useState, useEffect } from "react";
+import { formatUnits, parseUnits } from "ethers";
+
+const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
+	const [amountOut, setAmountOut] = useState("");
+	const [estimatedGas, setEstimatedGas] = useState(null);
+	const [quoteData, setQuoteData] = useState(null);
+	const [routeDetails, setRouteDetails] = useState(null);
+	const [tokenPrices, setTokenPrices] = useState({});
+	const [inputUsdValue, setInputUsdValue] = useState("");
+	const [outputUsdValue, setOutputUsdValue] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
+
+	const getApiTokenAddress = (symbol) => {
+		if (symbol === "PLS") return "PLS";
+		return TOKENS[symbol]?.address;
+	};
+
+	const fetchQuote = async () => {
+		if (!amountIn || isNaN(amountIn)) {
+			setAmountOut("");
+			setQuoteData(null);
+			setRouteDetails([]);
+			setEstimatedGas(null);
+			return;
+		}
+
+		try {
+			setIsLoading(true);
+			const amount = parseUnits(amountIn, TOKENS[tokenIn].decimals).toString();
+			const tokenInAddress = getApiTokenAddress(tokenIn);
+			const tokenOutAddress = getApiTokenAddress(tokenOut);
+			const url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=${slippage}`;
+			const response = await fetch(url);
+			if (!response.ok) throw new Error("Quote fetch failed.");
+			const data = await response.json();
+			setAmountOut(formatUnits(data.destAmount, TOKENS[tokenOut].decimals));
+			setEstimatedGas(data.gasUseEstimateUSD?.toFixed(4) || null);
+			setQuoteData(data.methodParameters);
+			setRouteDetails(data.route || { swaps: [] });
+		} catch (err) {
+			console.error(err);
+			setAmountOut("");
+			setRouteDetails([]);
+			setEstimatedGas(null);
+			setQuoteData(null);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const fetchTokenPrices = async () => {
+		try {
+			const prices = {};
+
+			if (tokenIn !== "PLS" && TOKENS[tokenIn]?.address) {
+				try {
+					const response = await fetch(`https://api.geckoterminal.com/api/v2/networks/pulsechain/tokens/${TOKENS[tokenIn].address}`);
+					if (response.ok) {
+						const data = await response.json();
+						prices[TOKENS[tokenIn].address.toLowerCase()] = data.data?.attributes?.price_usd || 0;
+						console.log(`Price for ${tokenIn}:`, data.data?.attributes?.price_usd);
+					}
+				} catch (err) {
+					console.error(`Error fetching price for ${tokenIn}:`, err);
+				}
+			}
+
+			if (tokenOut !== "PLS" && TOKENS[tokenOut]?.address && tokenOut !== tokenIn) {
+				try {
+					const response = await fetch(`https://api.geckoterminal.com/api/v2/networks/pulsechain/tokens/${TOKENS[tokenOut].address}`);
+					if (response.ok) {
+						const data = await response.json();
+						prices[TOKENS[tokenOut].address.toLowerCase()] = data.data?.attributes?.price_usd || 0;
+						console.log(`Price for ${tokenOut}:`, data.data?.attributes?.price_usd);
+					}
+				} catch (err) {
+					console.error(`Error fetching price for ${tokenOut}:`, err);
+				}
+			}
+
+			if (tokenIn === "PLS" || tokenOut === "PLS") {
+				try {
+					const plsResponse = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=pulsechain&vs_currencies=usd");
+					const plsData = await plsResponse.json();
+					if (plsData.pulsechain) {
+						prices["pls"] = plsData.pulsechain.usd;
+						console.log("PLS price:", plsData.pulsechain.usd);
+					}
+				} catch (err) {
+					console.error("Error fetching PLS price:", err);
+				}
+			}
+
+			const fallbackPrices = {};
+			Object.keys(fallbackPrices).forEach((address) => {
+				if (!prices[address.toLowerCase()]) {
+					prices[address.toLowerCase()] = fallbackPrices[address];
+				}
+			});
+
+			console.log("Final prices object:", prices);
+			setTokenPrices(prices);
+		} catch (err) {
+			console.error("Error fetching token prices:", err);
+		}
+	};
+
+	const calculateUsdValues = () => {
+		if (!amountIn || isNaN(amountIn)) {
+			setInputUsdValue("");
+			setOutputUsdValue("");
+			return;
+		}
+
+		let inputPrice = 0;
+		if (tokenIn === "PLS") {
+			inputPrice = tokenPrices["pls"] || 0;
+		} else if (TOKENS[tokenIn]?.address) {
+			inputPrice = tokenPrices[TOKENS[tokenIn].address.toLowerCase()] || 0;
+		}
+		const inputUsd = parseFloat(amountIn) * inputPrice;
+		setInputUsdValue(inputUsd > 0 ? `$${inputUsd.toFixed(8)}` : "");
+
+		if (amountOut && !isNaN(amountOut)) {
+			let outputPrice = 0;
+			if (tokenOut === "PLS") {
+				outputPrice = tokenPrices["pls"] || 0;
+			} else if (TOKENS[tokenOut]?.address) {
+				outputPrice = tokenPrices[TOKENS[tokenOut].address.toLowerCase()] || 0;
+			}
+			const outputUsd = parseFloat(amountOut) * outputPrice;
+			setOutputUsdValue(outputUsd > 0 ? `$${outputUsd.toFixed(8)}` : "");
+		} else {
+			setOutputUsdValue("");
+		}
+	};
+
+	useEffect(() => {
+		fetchQuote();
+	}, [amountIn, tokenIn, tokenOut, slippage]);
+
+	useEffect(() => {
+		fetchTokenPrices();
+	}, [tokenIn, tokenOut]);
+
+	useEffect(() => {
+		calculateUsdValues();
+	}, [amountIn, amountOut, tokenPrices, tokenIn, tokenOut]);
+
+	return {
+		amountOut,
+		estimatedGas,
+		quoteData,
+		routeDetails,
+		tokenPrices,
+		inputUsdValue,
+		outputUsdValue,
+		fetchQuote,
+		fetchTokenPrices,
+		isLoading,
+	};
+};
+
+export default useSwapData;
