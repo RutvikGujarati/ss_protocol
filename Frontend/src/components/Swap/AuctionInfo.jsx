@@ -5,7 +5,7 @@ const AuctionInfo = () => {
     const { tokens: auctionTokens } = useAuctionTokens();
     const activeAuctions = auctionTokens.filter(
         ({ isReversing, AuctionStatus }) =>
-            AuctionStatus === "false" ||
+            AuctionStatus === "true" ||
             (AuctionStatus === "false" && isReversing === "true")
     );
 
