@@ -250,7 +250,16 @@ const DataTable = () => {
                     </a>
                   </div>
                 </th>
-               
+                <th
+                  style={{
+                    paddingTop: "4px",
+                    paddingBottom: "20px",
+                  }}
+                >
+                  <div style={{ fontSize: "13px", lineHeight: "1" }}>3</div>
+                  <div>Double Your Stash</div>
+                </th>
+                <th></th>
                 <th></th>
               </tr>
             </thead>
@@ -314,8 +323,8 @@ const DataTable = () => {
                           {checkingStates[id]
                             ? ` AIRDROPPING...`
                             : AirdropClaimedForToken == "true"
-                            ? " CLAIMED"
-                            : `${formatWithCommas(AirDropAmount[name])} `}
+                              ? " CLAIMED"
+                              : `${formatWithCommas(AirDropAmount[name])} `}
                         </button>
                       </td>
                       <td>
@@ -328,8 +337,8 @@ const DataTable = () => {
                               name === "DAV"
                                 ? "pDAV"
                                 : name === "STATE"
-                                ? "State"
-                                : name
+                                  ? "State"
+                                  : name
                             )
                           }
                           alt="MetaMask"
@@ -396,8 +405,8 @@ const DataTable = () => {
                                   {userHasReverse == "true"
                                     ? "Reverse Swapped ✅"
                                     : swappingStates[id]
-                                    ? "Swapping..."
-                                    : "Reverse Swap"}
+                                      ? "Swapping..."
+                                      : "Reverse Swap"}
                                 </button>
                               )}
 
@@ -414,8 +423,8 @@ const DataTable = () => {
                                   {userHasSwapped == "true"
                                     ? "Swapped ✅"
                                     : swappingStates[id]
-                                    ? "Swapping..."
-                                    : buttonTextStates[id] || "Swap"}
+                                      ? "Swapping..."
+                                      : buttonTextStates[id] || "Swap"}
                                 </button>
                               )}
                             </>
@@ -446,7 +455,20 @@ const DataTable = () => {
                           </div>
                         </div>
                       )}
-                   
+                      {isReversing == "true" ? (
+                        <>
+                          <td>Provide Liquidity with your tokens</td>
+                          <td></td>
+                        </>
+                      ) : (
+                        <>
+                          <td>
+                            Swap {formatWithCommas(outputToken)} tokens <br />{" "}
+                            for {name} tokens on external DEX
+                          </td>
+                          <td></td>
+                        </>
+                      )}
                       <td></td>
                       {isPopupOpen && (
                         <div
@@ -469,16 +491,15 @@ const DataTable = () => {
                                 <div className="tx-progress-container">
                                   <div className="step-line">
                                     <div
-                                      className={`step ${
-                                        txStatusForSwap === "initializing" ||
-                                        txStatusForSwap === "initiated" ||
-                                        txStatusForSwap === "Approving" ||
-                                        txStatusForSwap === "swap pending" ||
-                                        txStatusForSwap === "confirmed" ||
-                                        txStatusForSwap === "error"
+                                      className={`step ${txStatusForSwap === "initializing" ||
+                                          txStatusForSwap === "initiated" ||
+                                          txStatusForSwap === "Approving" ||
+                                          txStatusForSwap === "swap pending" ||
+                                          txStatusForSwap === "confirmed" ||
+                                          txStatusForSwap === "error"
                                           ? "active"
                                           : ""
-                                      }`}
+                                        }`}
                                     >
                                       <span className="dot" />
                                       <span className="label">
@@ -486,51 +507,47 @@ const DataTable = () => {
                                       </span>
                                     </div>
                                     <div
-                                      className={`step ${
-                                        txStatusForSwap === "initiated" ||
-                                        txStatusForSwap === "Approving" ||
-                                        txStatusForSwap === "pending" ||
-                                        txStatusForSwap === "confirmed" ||
-                                        txStatusForSwap === "error"
+                                      className={`step ${txStatusForSwap === "initiated" ||
+                                          txStatusForSwap === "Approving" ||
+                                          txStatusForSwap === "pending" ||
+                                          txStatusForSwap === "confirmed" ||
+                                          txStatusForSwap === "error"
                                           ? "active"
                                           : ""
-                                      }`}
+                                        }`}
                                     >
                                       <span className="dot" />
                                       <span className="label">Initiated</span>
                                     </div>
                                     <div
-                                      className={`step ${
-                                        txStatusForSwap === "Approving" ||
-                                        txStatusForSwap === "pending" ||
-                                        txStatusForSwap === "confirmed" ||
-                                        txStatusForSwap === "error"
+                                      className={`step ${txStatusForSwap === "Approving" ||
+                                          txStatusForSwap === "pending" ||
+                                          txStatusForSwap === "confirmed" ||
+                                          txStatusForSwap === "error"
                                           ? "active"
                                           : ""
-                                      }`}
+                                        }`}
                                     >
                                       <span className="dot" />
                                       <span className="label">Approving</span>
                                     </div>
                                     <div
-                                      className={`step ${
-                                        txStatusForSwap === "pending" ||
-                                        txStatusForSwap === "confirmed" ||
-                                        txStatusForSwap === "error"
+                                      className={`step ${txStatusForSwap === "pending" ||
+                                          txStatusForSwap === "confirmed" ||
+                                          txStatusForSwap === "error"
                                           ? "active"
                                           : ""
-                                      }`}
+                                        }`}
                                     >
                                       <span className="dot" />
                                       <span className="label">Swapping</span>
                                     </div>
                                     <div
-                                      className={`step ${
-                                        txStatusForSwap === "confirmed" ||
-                                        txStatusForSwap === "error"
+                                      className={`step ${txStatusForSwap === "confirmed" ||
+                                          txStatusForSwap === "error"
                                           ? "active"
                                           : ""
-                                      }`}
+                                        }`}
                                     >
                                       <span className="dot" />
                                       <span className="label">
@@ -725,9 +742,9 @@ const DataTable = () => {
                               >
                                 {TokenAddress
                                   ? `${TokenAddress.slice(
-                                      0,
-                                      6
-                                    )}...${TokenAddress.slice(-4)}`
+                                    0,
+                                    6
+                                  )}...${TokenAddress.slice(-4)}`
                                   : "N/A"}
                               </div>
 
@@ -817,43 +834,40 @@ const DataTable = () => {
                                   <div className="tx-progress-container">
                                     <div className="step-line">
                                       <div
-                                        className={`step ${
-                                          txStatusForAdding === "initiated" ||
-                                          txStatusForAdding === "Adding" ||
-                                          txStatusForAdding ===
+                                        className={`step ${txStatusForAdding === "initiated" ||
+                                            txStatusForAdding === "Adding" ||
+                                            txStatusForAdding ===
                                             "Status Updating" ||
-                                          txStatusForAdding === "confirmed" ||
-                                          txStatusForAdding === "error"
+                                            txStatusForAdding === "confirmed" ||
+                                            txStatusForAdding === "error"
                                             ? "active"
                                             : ""
-                                        }`}
+                                          }`}
                                       >
                                         <span className="dot" />
                                         <span className="label">Initiated</span>
                                       </div>
                                       <div
-                                        className={`step ${
-                                          txStatusForAdding === "Adding" ||
-                                          txStatusForAdding ===
+                                        className={`step ${txStatusForAdding === "Adding" ||
+                                            txStatusForAdding ===
                                             "Status Updating" ||
-                                          txStatusForAdding === "confirmed" ||
-                                          txStatusForAdding === "error"
+                                            txStatusForAdding === "confirmed" ||
+                                            txStatusForAdding === "error"
                                             ? "active"
                                             : ""
-                                        }`}
+                                          }`}
                                       >
                                         <span className="dot" />
                                         <span className="label">Adding</span>
                                       </div>
                                       <div
-                                        className={`step ${
-                                          txStatusForAdding ===
+                                        className={`step ${txStatusForAdding ===
                                             "Status Updating" ||
-                                          txStatusForAdding === "confirmed" ||
-                                          txStatusForAdding === "error"
+                                            txStatusForAdding === "confirmed" ||
+                                            txStatusForAdding === "error"
                                             ? "active"
                                             : ""
-                                        }`}
+                                          }`}
                                       >
                                         <span className="dot" />
                                         <span className="label">
@@ -861,12 +875,11 @@ const DataTable = () => {
                                         </span>
                                       </div>
                                       <div
-                                        className={`step ${
-                                          txStatusForAdding === "confirmed" ||
-                                          txStatusForAdding === "error"
+                                        className={`step ${txStatusForAdding === "confirmed" ||
+                                            txStatusForAdding === "error"
                                             ? "active"
                                             : ""
-                                        }`}
+                                          }`}
                                       >
                                         <span className="dot" />
                                         <span className="label">
@@ -948,8 +961,8 @@ const DataTable = () => {
                         >
                           {pairAddress
                             ? `${pairAddress.slice(0, 6)}...${pairAddress.slice(
-                                -4
-                              )}`
+                              -4
+                            )}`
                             : "N/A"}
                         </td>
                         <td>1,500,000</td>
