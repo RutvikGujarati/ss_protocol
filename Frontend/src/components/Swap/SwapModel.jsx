@@ -10,8 +10,7 @@ import pulsechainLogo from "../../assets/pls1.png";
 import { useAccount } from "wagmi";
 import SettingsPopup from "./SettingsPopup";
 import RouteDetailsPopup from "./RouteDetailsPopup";
-import copyIcon from "/copy.png";
-import metamaskIcon from "../../assets/metamask-icon.png";
+
 import useSwapData from "./useSwapData";
 import { useRef } from "react";
 import AuctionInfo from "./AuctionInfo";
@@ -21,7 +20,6 @@ const SwapComponent = () => {
   const { signer } = useContext(ContractContext);
   const TOKENS = useAllTokens();
   const { address } = useAccount();
-
 
   const [tokenIn, setTokenIn] = useState("PLS");
   const [tokenOut, setTokenOut] = useState("STATE");
@@ -38,8 +36,6 @@ const SwapComponent = () => {
   const [needsApproval, setNeedsApproval] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [tokenBalance, setTokenBalance] = useState("");
-  const [copiedTokenIn, setCopiedTokenIn] = useState(false);
-  const [copiedTokenOut, setCopiedTokenOut] = useState(false);
   const swapCardRef = useRef(null);
   const [swapCardHeight, setSwapCardHeight] = useState(null);
   const [showTxModal, setShowTxModal] = useState(false);
@@ -134,19 +130,40 @@ const SwapComponent = () => {
 
   const getTokenLogo = (symbol) => {
     if (SPECIAL_TOKEN_LOGOS[symbol]) {
-      return <img src={SPECIAL_TOKEN_LOGOS[symbol]} alt={symbol} width="32" className="rounded-circle" />;
+      return (
+        <img
+          src={SPECIAL_TOKEN_LOGOS[symbol]}
+          alt={symbol}
+          width="32"
+          className="rounded-circle"
+        />
+      );
     }
     if (
       TOKENS[symbol]?.image &&
       (TOKENS[symbol].image.startsWith("http") ||
         TOKENS[symbol].image.startsWith("/"))
     ) {
-      return <img src={TOKENS[symbol].image} alt={symbol} width="32" className="rounded-circle" />;
+      return (
+        <img
+          src={TOKENS[symbol].image}
+          alt={symbol}
+          width="32"
+          className="rounded-circle"
+        />
+      );
     }
     if (TOKENS[symbol]?.emoji) {
       return <span style={{ fontSize: "1.1em" }}>{TOKENS[symbol].emoji}</span>;
     }
-    return <img src="/default.png" alt={symbol} width="32" className="rounded-circle" />;
+    return (
+      <img
+        src="/default.png"
+        alt={symbol}
+        width="32"
+        className="rounded-circle"
+      />
+    );
   };
 
   const openModal = (type) => {
@@ -206,42 +223,6 @@ const SwapComponent = () => {
     }
   };
 
-  const handleCopy = (address, type) => {
-    if (!address) return;
-    navigator.clipboard.writeText(address);
-    if (type === "in") {
-      setCopiedTokenIn(true);
-      setTimeout(() => setCopiedTokenIn(false), 1200);
-    } else {
-      setCopiedTokenOut(true);
-      setTimeout(() => setCopiedTokenOut(false), 1200);
-    }
-  };
-
-  const handleAddToMetaMask = async (token) => {
-    if (!window.ethereum || !token?.address) return;
-    try {
-      let symbol = token.symbol;
-      if (symbol === "STATE" && token.address) {
-        symbol = "pSTATE";
-      }
-      await window.ethereum.request({
-        method: "wallet_watchAsset",
-        params: {
-          type: "ERC20",
-          options: {
-            address: token.address,
-            symbol: symbol,
-            decimals: token.decimals,
-            image: token.image || window.location.origin + "/default.png",
-          },
-        },
-      });
-    } catch (err) {
-      console.log("Error adding to MetaMask", err);
-    }
-  };
-
   useEffect(() => {
     const fetchBalance = async () => {
       if (!signer || !address || !tokenIn || !TOKENS[tokenIn]) {
@@ -288,11 +269,27 @@ const SwapComponent = () => {
     if (swapCardRef.current) {
       setSwapCardHeight(swapCardRef.current.offsetHeight);
     }
-  }, [amountIn, amountOut, isLoading, showSettings, showConfirmation, needsApproval, isApproving, isSwapping, tokenIn, tokenOut, TOKENS]);
+  }, [
+    amountIn,
+    amountOut,
+    isLoading,
+    showSettings,
+    showConfirmation,
+    needsApproval,
+    isApproving,
+    isSwapping,
+    tokenIn,
+    tokenOut,
+    TOKENS,
+  ]);
 
   return (
     <>
-      <TxProgressModal isOpen={showTxModal} txStatus={txStatus} onClose={() => setShowTxModal(false)} />
+      <TxProgressModal
+        isOpen={showTxModal}
+        txStatus={txStatus}
+        onClose={() => setShowTxModal(false)}
+      />
       <div
         className="d-flex justify-content-center"
         style={{
@@ -303,10 +300,18 @@ const SwapComponent = () => {
           margin: 0,
           boxSizing: "border-box",
           overflowY: "auto",
-          transition: "all 0.3s"
+          transition: "all 0.3s",
         }}
       >
-        <div className="d-flex flex-row flex-wrap justify-content-center w-100" style={{ minHeight: "80vh", gap: 32, maxWidth: "100%", alignItems: "flex-start" }}>
+        <div
+          className="d-flex flex-row flex-wrap justify-content-center w-100"
+          style={{
+            minHeight: "80vh",
+            gap: 32,
+            maxWidth: "100%",
+            alignItems: "flex-start",
+          }}
+        >
           {/* Left info section for auction swap line */}
           <AuctionInfo swapCardHeight={swapCardHeight} />
           {/* Main swap card */}
@@ -320,13 +325,16 @@ const SwapComponent = () => {
                 padding: "24px",
                 margin: 0,
                 transition: "margin 0.3s",
-                border: "1px solid #ffffff26"
+                border: "1px solid #ffffff26",
               }}
             >
               <div className="d-flex justify-content-between detailText ">
                 <p
                   className="mb-1 detailText fs-5"
-                  style={{ fontFamily: "Satoshi, sans-serif", textTransform: "uppercase" }}
+                  style={{
+                    fontFamily: "Satoshi, sans-serif",
+                    textTransform: "uppercase",
+                  }}
                 >
                   SWAP TOKENS
                 </p>
@@ -356,7 +364,7 @@ const SwapComponent = () => {
                   value={amountIn}
                   onChange={(e) => setAmountIn(e.target.value)}
                   placeholder="0.0"
-                  style={{ boxShadow: "none", color: '#343a40' }}
+                  style={{ boxShadow: "none", color: "#343a40" }}
                   disabled={isApproving || isSwapping}
                 />
                 <div className="d-flex align-items-center gap-1">
@@ -367,59 +375,31 @@ const SwapComponent = () => {
                   >
                     <span className="d-flex align-items-center gap-2">
                       {getTokenLogo(tokenIn)}
-                      <span style={{ fontWeight: 700 }}>{TOKENS[tokenIn]?.symbol || tokenIn}</span>
+                      <span style={{ fontWeight: 700 }}>
+                        {TOKENS[tokenIn]?.symbol || tokenIn}
+                      </span>
                     </span>
                     <span className="ms-2 d-flex align-items-center">
-                      <i className="bi bi-chevron-down" style={{ fontSize: '1.1em' }}></i>
+                      <i
+                        className="bi bi-chevron-down"
+                        style={{ fontSize: "1.1em" }}
+                      ></i>
                     </span>
                   </button>
-                  {tokenIn !== "PLS" && TOKENS[tokenIn]?.address && (
-                    <>
-                      <span
-                        role="button"
-                        title={copiedTokenIn ? "Copied!" : "Copy address"}
-                        onClick={() => handleCopy(TOKENS[tokenIn].address, "in")}
-                        style={{
-                          cursor: "pointer",
-                          marginLeft: 4,
-                          color: copiedTokenIn ? "#4caf50" : "#ffffff",
-                          fontSize: 18,
-                        }}
-                      >
-                        {copiedTokenIn ? (
-                          "✔️"
-                        ) : (
-                          <img src={copyIcon} alt="Copy" width="18" />
-                        )}
-                      </span>
-                      <span
-                        role="button"
-                        title="Add to MetaMask"
-                        onClick={() => handleAddToMetaMask(TOKENS[tokenIn])}
-                        style={{
-                          cursor: "pointer",
-                          marginLeft: 6,
-                          color: "#f6851b",
-                          fontSize: 18,
-                        }}
-                      >
-                        <img
-                          src={metamaskIcon}
-                          alt="MetaMask"
-                          width="18"
-                          style={{ verticalAlign: "middle" }}
-                        />
-                      </span>
-                    </>
-                  )}
                 </div>
               </div>
-              <div className="d-flex justify-content-between align-items-center mb-2" style={{ fontSize: "0.9rem" }}>
+              <div
+                className="d-flex justify-content-between align-items-center mb-2"
+                style={{ fontSize: "0.9rem" }}
+              >
                 <small className="text-secondary">
                   {inputUsdValue && <span>{inputUsdValue}</span>}
                 </small>
                 <span className="text-secondary small fw-normal ms-1">
-                  Bal: {tokenBalance ? `${parseFloat(tokenBalance).toFixed(2)}` : "-"}
+                  Bal:{" "}
+                  {tokenBalance
+                    ? `${parseFloat(tokenBalance).toFixed(2)}`
+                    : "-"}
                 </span>
               </div>
 
@@ -444,11 +424,11 @@ const SwapComponent = () => {
                     isLoading
                       ? "Fetching..."
                       : amountOut
-                        ? amountOut
-                        : "Waiting for input..."
+                      ? amountOut
+                      : "Waiting for input..."
                   }
                   readOnly
-                  style={{ fontSize: "1.15rem", background: '#343a40' }}
+                  style={{ fontSize: "1.15rem", background: "#343a40" }}
                 />
                 <div className="d-flex align-items-center gap-1">
                   <button
@@ -458,55 +438,24 @@ const SwapComponent = () => {
                   >
                     <span className="d-flex align-items-center gap-2">
                       {getTokenLogo(tokenOut)}
-                      <span style={{ fontWeight: 700 }}>{TOKENS[tokenOut]?.symbol || tokenOut}</span>
+                      <span style={{ fontWeight: 700 }}>
+                        {TOKENS[tokenOut]?.symbol || tokenOut}
+                      </span>
                     </span>
                     <span className="ms-2 d-flex align-items-center">
-                      <i className="bi bi-chevron-down" style={{ fontSize: '1.1em' }}></i>
+                      <i
+                        className="bi bi-chevron-down"
+                        style={{ fontSize: "1.1em" }}
+                      ></i>
                     </span>
                   </button>
-                  {tokenOut !== "PLS" && TOKENS[tokenOut]?.address && (
-                    <>
-                      <span
-                        role="button"
-                        title={copiedTokenOut ? "Copied!" : "Copy address"}
-                        onClick={() => handleCopy(TOKENS[tokenOut].address, "out")}
-                        style={{
-                          cursor: "pointer",
-                          marginLeft: 4,
-                          color: copiedTokenOut ? "#4caf50" : "#ffffff",
-                          fontSize: 18,
-                        }}
-                      >
-                        {copiedTokenOut ? (
-                          "✔️"
-                        ) : (
-                          <img src={copyIcon} alt="Copy" width="18" />
-                        )}
-                      </span>
-                      <span
-                        role="button"
-                        title="Add to MetaMask"
-                        onClick={() => handleAddToMetaMask(TOKENS[tokenOut])}
-                        style={{
-                          cursor: "pointer",
-                          marginLeft: 6,
-                          color: "#f6851b",
-                          fontSize: 18,
-                        }}
-                      >
-                        <img
-                          src={metamaskIcon}
-                          alt="MetaMask"
-                          width="18"
-                          style={{ verticalAlign: "middle" }}
-                        />
-                      </span>
-                    </>
-                  )}
                 </div>
               </div>
               {outputUsdValue && (
-                <div className="d-flex justify-content-start align-items-center gap-2 mb-2" style={{ fontSize: "0.9rem" }}>
+                <div
+                  className="d-flex justify-content-start align-items-center gap-2 mb-2"
+                  style={{ fontSize: "0.9rem" }}
+                >
                   <small className="text-secondary">{outputUsdValue}</small>
                   {getPriceDifference() && (
                     <span
@@ -531,8 +480,13 @@ const SwapComponent = () => {
 
               {error && <div className="alert alert-danger py-2">{error}</div>}
 
-              <div className="d-flex justify-content-between align-items-center mb-2 " style={{ fontSize: "0.9rem" }}>
-                <small className="text-secondary">Network Fee: {estimatedGas}</small>
+              <div
+                className="d-flex justify-content-between align-items-center mb-2 "
+                style={{ fontSize: "0.9rem" }}
+              >
+                <small className="text-secondary">
+                  Network Fee: {estimatedGas}
+                </small>
               </div>
 
               <RouteDetailsPopup
