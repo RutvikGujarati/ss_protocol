@@ -46,7 +46,7 @@ const Footer = () => {
           </div>
           <div
             className="flex-grow-1 text-center text-white"
-            style={{ fontSize: "14px", marginLeft: "200px" }}
+            style={{ fontSize: "14px", marginLeft: "100px" }}
           >
             {messages[currentMessageIndex]}
           </div>
@@ -60,15 +60,6 @@ const Footer = () => {
               rel="noopener noreferrer"
             >
               Docs
-            </a>
-            <a
-              href="https://system-state-documentation.gitbook.io/system-state/career"
-              className="text-white"
-              style={{ fontSize: "14px" }}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Career
             </a>
             <a
               href="https://system-state-documentation.gitbook.io/system-state/disclaimer"

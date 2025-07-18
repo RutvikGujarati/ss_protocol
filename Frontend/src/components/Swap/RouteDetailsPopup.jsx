@@ -21,7 +21,7 @@ const RouteDetailsPopup = ({
                         className="bg-dark text-light rounded-4 shadow-lg p-4 position-absolute"
                         style={{
                             left: "50%",
-                            top: "40%",
+                            top: "82%",
                             transform: "translate(-50%, -50%)",
                             zIndex: 2001,
                             minWidth: "320px",

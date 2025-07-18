@@ -14,15 +14,15 @@ import RouteDetailsPopup from "./RouteDetailsPopup";
 import useSwapData from "./useSwapData";
 import { useRef } from "react";
 import AuctionInfo from "./AuctionInfo";
-import TxProgressModal from "../TxProgressModal";
+import toast from "react-hot-toast";
 
 const SwapComponent = () => {
   const { signer } = useContext(ContractContext);
   const TOKENS = useAllTokens();
   const { address } = useAccount();
 
-  const [tokenIn, setTokenIn] = useState("PLS");
-  const [tokenOut, setTokenOut] = useState("STATE");
+  const [tokenIn, setTokenIn] = useState("STATE");
+  const [tokenOut, setTokenOut] = useState("PLS");
   const [amountIn, setAmountIn] = useState("");
   const [isSwapping, setIsSwapping] = useState(false);
   const [slippage, setSlippage] = useState(0.5);
@@ -287,13 +287,33 @@ const SwapComponent = () => {
     TOKENS,
   ]);
 
+  useEffect(() => {
+    if (showConfirmation) {
+      toast.success(
+        `${confirmedAmountIn} ${getDisplaySymbol(TOKENS[tokenIn].symbol)} → ${confirmedAmountOut} ${getDisplaySymbol(TOKENS[tokenOut].symbol)} Swap Complete!`,
+        {
+          position: "top-center",
+          autoClose: 6000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          theme: "dark",
+        }
+      );
+      setShowConfirmation(false);
+    }
+  }, [showConfirmation]);
+
+  // Helper to truncate token symbol
+  const getDisplaySymbol = (symbol) => {
+    if (!symbol) return '';
+    return symbol.length > 6 ? symbol.slice(0, 6) + '..' : symbol;
+  };
+
   return (
     <>
-      <TxProgressModal
-        isOpen={showTxModal}
-        txStatus={txStatus}
-        onClose={() => setShowTxModal(false)}
-      />
+      {/* Inline transaction progress bar */}
       <div className="d-flex justify-content-center swap-container">
         <div
           className="d-flex flex-row flex-wrap justify-content-center w-100"
@@ -309,8 +329,10 @@ const SwapComponent = () => {
           {/* Main swap card */}
           <div className="card-container" ref={swapCardRef}>
             <div className="shadow-sm rounded-3 swap-card ">
-              <div className="d-flex justify-content-between detailText ">
-                <p className="mb-1 detailText detail-text">SWAP TOKENS</p>
+              <div className="d-flex justify-content-between">
+                <p className="mb-1 detailText detail-text">
+                  SWAP TOKENS
+                </p>
                 <button
                   className="btn btn-link text-light"
                   onClick={() => setShowSettings(!showSettings)}
@@ -333,10 +355,15 @@ const SwapComponent = () => {
               <div className="d-flex align-items-center gap-2">
                 <input
                   type="number"
-                  className="form-control text-light fw-bold swap-amount-input"
+                  className="form-control"
                   value={amountIn}
                   onChange={(e) => setAmountIn(e.target.value)}
                   placeholder="0.0"
+                  style={{
+                    boxShadow: "none",
+                    "--placeholder-color": "#6c757d",
+                    backgroundColor: (isApproving || isSwapping) ? "#343a40" : undefined
+                  }}
                   disabled={isApproving || isSwapping}
                 />
                 <div className="d-flex align-items-center gap-1">
@@ -347,8 +374,8 @@ const SwapComponent = () => {
                   >
                     <span className="d-flex align-items-center gap-2">
                       {getTokenLogo(tokenIn)}
-                      <span style={{ fontWeight: 700 }}>
-                        {TOKENS[tokenIn]?.symbol || tokenIn}
+                      <span style={{ fontWeight: 500 }}>
+                        {getDisplaySymbol(TOKENS[tokenIn]?.symbol || tokenIn)}
                       </span>
                     </span>
                     <span className="ms-2 d-flex align-items-center">
@@ -391,16 +418,16 @@ const SwapComponent = () => {
               <div className="d-flex align-items-center gap-2">
                 <input
                   type="text"
-                  className="form-control text-light fw-bold fs-6"
+                  className="form-control "
                   value={
                     isLoading
                       ? "Fetching..."
                       : amountOut
-                      ? amountOut
-                      : "Waiting for input..."
+                        ? amountOut
+                        : "0.0"
                   }
                   readOnly
-                  style={{ fontSize: "1.15rem", background: "#343a40" }}
+                  style={{ fontSize: "1rem", background: "#343a40", "--placeholder-color": "#6c757d" }}
                 />
                 <div className="d-flex align-items-center gap-1">
                   <button
@@ -410,8 +437,8 @@ const SwapComponent = () => {
                   >
                     <span className="d-flex align-items-center gap-2">
                       {getTokenLogo(tokenOut)}
-                      <span style={{ fontWeight: 700 }}>
-                        {TOKENS[tokenOut]?.symbol || tokenOut}
+                      <span style={{ fontWeight: 500 }}>
+                        {getDisplaySymbol(TOKENS[tokenOut]?.symbol || tokenOut)}
                       </span>
                     </span>
                     <span className="ms-2 d-flex align-items-center">
@@ -461,6 +488,34 @@ const SwapComponent = () => {
                 </small>
               </div>
 
+              {/* Inline transaction progress bar below Network Fee */}
+              {(isSwapping || isApproving || showTxModal) && (
+                <div className="tx-progress-container mb-3">
+                  <div className="step-line">
+                    <div className={`step ${txStatus === "initializing" || txStatus === "initiated" || txStatus === "Approving" || txStatus === "pending" || txStatus === "confirmed" ? "active" : ""}`}>
+                      <span className="dot" />
+                      <span className="label">Initializing</span>
+                    </div>
+                    <div className={`step ${txStatus === "initiated" || txStatus === "Approving" || txStatus === "pending" || txStatus === "confirmed" ? "active" : ""}`}>
+                      <span className="dot" />
+                      <span className="label">Initiated</span>
+                    </div>
+                    <div className={`step ${txStatus === "Approving" || txStatus === "pending" || txStatus === "confirmed" ? "active" : ""}`}>
+                      <span className="dot" />
+                      <span className="label">Approving</span>
+                    </div>
+                    <div className={`step ${txStatus === "pending" || txStatus === "confirmed" ? "active" : ""}`}>
+                      <span className="dot" />
+                      <span className="label">Swapping</span>
+                    </div>
+                    <div className={`step ${txStatus === "confirmed" || txStatus === "error" ? "active" : ""}`}>
+                      <span className="dot" />
+                      <span className="label">{txStatus === "error" ? "Error" : "Confirmed"}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <RouteDetailsPopup
                 routeDetails={routeDetails}
                 showRoutePopup={showRoutePopup}
@@ -504,7 +559,7 @@ const SwapComponent = () => {
                     className="btn btn-primary rounded-pill py-2"
                     onClick={handleSwap}
                     disabled={!quoteData || isSwapping}
-                    style={{ flex: 1.5, padding: "10px 20px", fontWeight: 400 }}
+                    style={{ flex: 1, padding: "10px 20px", fontWeight: 400,height: "40px" }}
                   >
                     {isSwapping ? (
                       <>
@@ -515,7 +570,7 @@ const SwapComponent = () => {
                         Swapping...
                       </>
                     ) : (
-                      "Swap Now"
+                      "SWAP"
                     )}
                   </button>
                 )}
@@ -530,31 +585,7 @@ const SwapComponent = () => {
                 />
               )}
 
-              {showConfirmation && (
-                <div
-                  className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
-                  style={{ backgroundColor: "rgba(0,0,0,0.7)", zIndex: 3000 }}
-                >
-                  <div
-                    className="bg-dark text-light rounded-4 p-4 shadow-lg text-center"
-                    style={{ maxWidth: "350px", width: "90%" }}
-                  >
-                    <h5 className="mb-3 text-success">Swap Complete</h5>
-                    <p className="mb-1">
-                      <strong>{confirmedAmountIn}</strong>{" "}
-                      {TOKENS[tokenIn].symbol} →{" "}
-                      <strong>{confirmedAmountOut}</strong>{" "}
-                      {TOKENS[tokenOut].symbol}
-                    </p>
-                    <button
-                      className="btn btn-outline-light mt-3"
-                      onClick={() => setShowConfirmation(false)}
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              )}
+              {/* Toast notification for swap confirmation (now handled by react-toastify) */}
             </div>
           </div>
         </div>

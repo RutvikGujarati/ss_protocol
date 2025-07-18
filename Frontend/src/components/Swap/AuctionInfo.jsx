@@ -26,37 +26,12 @@ const AuctionInfo = ({ swapCardHeight }) => {
             border: "1px solid #ffffff26",
           }}
         >
-          <div className="d-flex flex-column align-items-center justify-content-center h-100">
-            <div className="mb-2">
-              <span
-                className="d-inline-block bg-primary bg-opacity-70 rounded-circle p-2 shadow-sm"
-                style={{
-                  fontSize: "24px",
-                  color: "#fff",
-                  lineHeight: "24px",
-                  borderRadius: "50%",
-                  border: "2.5px solid #fff",
-                  width: 48,
-                  height: 48,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <i className="fas fa-gavel"></i>
-              </span>
-            </div>
-            <h5
-              className="fw-bold mb-2"
-              style={{
-                letterSpacing: "0.5px",
-                fontSize: "1.25rem",
-                color: "#e1e1e1",
-              }}
-            >
-              Active Auctions
-            </h5>
-            <div style={{ width: "100%", flex: 1, overflow: "hidden" }}>
+          <div className="d-flex flex-column align-items-center justify-content-center h-100 mt-2">
+
+            <p className="mb-1 detailText detail-text">
+              ACTIVE AUCTIONS
+            </p>
+            <div style={{ width: "100%", flex: 1, overflow: "hidden" }} className="mt-2">
               <ul
                 style={{
                   textAlign: "left",
@@ -80,8 +55,8 @@ const AuctionInfo = ({ swapCardHeight }) => {
                     }}
                   >
                     <span className="text-info fw-medium">Swap</span>
-                    <span> {auction.outputToken}</span> tokens for
-                    <span> {auction.name}</span> tokens
+                    <span> {auction.outputToken}</span> for
+                    <span> {auction.name}</span>
                   </li>
                 ))}
               </ul>

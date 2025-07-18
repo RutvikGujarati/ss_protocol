@@ -49,7 +49,7 @@ const Header = () => {
                   }
                   to="/Swap"
                 >
-                  Dex
+                  DEX
                 </NavLink>
               </li>
               <li className="nav-item mx-2">
@@ -142,7 +142,7 @@ const Header = () => {
           }
         >
           <i className="bi bi-swap"></i>
-          <div>Dex</div>
+          <div>DEX</div>
         </NavLink>
         <NavLink
           to="/AddToken"
