@@ -13,8 +13,10 @@ const RouteDetailsPopup = ({
         <>
             {showRoutePopup && (
                 <div
-                    className="position-fixed top-0 start-0 w-100 h-100"
-                    style={{ zIndex: 2000, backgroundColor: "rgba(0,0,0,0.5)" }}
+                    className="position-absolute top-0 start-0 w-100 h-100"
+                    style={{
+                        zIndex: 2000, backgroundColor: "#3141920", backdropFilter: "blur(2px)"
+                    }}
                     onClick={() => setShowRoutePopup(false)}
                 >
                     <div
@@ -31,7 +33,6 @@ const RouteDetailsPopup = ({
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <h6 className="text-light mb-3">Route Details</h6>
                         <div style={{ borderTop: "1px solid #333", marginBottom: 16 }}></div>
                         <div className="d-flex flex-column gap-3">
                             {routeDetails?.paths?.length > 0 &&
