@@ -305,10 +305,12 @@ const SwapComponent = () => {
     }
   }, [showConfirmation]);
 
-  // Helper to truncate token symbol
+  // Helper to truncate token symbol and ensure single line
   const getDisplaySymbol = (symbol) => {
     if (!symbol) return '';
-    return symbol.length > 6 ? symbol.slice(0, 6) + '..' : symbol;
+    // Remove all whitespace to ensure single line
+    const singleLine = symbol.replace(/\s+/g, '');
+    return singleLine.length > 6 ? singleLine.slice(0, 6) + '..' : singleLine;
   };
 
   return (
