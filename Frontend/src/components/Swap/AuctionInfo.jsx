@@ -27,7 +27,7 @@ const AuctionInfo = ({ swapCardHeight }) => {
             <div className="mb-2">
               <span
                 className="d-inline-block bg-primary bg-opacity-70 rounded-circle p-2 shadow-sm"
-                style={{ fontSize: "24px", color: "#fff", lineHeight: "24px" }}
+                style={{ fontSize: "24px", color: "#fff", lineHeight: "24px", borderRadius: "50%", border: "2.5px solid #fff", width: 48, height: 48, display: "flex", alignItems: "center", justifyContent: "center" }}
               >
                 <i className="fas fa-gavel"></i>
               </span>
@@ -66,9 +66,8 @@ const AuctionInfo = ({ swapCardHeight }) => {
                     }}
                   >
                     <span className="text-info fw-medium">Swap</span>
-                    <span className="fw-semibold"> {auction.outputToken}</span> tokens for
-                    <span className="fw-semibold"> {auction.name}</span> tokens on
-                    <span className="text-warning fw-medium"> STATE DEX</span>
+                    <span > {auction.outputToken}</span> tokens for
+                    <span > {auction.name}</span> tokens
                   </li>
                 ))}
               </ul>

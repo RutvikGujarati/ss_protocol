@@ -386,7 +386,7 @@ const InfoCards = () => {
       {isAuction ? (
         <>
           <div className="container mt-4">
-            <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
+            <div className="row g-4 d-flex align-items-stretch pb-1">
               <div className="col-md-4 p-0 m-2 cards">
                 <div
                   className="card bg-dark text-light border-light p-3 text-center w-100"
@@ -630,7 +630,7 @@ const InfoCards = () => {
       ): isBurn ? (
         <>
           <div className="container mt-4">
-            <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
+            <div className="row g-4 d-flex align-items-stretch pb-1 ">
               <div className="col-md-4 p-0 m-2 cards">
                 <div
                   className="card bg-dark text-light border-light p-3 d-flex w-100"
@@ -927,7 +927,7 @@ const InfoCards = () => {
       ) : isAddToken ? (
         <>
           <div className="container mt-4">
-            <div className="row g-4 d-flex align-items-stretch pb-1 border-bottom-">
+            <div className="row g-4 d-flex align-items-stretch pb-1 ">
               <div className="col-md-4 p-0 m-2 cards">
                 <div
                   className="card bg-dark text-light border-light p-0 d-flex justify-content-start align-items-center text-center w-100 "

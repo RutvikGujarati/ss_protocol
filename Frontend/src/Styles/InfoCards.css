@@ -330,3 +330,8 @@
   margin-left: 18px;
   border-radius: 20%;
 }
+
+.swap-amount-input:disabled {
+  background-color: #212529 !important;
+  color: #fff !important;
+}

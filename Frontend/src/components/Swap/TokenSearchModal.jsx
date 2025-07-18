@@ -122,11 +122,8 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content bg-dark text-light border border-secondary rounded-4 shadow-lg">
             {/* Header */}
-            <div className="modal-header border-0 pb-0 py-2">
-              <h6 className="modal-title fw-bold mb-0">
-                <i className="bi bi-search me-2 text-primary"></i>
-                Select Token
-              </h6>
+            <div className="modal-header border-0 pb-0 py-2 mb-3 mt-1">
+
               <button
                 type="button"
                 className="btn-close btn-close-white"
@@ -138,25 +135,27 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
             {/* Body */}
             <div className="modal-body pt-0 py-2">
               {/* Enhanced Search Input */}
-              <div className="mb-3">
+              <div className="mb-1">
                 <div className="position-relative">
                   <div className="input-group input-group-sm shadow-sm">
-                    <span className="input-group-text bg-secondary border-0 text-light rounded-start-pill">
+                    <span className="input-group-text bg-transparent border-0 text-light" style={{ borderRadius: 0 }}>
                       <i className="bi bi-search fs-6"></i>
                     </span>
                     <input
                       ref={searchInputRef}
                       type="text"
-                      className="form-control border-0 bg-secondary text-light fs-6 py-2"
+                      className="form-control border-0 bg-secondary text-light fs-6 py-2 rounded-pill"
                       placeholder="Search by name, symbol, or address..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
+                      style={{ borderTopLeftRadius: 50, borderBottomLeftRadius: 50, borderTopRightRadius: 50, borderBottomRightRadius: 50 }}
                     />
                     {searchTerm && (
                       <button
                         type="button"
-                        className="btn btn-outline-secondary border-0 text-light rounded-end-pill"
+                        className="btn btn-outline-secondary border-0 text-light rounded-pill"
                         onClick={() => setSearchTerm("")}
+                        style={{ borderTopRightRadius: 50, borderBottomRightRadius: 50 }}
                       >
                         <i className="bi bi-x-lg"></i>
                       </button>
@@ -187,11 +186,10 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                     return (
                       <div
                         key={key}
-                        className={`px-3 py-2 d-flex align-items-center justify-content-between cursor-pointer border-bottom border-secondary ${
-                          index === filteredTokens.length - 1
-                            ? "border-bottom-0"
-                            : ""
-                        }`}
+                        className={`px-3 py-2 d-flex align-items-center justify-content-between cursor-pointer border-bottom border-secondary ${index === filteredTokens.length - 1
+                          ? "border-bottom-0"
+                          : ""
+                          }`}
                         style={{
                           cursor: "pointer",
                           transition: "all 0.2s ease-in-out",
@@ -244,18 +242,6 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                     </small>
                   </div>
                 )}
-              </div>
-
-              {/* Footer Info */}
-              <div className="mt-2">
-                <div className="alert alert-info bg-secondary border-0 text-light small mb-0 rounded-3 py-2">
-                  <div className="d-flex align-items-center">
-                    <i className="bi bi-keyboard me-1 small"></i>
-                    <div className="small">
-                      <strong>Keyboard shortcuts:</strong> Press Esc to close
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

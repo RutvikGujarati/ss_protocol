@@ -14,6 +14,8 @@ import nine from "../assets/ninemm.png";
 import puslex from "../assets/pulsex.png";
 import nineinch from "../assets/nineinch.png";
 import IOSpinner from "../Constants/Spinner";
+import React from "react";
+import TxProgressModal from "./TxProgressModal";
 const DataTable = () => {
   const {
     davHolds,
@@ -470,99 +472,7 @@ const DataTable = () => {
                         </>
                       )}
                       <td></td>
-                      {isPopupOpen && (
-                        <div
-                          className="modal d-flex align-items-center justify-content-center"
-                          style={{
-                            zIndex: 30000,
-                            background: "rgba(33, 37, 41, 0.1)",
-                            pointerEvents: isPopupOpen ? "auto" : "none",
-                          }}
-                        >
-                          <div className="modal-dialog modal-dialog-centered">
-                            <div className="modal-content popup-content">
-                              <div className="modal-header border-0 text-center w-100 d-block">
-                                <h3 className="modal-title text-light">
-                                  Transaction Status
-                                </h3>
-                              </div>
-
-                              <div className="modal-body">
-                                <div className="tx-progress-container">
-                                  <div className="step-line">
-                                    <div
-                                      className={`step ${txStatusForSwap === "initializing" ||
-                                          txStatusForSwap === "initiated" ||
-                                          txStatusForSwap === "Approving" ||
-                                          txStatusForSwap === "swap pending" ||
-                                          txStatusForSwap === "confirmed" ||
-                                          txStatusForSwap === "error"
-                                          ? "active"
-                                          : ""
-                                        }`}
-                                    >
-                                      <span className="dot" />
-                                      <span className="label">
-                                        Initializing
-                                      </span>
-                                    </div>
-                                    <div
-                                      className={`step ${txStatusForSwap === "initiated" ||
-                                          txStatusForSwap === "Approving" ||
-                                          txStatusForSwap === "pending" ||
-                                          txStatusForSwap === "confirmed" ||
-                                          txStatusForSwap === "error"
-                                          ? "active"
-                                          : ""
-                                        }`}
-                                    >
-                                      <span className="dot" />
-                                      <span className="label">Initiated</span>
-                                    </div>
-                                    <div
-                                      className={`step ${txStatusForSwap === "Approving" ||
-                                          txStatusForSwap === "pending" ||
-                                          txStatusForSwap === "confirmed" ||
-                                          txStatusForSwap === "error"
-                                          ? "active"
-                                          : ""
-                                        }`}
-                                    >
-                                      <span className="dot" />
-                                      <span className="label">Approving</span>
-                                    </div>
-                                    <div
-                                      className={`step ${txStatusForSwap === "pending" ||
-                                          txStatusForSwap === "confirmed" ||
-                                          txStatusForSwap === "error"
-                                          ? "active"
-                                          : ""
-                                        }`}
-                                    >
-                                      <span className="dot" />
-                                      <span className="label">Swapping</span>
-                                    </div>
-                                    <div
-                                      className={`step ${txStatusForSwap === "confirmed" ||
-                                          txStatusForSwap === "error"
-                                          ? "active"
-                                          : ""
-                                        }`}
-                                    >
-                                      <span className="dot" />
-                                      <span className="label">
-                                        {txStatusForSwap === "error"
-                                          ? "Error"
-                                          : "Confirmed"}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                      <TxProgressModal isOpen={isPopupOpen} txStatus={txStatusForSwap} onClose={() => setIsPopupOpen(false)} />
                     </tr>
                   )
                 )
@@ -835,13 +745,13 @@ const DataTable = () => {
                                     <div className="step-line">
                                       <div
                                         className={`step ${txStatusForAdding === "initiated" ||
-                                            txStatusForAdding === "Adding" ||
-                                            txStatusForAdding ===
-                                            "Status Updating" ||
-                                            txStatusForAdding === "confirmed" ||
-                                            txStatusForAdding === "error"
-                                            ? "active"
-                                            : ""
+                                          txStatusForAdding === "Adding" ||
+                                          txStatusForAdding ===
+                                          "Status Updating" ||
+                                          txStatusForAdding === "confirmed" ||
+                                          txStatusForAdding === "error"
+                                          ? "active"
+                                          : ""
                                           }`}
                                       >
                                         <span className="dot" />
@@ -849,12 +759,12 @@ const DataTable = () => {
                                       </div>
                                       <div
                                         className={`step ${txStatusForAdding === "Adding" ||
-                                            txStatusForAdding ===
-                                            "Status Updating" ||
-                                            txStatusForAdding === "confirmed" ||
-                                            txStatusForAdding === "error"
-                                            ? "active"
-                                            : ""
+                                          txStatusForAdding ===
+                                          "Status Updating" ||
+                                          txStatusForAdding === "confirmed" ||
+                                          txStatusForAdding === "error"
+                                          ? "active"
+                                          : ""
                                           }`}
                                       >
                                         <span className="dot" />
@@ -862,11 +772,11 @@ const DataTable = () => {
                                       </div>
                                       <div
                                         className={`step ${txStatusForAdding ===
-                                            "Status Updating" ||
-                                            txStatusForAdding === "confirmed" ||
-                                            txStatusForAdding === "error"
-                                            ? "active"
-                                            : ""
+                                          "Status Updating" ||
+                                          txStatusForAdding === "confirmed" ||
+                                          txStatusForAdding === "error"
+                                          ? "active"
+                                          : ""
                                           }`}
                                       >
                                         <span className="dot" />
@@ -876,9 +786,9 @@ const DataTable = () => {
                                       </div>
                                       <div
                                         className={`step ${txStatusForAdding === "confirmed" ||
-                                            txStatusForAdding === "error"
-                                            ? "active"
-                                            : ""
+                                          txStatusForAdding === "error"
+                                          ? "active"
+                                          : ""
                                           }`}
                                       >
                                         <span className="dot" />
