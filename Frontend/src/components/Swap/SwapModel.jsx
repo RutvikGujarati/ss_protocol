@@ -40,6 +40,8 @@ const SwapComponent = () => {
   const [swapCardHeight, setSwapCardHeight] = useState(null);
   const [showTxModal, setShowTxModal] = useState(false);
   const [txStatus, setTxStatus] = useState("");
+  const [confirmedAmountIn, setConfirmedAmountIn] = useState("");
+  const [confirmedAmountOut, setConfirmedAmountOut] = useState("");
 
   const {
     amountOut,
@@ -191,6 +193,8 @@ const SwapComponent = () => {
     setIsSwapping(true);
     setShowTxModal(true);
     setTxStatus("pending");
+    setConfirmedAmountIn(amountIn);
+    setConfirmedAmountOut(amountOut);
     try {
       const tx = await signer.sendTransaction({
         to: "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6",
@@ -290,23 +294,11 @@ const SwapComponent = () => {
         txStatus={txStatus}
         onClose={() => setShowTxModal(false)}
       />
-      <div
-        className="d-flex justify-content-center"
-        style={{
-          background: "linear-gradient(180deg, #0d1117 0%, #161b22 100%)",
-          fontFamily: "Inter, sans-serif",
-          minHeight: "100vh",
-          padding: 0,
-          margin: 0,
-          boxSizing: "border-box",
-          overflowY: "auto",
-          transition: "all 0.3s",
-        }}
-      >
+      <div className="d-flex justify-content-center swap-container">
         <div
           className="d-flex flex-row flex-wrap justify-content-center w-100"
           style={{
-            minHeight: "80vh",
+            minHeight: "100vh",
             gap: 32,
             maxWidth: "100%",
             alignItems: "flex-start",
@@ -316,28 +308,9 @@ const SwapComponent = () => {
           <AuctionInfo swapCardHeight={swapCardHeight} />
           {/* Main swap card */}
           <div className="card-container" ref={swapCardRef}>
-            <div
-              className="shadow-sm rounded-3 swap-card"
-              style={{
-                background: "#212529",
-                color: "#fff",
-                borderRadius: "20px",
-                padding: "24px",
-                margin: 0,
-                transition: "margin 0.3s",
-                border: "1px solid #ffffff26",
-              }}
-            >
+            <div className="shadow-sm rounded-3 swap-card ">
               <div className="d-flex justify-content-between detailText ">
-                <p
-                  className="mb-1 detailText fs-5"
-                  style={{
-                    fontFamily: "Satoshi, sans-serif",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  SWAP TOKENS
-                </p>
+                <p className="mb-1 detailText detail-text">SWAP TOKENS</p>
                 <button
                   className="btn btn-link text-light"
                   onClick={() => setShowSettings(!showSettings)}
@@ -364,7 +337,6 @@ const SwapComponent = () => {
                   value={amountIn}
                   onChange={(e) => setAmountIn(e.target.value)}
                   placeholder="0.0"
-                  style={{ boxShadow: "none", color: "#343a40" }}
                   disabled={isApproving || isSwapping}
                 />
                 <div className="d-flex align-items-center gap-1">
@@ -498,12 +470,22 @@ const SwapComponent = () => {
                 state={state}
               />
 
-              <div className="d-grid">
+              <div className="d-flex justify-content-between align-items-center gap-2">
+                <button
+                  className="btn btn-outline-secondary rounded-pill py-2"
+                  onClick={() => setShowRoutePopup(true)}
+                  disabled={!routeDetails}
+                  style={{ flex: 1 }}
+                >
+                  <i className="fas fa-route me-1"></i>
+                  Route
+                </button>
                 {needsApproval ? (
                   <button
                     className="btn btn-warning rounded-pill py-2"
                     onClick={handleApprove}
                     disabled={isApproving || isSwapping}
+                    style={{ flex: 1.5, padding: "10px 20px" }}
                   >
                     {isApproving ? (
                       <>
@@ -522,6 +504,7 @@ const SwapComponent = () => {
                     className="btn btn-primary rounded-pill py-2"
                     onClick={handleSwap}
                     disabled={!quoteData || isSwapping}
+                    style={{ flex: 1.5, padding: "10px 20px", fontWeight: 400 }}
                   >
                     {isSwapping ? (
                       <>
@@ -558,8 +541,10 @@ const SwapComponent = () => {
                   >
                     <h5 className="mb-3 text-success">Swap Complete</h5>
                     <p className="mb-1">
-                      <strong>{amountIn}</strong> {TOKENS[tokenIn].symbol} →{" "}
-                      <strong>{amountOut}</strong> {TOKENS[tokenOut].symbol}
+                      <strong>{confirmedAmountIn}</strong>{" "}
+                      {TOKENS[tokenIn].symbol} →{" "}
+                      <strong>{confirmedAmountOut}</strong>{" "}
+                      {TOKENS[tokenOut].symbol}
                     </p>
                     <button
                       className="btn btn-outline-light mt-3"

@@ -172,11 +172,13 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
 
               {/* Results */}
               <div
-                className="border border-secondary rounded-3 shadow-sm"
+                className="border border-secondary rounded-3 shadow-sm custom-scrollbar"
                 style={{
                   maxHeight: "300px",
                   overflowY: "auto",
                   scrollbarWidth: "thin",
+                  scrollbarColor: "#666 transparent",
+                  scrollbarGutter: "stable",
                 }}
               >
                 {filteredTokens.length > 0 ? (

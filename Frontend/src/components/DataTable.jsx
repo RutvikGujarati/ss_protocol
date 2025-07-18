@@ -10,11 +10,7 @@ import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useAccount } from "wagmi";
 import { useAddTokens, useUsersOwnerTokens } from "../data/AddTokens";
 import { Auction_TESTNET } from "../Constants/ContractAddresses";
-import nine from "../assets/ninemm.png";
-import puslex from "../assets/pulsex.png";
-import nineinch from "../assets/nineinch.png";
 import IOSpinner from "../Constants/Spinner";
-import React from "react";
 import TxProgressModal from "./TxProgressModal";
 const DataTable = () => {
   const {
