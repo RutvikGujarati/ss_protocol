@@ -40,29 +40,18 @@ const Header = () => {
                   Auction
                 </NavLink>
               </li>
-              <li className="nav-item mx-2 dropdown">
+              <li className="nav-item mx-2">
                 <NavLink
                   className={({ isActive }) =>
                     isActive
-                      ? "nav-link active-link text-light dropdown-toggle"
-                      : "nav-link text-light dropdown-toggle"
+                      ? "nav-link active-link text-light"
+                      : "nav-link text-light"
                   }
-                  to="/NewSwap"
+                  to="/Swap"
                 >
-                  Ratio DEX
+                  DEX
                 </NavLink>
-                <ul className="dropdown-menu custom-dropdown-menu bg-dark border-0 shadow">
-                  <li>
-                    <NavLink
-                      className="dropdown-item text-light"
-                      to="/Swap"
-                    >
-                      DEX
-                    </NavLink>
-                  </li>
-                </ul>
               </li>
-
               <li className="nav-item mx-2">
                 <NavLink
                   className={({ isActive }) =>
