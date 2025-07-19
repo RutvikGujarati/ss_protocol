@@ -25,7 +25,6 @@ const SwapComponent = () => {
   const [isSwapping, setIsSwapping] = useState(false);
   const [slippage, setSlippage] = useState(0.5);
   const [isCustomSlippage, setIsCustomSlippage] = useState(false);
-  const [customSlippageValue, setCustomSlippageValue] = useState("1.00");
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
@@ -223,23 +222,6 @@ const SwapComponent = () => {
     setIsCustomSlippage(false);
   };
 
-  const handleCustomSlippage = () => {
-    setIsCustomSlippage(true);
-    const customValue = parseFloat(customSlippageValue);
-    if (!isNaN(customValue) && customValue > 0) {
-      setSlippage(customValue);
-    }
-  };
-
-  const handleCustomSlippageInput = (value) => {
-    setCustomSlippageValue(value);
-    const customValue = parseFloat(value);
-    if (!isNaN(customValue) && customValue > 0) {
-      setSlippage(customValue);
-    }
-  };
-
-
   const getPriceDifference = () => {
     if (!inputUsdValue || !outputUsdValue) return null;
     const inputUsd = parseFloat(inputUsdValue.replace("$", ""));
@@ -321,25 +303,9 @@ const SwapComponent = () => {
                 <p className="mb-1 detailText detail-text">
                   SWAP TOKENS
                 </p>
-                <div className="d-flex align-items-center gap-2">
-                  <div className="d-flex gap-1">
-                    {[0.1, 0.5, 1.0, 1.5].map((val) => (
-                      <button
-                        key={val}
-                        className={`btn btn-sm rounded-circle p-1 ${slippage === val && !isCustomSlippage ? 'btn-primary' : 'btn-outline-primary'}`}
-                        onClick={() => handleSlippageSelection(val)}
-                        style={{ width: "32px", height: "32px", fontSize: "0.6rem", lineHeight: "1" }}
-                      >
-                        {val}%
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-
               </div>
 
-              <label className="text-light small mb-1 font-weight-normal">From</label>
+              <label className="text-light small mb-1 font-weight-normal ">From</label>
 
               <div className="d-flex align-items-center gap-2">
                 <input
@@ -363,14 +329,14 @@ const SwapComponent = () => {
                   >
                     <span className="d-flex align-items-center gap-2">
                       {getTokenLogo(tokenIn)}
-                      <span style={{ fontWeight: 500 }}>
+                      <span style={{ fontWeight: 500,fontSize: "1rem" }}>
                         {getDisplaySymbol(TOKENS[tokenIn]?.symbol || tokenIn)}
                       </span>
                     </span>
                     <span className="ms-2 d-flex align-items-center">
                       <i
                         className="bi bi-chevron-down"
-                        style={{ fontSize: "1.1em" }}
+                        style={{ fontSize: "1rem" }}
                       ></i>
                     </span>
                   </button>
@@ -425,14 +391,14 @@ const SwapComponent = () => {
                   >
                     <span className="d-flex align-items-center gap-2">
                       {getTokenLogo(tokenOut)}
-                      <span style={{ fontWeight: 500 }}>
+                      <span style={{ fontWeight: 500 ,fontSize: "1rem"}}>
                         {getDisplaySymbol(TOKENS[tokenOut]?.symbol || tokenOut)}
                       </span>
                     </span>
                     <span className="ms-2 d-flex align-items-center">
                       <i
                         className="bi bi-chevron-down"
-                        style={{ fontSize: "1.1em" }}
+                        style={{ fontSize: "1rem" }}
                       ></i>
                     </span>
                   </button>
@@ -515,14 +481,26 @@ const SwapComponent = () => {
 
               <div className="d-flex justify-content-between align-items-center gap-2">
                 <button
-                  className="btn btn-outline-secondary rounded-pill py-2"
+                  className="btn btn-sm rounded-circle btn-outline-secondary"
                   onClick={() => setShowRoutePopup(true)}
                   disabled={!routeDetails}
-                  style={{ flex: 1 }}
+                  style={{ width: "32px", height: "32px", fontSize: "0.6rem", lineHeight: "1" }}
+                  title="View Route Details"
                 >
-                  <i className="fas fa-route me-1"></i>
-                  Route
+                  <i className="fas fa-route"></i>
                 </button>
+                <div className="d-flex gap-1">
+                  {[0.1, 0.5, 1.0, 2].map((val) => (
+                    <button
+                      key={val}
+                      className={`btn btn-sm rounded-circle p-1 ${slippage === val && !isCustomSlippage ? 'btn-primary' : 'btn-outline-primary'}`}
+                      onClick={() => handleSlippageSelection(val)}
+                      style={{ width: "32px", height: "32px", fontSize: "0.6rem", lineHeight: "1" }}
+                    >
+                      {val}%
+                    </button>
+                  ))}
+                </div>
                 {needsApproval ? (
                   <button
                     className="btn btn-warning rounded-pill py-2"
