@@ -2,13 +2,11 @@ import { parseUnits } from "ethers";
 import { useState, useEffect, useContext } from "react";
 import TokenSearchModal from "./TokenSearchModal";
 import { ethers } from "ethers";
-import setting from "/setting.png";
 import { ContractContext } from "../../Functions/ContractInitialize";
 import { useAllTokens } from "./Tokens";
 import state from "../../assets/statelogo.png";
 import pulsechainLogo from "../../assets/pls1.png";
 import { useAccount } from "wagmi";
-import SettingsPopup from "./SettingsPopup";
 import RouteDetailsPopup from "./RouteDetailsPopup";
 
 import useSwapData from "./useSwapData";
@@ -26,12 +24,12 @@ const SwapComponent = () => {
   const [amountIn, setAmountIn] = useState("");
   const [isSwapping, setIsSwapping] = useState(false);
   const [slippage, setSlippage] = useState(0.5);
-  const [isAutoSlippage, setIsAutoSlippage] = useState(true);
+  const [isCustomSlippage, setIsCustomSlippage] = useState(false);
+  const [customSlippageValue, setCustomSlippageValue] = useState("1.00");
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
   const [showRoutePopup, setShowRoutePopup] = useState(false);
   const [needsApproval, setNeedsApproval] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
@@ -220,13 +218,26 @@ const SwapComponent = () => {
     }
   };
 
-  const handleSlippageToggle = (isAuto) => {
-    setIsAutoSlippage(isAuto);
-    if (isAuto) {
-      setSlippage(0.5);
+  const handleSlippageSelection = (selectedSlippage) => {
+    setSlippage(selectedSlippage);
+    setIsCustomSlippage(false);
+  };
+
+  const handleCustomSlippage = () => {
+    setIsCustomSlippage(true);
+    const customValue = parseFloat(customSlippageValue);
+    if (!isNaN(customValue) && customValue > 0) {
+      setSlippage(customValue);
     }
   };
 
+  const handleCustomSlippageInput = (value) => {
+    setCustomSlippageValue(value);
+    const customValue = parseFloat(value);
+    if (!isNaN(customValue) && customValue > 0) {
+      setSlippage(customValue);
+    }
+  };
 
 
   const getPriceDifference = () => {
@@ -251,7 +262,6 @@ const SwapComponent = () => {
     amountIn,
     amountOut,
     isLoading,
-    showSettings,
     showConfirmation,
     needsApproval,
     isApproving,
@@ -259,6 +269,8 @@ const SwapComponent = () => {
     tokenIn,
     tokenOut,
     TOKENS,
+    slippage,
+    isCustomSlippage,
   ]);
 
   useEffect(() => {
@@ -309,22 +321,23 @@ const SwapComponent = () => {
                 <p className="mb-1 detailText detail-text">
                   SWAP TOKENS
                 </p>
-                <button
-                  className="btn btn-link text-light"
-                  onClick={() => setShowSettings(!showSettings)}
-                >
-                  <img src={setting} width="24" height="24" alt="Settings" />
-                </button>
-              </div>
+                <div className="d-flex align-items-center gap-2">
+                  <div className="d-flex gap-1">
+                    {[0.1, 0.5, 1.0, 1.5].map((val) => (
+                      <button
+                        key={val}
+                        className={`btn btn-sm rounded-circle p-1 ${slippage === val && !isCustomSlippage ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => handleSlippageSelection(val)}
+                        style={{ width: "32px", height: "32px", fontSize: "0.6rem", lineHeight: "1" }}
+                      >
+                        {val}%
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-              <SettingsPopup
-                show={showSettings}
-                slippage={slippage}
-                isAutoSlippage={isAutoSlippage}
-                handleSlippageToggle={handleSlippageToggle}
-                setSlippage={setSlippage}
-                onClose={() => setShowSettings(false)}
-              />
+
+              </div>
 
               <label className="text-light small mb-1 font-weight-normal">From</label>
 
