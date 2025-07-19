@@ -403,7 +403,7 @@ const NewSwap = () => {
                                         <div className="d-flex flex-column gap-2">
                                             {needsApproval ? (
                                                 <button
-                                                    className="btn btn-warning btn-sm"
+                                                    className="btn btn-primary btn-sm"
                                                     onClick={handleApprove}
                                                     disabled={isApproving || isSwapping}
                                                     style={{
