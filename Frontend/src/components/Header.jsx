@@ -49,6 +49,18 @@ const Header = () => {
                   }
                   to="/Swap"
                 >
+                  Ratio DEX
+                </NavLink>
+              </li>
+              <li className="nav-item mx-2">
+                <NavLink
+                  className={({ isActive }) =>
+                    isActive
+                      ? "nav-link active-link text-light"
+                      : "nav-link text-light"
+                  }
+                  to="/NewSwap"
+                >
                   DEX
                 </NavLink>
               </li>

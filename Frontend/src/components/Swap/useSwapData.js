@@ -1,7 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { formatUnits, parseUnits } from "ethers";
+import { useAccount } from "wagmi";
+import { ethers } from "ethers";
+import { ContractContext } from "../../Functions/ContractInitialize";
 
 const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
+	const { signer } = useContext(ContractContext);
+	const { address } = useAccount();
 	const [amountOut, setAmountOut] = useState("");
 	const [estimatedGas, setEstimatedGas] = useState(null);
 	const [quoteData, setQuoteData] = useState(null);
@@ -10,10 +15,37 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
 	const [inputUsdValue, setInputUsdValue] = useState("");
 	const [outputUsdValue, setOutputUsdValue] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
+	const [tokenInBalance, setTokenInBalance] = useState("");
+	const [tokenOutBalance, setTokenOutBalance] = useState("");
 
 	const getApiTokenAddress = (symbol) => {
 		if (symbol === "PLS") return "PLS";
 		return TOKENS[symbol]?.address;
+	};
+
+	const fetchTokenBalance = async (tokenSymbol, setBalance) => {
+		if (!signer || !address || !tokenSymbol || !TOKENS[tokenSymbol]) {
+			setBalance("");
+			return;
+		}
+		try {
+			if (tokenSymbol === "PLS") {
+				const bal = await signer.provider.getBalance(address);
+				setBalance(ethers.formatUnits(bal, 18));
+			} else {
+				const tokenAddress = TOKENS[tokenSymbol].address;
+				const contract = new ethers.Contract(
+					tokenAddress,
+					["function balanceOf(address) view returns (uint256)"],
+					signer
+				);
+				const bal = await contract.balanceOf(address);
+				setBalance(ethers.formatUnits(bal, TOKENS[tokenSymbol].decimals));
+			}
+		} catch (err) {
+			console.error("Error fetching balance", err);
+			setBalance("");
+		}
 	};
 
 	const fetchQuote = async () => {
@@ -148,6 +180,15 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
 		calculateUsdValues();
 	}, [amountIn, amountOut, tokenPrices, tokenIn, tokenOut]);
 
+	// Fetch balances when tokens or wallet changes
+	useEffect(() => {
+		fetchTokenBalance(tokenIn, setTokenInBalance);
+	}, [signer, address, tokenIn, TOKENS]);
+
+	useEffect(() => {
+		fetchTokenBalance(tokenOut, setTokenOutBalance);
+	}, [signer, address, tokenOut, TOKENS]);
+
 	return {
 		amountOut,
 		estimatedGas,
@@ -156,6 +197,8 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
 		tokenPrices,
 		inputUsdValue,
 		outputUsdValue,
+		tokenInBalance,
+		tokenOutBalance,
 		fetchQuote,
 		fetchTokenPrices,
 		isLoading,
