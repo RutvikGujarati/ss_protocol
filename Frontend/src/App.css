@@ -112,3 +112,6 @@ input[type="number"] {
 .text-pink {
   color: #ff4081 !important;
 }
+.font-weight-bold {
+  font-weight: normal !important;
+}

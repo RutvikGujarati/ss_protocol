@@ -24,11 +24,12 @@ const AuctionInfo = ({ swapCardHeight }) => {
           style={{
             height: "100%",
             border: "1px solid #ffffff26",
+            fontWeight: "normal"
           }}
         >
-          <div className="d-flex flex-column align-items-center justify-content-center h-100 mt-2">
+          <div className="d-flex flex-column align-items-start justify-content-center h-100 mt-2">
 
-            <p className="mb-1 detailText detail-text">
+            <p className="mb-1 detailText detail-text text-start w-100 font-weight-normal">
               ACTIVE AUCTIONS
             </p>
             <div style={{ width: "100%", flex: 1, overflow: "hidden" }} className="mt-2">
@@ -47,7 +48,7 @@ const AuctionInfo = ({ swapCardHeight }) => {
                 {activeAuctions.map((auction, idx) => (
                   <li
                     key={idx}
-                    className="text-light mb-1 px-2"
+                    className="text-light mb-1 px-2 font-weight-normal"
                     style={{
                       fontSize: "0.95rem",
                       fontWeight: 400,
