@@ -414,10 +414,9 @@ const SwapComponent = () => {
                     <span
                       className="badge"
                       style={{
-                        backgroundColor: getPriceDifference().isPositive
+                        color: getPriceDifference().isPositive
                           ? "#28a745"
                           : "#dc3545",
-                        color: "white",
                         fontSize: "0.7rem",
                         padding: "2px 6px",
                       }}
@@ -503,7 +502,7 @@ const SwapComponent = () => {
                 </div>
                 {needsApproval ? (
                   <button
-                    className="btn btn-warning rounded-pill py-2"
+                    className="btn btn-success rounded-pill py-2"
                     onClick={handleApprove}
                     disabled={isApproving || isSwapping}
                     style={{ flex: 1.5, padding: "10px 20px" }}
