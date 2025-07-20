@@ -24,7 +24,7 @@ const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
 
     const activeAuctions = auctionTokens.filter(
         ({ isReversing, AuctionStatus }) =>
-            AuctionStatus === "false" ||
+            AuctionStatus === "true" ||
             (AuctionStatus === "false" && isReversing === "true")
     );
 
@@ -46,7 +46,7 @@ const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
                     onClick={(e) => e.stopPropagation()}
                     style={{
                         backgroundColor: '#1e1e1e',
-                        top: "80%",
+                        top: "70%",
                         left: "50%",
                         transform: "translate(-50%, -50%)",
                         maxWidth: '480px',
