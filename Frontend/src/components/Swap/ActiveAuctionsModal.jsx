@@ -1,111 +1,104 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React from 'react';
 import { useAuctionTokens } from "../../data/auctionTokenData";
 
-const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS, swapCardRef }) => {
+// Custom scrollbar styles
+const scrollbarStyles = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #1e1e1e;
+    border-radius: 3px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #4a4a4a;
+    border-radius: 3px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #5a5a5a;
+  }
+`;
+
+const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
     const { tokens: auctionTokens } = useAuctionTokens();
-    const modalRef = useRef(null);
-    const [modalPosition, setModalPosition] = useState({ top: 0, left: 0 });
 
     const activeAuctions = auctionTokens.filter(
         ({ isReversing, AuctionStatus }) =>
-            AuctionStatus === "true" ||
+            AuctionStatus === "false" ||
             (AuctionStatus === "false" && isReversing === "true")
     );
-
-    useEffect(() => {
-        if (isOpen && swapCardRef?.current) {
-            const swapCard = swapCardRef.current;
-            const rect = swapCard.getBoundingClientRect();
-            const footerHeight = 60; // Approximate footer height
-            const windowHeight = window.innerHeight;
-
-            // Calculate if modal would overlap with footer
-            const modalHeight = 300;
-            const spaceBelowSwap = windowHeight - rect.bottom;
-            const spaceAboveFooter = windowHeight - footerHeight;
-
-            let topPosition;
-            if (spaceBelowSwap >= modalHeight) {
-                // Enough space below swap card
-                topPosition = rect.bottom;
-            } else if (spaceAboveFooter >= modalHeight) {
-                // Position above footer
-                topPosition = spaceAboveFooter - modalHeight + 50;
-            } else {
-                // Not enough space, position at top with scroll
-                topPosition = 150;
-            }
-
-            setModalPosition({
-                top: topPosition,
-                left: rect.left + (rect.width / 2) - 240 // Center the modal
-            });
-        }
-    }, [isOpen, swapCardRef]);
 
     if (!isOpen) return null;
 
     return (
-        <div
-            className="position-absolute top-0 start-0 w-100 h-100"
-            style={{
-                zIndex: 2000,
-                backdropFilter: "blur(1px)"
-            }}
-            onClick={onClose}
-        >
+        <>
+            <style>{scrollbarStyles}</style>
             <div
-                ref={modalRef}
-                className="simple-modal-content"
-                onClick={(e) => e.stopPropagation()}
+                className="position-absolute top-0 start-0 w-100 h-100"
                 style={{
-                    position: 'absolute',
-                    top: modalPosition.top,
-                    left: modalPosition.left,
-                    maxWidth: '480px',
-                    width: '480px',
-                    maxHeight: '300px',
-                    overflow: 'auto'
+                    zIndex: 2000,
+                    backdropFilter: "blur(1px)"
                 }}
+                onClick={onClose}
             >
-                <div className="simple-modal-header">
-                    <h6 className="simple-modal-title text-light mb-0">Active Auctions</h6>
-                    <button
-                        type="button"
-                        className="btn-close btn-close-white btn-close-sm"
-                        onClick={onClose}
-                        aria-label="Close"
-                    ></button>
-                </div>
-                <div className="simple-modal-body" style={{ maxHeight: 'calc(300px - 60px)' }}>
-                    {activeAuctions.length === 0 ? (
-                        <div className="text-center text-secondary">
-                            <small>No active auctions</small>
-                        </div>
-                    ) : (
-                        <div className="simple-auctions-list">
-                            {activeAuctions.map((auction, idx) => (
-                                <div key={idx} className="simple-auction-item">
-                                    <div className="d-flex align-items-center gap-2">
-                                        <div className="simple-token-logo">
-                                            {getTokenLogo(auction.name)}
-                                        </div>
-                                        <div className="simple-token-info">
-                                            <div className="simple-token-name text-light">
-                                                {auction.name}
+                <div
+                    className="border border-secondary border-opacity-25 rounded shadow-lg position-absolute"
+                    onClick={(e) => e.stopPropagation()}
+                    style={{
+                        backgroundColor: '#1e1e1e',
+                        top: "80%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        maxWidth: '480px',
+                        width: '480px',
+                        maxHeight: '300px',
+                        overflow: 'auto'
+                    }}
+                >
+                    <div className="d-flex align-items-center justify-content-between p-3 border-bottom border-secondary border-opacity-25">
+                        <h6 className="text-light mb-0 fw-semibold">Active Auctions</h6>
+                        <button
+                            type="button"
+                            className="btn-close btn-close-white btn-close-sm"
+                            onClick={onClose}
+                            aria-label="Close"
+                        ></button>
+                    </div>
+                    <div className="p-3 custom-scrollbar" style={{
+                        maxHeight: 'calc(300px - 60px)',
+                        overflowY: 'auto',
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: '#4a4a4a #1e1e1e'
+                    }}>
+                        {activeAuctions.length === 0 ? (
+                            <div className="text-center text-secondary">
+                                <small>No active auctions</small>
+                            </div>
+                        ) : (
+                            <div className="d-flex flex-column gap-2">
+                                {activeAuctions.map((auction, idx) => (
+                                    <div key={idx} className="p-2 bg-dark bg-opacity-25 rounded border border-secondary border-opacity-25">
+                                        <div className="d-flex align-items-center gap-2">
+                                            <div className="d-flex align-items-center justify-content-center" style={{ width: '28px', height: '28px', flexShrink: 0 }}>
+                                                {getTokenLogo(auction.name)}
                                             </div>
-                                            <div className="simple-auction-status text-secondary">
-                                                {auction.isReversing === "true" ? "Reverse Auction" : "Auction Active"}
+                                            <div className="flex-grow-1 min-w-0">
+                                                <div className="text-light fw-medium small mb-1">
+                                                    {auction.name}
+                                                </div>
+                                                <div className="text-secondary small opacity-75">
+                                                    {auction.isReversing === "true" ? "Reverse Auction" : "Auction Active"}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 

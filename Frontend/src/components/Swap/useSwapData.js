@@ -66,7 +66,7 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
 			const response = await fetch(url);
 			if (!response.ok) throw new Error("Quote fetch failed.");
 			const data = await response.json();
-			setAmountOut(formatUnits(data.destAmount, TOKENS[tokenOut].decimals));
+			setAmountOut(Number(formatUnits(data.destAmount, TOKENS[tokenOut].decimals)).toFixed(4));
 			setEstimatedGas(data.gasUseEstimateUSD?.toFixed(4) || null);
 			setQuoteData(data.methodParameters);
 			setRouteDetails(data.route || { swaps: [] });

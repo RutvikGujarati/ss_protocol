@@ -560,10 +560,7 @@ const SwapComponent = () => {
                 onClose={() => setShowActiveAuctionsModal(false)}
                 getTokenLogo={getTokenLogo}
                 TOKENS={TOKENS}
-                swapCardRef={swapCardRef}
               />
-
-              {/* Toast notification for swap confirmation (now handled by react-toastify) */}
             </div>
           </div>
         </div>

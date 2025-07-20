@@ -224,7 +224,7 @@ const DetailsInfo = ({ selectedToken }) => {
                             )}
                           </span>
                           <span>
-                            {token.tokenName}
+                            {token.tokenName === "DAV" ? "pDAV" : token.tokenName === "STATE" ? "pSTATE" : token.tokenName}
                             {token.isFlammed === "true" && <>🔥</>}
                           </span>
                         </div>
@@ -232,7 +232,7 @@ const DetailsInfo = ({ selectedToken }) => {
                       <td className="text-center">
                         <div className="mx-2">
                           {token.tokenName === "DAV" ||
-                          token.tokenName === "STATE"
+                            token.tokenName === "STATE"
                             ? "------"
                             : `1:${formatWithCommas(token.ratio)}`}
                         </div>
@@ -240,7 +240,7 @@ const DetailsInfo = ({ selectedToken }) => {
                       <td className="text-center">
                         <div className="mx-4">
                           {token.tokenName === "DAV" ||
-                          token.tokenName === "STATE"
+                            token.tokenName === "STATE"
                             ? "-----"
                             : `${token.Cycle}/20`}
                         </div>
@@ -257,11 +257,11 @@ const DetailsInfo = ({ selectedToken }) => {
                           {token.tokenName === "DAV"
                             ? "-----"
                             : token.tokenName === "STATE"
-                            ? formatWithCommas(
+                              ? formatWithCommas(
                                 Number(token.burned || 0) +
-                                  Number(totalStateBurned)
+                                Number(totalStateBurned)
                               )
-                            : formatWithCommas(token.burned || 0)}
+                              : formatWithCommas(token.burned || 0)}
                         </div>
                       </td>
                       <td className="text-center">
@@ -319,8 +319,8 @@ const DetailsInfo = ({ selectedToken }) => {
                                   token.tokenName === "DAV"
                                     ? "pDAV"
                                     : token.tokenName === "STATE"
-                                    ? "pSTATE"
-                                    : token.tokenName
+                                      ? "pSTATE"
+                                      : token.tokenName
                                 )
                               }
                               alt="MetaMask"
@@ -341,7 +341,7 @@ const DetailsInfo = ({ selectedToken }) => {
                               )
                             ) : token.tokenName === "STATE" ? (
                               DavAddress ===
-                              "0x0000000000000000000000000000000000000000" ? (
+                                "0x0000000000000000000000000000000000000000" ? (
                                 <button
                                   className="btn btn-sm swap-btn btn-primary"
                                   onClick={() => setDavAndStateIntoSwap()}
