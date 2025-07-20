@@ -15,213 +15,110 @@ const RouteDetailsPopup = ({
                 <div
                     className="position-absolute top-0 start-0 w-100 h-100"
                     style={{
-                        zIndex: 2000, backgroundColor: "#3141920", backdropFilter: "blur(2px)"
+                        zIndex: 2000,
+                        backdropFilter: "blur(1px)"
                     }}
                     onClick={() => setShowRoutePopup(false)}
                 >
                     <div
-                        className="bg-dark text-light rounded-4 shadow-lg p-4 position-absolute"
+                        className="simple-modal-content"
                         style={{
+                            position: 'absolute',
                             left: "50%",
-                            top: "82%",
+                            top: "72%",
                             transform: "translate(-50%, -50%)",
                             zIndex: 2001,
-                            minWidth: "320px",
-                            maxWidth: "95vw",
-                            width: "800px",
-                            boxSizing: "border-box",
+                            maxWidth: '480px',
+                            width: '480px',
+                            maxHeight: '80vh',
+                            overflow: 'auto'
                         }}
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div style={{ borderTop: "1px solid #333", marginBottom: 16 }}></div>
-                        <div className="d-flex flex-column gap-3">
+                        <div className="simple-modal-header">
+                            <h6 className="simple-modal-title text-light mb-0">Route Details</h6>
+                            <button
+                                type="button"
+                                className="btn-close btn-close-white btn-close-sm"
+                                onClick={() => setShowRoutePopup(false)}
+                                aria-label="Close"
+                            ></button>
+                        </div>
+                        <div className="simple-modal-body" style={{ maxHeight: 'calc(80vh - 60px)' }}>
                             {routeDetails?.paths?.length > 0 &&
                                 routeDetails?.swaps?.length > 0 ? (
-                                routeDetails.paths.map((path, i) => (
-                                    <div
-                                        key={i}
-                                        className="d-flex align-items-center gap-3 flex-wrap"
-                                    >
-                                        <div
-                                            className="d-flex flex-column align-items-center"
-                                            style={{ minWidth: 70 }}
-                                        >
-                                            {getTokenLogo(path[0]?.symbol)}
-                                            <span className="badge bg-secondary mt-1">
-                                                {(routeDetails.swaps[i]?.percent / 1000).toFixed(2)}%
-                                            </span>
-                                        </div>
-                                        <div
-                                            className="d-flex flex-row gap-3 flex-wrap align-items-center"
-                                            style={{ flex: 1, minWidth: 0 }}
-                                        >
-                                            <div
-                                                className="d-flex flex-row gap-3 flex-wrap align-items-center justify-content-center"
-                                                style={{ flex: 1, minWidth: 0 }}
-                                            >
-                                                {path.map((token, idx) => {
-                                                    if (idx === path.length - 1) return null;
-                                                    const nextToken = path[idx + 1];
-                                                    const swap = routeDetails.swaps[i];
-                                                    const sub = swap?.subswaps?.[idx];
-                                                    const p = sub?.paths?.[0];
-                                                    const platform = p?.exchange || p?.poolName || "";
-                                                    const percent = p?.percent
-                                                        ? (p.percent / 1000).toFixed(2)
-                                                        : "100.00";
-                                                    return (
-                                                        <React.Fragment key={idx}>
-                                                            <div
-                                                                className="bg-secondary bg-opacity-10 border border-secondary rounded-3 px-1 py-1 d-flex flex-column align-items-center"
-                                                                style={{
-                                                                    width: 120,
-                                                                    minWidth: 90,
-                                                                    maxWidth: 120,
-                                                                    flex: "1 1 68px",
-                                                                    boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-                                                                    marginBottom: 4,
-                                                                }}
-                                                            >
-                                                                <div
-                                                                    className="d-flex align-items-center mb-1"
-                                                                    style={{ gap: 2, fontSize: "0.78rem" }}
-                                                                >
-                                                                    {TOKENS[token.symbol]?.symbol === "STATE" ? (
-                                                                        <img
-                                                                            src={state}
-                                                                            alt="STATE"
-                                                                            width="12"
-                                                                            height="12"
-                                                                            style={{ borderRadius: "50%" }}
-                                                                        />
-                                                                    ) : TOKENS[token.symbol]?.image &&
-                                                                        TOKENS[token.symbol]?.image.startsWith(
-                                                                            "http"
-                                                                        ) ? (
-                                                                        <img
-                                                                            src={TOKENS[token.symbol].image}
-                                                                            alt={token.symbol}
-                                                                            width="12"
-                                                                            height="12"
-                                                                            style={{ borderRadius: "50%" }}
-                                                                        />
-                                                                    ) : TOKENS[token.symbol]?.emoji ? (
-                                                                        <span style={{ fontSize: "0.78em" }}>
-                                                                            {TOKENS[token.symbol].emoji}
-                                                                        </span>
-                                                                    ) : (
-                                                                        <img
-                                                                            src="/default.png"
-                                                                            alt={token.symbol}
-                                                                            width="12"
-                                                                            height="12"
-                                                                            style={{ borderRadius: "50%" }}
-                                                                        />
+                                <div className="d-flex flex-column gap-2">
+                                    {routeDetails.paths.map((path, i) => {
+                                        const swap = routeDetails.swaps[i];
+                                        const routePercent = (swap?.percent / 1000).toFixed(2);
+
+                                        return (
+                                            <div key={i} className="p-2 bg-dark bg-opacity-25 rounded border border-secondary border-opacity-25">
+                                                <div className="d-flex align-items-center gap-2 mb-2">
+                                                    <div className="simple-token-logo">
+                                                        {getTokenLogo(path[0]?.symbol)}
+                                                    </div>
+                                                    <div className="flex-grow-1 min-w-0">
+                                                        <div className="text-light fw-medium small mb-1 text-truncate">
+                                                            {path.map((token, idx) => (
+                                                                <React.Fragment key={idx}>
+                                                                    <span className="fw-medium text-light">{token.symbol}</span>
+                                                                    {idx < path.length - 1 && (
+                                                                        <span className="text-secondary mx-1 small">→</span>
                                                                     )}
-                                                                    <span
-                                                                        className="fw-bold"
-                                                                        style={{ fontSize: "0.78em" }}
-                                                                    >
-                                                                        {token.symbol}
-                                                                    </span>
-                                                                    <span
-                                                                        style={{ fontSize: "0.95rem", color: "#aaa" }}
-                                                                    >
-                                                                        →
-                                                                    </span>
-                                                                    {TOKENS[nextToken.symbol]?.symbol ===
-                                                                        "STATE" ? (
-                                                                        <img
-                                                                            src={state}
-                                                                            alt="STATE"
-                                                                            width="12"
-                                                                            height="12"
-                                                                            style={{ borderRadius: "50%" }}
-                                                                        />
-                                                                    ) : TOKENS[nextToken.symbol]?.image &&
-                                                                        TOKENS[nextToken.symbol]?.image.startsWith(
-                                                                            "http"
-                                                                        ) ? (
-                                                                        <img
-                                                                            src={TOKENS[nextToken.symbol].image}
-                                                                            alt={nextToken.symbol}
-                                                                            width="12"
-                                                                            height="12"
-                                                                            style={{ borderRadius: "50%" }}
-                                                                        />
-                                                                    ) : TOKENS[nextToken.symbol]?.emoji ? (
-                                                                        <span style={{ fontSize: "0.78em" }}>
-                                                                            {TOKENS[nextToken.symbol].emoji}
-                                                                        </span>
-                                                                    ) : (
-                                                                        <img
-                                                                            src="/default.png"
-                                                                            alt={nextToken.symbol}
-                                                                            width="12"
-                                                                            height="12"
-                                                                            style={{ borderRadius: "50%" }}
-                                                                        />
-                                                                    )}
-                                                                    <span
-                                                                        className="fw-bold"
-                                                                        style={{ fontSize: "0.78em" }}
-                                                                    >
-                                                                        {nextToken.symbol}
-                                                                    </span>
-                                                                </div>
-                                                                <div
-                                                                    className="small text-secondary"
-                                                                    style={{ fontSize: "0.68em", lineHeight: 1 }}
-                                                                >
-                                                                    {platform}
-                                                                </div>
-                                                                <div
-                                                                    className="small"
-                                                                    style={{ fontSize: "0.68em", lineHeight: 1 }}
-                                                                >
-                                                                    {percent}%
+                                                                </React.Fragment>
+                                                            ))}
+                                                        </div>
+                                                        <div className="text-secondary small opacity-75">
+                                                            {routePercent}% of total
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Show each pair with exchange and percentage */}
+                                                <div className="d-flex flex-column gap-1 mt-2 pt-2 border-top border-secondary border-opacity-25">
+                                                    {path.map((token, idx) => {
+                                                        if (idx === path.length - 1) return null;
+                                                        const nextToken = path[idx + 1];
+                                                        const subswap = swap?.subswaps?.[idx];
+                                                        const subPath = subswap?.paths?.[0];
+                                                        const exchangeName = subPath?.exchange || subPath?.poolName || "Unknown";
+                                                        const pairPercent = subPath?.percent ? (subPath.percent / 1000).toFixed(2) : "100.00";
+
+                                                        return (
+                                                            <div key={idx} className="p-2 bg-dark bg-opacity-10 rounded border border-secondary border-opacity-10">
+                                                                <div className="d-flex align-items-center justify-content-between">
+                                                                    <div className="d-flex align-items-center gap-1 small">
+                                                                        <span className="fw-medium text-light">{token.symbol}</span>
+                                                                        <span className="text-secondary small">→</span>
+                                                                        <span className="fw-medium text-light">{nextToken.symbol}</span>
+                                                                    </div>
+                                                                    <div className="d-flex align-items-center gap-2 small">
+                                                                        <span className="text-secondary fw-medium">{exchangeName}</span>
+                                                                        <span className="text-secondary small opacity-75">{pairPercent}%</span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                            {idx < path.length - 2 && (
-                                                                <div
-                                                                    style={{
-                                                                        width: 10,
-                                                                        height: 2,
-                                                                        borderBottom: "2px dotted #555",
-                                                                        margin: "0 2px",
-                                                                    }}
-                                                                ></div>
-                                                            )}
-                                                        </React.Fragment>
-                                                    );
-                                                })}
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div
-                                            className="d-flex flex-column align-items-center"
-                                            style={{ minWidth: 70 }}
-                                        >
-                                            {getTokenLogo(path[path.length - 1]?.symbol)}
-                                        </div>
-                                    </div>
-                                ))
+                                        );
+                                    })}
+                                </div>
                             ) : (
                                 <div className="text-center text-secondary">
-                                    No route details available.
+                                    <small>No route details available</small>
                                 </div>
                             )}
                         </div>
-                        <div style={{ borderTop: "1px solid #333", margin: "16px 0" }}></div>
-                        <p className="text-light small mb-0">
-                            This route optimizes your total output by considering split routes,
-                            multi-hops, and the gas cost of each step.
-                        </p>
                     </div>
                 </div>
             )}
         </>
     );
 };
+
 RouteDetailsPopup.propTypes = {
     routeDetails: PropTypes.shape({
         paths: PropTypes.array,

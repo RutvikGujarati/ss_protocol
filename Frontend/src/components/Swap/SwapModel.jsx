@@ -12,6 +12,7 @@ import RouteDetailsPopup from "./RouteDetailsPopup";
 import useSwapData from "./useSwapData";
 import { useRef } from "react";
 import AuctionInfo from "./AuctionInfo";
+import ActiveAuctionsModal from "./ActiveAuctionsModal";
 import toast from "react-hot-toast";
 
 const SwapComponent = () => {
@@ -38,6 +39,7 @@ const SwapComponent = () => {
   const [txStatus, setTxStatus] = useState("");
   const [confirmedAmountIn, setConfirmedAmountIn] = useState("");
   const [confirmedAmountOut, setConfirmedAmountOut] = useState("");
+  const [showActiveAuctionsModal, setShowActiveAuctionsModal] = useState(false);
 
   const {
     amountOut,
@@ -299,12 +301,6 @@ const SwapComponent = () => {
           {/* Main swap card */}
           <div className="card-container" ref={swapCardRef}>
             <div className="shadow-sm rounded-3 swap-card ">
-              <div className="d-flex justify-content-between">
-                <p className="mb-1 detailText detail-text">
-                  SWAP TOKENS
-                </p>
-              </div>
-
               <label className="text-light small mb-1 font-weight-normal ">From</label>
 
               <div className="d-flex align-items-center gap-2">
@@ -329,7 +325,7 @@ const SwapComponent = () => {
                   >
                     <span className="d-flex align-items-center gap-2">
                       {getTokenLogo(tokenIn)}
-                      <span style={{ fontWeight: 500,fontSize: "1rem" }}>
+                      <span style={{ fontWeight: 500, fontSize: "1rem" }}>
                         {getDisplaySymbol(TOKENS[tokenIn]?.symbol || tokenIn)}
                       </span>
                     </span>
@@ -391,7 +387,7 @@ const SwapComponent = () => {
                   >
                     <span className="d-flex align-items-center gap-2">
                       {getTokenLogo(tokenOut)}
-                      <span style={{ fontWeight: 500 ,fontSize: "1rem"}}>
+                      <span style={{ fontWeight: 500, fontSize: "1rem" }}>
                         {getDisplaySymbol(TOKENS[tokenOut]?.symbol || tokenOut)}
                       </span>
                     </span>
@@ -432,14 +428,7 @@ const SwapComponent = () => {
 
               {error && <div className="alert alert-danger py-2">{error}</div>}
 
-              <div
-                className="d-flex justify-content-between align-items-center mb-2 "
-                style={{ fontSize: "0.9rem" }}
-              >
-                <small className="text-secondary">
-                  Network Fee: {estimatedGas}
-                </small>
-              </div>
+
 
               {/* Inline transaction progress bar below Network Fee */}
               {(isSwapping || isApproving || showTxModal) && (
@@ -478,7 +467,15 @@ const SwapComponent = () => {
                 state={state}
               />
 
-              <div className="d-flex justify-content-between align-items-center gap-2">
+              <div className="d-flex justify-content-between align-items-center gap-2 mt-3">
+                <button
+                  className="btn btn-sm rounded-circle btn-outline-secondary"
+                  onClick={() => setShowActiveAuctionsModal(true)}
+                  style={{ width: "32px", height: "32px", fontSize: "0.6rem", lineHeight: "1" }}
+                  title="View Active Auctions"
+                >
+                  <i className="fas fa-gavel"></i>
+                </button>
                 <button
                   className="btn btn-sm rounded-circle btn-outline-secondary"
                   onClick={() => setShowRoutePopup(true)}
@@ -540,7 +537,14 @@ const SwapComponent = () => {
                   </button>
                 )}
               </div>
-
+              <div
+                className="d-flex justify-content-center align-items-center"
+                style={{ fontSize: "0.9rem" }}
+              >
+                <small className="text-secondary">
+                  Network Fee: $ {estimatedGas}
+                </small>
+              </div>
               {isModalOpen && (
                 <TokenSearchModal
                   tokens={TOKENS}
@@ -549,6 +553,15 @@ const SwapComponent = () => {
                   onClose={closeModal}
                 />
               )}
+
+              {/* Active Auctions Modal */}
+              <ActiveAuctionsModal
+                isOpen={showActiveAuctionsModal}
+                onClose={() => setShowActiveAuctionsModal(false)}
+                getTokenLogo={getTokenLogo}
+                TOKENS={TOKENS}
+                swapCardRef={swapCardRef}
+              />
 
               {/* Toast notification for swap confirmation (now handled by react-toastify) */}
             </div>
