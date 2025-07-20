@@ -36,7 +36,7 @@ const RouteDetailsPopup = ({
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="simple-modal-header">
-                            <h6 className="simple-modal-title text-light mb-0">Route Details</h6>
+                            <h6 className="simple-modal-title text-light mb-0">Routes</h6>
                             <button
                                 type="button"
                                 className="btn-close btn-close-white btn-close-sm"
