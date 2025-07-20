@@ -46,7 +46,7 @@ const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
                     onClick={(e) => e.stopPropagation()}
                     style={{
                         backgroundColor: '#1e1e1e',
-                        top: "70%",
+                        top: "73%",
                         left: "50%",
                         transform: "translate(-50%, -50%)",
                         maxWidth: '480px',
@@ -56,8 +56,8 @@ const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
                     }}
                 >
                     <div className="d-flex align-items-center justify-content-between p-3 border-bottom border-secondary border-opacity-25">
-                        <h6 className="text-light mb-0 fw-semibold">Active Auctions</h6>
-                        <button
+                    <h6 className="simple-modal-title text-light mb-0">Active Auctions</h6>
+                    <button
                             type="button"
                             className="btn-close btn-close-white btn-close-sm"
                             onClick={onClose}

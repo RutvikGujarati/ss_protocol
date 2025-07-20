@@ -535,7 +535,7 @@ const SwapComponent = () => {
                 )}
               </div>
               <div
-                className="mx-5 py-1 mb-0 pb-0 "
+                className="d-flex justify-content-center align-items-center py-3 pb-0"
                 style={{ fontSize: "0.9rem" }}
               >
                 <small className="text-secondary">
