@@ -11,7 +11,6 @@ import RouteDetailsPopup from "./RouteDetailsPopup";
 
 import useSwapData from "./useSwapData";
 import { useRef } from "react";
-import AuctionInfo from "./AuctionInfo";
 import ActiveAuctionsModal from "./ActiveAuctionsModal";
 import toast from "react-hot-toast";
 
@@ -296,8 +295,6 @@ const SwapComponent = () => {
             alignItems: "flex-start",
           }}
         >
-          {/* Left info section for auction swap line */}
-          <AuctionInfo swapCardHeight={swapCardHeight} />
           {/* Main swap card */}
           <div className="card-container" ref={swapCardRef}>
             <div className="shadow-sm rounded-3 swap-card ">
@@ -538,7 +535,7 @@ const SwapComponent = () => {
                 )}
               </div>
               <div
-                className="d-flex justify-content-center align-items-center"
+                className="mx-5 py-1 mb-0 pb-0 "
                 style={{ fontSize: "0.9rem" }}
               >
                 <small className="text-secondary">
