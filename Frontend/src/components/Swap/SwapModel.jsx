@@ -6,6 +6,7 @@ import { ContractContext } from "../../Functions/ContractInitialize";
 import { useAllTokens } from "./Tokens";
 import state from "../../assets/statelogo.png";
 import pulsechainLogo from "../../assets/pls1.png";
+import plslogo from "/pls.png";
 import { useAccount } from "wagmi";
 import RouteDetailsPopup from "./RouteDetailsPopup";
 
@@ -19,7 +20,7 @@ const SwapComponent = () => {
   const { address } = useAccount();
 
   const [tokenIn, setTokenIn] = useState("STATE");
-  const [tokenOut, setTokenOut] = useState("PLS");
+  const [tokenOut, setTokenOut] = useState("PulseChain from pump.tires");
   const [amountIn, setAmountIn] = useState("");
   const [isSwapping, setIsSwapping] = useState(false);
   const [slippage, setSlippage] = useState(1);
@@ -67,10 +68,11 @@ const SwapComponent = () => {
     STATE: state,
     pSTATE: state,
     PulseChain: pulsechainLogo,
+    "PulseChain from pump.tires": plslogo,
   };
 
   const checkAllowance = async () => {
-    if (tokenIn === "PLS") {
+    if (tokenIn === "PulseChain from pump.tires") {
       setNeedsApproval(false);
       return;
     }
@@ -131,8 +133,12 @@ const SwapComponent = () => {
       setIsApproving(false);
     }
   };
-
+  const TOKENS_BY_SYMBOL = Object.values(TOKENS).reduce((acc, token) => {
+    acc[token.symbol] = token;
+    return acc;
+  }, {});
   const getTokenLogo = (symbol) => {
+    const token = TOKENS_BY_SYMBOL[symbol];
     if (SPECIAL_TOKEN_LOGOS[symbol]) {
       return (
         <img
@@ -144,21 +150,21 @@ const SwapComponent = () => {
       );
     }
     if (
-      TOKENS[symbol]?.image &&
-      (TOKENS[symbol].image.startsWith("http") ||
-        TOKENS[symbol].image.startsWith("/"))
+      token?.image &&
+      (token.image.startsWith("http") ||
+        token.image.startsWith("/"))
     ) {
       return (
         <img
-          src={TOKENS[symbol].image}
+          src={token.image}
           alt={symbol}
           width="32"
           className="rounded-circle"
         />
       );
     }
-    if (TOKENS[symbol]?.emoji) {
-      return <span style={{ fontSize: "1.1em" }}>{TOKENS[symbol].emoji}</span>;
+    if (token?.emoji) {
+      return <span style={{ fontSize: "1.1em" }}>{token.emoji}</span>;
     }
     return (
       <img

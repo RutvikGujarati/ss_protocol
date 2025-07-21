@@ -56,9 +56,9 @@ const RouteDetailsPopup = ({
                                         return (
                                             <div key={i} className="p-2 bg-dark bg-opacity-25 rounded border border-secondary border-opacity-25">
                                                 <div className="d-flex align-items-center gap-2 mb-2">
-                                                    <div className="simple-token-logo">
-                                                        {getTokenLogo(path[0]?.symbol)}
-                                                    </div>
+                                                    {/* <div className="simple-token-logo">
+                                                        {getTokenLogo(path[0]?.name)}
+                                                    </div> */}
                                                     <div className="flex-grow-1 min-w-0">
                                                         <div className="text-secondary  small mb-1 text-truncate">
                                                             {path.map((token, idx) => (

@@ -74,9 +74,6 @@ export const TokensDetails = () => {
 		.filter((name) => name !== "DAV" && name !== "STATE")
 		.map((name) => {
 			const emoji = nameToEmoji[name.toLowerCase()];
-			if (!emoji && name !== "DAV" && name !== "STATE") {
-				console.warn(`No emoji found for token: ${name}`);
-			}
 			return {
 				name,
 				key: name,

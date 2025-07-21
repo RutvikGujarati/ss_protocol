@@ -15,7 +15,7 @@ export function useAllTokens() {
 				// Convert array to object keyed by symbol
 				const obj = {};
 				data.tokens.forEach(token => {
-					obj[token.symbol] = {
+					obj[token.name] = {
 						symbol: token.symbol,
 						address: token.address,
 						decimals: token.decimals,

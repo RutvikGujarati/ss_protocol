@@ -44,9 +44,7 @@ export const useAuctionTokens = () => {
 		const address =
 			tokenMap?.[contract] || "0x0000000000000000000000000000000000000000";
 		const emoji = nameToEmoji[contract.toLowerCase()];
-		if (!emoji && contract !== "DAV" && contract !== "STATE") {
-			console.warn(`No emoji found for token: ${contract}`);
-		}
+	
 
 		return {
 			id,
