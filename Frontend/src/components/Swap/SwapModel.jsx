@@ -415,7 +415,7 @@ const SwapComponent = () => {
                       }}
                     >
                       {getPriceDifference().isPositive ? "+" : ""}
-                      {getPriceDifference().value.toFixed(8)} (
+                      {getPriceDifference().value.toFixed(4)} (
                       {getPriceDifference().isPositive ? "+" : ""}
                       {getPriceDifference().percentage.toFixed(2)}%)
                     </span>

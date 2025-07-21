@@ -77,16 +77,13 @@ const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
                         ) : (
                             <div className="d-flex flex-column gap-2">
                                 {activeAuctions.map((auction, idx) => (
-                                    <div key={idx} className="p-2 bg-dark bg-opacity-25 rounded border border-secondary border-opacity-25">
-                                        <div className="d-flex align-items-center gap-2">
-                                            <div className="d-flex align-items-center justify-content-center" style={{ width: '28px', height: '28px', flexShrink: 0 }}>
-                                                {getTokenLogo(auction.name)}
-                                            </div>
-                                            <div className="flex-grow-1 min-w-0">
-                                                <div className="text-light fw-medium small mb-1">
-                                                    <span className="text-secondary">Swap {auction.outputToken} for {auction.name}</span>
-                                                </div>
-
+                                    <div key={idx} className="d-flex align-items-center gap-2" style={{ minHeight: '32px' }}>
+                                        <div className="d-flex align-items-center justify-content-center" style={{ width: '28px', height: '28px', flexShrink: 0 }}>
+                                            {getTokenLogo(auction.name)}
+                                        </div>
+                                        <div className="flex-grow-1 min-w-0">
+                                            <div className="text-light fw-medium small mb-1">
+                                                <span className="text-secondary">Swap {auction.outputToken} for {auction.name}</span>
                                             </div>
                                         </div>
                                     </div>
