@@ -428,23 +428,23 @@ const SwapComponent = () => {
                   <div className="step-line">
                     <div className={`step ${txStatus === "initializing" || txStatus === "initiated" || txStatus === "Approving" || txStatus === "pending" || txStatus === "confirmed" ? "active" : ""}`}>
                       <span className="dot" />
-                      <span className="label">Initializing</span>
+                      <span className="label" style={{ fontSize: "0.65em" }}>Initializing</span>
                     </div>
                     <div className={`step ${txStatus === "initiated" || txStatus === "Approving" || txStatus === "pending" || txStatus === "confirmed" ? "active" : ""}`}>
                       <span className="dot" />
-                      <span className="label">Initiated</span>
+                      <span className="label" style={{ fontSize: "0.65em" }}>Initiated</span>
                     </div>
                     <div className={`step ${txStatus === "Approving" || txStatus === "pending" || txStatus === "confirmed" ? "active" : ""}`}>
                       <span className="dot" />
-                      <span className="label">Approving</span>
+                      <span className="label" style={{ fontSize: "0.65em" }}>Approving</span>
                     </div>
                     <div className={`step ${txStatus === "pending" || txStatus === "confirmed" ? "active" : ""}`}>
                       <span className="dot" />
-                      <span className="label">Swapping</span>
+                      <span className="label" style={{ fontSize: "0.65em" }}>Swapping</span>
                     </div>
                     <div className={`step ${txStatus === "confirmed" || txStatus === "error" ? "active" : ""}`}>
                       <span className="dot" />
-                      <span className="label">{txStatus === "error" ? "Error" : "Confirmed"}</span>
+                      <span className="label" style={{ fontSize: "0.65em" }}>{txStatus === "error" ? "Error" : "Confirmed"}</span>
                     </div>
                   </div>
                 </div>

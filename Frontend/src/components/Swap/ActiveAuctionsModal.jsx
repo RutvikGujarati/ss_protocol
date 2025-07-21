@@ -24,7 +24,7 @@ const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
 
     const activeAuctions = auctionTokens.filter(
         ({ isReversing, AuctionStatus }) =>
-            AuctionStatus === "true" ||
+            AuctionStatus === "false" ||
             (AuctionStatus === "false" && isReversing === "true")
     );
 
@@ -84,7 +84,7 @@ const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
                                             </div>
                                             <div className="flex-grow-1 min-w-0">
                                                 <div className="text-light fw-medium small mb-1">
-                                                    <span className="text-secondary">Swap</span> <span className="fw-bold text-light">{auction.outputToken}</span> <span className="text-secondary">for</span> <span className="fw-bold text-light">{auction.name}</span>
+                                                    <span className="text-secondary">Swap</span> <span className="text-light">{auction.outputToken}</span> <span className="text-secondary">for</span> <span className="text-light">{auction.name}</span>
                                                 </div>
                                                 <div className="text-secondary small opacity-75">
                                                     {auction.isReversing === "true" ? "Reverse Auction" : "Auction Active"}
