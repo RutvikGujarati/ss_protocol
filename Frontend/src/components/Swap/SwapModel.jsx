@@ -104,10 +104,11 @@ const SwapComponent = () => {
     try {
       const tokenAddress = TOKENS[tokenIn].address;
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
-      const amount = parseUnits(amountIn, TOKENS[tokenIn].decimals);
+      // Approve unlimited amount (max uint256
+      const maxUint256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
       const tx = await contract.approve(
         "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6",
-        amount
+        maxUint256
       );
       await tx.wait();
       setNeedsApproval(false);
@@ -335,8 +336,8 @@ const SwapComponent = () => {
                 </div>
               </div>
               <div
-                className="d-flex justify-content-between align-items-center mb-2"
-                style={{ fontSize: "0.9rem" }}
+                className="d-flex justify-content-between align-items-center mb-2 mt-1"
+                style={{ fontSize: "0.7rem" }}
               >
                 <small className="text-secondary">
                   {inputUsdValue && <span>{inputUsdValue}</span>}
@@ -399,7 +400,7 @@ const SwapComponent = () => {
               {outputUsdValue && (
                 <div
                   className="d-flex justify-content-start align-items-center gap-2 mb-2"
-                  style={{ fontSize: "0.9rem" }}
+                  style={{ fontSize: "0.7rem" }}
                 >
                   <small className="text-secondary">{outputUsdValue}</small>
                   {getPriceDifference() && (
@@ -530,10 +531,10 @@ const SwapComponent = () => {
               </div>
               <div
                 className="d-flex justify-content-center align-items-center py-3 pb-0"
-                style={{ fontSize: "0.9rem" }}
+                style={{ fontSize: "0.7rem" }}
               >
                 <small className="text-secondary">
-                  Network Fee: $ {estimatedGas}
+                  Network Fee: ${estimatedGas}
                 </small>
               </div>
               {isModalOpen && (

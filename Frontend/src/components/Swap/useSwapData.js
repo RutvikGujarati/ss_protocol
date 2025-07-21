@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import { formatUnits, parseUnits } from "ethers";
 import { useAccount } from "wagmi";
 import { ethers } from "ethers";
@@ -17,6 +17,9 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [tokenInBalance, setTokenInBalance] = useState("");
 	const [tokenOutBalance, setTokenOutBalance] = useState("");
+
+	// Add a ref to track the latest request id
+	const requestIdRef = useRef(0);
 
 	const getApiTokenAddress = (symbol) => {
 		if (symbol === "PLS") return "PLS";
@@ -57,8 +60,13 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
 			return;
 		}
 
+		// Increment request id
+		requestIdRef.current += 1;
+		const thisRequestId = requestIdRef.current;
+
 		try {
 			setIsLoading(true);
+			setAmountOut(""); // Clear output while fetching
 			const amount = parseUnits(amountIn, TOKENS[tokenIn].decimals).toString();
 			const tokenInAddress = getApiTokenAddress(tokenIn);
 			const tokenOutAddress = getApiTokenAddress(tokenOut);
@@ -66,18 +74,25 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
 			const response = await fetch(url);
 			if (!response.ok) throw new Error("Quote fetch failed.");
 			const data = await response.json();
-			setAmountOut(Number(formatUnits(data.destAmount, TOKENS[tokenOut].decimals)).toFixed(4));
-			setEstimatedGas(data.gasUseEstimateUSD?.toFixed(4) || null);
-			setQuoteData(data.methodParameters);
-			setRouteDetails(data.route || { swaps: [] });
+			// Only update state if this is the latest request
+			if (requestIdRef.current === thisRequestId) {
+				setAmountOut(Number(formatUnits(data.destAmount, TOKENS[tokenOut].decimals)).toFixed(4));
+				setEstimatedGas(data.gasUseEstimateUSD?.toFixed(4) || null);
+				setQuoteData(data.methodParameters);
+				setRouteDetails(data.route || { swaps: [] });
+			}
 		} catch (err) {
-			console.error(err);
-			setAmountOut("");
-			setRouteDetails([]);
-			setEstimatedGas(null);
-			setQuoteData(null);
+			if (requestIdRef.current === thisRequestId) {
+				console.error(err);
+				setAmountOut("");
+				setRouteDetails([]);
+				setEstimatedGas(null);
+				setQuoteData(null);
+			}
 		} finally {
-			setIsLoading(false);
+			if (requestIdRef.current === thisRequestId) {
+				setIsLoading(false);
+			}
 		}
 	};
 
@@ -152,7 +167,7 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
 			inputPrice = tokenPrices[TOKENS[tokenIn].address.toLowerCase()] || 0;
 		}
 		const inputUsd = parseFloat(amountIn) * inputPrice;
-		setInputUsdValue(inputUsd > 0 ? `$${inputUsd.toFixed(8)}` : "");
+		setInputUsdValue(inputUsd > 0 ? `$${inputUsd.toFixed(4)}` : "");
 
 		if (amountOut && !isNaN(amountOut)) {
 			let outputPrice = 0;
@@ -162,7 +177,7 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
 				outputPrice = tokenPrices[TOKENS[tokenOut].address.toLowerCase()] || 0;
 			}
 			const outputUsd = parseFloat(amountOut) * outputPrice;
-			setOutputUsdValue(outputUsd > 0 ? `$${outputUsd.toFixed(8)}` : "");
+			setOutputUsdValue(outputUsd > 0 ? `$${outputUsd.toFixed(4)}` : "");
 		} else {
 			setOutputUsdValue("");
 		}
