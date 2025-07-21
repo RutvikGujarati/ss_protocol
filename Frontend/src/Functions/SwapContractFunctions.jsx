@@ -782,9 +782,11 @@ export const SwapContractProvider = ({ children }) => {
 
         try {
           setTxStatusForSwap("Approving");
+          // Approve unlimited amount (max uint256)
+          const maxUint256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
           const approveTx = await selectedContract.approve(
             ContractAddressToUse,
-            approvalAmount
+            maxUint256
           );
           await approveTx.wait();
           console.log("Approval successful!");

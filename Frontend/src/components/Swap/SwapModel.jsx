@@ -22,7 +22,7 @@ const SwapComponent = () => {
   const [tokenOut, setTokenOut] = useState("PLS");
   const [amountIn, setAmountIn] = useState("");
   const [isSwapping, setIsSwapping] = useState(false);
-  const [slippage, setSlippage] = useState(0.5);
+  const [slippage, setSlippage] = useState(0.1);
   const [isCustomSlippage, setIsCustomSlippage] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
