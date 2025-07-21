@@ -23,6 +23,7 @@ const RouteDetailsPopup = ({
                     <div
                         className="simple-modal-content"
                         style={{
+                            backgroundColor: '#2d3238',
                             position: 'absolute',
                             left: "50%",
                             top: "72%",

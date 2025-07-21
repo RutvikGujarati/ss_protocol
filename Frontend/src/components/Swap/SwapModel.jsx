@@ -10,7 +10,6 @@ import { useAccount } from "wagmi";
 import RouteDetailsPopup from "./RouteDetailsPopup";
 
 import useSwapData from "./useSwapData";
-import { useRef } from "react";
 import ActiveAuctionsModal from "./ActiveAuctionsModal";
 import toast from "react-hot-toast";
 
@@ -25,15 +24,12 @@ const SwapComponent = () => {
   const [isSwapping, setIsSwapping] = useState(false);
   const [slippage, setSlippage] = useState(0.5);
   const [isCustomSlippage, setIsCustomSlippage] = useState(false);
-  const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showRoutePopup, setShowRoutePopup] = useState(false);
   const [needsApproval, setNeedsApproval] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
-  const swapCardRef = useRef(null);
-  const [swapCardHeight, setSwapCardHeight] = useState(null);
   const [showTxModal, setShowTxModal] = useState(false);
   const [txStatus, setTxStatus] = useState("");
   const [confirmedAmountIn, setConfirmedAmountIn] = useState("");
@@ -115,11 +111,18 @@ const SwapComponent = () => {
       );
       await tx.wait();
       setNeedsApproval(false);
-      setError("");
       setTxStatus("pending");
       await handleSwap();
     } catch (err) {
-      setError("Approval failed. Try again.");
+      toast.error("Approval failed. Try again.", {
+        position: "top-center",
+        autoClose: 5000, // 5 seconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       console.error("Approval error", err);
       setTxStatus("error");
       setTimeout(() => setShowTxModal(false), 1200);
@@ -184,7 +187,15 @@ const SwapComponent = () => {
 
   const handleSwap = async () => {
     if (!signer || !quoteData) {
-      setError("Wallet not connected or quote data missing.");
+      toast.error("Wallet not connected or quote data missing.", {
+        position: "top-center",
+        autoClose: 5000, // 5 seconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       return;
     }
 
@@ -202,14 +213,21 @@ const SwapComponent = () => {
       console.log("Transaction sent:", tx.hash);
       await tx.wait();
       console.log("Transaction confirmed:", tx.hash);
-      setError("");
       setShowConfirmation(true);
       setAmountIn("");
       setTxStatus("confirmed");
       setTimeout(() => setShowTxModal(false), 1200);
     } catch (err) {
       console.error("Swap failed", err);
-      setError("Swap failed. Try again.");
+      toast.error("Swap failed. Try again.", {
+        position: "top-center",
+        autoClose: 5000, // 5 seconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       setTxStatus("error");
       setTimeout(() => setShowTxModal(false), 1200);
     } finally {
@@ -236,25 +254,6 @@ const SwapComponent = () => {
       isPositive: difference > 0,
     };
   };
-
-  useEffect(() => {
-    if (swapCardRef.current) {
-      setSwapCardHeight(swapCardRef.current.offsetHeight);
-    }
-  }, [
-    amountIn,
-    amountOut,
-    isLoading,
-    showConfirmation,
-    needsApproval,
-    isApproving,
-    isSwapping,
-    tokenIn,
-    tokenOut,
-    TOKENS,
-    slippage,
-    isCustomSlippage,
-  ]);
 
   useEffect(() => {
     if (showConfirmation) {
@@ -296,7 +295,7 @@ const SwapComponent = () => {
           }}
         >
           {/* Main swap card */}
-          <div className="card-container" ref={swapCardRef}>
+          <div className="card-container">
             <div className="shadow-sm rounded-3 swap-card ">
               <label className="text-light small mb-1 font-weight-normal ">From</label>
 
@@ -422,11 +421,6 @@ const SwapComponent = () => {
                   )}
                 </div>
               )}
-
-              {error && <div className="alert alert-danger py-2">{error}</div>}
-
-
-
               {/* Inline transaction progress bar below Network Fee */}
               {(isSwapping || isApproving || showTxModal) && (
                 <div className="tx-progress-container mb-3">

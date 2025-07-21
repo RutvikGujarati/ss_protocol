@@ -45,7 +45,7 @@ const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
                     className="border border-secondary border-opacity-25 rounded shadow-lg position-absolute"
                     onClick={(e) => e.stopPropagation()}
                     style={{
-                        backgroundColor: '#1e1e1e',
+                        backgroundColor: '#2d3238',
                         top: "73%",
                         left: "50%",
                         transform: "translate(-50%, -50%)",
