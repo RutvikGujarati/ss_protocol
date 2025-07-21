@@ -138,7 +138,6 @@ const SwapComponent = () => {
     return acc;
   }, {});
   const getTokenLogo = (symbol) => {
-    const token = TOKENS_BY_SYMBOL[symbol];
     if (SPECIAL_TOKEN_LOGOS[symbol]) {
       return (
         <img
@@ -150,21 +149,21 @@ const SwapComponent = () => {
       );
     }
     if (
-      token?.image &&
-      (token.image.startsWith("http") ||
-        token.image.startsWith("/"))
+      TOKENS[symbol]?.image &&
+      (TOKENS[symbol].image.startsWith("http") ||
+        TOKENS[symbol].image.startsWith("/"))
     ) {
       return (
         <img
-          src={token.image}
+          src={TOKENS[symbol].image}
           alt={symbol}
           width="32"
           className="rounded-circle"
         />
       );
     }
-    if (token?.emoji) {
-      return <span style={{ fontSize: "1.1em" }}>{token.emoji}</span>;
+    if (TOKENS[symbol]?.emoji) {
+      return <span style={{ fontSize: "1.1em" }}>{TOKENS[symbol].emoji}</span>;
     }
     return (
       <img
