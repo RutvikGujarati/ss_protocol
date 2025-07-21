@@ -56,7 +56,7 @@ const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
                     }}
                 >
                     <div className="d-flex align-items-center justify-content-between p-3 border-bottom border-secondary border-opacity-25">
-                        <h6 className="simple-modal-title text-light mb-0">Active Auctions</h6>
+                        <h6 className="simple-modal-title text-light mb-0" style={{ fontWeight:"300" }}>Active Auctions</h6>
                         <button
                             type="button"
                             className="btn-close btn-close-white btn-close-sm"

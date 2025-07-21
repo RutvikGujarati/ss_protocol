@@ -37,7 +37,7 @@ const RouteDetailsPopup = ({
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="simple-modal-header">
-                            <h6 className="simple-modal-title text-light mb-0">Routes</h6>
+                            <h6 className="simple-modal-title text-light mb-0" style={{ fontWeight: "300" }}>Routes</h6>
                             <button
                                 type="button"
                                 className="btn-close btn-close-white btn-close-sm"
@@ -60,10 +60,10 @@ const RouteDetailsPopup = ({
                                                         {getTokenLogo(path[0]?.symbol)}
                                                     </div>
                                                     <div className="flex-grow-1 min-w-0">
-                                                        <div className="text-light  small mb-1 text-truncate">
+                                                        <div className="text-secondary  small mb-1 text-truncate">
                                                             {path.map((token, idx) => (
                                                                 <React.Fragment key={idx}>
-                                                                    <span className=" text-light">{token.symbol}</span>
+                                                                    <span className=" text-secondary">{token.symbol}</span>
                                                                     {idx < path.length - 1 && (
                                                                         <span className="text-secondary mx-1 small">→</span>
                                                                     )}
@@ -90,9 +90,9 @@ const RouteDetailsPopup = ({
                                                             <div key={idx} className="p-2 bg-dark bg-opacity-10 rounded border border-secondary border-opacity-10">
                                                                 <div className="d-flex align-items-center justify-content-between">
                                                                     <div className="d-flex align-items-center gap-1 small">
-                                                                        <span className=" text-light">{token.symbol}</span>
+                                                                        <span className=" text-secondary">{token.symbol}</span>
                                                                         <span className="text-secondary small">→</span>
-                                                                        <span className=" text-light">{nextToken.symbol}</span>
+                                                                        <span className=" text-secondary">{nextToken.symbol}</span>
                                                                     </div>
                                                                     <div className="d-flex align-items-center gap-2 small">
                                                                         <span className="text-secondary ">{exchangeName}</span>
