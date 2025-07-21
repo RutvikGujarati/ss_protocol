@@ -24,7 +24,7 @@ const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
 
     const activeAuctions = auctionTokens.filter(
         ({ isReversing, AuctionStatus }) =>
-            AuctionStatus === "false" ||
+            AuctionStatus === "true" ||
             (AuctionStatus === "false" && isReversing === "true")
     );
 
@@ -56,8 +56,8 @@ const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
                     }}
                 >
                     <div className="d-flex align-items-center justify-content-between p-3 border-bottom border-secondary border-opacity-25">
-                    <h6 className="simple-modal-title text-light mb-0">Active Auctions</h6>
-                    <button
+                        <h6 className="simple-modal-title text-light mb-0">Active Auctions</h6>
+                        <button
                             type="button"
                             className="btn-close btn-close-white btn-close-sm"
                             onClick={onClose}
@@ -84,11 +84,9 @@ const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
                                             </div>
                                             <div className="flex-grow-1 min-w-0">
                                                 <div className="text-light fw-medium small mb-1">
-                                                    <span className="text-secondary">Swap</span> <span className="text-light">{auction.outputToken}</span> <span className="text-secondary">for</span> <span className="text-light">{auction.name}</span>
+                                                    <span className="text-secondary">Swap {auction.outputToken} for {auction.name}</span>
                                                 </div>
-                                                <div className="text-secondary small opacity-75">
-                                                    {auction.isReversing === "true" ? "Reverse Auction" : "Auction Active"}
-                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
