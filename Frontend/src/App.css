@@ -40,14 +40,13 @@ input[type="number"] {
 }
 
 .swap-container {
-  background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
   font-family: "Inter", sans-serif;
-  min-height: 100vh;
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  overflow-y: auto;
+  overflow-y: visible;
   transition: all 0.3s;
+  padding-bottom: 56px; /* Ensures content above the footer is visible */
 }
 
 .swap-flex-container {

@@ -299,7 +299,6 @@ const SwapComponent = () => {
         <div
           className="d-flex flex-row flex-wrap justify-content-center w-100"
           style={{
-            minHeight: "100vh",
             gap: 32,
             maxWidth: "100%",
             alignItems: "flex-start",
