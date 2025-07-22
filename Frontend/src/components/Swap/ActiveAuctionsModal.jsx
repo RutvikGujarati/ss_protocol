@@ -34,7 +34,7 @@ const ActiveAuctionsInline = ({ getTokenLogo, TOKENS }) => {
             <div
                 className="border border-secondary border-opacity-25 rounded shadow-sm custom-scrollbar"
                 style={{
-                    backgroundColor: '#2d3238',
+                    backgroundColor: '#212529',
                     maxWidth: '480px',
                     width: '100%',
                     maxHeight: '180px',

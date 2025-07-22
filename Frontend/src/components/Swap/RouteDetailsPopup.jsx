@@ -2,11 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 const RouteDetailsPopup = ({
-    routeDetails,
-    getTokenLogo, // not used anymore
-    TOKENS,
-    state,
-    inline, // not used anymore
+    routeDetails
 }) => {
     return (
         <div className="d-flex flex-column gap-2">

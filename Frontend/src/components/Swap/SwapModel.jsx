@@ -433,7 +433,7 @@ const SwapComponent = () => {
               )}
               {/* Inline transaction progress bar below Network Fee */}
               {(isSwapping || isApproving || showTxModal) && (
-                <div className="tx-progress-container mb-3">
+                <div className="tx-progress-container mb-3 mt-3">
                   <div className="step-line">
                     <div className={`step ${txStatus === "initializing" || txStatus === "initiated" || txStatus === "Approving" || txStatus === "pending" || txStatus === "confirmed" ? "active" : ""}`}>
                       <span className="dot" />
@@ -514,10 +514,10 @@ const SwapComponent = () => {
               </div>
 
               {/* Details Toggle */}
-              <div className="d-flex justify-content-between align-items-center mt-3">
+              <div className="d-flex justify-content-between align-items-center mt-3" >
                 <button
-                  className="btn btn-link text-secondary p-0"
-                  style={{ textDecoration: "none", fontWeight: 500, fontSize: "1rem" }}
+                  className="btn btn-link text-light small  font-weight-normal p-0"
+                  style={{ textDecoration: "none", fontWeight: 200, fontSize: "14px" }}
                   onClick={() => setShowDetails((prev) => !prev)}
                 >
                   Details {showDetails ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
@@ -528,13 +528,13 @@ const SwapComponent = () => {
               {showDetails && (
                 <div className="border border-secondary rounded-3 px-2 py-1 bg-dark bg-opacity-50" style={{ fontSize: "0.85rem" }}>
                   <div className="d-flex justify-content-between align-items-center h-100 mb-1">
-                    <small className="text-secondary">Network Fee: ${estimatedGas}</small>
+                    <small className="text-secondary"style={{fontSize:"9.8px"}}>Network Fee: ${estimatedGas}</small>
                   </div>
                   {/* Collapsible Active Auctions */}
                   <div className="border-top border-secondary pt-2 mt-1">
                     <button
                       className="btn btn-link text-secondary p-0"
-                      style={{ textDecoration: "none", fontWeight: 500, fontSize: "1rem" }}
+                      style={{ textDecoration: "none", fontWeight: 500, fontSize: "14px" }}
                       onClick={() => setShowAuctions((prev) => !prev)}
                     >
                       Active Auctions {showAuctions ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
@@ -550,7 +550,7 @@ const SwapComponent = () => {
                     <div className="border-top border-secondary pt-2 mt-1">
                       <button
                         className="btn btn-link text-secondary p-0"
-                        style={{ textDecoration: "none", fontWeight: 500, fontSize: "1rem" }}
+                        style={{ textDecoration: "none", fontWeight: 500, fontSize: "14px" }}
                         onClick={() => setShowRouteDetails((prev) => !prev)}
                       >
                         Route {showRouteDetails ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
@@ -558,8 +558,6 @@ const SwapComponent = () => {
                       {showRouteDetails && (
                         <RouteDetailsPopup
                           routeDetails={routeDetails}
-                          TOKENS={TOKENS}
-                          state={state}
                         />
                       )}
                     </div>
