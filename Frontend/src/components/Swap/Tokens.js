@@ -12,16 +12,26 @@ export function useAllTokens() {
 			try {
 				const res = await fetch("https://raw.githubusercontent.com/piteasio/app-tokens/main/piteas-tokenlist.json");
 				const data = await res.json();
-				// Convert array to object keyed by symbol
+				// Only include tokens with specific names
+				const allowedNames = [
+					"Wrapped Pulse",
+					"PulseChain from pump.tires",
+					"HEX",
+					"HEX from Ethereum",
+					"PulseX",
+					"Incentive"
+				];
 				const obj = {};
-				data.tokens.forEach(token => {
-					obj[token.name] = {
-						symbol: token.symbol,
-						address: token.address,
-						decimals: token.decimals,
-						image: token.logoURI,
-					};
-				});
+				data.tokens
+					.filter(token => allowedNames.includes(token.name))
+					.forEach(token => {
+						obj[token.name] = {
+							symbol: token.symbol,
+							address: token.address,
+							decimals: token.decimals,
+							image: token.logoURI,
+						};
+					});
 				setApiTokensObj(obj);
 			} catch (e) {
 				console.error(e);
