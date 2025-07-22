@@ -13,6 +13,8 @@ import RouteDetailsPopup from "./RouteDetailsPopup";
 import useSwapData from "./useSwapData";
 import ActiveAuctionsModal from "./ActiveAuctionsModal";
 import toast from "react-hot-toast";
+import React from "react";
+import ActiveAuctionsInline from "./ActiveAuctionsModal";
 
 const SwapComponent = () => {
   const { signer } = useContext(ContractContext);
@@ -36,6 +38,9 @@ const SwapComponent = () => {
   const [confirmedAmountIn, setConfirmedAmountIn] = useState("");
   const [confirmedAmountOut, setConfirmedAmountOut] = useState("");
   const [showActiveAuctionsModal, setShowActiveAuctionsModal] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showRouteDetails, setShowRouteDetails] = useState(false);
+  const [showAuctions, setShowAuctions] = useState(false);
 
   const {
     amountOut,
@@ -455,33 +460,7 @@ const SwapComponent = () => {
                 </div>
               )}
 
-              <RouteDetailsPopup
-                routeDetails={routeDetails}
-                showRoutePopup={showRoutePopup}
-                setShowRoutePopup={setShowRoutePopup}
-                getTokenLogo={getTokenLogo}
-                TOKENS={TOKENS}
-                state={state}
-              />
-
               <div className="d-flex justify-content-between align-items-center gap-2 mt-3">
-                <button
-                  className="btn btn-sm rounded-circle btn-outline-secondary"
-                  onClick={() => setShowActiveAuctionsModal(true)}
-                  style={{ width: "32px", height: "32px", fontSize: "0.6rem", lineHeight: "1" }}
-                  title="View Active Auctions"
-                >
-                  <i className="fas fa-gavel"></i>
-                </button>
-                <button
-                  className="btn btn-sm rounded-circle btn-outline-secondary"
-                  onClick={() => setShowRoutePopup(true)}
-                  disabled={!routeDetails}
-                  style={{ width: "32px", height: "32px", fontSize: "0.6rem", lineHeight: "1" }}
-                  title="View Route Details"
-                >
-                  <i className="fas fa-route"></i>
-                </button>
                 <div className="d-flex gap-1">
                   {[0.1, 0.5, 1.0, 2].map((val) => (
                     <button
@@ -534,14 +513,61 @@ const SwapComponent = () => {
                   </button>
                 )}
               </div>
-              <div
-                className="d-flex justify-content-center align-items-center py-3 pb-0"
-                style={{ fontSize: "0.7rem" }}
-              >
-                <small className="text-secondary">
-                  Network Fee: ${estimatedGas}
-                </small>
+
+              {/* Details Toggle */}
+              <div className="d-flex justify-content-between align-items-center mt-3">
+                <button
+                  className="btn btn-link text-secondary p-0"
+                  style={{ textDecoration: "none", fontWeight: 500, fontSize: "1rem" }}
+                  onClick={() => setShowDetails((prev) => !prev)}
+                >
+                  Details {showDetails ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
+                </button>
               </div>
+
+              {/* Details Section */}
+              {showDetails && (
+                <div className="border border-secondary rounded-3 px-2 py-1 bg-dark bg-opacity-50" style={{ fontSize: "0.85rem" }}>
+                  <div className="d-flex justify-content-between align-items-center h-100 mb-1">
+                    <small className="text-secondary">Network Fee: ${estimatedGas}</small>
+                  </div>
+                  {/* Collapsible Active Auctions */}
+                  <div className="border-top border-secondary pt-2 mt-1">
+                    <button
+                      className="btn btn-link text-secondary p-0"
+                      style={{ textDecoration: "none", fontWeight: 500, fontSize: "1rem" }}
+                      onClick={() => setShowAuctions((prev) => !prev)}
+                    >
+                      Active Auctions {showAuctions ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
+                    </button>
+                    {showAuctions && (
+                      <div className="d-flex flex-column gap-2 mt-2">
+                        <ActiveAuctionsInline TOKENS={TOKENS} getTokenLogo={getTokenLogo} />
+                      </div>
+                    )}
+                  </div>
+                  {/* Collapsible Route Details */}
+                  {routeDetails?.paths?.length > 0 && routeDetails?.swaps?.length > 0 && (
+                    <div className="border-top border-secondary pt-2 mt-1">
+                      <button
+                        className="btn btn-link text-secondary p-0"
+                        style={{ textDecoration: "none", fontWeight: 500, fontSize: "1rem" }}
+                        onClick={() => setShowRouteDetails((prev) => !prev)}
+                      >
+                        Route {showRouteDetails ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
+                      </button>
+                      {showRouteDetails && (
+                        <RouteDetailsPopup
+                          routeDetails={routeDetails}
+                          TOKENS={TOKENS}
+                          state={state}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {isModalOpen && (
                 <TokenSearchModal
                   tokens={TOKENS}
@@ -550,14 +576,6 @@ const SwapComponent = () => {
                   onClose={closeModal}
                 />
               )}
-
-              {/* Active Auctions Modal */}
-              <ActiveAuctionsModal
-                isOpen={showActiveAuctionsModal}
-                onClose={() => setShowActiveAuctionsModal(false)}
-                getTokenLogo={getTokenLogo}
-                TOKENS={TOKENS}
-              />
             </div>
           </div>
         </div>

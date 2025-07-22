@@ -27,6 +27,10 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Prevent zoom in/out with Ctrl+Plus, Ctrl+Minus, Ctrl+0
+      if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '0')) {
+        e.preventDefault();
+      }
       switch (e.key) {
         case "Enter":
           e.preventDefault();
@@ -37,8 +41,32 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
       }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    // Prevent zoom with mouse wheel (Ctrl+wheel)
+    const handleWheel = (e) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    };
+
+    // Prevent zoom with pinch gesture (touchpad)
+    const handleGesture = (e) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown, { passive: false });
+    document.addEventListener("wheel", handleWheel, { passive: false });
+    document.addEventListener("gesturestart", handleGesture, { passive: false });
+    document.addEventListener("gesturechange", handleGesture, { passive: false });
+    document.addEventListener("gestureend", handleGesture, { passive: false });
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("wheel", handleWheel);
+      document.removeEventListener("gesturestart", handleGesture);
+      document.removeEventListener("gesturechange", handleGesture);
+      document.removeEventListener("gestureend", handleGesture);
+    };
   }, [onClose]);
 
   // Auto-focus search input
@@ -119,7 +147,7 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
 
       {/* Modal */}
       <div className="modal d-block" tabIndex="-1" style={{ zIndex: 2050 }}>
-        <div className="modal-dialog modal-dialog-centered">
+        <div className="modal-dialog modal-dialog-centered justify-content-center" >
           <div className="modal-content bg-dark text-light border border-secondary rounded-4 shadow-lg">
             {/* Header */}
             <div className="modal-header border-0 pb-0 py-2 mb-3 mt-1">

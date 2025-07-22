@@ -19,7 +19,7 @@ const scrollbarStyles = `
   }
 `;
 
-const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
+const ActiveAuctionsInline = ({ getTokenLogo, TOKENS }) => {
     const { tokens: auctionTokens } = useAuctionTokens();
 
     const activeAuctions = auctionTokens.filter(
@@ -28,73 +28,43 @@ const ActiveAuctionsModal = ({ isOpen, onClose, getTokenLogo, TOKENS }) => {
             (AuctionStatus === "false" && isReversing === "true")
     );
 
-    if (!isOpen) return null;
-
     return (
         <>
             <style>{scrollbarStyles}</style>
             <div
-                className="position-absolute top-0 start-0 w-100 h-100"
+                className="border border-secondary border-opacity-25 rounded shadow-sm custom-scrollbar"
                 style={{
-                    zIndex: 2000,
-                    backdropFilter: "blur(1px)"
+                    backgroundColor: '#2d3238',
+                    maxWidth: '480px',
+                    width: '100%',
+                    maxHeight: '180px',
+                    overflow: 'auto',
+                    padding: '8px 12px',
                 }}
-                onClick={onClose}
             >
-                <div
-                    className="border border-secondary border-opacity-25 rounded shadow-lg position-absolute"
-                    onClick={(e) => e.stopPropagation()}
-                    style={{
-                        backgroundColor: '#2d3238',
-                        top: "73%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        maxWidth: '480px',
-                        width: '480px',
-                        maxHeight: '300px',
-                        overflow: 'auto'
-                    }}
-                >
-                    <div className="d-flex align-items-center justify-content-between p-3 border-bottom border-secondary border-opacity-25">
-                        <h6 className="simple-modal-title text-light mb-0" style={{ fontWeight:"300" }}>Active Auctions</h6>
-                        <button
-                            type="button"
-                            className="btn-close btn-close-white btn-close-sm"
-                            onClick={onClose}
-                            aria-label="Close"
-                        ></button>
+                {activeAuctions.length === 0 ? (
+                    <div className="text-center text-secondary">
+                        <small>No active auctions</small>
                     </div>
-                    <div className="p-3 custom-scrollbar" style={{
-                        maxHeight: 'calc(300px - 60px)',
-                        overflowY: 'auto',
-                        scrollbarWidth: 'thin',
-                        scrollbarColor: '#4a4a4a #1e1e1e'
-                    }}>
-                        {activeAuctions.length === 0 ? (
-                            <div className="text-center text-secondary">
-                                <small>No active auctions</small>
-                            </div>
-                        ) : (
-                            <div className="d-flex flex-column gap-2">
-                                {activeAuctions.map((auction, idx) => (
-                                    <div key={idx} className="d-flex align-items-center gap-2" style={{ minHeight: '32px' }}>
-                                        <div className="d-flex align-items-center justify-content-center" style={{ width: '28px', height: '28px', flexShrink: 0 }}>
-                                            {getTokenLogo(auction.name)}
-                                        </div>
-                                        <div className="flex-grow-1 min-w-0">
-                                            <div className="text-light fw-medium small mb-1">
-                                                <span className="text-secondary">Swap {auction.outputToken} for {auction.name}</span>
-                                            </div>
-                                        </div>
+                ) : (
+                    <div className="d-flex flex-column gap-2">
+                        {activeAuctions.map((auction, idx) => (
+                            <div key={idx} className="d-flex align-items-center gap-2" style={{ minHeight: '28px' }}>
+                                <div className="d-flex align-items-center justify-content-center" style={{ width: '24px', height: '24px', flexShrink: 0 }}>
+                                    {getTokenLogo(auction.name)}
+                                </div>
+                                <div className="flex-grow-1 min-w-0">
+                                    <div className="text-light fw-medium small mb-1">
+                                        <span className="text-secondary">Swap {auction.outputToken} for {auction.name}</span>
                                     </div>
-                                ))}
+                                </div>
                             </div>
-                        )}
+                        ))}
                     </div>
-                </div>
+                )}
             </div>
         </>
     );
 };
 
-export default ActiveAuctionsModal; 
+export default ActiveAuctionsInline; 
