@@ -41,6 +41,7 @@ const SwapComponent = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [showRouteDetails, setShowRouteDetails] = useState(false);
   const [showAuctions, setShowAuctions] = useState(false);
+  const [isInputHovered, setIsInputHovered] = useState(false);
 
   const {
     amountOut,
@@ -309,39 +310,68 @@ const SwapComponent = () => {
             <div className="shadow-sm rounded-3 swap-card ">
               <label className="text-light small mb-1 font-weight-normal ">From</label>
 
-              <div className="d-flex align-items-center gap-2">
-                <input
-                  type="number"
-                  className="form-control"
-                  value={amountIn}
-                  onChange={(e) => setAmountIn(e.target.value)}
-                  placeholder="0.0"
-                  style={{
-                    boxShadow: "none",
-                    "--placeholder-color": "#6c757d",
-                    backgroundColor: (isApproving || isSwapping) ? "#343a40" : undefined
-                  }}
-                  disabled={isApproving || isSwapping}
-                />
-                <div className="d-flex align-items-center gap-1">
-                  <button
-                    className="d-flex align-items-center justify-content-between gap-2 px-2 token-select-btn"
-                    onClick={() => openModal("in")}
+              <div
+                onMouseEnter={() => setIsInputHovered(true)}
+                onMouseLeave={() => setIsInputHovered(false)}
+              >
+                {isInputHovered && (
+                  <div className="d-flex gap-2 mb-1">
+                    {[25, 50, 75].map((percent) => (
+                      <button
+                        key={percent}
+                        className="btn btn-outline-secondary btn-sm px-2 py-0"
+                        style={{ fontSize: "0.85em", borderRadius: "16px" }}
+                        onClick={() => setAmountIn(((parseFloat(tokenInBalance || 0) * percent) / 100).toString())}
+                        type="button"
+                        disabled={isApproving || isSwapping}
+                      >
+                        {percent}%
+                      </button>
+                    ))}
+                    <button
+                      className="btn btn-outline-secondary btn-sm px-2 py-0"
+                      style={{ fontSize: "0.85em", borderRadius: "16px" }}
+                      onClick={() => setAmountIn(tokenInBalance ? parseFloat(tokenInBalance).toString() : "")}
+                      type="button"
+                    >
+                      Max
+                    </button>
+                  </div>
+                )}
+                <div className="d-flex align-items-center gap-2">
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={amountIn}
+                    onChange={(e) => setAmountIn(e.target.value)}
+                    placeholder="0.0"
+                    style={{
+                      boxShadow: "none",
+                      "--placeholder-color": "#6c757d",
+                      backgroundColor: (isApproving || isSwapping) ? "#343a40" : undefined
+                    }}
                     disabled={isApproving || isSwapping}
-                  >
-                    <span className="d-flex align-items-center gap-2">
-                      {getTokenLogo(tokenIn)}
-                      <span style={{ fontWeight: 500, fontSize: "1rem" }}>
-                        {getDisplaySymbol(TOKENS[tokenIn]?.symbol || tokenIn)}
+                  />
+                  <div className="d-flex align-items-center gap-1">
+                    <button
+                      className="d-flex align-items-center justify-content-between gap-2 px-2 token-select-btn"
+                      onClick={() => openModal("in")}
+                      disabled={isApproving || isSwapping}
+                    >
+                      <span className="d-flex align-items-center gap-2">
+                        {getTokenLogo(tokenIn)}
+                        <span style={{ fontWeight: 500, fontSize: "1rem" }}>
+                          {getDisplaySymbol(TOKENS[tokenIn]?.symbol || tokenIn)}
+                        </span>
                       </span>
-                    </span>
-                    <span className="ms-2 d-flex align-items-center">
-                      <i
-                        className="bi bi-chevron-down"
-                        style={{ fontSize: "1rem" }}
-                      ></i>
-                    </span>
-                  </button>
+                      <span className="ms-2 d-flex align-items-center">
+                        <i
+                          className="bi bi-chevron-down"
+                          style={{ fontSize: "1rem" }}
+                        ></i>
+                      </span>
+                    </button>
+                  </div>
                 </div>
               </div>
               <div
@@ -528,7 +558,7 @@ const SwapComponent = () => {
               {showDetails && (
                 <div className="border border-secondary rounded-3 px-2 py-1 bg-dark bg-opacity-50" style={{ fontSize: "0.85rem" }}>
                   <div className="d-flex justify-content-between align-items-center h-100 mb-1">
-                    <small className="text-secondary"style={{fontSize:"9.8px"}}>Network Fee: ${estimatedGas}</small>
+                    <small className="text-secondary" style={{ fontSize: "9.8px" }}>Network Fee: ${estimatedGas}</small>
                   </div>
                   {/* Collapsible Active Auctions */}
                   <div className="border-top border-secondary pt-2 mt-1">

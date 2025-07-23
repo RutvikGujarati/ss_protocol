@@ -202,13 +202,13 @@ const DetailsInfo = ({ selectedToken }) => {
                             {token.tokenName === "DAV" ? (
                               <img
                                 src={dav} // Replace with actual path
-                                style={{ width: "30px", height: "30px" }}
+                                style={{ width: "30px", height: "30px",borderRadius: "50%" }}
                                 alt="DAV logo"
                               />
                             ) : token.tokenName === "STATE" ? (
                               <img
                                 src={state} // Replace with actual path
-                                style={{ width: "30px", height: "30px" }}
+                                style={{ width: "30px", height: "30px",borderRadius: "50%" }}
                                 alt="STATE logo"
                               />
                             ) : isImageUrl(token.emoji) ? (
