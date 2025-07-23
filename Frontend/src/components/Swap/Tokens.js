@@ -17,7 +17,6 @@ export function useAllTokens() {
 					"Wrapped Pulse",
 					"PulseChain from pump.tires",
 					"HEX",
-					"HEX from Ethereum",
 					"PulseX",
 					"Incentive"
 				];
