@@ -174,7 +174,7 @@ export const DavProvider = ({ children }) => {
     }
   }, [AllContracts, address]);
 
-//   console.log("dav entries", data.DavMintFee);
+  //   console.log("dav entries", data.DavMintFee);
 
   const fetchAndStoreTokenEntries = async () => {
     try {
@@ -184,7 +184,7 @@ export const DavProvider = ({ children }) => {
       // Extract addresses and token names
       const addresses = tokenEntries.map((entry) => entry.user);
       const tokenNames = tokenEntries.map((entry) => entry.tokenName);
-const tokenEmojis = tokenEntries.map((entry) => entry.emojiOrImage);
+      const tokenEmojis = tokenEntries.map((entry) => entry.emojiOrImage);
       const tokenStatus = tokenEntries.map((entry) => entry.TokenStatus);
       // Update state
       setUsers(addresses);
@@ -319,8 +319,8 @@ const tokenEmojis = tokenEntries.map((entry) => entry.emojiOrImage);
       (chainId === 146
         ? 100
         : isImage
-        ? data.TokenWithImageProcessing
-        : data.TokenProcessing
+          ? data.TokenWithImageProcessing
+          : data.TokenProcessing
       ).toString()
     );
     let toastId = null;
@@ -333,8 +333,8 @@ const tokenEmojis = tokenEntries.map((entry) => entry.emojiOrImage);
         address == import.meta.env.VITE_AUTH_ADDRESS
           ? await AllContracts.davContract.processYourToken(amount, Emoji)
           : await AllContracts.davContract.processYourToken(amount, Emoji, {
-              value: cost,
-            });
+            value: cost,
+          });
 
       toastId = toast.loading(
         isImage ? (
@@ -523,13 +523,19 @@ const tokenEmojis = tokenEntries.map((entry) => entry.emojiOrImage);
       setButtonTextStates("initiated");
       setClicked(true);
       const weiAmount = ethers.parseUnits(amount.toString(), 18);
+      const maxUint256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
       const tokenContract = new ethers.Contract(
         STATE_TESTNET,
         ERC20_ABI,
         signer
       );
-      setButtonTextStates("Approving");
-      await (await tokenContract.approve(DAV_TESTNET, weiAmount)).wait();
+      const allowance = await tokenContract.allowance(address, DAV_TESTNET);
+      // 2. If allowance is not enough, approve
+      if (BigInt(allowance) < BigInt(weiAmount)) {
+        setButtonTextStates("Approving");
+        await (await tokenContract.approve(DAV_TESTNET, maxUint256)).wait();
+      }
+
       setButtonTextStates("Pending");
       await (await AllContracts.davContract.burnState(weiAmount)).wait();
       setButtonTextStates("confirmed");
