@@ -573,7 +573,7 @@ const DataTable = () => {
                             <img
                               src={Emojis}
                               alt="token visual"
-                              style={{ width: "30px", height: "30px" }}
+                              style={{ width: "30px", height: "30px" ,borderRadius:"50%"}}
                             />
                           ) : (
                             <span style={{ fontSize: "20px" }}>{Emojis}</span>
@@ -831,7 +831,7 @@ const DataTable = () => {
                             <img
                               src={Emojis}
                               alt="token visual"
-                              style={{ width: "30px", height: "30px" }}
+                              style={{ width: "30px", height: "30px",borderRadius:"50%"}}
                             />
                           ) : (
                             <span style={{ fontSize: "20px" }}>{Emojis}</span>

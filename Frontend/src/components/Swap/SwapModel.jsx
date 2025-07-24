@@ -314,31 +314,8 @@ const SwapComponent = () => {
                 onMouseEnter={() => setIsInputHovered(true)}
                 onMouseLeave={() => setIsInputHovered(false)}
               >
-                {isInputHovered && (
-                  <div className="d-flex gap-2 mb-1">
-                    {[25, 50, 75].map((percent) => (
-                      <button
-                        key={percent}
-                        className="btn btn-outline-secondary btn-sm px-2 py-0"
-                        style={{ fontSize: "0.85em", borderRadius: "16px" }}
-                        onClick={() => setAmountIn(((parseFloat(tokenInBalance || 0) * percent) / 100).toString())}
-                        type="button"
-                        disabled={isApproving || isSwapping}
-                      >
-                        {percent}%
-                      </button>
-                    ))}
-                    <button
-                      className="btn btn-outline-secondary btn-sm px-2 py-0"
-                      style={{ fontSize: "0.85em", borderRadius: "16px" }}
-                      onClick={() => setAmountIn(tokenInBalance ? parseFloat(tokenInBalance).toString() : "")}
-                      type="button"
-                    >
-                      Max
-                    </button>
-                  </div>
-                )}
-                <div className="d-flex align-items-center gap-2">
+
+                <div className="d-flex align-items-center gap-2" style={{ position: 'relative' }}>
                   <input
                     type="number"
                     className="form-control"
@@ -352,6 +329,36 @@ const SwapComponent = () => {
                     }}
                     disabled={isApproving || isSwapping}
                   />
+                  <div
+                    className="d-flex gap-1 position-absolute"
+                    style={{
+                      right: "140px",
+                      top: "140%",
+                      transform: "translateY(-50%)",
+                      zIndex: 2,
+                    }}
+                  >
+                    {[25, 50, 75].map((percent) => (
+                      <button
+                        key={percent}
+                        className="btn btn-outline-secondary btn-sm px-1 py-0"
+                        style={{ fontSize: "0.6em", borderRadius: "10px", height: "20px", minWidth: "32px" }}
+                        onClick={() => setAmountIn(((parseFloat(tokenInBalance || 0) * percent) / 100).toString())}
+                        type="button"
+                        disabled={isApproving || isSwapping}
+                      >
+                        {percent}%
+                      </button>
+                    ))}
+                    <button
+                      className="btn btn-outline-secondary btn-sm px-1 py-0"
+                      style={{ fontSize: "0.6em", borderRadius: "10px", height: "20px", minWidth: "32px" }}
+                      onClick={() => setAmountIn(tokenInBalance ? parseFloat(tokenInBalance).toString() : "")}
+                      type="button"
+                    >
+                      Max
+                    </button>
+                  </div>
                   <div className="d-flex align-items-center gap-1">
                     <button
                       className="d-flex align-items-center justify-content-between gap-2 px-2 token-select-btn"
@@ -391,7 +398,7 @@ const SwapComponent = () => {
 
               <div className="text-center ">
                 <button
-                  className="btn btn-outline-primary btn-sm rounded-circle"
+                  className="btn btn-outline-primary btn-sm rounded-circle mt-3"
                   onClick={handleSwitchTokens}
                   disabled={isApproving || isSwapping}
                   style={{ width: "40px", height: "40px" }}

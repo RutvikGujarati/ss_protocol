@@ -214,7 +214,7 @@ const DetailsInfo = ({ selectedToken }) => {
                             ) : isImageUrl(token.emoji) ? (
                               <img
                                 src={token.emoji}
-                                style={{ width: "30px", height: "30px" }}
+                                style={{ width: "30px", height: "30px",borderRadius:"50%"}}
                                 alt={`${token.tokenName} emoji`}
                               />
                             ) : (

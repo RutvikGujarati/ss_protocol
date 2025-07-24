@@ -17,10 +17,13 @@ import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
 import toast from "react-hot-toast";
 import IOSpinner from "../Constants/Spinner";
+import GraphemeSplitter from 'grapheme-splitter';
+
 
 import axios from "axios";
 const InfoCards = () => {
   const chainId = useChainId();
+  const splitter = new GraphemeSplitter();
 
   const [copied, setCopied] = useState(false);
   const [copiedCode, setCopiedCode] = useState("");
@@ -122,9 +125,8 @@ const InfoCards = () => {
 
       const ipfsHash = res.data.IpfsHash;
       // Ensure no double slashes by normalizing the URL
-      const pinataURL = `${
-        gateway.endsWith("/") ? gateway.slice(0, -1) : gateway
-      }/${ipfsHash}`;
+      const pinataURL = `${gateway.endsWith("/") ? gateway.slice(0, -1) : gateway
+        }/${ipfsHash}`;
       return pinataURL;
     } catch (err) {
       console.error("Pinata upload failed:", err.response?.data || err.message);
@@ -401,9 +403,8 @@ const InfoCards = () => {
                         type="text"
                         id="affiliateLink"
                         list="referralSuggestions"
-                        className={`form-control text-center fw-bold ${
-                          Refferalamount ? "filled" : ""
-                        }`}
+                        className={`form-control text-center fw-bold ${Refferalamount ? "filled" : ""
+                          }`}
                         value={Refferalamount}
                         onChange={handleOptionalInputChange}
                         style={{ height: "38px", color: "#ffffff" }}
@@ -424,9 +425,8 @@ const InfoCards = () => {
                       <input
                         type="text"
                         id="mintAmount"
-                        className={`form-control text-center fw-bold ${
-                          amount ? "filled" : ""
-                        }`}
+                        className={`form-control text-center fw-bold ${amount ? "filled" : ""
+                          }`}
                         value={amount}
                         onChange={handleInputChange}
                         required
@@ -452,44 +452,40 @@ const InfoCards = () => {
                     <div className="tx-progress-container">
                       <div className="step-line">
                         <div
-                          className={`step ${
-                            txStatus === "initializing" ||
-                            txStatus === "initiated" ||
-                            txStatus === "pending" ||
-                            txStatus === "confirmed"
+                          className={`step ${txStatus === "initializing" ||
+                              txStatus === "initiated" ||
+                              txStatus === "pending" ||
+                              txStatus === "confirmed"
                               ? "active"
                               : ""
-                          }`}
+                            }`}
                         >
                           <span className="dot" />
                           <span className="label">Initializing</span>
                         </div>
                         <div
-                          className={`step ${
-                            txStatus === "initiated" ||
-                            txStatus === "pending" ||
-                            txStatus === "confirmed"
+                          className={`step ${txStatus === "initiated" ||
+                              txStatus === "pending" ||
+                              txStatus === "confirmed"
                               ? "active"
                               : ""
-                          }`}
+                            }`}
                         >
                           <span className="dot" />
                           <span className="label">Initiated</span>
                         </div>
                         <div
-                          className={`step ${
-                            txStatus === "pending" || txStatus === "confirmed"
+                          className={`step ${txStatus === "pending" || txStatus === "confirmed"
                               ? "active"
                               : ""
-                          }`}
+                            }`}
                         >
                           <span className="dot" />
                           <span className="label">Pending</span>
                         </div>
                         <div
-                          className={`step ${
-                            txStatus === "confirmed" ? "active" : ""
-                          }`}
+                          className={`step ${txStatus === "confirmed" ? "active" : ""
+                            }`}
                         >
                           <span className="dot" />
                           <span className="label">Confirmed</span>
@@ -627,7 +623,7 @@ const InfoCards = () => {
             </div>
           </div>
         </>
-      ): isBurn ? (
+      ) : isBurn ? (
         <>
           <div className="container mt-4">
             <div className="row g-4 d-flex align-items-stretch pb-1 ">
@@ -711,8 +707,7 @@ const InfoCards = () => {
                           }}
                         >
                           <div
-                            className={`step ${
-                              [
+                            className={`step ${[
                                 "initializing",
                                 "initiated",
                                 "Approving",
@@ -721,14 +716,13 @@ const InfoCards = () => {
                               ].includes(buttonTextStates)
                                 ? "active"
                                 : ""
-                            }`}
+                              }`}
                           >
                             <span className="dot" />
                             <span className="label">Initializing</span>
                           </div>
                           <div
-                            className={`step ${
-                              [
+                            className={`step ${[
                                 "initiated",
                                 "Approving",
                                 "Pending",
@@ -736,39 +730,36 @@ const InfoCards = () => {
                               ].includes(buttonTextStates)
                                 ? "active"
                                 : ""
-                            }`}
+                              }`}
                           >
                             <span className="dot" />
                             <span className="label">Initiated</span>
                           </div>
                           <div
-                            className={`step ${
-                              ["Approving", "Pending", "confirmed"].includes(
-                                buttonTextStates
-                              )
+                            className={`step ${["Approving", "Pending", "confirmed"].includes(
+                              buttonTextStates
+                            )
                                 ? "active"
                                 : ""
-                            }`}
+                              }`}
                           >
                             <span className="dot" />
                             <span className="label">Approving</span>
                           </div>
                           <div
-                            className={`step ${
-                              ["Pending", "confirmed"].includes(
-                                buttonTextStates
-                              )
+                            className={`step ${["Pending", "confirmed"].includes(
+                              buttonTextStates
+                            )
                                 ? "active"
                                 : ""
-                            }`}
+                              }`}
                           >
                             <span className="dot" />
                             <span className="label">Burning</span>
                           </div>
                           <div
-                            className={`step ${
-                              buttonTextStates === "confirmed" ? "active" : ""
-                            }`}
+                            className={`step ${buttonTextStates === "confirmed" ? "active" : ""
+                              }`}
                           >
                             <span className="dot" />
                             <span className="label">Confirmed</span>
@@ -943,9 +934,8 @@ const InfoCards = () => {
                       >
                         <input
                           type="text"
-                          className={`form-control text-center fw-bold ${
-                            TokenName ? "filled" : ""
-                          }`}
+                          className={`form-control text-center fw-bold ${TokenName ? "filled" : ""
+                            }`}
                           style={{ "--placeholder-color": "#6c757d" }}
                           value={TokenName}
                           maxLength={11}
@@ -972,14 +962,14 @@ const InfoCards = () => {
                       >
                         <input
                           type="text"
-                          className={`form-control text-center fw-bold ${
-                            Emoji ? "filled" : ""
-                          }`}
+                          className={`form-control text-center fw-bold ${Emoji ? "filled" : ""
+                            }`}
                           style={{ "--placeholder-color": "#6c757d" }}
                           value={Emoji}
                           disabled={isProcessingToken || !!selectedFile}
                           onChange={(e) => {
-                            const value = e.target.value;
+                            const graphemes = splitter.splitGraphemes(e.target.value);
+                            const value = graphemes[0] || ''; 
                             setFileUploaded(null);
                             setIsFileUploaded(false);
                             handleInputChangeForEmoji(value);

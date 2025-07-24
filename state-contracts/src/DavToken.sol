@@ -612,7 +612,7 @@ contract DAV_V2_2 is
             _tokenName,
             _emojiOrImage,
             64, // maxNameLength
-            10 // maxEmojiLength
+            1 // maxEmojiLength
         );
 
         uint256 userTokenBalance = getActiveBalance(msg.sender);
