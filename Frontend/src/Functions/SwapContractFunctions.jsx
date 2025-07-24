@@ -68,7 +68,7 @@ export const SwapContractProvider = ({ children }) => {
     if (chainId == 146) {
       setTotalCost(ethers.parseEther((amount * 100).toString()));
     } else {
-      setTotalCost(ethers.parseEther((amount * DavMintFee).toString()));
+      setTotalCost(ethers.parseEther((amount * 1500000).toString()));
     }
   };
   const fetchTokenData = async ({

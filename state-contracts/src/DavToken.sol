@@ -34,7 +34,7 @@ contract DAV_V2_2 is
     //Global unit256 Variables
     // DAV TOken
     // NOTE: // This contract is intended for PulseChain, not Ethereum.
-    uint256 public constant MAX_SUPPLY = 10000000 ether; // 10 Million DAV Tokens
+    uint256 public constant MAX_SUPPLY = 1000000000 ether; // 1 billion DAV Tokens
     uint256 public constant MAX_HOLDERS = 25000;
     uint256 public constant TOKEN_COST = 500 ether; // 1000000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
@@ -42,7 +42,7 @@ contract DAV_V2_2 is
     uint256 public constant DEVELOPMENT_SHARE = 5; // 5% DEV SHARE
     uint256 public constant HOLDER_SHARE = 10; // 10% HOLDER SHARE
     uint256 public constant BASIS_POINTS = 10000;
-    uint256 public constant INITIAL_GOV_MINT = 1000 ether;
+    uint256 public constant INITIAL_GOV_MINT = 2000 ether;
     uint256 public constant MAX_TOKEN_PER_USER = 100;
     uint256 public constant DAV_TOKEN_EXPIRE = 24 hours; // 50 days for mainnet
 
