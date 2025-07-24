@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 library TimeUtilsLib {
     uint256 internal constant SECONDS_IN_DAY = 86400;
-    uint256 internal constant TARGET_GMT_HOUR = 10;
+    uint256 internal constant TARGET_GMT_HOUR = 11;
     uint256 internal constant TARGET_GMT_MINUTE = 0;
 
     /**
