@@ -11,7 +11,6 @@ import { useAccount } from "wagmi";
 import RouteDetailsPopup from "./RouteDetailsPopup";
 
 import useSwapData from "./useSwapData";
-import ActiveAuctionsModal from "./ActiveAuctionsModal";
 import toast from "react-hot-toast";
 import React from "react";
 import ActiveAuctionsInline from "./ActiveAuctionsModal";
@@ -30,18 +29,15 @@ const SwapComponent = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [showRoutePopup, setShowRoutePopup] = useState(false);
   const [needsApproval, setNeedsApproval] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [showTxModal, setShowTxModal] = useState(false);
   const [txStatus, setTxStatus] = useState("");
   const [confirmedAmountIn, setConfirmedAmountIn] = useState("");
   const [confirmedAmountOut, setConfirmedAmountOut] = useState("");
-  const [showActiveAuctionsModal, setShowActiveAuctionsModal] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [showRouteDetails, setShowRouteDetails] = useState(false);
   const [showAuctions, setShowAuctions] = useState(false);
-  const [isInputHovered, setIsInputHovered] = useState(false);
 
   const {
     amountOut,
@@ -65,14 +61,14 @@ const SwapComponent = () => {
     setTokenOut(tokenIn);
   };
 
-   const formatWithCommas = (value) => {
+  const formatWithCommas = (value) => {
     if (value === null || value === undefined) return "";
     const valueString = value.toString();
     const [integerPart, decimalPart] = valueString.split(".");
     const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger;
   };
-  
+
 
   const ERC20_ABI = [
     "function allowance(address owner, address spender) view returns (uint256)",
@@ -319,10 +315,7 @@ const SwapComponent = () => {
             <div className="shadow-sm rounded-3 swap-card ">
               <label className="text-light small mb-1 font-weight-normal ">From</label>
 
-              <div
-                onMouseEnter={() => setIsInputHovered(true)}
-                onMouseLeave={() => setIsInputHovered(false)}
-              >
+              <div>
 
                 <div className="d-flex align-items-center gap-2" style={{ position: 'relative' }}>
                   <input

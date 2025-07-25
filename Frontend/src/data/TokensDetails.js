@@ -106,7 +106,6 @@ export const TokensDetails = () => {
 						? "true"
 						: swap.supportedToken?.[key],
 			TokenAddress: token.address,
-			isFlammed: swap.isGotFlammed?.[token.name],
 			Cycle:
 				swap.CurrentCycleCount?.[key] === "not started"
 					? "Not Started"

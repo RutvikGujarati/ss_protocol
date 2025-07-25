@@ -42,7 +42,6 @@ export const useAddTokens = () => {
 		const isDeployed = isUsedMap[name] ?? false;
 		const isRenounceToken = isTokenRenounce?.[name] ?? false;
 		const isAdded = supportedToken?.[name] ?? false;
-		const isFlammed = isGotFlammed?.[name] ?? false;
 		const Emojis = Emojies[index] || "❓";
 		const tokenAddress = tokenMap?.[name] || "0x0000000000000000000000000000000000000000";
 		const timeLeft = TimeLeftClaim?.[name] || "0";
@@ -51,7 +50,6 @@ export const useAddTokens = () => {
 			name,
 			Emojis,
 			isDeployed,
-			isFlammed,
 			isAdded,
 			isRenounceToken,
 			contract: name || user,
@@ -66,7 +64,6 @@ export const useAddTokens = () => {
 			id: config.user,
 			user: config.user,
 			name: config.name,
-			isFlammed: config.isFlammed,
 			isDeployed: config.isDeployed,
 			Emojis: config.Emojis,
 			isRenounceToken: config.isRenounceToken,
@@ -144,7 +141,6 @@ export const useUsersOwnerTokens = () => {
 			pairAddress: pairAddress,
 			nextClaimTime: nextClaimTime,
 			Emojis: emojis,
-			isFlammed: isGotFlammed?.[tokenName],
 		};
 
 		return tokenEntry;

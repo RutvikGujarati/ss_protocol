@@ -1,14 +1,5 @@
 import React from "react";
 
-const statusSteps = [
-  { key: "initializing", label: "Initializing" },
-  { key: "initiated", label: "Initiated" },
-  { key: "Approving", label: "Approving" },
-  { key: "pending", label: "Swapping" },
-  { key: "confirmed", label: "Confirmed" },
-  { key: "error", label: "Error" },
-];
-
 const getStepActive = (step, txStatus) => {
   // Map status to step index for highlighting
   const order = [

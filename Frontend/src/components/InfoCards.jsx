@@ -64,7 +64,6 @@ const InfoCards = () => {
     davGovernanceHolds,
     isProcessingToken,
   } = useDAvContract();
-  console.log("mint fee", DavMintFee);
   const handleBurnClick = async () => {
     const amountToBurn = rawAmount.trim() === "" ? stateHolding : rawAmount;
 

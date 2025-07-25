@@ -225,7 +225,6 @@ const DetailsInfo = ({ selectedToken }) => {
                           </span>
                           <span>
                             {token.tokenName === "DAV" ? "pDAV" : token.tokenName === "STATE" ? "pSTATE" : token.tokenName}
-                            {token.isFlammed === "true" && <>🔥</>}
                           </span>
                         </div>
                       </td>

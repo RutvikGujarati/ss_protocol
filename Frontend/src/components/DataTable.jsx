@@ -300,7 +300,7 @@ const DataTable = () => {
                           <img
                             src={emoji}
                             alt="token visual"
-                            style={{ width: "30px", height: "30px" }}
+                            style={{ width: "30px", height: "30px", borderRadius: "50%" }}
                           />
                         ) : (
                           <span style={{ fontSize: "20px" }}>{emoji}</span>
@@ -563,7 +563,6 @@ const DataTable = () => {
                         isDeployed,
                         isRenounceToken,
                         TokenAddress,
-                        isFlammed,
                       },
                       index
                     ) => (
@@ -581,7 +580,6 @@ const DataTable = () => {
                         </td>
                         <td>
                           {name}
-                          {isFlammed == "true" && <>🔥 </>}
                         </td>
                         <td>
                           {isDeployed ? (
