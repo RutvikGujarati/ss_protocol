@@ -61,14 +61,6 @@ const SwapComponent = () => {
     setTokenOut(tokenIn);
   };
 
-  const formatWithCommas = (value) => {
-    if (value === null || value === undefined) return "";
-    const valueString = value.toString();
-    const [integerPart, decimalPart] = valueString.split(".");
-    const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger;
-  };
-
 
   const ERC20_ABI = [
     "function allowance(address owner, address spender) view returns (uint256)",
@@ -321,12 +313,8 @@ const SwapComponent = () => {
                   <input
                     type="text"
                     className="form-control"
-                    value={formatWithCommas(amountIn)}
-                    onChange={(e) => {
-                      // Remove commas before updating state
-                      const rawValue = e.target.value.replace(/,/g, '');
-                      setAmountIn(rawValue);
-                    }}
+                    value={amountIn}
+                    onChange={(e) => setAmountIn(e.target.value)}
                     placeholder="0.0"
                     style={{
                       boxShadow: "none",
@@ -361,6 +349,7 @@ const SwapComponent = () => {
                       style={{ fontSize: "0.6em", borderRadius: "10px", height: "20px", minWidth: "32px" }}
                       onClick={() => setAmountIn(tokenInBalance ? parseFloat(tokenInBalance).toString() : "")}
                       type="button"
+                      disabled={isApproving || isSwapping}
                     >
                       Max
                     </button>
@@ -423,7 +412,7 @@ const SwapComponent = () => {
                   value={
                     isLoading
                       ? "Fetching..."
-                      : formatWithCommas(amountOut)
+                      : amountOut
                   }
                   readOnly
                   style={{ fontSize: "1rem", background: "#343a40", "--placeholder-color": "#6c757d" }}
