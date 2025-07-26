@@ -642,36 +642,11 @@ const SwapComponent = () => {
                   </div>
                   {/* Collapsible Active Auctions */}
                   <div className="border-top border-secondary pt-2 mt-1">
-                    <button
-                      className="btn btn-link text-secondary p-0"
-                      style={{ textDecoration: "none", fontWeight: 500, fontSize: "14px" }}
-                      onClick={() => setShowAuctions((prev) => !prev)}
-                    >
-                      Active Auctions {showAuctions ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
-                    </button>
-                    {showAuctions && (
-                      <div className="d-flex flex-column gap-2 mt-2">
-                        <ActiveAuctionsInline TOKENS={TOKENS} getTokenLogo={getTokenLogo} />
-                      </div>
-                    )}
+                  <div className="d-flex justify-content-between align-items-center h-100 mb-1">
+                    <small className="text-secondary" style={{ fontSize: "9.8px" }}>Route: Piteas API</small>
                   </div>
-                  {/* Collapsible Route Details */}
-                  {routeDetails?.paths?.length > 0 && routeDetails?.swaps?.length > 0 && (
-                    <div className="border-top border-secondary pt-2 mt-1">
-                      <button
-                        className="btn btn-link text-secondary p-0"
-                        style={{ textDecoration: "none", fontWeight: 500, fontSize: "14px" }}
-                        onClick={() => setShowRouteDetails((prev) => !prev)}
-                      >
-                        Route {showRouteDetails ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
-                      </button>
-                      {showRouteDetails && (
-                        <RouteDetailsPopup
-                          routeDetails={routeDetails}
-                        />
-                      )}
-                    </div>
-                  )}
+                  </div>
+                
                 </div>
               )}
 

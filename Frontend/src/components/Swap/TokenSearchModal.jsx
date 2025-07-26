@@ -1,11 +1,37 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import state from "../../assets/statelogo.png";
+import { useAuctionTokens } from "../../data/auctionTokenData";
 
 const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const searchInputRef = useRef(null);
 
+  // Get active auction tokens
+  const { tokens: auctionTokens } = useAuctionTokens();
+  const activeAuctionSymbols = useMemo(
+    () =>
+      auctionTokens
+        .filter(
+          (t) =>
+            t.AuctionStatus === "true" ||
+            (t.AuctionStatus === "false" && t.isReversing === "true")
+        )
+        .map((t) => t.symbol || t.name),
+    [auctionTokens]
+  );
+  const activeAuctionInfo = useMemo(() => {
+    const info = {};
+    auctionTokens.forEach((t) => {
+      if (
+        t.AuctionStatus === "true" ||
+        (t.AuctionStatus === "false" && t.isReversing === "true")
+      ) {
+        info[t.symbol || t.name] = `Swap ${t.outputToken} for ${t.name}`;
+      }
+    });
+    return info;
+  }, [auctionTokens]);
   const filteredTokens = useMemo(() => {
     if (!searchTerm.trim()) {
       return Object.keys(tokens).filter((key) => key !== excludeToken);
@@ -23,6 +49,17 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
       return symbolMatch || addressMatch || nameMatch;
     });
   }, [searchTerm, excludeToken, tokens]);
+
+  // Sort filtered tokens so active auction tokens are at the top
+  const sortedFilteredTokens = useMemo(() => {
+    return [...filteredTokens].sort((a, b) => {
+      const aActive = activeAuctionSymbols.includes(a);
+      const bActive = activeAuctionSymbols.includes(b);
+      if (aActive && !bActive) return -1;
+      if (!aActive && bActive) return 1;
+      return 0;
+    });
+  }, [filteredTokens, activeAuctionSymbols]);
 
   // Handle keyboard navigation
   useEffect(() => {
@@ -209,14 +246,15 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                   scrollbarGutter: "stable",
                 }}
               >
-                {filteredTokens.length > 0 ? (
-                  filteredTokens.map((key, index) => {
+                {sortedFilteredTokens.length > 0 ? (
+                  sortedFilteredTokens.map((key, index) => {
                     const token = tokens[key];
+                    const isActiveAuction = activeAuctionSymbols.includes(key);
 
                     return (
                       <div
                         key={key}
-                        className={`px-3 py-2 d-flex align-items-center justify-content-between cursor-pointer border-bottom border-secondary ${index === filteredTokens.length - 1
+                        className={`px-3 py-2 d-flex align-items-center justify-content-between cursor-pointer border-bottom border-secondary ${index === sortedFilteredTokens.length - 1
                           ? "border-bottom-0"
                           : ""
                           }`}
@@ -255,7 +293,12 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                         </div>
 
                         <div className="d-flex align-items-center">
-                          <i className="bi bi-chevron-right text-muted small"></i>
+                          <i className="bi bi-chevron-right text-muted small me-2 mx-5"></i>
+                          {activeAuctionInfo[key] && (
+                            <span className=" detailAmount">
+                              {activeAuctionInfo[key]}
+                            </span>
+                          )}
                         </div>
                       </div>
                     );

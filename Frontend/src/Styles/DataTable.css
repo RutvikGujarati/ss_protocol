@@ -274,7 +274,7 @@ table.table-dark tbody tr:last-child td:last-child {
 }
 /* Modal Dialog */
 .modal-dialog {
-  max-width: 500px; /* Wider popup */
+  max-width: 530px; /* Wider popup */
   width: 90%; /* Responsive width */
 }
 
