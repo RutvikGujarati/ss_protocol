@@ -306,6 +306,7 @@ const DataTable = () => {
                         )}
                       </td>
                       <td className="justify-content-center">{`${name}`}</td>
+                      <td></td>
                       <td style={{ position: "relative" }}>
                         <button
                           onClick={() => Checking(id, ContractName)}
@@ -569,7 +570,7 @@ const DataTable = () => {
                             <img
                               src={Emojis}
                               alt="token visual"
-                              style={{ width: "30px", height: "30px" ,borderRadius:"50%"}}
+                              style={{ width: "30px", height: "30px", borderRadius: "50%" }}
                             />
                           ) : (
                             <span style={{ fontSize: "20px" }}>{Emojis}</span>
@@ -826,7 +827,7 @@ const DataTable = () => {
                             <img
                               src={Emojis}
                               alt="token visual"
-                              style={{ width: "30px", height: "30px",borderRadius:"50%"}}
+                              style={{ width: "30px", height: "30px", borderRadius: "50%" }}
                             />
                           ) : (
                             <span style={{ fontSize: "20px" }}>{Emojis}</span>
