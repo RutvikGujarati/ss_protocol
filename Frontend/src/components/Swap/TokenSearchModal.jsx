@@ -27,7 +27,9 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
         t.AuctionStatus === "true" ||
         (t.AuctionStatus === "false" && t.isReversing === "true")
       ) {
-        info[t.symbol || t.name] = `Swap ${t.outputToken} for ${t.name}`;
+        // Split outputToken into words and join with line breaks
+        const outputTokenWords = t.outputToken.split(' ');
+        info[t.symbol || t.name] = `Swap\n${outputTokenWords.join('\n')}`;
       }
     });
     return info;
@@ -295,7 +297,7 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                         <div className="d-flex align-items-center">
                           <i className="bi bi-chevron-right text-muted small me-2 mx-5"></i>
                           {activeAuctionInfo[key] && (
-                            <span className=" detailAmount">
+                            <span className="detailAmount" style={{ whiteSpace: 'pre-line' }}>
                               {activeAuctionInfo[key]}
                             </span>
                           )}
