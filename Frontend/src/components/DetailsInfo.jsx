@@ -4,7 +4,7 @@ import "../Styles/SearchInfo.css";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { TokensDetails } from "../data/TokensDetails";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { Tooltip } from "bootstrap";
@@ -12,6 +12,9 @@ import IOSpinner from "../Constants/Spinner";
 import toast from "react-hot-toast";
 import dav from "../assets/davlogo.png";
 import state from "../assets/statelogo.png";
+import useTokenBalances from "./Swap/UserTokenBalances";
+import { ContractContext } from "../Functions/ContractInitialize";
+import { useAllTokens } from "./Swap/Tokens";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -29,10 +32,75 @@ const DetailsInfo = ({ selectedToken }) => {
     handleAddToken,
     DavAddress,
   } = useSwapContract();
+
   const { totalStateBurned } = useDAvContract();
   const [localSearchQuery, setLocalSearchQuery] = useState("");
   const { tokens, loading } = TokensDetails(); // Destructure tokens and loading
+  const { signer } = useContext(ContractContext);
+  const TOKENS = useAllTokens();
+  const tokenBalances = useTokenBalances(TOKENS, signer);
+  const [pstateToPlsRatio, setPstateToPlsRatio] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Debug logging
+  useEffect(() => {
+    console.log("TOKENS object:", TOKENS);
+    console.log("Token balances:", tokenBalances);
+    console.log("Tokens from TokensDetails:", tokens);
+    console.log("pSTATE to PLS ratio:", pstateToPlsRatio);
+  }, [TOKENS, tokenBalances, tokens, pstateToPlsRatio]);
+
+  // Fetch pSTATE to PLS ratio
+  const fetchPstateToPlsRatio = async () => {
+    try {
+      setIsRefreshing(true);
+      const response = await fetch("https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0x3403400cf93c82e4d74e51a63b107626a63d53fb");
+      if (response.ok) {
+        const data = await response.json();
+        // The ratio is base_token_price_quote_token which gives us pSTATE price in terms of quote token (WPLS)
+        const ratio = parseFloat(data.data.attributes.base_token_price_quote_token);
+        setPstateToPlsRatio(ratio);
+        console.log("pSTATE to PLS ratio:", ratio);
+      }
+    } catch (err) {
+      console.error("Error fetching pSTATE to PLS ratio:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Initial fetch on component mount
+  useEffect(() => {
+    fetchPstateToPlsRatio();
+  }, []); // Empty dependency array - only runs once when component mounts
+
+  // Helper function to calculate PLS value for a token
+  const calculatePlsValue = (token) => {
+    if (token.tokenName === "DAV" || token.tokenName === "STATE") {
+      return "-----";
+    }
+
+    const userBalance = tokenBalances[token.tokenName];
+    const tokenRatio = token.ratio;
+
+    if (userBalance === undefined || !tokenRatio || pstateToPlsRatio <= 0) {
+      return "Loading...";
+    }
+
+    // Calculate: (userBalance / tokenRatio) * pstateToPlsRatio
+    const pstateValue = parseFloat(userBalance) * parseFloat(tokenRatio);
+    const plsValue = pstateValue * pstateToPlsRatio;
+
+    console.log(`${token.tokenName} calculation:`, {
+      userBalance,
+      tokenRatio,
+      pstateToPlsRatio,
+      pstateValue,
+      plsValue
+    });
+
+    return `${formatWithCommas(plsValue.toFixed(0))} PLS`;
+  };
   useEffect(() => {
     const handleStorageChange = (event) => {
       if (event.key === "DavBalanceRequire") {
@@ -91,7 +159,6 @@ const DetailsInfo = ({ selectedToken }) => {
 
   // Get supported tokens
   const supportedTokens = tokens.filter((token) => token.isSupported);
-
   // Helper function to sort tokens for display
   const getSortedTokens = (tokensToSort) => {
     // Step 1: Extract and sort DAV and STATE to ensure they appear at the top
@@ -158,9 +225,10 @@ const DetailsInfo = ({ selectedToken }) => {
     .slice(0, 5)
     .map((token) => token.tokenName);
 
+
   return (
     <div className="container mt-3 p-0 pb-4 mb-5">
-      <div className="mb-3 d-flex justify-content-center">
+      <div className="mb-3 d-flex justify-content-center align-items-center gap-3">
         <input
           type="text"
           className="form-control text-center"
@@ -169,6 +237,7 @@ const DetailsInfo = ({ selectedToken }) => {
           onChange={handleSearch}
           style={{ maxWidth: "300%", "--placeholder-color": "#6c757d" }}
         />
+
       </div>
       <div className={`table-responsive ${isInfoPage ? "info-page" : ""}`}>
         {dataToShow ? (
@@ -182,8 +251,7 @@ const DetailsInfo = ({ selectedToken }) => {
                   <th className="text-center">DAV Vault</th>
                   <th className="text-center">Burned</th>
                   <th className="text-center">Info</th>
-                  <th></th>
-                  <th className="text-center">Highest Ratio</th>
+                  <th className="text-center">PLS Value</th>
                   <th className="col-auto"></th>
                 </tr>
               </thead>
@@ -202,19 +270,19 @@ const DetailsInfo = ({ selectedToken }) => {
                             {token.tokenName === "DAV" ? (
                               <img
                                 src={dav} // Replace with actual path
-                                style={{ width: "30px", height: "30px",borderRadius: "50%" }}
+                                style={{ width: "30px", height: "30px", borderRadius: "50%" }}
                                 alt="DAV logo"
                               />
                             ) : token.tokenName === "STATE" ? (
                               <img
                                 src={state} // Replace with actual path
-                                style={{ width: "30px", height: "30px",borderRadius: "50%" }}
+                                style={{ width: "30px", height: "30px", borderRadius: "50%" }}
                                 alt="STATE logo"
                               />
                             ) : isImageUrl(token.emoji) ? (
                               <img
                                 src={token.emoji}
-                                style={{ width: "30px", height: "30px",borderRadius:"50%"}}
+                                style={{ width: "30px", height: "30px", borderRadius: "50%" }}
                                 alt={`${token.tokenName} emoji`}
                               />
                             ) : (
@@ -233,7 +301,11 @@ const DetailsInfo = ({ selectedToken }) => {
                           {token.tokenName === "DAV" ||
                             token.tokenName === "STATE"
                             ? "------"
-                            : `1:${formatWithCommas(token.ratio)}`}
+                            : (
+                              <span style={{ color: showDot ? "#28a745" : "inherit" }}>
+                                {`1:${formatWithCommas(token.ratio)}`}
+                              </span>
+                            )}
                         </div>
                       </td>
                       <td className="text-center">
@@ -360,20 +432,11 @@ const DetailsInfo = ({ selectedToken }) => {
                           </div>
                         </div>
                       </td>
-                      <td></td>
-                      <td>
-                        {showDot && (
-                          <span
-                            style={{
-                              marginLeft: "6px",
-                              width: "10px",
-                              height: "10px",
-                              borderRadius: "50%",
-                              display: "inline-block",
-                              backgroundColor: isRed ? "green" : "green",
-                            }}
-                          ></span>
-                        )}
+
+                      <td className="text-center">
+                        <div className="mx-2">
+                          {calculatePlsValue(token)}
+                        </div>
                       </td>
                       <td></td>
                     </tr>
