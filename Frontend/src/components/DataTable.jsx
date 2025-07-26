@@ -285,7 +285,6 @@ const DataTable = () => {
                       userHasReverse,
                       // AuctionStatus,
                       TimeLeft,
-                      flammed,
                       inputTokenAmount,
                       onlyInputAmount,
                       // handleAddToken,
@@ -307,8 +306,6 @@ const DataTable = () => {
                         )}
                       </td>
                       <td className="justify-content-center">{`${name}`}</td>
-                      <td> {flammed == "true" && <>🔥</>}</td>
-
                       <td style={{ position: "relative" }}>
                         <button
                           onClick={() => Checking(id, ContractName)}

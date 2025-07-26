@@ -38,6 +38,8 @@ const SwapComponent = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [showRouteDetails, setShowRouteDetails] = useState(false);
   const [showAuctions, setShowAuctions] = useState(false);
+  const [isInputHovered, setIsInputHovered] = useState(false);
+  const [insufficientBalance, setInsufficientBalance] = useState(false);
 
   const {
     amountOut,
@@ -55,6 +57,17 @@ const SwapComponent = () => {
     slippage,
     TOKENS,
   });
+
+  // Check if input amount exceeds balance
+  useEffect(() => {
+    if (amountIn && tokenInBalance) {
+      const inputAmount = parseFloat(amountIn.replace(/,/g, ''));
+      const balance = parseFloat(tokenInBalance);
+      setInsufficientBalance(inputAmount > balance);
+    } else {
+      setInsufficientBalance(false);
+    }
+  }, [amountIn, tokenInBalance]);
 
   const handleSwitchTokens = () => {
     setTokenIn(tokenOut);
@@ -290,6 +303,49 @@ const SwapComponent = () => {
     return singleLine.length > 6 ? singleLine.slice(0, 6) + '..' : singleLine;
   };
 
+  // Helper to format number with commas and decimals
+  const formatNumberWithCommas = (value) => {
+    if (!value || isNaN(value.replace(/,/g, ''))) return value;
+    return Number(value.replace(/,/g, '')).toLocaleString('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 4,
+    });
+  };
+
+  // Helper to validate input amount
+  const validateInputAmount = (rawValue) => {
+    return /^\d*\.?\d{0,18}$/.test(rawValue);
+  };
+
+  // Helper to check if amount exceeds balance
+  const checkInsufficientBalance = (inputValue, balance) => {
+    if (!inputValue || !balance) return false;
+    const inputAmount = parseFloat(inputValue.replace(/,/g, ''));
+    const userBalance = parseFloat(balance);
+    return inputAmount > userBalance;
+  };
+
+  // Helper to handle input change
+  const handleInputChange = (value) => {
+    const rawValue = value.replace(/,/g, '');
+    if (validateInputAmount(rawValue)) {
+      const isInsufficient = checkInsufficientBalance(rawValue, tokenInBalance);
+      setInsufficientBalance(isInsufficient);
+      setAmountIn(rawValue);
+    }
+  };
+
+  // Helper to get percentage amount
+  const getPercentageAmount = (percentage) => {
+    const balance = parseFloat(tokenInBalance || 0);
+    return ((balance * percentage) / 100).toString();
+  };
+
+  // Helper to get max amount
+  const getMaxAmount = () => {
+    return tokenInBalance ? parseFloat(tokenInBalance).toString() : "";
+  };
+
   return (
     <>
       {/* Inline transaction progress bar */}
@@ -313,16 +369,18 @@ const SwapComponent = () => {
                   <input
                     type="text"
                     className="form-control"
-                    value={amountIn}
-                    onChange={(e) => setAmountIn(e.target.value)}
+                    value={formatNumberWithCommas(amountIn)}
+                    onChange={(e) => handleInputChange(e.target.value)}
                     placeholder="0.0"
                     style={{
                       boxShadow: "none",
                       "--placeholder-color": "#6c757d",
-                      backgroundColor: (isApproving || isSwapping) ? "#343a40" : undefined
+                      backgroundColor: (isApproving || isSwapping) ? "#343a40" : undefined,
+                      borderColor: insufficientBalance ? "#dc3545" : undefined,
                     }}
                     disabled={isApproving || isSwapping}
                   />
+
                   <div
                     className="d-flex gap-1 position-absolute"
                     style={{
@@ -337,7 +395,7 @@ const SwapComponent = () => {
                         key={percent}
                         className="btn btn-outline-secondary btn-sm px-1 py-0"
                         style={{ fontSize: "0.6em", borderRadius: "10px", height: "20px", minWidth: "32px" }}
-                        onClick={() => setAmountIn(((parseFloat(tokenInBalance || 0) * percent) / 100).toString())}
+                        onClick={() => setAmountIn(getPercentageAmount(percent))}
                         type="button"
                         disabled={isApproving || isSwapping}
                       >
@@ -347,7 +405,7 @@ const SwapComponent = () => {
                     <button
                       className="btn btn-outline-secondary btn-sm px-1 py-0"
                       style={{ fontSize: "0.6em", borderRadius: "10px", height: "20px", minWidth: "32px" }}
-                      onClick={() => setAmountIn(tokenInBalance ? parseFloat(tokenInBalance).toString() : "")}
+                      onClick={() => setAmountIn(getMaxAmount())}
                       type="button"
                       disabled={isApproving || isSwapping}
                     >
@@ -390,6 +448,11 @@ const SwapComponent = () => {
                     : "-"}
                 </span>
               </div>
+              {insufficientBalance && (
+                <div className="text-danger small mb-2">
+                  Insufficient balance. You only have {parseFloat(tokenInBalance).toFixed(2)} {TOKENS[tokenIn]?.symbol || tokenIn}.
+                </div>
+              )}
 
               <div className="text-center ">
                 <button
@@ -527,7 +590,7 @@ const SwapComponent = () => {
                   <button
                     className="btn btn-primary rounded-pill py-2"
                     onClick={handleSwap}
-                    disabled={!quoteData || isSwapping}
+                    disabled={!quoteData || isSwapping || insufficientBalance}
                     style={{ flex: 1, padding: "10px 20px", fontWeight: 400, height: "40px" }}
                   >
                     {isSwapping ? (
@@ -538,6 +601,8 @@ const SwapComponent = () => {
                         ></span>
                         Swapping...
                       </>
+                    ) : insufficientBalance ? (
+                      `Insufficient ${TOKENS[tokenIn]?.symbol || tokenIn}`
                     ) : (
                       "SWAP"
                     )}

@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 // ✅ 1. First hook: for general token config
 export const useAddTokens = () => {
 	const { names, users, Emojies, isUsed } = useDAvContract();
-	const { tokenMap, TimeLeftClaim, supportedToken, isTokenRenounce,isGotFlammed } = useSwapContract();
+	const { tokenMap, TimeLeftClaim, supportedToken, isTokenRenounce } = useSwapContract();
 	const [AuthLoading, setAuthLoading] = useState(true);
 
 	useEffect(() => {
@@ -83,7 +83,7 @@ export const useAddTokens = () => {
 
 
 export const useUsersOwnerTokens = () => {
-	const { UsersSupportedTokens, isGotFlammed } = useSwapContract();
+	const { UsersSupportedTokens } = useSwapContract();
 	const { names, Emojies } = useDAvContract();
 
 	// Create name → Emojies map

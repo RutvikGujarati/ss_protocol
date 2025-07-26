@@ -15,7 +15,6 @@ export const useAuctionTokens = () => {
 		OutPutAmount,
 		AirdropClaimed,
 		TokenNames,
-		isGotFlammed,
 		tokenMap,
 	} = useSwapContract();
 	const { Emojies, names } = useDAvContract(); // Add names from useDAvContract
@@ -61,7 +60,6 @@ export const useAuctionTokens = () => {
 			RatioTargetToken: RatioTargetsofTokens?.[contract] || 0,
 			address,
 			AuctionStatus: IsAuctionActive?.[contract],
-			flammed: isGotFlammed?.[contract],
 			userHasSwapped: userHashSwapped?.[contract],
 			userHasReverse: userHasReverseSwapped?.[contract],
 			SwapT: () => SwapTokens(id, contract),
@@ -81,7 +79,6 @@ export const useAuctionTokens = () => {
 				IsAuctionActive &&
 				userHashSwapped &&
 				userHasReverseSwapped &&
-				isGotFlammed &&
 				InputAmount &&
 				OutPutAmount &&
 				AirdropClaimed &&
@@ -100,7 +97,6 @@ export const useAuctionTokens = () => {
 		names,
 		isReversed,
 		IsAuctionActive,
-		isGotFlammed,
 		userHashSwapped,
 		userHasReverseSwapped,
 		InputAmount,
