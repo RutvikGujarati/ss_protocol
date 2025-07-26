@@ -453,7 +453,7 @@ const DataTable = () => {
                       )}
                       {isReversing == "true" ? (
                         <>
-                          <td>Provide Liquidity with your tokens</td>
+                          <td>No action required.</td>
                           <td></td>
                         </>
                       ) : (

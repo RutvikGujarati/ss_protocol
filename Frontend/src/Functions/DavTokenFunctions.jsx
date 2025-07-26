@@ -68,6 +68,14 @@ export const DavProvider = ({ children }) => {
     davExpireHolds: "0.0",
   });
 
+  // Helper to truncate without rounding
+  const truncateDecimals = (number, digits) => {
+    const [intPart, decPart = ""] = number.toString().split(".");
+    return decPart.length > digits
+      ? `${intPart}.${decPart.slice(0, digits)}`
+      : number.toString();
+  };
+
   const fetchAndSet = async (
     label,
     fn,
@@ -80,13 +88,13 @@ export const DavProvider = ({ children }) => {
       let value;
 
       if (type === "boolean") {
-        value = res ? "true" : "false"; // Convert to string explicitly
+        value = res ? "true" : "false";
       } else if (label === "UserPercentage") {
-        value = (Number(res) / 100).toFixed(fixed);
+        const raw = Number(res) / 100;
+        value = truncateDecimals(raw, fixed);
       } else {
-        value = format
-          ? parseFloat(ethers.formatUnits(res, 18)).toFixed(fixed)
-          : res.toString();
+        const raw = format ? parseFloat(ethers.formatUnits(res, 18)) : res;
+        value = format ? truncateDecimals(raw, fixed) : raw.toString();
       }
 
       setData((prev) => ({
@@ -97,6 +105,7 @@ export const DavProvider = ({ children }) => {
       console.error(`Error fetching ${label}:`, err);
     }
   };
+
 
   const fetchData = useCallback(async () => {
     if (!AllContracts?.davContract || !address) return;

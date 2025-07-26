@@ -302,14 +302,24 @@ const SwapComponent = () => {
     const singleLine = symbol.replace(/\s+/g, '');
     return singleLine.length > 6 ? singleLine.slice(0, 6) + '..' : singleLine;
   };
+  // Helper to truncate decimal without rounding
+  const truncateDecimals = (number, digits) => {
+    const [intPart, decPart = ""] = number.toString().split(".");
+    const truncated = decPart.length > digits
+      ? `${intPart}.${decPart.slice(0, digits)}`
+      : number.toString();
+    return truncated;
+  };
 
   // Helper to format number with commas and decimals
   const formatNumberWithCommas = (value) => {
     if (!value || isNaN(value.replace(/,/g, ''))) return value;
-    return Number(value.replace(/,/g, '')).toLocaleString('en-US', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 4,
-    });
+    const raw = value.replace(/,/g, '');
+    const truncated = truncateDecimals(raw, 4);
+    const [intPart, decPart] = truncated.split('.');
+    return decPart
+      ? Number(intPart).toLocaleString('en-US') + '.' + decPart
+      : Number(intPart).toLocaleString('en-US');
   };
 
   // Helper to validate input amount
@@ -335,15 +345,18 @@ const SwapComponent = () => {
     }
   };
 
-  // Helper to get percentage amount
+  // Helper to get percentage amount (without rounding)
   const getPercentageAmount = (percentage) => {
-    const balance = parseFloat(tokenInBalance || 0);
-    return ((balance * percentage) / 100).toString();
+    if (!tokenInBalance) return "0";
+    const balance = parseFloat(tokenInBalance);
+    const result = (balance * percentage) / 100;
+    // Return with full precision, don't round
+    return result.toString();
   };
 
-  // Helper to get max amount
+  // Helper to get max amount (exact balance without rounding)
   const getMaxAmount = () => {
-    return tokenInBalance ? parseFloat(tokenInBalance).toString() : "";
+    return tokenInBalance ? tokenInBalance.toString() : "";
   };
 
   return (
