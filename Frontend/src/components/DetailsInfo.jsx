@@ -91,15 +91,19 @@ const DetailsInfo = ({ selectedToken }) => {
     const pstateValue = parseFloat(userBalance) * parseFloat(tokenRatio);
     const plsValue = pstateValue * pstateToPlsRatio;
 
+    // Round to nearest thousand
+    const roundedPlsValue = Math.round(plsValue / 1000) * 1000;
+
     console.log(`${token.tokenName} calculation:`, {
       userBalance,
       tokenRatio,
       pstateToPlsRatio,
       pstateValue,
-      plsValue
+      plsValue,
+      roundedPlsValue
     });
 
-    return `${formatWithCommas(plsValue.toFixed(0))} PLS`;
+    return `${formatWithCommas(roundedPlsValue.toFixed(0))} PLS`;
   };
   useEffect(() => {
     const handleStorageChange = (event) => {

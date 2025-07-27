@@ -13,8 +13,8 @@ export default defineConfig({
 			rewrite: path => path.replace(/^\/api/, ''),
 		  }
 		}
-	  },
-	esbuild: {
-		drop: ['console']
-	}
+	  }
+	// esbuild: {
+	// 	drop: ['console']
+	// }
 })

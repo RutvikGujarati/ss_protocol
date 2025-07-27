@@ -81,6 +81,7 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
 				setQuoteData(data.methodParameters);
 				setRouteDetails(data.route || { swaps: [] });
 			}
+			console.log("data",data)
 		} catch (err) {
 			if (requestIdRef.current === thisRequestId) {
 				console.error(err);
