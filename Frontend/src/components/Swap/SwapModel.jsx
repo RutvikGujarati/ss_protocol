@@ -8,12 +8,10 @@ import state from "../../assets/statelogo.png";
 import pulsechainLogo from "../../assets/pls1.png";
 import plslogo from "/pls.png";
 import { useAccount } from "wagmi";
-import RouteDetailsPopup from "./RouteDetailsPopup";
 
 import useSwapData from "./useSwapData";
 import toast from "react-hot-toast";
 import React from "react";
-import ActiveAuctionsInline from "./ActiveAuctionsModal";
 
 const SwapComponent = () => {
   const { signer } = useContext(ContractContext);
@@ -532,9 +530,7 @@ const SwapComponent = () => {
                       }}
                     >
                       {getPriceDifference().isPositive ? "+" : ""}
-                      {getPriceDifference().value.toFixed(4)} (
-                      {getPriceDifference().isPositive ? "+" : ""}
-                      {getPriceDifference().percentage.toFixed(2)}%)
+                      ({getPriceDifference().percentage.toFixed(2)}%)
                     </span>
                   )}
                 </div>
@@ -636,17 +632,17 @@ const SwapComponent = () => {
 
               {/* Details Section */}
               {showDetails && (
-                <div className="border border-secondary rounded-3 px-2 py-1 bg-dark bg-opacity-50" style={{ fontSize: "0.85rem" }}>
+                <div className="border border-secondary rounded-3 px-2 py-1 mt-1 bg-dark bg-opacity-50" style={{ fontSize: "0.85rem" }}>
                   <div className="d-flex justify-content-between align-items-center h-100 mb-1">
                     <small className="text-secondary" style={{ fontSize: "9.8px" }}>Network Fee: ${estimatedGas}</small>
                   </div>
                   {/* Collapsible Active Auctions */}
-                  <div className="border-top border-secondary pt-2 mt-1">
-                  <div className="d-flex justify-content-between align-items-center h-100 mb-1">
-                    <small className="text-secondary" style={{ fontSize: "9.8px" }}>Route: Piteas API</small>
+                  <div className="border-top border-secondary pt-1 mb-0">
+                    <div className="d-flex justify-content-between align-items-center h-100 mb-0">
+                      <small className="text-secondary" style={{ fontSize: "9.8px" }}>Route: Piteas API</small>
+                    </div>
                   </div>
-                  </div>
-                
+
                 </div>
               )}
 
