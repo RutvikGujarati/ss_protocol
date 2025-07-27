@@ -251,7 +251,7 @@ const DetailsInfo = ({ selectedToken }) => {
                   <th className="text-center">DAV Vault</th>
                   <th className="text-center">Burned</th>
                   <th className="text-center">Info</th>
-                  <th className="text-center">PLS Value</th>
+                  <th className="text-center">Est. PLS Value</th>
                   <th className="col-auto"></th>
                 </tr>
               </thead>

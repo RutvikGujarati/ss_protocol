@@ -188,7 +188,7 @@ const SwapComponent = () => {
       />
     );
   };
-
+console.log(quoteData)
   const openModal = (type) => {
     setModalType(type);
     setIsModalOpen(true);

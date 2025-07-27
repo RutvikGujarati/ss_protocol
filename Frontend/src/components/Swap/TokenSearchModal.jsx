@@ -6,6 +6,7 @@ import { useAuctionTokens } from "../../data/auctionTokenData";
 const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const searchInputRef = useRef(null);
+  const [copiedStates, setCopiedStates] = useState({});
 
   // Get active auction tokens
   const { tokens: auctionTokens } = useAuctionTokens();
@@ -27,8 +28,8 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
         t.AuctionStatus === "true" ||
         (t.AuctionStatus === "false" && t.isReversing === "true")
       ) {
-        // Split outputToken into words and join with line breaks
-        const outputTokenWords = t.outputToken.split(' ');
+        // Split outputToken into words, reverse the order, and join with line breaks
+        const outputTokenWords = t.outputToken.split(' ').reverse();
         info[t.symbol || t.name] = `Swap\n${outputTokenWords.join('\n')}`;
       }
     });
@@ -230,8 +231,7 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                   </div>
                   <div className="mt-1 d-flex align-items-center gap-1">
                     <i className="bi bi-info-circle text-muted small"></i>
-                    <small className="text-muted small">
-                      Type token name, symbol, or paste contract address
+                    <small className="text-secondary small">
                     </small>
                   </div>
                 </div>
@@ -297,10 +297,31 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                         <div className="d-flex align-items-center">
                           <i className="bi bi-chevron-right text-muted small me-2 mx-5"></i>
                           {activeAuctionInfo[key] && (
-                            <span className="detailAmount" style={{ whiteSpace: 'pre-line' }}>
+                            <>                            <span className=" detailAmount">
                               {activeAuctionInfo[key]}
                             </span>
+                              <button
+                                className="btn btn-sm btn-link text-light p-0 ms-1"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const words = activeAuctionInfo[key].split('\n');
+                                  const lastWord = words[words.length - 1];
+                                  navigator.clipboard.writeText(lastWord);
+
+                                  // Show checkmark for 2 seconds
+                                  setCopiedStates(prev => ({ ...prev, [key]: true }));
+                                  setTimeout(() => {
+                                    setCopiedStates(prev => ({ ...prev, [key]: false }));
+                                  }, 2000);
+                                }}
+                                title="Copy amount"
+                              >
+                                <i className={`bi ${copiedStates[key] ? 'bi-check text-success' : 'bi-copy'} small`}></i>
+                              </button>
+                            </>
+
                           )}
+
                         </div>
                       </div>
                     );
