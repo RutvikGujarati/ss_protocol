@@ -438,7 +438,7 @@ const InfoCards = () => {
                   </div>
 
                   <h5 className="detailAmount">
-                    1 DAV TOKEN = {formatWithCommas(Math.floor(1500000))} PLS
+                    1 DAV TOKEN = {formatWithCommas(Math.floor(DavMintFee))} PLS
                   </h5>
                   <h5 className="detailAmount mb-4">
                     {TotalCost
