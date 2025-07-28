@@ -674,7 +674,7 @@ const InfoCards = () => {
                           textTransform: "capitalize",
                         }}
                       >
-                        A MINIMUM OF 10 DAV TOKENS ARE REQUIRED TO CLAIM REWARDS
+                        A MINIMUM OF 50 DAV TOKENS ARE REQUIRED TO CLAIM REWARDS
                       </h6>
                     </div>
                   </div>

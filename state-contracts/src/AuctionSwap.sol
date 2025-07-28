@@ -36,8 +36,6 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     }
 
     //For Airdrop
-
-    uint256 public constant OWNER_REWARD_AMOUNT = 2500000 ether;
     uint256 public constant CLAIM_INTERVAL = 50 days;
     uint256 public constant MAX_SUPPLY = 500000000000 ether;
     uint256 constant MIN_DAV_REQUIRED = 1 ether;
