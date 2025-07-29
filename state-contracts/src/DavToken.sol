@@ -55,7 +55,7 @@ contract DAV_V2_2 is
     // This contract is intended for PulseChain, not Ethereum.
     // Please note that the value of PLS is significantly lower compared to ETH,
     uint256 public constant TOKEN_PROCESSING_FEE = 15000000 ether;
-    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 5000000 ether;
+    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 20000000 ether;
     uint256 public totalReferralRewardsDistributed;
     uint256 public mintedSupply; // Total Minted DAV Tokens
     uint256 public claimStartTime;

@@ -3,7 +3,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import WalletConnector from "../WalletComps/WalletConnect";
 import { NavLink } from "react-router-dom";
-import pulsex from "../assets/ninemm.png";
 
 const Header = () => {
   return (
@@ -188,25 +187,6 @@ const Header = () => {
           <i className="bi bi-file-earmark-text"></i>
           <div>Docs</div>
         </NavLink>
-        <div className="mt-2">
-          <NavLink
-            className={({ isActive }) =>
-              isActive
-                ? "nav-link active-link text-light"
-                : "nav-link text-light"
-            }
-            to="https://dex.9mm.pro/swap?chain=pulsechain"
-            target="_blank"
-          >
-            <img
-              src={pulsex}
-              alt="9mm Logo"
-              width="30"
-              height="30"
-              style={{ borderRadius: "50%", background: "transparent" }}
-            />
-          </NavLink>
-        </div>
       </div>
     </>
   );
