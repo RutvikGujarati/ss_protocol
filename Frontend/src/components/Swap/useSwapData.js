@@ -4,7 +4,7 @@ import { useAccount } from "wagmi";
 import { ethers } from "ethers";
 import { ContractContext } from "../../Functions/ContractInitialize";
 
-const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
+const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 	const { signer } = useContext(ContractContext);
 	const { address } = useAccount();
 	const [amountOut, setAmountOut] = useState("");
@@ -70,7 +70,7 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
 			const amount = parseUnits(amountIn, TOKENS[tokenIn].decimals).toString();
 			const tokenInAddress = getApiTokenAddress(tokenIn);
 			const tokenOutAddress = getApiTokenAddress(tokenOut);
-			const url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=${slippage}`;
+			const url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=1`;
 			const response = await fetch(url);
 			if (!response.ok) throw new Error("Quote fetch failed.");
 			const data = await response.json();
@@ -186,7 +186,7 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, slippage, TOKENS }) => {
 
 	useEffect(() => {
 		fetchQuote();
-	}, [amountIn, tokenIn, tokenOut, slippage]);
+	}, [amountIn, tokenIn, tokenOut]);
 
 	useEffect(() => {
 		fetchTokenPrices();

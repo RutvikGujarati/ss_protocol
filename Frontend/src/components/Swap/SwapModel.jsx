@@ -22,8 +22,6 @@ const SwapComponent = () => {
   const [tokenOut, setTokenOut] = useState("PulseChain from pump.tires");
   const [amountIn, setAmountIn] = useState("");
   const [isSwapping, setIsSwapping] = useState(false);
-  const [slippage, setSlippage] = useState(1);
-  const [isCustomSlippage, setIsCustomSlippage] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -34,9 +32,6 @@ const SwapComponent = () => {
   const [confirmedAmountIn, setConfirmedAmountIn] = useState("");
   const [confirmedAmountOut, setConfirmedAmountOut] = useState("");
   const [showDetails, setShowDetails] = useState(false);
-  const [showRouteDetails, setShowRouteDetails] = useState(false);
-  const [showAuctions, setShowAuctions] = useState(false);
-  const [isInputHovered, setIsInputHovered] = useState(false);
   const [insufficientBalance, setInsufficientBalance] = useState(false);
 
   const {
@@ -44,7 +39,6 @@ const SwapComponent = () => {
     estimatedGas,
     tokenInBalance,
     quoteData,
-    routeDetails,
     inputUsdValue,
     outputUsdValue,
     isLoading,
@@ -52,7 +46,6 @@ const SwapComponent = () => {
     amountIn,
     tokenIn,
     tokenOut,
-    slippage,
     TOKENS,
   });
 
@@ -255,11 +248,6 @@ const SwapComponent = () => {
     }
   };
 
-  const handleSlippageSelection = (selectedSlippage) => {
-    setSlippage(selectedSlippage);
-    setIsCustomSlippage(false);
-  };
-
   const getPriceDifference = () => {
     if (!inputUsdValue || !outputUsdValue) return null;
     const inputUsd = parseFloat(inputUsdValue.replace("$", ""));
@@ -422,7 +410,7 @@ const SwapComponent = () => {
                 </small>
                 <span
                   className="text-secondary small fw-normal ms-1"
-                  style={{ 
+                  style={{
                     cursor: (isApproving || isSwapping) ? "default" : "pointer",
                     opacity: (isApproving || isSwapping) ? "0.6" : "1"
                   }}
@@ -544,7 +532,7 @@ const SwapComponent = () => {
                       className="btn btn-success rounded-pill py-2"
                       onClick={handleApprove}
                       disabled={isApproving || isSwapping}
-                      style={{ width: "300px", padding: "10px 20px", fontWeight: 400, height: "40px", textAlign: "right", paddingRight: "40px" }}
+                      style={{ width: "170px", padding: "10px 20px", fontWeight: 400, height: "40px", textAlign: "center" }}
                     >
                       {isApproving ? (
                         <>
@@ -563,7 +551,7 @@ const SwapComponent = () => {
                       className="btn btn-primary rounded-pill py-2"
                       onClick={handleSwap}
                       disabled={!quoteData || isSwapping || insufficientBalance}
-                      style={{ width: "300px", padding: "10px 20px", fontWeight: 400, height: "40px", textAlign: "right", paddingRight: "40px" }}
+                      style={{ width: "170px", padding: "10px 20px", fontWeight: 400, height: "40px", textAlign: "center" }}
                     >
                       {isSwapping ? (
                         <>
@@ -580,19 +568,6 @@ const SwapComponent = () => {
                       )}
                     </button>
                   )}
-                  <div className="d-flex gap-1 position-absolute" style={{ left: "3%", top: "50%", transform: "translateY(-50%)" }}>
-                    {[0.1, 0.5, 1.0, 2].map((val) => (
-                      <button
-                        key={val}
-                        disabled={isApproving || isSwapping}
-                        className={`btn btn-sm rounded-circle p-1 ${slippage === val && !isCustomSlippage ? 'btn-primary' : 'btn-outline-primary'}`}
-                        onClick={() => handleSlippageSelection(val)}
-                        style={{ width: "30px", height: "30px", fontSize: "0.6rem", lineHeight: "1" }}
-                      >
-                        {val}%
-                      </button>
-                    ))}
-                  </div>
                 </div>
               </div>
 
@@ -617,6 +592,12 @@ const SwapComponent = () => {
                   <div className="border-top border-secondary pt-1 mb-0">
                     <div className="d-flex justify-content-between align-items-center h-100 mb-0">
                       <small className="text-secondary" style={{ fontSize: "9.8px" }}>Route: Piteas API</small>
+                    </div>
+                  </div>
+                  <div className="border-top border-secondary pt-1 mb-0">
+                    <div className="d-flex justify-content-between align-items-center h-100 mb-0">
+                      <small className="text-secondary" style={{ fontSize: "9.8px" }}>Slippage 1% : (Gas swap levy)
+                      </small>
                     </div>
                   </div>
 
