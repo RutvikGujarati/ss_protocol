@@ -402,7 +402,7 @@ const SwapComponent = () => {
                 </div>
               </div>
               <div
-                className="d-flex justify-content-between align-items-center mb-2 mt-1"
+                className="d-flex justify-content-between align-items-center mb-2"
                 style={{ fontSize: "0.7rem" }}
               >
                 <small className="text-secondary">
