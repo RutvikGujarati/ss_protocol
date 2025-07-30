@@ -190,19 +190,10 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
         <div className="modal-dialog modal-dialog-centered justify-content-center" >
           <div className="modal-content bg-dark text-light border border-secondary rounded-4 shadow-lg">
             {/* Header */}
-            <div className="modal-header border-0 pb-0 py-2 mb-2">
 
-              <button
-                type="button"
-                className="btn-close btn-close-white"
-                style={{ borderRadius: "50%"}}
-                aria-label="Close"
-                onClick={onClose}
-              ></button>
-            </div>
 
             {/* Body */}
-            <div className="modal-body pt-0 py-2">
+            <div className="modal-body pt-0 py-2 mt-4">
               {/* Enhanced Search Input */}
               <div className="mb-1">
                 <div className="position-relative">
@@ -219,16 +210,18 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                       onChange={(e) => setSearchTerm(e.target.value)}
                       style={{ borderTopLeftRadius: 50, borderBottomLeftRadius: 50, borderTopRightRadius: 50, borderBottomRightRadius: 50 }}
                     />
-                    {searchTerm && (
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary border-0 text-light rounded-pill"
-                        onClick={() => setSearchTerm("")}
-                        style={{ borderTopRightRadius: 50, borderBottomRightRadius: 50 }}
-                      >
-                        <i className="bi bi-x-lg"></i>
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      className="btn-close btn-close-white"
+                      style={{
+                        borderRadius: "50%",
+                        width: "30px",
+                        height: "30px",
+                        fontSize: "16px"
+                      }}
+                      aria-label="Close"
+                      onClick={onClose}
+                    ></button>
                   </div>
                   <div className="mt-1 d-flex align-items-center gap-1">
                     <i className="bi bi-info-circle text-muted small"></i>

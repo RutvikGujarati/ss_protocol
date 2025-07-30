@@ -252,6 +252,8 @@ const InfoCards = () => {
   const getLogoSize = () => {
     return chainId === 56
       ? { width: "170px", height: "140px" } // Bigger size for BNB
+      : chainId === 369
+      ? { width: "110px", height: "110px" } // Bigger size for BNB
       : { width: "110px", height: "140px" }; // Default size
   };
 

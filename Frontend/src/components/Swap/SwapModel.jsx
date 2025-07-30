@@ -527,7 +527,7 @@ const SwapComponent = () => {
                       className="btn btn-success rounded-pill py-2"
                       onClick={handleApprove}
                       disabled={isApproving || isSwapping}
-                      style={{ width: "170px",fontSize:"16px", padding: "10px 20px", fontWeight: 400, height: "40px", textAlign: "center" }}
+                      style={{ width: "270px",fontSize:"16px", padding: "10px 20px", fontWeight: 400, height: "40px", textAlign: "center" }}
                     >
                       {isApproving ? (
                         <>
@@ -574,6 +574,18 @@ const SwapComponent = () => {
                   onClick={() => setShowDetails((prev) => !prev)}
                 >
                   Details {showDetails ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
+                </button>
+                <button
+                  className="btn btn-link text-light small font-weight-normal p-0"
+                  style={{ textDecoration: "none", fontWeight: 200, fontSize: "14px" }}
+                  onClick={() => {
+                    setTokenIn("STATE");
+                    setTokenOut("PulseChain from pump.tires");
+                    setAmountIn("");
+                  }}
+                  title="Reset to default tokens"
+                >
+                  <i className="bi bi-arrow-clockwise"></i> Refresh
                 </button>
               </div>
 
