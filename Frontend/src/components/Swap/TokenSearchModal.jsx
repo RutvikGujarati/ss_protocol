@@ -190,11 +190,12 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
         <div className="modal-dialog modal-dialog-centered justify-content-center" >
           <div className="modal-content bg-dark text-light border border-secondary rounded-4 shadow-lg">
             {/* Header */}
-            <div className="modal-header border-0 pb-0 py-2 mb-3 mt-1">
+            <div className="modal-header border-0 pb-0 py-2 mb-2">
 
               <button
                 type="button"
                 className="btn-close btn-close-white"
+                style={{ borderRadius: "50%"}}
                 aria-label="Close"
                 onClick={onClose}
               ></button>
@@ -239,7 +240,7 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
 
               {/* Results */}
               <div
-                className="border border-secondary rounded-3 shadow-sm custom-scrollbar"
+                className="border border-secondary rounded-3 shadow-sm custom-scrollbar mb-3 mx-1"
                 style={{
                   maxHeight: "300px",
                   overflowY: "auto",
@@ -251,7 +252,6 @@ const TokenSearchModal = ({ tokens, excludeToken, onSelect, onClose }) => {
                 {sortedFilteredTokens.length > 0 ? (
                   sortedFilteredTokens.map((key, index) => {
                     const token = tokens[key];
-                    const isActiveAuction = activeAuctionSymbols.includes(key);
 
                     return (
                       <div

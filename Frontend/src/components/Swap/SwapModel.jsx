@@ -6,7 +6,6 @@ import { ContractContext } from "../../Functions/ContractInitialize";
 import { useAllTokens } from "./Tokens";
 import state from "../../assets/statelogo.png";
 import pulsechainLogo from "../../assets/pls1.png";
-import plslogo from "/pls.png";
 import { useAccount } from "wagmi";
 
 import useSwapData from "./useSwapData";
@@ -74,8 +73,7 @@ const SwapComponent = () => {
   const SPECIAL_TOKEN_LOGOS = {
     STATE: state,
     pSTATE: state,
-    PulseChain: pulsechainLogo,
-    "PulseChain from pump.tires": plslogo,
+    "PulseChain from pump.tires": pulsechainLogo,
   };
 
   const checkAllowance = async () => {
@@ -140,10 +138,6 @@ const SwapComponent = () => {
       setIsApproving(false);
     }
   };
-  const TOKENS_BY_SYMBOL = Object.values(TOKENS).reduce((acc, token) => {
-    acc[token.symbol] = token;
-    return acc;
-  }, {});
   const getTokenLogo = (symbol) => {
     if (SPECIAL_TOKEN_LOGOS[symbol]) {
       return (

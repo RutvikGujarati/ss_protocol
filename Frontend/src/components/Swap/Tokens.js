@@ -14,22 +14,36 @@ export function useAllTokens() {
 				const data = await res.json();
 				// Only include tokens with specific names
 				const allowedNames = [
-					"Wrapped Pulse",
 					"PulseChain from pump.tires",
 					"HEX",
 					"PulseX",
 					"Incentive"
 				];
 				const obj = {};
+				
+				// Find WPLS logo URI first
+				const wplsToken = data.tokens.find(token => token.name === "Wrapped Pulse");
+				const wplsLogoURI = wplsToken ? wplsToken.logoURI : null;
+				
 				data.tokens
 					.filter(token => allowedNames.includes(token.name))
 					.forEach(token => {
-						obj[token.name] = {
-							symbol: token.symbol,
-							address: token.address,
-							decimals: token.decimals,
-							image: token.logoURI,
-						};
+						// If it's "PulseChain from pump.tires", use WPLS logo
+						if (token.name === "PulseChain from pump.tires" && wplsLogoURI) {
+							obj[token.name] = {
+								symbol: token.symbol,
+								address: token.address,
+								decimals: token.decimals,
+								image: wplsLogoURI,
+							};
+						} else {
+							obj[token.name] = {
+								symbol: token.symbol,
+								address: token.address,
+								decimals: token.decimals,
+								image: token.logoURI,
+							};
+						}
 					});
 				setApiTokensObj(obj);
 			} catch (e) {
