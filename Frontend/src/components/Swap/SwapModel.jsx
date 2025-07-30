@@ -562,60 +562,63 @@ const SwapComponent = () => {
                 </div>
               )}
 
-              <div className="d-flex justify-content-between align-items-center gap-2 mt-3">
-                <div className="d-flex gap-1">
-                  {[0.1, 0.5, 1.0, 2].map((val) => (
+              <div className="d-flex justify-content-center align-items-center mt-3">
+                <div className="position-relative">
+                  {needsApproval ? (
                     <button
-                      key={val}
-                      className={`btn btn-sm rounded-circle p-1 ${slippage === val && !isCustomSlippage ? 'btn-primary' : 'btn-outline-primary'}`}
-                      onClick={() => handleSlippageSelection(val)}
-                      style={{ width: "32px", height: "32px", fontSize: "0.6rem", lineHeight: "1" }}
+                      className="btn btn-success rounded-pill py-2"
+                      onClick={handleApprove}
+                      disabled={isApproving || isSwapping}
+                      style={{ width: "300px", padding: "10px 20px", fontWeight: 400, height: "40px", textAlign: "right", paddingRight: "40px" }}
                     >
-                      {val}%
+                      {isApproving ? (
+                        <>
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                          ></span>
+                          Approving...
+                        </>
+                      ) : (
+                        `Approve ${TOKENS[tokenIn]?.symbol || tokenIn}`
+                      )}
                     </button>
-                  ))}
+                  ) : (
+                    <button
+                      className="btn btn-primary rounded-pill py-2"
+                      onClick={handleSwap}
+                      disabled={!quoteData || isSwapping || insufficientBalance}
+                      style={{ width: "300px", padding: "10px 20px", fontWeight: 400, height: "40px", textAlign: "right", paddingRight: "40px" }}
+                    >
+                      {isSwapping ? (
+                        <>
+                          <span
+                            className="spinner-border spinner-border-sm me-2"
+                            role="status"
+                          ></span>
+                          Swapping...
+                        </>
+                      ) : insufficientBalance ? (
+                        `Insufficient ${TOKENS[tokenIn]?.symbol || tokenIn}`
+                      ) : (
+                        "SWAP"
+                      )}
+                    </button>
+                  )}
+                  <div className="d-flex gap-1 position-absolute" style={{ left: "3%", top: "50%", transform: "translateY(-50%)" }}>
+                    {[0.1, 0.5, 1.0, 2].map((val) => (
+                      <button
+                        key={val}
+                        disabled={isApproving || isSwapping}
+                        className={`btn btn-sm rounded-circle p-1 ${slippage === val && !isCustomSlippage ? 'btn-primary' : 'btn-outline-primary'}`}
+                        onClick={() => handleSlippageSelection(val)}
+                        style={{ width: "30px", height: "30px", fontSize: "0.6rem", lineHeight: "1" }}
+                      >
+                        {val}%
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                {needsApproval ? (
-                  <button
-                    className="btn btn-success rounded-pill py-2"
-                    onClick={handleApprove}
-                    disabled={isApproving || isSwapping}
-                    style={{ flex: 1.5, padding: "10px 20px" }}
-                  >
-                    {isApproving ? (
-                      <>
-                        <span
-                          className="spinner-border spinner-border-sm me-2"
-                          role="status"
-                        ></span>
-                        Approving...
-                      </>
-                    ) : (
-                      `Approve ${TOKENS[tokenIn]?.symbol || tokenIn}`
-                    )}
-                  </button>
-                ) : (
-                  <button
-                    className="btn btn-primary rounded-pill py-2"
-                    onClick={handleSwap}
-                    disabled={!quoteData || isSwapping || insufficientBalance}
-                    style={{ flex: 1, padding: "10px 20px", fontWeight: 400, height: "40px" }}
-                  >
-                    {isSwapping ? (
-                      <>
-                        <span
-                          className="spinner-border spinner-border-sm me-2"
-                          role="status"
-                        ></span>
-                        Swapping...
-                      </>
-                    ) : insufficientBalance ? (
-                      `Insufficient ${TOKENS[tokenIn]?.symbol || tokenIn}`
-                    ) : (
-                      "SWAP"
-                    )}
-                  </button>
-                )}
               </div>
 
               {/* Details Toggle */}
