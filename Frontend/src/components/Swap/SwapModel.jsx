@@ -429,7 +429,7 @@ const SwapComponent = () => {
 
               <div className="text-center ">
                 <button
-                  className="btn btn-outline-primary btn-sm rounded-circle mt-3"
+                  className="btn btn-outline-primary btn-sm rounded-circle "
                   onClick={handleSwitchTokens}
                   disabled={isApproving || isSwapping}
                   style={{ width: "40px", height: "40px" }}
@@ -488,6 +488,7 @@ const SwapComponent = () => {
                           ? "#28a745"
                           : "#dc3545",
                         fontSize: "0.7rem",
+                        fontWeight: 100,
                         padding: "2px 6px",
                       }}
                     >
