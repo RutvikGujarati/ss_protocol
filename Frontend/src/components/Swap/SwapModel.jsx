@@ -391,37 +391,6 @@ const SwapComponent = () => {
                     disabled={isApproving || isSwapping}
                   />
 
-                  <div
-                    className="d-flex gap-1 position-absolute"
-                    style={{
-                      right: "140px",
-                      top: "140%",
-                      transform: "translateY(-50%)",
-                      zIndex: 2,
-                    }}
-                  >
-                    {[25, 50, 75].map((percent) => (
-                      <button
-                        key={percent}
-                        className="btn btn-outline-secondary btn-sm px-1 py-0"
-                        style={{ fontSize: "0.6em", borderRadius: "10px", height: "20px", minWidth: "32px" }}
-                        onClick={() => setAmountIn(getPercentageAmount(percent))}
-                        type="button"
-                        disabled={isApproving || isSwapping}
-                      >
-                        {percent}%
-                      </button>
-                    ))}
-                    <button
-                      className="btn btn-outline-secondary btn-sm px-1 py-0"
-                      style={{ fontSize: "0.6em", borderRadius: "10px", height: "20px", minWidth: "32px" }}
-                      onClick={() => setAmountIn(getMaxAmount())}
-                      type="button"
-                      disabled={isApproving || isSwapping}
-                    >
-                      Max
-                    </button>
-                  </div>
                   <div className="d-flex align-items-center gap-1">
                     <button
                       className="d-flex align-items-center justify-content-between gap-2 px-2 token-select-btn"
@@ -451,7 +420,13 @@ const SwapComponent = () => {
                 <small className="text-secondary">
                   {inputUsdValue && <span>{inputUsdValue}</span>}
                 </small>
-                <span className="text-secondary small fw-normal ms-1">
+                <span
+                  className="text-secondary small fw-normal ms-1"
+                  style={{ 
+                    cursor: (isApproving || isSwapping) ? "default" : "pointer",
+                    opacity: (isApproving || isSwapping) ? "0.6" : "1"
+                  }}
+                  onClick={(isApproving || isSwapping) ? undefined : () => setAmountIn(getMaxAmount())}>
                   Bal:{" "}
                   {tokenInBalance
                     ? `${parseFloat(tokenInBalance).toFixed(2)}`
