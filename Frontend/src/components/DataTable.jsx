@@ -3,7 +3,7 @@ import "../Styles/DataTable.css";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { formatWithCommas } from "./DetailsInfo";
 import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
@@ -180,12 +180,18 @@ const DataTable = () => {
     return () => clearTimeout(timer);
   }, [txStatusForSwap]);
 
-  const filteredTokens = tokens.filter(({ isReversing, AuctionStatus }) => {
-    const isAuctionActive = AuctionStatus === "true";
-    const isReverseAuction =
-      AuctionStatus === "false" && isReversing === "true";
-    return isAuctionActive || isReverseAuction;
-  });
+  const filteredTokens = useMemo(() => {
+    return tokens.filter(({ isReversing, AuctionStatus }) => {
+      // Show tokens that are either:
+      // 1. Currently in active auction (AuctionStatus === "true")
+      // 2. In reverse auction phase (AuctionStatus === "false" && isReversing === "true")
+      const isAuctionActive = AuctionStatus === "true";
+      const isReverseAuction = AuctionStatus === "false" && isReversing === "true";
+      
+      // Only show if auction is active OR in reverse phase
+      return isAuctionActive || isReverseAuction;
+    });
+  }, [tokens]);
 
   return !isConnected || !address ? (
     <div className="container text-center mt-5">

@@ -583,6 +583,7 @@ const SwapComponent = () => {
                     setTokenOut("PulseChain from pump.tires");
                     setAmountIn("");
                   }}
+                  disabled={isApproving || isSwapping}
                   title="Reset to default tokens"
                 >
                   <i className="bi bi-arrow-clockwise"></i> Refresh
