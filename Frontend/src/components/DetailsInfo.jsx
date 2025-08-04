@@ -349,17 +349,22 @@ const DetailsInfo = ({ selectedToken }) => {
                           {token.tokenName === "DAV" ? (
                             "-----"
                           ) : token.tokenName === "STATE" ? (
-                            Number(token.burned || 0) + Number(totalStateBurned) === 0
-                              ? "NEW"
-                              : formatWithCommas(
+                            Number(token.burned || 0) + Number(totalStateBurned) === 0 ? (
+                              <span className="blink-new">NEW</span>
+                            ) : (
+                              formatWithCommas(
                                 Number(token.burned || 0) + Number(totalStateBurned)
                               )
+                            )
                           ) : (
-                            Number(token.burned || 0) === 0
-                              ? "NEW"
-                              : formatWithCommas(token.burned || 0)
+                            Number(token.burned || 0) === 0 ? (
+                              <span className="blink-new">NEW</span>
+                            ) : (
+                              formatWithCommas(token.burned || 0)
+                            )
                           )}
                         </div>
+
 
                       </td>
                       <td className="text-center">

@@ -6,23 +6,29 @@
   width: 100%;
   border-collapse: collapse;
 }
+
 .tc {
   color: white;
 }
+
 .text-blue {
-	color: blue !important;
-  }
-  
+  color: blue !important;
+}
+
 .infoTable tr {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
 }
+
 .infoTable span {
-  color: white !important; /* Ensures bright text */
-  filter: none !important; /* Removes any dimming effect */
-  opacity: 1 !important; /* Ensures full visibility */
+  color: white !important;
+  /* Ensures bright text */
+  filter: none !important;
+  /* Removes any dimming effect */
+  opacity: 1 !important;
+  /* Ensures full visibility */
 }
 
 .infoTable td {
@@ -40,6 +46,7 @@
 .mh-30 {
   max-height: 30px;
 }
+
 .fontSetting {
   font-size: small;
   opacity: 0.5;
@@ -48,7 +55,8 @@
 @media (max-width: 480px) {
   .infoTable {
     margin-bottom: 70px;
-    font-size: 12px; /* Reduce font size on very small screens */
+    font-size: 12px;
+    /* Reduce font size on very small screens */
   }
 
   .infoTable th {
@@ -70,4 +78,24 @@
   .mh-30 {
     max-height: 25px;
   }
+}
+
+@keyframes blinkPink {
+
+  0%,
+  50%,
+  100% {
+    color: #ff4081;
+    opacity: 1;
+  }
+
+  25%,
+  75% {
+    opacity: 0;
+  }
+}
+
+.blink-new {
+  font-weight: bold;
+  animation: blinkPink 2s infinite;
 }

@@ -10,6 +10,7 @@ const Footer = () => {
     "Refresh when minting more DAV tokens.",
     "Transferring DAV tokens is not allowed after minting",
     "Referrers receive their commission directly in their wallet",
+    "Pulsechain transactions may take 1-3 minutes sometimes",
   ];
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   useEffect(() => {
