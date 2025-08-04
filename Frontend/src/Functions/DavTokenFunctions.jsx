@@ -219,7 +219,7 @@ export const DavProvider = ({ children }) => {
 
       setData((prev) => ({
         ...prev,
-        totalInvestedPls: totalInvestedPlsValue,
+        totalInvestedPls: parseFloat(totalInvestedPlsValue).toFixed(0),
       }));
 
       console.log("Total invested PLS:", totalInvestedPlsValue);

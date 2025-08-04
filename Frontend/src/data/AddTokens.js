@@ -1,7 +1,6 @@
 // useAddTokens.js
 
 import { ethers } from "ethers";
-import FluxinLogo from "../assets/2.png";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useEffect, useState } from "react";
@@ -53,7 +52,6 @@ export const useAddTokens = () => {
 			isAdded,
 			isRenounceToken,
 			contract: name || user,
-			image: FluxinLogo,
 			tokenAddress,
 			timeLeft,
 		};
