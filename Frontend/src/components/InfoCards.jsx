@@ -18,9 +18,13 @@ import { faCopy } from "@fortawesome/free-regular-svg-icons";
 import toast from "react-hot-toast";
 import IOSpinner from "../Constants/Spinner";
 import GraphemeSplitter from 'grapheme-splitter';
+import { calculatePlsValue, calculatePlsValueNumeric } from "./DetailsInfo";
+import useTokenBalances from "./Swap/UserTokenBalances";
+import { TokensDetails } from "../data/TokensDetails";
+import { useAllTokens } from "./Swap/Tokens";
+import { useContext } from "react";
+import { ContractContext } from "../Functions/ContractInitialize";
 
-
-import axios from "axios";
 const InfoCards = () => {
   const chainId = useChainId();
   const splitter = new GraphemeSplitter();
@@ -63,7 +67,10 @@ const InfoCards = () => {
     ReferralCodeOfUser,
     davGovernanceHolds,
     isProcessingToken,
+    totalInvestedPls,
   } = useDAvContract();
+
+  const { pstateToPlsRatio } = useSwapContract();
   const handleBurnClick = async () => {
     const amountToBurn = rawAmount.trim() === "" ? stateHolding : rawAmount;
 
@@ -253,8 +260,8 @@ const InfoCards = () => {
     return chainId === 56
       ? { width: "170px", height: "140px" } // Bigger size for BNB
       : chainId === 369
-      ? { width: "110px", height: "110px" } // Bigger size for BNB
-      : { width: "110px", height: "140px" }; // Default size
+        ? { width: "110px", height: "110px" } // Bigger size for BNB
+        : { width: "110px", height: "140px" }; // Default size
   };
 
   const {
@@ -384,6 +391,18 @@ const InfoCards = () => {
   const customWidth = "180px";
   const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
 
+  const { tokens, loading: tokensLoading } = TokensDetails();
+  const { signer } = useContext(ContractContext);
+  const TOKENS = useAllTokens();
+  const tokenBalances = useTokenBalances(TOKENS, signer);
+
+  // Helper to calculate total sum
+  const calculateTotalSum = () => {
+    return tokens.reduce((sum, token) => {
+      return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio);
+    }, 0);
+  };
+
   return (
     <>
       {isAuction ? (
@@ -454,11 +473,11 @@ const InfoCards = () => {
                       <div className="step-line">
                         <div
                           className={`step ${txStatus === "initializing" ||
-                              txStatus === "initiated" ||
-                              txStatus === "pending" ||
-                              txStatus === "confirmed"
-                              ? "active"
-                              : ""
+                            txStatus === "initiated" ||
+                            txStatus === "pending" ||
+                            txStatus === "confirmed"
+                            ? "active"
+                            : ""
                             }`}
                         >
                           <span className="dot" />
@@ -466,10 +485,10 @@ const InfoCards = () => {
                         </div>
                         <div
                           className={`step ${txStatus === "initiated" ||
-                              txStatus === "pending" ||
-                              txStatus === "confirmed"
-                              ? "active"
-                              : ""
+                            txStatus === "pending" ||
+                            txStatus === "confirmed"
+                            ? "active"
+                            : ""
                             }`}
                         >
                           <span className="dot" />
@@ -477,8 +496,8 @@ const InfoCards = () => {
                         </div>
                         <div
                           className={`step ${txStatus === "pending" || txStatus === "confirmed"
-                              ? "active"
-                              : ""
+                            ? "active"
+                            : ""
                             }`}
                         >
                           <span className="dot" />
@@ -616,6 +635,25 @@ const InfoCards = () => {
                             <FontAwesomeIcon icon={copied ? faCheck : faCopy} />
                           </button>
                         </p>
+                        <p className="mb-1">
+                          <span className="detailText">
+                            ROI / PLS -
+                          </span>
+                          <span className="ms-2">
+                            {isLoading ? <DotAnimation /> : `${(formatWithCommas(totalInvestedPls)) || "0"}`} / {" "}
+                            <span style={{ 
+                              color: calculateTotalSum() > (totalInvestedPls || 0) ? '#28a745' : '#ff4081' 
+                            }}>
+                              {isLoading ? <DotAnimation /> : `${(formatWithCommas(calculateTotalSum())) || "0"}`}
+                            </span>
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
+                      <div className="carddetails2 ">
+
+                       
                       </div>
                     </div>
                   </div>
@@ -709,14 +747,14 @@ const InfoCards = () => {
                         >
                           <div
                             className={`step ${[
-                                "initializing",
-                                "initiated",
-                                "Approving",
-                                "Pending",
-                                "confirmed",
-                              ].includes(buttonTextStates)
-                                ? "active"
-                                : ""
+                              "initializing",
+                              "initiated",
+                              "Approving",
+                              "Pending",
+                              "confirmed",
+                            ].includes(buttonTextStates)
+                              ? "active"
+                              : ""
                               }`}
                           >
                             <span className="dot" />
@@ -724,13 +762,13 @@ const InfoCards = () => {
                           </div>
                           <div
                             className={`step ${[
-                                "initiated",
-                                "Approving",
-                                "Pending",
-                                "confirmed",
-                              ].includes(buttonTextStates)
-                                ? "active"
-                                : ""
+                              "initiated",
+                              "Approving",
+                              "Pending",
+                              "confirmed",
+                            ].includes(buttonTextStates)
+                              ? "active"
+                              : ""
                               }`}
                           >
                             <span className="dot" />
@@ -740,8 +778,8 @@ const InfoCards = () => {
                             className={`step ${["Approving", "Pending", "confirmed"].includes(
                               buttonTextStates
                             )
-                                ? "active"
-                                : ""
+                              ? "active"
+                              : ""
                               }`}
                           >
                             <span className="dot" />
@@ -751,8 +789,8 @@ const InfoCards = () => {
                             className={`step ${["Pending", "confirmed"].includes(
                               buttonTextStates
                             )
-                                ? "active"
-                                : ""
+                              ? "active"
+                              : ""
                               }`}
                           >
                             <span className="dot" />
@@ -970,7 +1008,7 @@ const InfoCards = () => {
                           disabled={isProcessingToken || !!selectedFile}
                           onChange={(e) => {
                             const graphemes = splitter.splitGraphemes(e.target.value);
-                            const value = graphemes[0] || ''; 
+                            const value = graphemes[0] || '';
                             setFileUploaded(null);
                             setIsFileUploaded(false);
                             handleInputChangeForEmoji(value);

@@ -71,6 +71,7 @@ export const DavProvider = ({ children }) => {
     ContractPls: "0.0",
     davHolds: "0.0",
     davExpireHolds: "0.0",
+    totalInvestedPls: "0.0",
   });
 
   // Helper to truncate without rounding
@@ -193,6 +194,9 @@ export const DavProvider = ({ children }) => {
           AllContracts.davContract.referralRewards(address)
         ),
       ]);
+
+      // Calculate total invested PLS
+      await calculateTotalInvestedPls();
     } catch (error) {
       console.error("Error fetching contract data:", error);
     } finally {
@@ -201,6 +205,32 @@ export const DavProvider = ({ children }) => {
   }, [AllContracts, address, chainId]);
 
   //   console.log("dav entries", data.DavMintFee);
+  const calculateTotalInvestedPls = async () => {
+    try {
+      const davBalanceRaw = await AllContracts.davContract.balanceOf(address);
+      const davMintFeeRaw = await AllContracts.davContract.TOKEN_COST();
+
+      // Convert BigInt → decimal values
+      const davBalance = parseFloat(ethers.formatUnits(davBalanceRaw, 18));
+      const davMintFee = parseFloat(ethers.formatUnits(davMintFeeRaw, 18));
+
+      // Normal JS multiplication and division
+      const totalInvestedPlsValue = (davBalance * davMintFee).toFixed(2);
+
+      setData((prev) => ({
+        ...prev,
+        totalInvestedPls: totalInvestedPlsValue,
+      }));
+
+      console.log("Total invested PLS:", totalInvestedPlsValue);
+    } catch (error) {
+      console.error("Error calculating total invested PLS:", error);
+      setData((prev) => ({
+        ...prev,
+        totalInvestedPls: "0.0",
+      }));
+    }
+  };
 
   const fetchAndStoreTokenEntries = async () => {
     try {
@@ -343,13 +373,13 @@ export const DavProvider = ({ children }) => {
   const mintDAV = async (amount, ref = "") => {
     if (!AllContracts?.davContract) return;
     const ethAmount = ethers.parseEther(amount.toString());
-    
+
     // Convert DavMintFee from string to number and calculate cost
     const davMintFeeNumber = parseFloat(data.DavMintFee);
     const cost = ethers.parseEther(
       (amount * davMintFeeNumber).toString()
     );
-    
+
     console.log("🔍 Minting Debug:", {
       amount,
       davMintFee: data.DavMintFee,
@@ -357,7 +387,7 @@ export const DavProvider = ({ children }) => {
       calculatedCost: (amount * davMintFeeNumber).toString(),
       chainId
     });
-    
+
     const referral = ref.trim() || "0x0000000000000000000000000000000000000000";
 
     try {

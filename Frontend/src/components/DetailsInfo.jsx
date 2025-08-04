@@ -24,6 +24,54 @@ export const formatWithCommas = (value) => {
   return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger;
 };
 
+// Exported helper function to calculate PLS value for a token
+export function calculatePlsValue(token, tokenBalances, pstateToPlsRatio) {
+  if (token.tokenName === "DAV" || token.tokenName === "STATE") {
+    return "-----";
+  }
+
+  const userBalance = tokenBalances[token.tokenName];
+  const tokenRatio = token.ratio;
+  const ratio = parseFloat(pstateToPlsRatio || 0);
+
+  if (userBalance === undefined || !tokenRatio || ratio <= 0) {
+    return "Loading...";
+  }
+
+  // Calculate: (userBalance / tokenRatio) * pstateToPlsRatio
+  const pstateValue = parseFloat(userBalance) * parseFloat(tokenRatio);
+  const plsValue = pstateValue * ratio;
+
+  // Round to nearest thousand
+  const roundedPlsValue = Math.round(plsValue / 1000) * 1000;
+
+  return `${formatWithCommas(roundedPlsValue.toFixed(0))} PLS`;
+}
+
+// Exported helper function to calculate numeric PLS value for sum calculation
+export function calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio) {
+  if (token.tokenName === "DAV" || token.tokenName === "STATE") {
+    return 0;
+  }
+
+  const userBalance = tokenBalances[token.tokenName];
+  const tokenRatio = token.ratio;
+  const ratio = parseFloat(pstateToPlsRatio || 0);
+
+  if (userBalance === undefined || !tokenRatio || ratio <= 0) {
+    return 0;
+  }
+
+  // Calculate: (userBalance / tokenRatio) * pstateToPlsRatio
+  const pstateValue = parseFloat(userBalance) * parseFloat(tokenRatio);
+  const plsValue = pstateValue * ratio;
+
+  // Round to nearest thousand
+  const roundedPlsValue = Math.round(plsValue / 1000) * 1000;
+
+  return roundedPlsValue;
+}
+
 const DetailsInfo = ({ selectedToken }) => {
   const {
     setDBRequired,
@@ -31,6 +79,7 @@ const DetailsInfo = ({ selectedToken }) => {
     setDavAndStateIntoSwap,
     handleAddToken,
     DavAddress,
+    pstateToPlsRatio,
   } = useSwapContract();
 
   const { totalStateBurned } = useDAvContract();
@@ -39,71 +88,21 @@ const DetailsInfo = ({ selectedToken }) => {
   const { signer } = useContext(ContractContext);
   const TOKENS = useAllTokens();
   const tokenBalances = useTokenBalances(TOKENS, signer);
-  const [pstateToPlsRatio, setPstateToPlsRatio] = useState(0);
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Debug logging
   useEffect(() => {
     console.log("TOKENS object:", TOKENS);
     console.log("Token balances:", tokenBalances);
     console.log("Tokens from TokensDetails:", tokens);
-    console.log("pSTATE to PLS ratio:", pstateToPlsRatio);
-  }, [TOKENS, tokenBalances, tokens, pstateToPlsRatio]);
+  }, [TOKENS, tokenBalances, tokens]);
 
-  // Fetch pSTATE to PLS ratio
-  const fetchPstateToPlsRatio = async () => {
-    try {
-      setIsRefreshing(true);
-      const response = await fetch("https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0x5f5C53f62eA7c5Ed39D924063780dc21125dbDe7");
-      if (response.ok) {
-        const data = await response.json();
-        // The ratio is base_token_price_quote_token which gives us pSTATE price in terms of quote token (WPLS)
-        const ratio = parseFloat(data.data.attributes.base_token_price_quote_token);
-        setPstateToPlsRatio(ratio);
-        console.log("pSTATE to PLS ratio:", ratio);
-      }
-    } catch (err) {
-      console.error("Error fetching pSTATE to PLS ratio:", err);
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
+  // Calculate total sum of all tokens' PLS values
+  const calculateTotalSum = () => {
+    const totalSum = sortedTokens.reduce((sum, token) => {
+      return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio);
+    }, 0);
 
-  // Initial fetch on component mount
-  useEffect(() => {
-    fetchPstateToPlsRatio();
-  }, []); // Empty dependency array - only runs once when component mounts
-
-  // Helper function to calculate PLS value for a token
-  const calculatePlsValue = (token) => {
-    if (token.tokenName === "DAV" || token.tokenName === "STATE") {
-      return "-----";
-    }
-
-    const userBalance = tokenBalances[token.tokenName];
-    const tokenRatio = token.ratio;
-
-    if (userBalance === undefined || !tokenRatio || pstateToPlsRatio <= 0) {
-      return "Loading...";
-    }
-
-    // Calculate: (userBalance / tokenRatio) * pstateToPlsRatio
-    const pstateValue = parseFloat(userBalance) * parseFloat(tokenRatio);
-    const plsValue = pstateValue * pstateToPlsRatio;
-
-    // Round to nearest thousand
-    const roundedPlsValue = Math.round(plsValue / 1000) * 1000;
-
-    console.log(`${token.tokenName} calculation:`, {
-      userBalance,
-      tokenRatio,
-      pstateToPlsRatio,
-      pstateValue,
-      plsValue,
-      roundedPlsValue
-    });
-
-    return `${formatWithCommas(roundedPlsValue.toFixed(0))} PLS`;
+    return formatWithCommas(totalSum.toFixed(0));
   };
   useEffect(() => {
     const handleStorageChange = (event) => {
@@ -146,9 +145,22 @@ const DetailsInfo = ({ selectedToken }) => {
   };
 
   // Filter tokens by tokenName based on search query
-  const filteredTokens = tokens.filter((item) =>
-    item.tokenName.toLowerCase().includes(localSearchQuery.toLowerCase())
-  );
+  const filteredTokens = tokens.filter((item) => {
+    const searchQuery = localSearchQuery.toLowerCase();
+    const tokenName = item.tokenName.toLowerCase();
+
+    // Include DAV if searching for special cases
+    if (["p", "pd", "pda", "pdav"].includes(searchQuery) && item.tokenName === "DAV") {
+      return true;
+    }
+    // Include STATE if searching for special cases
+    if (["p", "ps", "psta", "pstat", "pstate"].includes(searchQuery) && item.tokenName === "STATE") {
+      return true;
+    }
+    // Regular search logic
+    return tokenName.includes(searchQuery);
+  });
+
 
   const isImageUrl = (url) => {
     return (
@@ -255,7 +267,12 @@ const DetailsInfo = ({ selectedToken }) => {
                   <th className="text-center">DAV Vault</th>
                   <th className="text-center">Burned</th>
                   <th className="text-center">Info</th>
-                  <th className="text-center">Your Est. PLS Value</th>
+                  <th className="text-center">Your Est. PLS Value <br />
+                    {loading ? (
+                      <IOSpinner />
+                    ) : (
+                      `${calculateTotalSum()} PLS`
+                    )}</th>
                   <th className="col-auto"></th>
                 </tr>
               </thead>
@@ -329,15 +346,21 @@ const DetailsInfo = ({ selectedToken }) => {
                       </td>
                       <td className="text-center">
                         <div className="mx-4">
-                          {token.tokenName === "DAV"
-                            ? "-----"
-                            : token.tokenName === "STATE"
-                              ? formatWithCommas(
-                                Number(token.burned || 0) +
-                                Number(totalStateBurned)
+                          {token.tokenName === "DAV" ? (
+                            "-----"
+                          ) : token.tokenName === "STATE" ? (
+                            Number(token.burned || 0) + Number(totalStateBurned) === 0
+                              ? "NEW"
+                              : formatWithCommas(
+                                Number(token.burned || 0) + Number(totalStateBurned)
                               )
-                              : formatWithCommas(token.burned || 0)}
+                          ) : (
+                            Number(token.burned || 0) === 0
+                              ? "NEW"
+                              : formatWithCommas(token.burned || 0)
+                          )}
                         </div>
+
                       </td>
                       <td className="text-center">
                         <div className="d-flex justify-content-center align-items-center gap-3">
@@ -439,7 +462,7 @@ const DetailsInfo = ({ selectedToken }) => {
 
                       <td className="text-center">
                         <div className="mx-2">
-                          {calculatePlsValue(token)}
+                          {calculatePlsValue(token, tokenBalances, pstateToPlsRatio)}
                         </div>
                       </td>
                       <td></td>

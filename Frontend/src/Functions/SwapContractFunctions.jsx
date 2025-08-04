@@ -17,7 +17,6 @@ import {
   getAUCTIONContractAddress,
 } from "../Constants/ContractAddresses";
 import { useAccount, useChainId } from "wagmi";
-import { useDAvContract } from "./DavTokenFunctions";
 
 const SwapContractContext = createContext();
 
@@ -27,7 +26,6 @@ export const SwapContractProvider = ({ children }) => {
   const chainId = useChainId();
   const { loading, provider, signer, AllContracts } =
     useContext(ContractContext);
-  const { fetchData, DavMintFee } = useDAvContract();
   const { address } = useAccount();
 
   // Get contract addresses for the connected chain
@@ -67,11 +65,24 @@ export const SwapContractProvider = ({ children }) => {
   const [userHasReverseSwapped, setUserHasReverseSwapped] = useState({});
 
   const [isCliamProcessing, setIsCllaimProccessing] = useState(null);
+  
+  // Add new state variables for token value calculations
+  const [pstateToPlsRatio, setPstateToPlsRatio] = useState("0.0");
+  
   const CalculationOfCost = async (amount) => {
     if (chainId == 146) {
       setTotalCost(ethers.parseEther((amount * 100).toString()));
     } else {
-      setTotalCost(ethers.parseEther((amount * DavMintFee).toString()));
+      try {
+        // Get DavMintFee directly from the contract
+        const davMintFee = await AllContracts.davContract.TOKEN_COST();
+        const davMintFeeFormatted = parseFloat(ethers.formatUnits(davMintFee, 18));
+        setTotalCost(ethers.parseEther((amount * davMintFeeFormatted).toString()));
+      } catch (error) {
+        console.error("Error getting DavMintFee:", error);
+        // Fallback to a default value
+        setTotalCost(ethers.parseEther((amount * 10).toString()));
+      }
     }
   };
 
@@ -808,6 +819,7 @@ export const SwapContractProvider = ({ children }) => {
       getTokenNamesByUser,
       HasSwappedAucton,
       HasReverseSwappedAucton,
+      fetchPstateToPlsRatio,
     ];
 
     const runAll = async () => {
@@ -939,7 +951,6 @@ export const SwapContractProvider = ({ children }) => {
       await CheckIsAuctionActive();
       await HasSwappedAucton();
       await HasReverseSwappedAucton();
-      await fetchData();
     } catch (error) {
       console.error("Error during token swap:", error);
 
@@ -986,7 +997,6 @@ export const SwapContractProvider = ({ children }) => {
       await CheckIsAuctionActive();
       await HasSwappedAucton();
       await HasReverseSwappedAucton();
-      await fetchData();
     }
   };
 
@@ -1049,6 +1059,25 @@ export const SwapContractProvider = ({ children }) => {
     }
   };
 
+  // Fetch pSTATE to PLS ratio from API
+  const fetchPstateToPlsRatio = async () => {
+    try {
+      const response = await fetch("https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0x5f5C53f62eA7c5Ed39D924063780dc21125dbDe7");
+      if (response.ok) {
+        const data = await response.json();
+        // The ratio is base_token_price_quote_token which gives us pSTATE price in terms of quote token (WPLS)
+        const ratio = parseFloat(data.data.attributes.base_token_price_quote_token);
+        setPstateToPlsRatio(ratio.toString());
+        console.log("pSTATE to PLS ratio:", ratio);
+        return ratio;
+      }
+    } catch (err) {
+      console.error("Error fetching pSTATE to PLS ratio:", err);
+      return 0;
+    }
+  };
+
+
   return (
     <SwapContractContext.Provider
       value={{
@@ -1105,6 +1134,7 @@ export const SwapContractProvider = ({ children }) => {
         tokenMap,
         IsAuctionActive,
         TokenRatio,
+        pstateToPlsRatio,
       }}
     >
       {children}
