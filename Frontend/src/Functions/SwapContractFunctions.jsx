@@ -12,11 +12,9 @@ import PropTypes from "prop-types";
 import toast from "react-hot-toast";
 import { ContractContext } from "./ContractInitialize";
 import {
-  Auction_TESTNET,
-  DAV_TESTNET,
-  DAV_TOKEN_SONIC_ADDRESS,
-  STATE_TESTNET,
-  STATE_TOKEN_SONIC_ADDRESS,
+  getDAVContractAddress,
+  getSTATEContractAddress,
+  getAUCTIONContractAddress,
 } from "../Constants/ContractAddresses";
 import { useAccount, useChainId } from "wagmi";
 import { useDAvContract } from "./DavTokenFunctions";
@@ -31,6 +29,11 @@ export const SwapContractProvider = ({ children }) => {
     useContext(ContractContext);
   const { fetchData, DavMintFee } = useDAvContract();
   const { address } = useAccount();
+
+  // Get contract addresses for the connected chain
+  const getDavAddress = () => getDAVContractAddress(chainId);
+  const getStateAddress = () => getSTATEContractAddress(chainId);
+  const getAuctionAddress = () => getAUCTIONContractAddress(chainId);
 
   const [claiming, setClaiming] = useState(false);
   const [txStatusForSwap, setTxStatusForSwap] = useState("");
@@ -71,6 +74,34 @@ export const SwapContractProvider = ({ children }) => {
       setTotalCost(ethers.parseEther((amount * DavMintFee).toString()));
     }
   };
+
+  const ReturnfetchUserTokenAddresses = async () => {
+    if (!AllContracts?.AuctionContract) {
+      console.warn("AuctionContract not found");
+      return {};
+    }
+
+    try {
+      // Step 1: Get token names
+      const proxyResult =
+        await AllContracts.AuctionContract.getUserTokenNames();
+      const tokenNames = Array.from(proxyResult);
+
+      const tokenAddresses = {};
+
+      // Step 2: Loop through names and get corresponding addresses
+      for (const name of tokenNames) {
+        const TokenAddress =
+          await AllContracts.AuctionContract.getUserTokenAddress(name);
+        tokenAddresses[name] = TokenAddress;
+      }
+
+      return tokenAddresses; // 🔁 return result directly
+    } catch (error) {
+      console.error("Error fetching token data:", error);
+      return {};
+    }
+  };
   const fetchTokenData = async ({
     contractMethod,
     setState,
@@ -85,7 +116,7 @@ export const SwapContractProvider = ({ children }) => {
       const tokenMap = await ReturnfetchUserTokenAddresses();
 
       const extendedMap = includeTestState
-        ? { ...tokenMap, state: STATE_TESTNET }
+        ? { ...tokenMap, state: getStateAddress() }
         : tokenMap;
 
       for (const [tokenName, tokenAddress] of Object.entries(extendedMap)) {
@@ -162,45 +193,77 @@ export const SwapContractProvider = ({ children }) => {
       buildArgs: (tokenAddress) => [address, tokenAddress],
     });
   };
-
   useEffect(() => {
     const intervalHandles = {};
     const results = {};
 
     const initializeCountdowns = async () => {
+      if (!AllContracts?.AuctionContract || !provider) return;
+
       const tokenMap = await ReturnfetchUserTokenAddresses();
+      
       for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
         try {
-          const AuctionTimeInWei =
-            await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
-          const totalSeconds = Math.floor(Number(AuctionTimeInWei));
-
-          results[tokenName] = totalSeconds;
-
-          intervalHandles[tokenName] = setInterval(() => {
-            setAuctionTime((prev) => {
-              const newTime = { ...prev };
-              if (newTime[tokenName] > 0) {
-                newTime[tokenName] = newTime[tokenName] - 1;
-              }
-              return newTime;
-            });
+          // Get current block timestamp from the contract
+          const currentBlock = await provider.getBlock('latest');
+          const currentBlockTime = currentBlock.timestamp;
+          
+          // Fetch the remaining auction time from the smart contract
+          const AuctionTimeInWei = await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
+          const timeLeft = Math.floor(Number(AuctionTimeInWei));
+          
+          // Store the end time based on blockchain timestamp
+          const endTime = currentBlockTime + timeLeft;
+          results[tokenName] = timeLeft >= 0 ? timeLeft : 0;
+          
+          // Set up blockchain-synchronized countdown
+          intervalHandles[tokenName] = setInterval(async () => {
+            try {
+              // Get latest block timestamp
+              const latestBlock = await provider.getBlock('latest');
+              const latestBlockTime = latestBlock.timestamp;
+              
+              // Calculate remaining time based on blockchain time
+              const remainingTime = Math.max(0, endTime - latestBlockTime);
+              
+              setAuctionTime((prev) => {
+                const newTime = { ...prev };
+                newTime[tokenName] = remainingTime;
+                
+                // Check auction status when time runs low
+                if (remainingTime <= 300) { // 5 minutes or less
+                  CheckIsAuctionActive();
+                  CheckIsReverse();
+                }
+                
+                return newTime;
+              });
+            } catch (error) {
+              console.error(`Error updating timer for ${tokenName}:`, error);
+            }
           }, 1000);
         } catch (e) {
           results[tokenName] = 0;
-          console.log("error", e);
+          console.error(`Error fetching auction time for ${tokenName} (${TokenAddress}):`, e);
         }
       }
 
-      setAuctionTime(results);
+      // Update state only if results are valid
+      if (Object.keys(results).length > 0) {
+        setAuctionTime(results);
+      } else {
+        console.warn("No valid auction times fetched, skipping state update");
+      }
     };
 
-    initializeCountdowns();
+    if (AllContracts?.AuctionContract && provider) {
+      initializeCountdowns();
+    }
 
     return () => {
       Object.values(intervalHandles).forEach(clearInterval);
     };
-  }, [AllContracts]);
+  }, [AllContracts, provider]);
 
   const getCurrentAuctionCycle = async () => {
     await fetchTokenData({
@@ -232,21 +295,37 @@ export const SwapContractProvider = ({ children }) => {
 
     for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
       try {
+        // Get current block timestamp
+        const currentBlock = await provider.getBlock('latest');
+        const currentBlockTime = currentBlock.timestamp;
+        
         const timeLeftInSeconds =
           await AllContracts.AuctionContract.getNextClaimTime(TokenAddress);
 
         const timeLeft = Number(timeLeftInSeconds);
+        
+        // Store the end time based on blockchain timestamp
+        const endTime = currentBlockTime + timeLeft;
         results[tokenName] = timeLeft;
 
-        // Start countdown interval
-        intervalHandles[tokenName] = setInterval(() => {
-          setTimeLeftClaim((prev) => {
-            const updated = { ...prev };
-            if (updated[tokenName] > 0) {
-              updated[tokenName] = updated[tokenName] - 1;
-            }
-            return updated;
-          });
+        // Start blockchain-synchronized countdown interval
+        intervalHandles[tokenName] = setInterval(async () => {
+          try {
+            // Get latest block timestamp
+            const latestBlock = await provider.getBlock('latest');
+            const latestBlockTime = latestBlock.timestamp;
+            
+            // Calculate remaining time based on blockchain time
+            const remainingTime = Math.max(0, endTime - latestBlockTime);
+            
+            setTimeLeftClaim((prev) => {
+              const updated = { ...prev };
+              updated[tokenName] = remainingTime;
+              return updated;
+            });
+          } catch (error) {
+            console.error(`Error updating claim timer for ${tokenName}:`, error);
+          }
         }, 1000);
       } catch (err) {
         console.warn(`Error getting claim time for ${tokenName}`, err);
@@ -255,7 +334,7 @@ export const SwapContractProvider = ({ children }) => {
     }
 
     setTimeLeftClaim(results);
-  }, [AllContracts]);
+  }, [AllContracts, provider]);
   useEffect(() => {
     initializeClaimCountdowns();
 
@@ -284,7 +363,7 @@ export const SwapContractProvider = ({ children }) => {
       const tokenMap = await ReturnfetchUserTokenAddresses();
       const extendedMap = {
         ...tokenMap,
-        state: STATE_TESTNET,
+        state: getStateAddress(),
       };
 
       for (const [tokenName, TokenAddress] of Object.entries(extendedMap)) {
@@ -293,7 +372,7 @@ export const SwapContractProvider = ({ children }) => {
           ERC20_ABI,
           provider
         );
-        const rawBalance = await tokenContract.balanceOf(Auction_TESTNET);
+        const rawBalance = await tokenContract.balanceOf(getAuctionAddress());
 
         // Convert to string in full units, then floor to get whole number
         const formattedBalance = Math.floor(
@@ -356,8 +435,8 @@ export const SwapContractProvider = ({ children }) => {
       const tokenMap = await ReturnfetchUserTokenAddresses();
       const extendedMap = {
         ...tokenMap,
-        STATE: STATE_TESTNET,
-        DAV: DAV_TESTNET,
+        STATE: getStateAddress(),
+        DAV: getDavAddress(),
       };
 
       for (const [tokenName, TokenAddress] of Object.entries(extendedMap)) {
@@ -384,8 +463,8 @@ export const SwapContractProvider = ({ children }) => {
           tokenName === "STATE"
             ? renouncingString === "true" && isOwnerZero
             : tokenName === "DAV"
-            ? renouncingString === "true" && isOwnerZero
-            : renouncingString;
+              ? renouncingString === "true" && isOwnerZero
+              : renouncingString;
       }
 
       setRenonced(results);
@@ -465,33 +544,7 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching token data:", error);
     }
   };
-  const ReturnfetchUserTokenAddresses = async () => {
-    if (!AllContracts?.AuctionContract) {
-      console.warn("AuctionContract not found");
-      return {};
-    }
 
-    try {
-      // Step 1: Get token names
-      const proxyResult =
-        await AllContracts.AuctionContract.getUserTokenNames();
-      const tokenNames = Array.from(proxyResult);
-
-      const tokenAddresses = {};
-
-      // Step 2: Loop through names and get corresponding addresses
-      for (const name of tokenNames) {
-        const TokenAddress =
-          await AllContracts.AuctionContract.getUserTokenAddress(name);
-        tokenAddresses[name] = TokenAddress;
-      }
-
-      return tokenAddresses; // 🔁 return result directly
-    } catch (error) {
-      console.error("Error fetching token data:", error);
-      return {};
-    }
-  };
 
   const getTokenNamesForUser = async () => {
     try {
@@ -604,8 +657,8 @@ export const SwapContractProvider = ({ children }) => {
 
     try {
       const tx = await AllContracts.AuctionContract.setTokenAddress(
-        STATE_TESTNET,
-        DAV_TESTNET
+        getStateAddress(),
+        getDavAddress()
       );
       await tx.wait();
       await AddressesFromContract();
@@ -691,6 +744,50 @@ export const SwapContractProvider = ({ children }) => {
     };
 
     runAuctionChecks();
+
+    // Set up polling to check auction status every 10 seconds
+    const auctionPollingInterval = setInterval(() => {
+      runAuctionChecks();
+    }, 10000); // 10 seconds
+
+    // Listen for account changes in MetaMask
+    const handleAccountsChanged = (accounts) => {
+      if (accounts.length === 0) {
+        console.log('Please connect to MetaMask.');
+      } else if (accounts[0] !== address) {
+        console.log('Account changed, refreshing data...');
+        // Force refresh all data when account changes
+        runAuctionChecks();
+        fetchUserTokenAddresses();
+        getInputAmount();
+        getOutPutAmount();
+        getCurrentAuctionCycle();
+        getTokenRatio();
+        getTokensBurned();
+        getAirdropAmount();
+        getTokenBalances();
+        isAirdropClaimed();
+        AddressesFromContract();
+        isRenounced();
+        getTokenNamesForUser();
+        isTokenSupporteed();
+        getTokenNamesByUser();
+        HasSwappedAucton();
+        HasReverseSwappedAucton();
+      }
+    };
+
+    // Add event listener for account changes
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+    }
+
+    return () => {
+      clearInterval(auctionPollingInterval);
+      if (window.ethereum) {
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+      }
+    };
   }, [AllContracts, address]);
 
   useEffect(() => {
@@ -726,6 +823,15 @@ export const SwapContractProvider = ({ children }) => {
     };
 
     runAll();
+
+    // Set up polling to refresh all data every 30 seconds
+    const dataPollingInterval = setInterval(() => {
+      runAll();
+    }, 30000); // 30 seconds
+
+    return () => {
+      clearInterval(dataPollingInterval);
+    };
   }, [AllContracts, address]);
   // Adjust based on when you want it to run
 
@@ -747,7 +853,7 @@ export const SwapContractProvider = ({ children }) => {
       const OutAmountsMapping = OutPutAmount[ContractName];
       const InAmountMapping = InputAmount[ContractName];
 
-      const ContractAddressToUse = Auction_TESTNET;
+      const ContractAddressToUse = getAuctionAddress();
 
       let approvalAmount;
       const tokenAddress = tokenMap[ContractName];
@@ -755,7 +861,7 @@ export const SwapContractProvider = ({ children }) => {
       let selectedContract;
       if (isReversed[ContractName] == "true") {
         selectedContract = new ethers.Contract(
-          STATE_TESTNET,
+          getStateAddress(),
           ERC20_ABI,
           signer
         );
@@ -943,13 +1049,6 @@ export const SwapContractProvider = ({ children }) => {
     }
   };
 
-  const handleAddDAV = () => handleAddToken(DAV_TESTNET, "pDAV");
-  const handleAddTokensDAV = () =>
-    handleAddToken(DAV_TOKEN_SONIC_ADDRESS, "sDAV");
-
-  const handleAddTokensState = () =>
-    handleAddToken(STATE_TOKEN_SONIC_ADDRESS, "sState");
-  //   console.log("dav and state address", DavAddress, StateAddress);
   return (
     <SwapContractContext.Provider
       value={{
@@ -960,10 +1059,7 @@ export const SwapContractProvider = ({ children }) => {
         address,
 
         CalculationOfCost,
-        handleAddDAV,
         UsersSupportedTokens,
-        handleAddTokensDAV,
-        handleAddTokensState,
         TotalCost,
         isAirdropClaimed,
         setClaiming,

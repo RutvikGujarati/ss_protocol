@@ -11,9 +11,9 @@ import { ethers } from "ethers";
 import { useAccount, useChainId } from "wagmi";
 import { ContractContext } from "./ContractInitialize";
 import {
-  Auction_TESTNET,
-  DAV_TESTNET,
-  STATE_TESTNET,
+  getDAVContractAddress,
+  getSTATEContractAddress,
+  getAUCTIONContractAddress,
 } from "../Constants/ContractAddresses";
 import toast from "react-hot-toast";
 
@@ -29,6 +29,11 @@ export const DavProvider = ({ children }) => {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const [buttonTextStates, setButtonTextStates] = useState({});
+
+  // Get contract addresses for the connected chain
+  const getDavAddress = () => getDAVContractAddress(chainId);
+  const getStateAddress = () => getSTATEContractAddress(chainId);
+  const getAuctionAddress = () => getAUCTIONContractAddress(chainId);
 
   const [isLoading, setLoading] = useState(true);
   const [BurnClicked, setClicked] = useState(false);
@@ -92,6 +97,11 @@ export const DavProvider = ({ children }) => {
       } else if (label === "UserPercentage") {
         const raw = Number(res) / 100;
         value = truncateDecimals(raw, fixed);
+      } else if (label === "DavMintFee") {
+        // Special handling for DavMintFee to preserve full decimal value
+        const raw = parseFloat(ethers.formatUnits(res, 18));
+        value = raw.toString(); // Keep full precision
+
       } else {
         const raw = format ? parseFloat(ethers.formatUnits(res, 18)) : res;
         value = format ? truncateDecimals(raw, fixed) : raw.toString();
@@ -109,6 +119,10 @@ export const DavProvider = ({ children }) => {
 
   const fetchData = useCallback(async () => {
     if (!AllContracts?.davContract || !address) return;
+
+    console.log("🔍 Fetching contract data for chain:", chainId);
+    console.log("🏦 DAV Contract address:", getDavAddress());
+    console.log("👤 User address:", address);
 
     setLoading(true);
     try {
@@ -144,7 +158,10 @@ export const DavProvider = ({ children }) => {
         fetchAndSet("TokenWithImageProcessing", () =>
           AllContracts.davContract.TOKEN_WITHIMAGE_PROCESS()
         ),
-        fetchAndSet("DavMintFee", () => AllContracts.davContract.TOKEN_COST()),
+        fetchAndSet("DavMintFee", () => {
+          console.log("🎯 Fetching TOKEN_COST from contract...");
+          return AllContracts.davContract.TOKEN_COST();
+        }),
         fetchAndSet("davHolds", () =>
           AllContracts.davContract.getActiveBalance(address)
         ),
@@ -160,7 +177,7 @@ export const DavProvider = ({ children }) => {
           AllContracts.stateContract.balanceOf(address)
         ),
         fetchAndSet("stateHoldingOfSwapContract", () =>
-          AllContracts.stateContract.balanceOf(Auction_TESTNET)
+          AllContracts.stateContract.balanceOf(getAuctionAddress())
         ),
         fetchAndSet(
           "tokenEntries",
@@ -181,7 +198,7 @@ export const DavProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [AllContracts, address]);
+  }, [AllContracts, address, chainId]);
 
   //   console.log("dav entries", data.DavMintFee);
 
@@ -207,22 +224,43 @@ export const DavProvider = ({ children }) => {
 
   const isTokenDeployed = async () => {
     try {
+      // Only proceed if we have names and contracts are available
+      if (!names || names.length === 0 || !AllContracts?.AuctionContract) {
+        console.log("Skipping isTokenDeployed - no names or contracts available");
+        return;
+      }
+
       const results = await Promise.all(
-        names.map((name) => AllContracts.AuctionContract.isTokenNameUsed(name))
+        names.map(async (name) => {
+          try {
+            const isUsed = await AllContracts.AuctionContract.isTokenNameUsed(name);
+            return isUsed;
+          } catch (error) {
+            console.error(`Error checking deployment for ${name}:`, error);
+            return false; // Default to false on error
+          }
+        })
       );
 
       // Store the results directly as an array of booleans in the state
-      setisUsed(results); // Assuming setisUsed accepts an array of booleans
+      setisUsed(results);
+      console.log("✅ Updated isUsed state:", results);
     } catch (error) {
-      console.log("Error getting deployed details", error);
+      console.error("Error in isTokenDeployed:", error);
+      // Don't update state on error to preserve previous values
     }
   };
 
   useEffect(() => {
     if (address && AllContracts?.davContract) fetchData();
-  }, [address, AllContracts?.davContract]);
+  }, [address, AllContracts?.davContract, fetchData]);
 
-  isTokenDeployed();
+  // Call isTokenDeployed when names array changes
+  useEffect(() => {
+    if (names && names.length > 0 && AllContracts?.AuctionContract) {
+      isTokenDeployed();
+    }
+  }, [names, AllContracts?.AuctionContract]);
 
   const fetchTimeUntilNextClaim = useCallback(async () => {
     if (!AllContracts?.davContract || !address) return;
@@ -271,31 +309,55 @@ export const DavProvider = ({ children }) => {
     const interval = setInterval(() => {
       fetchTimeUntilNextClaim();
       fetchAndStoreTokenEntries();
+      // Removed isTokenDeployed from frequent interval to prevent flickering
     }, 1000); // run every second
 
     return () => clearInterval(interval); // clean up on unmount
   }, [fetchTimeUntilNextClaim, AllContracts?.davContract, address]);
 
+  // Separate interval for deployment status with longer frequency to prevent flickering
+  useEffect(() => {
+    if (!AllContracts?.AuctionContract || !names || names.length === 0) return;
+
+    const deploymentInterval = setInterval(() => {
+      isTokenDeployed();
+    }, 10000); // Check deployment status every 10 seconds instead of every second
+
+    return () => clearInterval(deploymentInterval);
+  }, [names, AllContracts?.AuctionContract]);
+
   useEffect(() => {
     if (data.TimeUntilNextClaim === 0) {
       fetchData();
     }
-  }, [data.TimeUntilNextClaim]);
+  }, [data.TimeUntilNextClaim, fetchData]);
 
   useEffect(() => {
     if (isConnected && AllContracts?.davContract) {
       fetchData();
     }
-  }, [isConnected, AllContracts]);
+  }, [isConnected, AllContracts, fetchData]);
 
   const [txStatus, setTxStatus] = useState(""); // e.g. "initiated", "pending", "confirmed", "error"
 
   const mintDAV = async (amount, ref = "") => {
     if (!AllContracts?.davContract) return;
     const ethAmount = ethers.parseEther(amount.toString());
+    
+    // Convert DavMintFee from string to number and calculate cost
+    const davMintFeeNumber = parseFloat(data.DavMintFee);
     const cost = ethers.parseEther(
-      (amount * (chainId === 146 ? 100 : 1500000)).toString()
+      (amount * davMintFeeNumber).toString()
     );
+    
+    console.log("🔍 Minting Debug:", {
+      amount,
+      davMintFee: data.DavMintFee,
+      davMintFeeNumber,
+      calculatedCost: (amount * davMintFeeNumber).toString(),
+      chainId
+    });
+    
     const referral = ref.trim() || "0x0000000000000000000000000000000000000000";
 
     try {
@@ -499,13 +561,13 @@ export const DavProvider = ({ children }) => {
   const DepositStateBack = async (TokenAddress) => {
     try {
       const tokenContract = new ethers.Contract(
-        STATE_TESTNET,
+        getStateAddress(),
         ERC20_ABI,
         signer
       );
       const weiAmount = ethers.parseUnits("500000000".toString(), 18);
 
-      await (await tokenContract.approve(Auction_TESTNET, weiAmount)).wait();
+      await (await tokenContract.approve(getAuctionAddress(), weiAmount)).wait();
 
       const tx = await AllContracts.AuctionContract.depositStateForTokenOwner(
         TokenAddress
@@ -534,15 +596,15 @@ export const DavProvider = ({ children }) => {
       const weiAmount = ethers.parseUnits(amount.toString(), 18);
       const maxUint256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
       const tokenContract = new ethers.Contract(
-        STATE_TESTNET,
+        getStateAddress(),
         ERC20_ABI,
         signer
       );
-      const allowance = await tokenContract.allowance(address, DAV_TESTNET);
+      const allowance = await tokenContract.allowance(address, getDavAddress());
       // 2. If allowance is not enough, approve
       if (BigInt(allowance) < BigInt(weiAmount)) {
         setButtonTextStates("Approving");
-        await (await tokenContract.approve(DAV_TESTNET, maxUint256)).wait();
+        await (await tokenContract.approve(getDavAddress(), maxUint256)).wait();
       }
 
       setButtonTextStates("Pending");

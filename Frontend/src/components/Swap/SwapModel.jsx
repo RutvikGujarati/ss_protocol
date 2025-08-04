@@ -546,7 +546,16 @@ const SwapComponent = () => {
                       className="btn btn-primary rounded-pill py-2"
                       onClick={handleSwap}
                       disabled={!quoteData || isSwapping || insufficientBalance}
-                      style={{ width: "170px",fontSize:"16px", padding: "10px 20px", fontWeight: 400, height: "40px", textAlign: "center" }}
+                      style={{ 
+                        minWidth: "170px", 
+                        width: "auto", 
+                        fontSize: "16px", 
+                        padding: "10px 20px", 
+                        fontWeight: 400, 
+                        height: "40px", 
+                        textAlign: "center",
+                        whiteSpace: "nowrap"
+                      }}
                     >
                       {isSwapping ? (
                         <>

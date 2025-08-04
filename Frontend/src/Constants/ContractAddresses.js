@@ -1,15 +1,60 @@
-export const DAV_TOKEN_ADDRESS = "0x78f8Aba822259d8B5E4E381bc536816874Aa5D86";
-export const DAV_TOKEN_SONIC_ADDRESS = "0xC4CD0c1BAC56FB0CB5c3b6474E1EbAb1D7492667";
-export const STATE_TOKEN_ADDRESS = "0xc359f56c63A8117C83AbE84F4BB78d9eF124b567";
-export const STATE_TOKEN_SONIC_ADDRESS = "0xC3C304636269975B528603B365b43D78AE26162A";
+// Chain IDs
+export const CHAIN_IDS = {
+    PULSECHAIN: 369,
+    POLYGON: 137,
+    SONIC: 146,
+    MAINNET: 1,
+    PULSECHAIN_TESTNET: 943,
+};
 
+// Contract addresses organized by chain
+export const CONTRACT_ADDRESSES = {
+    [CHAIN_IDS.PULSECHAIN]: {
+        DAV_TOKEN: "0x68426cF2C581C2Bb271DA70F43Ed69D0116075AC",
+        STATE_TOKEN: "0x7b1411B3562e48e7a56F63BB7e59eb75a97c661d",
+        AUCTION: "0x870280Fd978EFf5A7B630C07982975E44AAe659E",
+    },
+    [CHAIN_IDS.POLYGON]: {
+        DAV_TOKEN: "", // Add Polygon mainnet addresses when available
+        STATE_TOKEN: "",
+        AUCTION: "",
+    },
+    [CHAIN_IDS.MAINNET]: {
+        DAV_TOKEN: "", // Add Ethereum mainnet addresses when available
+        STATE_TOKEN: "",
+        AUCTION: "",
+    },
+};
 
+// Helper function to get contract addresses for a specific chain
+export const getContractAddresses = (chainId) => {
+    return CONTRACT_ADDRESSES[chainId] || CONTRACT_ADDRESSES[CHAIN_IDS.PULSECHAIN];
+};
 
+// Helper function to get a specific contract address
+export const getContractAddress = (chainId, contractType) => {
+    const addresses = getContractAddresses(chainId);
+    return addresses[contractType];
+};
 
-//testnet 
+// Simple functions to get contract addresses for connected chain
+export const getDAVContractAddress = (chainId) => {
+    return getContractAddress(chainId, 'DAV_TOKEN') || getContractAddress(CHAIN_IDS.PULSECHAIN, 'DAV_TOKEN');
+};
 
-export const DAV_TESTNET = "0x68426cF2C581C2Bb271DA70F43Ed69D0116075AC"
-export const STATE_TESTNET = "0x7b1411B3562e48e7a56F63BB7e59eb75a97c661d"
-export const Auction_TESTNET = "0x870280Fd978EFf5A7B630C07982975E44AAe659E"
+export const getSTATEContractAddress = (chainId) => {
+    return getContractAddress(chainId, 'STATE_TOKEN') || getContractAddress(CHAIN_IDS.PULSECHAIN, 'STATE_TOKEN');
+};
 
-export const Addresses = [DAV_TESTNET, STATE_TESTNET, Auction_TESTNET]
+export const getAUCTIONContractAddress = (chainId) => {
+    return getContractAddress(chainId, 'AUCTION') || getContractAddress(CHAIN_IDS.PULSECHAIN, 'AUCTION');
+};
+
+// Get all contract addresses for a chain
+export const getContractAddressesForChain = (chainId) => {
+    return {
+        DAV_TOKEN: getDAVContractAddress(chainId),
+        STATE_TOKEN: getSTATEContractAddress(chainId),
+        AUCTION: getAUCTIONContractAddress(chainId),
+    };
+};

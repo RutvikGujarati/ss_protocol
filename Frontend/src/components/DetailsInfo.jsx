@@ -54,7 +54,7 @@ const DetailsInfo = ({ selectedToken }) => {
   const fetchPstateToPlsRatio = async () => {
     try {
       setIsRefreshing(true);
-      const response = await fetch("https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0x3403400cf93c82e4d74e51a63b107626a63d53fb");
+      const response = await fetch("https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0x5f5C53f62eA7c5Ed39D924063780dc21125dbDe7");
       if (response.ok) {
         const data = await response.json();
         // The ratio is base_token_price_quote_token which gives us pSTATE price in terms of quote token (WPLS)

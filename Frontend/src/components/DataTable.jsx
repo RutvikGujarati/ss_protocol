@@ -7,12 +7,14 @@ import { useEffect, useState, useMemo } from "react";
 import { formatWithCommas } from "./DetailsInfo";
 import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import { useAddTokens, useUsersOwnerTokens } from "../data/AddTokens";
-import { Auction_TESTNET } from "../Constants/ContractAddresses";
+import { getAUCTIONContractAddress } from "../Constants/ContractAddresses";
 import IOSpinner from "../Constants/Spinner";
 import TxProgressModal from "./TxProgressModal";
+
 const DataTable = () => {
+  const chainId = useChainId();
   const {
     davHolds,
     davGovernanceHolds,
@@ -39,6 +41,9 @@ const DataTable = () => {
     tokenMap,
     giveRewardForAirdrop,
   } = useSwapContract();
+
+  // Get auction contract address for the connected chain
+  const getAuctionAddress = () => getAUCTIONContractAddress(chainId);
 
   const { tokens } = useAuctionTokens();
   const { tokens: Addtokens } = useAddTokens();
@@ -181,15 +186,17 @@ const DataTable = () => {
   }, [txStatusForSwap]);
 
   const filteredTokens = useMemo(() => {
-    return tokens.filter(({ isReversing, AuctionStatus }) => {
+    return tokens.filter(({ isReversing, AuctionStatus, TimeLeft }) => {
       // Show tokens that are either:
       // 1. Currently in active auction (AuctionStatus === "true")
       // 2. In reverse auction phase (AuctionStatus === "false" && isReversing === "true")
+      // 3. Has time left in the auction (TimeLeft > 0)
       const isAuctionActive = AuctionStatus === "true";
       const isReverseAuction = AuctionStatus === "false" && isReversing === "true";
+      const hasTimeLeft = TimeLeft > 0;
       
-      // Only show if auction is active OR in reverse phase
-      return isAuctionActive || isReverseAuction;
+      // Only show if auction is active OR in reverse phase OR has time left
+      return isAuctionActive || isReverseAuction || hasTimeLeft;
     });
   }, [tokens]);
 
@@ -241,7 +248,7 @@ const DataTable = () => {
                   >
                     Ratio Swapping Auction
                     <a
-                      href={`https://kekxplorer.avecdra.pro/address/${Auction_TESTNET}`}
+                      href={`https://kekxplorer.avecdra.pro/address/${getAuctionAddress()}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
@@ -603,7 +610,7 @@ const DataTable = () => {
                                     name,
                                     Emojis,
                                     address,
-                                    Auction_TESTNET,
+                                    getAuctionAddress(),
                                     address
                                   );
                                   await fetchUserTokenAddresses();

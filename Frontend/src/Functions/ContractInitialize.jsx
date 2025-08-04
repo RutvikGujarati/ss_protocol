@@ -1,7 +1,8 @@
 import { ethers } from "ethers";
 import { createContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { getContractConfigs, setChainId } from "../Constants/ContractConfig";
+import { getContractConfigs, setChainId, isChainSupported } from "../Constants/ContractConfig";
+import { CHAIN_IDS } from "../Constants/ContractAddresses";
 import { useAccount, useChainId } from "wagmi";
 
 export const ContractContext = createContext(null);
@@ -19,11 +20,17 @@ export const ContractProvider = ({ children }) => {
   const chainId = useChainId(); // Get chainId from Wagmi
   const { isConnected, address } = useAccount(); // ✅ this is the key
 
-
   useEffect(() => {
     if (!isConnected || !address || !chainId) return;
 
-    setChainId(chainId);
+    // Check if the connected chain is supported
+    if (!isChainSupported(chainId)) {
+      console.warn(`Connected chain ${chainId} is not supported. Using default chain.`);
+      setChainId(CHAIN_IDS.PULSECHAIN);
+    } else {
+      setChainId(chainId);
+    }
+    
     initializeContracts();
   }, [isConnected, address, chainId]);
 
@@ -84,12 +91,22 @@ export const ContractProvider = ({ children }) => {
       }
     };
 
+    const handleChainChanged = (chainId) => {
+      console.log("Chain changed to:", chainId);
+      // Re-initialize contracts when chain changes
+      if (isConnected && address) {
+        initializeContracts();
+      }
+    };
+
     window.ethereum.on("accountsChanged", handleAccountsChanged);
+    window.ethereum.on("chainChanged", handleChainChanged);
 
     return () => {
       window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
+      window.ethereum.removeListener("chainChanged", handleChainChanged);
     };
-  }, []);
+  }, [isConnected, address, chainId]);
 
   const contracts = {
     state: AllContracts.stateContract,

@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import {
-	DAV_TESTNET,
-	DAV_TOKEN_SONIC_ADDRESS,
-	STATE_TESTNET,
-	STATE_TOKEN_SONIC_ADDRESS,
+	getDAVContractAddress,
+	getSTATEContractAddress,
 } from "../Constants/ContractAddresses";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
@@ -18,6 +16,10 @@ export const TokensDetails = () => {
 	const { Emojies, names } = useDAvContract(); // Add names from useDAvContract
 	const chainId = useChainId();
 	const [loading, setLoading] = useState(true);
+
+	// Get contract addresses for the connected chain
+	const getDavAddress = () => getDAVContractAddress(chainId);
+	const getStateAddress = () => getSTATEContractAddress(chainId);
 
 	// Create a name-to-emoji mapping
 	const nameToEmoji = Array.isArray(names) && Array.isArray(Emojies) && names.length === Emojies.length
@@ -35,7 +37,7 @@ export const TokensDetails = () => {
 			name: "DAV",
 			key: "DAV",
 			displayName: "pDAV",
-			address: DAV_TESTNET,
+			address: getDavAddress(),
 			supply: "5,000,000.00",
 			price: 0,
 			actions: {
@@ -45,28 +47,7 @@ export const TokensDetails = () => {
 		{
 			name: "STATE",
 			key: "state",
-			address: STATE_TESTNET,
-		},
-	];
-
-	const sonicTokens = [
-		{
-			name: "DAV",
-			key: "dav",
-			displayName: "sDAV",
-			address: DAV_TOKEN_SONIC_ADDRESS,
-			supply: "5,000,000.00",
-			price: 0,
-			actions: {
-				ReanounceContract: swap.ReanounceContract,
-			},
-		},
-		{
-			name: "STATE",
-			key: "state",
-			address: STATE_TOKEN_SONIC_ADDRESS,
-			price: "0.0000",
-			mintAmount: "1,000,000,000,000",
+			address: getStateAddress(),
 		},
 	];
 
@@ -83,7 +64,7 @@ export const TokensDetails = () => {
 			};
 		});
 
-	const data = chainId === 146 ? sonicTokens : [...staticTokens, ...dynamicTokens];
+	const data = [...staticTokens, ...dynamicTokens];
 
 	const tokens = data.map((token) => {
 		const key = token.key;
