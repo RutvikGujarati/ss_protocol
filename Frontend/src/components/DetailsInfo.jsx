@@ -57,7 +57,9 @@ export function calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio)
   const userBalance = tokenBalances[token.tokenName];
   const tokenRatio = token.ratio;
   const ratio = parseFloat(pstateToPlsRatio || 0);
-
+  if (!tokenRatio || tokenRatio === "not started" || tokenRatio === "not listed") {
+    return 0;
+  }
   if (userBalance === undefined || !tokenRatio || ratio <= 0) {
     return 0;
   }

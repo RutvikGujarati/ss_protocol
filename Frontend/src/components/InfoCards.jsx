@@ -24,6 +24,7 @@ import { TokensDetails } from "../data/TokensDetails";
 import { useAllTokens } from "./Swap/Tokens";
 import { useContext } from "react";
 import { ContractContext } from "../Functions/ContractInitialize";
+import axios from "axios"
 
 const InfoCards = () => {
   const chainId = useChainId();
@@ -641,10 +642,16 @@ const InfoCards = () => {
                           </span>
                           <span className="ms-2">
                             {isLoading ? <DotAnimation /> : `${(formatWithCommas(totalInvestedPls)) || "0"}`} / {" "}
-                            <span style={{ 
-                              color: calculateTotalSum() > (totalInvestedPls || 0) ? '#28a745' : '#ff4081' 
+                            <span style={{
+                              color: calculateTotalSum() > (totalInvestedPls || 0) ? '#28a745' : '#ff4081'
                             }}>
-                              {isLoading ? <DotAnimation /> : `${(formatWithCommas(calculateTotalSum())) || "0"}`}
+                              {isLoading ? (
+                                <DotAnimation />
+                              ) : isNaN(calculateTotalSum()) ? (
+                                "Token Listing Process.."
+                              ) : (
+                                formatWithCommas(calculateTotalSum()) || "0"
+                              )}
                             </span>
                           </span>
                         </p>
@@ -653,7 +660,7 @@ const InfoCards = () => {
                     <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
                       <div className="carddetails2 ">
 
-                       
+
                       </div>
                     </div>
                   </div>
