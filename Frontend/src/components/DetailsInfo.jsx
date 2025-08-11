@@ -130,8 +130,6 @@ const DetailsInfo = ({ selectedToken }) => {
     });
   }, []);
 
-  const targetRatio = 0.03;
-
   useEffect(() => {
     const tooltipTriggerList = document.querySelectorAll(
       '[data-bs-toggle="tooltip"]'

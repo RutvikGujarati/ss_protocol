@@ -16,7 +16,7 @@ import {
   getSTATEContractAddress,
   getAUCTIONContractAddress,
 } from "../Constants/ContractAddresses";
-import { useAccount, useChainId } from "wagmi";
+import { useAccount, useChainId, useWalletClient } from "wagmi";
 
 const SwapContractContext = createContext();
 
@@ -26,8 +26,24 @@ export const SwapContractProvider = ({ children }) => {
   const chainId = useChainId();
   const { loading, provider, signer, AllContracts } =
     useContext(ContractContext);
-  const { address } = useAccount();
+  const { address, connector } = useAccount();
+  const { data: walletClient } = useWalletClient();
+  useEffect(() => {
+    if (!walletClient) return;
 
+    walletClient.transport?.on?.('chainChanged', () => {
+      window.location.reload();
+    });
+
+    // For injected providers like MetaMask
+    connector?.getProvider().then((provider) => {
+      if (provider?.on) {
+        provider.on('chainChanged', () => {
+          window.location.reload();
+        });
+      }
+    });
+  }, [walletClient, connector]);
   // Get contract addresses for the connected chain
   const getDavAddress = () => getDAVContractAddress(chainId);
   const getStateAddress = () => getSTATEContractAddress(chainId);
