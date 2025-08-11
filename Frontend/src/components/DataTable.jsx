@@ -3,18 +3,23 @@ import "../Styles/DataTable.css";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useContext } from "react";
 import { formatWithCommas } from "./DetailsInfo";
 import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useAccount, useChainId } from "wagmi";
 import { useAddTokens, useUsersOwnerTokens } from "../data/AddTokens";
-import { getAUCTIONContractAddress } from "../Constants/ContractAddresses";
+import { getAUCTIONContractAddress, getSTATEContractAddress } from "../Constants/ContractAddresses";
 import IOSpinner from "../Constants/Spinner";
 import TxProgressModal from "./TxProgressModal";
+import { useAllTokens } from "./Swap/Tokens";
+import { ContractContext } from "../Functions/ContractInitialize";
+import toast from "react-hot-toast";
 
 const DataTable = () => {
   const chainId = useChainId();
+  const { signer } = useContext(ContractContext);
+
   const {
     davHolds,
     davGovernanceHolds,
@@ -39,6 +44,9 @@ const DataTable = () => {
     fetchUserTokenAddresses,
     handleAddToken,
     tokenMap,
+    handleDexTokenSwap,
+    DexswappingStates,
+    setDexSwappingStates,
     giveRewardForAirdrop,
   } = useSwapContract();
 
@@ -185,6 +193,11 @@ const DataTable = () => {
     return () => clearTimeout(timer);
   }, [txStatusForSwap]);
 
+  const hasSwapped = (tokenInAddress) => {
+    const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
+    return swaps[address]?.[tokenInAddress] || false;
+  };
+
   const filteredTokens = useMemo(() => {
     return tokens.filter(({ isReversing, AuctionStatus, TimeLeft }) => {
       // Show tokens that are either:
@@ -194,12 +207,38 @@ const DataTable = () => {
       const isAuctionActive = AuctionStatus === "true";
       const isReverseAuction = AuctionStatus === "false" && isReversing === "true";
       const hasTimeLeft = TimeLeft > 0;
-      
+
       // Only show if auction is active OR in reverse phase OR has time left
       return isAuctionActive || isReverseAuction || hasTimeLeft;
     });
   }, [tokens]);
+  const TOKENS = useAllTokens();
+  const ERC20_ABI = [
+    "function allowance(address owner, address spender) view returns (uint256)",
+    "function approve(address spender, uint256 amount) returns (bool)",
+  ];
 
+  const stateAddress = getSTATEContractAddress(chainId)
+
+  const handleSwapClick = (id, onlyInputAmount) => {
+    try {
+      setIsPopupOpen(true)
+      const tokenOutAddress = TOKENS[id].address
+      handleDexTokenSwap(
+        id,
+        onlyInputAmount.toString(), // Convert to string for amountIn
+        signer,
+        address,
+        tokenOutAddress,
+        ERC20_ABI,
+        stateAddress,
+        toast
+      );
+    } catch (error) {
+      console.error("Error in handleSwapClick:", error);
+    } finally { setIsPopupOpen(false) }
+
+  };
   return !isConnected || !address ? (
     <div className="container text-center mt-5">
       <p className="text-light">Please connect your wallet.</p>
@@ -220,6 +259,9 @@ const DataTable = () => {
                 <th></th>
                 <th>Token Name</th>
                 <th></th>
+
+                <th></th>
+                <th>Auction Timer</th>
                 <th
                   style={{
                     paddingTop: "4px",
@@ -229,9 +271,6 @@ const DataTable = () => {
                   <div style={{ fontSize: "13px", lineHeight: "1" }}>1</div>
                   <div>Claim Airdrop</div>
                 </th>
-
-                <th></th>
-                <th>Auction Timer</th>
                 <th
                   style={{
                     paddingTop: "4px",
@@ -295,8 +334,9 @@ const DataTable = () => {
                       isReversing,
                       AirdropClaimedForToken,
                       userHasSwapped,
+                      onlyState,
                       userHasReverse,
-                      // AuctionStatus,
+                      AuctionStatus,
                       TimeLeft,
                       inputTokenAmount,
                       onlyInputAmount,
@@ -320,22 +360,6 @@ const DataTable = () => {
                       </td>
                       <td className="justify-content-center">{`${name}`}</td>
                       <td></td>
-                      <td style={{ position: "relative" }}>
-                        <button
-                          onClick={() => Checking(id, ContractName)}
-                          className="btn btn-primary btn-sm swap-btn"
-                          disabled={
-                            checkingStates[id] ||
-                            (authorized ? davGovernanceHolds : davHolds) == 0
-                          }
-                        >
-                          {checkingStates[id]
-                            ? ` AIRDROPPING...`
-                            : AirdropClaimedForToken == "true"
-                              ? " CLAIMED"
-                              : `${formatWithCommas(AirDropAmount[name])} `}
-                        </button>
-                      </td>
                       <td>
                         {" "}
                         <img
@@ -360,41 +384,40 @@ const DataTable = () => {
                           }}
                         />
                       </td>
+
                       <td className="timer-cell">
                         {formatCountdown(TimeLeft)}
                       </td>
+                      <td style={{ position: "relative" }}>
+                        <button
+                          onClick={() => Checking(id, ContractName)}
+                          className="btn btn-primary btn-sm swap-btn"
+                          disabled={
+                            checkingStates[id] ||
+                            (authorized ? davGovernanceHolds : davHolds) == 0
+                          }
+                        >
+                          {checkingStates[id]
+                            ? ` AIRDROPPING...`
+                            : AirdropClaimedForToken == "true"
+                              ? " CLAIMED"
+                              : `${formatWithCommas(AirDropAmount[name])} `}
+                        </button>
+                      </td>
+
                       <td>
                         <div className="d-flex justify-content-center gap-3 w-100">
                           {id !== "state" && (
                             <>
                               {isReversing == "true" ? (
                                 <>
-                                  <div className="tableClaim hover-container">
-                                    {outputToken <= "1" && (
-                                      <div className="hover-box">
-                                        {`not enough State Token available in your account`}
-                                      </div>
-                                    )}
-                                    {formatWithCommas(outputToken)}
-                                  </div>
-                                  <div className="tableClaim">
-                                    {formatWithCommas(inputTokenAmount)}
-                                  </div>
+                                  Swap  {formatWithCommas(outputToken)}   tokens<br />
+                                  for  {formatWithCommas(inputTokenAmount)} tokens
                                 </>
                               ) : (
                                 <>
-                                  <div className="tableClaim hover-container">
-                                    {onlyInputAmount <= 0 && (
-                                      <div className="hover-box">
-                                        {`not enough ${name} available in your account`}
-                                      </div>
-                                    )}
-                                    {formatWithCommas(inputTokenAmount)}
-                                  </div>
-
-                                  <div className="tableClaim">
-                                    {formatWithCommas(outputToken)}
-                                  </div>
+                                  Swap  {formatWithCommas(inputTokenAmount)}   tokens<br />
+                                  for  {formatWithCommas(outputToken)} tokens
                                 </>
                               )}
                             </>
@@ -472,8 +495,23 @@ const DataTable = () => {
                       ) : (
                         <>
                           <td>
-                            Swap {formatWithCommas(outputToken)} tokens <br />{" "}
-                            for {name} tokens on our DEX
+                            <div className="d-flex justify-content-center gap-3 w-100">
+                              Swap {formatWithCommas(outputToken)}  tokens<br />
+                              for  {id} tokens
+                              <div className="d-flex align-items-center gap-2">
+                                <button
+                                  onClick={() => handleSwapClick(id, onlyState)}
+                                  className="btn btn-sm swap-btn btn-primary"
+                                  disabled={!AuctionStatus || DexswappingStates[id] || onlyState <= 0 || hasSwapped(token)}
+                                >
+                                  {hasSwapped(token) ?
+                                    "Swapped ✅" :
+                                    DexswappingStates[id]
+                                      ? "Swapping..."
+                                      : buttonTextStates[id] || "Swap"}
+                                </button>
+                              </div>
+                            </div>
                           </td>
                           <td></td>
                         </>

@@ -283,8 +283,6 @@ const DetailsInfo = ({ selectedToken }) => {
                   const showDot = greenDotEligibleTokens.includes(
                     token.tokenName
                   );
-                  const ratio = Number(token.ratio);
-                  const isRed = ratio != null && ratio > targetRatio;
                   return (
                     <tr key={token.tokenName}>
                       <td className="text-center align-middle">

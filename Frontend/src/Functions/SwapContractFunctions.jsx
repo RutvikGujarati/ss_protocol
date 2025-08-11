@@ -54,7 +54,9 @@ export const SwapContractProvider = ({ children }) => {
   const [TokenNames, setTokenNames] = useState({});
 
   const [buttonTextStates, setButtonTextStates] = useState({});
+  const [DexbuttonTextStates, setDexButtonTextStates] = useState({});
   const [swappingStates, setSwappingStates] = useState({});
+  const [DexswappingStates, setDexSwappingStates] = useState({});
 
   const [userHashSwapped, setUserHashSwapped] = useState({});
   const [DavAddress, setDavAddress] = useState("");
@@ -65,10 +67,10 @@ export const SwapContractProvider = ({ children }) => {
   const [userHasReverseSwapped, setUserHasReverseSwapped] = useState({});
 
   const [isCliamProcessing, setIsCllaimProccessing] = useState(null);
-  
+
   // Add new state variables for token value calculations
   const [pstateToPlsRatio, setPstateToPlsRatio] = useState("0.0");
-  
+
   const CalculationOfCost = async (amount) => {
     if (chainId == 146) {
       setTotalCost(ethers.parseEther((amount * 100).toString()));
@@ -212,41 +214,41 @@ export const SwapContractProvider = ({ children }) => {
       if (!AllContracts?.AuctionContract || !provider) return;
 
       const tokenMap = await ReturnfetchUserTokenAddresses();
-      
+
       for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
         try {
           // Get current block timestamp from the contract
           const currentBlock = await provider.getBlock('latest');
           const currentBlockTime = currentBlock.timestamp;
-          
+
           // Fetch the remaining auction time from the smart contract
           const AuctionTimeInWei = await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
           const timeLeft = Math.floor(Number(AuctionTimeInWei));
-          
+
           // Store the end time based on blockchain timestamp
           const endTime = currentBlockTime + timeLeft;
           results[tokenName] = timeLeft >= 0 ? timeLeft : 0;
-          
+
           // Set up blockchain-synchronized countdown
           intervalHandles[tokenName] = setInterval(async () => {
             try {
               // Get latest block timestamp
               const latestBlock = await provider.getBlock('latest');
               const latestBlockTime = latestBlock.timestamp;
-              
+
               // Calculate remaining time based on blockchain time
               const remainingTime = Math.max(0, endTime - latestBlockTime);
-              
+
               setAuctionTime((prev) => {
                 const newTime = { ...prev };
                 newTime[tokenName] = remainingTime;
-                
+
                 // Check auction status when time runs low
                 if (remainingTime <= 300) { // 5 minutes or less
                   CheckIsAuctionActive();
                   CheckIsReverse();
                 }
-                
+
                 return newTime;
               });
             } catch (error) {
@@ -309,12 +311,12 @@ export const SwapContractProvider = ({ children }) => {
         // Get current block timestamp
         const currentBlock = await provider.getBlock('latest');
         const currentBlockTime = currentBlock.timestamp;
-        
+
         const timeLeftInSeconds =
           await AllContracts.AuctionContract.getNextClaimTime(TokenAddress);
 
         const timeLeft = Number(timeLeftInSeconds);
-        
+
         // Store the end time based on blockchain timestamp
         const endTime = currentBlockTime + timeLeft;
         results[tokenName] = timeLeft;
@@ -325,10 +327,10 @@ export const SwapContractProvider = ({ children }) => {
             // Get latest block timestamp
             const latestBlock = await provider.getBlock('latest');
             const latestBlockTime = latestBlock.timestamp;
-            
+
             // Calculate remaining time based on blockchain time
             const remainingTime = Math.max(0, endTime - latestBlockTime);
-            
+
             setTimeLeftClaim((prev) => {
               const updated = { ...prev };
               updated[tokenName] = remainingTime;
@@ -1077,6 +1079,204 @@ export const SwapContractProvider = ({ children }) => {
     }
   };
 
+  useEffect(() => {
+    const resetSwapsIfAuctionEnded = async () => {
+      // 1️⃣ Get all token addresses for this user
+      const tokenMap = await ReturnfetchUserTokenAddresses();
+      const extendedMap = {
+        ...tokenMap,
+        state: getStateAddress(),
+      };
+
+      // 2️⃣ Get swap history from localStorage
+      const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
+
+      if (swaps[address]) {
+        // 3️⃣ Remove swap entries for each token in extendedMap
+        for (const [, tokenAddress] of Object.entries(extendedMap)) {
+          // If auction is not active for this token and user has swapped, remove it
+          if (IsAuctionActive[tokenAddress] == "false" && address) {
+            const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
+
+            if (swaps[address]?.[tokenAddress]) {
+              delete swaps[address][tokenAddress];
+
+              // Remove address entry entirely if no tokens left
+              if (Object.keys(swaps[address]).length === 0) {
+                delete swaps[address];
+              }
+
+              localStorage.setItem("auctionSwaps", JSON.stringify(swaps));
+            }
+          }
+        }
+        // If no tokens left for this user, delete the user entry entirely
+        if (Object.keys(swaps[address]).length === 0) {
+          delete swaps[address];
+        }
+
+        // 4️⃣ Save updated swap history
+        localStorage.setItem("auctionSwaps", JSON.stringify(swaps));
+      }
+    }
+    resetSwapsIfAuctionEnded();
+  }, [address]);
+
+
+  const handleDexTokenSwap = async (
+    id,
+    amountIn,
+    signer,
+    address,
+    tokenOutAddress,
+    ERC20_ABI,
+    stateAddress,
+    toast
+  ) => {
+    // Input validation
+    setTxStatusForSwap("initiated");
+    setDexSwappingStates((prev) => ({ ...prev, [id]: true }));
+    setDexButtonTextStates((prev) => ({
+      ...prev,
+      [id]: "fetching quote...",
+    }));
+    const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
+    if (IsAuctionActive[tokenOutAddress] == "false") {
+      if (swaps[address]?.[tokenOutAddress]) {
+        toast.info("You have already swapped this token in this auction period.", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+        return;
+      }
+    }
+
+    if (!amountIn) {
+      toast.error('Invalid input parameters.', {
+        position: 'top-center',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      return;
+    }
+
+    // Step 1: Fetch Quote
+    let quoteData;
+    try {
+      const amount = ethers.parseUnits(amountIn, 18).toString();
+      const tokenInAddress = stateAddress;
+      const url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=1`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Quote fetch failed.');
+      quoteData = await response.json();
+    } catch (err) {
+      console.error('Error fetching quote:', err);
+      toast.error('Failed to fetch quote. Try again.', {
+        position: 'top-center',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      return;
+    }
+
+    // Step 2: Check Allowance
+    const swapContractAddress = '0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6';
+
+    try {
+      const contract = new ethers.Contract(tokenOutAddress, ERC20_ABI, signer);
+      const allowance = await contract.allowance(address, swapContractAddress);
+      const amount = ethers.parseUnits(amountIn || '0', 18);
+      const needsApproval = BigInt(allowance) < BigInt(amount);
+
+      // Step 3: Approve if necessary
+      if (needsApproval) {
+        setDexButtonTextStates((prev) => ({
+          ...prev,
+          [id]: "Checking allowance...",
+        }));
+        setTxStatusForSwap("Approving");
+        try {
+          const maxUint256 = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
+          const tx = await contract.approve(swapContractAddress, maxUint256);
+          await tx.wait();
+        } catch (err) {
+          console.error('Approval error:', err);
+          setTxStatusForSwap("error");
+          toast.error('Approval failed. Try again.', {
+            position: 'top-center',
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          });
+          return;
+        }
+      }
+    } catch (err) {
+      console.error('Error checking allowance:', err);
+      toast.error('Failed to check allowance. Try again.', {
+        position: 'top-center',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      return;
+    }
+
+    try {
+      setTxStatusForSwap("pending");
+      setDexButtonTextStates((prev) => ({
+        ...prev,
+        [id]: "Swapping...",
+      }));
+      const tx = await signer.sendTransaction({
+        to: swapContractAddress,
+        value: quoteData.methodParameters.value,
+        data: quoteData.methodParameters.calldata,
+      });
+      console.log('Transaction sent:', tx.hash);
+      await tx.wait();
+      console.log('Transaction confirmed:', tx.hash);
+      setTxStatusForSwap("confirmed");
+      const updatedSwaps = {
+        ...swaps,
+        [address]: {
+          ...(swaps[address] || {}),
+          [tokenOutAddress]: true, // mark tokenIn as swapped
+        },
+      };
+      localStorage.setItem("auctionSwaps", JSON.stringify(updatedSwaps));
+    } catch (err) {
+      setTxStatusForSwap("error");
+      console.error('Swap failed:', err);
+      if (err?.code === 4001) {
+        setTxStatusForSwap("cancelled");
+        toast.info("Transaction cancelled by user.", {
+          position: "top-center",
+          autoClose: 3000,
+        });
+        return;
+      }
+      setDexSwappingStates((prev) => ({ ...prev, [id]: false }));
+      setTxStatusForSwap("error");
+    } finally {
+      setTxStatusForSwap("error")
+    }
+  };
+
 
   return (
     <SwapContractContext.Provider
@@ -1086,8 +1286,10 @@ export const SwapContractProvider = ({ children }) => {
         signer,
         loading,
         address,
-
+        handleDexTokenSwap,
         CalculationOfCost,
+        setDexSwappingStates,
+        DexswappingStates,
         UsersSupportedTokens,
         TotalCost,
         isAirdropClaimed,

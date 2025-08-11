@@ -10,7 +10,6 @@ import { useAccount } from "wagmi";
 
 import useSwapData from "./useSwapData";
 import toast from "react-hot-toast";
-import React from "react";
 
 const SwapComponent = () => {
   const { signer } = useContext(ContractContext);
@@ -322,15 +321,6 @@ const SwapComponent = () => {
       setInsufficientBalance(isInsufficient);
       setAmountIn(rawValue);
     }
-  };
-
-  // Helper to get percentage amount (without rounding)
-  const getPercentageAmount = (percentage) => {
-    if (!tokenInBalance) return "0";
-    const balance = parseFloat(tokenInBalance);
-    const result = (balance * percentage) / 100;
-    // Return with full precision, don't round
-    return result.toString();
   };
 
   // Helper to get max amount (exact balance without rounding)

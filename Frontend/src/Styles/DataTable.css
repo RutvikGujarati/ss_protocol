@@ -51,7 +51,7 @@
   color: white;
 }
 .table td {
-  font-size: small;
+  font-size: 11px;
 }
 .popup {
   position: fixed;
@@ -100,6 +100,7 @@ table.table-dark tbody tr:last-child td:last-child {
 .table tbody tr {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Adds shadow effect */
   /* border-radius: 8px; */
+  height: 11px;
   border-top: 1px solid #343a40;
   transition: all 0.2s ease;
 }
