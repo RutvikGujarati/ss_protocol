@@ -46,7 +46,6 @@ const DataTable = () => {
     tokenMap,
     handleDexTokenSwap,
     DexswappingStates,
-    setDexSwappingStates,
     giveRewardForAirdrop,
   } = useSwapContract();
 
