@@ -371,7 +371,7 @@ const SwapComponent = () => {
                   <input
                     type="text"
                     className="form-control"
-                    value={formatNumberWithCommas(amountIn)}
+                    value={(amountIn)}
                     onChange={(e) => handleInputChange(e.target.value)}
                     placeholder="0.0"
                     style={{

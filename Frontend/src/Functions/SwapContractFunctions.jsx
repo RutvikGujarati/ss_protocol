@@ -975,7 +975,7 @@ export const SwapContractProvider = ({ children }) => {
       // 👇 Detect user rejection
       if (error?.code === 4001) {
         setTxStatusForSwap("cancelled");
-        toast.info("Transaction cancelled by user.", {
+        toast.error("Transaction cancelled by user.", {
           position: "top-center",
           autoClose: 3000,
         });
@@ -1159,7 +1159,7 @@ export const SwapContractProvider = ({ children }) => {
     const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
     if (IsAuctionActive[tokenOutAddress] == "false") {
       if (swaps[address]?.[tokenOutAddress]) {
-        toast.info("You have already swapped this token in this auction period.", {
+        toast.error("You have already swapped this token in this auction period.", {
           position: "top-center",
           autoClose: 3000,
         });
@@ -1279,7 +1279,7 @@ export const SwapContractProvider = ({ children }) => {
           data: quoteData.methodParameters.calldata,
         });
       } else {
-        txData = {
+        const txData = {
           to: quoteData.to,
           data: quoteData.data,
         };
@@ -1302,7 +1302,7 @@ export const SwapContractProvider = ({ children }) => {
       console.error('Swap failed:', err);
       if (err?.code === 4001) {
         setTxStatusForSwap("cancelled");
-        toast.info("Transaction cancelled by user.", {
+        toast.error("Transaction cancelled by user.", {
           position: "top-center",
           autoClose: 3000,
         });

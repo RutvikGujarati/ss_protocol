@@ -17,6 +17,7 @@ import { ContractContext } from "../Functions/ContractInitialize";
 import { useAllTokens } from "./Swap/Tokens";
 import { useChainId } from "wagmi";
 import { explorerUrls } from "../Constants/ContractAddresses";
+import { chainCurrencyMap } from "../../WalletConfig";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -146,6 +147,7 @@ const DetailsInfo = ({ selectedToken }) => {
     const query = e.target.value.trim(); // Trim to remove leading/trailing spaces
     setLocalSearchQuery(query);
   };
+  const nativeSymbol = chainCurrencyMap[chainId] || 'PLS';
 
   // Filter tokens by tokenName based on search query
   const filteredTokens = tokens.filter((item) => {
@@ -270,11 +272,11 @@ const DetailsInfo = ({ selectedToken }) => {
                   <th className="text-center">DAV Vault</th>
                   <th className="text-center">Burned</th>
                   <th className="text-center">Info</th>
-                  <th className="text-center">Your Est. PLS Value <br />
+                  <th className="text-center">Your Est. {nativeSymbol} Value <br />
                     {loading ? (
                       <IOSpinner />
                     ) : (
-                      `${calculateTotalSum()} PLS`
+                      `${calculateTotalSum()} ${nativeSymbol}`
                     )}</th>
                   <th className="col-auto"></th>
                 </tr>

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import PLSLogo from "../../assets/pls1.png";
 import BNBLogo from "../../assets/bnb.png";
+import matic from "../../assets/matic-token-icon.png";
 import sonic from "../../assets/S_token.svg";
 import { formatWithCommas } from ".././DetailsInfo";
 import { useDAvContract } from "../../Functions/DavTokenFunctions";
@@ -44,6 +45,7 @@ const AuctionSection = () => {
     const setBackLogo = () => {
         if (chainId === 369) return PLSLogo;
         else if (chainId === 56) return BNBLogo;
+        else if (chainId === 137) return matic;
         else if (chainId === 146) return sonic;
         return PLSLogo;
     };
@@ -53,7 +55,9 @@ const AuctionSection = () => {
             ? { width: "170px", height: "140px" }
             : chainId === 369
                 ? { width: "110px", height: "110px" }
-                : { width: "110px", height: "140px" };
+                : chainId === 137
+                    ? { width: "110px", height: "120px" }
+                    : { width: "110px", height: "140px" }
     };
 
     const handleMint = () => {

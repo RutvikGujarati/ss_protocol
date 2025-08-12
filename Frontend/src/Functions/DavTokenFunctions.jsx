@@ -502,7 +502,7 @@ export const DavProvider = ({ children }) => {
       // Update toast notification
       toast.dismiss(toastId);
       if (!toastId) {
-        toast.info("❌ Transaction rejected by user", {
+        toast.error("❌ Transaction rejected by user", {
           position: "top-center",
           autoClose: 3000,
         });
