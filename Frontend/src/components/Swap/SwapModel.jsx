@@ -351,112 +351,124 @@ const SwapComponent = () => {
   return (
     <>
       {/* Inline transaction progress bar */}
-      <div className="d-flex justify-content-center swap-container">
-        <div
-          className="d-flex flex-row flex-wrap justify-content-center w-100"
-          style={{
-            gap: 32,
-            maxWidth: "100%",
-            alignItems: "flex-start",
-          }}
-        >
-          {/* Main swap card */}
-          <div className="card-container">
-            <div className="shadow-sm rounded-3 swap-card ">
-              <label className="text-light small mb-1 font-weight-normal ">From</label>
-
-              <div>
-
-                <div className="d-flex align-items-center gap-2" style={{ position: 'relative' }}>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={(amountIn)}
-                    onChange={(e) => handleInputChange(e.target.value)}
-                    placeholder="0.0"
+      <div className="container mt-4">
+        <div className="row g-4 d-flex align-items-stretch pb-1">
+          <div className="col-md-4 p-0 m-2 cards">
+            <div className="card bg-dark text-light border-light p-3 d-flex w-100" style={{ minHeight: "260px" }}>
+              <label className="detailText text-center small mb-1 font-weight-normal w-100">YOU PAY</label>
+              <div className="d-flex flex-column align-items-center gap-2" style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={amountIn}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  placeholder="0.0"
+                  style={{
+                    boxShadow: "none",
+                    "--placeholder-color": "#6c757d",
+                    backgroundColor: (isApproving || isSwapping) ? "#343a40" : undefined,
+                    borderColor: insufficientBalance ? "#dc3545" : undefined,
+                    maxWidth: "80%",
+                  }}
+                  disabled={isApproving || isSwapping}
+                />
+                {inputUsdValue && (
+                  <small
+                    className="text-secondary"
                     style={{
-                      boxShadow: "none",
-                      "--placeholder-color": "#6c757d",
-                      backgroundColor: (isApproving || isSwapping) ? "#343a40" : undefined,
-                      borderColor: insufficientBalance ? "#dc3545" : undefined,
+                      alignSelf: "flex-start",
+                      marginLeft: "10%", // aligns with input box
+                      fontSize: "0.7rem"
                     }}
+                  >
+                    {inputUsdValue}
+                  </small>
+                )}
+                <div className="d-flex align-items-center gap-1">
+                  <button
+                    className="d-flex align-items-center justify-content-between gap-2 px-2 token-select-btn"
+                    onClick={() => openModal("in")}
                     disabled={isApproving || isSwapping}
-                  />
-
-                  <div className="d-flex align-items-center gap-1">
-                    <button
-                      className="d-flex align-items-center justify-content-between gap-2 px-2 token-select-btn"
-                      onClick={() => openModal("in")}
-                      disabled={isApproving || isSwapping}
-                    >
-                      <span className="d-flex align-items-center gap-2">
-                        {getTokenLogo(tokenIn)}
-                        <span style={{ fontWeight: 500, fontSize: "1rem" }}>
-                          {getDisplaySymbol(TOKENS[tokenIn]?.symbol || tokenIn)}
-                        </span>
+                  >
+                    <span className="d-flex align-items-center gap-2">
+                      {getTokenLogo(tokenIn)}
+                      <span style={{ fontWeight: 500, fontSize: "1rem" }}>
+                        {getDisplaySymbol(TOKENS[tokenIn]?.symbol || tokenIn)}
                       </span>
-                      <span className="ms-2 d-flex align-items-center">
-                        <i
-                          className="bi bi-chevron-down"
-                          style={{ fontSize: "1rem" }}
-                        ></i>
-                      </span>
-                    </button>
-                  </div>
+                    </span>
+                    <span className="ms-2 d-flex align-items-center">
+                      <i
+                        className="bi bi-chevron-down"
+                        style={{ fontSize: "1rem" }}
+                      ></i>
+                    </span>
+                  </button>
                 </div>
               </div>
               <div
-                className="d-flex justify-content-between align-items-center mb-2"
+                className="d-flex justify-content-center align-items-center mb-2 mt-1"
                 style={{ fontSize: "0.7rem" }}
               >
-                <small className="text-secondary">
-                  {inputUsdValue && <span>{inputUsdValue}</span>}
-                </small>
                 <span
                   className="text-secondary small fw-normal ms-1"
                   style={{
                     cursor: (isApproving || isSwapping) ? "default" : "pointer",
                     opacity: (isApproving || isSwapping) ? "0.6" : "1"
                   }}
-                  onClick={(isApproving || isSwapping) ? undefined : () => setAmountIn(getMaxAmount())}>
-                  Bal:{" "}
-                  {tokenInBalance
-                    ? `${parseFloat(tokenInBalance).toFixed(2)}`
-                    : "-"}
+                  onClick={(isApproving || isSwapping) ? undefined : () => setAmountIn(getMaxAmount())}
+                >
+                  Bal: {tokenInBalance ? `${parseFloat(tokenInBalance).toFixed(2)}` : "-"}
                 </span>
               </div>
               {insufficientBalance && (
-                <div className="text-danger small mb-2">
+                <div className="text-danger text-center small mb-2">
                   Insufficient balance. You only have {parseFloat(tokenInBalance).toFixed(2)} {TOKENS[tokenIn]?.symbol || tokenIn}.
                 </div>
               )}
+            </div>
+          </div>
 
-              <div className="text-center ">
-                <button
-                  className="btn btn-outline-primary btn-sm rounded-circle "
-                  onClick={handleSwitchTokens}
-                  disabled={isApproving || isSwapping}
-                  style={{ width: "40px", height: "40px" }}
-                >
-                  ⇅
-                </button>
-              </div>
+          {/* Second Card: To Token Selection */}
+          <div className="col-md-4 p-0 m-2 cards">
+            <div className="card bg-dark text-light border-light p-3 d-flex w-100">
 
-              <label className="text-light small mb-1 font-weight-normal">To</label>
-
-              <div className="d-flex align-items-center gap-2">
+              <label className="detailText text-center small mb-1 font-weight-normal w-100">To</label>
+              <div className="d-flex flex-column align-items-center gap-2" style={{ position: 'relative' }}>
                 <input
                   type="text"
                   className="form-control font-weight-bold"
                   placeholder="0.0"
-                  value={
-                    isLoading
-                      ? "Fetching..."
-                      : amountOut
-                  }
+                  value={isLoading ? "Fetching..." : amountOut}
                   readOnly
-                  style={{ fontSize: "1rem", background: "#343a40", "--placeholder-color": "#6c757d" }}
+                  style={{ fontSize: "1rem", width: "80%", background: "#343a40", "--placeholder-color": "#6c757d" }}
                 />
+                {outputUsdValue && (
+                  <div
+                    className="d-flex align-items-start gap-2 mb-2"
+                    style={{
+                      fontSize: "0.7rem",
+                      alignSelf: "flex-start",
+                      marginLeft: "10%", // aligns with centered input edges
+                    }}
+                  >
+                    <small className="text-secondary">{outputUsdValue}</small>
+                    {getPriceDifference() && (
+                      <span
+                        className="badge"
+                        style={{
+                          color: getPriceDifference().isPositive ? "#28a745" : "#dc3545",
+                          fontSize: "0.7rem",
+                          fontWeight: 100,
+                          padding: "2px 6px",
+                        }}
+                      >
+                        {getPriceDifference().isPositive ? "+" : ""}(
+                        {getPriceDifference().percentage.toFixed(2)}%)
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 <div className="d-flex align-items-center gap-1">
                   <button
                     className="d-flex align-items-center justify-content-between gap-2 px-2 token-select-btn"
@@ -478,31 +490,7 @@ const SwapComponent = () => {
                   </button>
                 </div>
               </div>
-              {outputUsdValue && (
-                <div
-                  className="d-flex justify-content-start align-items-center gap-2 mb-2"
-                  style={{ fontSize: "0.7rem" }}
-                >
-                  <small className="text-secondary">{outputUsdValue}</small>
-                  {getPriceDifference() && (
-                    <span
-                      className="badge"
-                      style={{
-                        color: getPriceDifference().isPositive
-                          ? "#28a745"
-                          : "#dc3545",
-                        fontSize: "0.7rem",
-                        fontWeight: 100,
-                        padding: "2px 6px",
-                      }}
-                    >
-                      {getPriceDifference().isPositive ? "+" : ""}
-                      ({getPriceDifference().percentage.toFixed(2)}%)
-                    </span>
-                  )}
-                </div>
-              )}
-              {/* Inline transaction progress bar below Network Fee */}
+
               {(isSwapping || isApproving || showTxModal) && (
                 <div className="tx-progress-container mb-3 mt-3">
                   <div className="step-line">
@@ -529,7 +517,6 @@ const SwapComponent = () => {
                   </div>
                 </div>
               )}
-
               <div className="d-flex justify-content-center align-items-center mt-3">
                 <div className="position-relative">
                   {needsApproval ? (
@@ -584,18 +571,9 @@ const SwapComponent = () => {
                   )}
                 </div>
               </div>
-
-              {/* Details Toggle */}
-              <div className="d-flex justify-content-between align-items-center mt-3" >
+              <div className="d-flex justify-content-end align-items-center mt-3">
                 <button
-                  className="btn btn-link text-light small  font-weight-normal p-0"
-                  style={{ textDecoration: "none", fontWeight: 200, fontSize: "14px" }}
-                  onClick={() => setShowDetails((prev) => !prev)}
-                >
-                  Details {showDetails ? <i className="bi bi-chevron-up"></i> : <i className="bi bi-chevron-down"></i>}
-                </button>
-                <button
-                  className="btn btn-link text-light small font-weight-normal p-0"
+                  className="btn detailText btn-link text-light small font-weight-normal p-0"
                   style={{ textDecoration: "none", fontWeight: 200, fontSize: "14px" }}
                   onClick={() => {
                     setTokenIn("STATE");
@@ -608,39 +586,38 @@ const SwapComponent = () => {
                   <i className="bi bi-arrow-clockwise"></i> Refresh
                 </button>
               </div>
-
-              {/* Details Section */}
-              {showDetails && (
-                <div className="border border-secondary rounded-3 px-2 py-1 mt-1 bg-dark bg-opacity-50" style={{ fontSize: "0.85rem" }}>
-                  <div className="d-flex justify-content-between align-items-center h-100 mb-1">
-                    <small className="text-secondary" style={{ fontSize: "9.8px" }}>Network Fee: ${estimatedGas}</small>
-                  </div>
-                  {/* Collapsible Active Auctions */}
-                  <div className="border-top border-secondary pt-1 mb-0">
-                    <div className="d-flex justify-content-between align-items-center h-100 mb-0">
-                      <small className="text-secondary" style={{ fontSize: "9.8px" }}>Route: Piteas API</small>
-                    </div>
-                  </div>
-                  <div className="border-top border-secondary pt-1 mb-0">
-                    <div className="d-flex justify-content-between align-items-center h-100 mb-0">
-                      <small className="text-secondary" style={{ fontSize: "9.8px" }}>Slippage 1% : (Gas swap levy)
-                      </small>
-                    </div>
-                  </div>
-
-                </div>
-              )}
-
-              {isModalOpen && (
-                <TokenSearchModal
-                  tokens={TOKENS}
-                  excludeToken={modalType === "in" ? tokenOut : tokenIn}
-                  onSelect={selectToken}
-                  onClose={closeModal}
-                />
-              )}
             </div>
           </div>
+
+          {/* Third Card: Swap Button and Details Section */}
+          <div className="col-md-4 p-0 m-2 cards">
+            <div className="card bg-dark text-light border-light p-3 d-flex w-100">
+              <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
+                <div className="carddetails2">
+                  <h6 className="detailText">Details</h6>
+                  <p className="mb-1">
+                    <span className="detailText">Network Fee - </span>
+                    <span className="detailText">{estimatedGas}</span>
+                  </p>
+                  <p className="mb-1 d-flex align-items-center gap-2 flex-wrap">
+                    <span className="detailText">Route: Piteas API </span>
+                  </p>
+                  <p className="mb-1">
+                    <span className="detailText">Slippage 1% : (Gas swap levy) </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {isModalOpen && (
+            <TokenSearchModal
+              tokens={TOKENS}
+              excludeToken={modalType === "in" ? tokenOut : tokenIn}
+              onSelect={selectToken}
+              onClose={closeModal}
+            />
+          )}
         </div>
       </div>
     </>
