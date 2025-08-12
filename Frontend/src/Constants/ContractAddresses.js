@@ -15,9 +15,9 @@ export const CONTRACT_ADDRESSES = {
         AUCTION: "0x870280Fd978EFf5A7B630C07982975E44AAe659E",
     },
     [CHAIN_IDS.POLYGON]: {
-        DAV_TOKEN: "", // Add Polygon mainnet addresses when available
-        STATE_TOKEN: "",
-        AUCTION: "0x1c385b46Ad2F324Ef30274f41877f5E4E31566D0",
+        DAV_TOKEN: "0xb0D4923bDAD80998A473EA6874A3005DB2bD19A1", // Add Polygon mainnet addresses when available
+        STATE_TOKEN: "0x9E7f120EA417515303A80DBF1c13a238bd1D365E",
+        AUCTION: "0x610E1044C026fCf6AB24B49cad1FF4c616647636",
     },
     [CHAIN_IDS.MAINNET]: {
         DAV_TOKEN: "", // Add Ethereum mainnet addresses when available
@@ -48,6 +48,12 @@ export const getSTATEContractAddress = (chainId) => {
 
 export const getAUCTIONContractAddress = (chainId) => {
     return getContractAddress(chainId, 'AUCTION') || getContractAddress(CHAIN_IDS.PULSECHAIN, 'AUCTION');
+};
+export const explorerUrls = {
+    1: "https://etherscan.io/address/",          // Ethereum Mainnet
+    137: "https://polygonscan.com/address/",     // Polygon Mainnet
+    10: "https://optimistic.etherscan.io/address/", // Optimism
+    369: "https://kekxplorer.avecdra.pro/address/", 
 };
 
 // Get all contract addresses for a chain

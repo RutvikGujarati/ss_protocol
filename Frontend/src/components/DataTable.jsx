@@ -9,7 +9,7 @@ import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useAccount, useChainId } from "wagmi";
 import { useAddTokens, useUsersOwnerTokens } from "../data/AddTokens";
-import { getAUCTIONContractAddress, getSTATEContractAddress } from "../Constants/ContractAddresses";
+import { explorerUrls, getAUCTIONContractAddress, getSTATEContractAddress } from "../Constants/ContractAddresses";
 import IOSpinner from "../Constants/Spinner";
 import TxProgressModal from "./TxProgressModal";
 import { useAllTokens } from "./Swap/Tokens";
@@ -286,7 +286,7 @@ const DataTable = () => {
                   >
                     Ratio Swapping Auction
                     <a
-                      href={`https://kekxplorer.avecdra.pro/address/${getAuctionAddress()}`}
+                      href={`${explorerUrls[chainId] || "https://defaultexplorer.io/address/"}${getAuctionAddress()}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{

@@ -15,6 +15,8 @@ import state from "../assets/statelogo.png";
 import useTokenBalances from "./Swap/UserTokenBalances";
 import { ContractContext } from "../Functions/ContractInitialize";
 import { useAllTokens } from "./Swap/Tokens";
+import { useChainId } from "wagmi";
+import { explorerUrls } from "../Constants/ContractAddresses";
 
 export const formatWithCommas = (value) => {
   if (value === null || value === undefined) return "";
@@ -83,6 +85,7 @@ const DetailsInfo = ({ selectedToken }) => {
     DavAddress,
     pstateToPlsRatio,
   } = useSwapContract();
+  const chainId = useChainId();
 
   const { totalStateBurned } = useDAvContract();
   const [localSearchQuery, setLocalSearchQuery] = useState("");
@@ -311,7 +314,11 @@ const DetailsInfo = ({ selectedToken }) => {
                             )}
                           </span>
                           <span>
-                            {token.tokenName === "DAV" ? "pDAV" : token.tokenName === "STATE" ? "pSTATE" : token.tokenName}
+                              {token.tokenName === "DAV"
+                                ? (chainId === 137 ? "mDAV" : "pDAV")
+                                : token.tokenName === "STATE"
+                                  ? (chainId === 137 ? "mSTATE" : "pSTATE")
+                                  : token.tokenName}
                           </span>
                         </div>
                       </td>
@@ -369,7 +376,7 @@ const DetailsInfo = ({ selectedToken }) => {
                         <div className="d-flex justify-content-center align-items-center gap-3">
                           <div className="d-flex flex-column align-items-center">
                             <a
-                              href={`https://kekxplorer.avecdra.pro/address/${token.TokenAddress}`}
+                              href={`${explorerUrls[chainId] || "https://defaultexplorer.io/address/"}${token.TokenAddress}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               style={{ fontSize: "15px", color: "white" }}
@@ -418,9 +425,9 @@ const DetailsInfo = ({ selectedToken }) => {
                                 handleAddToken(
                                   token.TokenAddress,
                                   token.tokenName === "DAV"
-                                    ? "pDAV"
+                                    ? (chainId === 137 ? "mDAV" : "pDAV")  // Polygon mDAV, else pDAV
                                     : token.tokenName === "STATE"
-                                      ? "pSTATE"
+                                      ? (chainId === 137 ? "mSTATE" : "pSTATE")  // Polygon mSTATE, else pSTATE
                                       : token.tokenName
                                 )
                               }
