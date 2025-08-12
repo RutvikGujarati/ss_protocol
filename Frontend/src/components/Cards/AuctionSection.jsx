@@ -14,6 +14,7 @@ import { useAccount, useChainId } from "wagmi";
 import { faCheck, faCopy } from "@fortawesome/free-solid-svg-icons";
 import toast from "react-hot-toast";
 import { useSwapContract } from "../../Functions/SwapContractFunctions";
+import { chainCurrencyMap } from "../../../WalletConfig";
 
 const AuctionSection = () => {
     const chainId = useChainId();
@@ -39,7 +40,7 @@ const AuctionSection = () => {
     const [copied, setCopied] = useState(false);
     const [copiedCode, setCopiedCode] = useState("");
     const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
-
+    const nativeSymbol = chainCurrencyMap[chainId] || 'PLS';
     const setBackLogo = () => {
         if (chainId === 369) return PLSLogo;
         else if (chainId === 56) return BNBLogo;
@@ -146,8 +147,8 @@ const AuctionSection = () => {
                                 </label>
                             </div>
                         </div>
-                        <h5 className="detailAmount">1 DAV TOKEN = {formatWithCommas(Math.floor(DavMintFee))} PLS</h5>
-                        <h5 className="detailAmount mb-4">{TotalCost ? formatNumber(ethers.formatUnits(TotalCost, 18)) : "0"} PLS</h5>
+                        <h5 className="detailAmount">1 DAV TOKEN = {formatWithCommas(Math.floor(DavMintFee))} {nativeSymbol}</h5>
+                        <h5 className="detailAmount mb-4">{TotalCost ? formatNumber(ethers.formatUnits(TotalCost, 18)) : "0"} {nativeSymbol} </h5>
                         {load ? (
                             <div className="tx-progress-container">
                                 <div className="step-line">
@@ -187,7 +188,7 @@ const AuctionSection = () => {
                     <div className="card bg-dark text-light border-light p-3 d-flex w-100">
                         <img
                             src={setBackLogo()}
-                            alt="PLS Logo"
+                            alt="native currency Logo"
                             style={{
                                 position: "absolute",
                                 ...getLogoSize(),
@@ -221,7 +222,7 @@ const AuctionSection = () => {
                                 <h6 className="detailText d-flex" style={{ fontSize: "14px", textTransform: "capitalize" }}>
                                     {chainId == 146 ? "SONIC - SWAP LEVY" : "GAS SWAP LEVY"}
                                 </h6>
-                                <h5>{formatWithCommas(claimableAmount)} PLS</h5>
+                                <h5>{formatWithCommas(claimableAmount)} {nativeSymbol}</h5>
                                 <div className="d-flex justify-content-center">
                                     <button
                                         onClick={async () => {
@@ -253,7 +254,7 @@ const AuctionSection = () => {
                                     <h6 className="detailText">INFO</h6>
                                     <p className="mb-1">
                                         <span className="detailText">Affiliate com received - </span>
-                                        <span>{formatWithCommas(ReferralAMount)} PLS</span>
+                                        <span>{formatWithCommas(ReferralAMount)} {nativeSymbol}</span>
                                     </p>
                                     <p className="mb-1 d-flex align-items-center gap-2 flex-wrap">
                                         <span className="detailText">Your Affiliate Link - </span>
@@ -273,7 +274,7 @@ const AuctionSection = () => {
                                         </button>
                                     </p>
                                     <p className="mb-1">
-                                        <span className="detailText">ROI / PLS - </span>
+                                        <span className="detailText">ROI / {nativeSymbol} - </span>
                                         <span className="ms-2">
                                             {isLoading ? <DotAnimation /> : formatWithCommas(totalInvestedPls) || "0"} /{" "}
                                             <span style={{ color: "#28a745" }}>

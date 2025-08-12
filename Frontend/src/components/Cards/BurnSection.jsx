@@ -4,11 +4,13 @@ import { useState } from "react";
 import { formatWithCommas } from ".././DetailsInfo";
 import { useDAvContract } from "../../Functions/DavTokenFunctions";
 import DotAnimation from "../../Animations/Animation";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 import IOSpinner from "../../Constants/Spinner";
+import { chainCurrencyMap } from "../../../WalletConfig";
 
 const BurnSection = () => {
     const { address } = useAccount();
+    const chainId = useChainId();
     const {
         BurnStateTokens,
         claimableAmountForBurn,
@@ -33,6 +35,7 @@ const BurnSection = () => {
     const [rawAmount, setRawAmount] = useState("");
     const customWidth = "180px";
     const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
+    const nativeSymbol = chainCurrencyMap[chainId] || 'PLS';
 
     const handleBurnClick = async () => {
         const amountToBurn = rawAmount.trim() === "" ? stateHolding : rawAmount;
@@ -67,7 +70,7 @@ const BurnSection = () => {
                                         <p className="mb-1 detailText">TREASURY</p>
                                     </div>
                                     <div className="d-flex justify-content-center">
-                                        <h5>{formatWithCommas(ContractPls)} PLS</h5>
+                                        <h5>{formatWithCommas(ContractPls)} {nativeSymbol}</h5>
                                     </div>
                                 </div>
                             </div>
@@ -169,7 +172,7 @@ const BurnSection = () => {
                         <div className="p-2 pt-3 pb-2">
                             <p className="mb-2 detailText">EXPECTED CLAIM</p>
                             <div className="d-flex justify-content-center">
-                                <h5 className="mt-2">{formatWithCommas(claimableAmountForBurn)} PLS</h5>
+                                <h5 className="mt-2">{formatWithCommas(claimableAmountForBurn)} {nativeSymbol} </h5>
                             </div>
                             <div className="d-flex justify-content-center mt-4">
                                 <button
@@ -211,7 +214,7 @@ const BurnSection = () => {
                                 )}
                             </h6>
                             <h6 className="detailText mb-0" style={{ fontSize: "14px", textTransform: "capitalize" }}>
-                                CLAIMABLE TREASURY - {formatWithCommas(usableTreasury)} PLS
+                                CLAIMABLE TREASURY - {formatWithCommas(usableTreasury)} {nativeSymbol}
                             </h6>
                         </div>
                     </div>

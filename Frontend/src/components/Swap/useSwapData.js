@@ -3,8 +3,10 @@ import { formatUnits, parseUnits } from "ethers";
 import { useAccount } from "wagmi";
 import { ethers } from "ethers";
 import { ContractContext } from "../../Functions/ContractInitialize";
+import { useChainId } from 'wagmi';
 
 const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
+	const chainId = useChainId();
 	const { signer } = useContext(ContractContext);
 	const { address } = useAccount();
 	const [amountOut, setAmountOut] = useState("");
@@ -60,28 +62,73 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 			return;
 		}
 
-		// Increment request id
 		requestIdRef.current += 1;
 		const thisRequestId = requestIdRef.current;
 
 		try {
 			setIsLoading(true);
 			setAmountOut(""); // Clear output while fetching
+
 			const amount = parseUnits(amountIn, TOKENS[tokenIn].decimals).toString();
 			const tokenInAddress = getApiTokenAddress(tokenIn);
 			const tokenOutAddress = getApiTokenAddress(tokenOut);
-			const url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=1`;
-			const response = await fetch(url);
-			if (!response.ok) throw new Error("Quote fetch failed.");
-			const data = await response.json();
+
+			let data;
+
+			if (chainId === 369) {
+				// Piteas API
+				const url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=1`;
+				const response = await fetch(url);
+				if (!response.ok) throw new Error("Quote fetch failed.");
+				data = await response.json();
+			} else {
+				// SushiSwap API for other chains
+				const SWAP_API_URL = new URL(`https://api.sushi.com/swap/v7/${chainId}`);
+				SWAP_API_URL.searchParams.set("tokenIn", tokenInAddress);
+				SWAP_API_URL.searchParams.set("tokenOut", tokenOutAddress);
+				SWAP_API_URL.searchParams.set("amount", amount);
+				SWAP_API_URL.searchParams.set("sender", address || "0x0000000000000000000000000000000000000000");
+				console.log("SushiSwap Quote API:", SWAP_API_URL.toString()); // ✅ Logs the final API URL
+
+				const response = await fetch(SWAP_API_URL.toString());
+				if (!response.ok) throw new Error("SushiSwap quote fetch failed.");
+				data = await response.json();
+			}
+
+
 			// Only update state if this is the latest request
 			if (requestIdRef.current === thisRequestId) {
-				setAmountOut(Number(formatUnits(data.destAmount, TOKENS[tokenOut].decimals)).toFixed(4));
-				setEstimatedGas(data.gasUseEstimateUSD?.toFixed(4) || null);
-				setQuoteData(data.methodParameters);
-				setRouteDetails(data.route || { swaps: [] });
+				if (chainId === 369) {
+					setAmountOut(Number(formatUnits(data.destAmount, TOKENS[tokenOut].decimals)).toFixed(4));
+					setEstimatedGas(data.gasUseEstimateUSD?.toFixed(4) || null);
+					setQuoteData(data.methodParameters);
+					setRouteDetails(data.route || { swaps: [] });
+				} else {
+					// SushiSwap API response format
+					if (data.status === 'Success') {
+						const amountOutRaw = data.assumedAmountOut ?? 0;
+						setAmountOut(Number(formatUnits(amountOutRaw, TOKENS[tokenOut].decimals)).toFixed(4));
+
+						// Sushi's swapPrice is the network fee (in native currency)
+						setEstimatedGas(data.swapPrice ? Number(data.swapPrice).toFixed(6) : null);
+
+						setQuoteData(data.tx);
+						setRouteDetails(data.route || { swaps: [] });
+					} else if (data.status === 'NoWay') {
+						console.warn(`No swap route found for ${tokenIn} → ${tokenOut} on chain ${chainId}`);
+						setAmountOut("");
+						setEstimatedGas(null);
+						setQuoteData(null);
+						setRouteDetails([]);
+					} else {
+						throw new Error(`SushiSwap status: ${data.status}`);
+					}
+				}
 			}
-			console.log("data",data)
+
+
+			console.log("data", data);
+
 		} catch (err) {
 			if (requestIdRef.current === thisRequestId) {
 				console.error(err);

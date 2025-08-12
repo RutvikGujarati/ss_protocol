@@ -7,9 +7,12 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import GraphemeSplitter from "grapheme-splitter";
 import { formatWithCommas } from "../DetailsInfo";
+import { chainCurrencyMap } from "../../../WalletConfig";
+import { useChainId } from "wagmi";
 
 const AddTokenSection = () => {
     const splitter = new GraphemeSplitter();
+    const chainId = useChainId();
     const {
         AddYourToken,
         TokenProcessing,
@@ -24,6 +27,7 @@ const AddTokenSection = () => {
     const [Emoji, setEmoji] = useState("");
     const uploadingToastIdRef = useRef(null);
     const customWidth = "180px";
+    const nativeSymbol = chainCurrencyMap[chainId] || 'PLS';
 
     useEffect(() => {
         if (isUploadingToPinata) {
@@ -256,7 +260,7 @@ const AddTokenSection = () => {
                         <div className="p-2 pt-3 pb-2">
                             <p className="mb-2 detailText ">TOKEN Fee</p>
                             <h6 className="text-center  mt-3">
-                                {formatWithCommas(adjustedTokenProcessing)} PLS
+                                {formatWithCommas(adjustedTokenProcessing)} {nativeSymbol}
                             </h6>
 
                             <button
@@ -286,8 +290,8 @@ const AddTokenSection = () => {
                                     fontSize: "14px",
                                 }}
                             >
-                                <li>Token Fee + Emoji Fee - 15 Million PLS </li>
-                                <li>Token Fee + Image Fee - 20 Million PLS </li>
+                                <li>Token Fee + Emoji Fee - 15 Million {nativeSymbol} </li>
+                                <li>Token Fee + Image Fee - 20 Million {nativeSymbol} </li>
                             </ul>
                         </h6>
                     </div>

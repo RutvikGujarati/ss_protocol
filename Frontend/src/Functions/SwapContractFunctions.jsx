@@ -1185,7 +1185,16 @@ export const SwapContractProvider = ({ children }) => {
     try {
       const amount = ethers.parseUnits(amountIn, 18).toString();
       const tokenInAddress = stateAddress;
-      const url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=1`;
+      let url;
+      if (chainId == 369) {
+        url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=1`;
+      } else {
+        const url = new URL(`https://api.sushi.com/swap/v7/${chainId}`);
+        url.searchParams.set("tokenIn", tokenInAddress);
+        url.searchParams.set("tokenOut", tokenOutAddress);
+        url.searchParams.set("amount", amount);
+        url.searchParams.set("sender", address || "0x0000000000000000000000000000000000000000");
+      }
       const response = await fetch(url);
       if (!response.ok) throw new Error('Quote fetch failed.');
       quoteData = await response.json();
@@ -1204,8 +1213,12 @@ export const SwapContractProvider = ({ children }) => {
     }
 
     // Step 2: Check Allowance
-    const swapContractAddress = '0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6';
-
+    let swapContractAddress;
+    if (chainId == 369) {
+      swapContractAddress = "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6"
+    } else {
+      swapContractAddress = quoteData.to;
+    }
     try {
       const contract = new ethers.Contract(tokenOutAddress, ERC20_ABI, signer);
       const allowance = await contract.allowance(address, swapContractAddress);
@@ -1258,11 +1271,20 @@ export const SwapContractProvider = ({ children }) => {
         ...prev,
         [id]: "Swapping...",
       }));
-      const tx = await signer.sendTransaction({
-        to: swapContractAddress,
-        value: quoteData.methodParameters.value,
-        data: quoteData.methodParameters.calldata,
-      });
+      let tx;
+      if (chainId == 369) {
+        tx = await signer.sendTransaction({
+          to: swapContractAddress,
+          value: quoteData.methodParameters.value,
+          data: quoteData.methodParameters.calldata,
+        });
+      } else {
+        txData = {
+          to: quoteData.to,
+          data: quoteData.data,
+        };
+        tx = await signer.sendTransaction(txData);
+      }
       console.log('Transaction sent:', tx.hash);
       await tx.wait();
       console.log('Transaction confirmed:', tx.hash);

@@ -6,18 +6,27 @@ import { ContractContext } from "../../Functions/ContractInitialize";
 import { useAllTokens } from "./Tokens";
 import state from "../../assets/statelogo.png";
 import pulsechainLogo from "../../assets/pls1.png";
-import { useAccount } from "wagmi";
+import { useAccount, useChainId } from "wagmi";
 
 import useSwapData from "./useSwapData";
 import toast from "react-hot-toast";
 
 const SwapComponent = () => {
   const { signer } = useContext(ContractContext);
+  const chainId = useChainId();
   const TOKENS = useAllTokens();
   const { address } = useAccount();
+  const nativeNames = {
+    1: "Wrapped Ether",
+    137: "Wrapped Matic",
+    42161: "Arbitrum",
+    10: "Optimism",
+    369: "PulseChain from pump.tires", // pump.tires case
+    56: "BNB Chain",
+  };
 
   const [tokenIn, setTokenIn] = useState("STATE");
-  const [tokenOut, setTokenOut] = useState("PulseChain from pump.tires");
+  const [tokenOut, setTokenOut] = useState(nativeNames[chainId] || "PulseChain from pump.tires");
   const [amountIn, setAmountIn] = useState("");
   const [isSwapping, setIsSwapping] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -83,9 +92,15 @@ const SwapComponent = () => {
     try {
       const tokenAddress = TOKENS[tokenIn].address;
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
+      let swapRouterAddress;
+      if (chainId == 369) {
+        swapRouterAddress = "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6"
+      } else {
+        swapRouterAddress = quoteData.to;
+      }
       const allowance = await contract.allowance(
         address,
-        "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6"
+        swapRouterAddress
       );
       const amount = parseUnits(amountIn || "0", TOKENS[tokenIn].decimals);
       setNeedsApproval(BigInt(allowance) < BigInt(amount));
@@ -112,8 +127,14 @@ const SwapComponent = () => {
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
       // Approve unlimited amount (max uint256
       const maxUint256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+      let swapRouterAddress;
+      if (chainId == 369) {
+        swapRouterAddress = "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6"
+      } else {
+        swapRouterAddress = quoteData.to;
+      }
       const tx = await contract.approve(
-        "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6",
+        swapRouterAddress,
         maxUint256
       );
       await tx.wait();
@@ -191,55 +212,54 @@ const SwapComponent = () => {
   };
 
   const handleSwap = async () => {
-    if (!signer || !quoteData) {
-      toast.error("Wallet not connected or quote data missing.", {
-        position: "top-center",
-        autoClose: 5000, // 5 seconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+    if (!signer) {
+      toast.error("Wallet not connected.", { position: "top-center", autoClose: 5000 });
       return;
     }
 
-    setIsSwapping(true);
-    setShowTxModal(true);
-    setTxStatus("pending");
-    setConfirmedAmountIn(amountIn);
-    setConfirmedAmountOut(amountOut);
     try {
-      const tx = await signer.sendTransaction({
-        to: "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6",
-        value: quoteData.value,
-        data: quoteData.calldata,
-      });
+      setIsSwapping(true);
+      setShowTxModal(true);
+      setTxStatus("pending");
+      setConfirmedAmountIn(amountIn);
+      setConfirmedAmountOut(amountOut);
+      let txData;
+
+      if (chainId === 369) {
+        // PulseChain → keep existing logic
+        txData = {
+          to: "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6",
+          value: quoteData.value,
+          data: quoteData.calldata,
+        };
+      } else {
+        // Other chains → Sushi API
+        console.log("Using Sushi API for swap", quoteData.to);
+
+        txData = {
+          to: quoteData.to,
+          data: quoteData.data,
+        };
+      }
+
+      const tx = await signer.sendTransaction(txData);
       console.log("Transaction sent:", tx.hash);
       await tx.wait();
-      console.log("Transaction confirmed:", tx.hash);
-      setShowConfirmation(true);
-      setAmountIn("");
       setTxStatus("confirmed");
+      setAmountIn("");
+      setShowConfirmation(true);
       setTimeout(() => setShowTxModal(false), 1200);
+
     } catch (err) {
       console.error("Swap failed", err);
-      toast.error("Swap failed. Try again.", {
-        position: "top-center",
-        autoClose: 5000, // 5 seconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      toast.error("Swap failed. Try again.", { position: "top-center", autoClose: 5000 });
       setTxStatus("error");
-      setTimeout(() => setShowTxModal(false), 1200);
     } finally {
       setIsSwapping(false);
-      setAmountIn("");
+      setTimeout(() => setShowTxModal(false), 1200);
     }
   };
+
 
   const getPriceDifference = () => {
     if (!inputUsdValue || !outputUsdValue) return null;
@@ -517,7 +537,7 @@ const SwapComponent = () => {
                       className="btn btn-success rounded-pill py-2"
                       onClick={handleApprove}
                       disabled={isApproving || isSwapping}
-                      style={{ width: "270px",fontSize:"16px", padding: "10px 20px", fontWeight: 400, height: "40px", textAlign: "center" }}
+                      style={{ width: "270px", fontSize: "16px", padding: "10px 20px", fontWeight: 400, height: "40px", textAlign: "center" }}
                     >
                       {isApproving ? (
                         <>
@@ -536,13 +556,13 @@ const SwapComponent = () => {
                       className="btn btn-primary rounded-pill py-2"
                       onClick={handleSwap}
                       disabled={!quoteData || isSwapping || insufficientBalance}
-                      style={{ 
-                        minWidth: "170px", 
-                        width: "auto", 
-                        fontSize: "16px", 
-                        padding: "10px 20px", 
-                        fontWeight: 400, 
-                        height: "40px", 
+                      style={{
+                        minWidth: "170px",
+                        width: "auto",
+                        fontSize: "16px",
+                        padding: "10px 20px",
+                        fontWeight: 400,
+                        height: "40px",
                         textAlign: "center",
                         whiteSpace: "nowrap"
                       }}

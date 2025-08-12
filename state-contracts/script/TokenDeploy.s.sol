@@ -8,9 +8,9 @@ contract DeployState is Script {
     function run() external {
         vm.startBroadcast();
         address Five = 0xBAaB2913ec979d9d21785063a0e4141e5B787D28;
-        address Swap = 0x870280Fd978EFf5A7B630C07982975E44AAe659E;
+        address Swap = 0x1c385b46Ad2F324Ef30274f41877f5E4E31566D0;
         //NOTE: Mainnet token name is pSTATE
-        STATE_V2_2 state = new STATE_V2_2("pSTATE", "pSTATE", Five, Swap);
+        STATE_V2_2 state = new STATE_V2_2("mSTATE", "mSTATE", Five, Swap);
 
         console.log("rievaollar deployed at:", address(state));
 
