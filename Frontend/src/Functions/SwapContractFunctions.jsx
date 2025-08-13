@@ -1186,6 +1186,7 @@ export const SwapContractProvider = ({ children }) => {
       const amount = ethers.parseUnits(amountIn, 18).toString();
       const tokenInAddress = stateAddress;
       let url;
+      console.log("chainid from swap fun",chainId)
       if (chainId == 369) {
         url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=1`;
       } else {

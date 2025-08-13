@@ -28,7 +28,7 @@ export const formatWithCommas = (value) => {
 };
 
 // Exported helper function to calculate PLS value for a token
-export function calculatePlsValue(token, tokenBalances, pstateToPlsRatio) {
+export function calculatePlsValue(token, tokenBalances, pstateToPlsRatio,chainId) {
   if (token.tokenName === "DAV" || token.tokenName === "STATE") {
     return "-----";
   }
@@ -48,11 +48,11 @@ export function calculatePlsValue(token, tokenBalances, pstateToPlsRatio) {
   // Round to nearest thousand
   const roundedPlsValue = Math.round(plsValue / 1000) * 1000;
 
-  return `${formatWithCommas(roundedPlsValue.toFixed(0))} PLS`;
+  return `${formatWithCommas(roundedPlsValue.toFixed(0))} ${chainCurrencyMap[chainId] || 'PLS'}`;
 }
 
 // Exported helper function to calculate numeric PLS value for sum calculation
-export function calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio) {
+export function calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio,chainId) {
   if (token.tokenName === "DAV" || token.tokenName === "STATE") {
     return 0;
   }
@@ -105,7 +105,7 @@ const DetailsInfo = ({ selectedToken }) => {
   // Calculate total sum of all tokens' PLS values
   const calculateTotalSum = () => {
     const totalSum = sortedTokens.reduce((sum, token) => {
-      return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio);
+      return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio,chainId);
     }, 0);
 
     return formatWithCommas(totalSum.toFixed(0));
@@ -474,7 +474,7 @@ const DetailsInfo = ({ selectedToken }) => {
 
                       <td className="text-center">
                         <div className="mx-2">
-                          {calculatePlsValue(token, tokenBalances, pstateToPlsRatio)}
+                          {calculatePlsValue(token, tokenBalances, pstateToPlsRatio,chainId)}
                         </div>
                       </td>
                       <td></td>

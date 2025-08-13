@@ -26,7 +26,7 @@ const SwapComponent = () => {
   };
 
   const [tokenIn, setTokenIn] = useState("STATE");
-  const [tokenOut, setTokenOut] = useState(nativeNames[chainId] || "PulseChain from pump.tires");
+  const [tokenOut, setTokenOut] = useState(null);
   const [amountIn, setAmountIn] = useState("");
   const [isSwapping, setIsSwapping] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,7 +38,6 @@ const SwapComponent = () => {
   const [txStatus, setTxStatus] = useState("");
   const [confirmedAmountIn, setConfirmedAmountIn] = useState("");
   const [confirmedAmountOut, setConfirmedAmountOut] = useState("");
-  const [showDetails, setShowDetails] = useState(false);
   const [insufficientBalance, setInsufficientBalance] = useState(false);
 
   const {
@@ -67,12 +66,13 @@ const SwapComponent = () => {
     }
   }, [amountIn, tokenInBalance]);
 
-  const handleSwitchTokens = () => {
-    setTokenIn(tokenOut);
-    setTokenOut(tokenIn);
-  };
-
-
+  useEffect(() => {
+    if (chainId && nativeNames[chainId]) {
+      setTokenOut(nativeNames[chainId]); // Set to native token for the chain
+    } else {
+      setTokenOut("STATE"); // Fallback to "STATE" if chainId is not supported
+    }
+  }, [chainId, nativeNames]);
   const ERC20_ABI = [
     "function allowance(address owner, address spender) view returns (uint256)",
     "function approve(address spender, uint256 amount) returns (bool)",
@@ -159,6 +159,9 @@ const SwapComponent = () => {
     }
   };
   const getTokenLogo = (symbol) => {
+    if (!symbol || !TOKENS[symbol]) {
+      return <span>Loading...</span>;
+    }
     if (SPECIAL_TOKEN_LOGOS[symbol]) {
       return (
         <img
@@ -432,7 +435,7 @@ const SwapComponent = () => {
           <div className="col-md-4 p-0 m-2 cards">
             <div className="card bg-dark text-light border-light p-3 d-flex w-100">
 
-              <label className="detailText text-center small mb-1 font-weight-normal w-100">To</label>
+              <label className="detailText text-center small mb-1 font-weight-normal w-100">YOU RECIEVE</label>
               <div className="d-flex flex-column align-items-center gap-2" style={{ position: 'relative' }}>
                 <input
                   type="text"
@@ -577,7 +580,7 @@ const SwapComponent = () => {
                   style={{ textDecoration: "none", fontWeight: 200, fontSize: "14px" }}
                   onClick={() => {
                     setTokenIn("STATE");
-                    setTokenOut("PulseChain from pump.tires");
+                    setTokenOut(nativeNames[chainId]);
                     setAmountIn("");
                   }}
                   disabled={isApproving || isSwapping}
