@@ -10,6 +10,7 @@ import { useAccount, useChainId } from "wagmi";
 
 import useSwapData from "./useSwapData";
 import toast from "react-hot-toast";
+import TxProgressModal from "../TxProgressModal";
 
 const SwapComponent = () => {
   const { signer } = useContext(ContractContext);
@@ -24,7 +25,13 @@ const SwapComponent = () => {
     369: "PulseChain from pump.tires", // pump.tires case
     56: "BNB Chain",
   };
-
+  const SwappingSteps = [
+    { key: "initiated", label: "Initializing" },
+    { key: "Approving", label: "Approving" },
+    { key: "pending", label: "Swapping" },
+    { key: "confirmed", label: "Confirmed" },
+    { key: "error", label: "Error" },
+  ];
   const [tokenIn, setTokenIn] = useState("STATE");
   const [tokenOut, setTokenOut] = useState(null);
   const [amountIn, setAmountIn] = useState("");
@@ -493,33 +500,9 @@ const SwapComponent = () => {
                   </button>
                 </div>
               </div>
+              <TxProgressModal isOpen={isSwapping} txStatus={txStatus}
+                steps={SwappingSteps} />
 
-              {(isSwapping || isApproving || showTxModal) && (
-                <div className="tx-progress-container mb-3 mt-3">
-                  <div className="step-line">
-                    <div className={`step ${txStatus === "initializing" || txStatus === "initiated" || txStatus === "Approving" || txStatus === "pending" || txStatus === "confirmed" ? "active" : ""}`}>
-                      <span className="dot" />
-                      <span className="label" style={{ fontSize: "0.65em" }}>Initializing</span>
-                    </div>
-                    <div className={`step ${txStatus === "initiated" || txStatus === "Approving" || txStatus === "pending" || txStatus === "confirmed" ? "active" : ""}`}>
-                      <span className="dot" />
-                      <span className="label" style={{ fontSize: "0.65em" }}>Initiated</span>
-                    </div>
-                    <div className={`step ${txStatus === "Approving" || txStatus === "pending" || txStatus === "confirmed" ? "active" : ""}`}>
-                      <span className="dot" />
-                      <span className="label" style={{ fontSize: "0.65em" }}>Approving</span>
-                    </div>
-                    <div className={`step ${txStatus === "pending" || txStatus === "confirmed" ? "active" : ""}`}>
-                      <span className="dot" />
-                      <span className="label" style={{ fontSize: "0.65em" }}>Swapping</span>
-                    </div>
-                    <div className={`step ${txStatus === "confirmed" || txStatus === "error" ? "active" : ""}`}>
-                      <span className="dot" />
-                      <span className="label" style={{ fontSize: "0.65em" }}>{txStatus === "error" ? "Error" : "Confirmed"}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
               <div className="d-flex justify-content-center align-items-center mt-3">
                 <div className="position-relative">
                   {needsApproval ? (

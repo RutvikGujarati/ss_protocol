@@ -16,6 +16,7 @@ import { faCheck, faCopy } from "@fortawesome/free-solid-svg-icons";
 import toast from "react-hot-toast";
 import { useSwapContract } from "../../Functions/SwapContractFunctions";
 import { chainCurrencyMap } from "../../../WalletConfig";
+import TxProgressModal from "../TxProgressModal";
 
 const AuctionSection = () => {
     const chainId = useChainId();
@@ -49,14 +50,20 @@ const AuctionSection = () => {
         else if (chainId === 146) return sonic;
         return PLSLogo;
     };
-
+    const mintSteps = [
+        { key: "initializing", label: "Initializing" },
+        { key: "initiated", label: "Initiated" },
+        { key: "pending", label: "Pending" },
+        { key: "confirmed", label: "Confirmed" },
+        { key: "error", label: "Error" },
+    ];
     const getLogoSize = () => {
         return chainId === 56
             ? { width: "170px", height: "140px" }
             : chainId === 369
                 ? { width: "110px", height: "110px" }
                 : chainId === 137
-                    ? { width: "110px", height: "120px" }
+                    ? { width: "110px", height: "110px" }
                     : { width: "110px", height: "140px" }
     };
 
@@ -153,39 +160,22 @@ const AuctionSection = () => {
                         </div>
                         <h5 className="detailAmount">1 DAV TOKEN = {formatWithCommas(Math.floor(DavMintFee))} {nativeSymbol}</h5>
                         <h5 className="detailAmount mb-4">{TotalCost ? formatNumber(ethers.formatUnits(TotalCost, 18)) : "0"} {nativeSymbol} </h5>
-                        {load ? (
-                            <div className="tx-progress-container">
-                                <div className="step-line">
-                                    <div className={`step ${["initializing", "initiated", "pending", "confirmed"].includes(txStatus) ? "active" : ""}`}>
-                                        <span className="dot" />
-                                        <span className="label">Initializing</span>
-                                    </div>
-                                    <div className={`step ${["initiated", "pending", "confirmed"].includes(txStatus) ? "active" : ""}`}>
-                                        <span className="dot" />
-                                        <span className="label">Initiated</span>
-                                    </div>
-                                    <div className={`step ${["pending", "confirmed"].includes(txStatus) ? "active" : ""}`}>
-                                        <span className="dot" />
-                                        <span className="label">Pending</span>
-                                    </div>
-                                    <div className={`step ${txStatus === "confirmed" ? "active" : ""}`}>
-                                        <span className="dot" />
-                                        <span className="label">Confirmed</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="d-flex justify-content-center">
-                                <button
-                                    onClick={handleMint}
-                                    className="btn btn-primary btn-sm mb-0"
-                                    style={{ width: "200px" }}
-                                    disabled={load}
-                                >
-                                    Mint
-                                </button>
-                            </div>
-                        )}
+
+                        <div className="d-flex justify-content-center">
+                            <button
+                                onClick={handleMint}
+                                className="btn btn-primary btn-sm mb-0"
+                                style={{ width: "200px" }}
+                                disabled={load}
+                            >
+                                Mint
+                            </button>
+                        </div>
+                        <TxProgressModal
+                            isOpen={load}
+                            txStatus={txStatus}
+                            steps={mintSteps}
+                        />
                     </div>
                 </div>
                 <div className="col-md-4 p-0 m-2 cards">

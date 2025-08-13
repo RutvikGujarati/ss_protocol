@@ -1312,6 +1312,7 @@ export const SwapContractProvider = ({ children }) => {
       setDexSwappingStates((prev) => ({ ...prev, [id]: false }));
       setTxStatusForSwap("error");
     } finally {
+      setDexSwappingStates((prev) => ({ ...prev, [id]: false }));
       setTxStatusForSwap("error")
     }
   };

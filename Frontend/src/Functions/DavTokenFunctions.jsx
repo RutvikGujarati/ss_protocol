@@ -718,6 +718,7 @@ export const DavProvider = ({ children }) => {
         TokenStatus,
         isProcessing,
         txStatus,
+        setTxStatus,
         isUsed,
       }}
     >

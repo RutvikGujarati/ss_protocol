@@ -1,73 +1,135 @@
-import React from "react";
+// TxProgressModal.jsx
+import { useEffect, useState } from "react";
+import { Spinner } from "react-bootstrap";
 
-const getStepActive = (step, txStatus) => {
-  // Map status to step index for highlighting
-  const order = [
-    "initializing",
-    "initiated",
-    "Approving",
-    "pending",
-    "confirmed",
-    "error",
-  ];
-  const statusIdx = order.indexOf(txStatus);
-  const stepIdx = order.indexOf(step);
-  if (step === "error") return txStatus === "error";
-  if (step === "confirmed") return txStatus === "confirmed";
-  return statusIdx >= stepIdx && statusIdx !== -1;
+const getStepIndex = (txStatus, steps) => {
+  return steps.findIndex(step => step.key === txStatus);
 };
 
-const TxProgressModal = ({ isOpen, txStatus }) => {
-  if (!isOpen) return null;
+const TxProgressModal = ({ isOpen, txStatus, steps }) => {
+  const [showClass, setShowClass] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      setShowClass("slide-in");
+    } else if (!isOpen && showClass === "slide-in") {
+      setShowClass("slide-out");
+    }
+  }, [isOpen]);
+
+  if (!isOpen && showClass !== "slide-out") return null;
+
+  const currentStepIndex = getStepIndex(txStatus, steps);
+
   return (
     <div
-      className="modal d-flex align-items-center justify-content-center"
+      className={`modal fade show d-block modal-animate ${showClass}`}
+      tabIndex="-1"
       style={{
+        background: "transparent",
         zIndex: 30000,
-        background: "rgba(33, 37, 41, 0.1)",
-        pointerEvents: isOpen ? "auto" : "none",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
+        backdropFilter: "blur(4px)",
+      }}
+      onAnimationEnd={() => {
+        if (showClass === "slide-out") {
+          setShowClass("");
+        }
       }}
     >
-      <div className="modal-dialog modal-dialog-centered" onClick={e => e.stopPropagation()}>
-        <div className="modal-content popup-content">
-          <div className="modal-header border-0 text-center w-100 d-block">
-            <h6 className="modal-title text-light">Transaction Status</h6>
-           
+      <div className="modal-dialog modal-dialog-centered">
+        <div
+          className="modal-content text-light shadow border-1 p-3"
+          style={{
+            background: "#1a1b1f",
+            borderRadius: "30px",
+          }}
+        >
+          <div className="modal-header border-0 pb-3">
+            <h6 className="modal-title">Transaction Status</h6>
           </div>
-          <div className="modal-body">
-            <div className="tx-progress-container">
-              <div className="step-line">
-                {/* Initializing */}
-                <div className={`step ${getStepActive("initializing", txStatus) ? "active" : ""}`}>
-                  <span className="dot" />
-                  <span className="label">Initializing</span>
-                </div>
-                {/* Initiated */}
-                <div className={`step ${getStepActive("initiated", txStatus) ? "active" : ""}`}>
-                  <span className="dot" />
-                  <span className="label">Initiated</span>
-                </div>
-                {/* Approving */}
-                <div className={`step ${getStepActive("Approving", txStatus) ? "active" : ""}`}>
-                  <span className="dot" />
-                  <span className="label">Approving</span>
-                </div>
-                {/* Swapping */}
-                <div className={`step ${getStepActive("pending", txStatus) ? "active" : ""}`}>
-                  <span className="dot" />
-                  <span className="label">Swapping</span>
-                </div>
-                {/* Confirmed/Error */}
-                <div className={`step ${getStepActive("confirmed", txStatus) || getStepActive("error", txStatus) ? "active" : ""}`}>
-                  <span className="dot" />
-                  <span className="label">{txStatus === "error" ? "Error" : "Confirmed"}</span>
-                </div>
-              </div>
+          <div className="modal-body pt-0">
+            <div className="position-relative d-flex justify-content-between align-items-center pb-2">
+              {/* Dotted connector */}
+              {steps.map((_, idx) => {
+                if (idx === steps.length - 1) return null;
+                return (
+                  <div
+                    key={`line-${idx}`}
+                    className="position-absolute"
+                    style={{
+                      top: "35%",
+                      left: `${(idx + 0.7) * (100 / steps.length)}%`,
+                      transform: "translateY(-50%)",
+                      width: `calc(${100 / steps.length}% - 30px)`,
+                      borderTop: "2px dotted #6c757d",
+                      zIndex: 0,
+                    }}
+                  ></div>
+                );
+              })}
+
+              {steps.map((step, idx) => {
+                const isActive = idx <= currentStepIndex;
+                const isCurrent = idx === currentStepIndex;
+                const isFinal = idx === steps.length - 1;
+
+                return (
+                  <div
+                    key={step.key}
+                    className="text-center position-relative"
+                    style={{ zIndex: 1, flex: 1 }}
+                  >
+                    <div className="d-flex justify-content-center align-items-center my-4">
+                      {isCurrent ? (
+                        <Spinner
+                          animation="border"
+                          style={{
+                            width: "20px",
+                            height: "20px",
+                            color: "#ff4081",
+                          }}
+                        />
+                      ) : (
+                        <div
+                          className="rounded-circle"
+                          style={{
+                            width: "20px",
+                            height: "20px",
+                            backgroundColor: isActive
+                              ? isFinal
+                                ? txStatus === "error"
+                                  ? "#dc3545"
+                                  : "#28a745"
+                                : "#ff4081"
+                              : "#1a1b1f",
+                            border: `2px solid ${isActive
+                              ? isFinal
+                                ? txStatus === "error"
+                                  ? "#dc3545"
+                                  : "#28a745"
+                                : "#ff4081"
+                              : "#6c757d"
+                              }`,
+                          }}
+                        ></div>
+                      )}
+                    </div>
+                    <small
+                      className={
+                        isActive
+                          ? isFinal
+                            ? txStatus === "error"
+                              ? "text-danger fw-bold"
+                              : "text-success fw-bold"
+                            : "text-light"
+                          : "text-light"
+                      }
+                    >
+                      {step.label}
+                    </small>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -76,4 +138,4 @@ const TxProgressModal = ({ isOpen, txStatus }) => {
   );
 };
 
-export default TxProgressModal; 
+export default TxProgressModal;

@@ -65,6 +65,20 @@ const DataTable = () => {
   const [checkingStates, setCheckingStates] = useState({});
   const [inputValues, setInputValues] = useState({});
   const [authorized, setAuthorized] = useState(false);
+  const SwappingSteps = [
+    { key: "initiated", label: "Initializing" },
+    { key: "Approving", label: "Approving" },
+    { key: "pending", label: "Swapping" },
+    { key: "confirmed", label: "Confirmed" },
+    { key: "error", label: "Error" },
+  ];
+  const AddingTokenSteps = [
+    { key: "initiated", label: "Initializing" },
+    { key: "Adding", label: "AddingToken" },
+    { key: "Status Updating", label: "Status Updating" },
+    { key: "confirmed", label: "Confirmed" },
+    { key: "error", label: "Error" },
+  ];
 
   const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
 
@@ -516,12 +530,14 @@ const DataTable = () => {
                         </>
                       )}
                       <td></td>
-                      <TxProgressModal isOpen={isPopupOpen} txStatus={txStatusForSwap} onClose={() => setIsPopupOpen(false)} />
+
                     </tr>
                   )
                 )
               )}
             </tbody>
+            <TxProgressModal isOpen={isPopupOpen} txStatus={txStatusForSwap}
+              steps={SwappingSteps} onClose={() => setIsPopupOpen(false)} />
           </table>
         </div>
       </div>
@@ -769,88 +785,10 @@ const DataTable = () => {
                           </button>
                         </td>
 
-                        {isAddingPopupOpen && (
-                          <div
-                            className="modal d-flex align-items-center justify-content-center"
-                            style={{
-                              zIndex: 30000,
-                              background: "rgba(33, 37, 41, 0.1)",
-                              pointerEvents: isAddingPopupOpen
-                                ? "auto"
-                                : "none",
-                            }}
-                          >
-                            <div className="modal-dialog modal-dialog-centered">
-                              <div className="modal-content popup-content">
-                                <div className="modal-body">
-                                  <div className="tx-progress-container">
-                                    <div className="step-line">
-                                      <div
-                                        className={`step ${txStatusForAdding === "initiated" ||
-                                          txStatusForAdding === "Adding" ||
-                                          txStatusForAdding ===
-                                          "Status Updating" ||
-                                          txStatusForAdding === "confirmed" ||
-                                          txStatusForAdding === "error"
-                                          ? "active"
-                                          : ""
-                                          }`}
-                                      >
-                                        <span className="dot" />
-                                        <span className="label">Initiated</span>
-                                      </div>
-                                      <div
-                                        className={`step ${txStatusForAdding === "Adding" ||
-                                          txStatusForAdding ===
-                                          "Status Updating" ||
-                                          txStatusForAdding === "confirmed" ||
-                                          txStatusForAdding === "error"
-                                          ? "active"
-                                          : ""
-                                          }`}
-                                      >
-                                        <span className="dot" />
-                                        <span className="label">Adding</span>
-                                      </div>
-                                      <div
-                                        className={`step ${txStatusForAdding ===
-                                          "Status Updating" ||
-                                          txStatusForAdding === "confirmed" ||
-                                          txStatusForAdding === "error"
-                                          ? "active"
-                                          : ""
-                                          }`}
-                                      >
-                                        <span className="dot" />
-                                        <span className="label">
-                                          Status update
-                                        </span>
-                                      </div>
-                                      <div
-                                        className={`step ${txStatusForAdding === "confirmed" ||
-                                          txStatusForAdding === "error"
-                                          ? "active"
-                                          : ""
-                                          }`}
-                                      >
-                                        <span className="dot" />
-                                        <span className="label">
-                                          {txStatusForAdding === "error"
-                                            ? "Error"
-                                            : "Confirmed"}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
                       </tr>
                     )
                   )}
-
+              <TxProgressModal steps={AddingTokenSteps} isOpen={isAddingPopupOpen} txStatus={txStatusForAdding} />
               {!authorized && (
                 <>
                   {pendingToken && (

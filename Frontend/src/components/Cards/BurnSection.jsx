@@ -7,6 +7,7 @@ import DotAnimation from "../../Animations/Animation";
 import { useAccount, useChainId } from "wagmi";
 import IOSpinner from "../../Constants/Spinner";
 import { chainCurrencyMap } from "../../../WalletConfig";
+import TxProgressModal from "../TxProgressModal";
 
 const BurnSection = () => {
     const { address } = useAccount();
@@ -46,6 +47,13 @@ const BurnSection = () => {
             console.error("Burn failed:", error);
         }
     };
+    const BurningSteps = [
+        { key: "initiated", label: "Initializing" },
+        { key: "Approving", label: "Approving" },
+        { key: "pending", label: "Burning" },
+        { key: "confirmed", label: "Confirmed" },
+        { key: "error", label: "Error" },
+    ];
 
     const handleInputChangeForBurn = (e) => {
         const input = e.target.value.replace(/,/g, "");
@@ -110,49 +118,24 @@ const BurnSection = () => {
                                     onChange={handleInputChangeForBurn}
                                 />
                             </div>
-                            {BurnClicked ? (
-                                <div className="tx-progress-container mt-5" style={{ justifyContent: "space-between", gap: "20x" }}>
-                                    <div className="step-line">
-                                        <div className={`step ${["initializing", "initiated", "Approving", "Pending", "confirmed"].includes(buttonTextStates) ? "active" : ""}`}>
-                                            <span className="dot" />
-                                            <span className="label">Initializing</span>
-                                        </div>
-                                        <div className={`step ${["initiated", "Approving", "Pending", "confirmed"].includes(buttonTextStates) ? "active" : ""}`}>
-                                            <span className="dot" />
-                                            <span className="label">Initiated</span>
-                                        </div>
-                                        <div className={`step ${["Approving", "Pending", "confirmed"].includes(buttonTextStates) ? "active" : ""}`}>
-                                            <span className="dot" />
-                                            <span className="label">Approving</span>
-                                        </div>
-                                        <div className={`step ${["Pending", "confirmed"].includes(buttonTextStates) ? "active" : ""}`}>
-                                            <span className="dot" />
-                                            <span className="label">Burning</span>
-                                        </div>
-                                        <div className={`step ${buttonTextStates === "confirmed" ? "active" : ""}`}>
-                                            <span className="dot" />
-                                            <span className="label">Confirmed</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={async () => {
-                                        setTimeout(async () => {
-                                            try {
-                                                await handleBurnClick();
-                                            } catch (err) {
-                                                console.error("Burn failed:", err);
-                                            }
-                                        }, 100);
-                                    }}
-                                    style={{ width: customWidth }}
-                                    className="btn btn-primary mx-5 mt-5 btn-sm d-flex justify-content-center align-items-center"
-                                    disabled={BurnClicked}
-                                >
-                                    Burn
-                                </button>
-                            )}
+                            <button
+                                onClick={async () => {
+                                    setTimeout(async () => {
+                                        try {
+                                            await handleBurnClick();
+                                        } catch (err) {
+                                            console.error("Burn failed:", err);
+                                        }
+                                    }, 100);
+                                }}
+                                style={{ width: customWidth }}
+                                className="btn btn-primary mx-5 mt-5 btn-sm d-flex justify-content-center align-items-center"
+                                disabled={BurnClicked}
+                            >
+                                Burn
+                            </button>
+                            <TxProgressModal isOpen={BurnClicked} txStatus={buttonTextStates}
+                                steps={BurningSteps} />
                         </div>
                         <div className="carddetails2">
                             <h6 className="detailText mb-0" style={{ fontSize: "14px", textTransform: "capitalize" }}>

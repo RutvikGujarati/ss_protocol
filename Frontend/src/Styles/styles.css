@@ -118,7 +118,7 @@ td {
 .modal-content {
   background-color: var(--secondary-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 30px !important;
   max-width: 500px;
   width: 90%;
   max-height: 80vh;
@@ -339,6 +339,7 @@ td {
   flex-direction: column;
   gap: 0.5rem;
 }
+
 .simple-route-item {
   padding: 0.5rem;
   background-color: rgba(255, 255, 255, 0.03);
@@ -421,4 +422,65 @@ td {
 .pair-percent {
   color: #888;
   font-weight: 600;
+}
+
+.animated-circle {
+  width: 30px;
+  height: 30px;
+  background-color: #ff4081;
+  /* purple */
+  border-radius: 50%;
+  position: relative;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(160, 32, 240, 0.7);
+  }
+
+  70% {
+    box-shadow: 0 0 0 15px rgba(160, 32, 240, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(160, 32, 240, 0);
+  }
+}
+
+.modal-animate {
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+
+.slide-in {
+  animation-name: slideInFromTop;
+}
+
+.slide-out {
+  animation-name: slideOutToBottom;
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-80px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideOutToBottom {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(80px);
+  }
 }
