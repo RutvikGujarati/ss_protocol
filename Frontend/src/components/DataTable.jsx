@@ -507,7 +507,7 @@ const DataTable = () => {
                                     "Swapped ✅" :
                                     DexswappingStates[id]
                                       ? "Swapping..."
-                                      : buttonTextStates[id] || "Swap"}
+                                      : DexswappingStates[id] || "Swap"}
                                 </button>
                               </div>
                             </div>

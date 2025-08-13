@@ -72,7 +72,7 @@ const SwapComponent = () => {
     } else {
       setTokenOut("STATE"); // Fallback to "STATE" if chainId is not supported
     }
-  }, [chainId, nativeNames]);
+  }, [chainId]);
   const ERC20_ABI = [
     "function allowance(address owner, address spender) view returns (uint256)",
     "function approve(address spender, uint256 amount) returns (bool)",

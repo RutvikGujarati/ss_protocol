@@ -1348,6 +1348,7 @@ export const SwapContractProvider = ({ children }) => {
         isTokenSupporteed,
         burnedAmount,
         buttonTextStates,
+        DexbuttonTextStates,
         DavAddress,
         StateAddress,
         swappingStates,

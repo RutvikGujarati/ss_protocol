@@ -28,7 +28,7 @@ export const formatWithCommas = (value) => {
 };
 
 // Exported helper function to calculate PLS value for a token
-export function calculatePlsValue(token, tokenBalances, pstateToPlsRatio,chainId) {
+export function calculatePlsValue(token, tokenBalances, pstateToPlsRatio, chainId) {
   if (token.tokenName === "DAV" || token.tokenName === "STATE") {
     return "-----";
   }
@@ -52,7 +52,7 @@ export function calculatePlsValue(token, tokenBalances, pstateToPlsRatio,chainId
 }
 
 // Exported helper function to calculate numeric PLS value for sum calculation
-export function calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio,chainId) {
+export function calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio) {
   if (token.tokenName === "DAV" || token.tokenName === "STATE") {
     return 0;
   }
@@ -105,7 +105,7 @@ const DetailsInfo = ({ selectedToken }) => {
   // Calculate total sum of all tokens' PLS values
   const calculateTotalSum = () => {
     const totalSum = sortedTokens.reduce((sum, token) => {
-      return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio,chainId);
+      return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio, chainId);
     }, 0);
 
     return formatWithCommas(totalSum.toFixed(0));
@@ -316,11 +316,11 @@ const DetailsInfo = ({ selectedToken }) => {
                             )}
                           </span>
                           <span>
-                              {token.tokenName === "DAV"
-                                ? (chainId === 137 ? "mDAV" : "pDAV")
-                                : token.tokenName === "STATE"
-                                  ? (chainId === 137 ? "mSTATE" : "pSTATE")
-                                  : token.tokenName}
+                            {token.tokenName === "DAV"
+                              ? (chainId === 137 ? "mDAV" : "pDAV")
+                              : token.tokenName === "STATE"
+                                ? (chainId === 137 ? "mSTATE" : "pSTATE")
+                                : token.tokenName}
                           </span>
                         </div>
                       </td>
@@ -474,7 +474,7 @@ const DetailsInfo = ({ selectedToken }) => {
 
                       <td className="text-center">
                         <div className="mx-2">
-                          {calculatePlsValue(token, tokenBalances, pstateToPlsRatio,chainId)}
+                          {calculatePlsValue(token, tokenBalances, pstateToPlsRatio, chainId)}
                         </div>
                       </td>
                       <td></td>
