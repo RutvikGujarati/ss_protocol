@@ -557,21 +557,7 @@ const SwapComponent = () => {
                   )}
                 </div>
               </div>
-              <div className="d-flex justify-content-end align-items-center mt-3">
-                <button
-                  className="btn detailText btn-link text-light small font-weight-normal p-0"
-                  style={{ textDecoration: "none", fontWeight: 200, fontSize: "14px" }}
-                  onClick={() => {
-                    setTokenIn("STATE");
-                    setTokenOut(nativeNames[chainId]);
-                    setAmountIn("");
-                  }}
-                  disabled={isApproving || isSwapping}
-                  title="Reset to default tokens"
-                >
-                  <i className="bi bi-arrow-clockwise"></i> Refresh
-                </button>
-              </div>
+
             </div>
           </div>
 
@@ -591,7 +577,23 @@ const SwapComponent = () => {
                   <p className="mb-1">
                     <span className="detailText">Slippage 1% : (Gas swap levy) </span>
                   </p>
+                  <div className="d-flex justify-content-start align-items-center mt-2">
+                    <button
+                      className="btn detailText btn-link text-light  p-0"
+                      style={{ textDecoration: "none", fontWeight: 200, fontSize: "14px", fontWeight: "700" }}
+                      onClick={() => {
+                        setTokenIn("STATE");
+                        setTokenOut(nativeNames[chainId]);
+                        setAmountIn("");
+                      }}
+                      disabled={isApproving || isSwapping}
+                      title="Reset to default tokens"
+                    >
+                      <i className="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                  </div>
                 </div>
+
               </div>
             </div>
           </div>
