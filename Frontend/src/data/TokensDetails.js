@@ -79,6 +79,7 @@ export const TokensDetails = () => {
 			emoji,
 			isRenounced: swap.isTokenRenounce?.[token.name],
 			DavVault: swap.TokenBalance?.[key],
+			BurnedLp: swap.burnedLPAmount?.[token.name]?.balance ?? "0", 
 			burned: swap.burnedAmount?.[key],
 			isSupported:
 				token.name === "DAV"

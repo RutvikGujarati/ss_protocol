@@ -62,6 +62,7 @@ export const SwapContractProvider = ({ children }) => {
   const [TokenRatio, setTokenRatio] = useState({});
   const [TimeLeftClaim, setTimeLeftClaim] = useState({});
   const [burnedAmount, setBurnedAmount] = useState({});
+  const [burnedLPAmount, setBurnLpAmount] = useState({});
   const [TokenBalance, setTokenbalance] = useState({});
   const [isReversed, setIsReverse] = useState({});
   const [IsAuctionActive, setisAuctionActive] = useState({});
@@ -136,7 +137,6 @@ export const SwapContractProvider = ({ children }) => {
     setState,
     formatFn = (v) => v.toString(),
     includeTestState = false,
-    customContractInstance = null,
     buildArgs,
     useAddressAsKey = false, // New: Control whether to key results by address
   }) => {
@@ -150,9 +150,7 @@ export const SwapContractProvider = ({ children }) => {
 
       for (const [tokenName, tokenAddress] of Object.entries(extendedMap)) {
         try {
-          const contract = customContractInstance
-            ? customContractInstance(tokenAddress)
-            : AllContracts.AuctionContract;
+          const contract = AllContracts.AuctionContract;
 
           if (!contract || typeof contract[contractMethod] !== "function") {
             throw new Error(`Method ${contractMethod} not found on contract`);
@@ -653,7 +651,6 @@ export const SwapContractProvider = ({ children }) => {
 
             const pairAddress =
               await AllContracts.AuctionContract.pairAddresses(tokenAddr);
-
             const nextClaimTime =
               await AllContracts.AuctionContract.getNextClaimTime(tokenAddr);
 
@@ -680,6 +677,87 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching token names or pair addresses:", error);
     }
   };
+
+  const fetchBurnLpAmount = async () => {
+    if (!AllContracts?.AuctionContract || !provider) {
+      console.warn("AuctionContract or provider not found");
+      return {};
+    }
+
+    try {
+      // Step 1: Get all token addresses for user
+      const tokenMap = await ReturnfetchUserTokenAddresses(); // { tokenName: tokenAddress }
+      const ERC20_ABI = [
+        "function balanceOf(address owner) view returns (uint256)",
+        "function decimals() view returns (uint8)"
+      ];
+      const targetAddress = "0x0000000000000000000000000000000000000369";
+
+      const results = {};
+
+      // Step 2: Loop through token map and fetch pair address + balance
+      for (const [tokenName, tokenAddress] of Object.entries(tokenMap)) {
+        try {
+          // ✅ Fetch LP pair address for token
+          const pairAddress = await AllContracts.AuctionContract.pairAddresses(tokenAddress);
+
+          // ✅ Create ERC20 contract for LP token
+          const lpTokenContract = new ethers.Contract(pairAddress, ERC20_ABI, provider);
+
+          // ✅ Fetch balance & decimals in parallel
+          const [balanceRaw, decimals] = await Promise.all([
+            lpTokenContract.balanceOf(targetAddress),
+            lpTokenContract.decimals()
+          ]);
+
+          // ✅ Format balance
+          const formattedBalance = parseFloat(ethers.formatUnits(balanceRaw, decimals)).toFixed(0);
+
+          results[tokenName] = {
+            pairAddress,
+            balance: formattedBalance
+          };
+        } catch (err) {
+          const reason =
+            err?.reason ||
+            err?.shortMessage ||
+            err?.error?.errorName ||
+            err?.message ||
+            "";
+
+          console.error(`Error fetching LP data for ${tokenName}:`, reason || err);
+        }
+      }
+      try {
+        const statePairAddress = "0x5f5c53f62ea7c5ed39d924063780dc21125dbde7";
+        const lpTokenContract = new ethers.Contract(statePairAddress, ERC20_ABI, provider);
+
+        const [balanceRaw, decimals] = await Promise.all([
+          lpTokenContract.balanceOf(targetAddress),
+          lpTokenContract.decimals()
+        ]);
+
+        const formattedBalance = ethers.utils.formatUnits(balanceRaw, decimals);
+
+        results["STATE"] = {
+          pairAddress: statePairAddress,
+          balance: formattedBalance
+        };
+      } catch (err) {
+        console.error("Error fetching STATE LP balance:", err);
+        results["STATE"] = { pairAddress: "error", balance: "0" };
+      }
+      // Step 3: Update state once after loop
+      setBurnLpAmount(results);
+      return results;
+    } catch (error) {
+      console.error("Error fetching burn LP amounts:", error);
+      return {};
+    }
+  };
+
+  console.log("burn lp", burnedLPAmount)
+
 
   const setDavAndStateIntoSwap = async () => {
     if (!AllContracts?.AuctionContract || !address) return;
@@ -790,6 +868,7 @@ export const SwapContractProvider = ({ children }) => {
         fetchUserTokenAddresses();
         getInputAmount();
         getOutPutAmount();
+        fetchBurnLpAmount();
         getCurrentAuctionCycle();
         getTokenRatio();
         getTokensBurned();
@@ -824,6 +903,7 @@ export const SwapContractProvider = ({ children }) => {
       fetchUserTokenAddresses,
       getInputAmount,
       getOutPutAmount,
+      fetchBurnLpAmount,
       getCurrentAuctionCycle,
       getTokenRatio,
       getTokensBurned,
@@ -1186,7 +1266,7 @@ export const SwapContractProvider = ({ children }) => {
       const amount = ethers.parseUnits(amountIn, 18).toString();
       const tokenInAddress = stateAddress;
       let url;
-      console.log("chainid from swap fun",chainId)
+      console.log("chainid from swap fun", chainId)
       if (chainId == 369) {
         url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=1`;
       } else {
@@ -1359,6 +1439,7 @@ export const SwapContractProvider = ({ children }) => {
         AirdropClaimed,
         isReversed,
         InputAmount,
+        burnedLPAmount,
         setTxStatusForSwap,
         AirDropAmount,
         getAirdropAmount,

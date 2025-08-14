@@ -271,6 +271,7 @@ const DetailsInfo = ({ selectedToken }) => {
                   <th className="text-center">Auctions</th>
                   <th className="text-center">DAV Vault</th>
                   <th className="text-center">Burned</th>
+                  <th className="text-center">Burned LP (Combined)</th>
                   <th className="text-center">Info</th>
                   <th className="text-center">Your Est. {nativeSymbol} Value <br />
                     {loading ? (
@@ -373,6 +374,13 @@ const DetailsInfo = ({ selectedToken }) => {
                         </div>
 
 
+                      </td>
+                      <td className="text-center">
+                        <div className="mx-4">
+                          {token.tokenName === "DAV"
+                            ? "-----"
+                            : `${formatWithCommas(token.BurnedLp)}`}
+                        </div>
                       </td>
                       <td className="text-center">
                         <div className="d-flex justify-content-center align-items-center gap-3">

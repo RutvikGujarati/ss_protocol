@@ -4,7 +4,6 @@ import StateABI from "../ABI/StateTokenABI.json";
 import RatioABI from "../ABI/RatioABI.json";
 import { 
   getContractAddresses, 
-  getContractAddress, 
   CHAIN_IDS,
   getDAVContractAddress,
   getSTATEContractAddress,
