@@ -217,7 +217,7 @@ const DataTable = () => {
       // 1. Currently in active auction (AuctionStatus === "true")
       // 2. In reverse auction phase (AuctionStatus === "false" && isReversing === "true")
       // 3. Has time left in the auction (TimeLeft > 0)
-      const isAuctionActive = AuctionStatus === "false";
+      const isAuctionActive = AuctionStatus === "true";
       const isReverseAuction = AuctionStatus === "false" && isReversing === "true";
       const hasTimeLeft = TimeLeft > 0;
 
