@@ -8,6 +8,7 @@ import { useTokenOperations } from './hooks/useTokenOperations';
 import { useTokenInfo } from './hooks/useTokenInfo';
 import { useAuctionState } from './hooks/useAuctionState';
 import PropTypes from 'prop-types';
+import { getAUCTIONContractAddress, getSTATEContractAddress } from '../Constants/ContractAddresses';
 
 
 const SwapContractContext = createContext();
@@ -22,16 +23,16 @@ export const SwapContractProvider = ({ children }) => {
   const { data: walletClient } = useWalletClient();
 
   // Custom hooks
-  const { fetchTokenData, ReturnfetchUserTokenAddresses, getAddresses } = useTokenData();
+  const { fetchTokenData, ReturnfetchUserTokenAddresses } = useTokenData();
   const swapActions = useSwapActions();
   const { AuctionTime, TimeLeftClaim, initializeClaimCountdowns } = useTokenTimers(
     AllContracts,
     provider,
     ReturnfetchUserTokenAddresses
   );
-  const tokenOperations = useTokenOperations(AllContracts, provider, signer, address, getAddresses);
-  const tokenInfo = useTokenInfo(AllContracts, provider, address, getAddresses, ReturnfetchUserTokenAddresses);
-  const auctionState = useAuctionState(AllContracts, address, getAddresses, fetchTokenData, ReturnfetchUserTokenAddresses);
+  const tokenOperations = useTokenOperations(AllContracts, provider, signer, address, chainId);
+  const tokenInfo = useTokenInfo(AllContracts, provider, address, chainId, ReturnfetchUserTokenAddresses);
+  const auctionState = useAuctionState(AllContracts, address, chainId, fetchTokenData, ReturnfetchUserTokenAddresses);
 
   // Handle chain changes
   useEffect(() => {
@@ -54,8 +55,7 @@ export const SwapContractProvider = ({ children }) => {
   useEffect(() => {
     const resetSwapsIfAuctionEnded = async () => {
       const tokenMap = await ReturnfetchUserTokenAddresses();
-      const addresses = getAddresses();
-      const extendedMap = { ...tokenMap, state: addresses.state };
+      const extendedMap = { ...tokenMap, state:getSTATEContractAddress(chainId) };
 
       const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
 
@@ -79,7 +79,7 @@ export const SwapContractProvider = ({ children }) => {
     };
 
     resetSwapsIfAuctionEnded();
-  }, [address, auctionState.IsAuctionActive, ReturnfetchUserTokenAddresses, getAddresses]);
+  }, [address, auctionState.IsAuctionActive, ReturnfetchUserTokenAddresses]);
 
   // Batch data fetching function
   const fetchAllData = useCallback(async () => {
@@ -191,15 +191,15 @@ export const SwapContractProvider = ({ children }) => {
       InputAmount: auctionState.InputAmount,
       OutputAmount: auctionState.OutPutAmount,
       isReversed: auctionState.isReversed,
-      getStateAddress: () => getAddresses().state,
-      getAuctionAddress: () => getAddresses().auction,
+      getStateAddress: () => getSTATEContractAddress(chainId),
+      getAuctionAddress: () => getAUCTIONContractAddress(chainId),
       onSuccess: () => {
         auctionState.CheckIsAuctionActive();
         auctionState.HasSwappedAucton();
         auctionState.HasReverseSwappedAucton();
       }
     });
-  }, [swapActions, tokenInfo.tokenMap, auctionState, getAddresses]);
+  }, [swapActions,chainId, tokenInfo.tokenMap, auctionState]);
 
   // Enhanced DEX swap function
   const enhancedDexSwap = useCallback(async (id, amountIn) => {
@@ -207,11 +207,11 @@ export const SwapContractProvider = ({ children }) => {
       id,
       amountIn,
       id,
-      getAddresses().state,
+     getSTATEContractAddress(chainId),
       auctionState.IsAuctionActive,
       ReturnfetchUserTokenAddresses
     );
-  }, [swapActions, getAddresses, auctionState.IsAuctionActive, ReturnfetchUserTokenAddresses]);
+  }, [swapActions,chainId, auctionState.IsAuctionActive, ReturnfetchUserTokenAddresses]);
 
   const value = {
     // Wallet & Provider info
@@ -243,7 +243,6 @@ export const SwapContractProvider = ({ children }) => {
     // Utility functions
     fetchAllData,
     ReturnfetchUserTokenAddresses,
-    getAddresses,
   };
 
   return (

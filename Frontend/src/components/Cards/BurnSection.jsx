@@ -50,7 +50,7 @@ const BurnSection = () => {
     const BurningSteps = [
         { key: "initiated", label: "Initializing" },
         { key: "Approving", label: "Approving" },
-        { key: "pending", label: "Burning" },
+        { key: "Pending", label: "Burning" },
         { key: "confirmed", label: "Confirmed" },
         { key: "error", label: "Error" },
     ];

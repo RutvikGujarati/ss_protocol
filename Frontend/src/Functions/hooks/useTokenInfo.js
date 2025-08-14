@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { ethers } from 'ethers';
 import { ERC20_ABI, ERC20Name_ABI, formatTokenAmount } from './contractHelpers';
+import { getAUCTIONContractAddress, getSTATEContractAddress } from '../../Constants/ContractAddresses';
 
-export const useTokenInfo = (AllContracts, provider, address, getAddresses, ReturnfetchUserTokenAddresses) => {
+export const useTokenInfo = (AllContracts, provider, address, chainId, ReturnfetchUserTokenAddresses) => {
     const [tokenMap, setTokenMap] = useState({});
     const [TokenNames, setTokenNames] = useState({});
     const [TokenBalance, setTokenbalance] = useState({});
@@ -49,12 +50,12 @@ export const useTokenInfo = (AllContracts, provider, address, getAddresses, Retu
         try {
             const results = {};
             const tokenMap = await ReturnfetchUserTokenAddresses();
-            const addresses = getAddresses();
-            const extendedMap = { ...tokenMap, state: addresses.state };
+            
+            const extendedMap = { ...tokenMap, state: getSTATEContractAddress(chainId) };
 
             for (const [tokenName, TokenAddress] of Object.entries(extendedMap)) {
                 const tokenContract = new ethers.Contract(TokenAddress, ERC20_ABI, provider);
-                const rawBalance = await tokenContract.balanceOf(addresses.auction);
+                const rawBalance = await tokenContract.balanceOf(getAUCTIONContractAddress(chainId));
                 const formattedBalance = formatTokenAmount(rawBalance, 18);
                 results[tokenName] = formattedBalance;
             }
@@ -63,7 +64,7 @@ export const useTokenInfo = (AllContracts, provider, address, getAddresses, Retu
         } catch (e) {
             console.error("Error fetching token balances:", e);
         }
-    }, [provider, ReturnfetchUserTokenAddresses, getAddresses]);
+    }, [provider, ReturnfetchUserTokenAddresses,chainId]);
 
     const getTokenNamesByUser = useCallback(async () => {
         if (!AllContracts?.AuctionContract || !provider) return;

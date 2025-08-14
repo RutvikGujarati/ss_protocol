@@ -1,7 +1,8 @@
 import { ethers } from 'ethers';
 import { useState, useCallback } from 'react';
+import { getDAVContractAddress, getSTATEContractAddress } from '../../Constants/ContractAddresses';
 
-export const useAuctionState = (AllContracts, address, getAddresses, fetchTokenData,ReturnfetchUserTokenAddresses) => {
+export const useAuctionState = (AllContracts, address, chainId, fetchTokenData,ReturnfetchUserTokenAddresses) => {
     const [InputAmount, setInputAmount] = useState({});
     const [OutPutAmount, setOutputAmount] = useState({});
     const [AirDropAmount, setAirdropAmount] = useState("0.0");
@@ -73,14 +74,14 @@ export const useAuctionState = (AllContracts, address, getAddresses, fetchTokenD
     const isRenounced = useCallback(async () => {
         try {
             const results = {};
-            const addresses = getAddresses();
+          
 
             // Get token map and extend with STATE and DAV
             const tokenMap = await ReturnfetchUserTokenAddresses();
             const extendedMap = {
                 ...tokenMap,
-                STATE: addresses.state,
-                DAV: addresses.dav,
+                STATE: getSTATEContractAddress(chainId),
+                DAV: getDAVContractAddress(chainId),
             };
 
             for (const [tokenName, TokenAddress] of Object.entries(extendedMap)) {
@@ -105,7 +106,7 @@ export const useAuctionState = (AllContracts, address, getAddresses, fetchTokenD
         } catch (e) {
             console.error("Error fetching renounce status:", e);
         }
-    }, [AllContracts, getAddresses,ReturnfetchUserTokenAddresses]);
+    }, [AllContracts, chainId,ReturnfetchUserTokenAddresses]);
 
     const HasReverseSwappedAucton = useCallback(async () => {
         await fetchTokenData({

@@ -788,7 +788,6 @@ const DataTable = () => {
                       </tr>
                     )
                   )}
-              <TxProgressModal steps={AddingTokenSteps} isOpen={isAddingPopupOpen} txStatus={txStatusForAdding} />
               {!authorized && (
                 <>
                   {pendingToken && (
@@ -878,6 +877,8 @@ const DataTable = () => {
               )}
             </tbody>
           </table>
+          <TxProgressModal steps={AddingTokenSteps} isOpen={isAddingPopupOpen} txStatus={txStatusForAdding} />
+
         </div>
       </div>
     </>

@@ -1,16 +1,12 @@
 import { useCallback, useContext } from 'react';
-import { getContractAddresses, handleContractError } from './contractHelpers';
+import { handleContractError } from './contractHelpers';
 import { useChainId } from 'wagmi';
 import { ContractContext } from '../ContractInitialize';
+import { getSTATEContractAddress } from '../../Constants/ContractAddresses';
 
 export const useTokenData = () => {
     const chainId = useChainId();
     const { AllContracts } = useContext(ContractContext);
-
-    const getAddresses = useCallback(() => {
-        return getContractAddresses(chainId);
-    }, [chainId]);
-
     const ReturnfetchUserTokenAddresses = useCallback(async () => {
         if (!AllContracts?.AuctionContract) {
             console.warn("AuctionContract not found");
@@ -47,7 +43,7 @@ export const useTokenData = () => {
             const tokenMap = await ReturnfetchUserTokenAddresses();
 
             const extendedMap = includeTestState
-                ? { ...tokenMap, state: getAddresses().state }
+                ? { ...tokenMap, state: getSTATEContractAddress(chainId) }
                 : tokenMap;
 
             for (const [tokenName, tokenAddress] of Object.entries(extendedMap)) {
@@ -76,11 +72,10 @@ export const useTokenData = () => {
             console.error("Error in fetchTokenData:", err);
             return {};
         }
-    }, [AllContracts, ReturnfetchUserTokenAddresses, getAddresses]);
+    }, [AllContracts, ReturnfetchUserTokenAddresses, chainId]);
 
     return {
         fetchTokenData,
         ReturnfetchUserTokenAddresses,
-        getAddresses
     };
 };

@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react';
 import { ethers } from 'ethers';
 import toast from 'react-hot-toast';
-import {  TokenABI} from './contractHelpers';
+import { TokenABI } from './contractHelpers';
+import { getDAVContractAddress, getSTATEContractAddress } from '../../Constants/ContractAddresses';
 
-export const useTokenOperations = (AllContracts,signer, address, getAddresses) => {
+export const useTokenOperations = (AllContracts, signer, address, chainId) => {
     const [claiming, setClaiming] = useState(false);
     const [isCliamProcessing, setIsCllaimProccessing] = useState(null);
     const [TotalCost, setTotalCost] = useState(null);
@@ -57,13 +58,23 @@ export const useTokenOperations = (AllContracts,signer, address, getAddresses) =
 
     const renounceTokenContract = useCallback(async (tokenAddress, tokenName) => {
         try {
+            if (!window.ethereum) {
+                console.error("No wallet found");
+                return;
+            }
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+
             const tokenContract = new ethers.Contract(tokenAddress, TokenABI, signer);
             const tx = await tokenContract.renounceOwnership();
             await tx.wait();
+
+            console.log(`Ownership renounced for ${tokenName}`);
         } catch (error) {
             console.error(`Error renouncing ownership for ${tokenName}:`, error);
         }
-    }, [signer]);
+    }, []);
+
 
     const handleAddToken = useCallback(async (tokenAddress, tokenSymbol, tokenDecimals = 18) => {
         if (!window.ethereum) {
@@ -105,17 +116,29 @@ export const useTokenOperations = (AllContracts,signer, address, getAddresses) =
     const setDavAndStateIntoSwap = useCallback(async () => {
         if (!AllContracts?.AuctionContract || !address) return;
 
+        const stateAddress = getSTATEContractAddress(chainId);
+        const davAddress = getDAVContractAddress(chainId);
+
+        console.log("STATE Address:", stateAddress);
+        console.log("DAV Address:", davAddress);
+
+        if (!davAddress || davAddress === ethers.ZeroAddress) {
+            console.error("❌ DAV address is zero. Aborting transaction.");
+            return;
+        }
+
         try {
-            const addresses = getAddresses();
             const tx = await AllContracts.AuctionContract.setTokenAddress(
-                addresses.state,
-                addresses.dav
+                stateAddress,
+                davAddress,
             );
             await tx.wait();
+            console.log("✅ Addresses set successfully");
         } catch (error) {
             console.error("Error setting addresses:", error);
         }
-    }, [AllContracts, address, getAddresses]);
+    }, [AllContracts, address, chainId]);
+
 
     return {
         claiming,
