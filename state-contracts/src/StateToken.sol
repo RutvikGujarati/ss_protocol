@@ -23,10 +23,10 @@ contract STATE_V2_2 is ERC20, Ownable(msg.sender) {
         uint256 fivePercentAmount,
         uint256 ninetyFivePercentAmount
     );
-    uint256 public constant FIVE_PERCENT_ALLOCATION = 5000000000000 ether; // 5% of total supply (50 trillion tokens)
+    uint256 public constant FIVE_PERCENT_ALLOCATION = 50000000000000 ether; // 5% of total supply (50 trillion tokens)
     /// @notice 95% of total supply (950 trillion tokens)
     uint256 public constant NINETY_FIVE_PERCENT_ALLOCATION =
-        95000000000000 ether;
+        950000000000000 ether;
     /// @param tokenName The name of the token
     /// @param tokenSymbol The symbol of the token
     /// @param recipientFivePercent Address receiving 5% of total supply

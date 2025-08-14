@@ -3,8 +3,10 @@ import { ethers } from 'ethers';
 import toast from 'react-hot-toast';
 import { TokenABI } from './contractHelpers';
 import { getDAVContractAddress, getSTATEContractAddress } from '../../Constants/ContractAddresses';
+import { useChainId } from 'wagmi';
 
-export const useTokenOperations = (AllContracts, signer, address, chainId) => {
+export const useTokenOperations = (AllContracts, address) => {
+    const chainId = useChainId();
     const [claiming, setClaiming] = useState(false);
     const [isCliamProcessing, setIsCllaimProccessing] = useState(null);
     const [TotalCost, setTotalCost] = useState(null);
@@ -45,8 +47,11 @@ export const useTokenOperations = (AllContracts, signer, address, chainId) => {
             setIsCllaimProccessing(null);
         }
     }, [AllContracts, address]);
-
+    
     const CheckMintBalance = useCallback(async (TokenAddress) => {
+        if (!ethers.isAddress(TokenAddress)) {
+            throw new Error(`Invalid token address: ${TokenAddress}`);
+        }
         try {
             const tx = await AllContracts.AuctionContract.distributeReward(address, TokenAddress);
             await tx.wait();
@@ -55,6 +60,7 @@ export const useTokenOperations = (AllContracts, signer, address, chainId) => {
             throw e;
         }
     }, [AllContracts, address]);
+
 
     const renounceTokenContract = useCallback(async (tokenAddress, tokenName) => {
         try {
@@ -115,12 +121,12 @@ export const useTokenOperations = (AllContracts, signer, address, chainId) => {
 
     const setDavAndStateIntoSwap = useCallback(async () => {
         if (!AllContracts?.AuctionContract || !address) return;
-
+        console.log("chainId from adding", chainId);
         const stateAddress = getSTATEContractAddress(chainId);
         const davAddress = getDAVContractAddress(chainId);
 
         console.log("STATE Address:", stateAddress);
-        console.log("DAV Address:", davAddress);
+        console.log("DAV Address from adding token:", davAddress);
 
         if (!davAddress || davAddress === ethers.ZeroAddress) {
             console.error("❌ DAV address is zero. Aborting transaction.");

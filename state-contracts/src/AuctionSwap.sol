@@ -41,7 +41,7 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     uint256 constant MIN_DAV_REQUIRED = 1 ether;
     uint256 constant DAV_FACTOR = 5000000 ether;
     //For Airdrop
-    uint256 constant AIRDROP_AMOUNT = 1000 ether;
+    uint256 constant AIRDROP_AMOUNT = 10000 ether;
     uint256 constant TOKEN_OWNER_AIRDROP = 1500000 ether;
     uint256 constant GOV_OWNER_AIRDROP = 150000 ether;
     uint256 constant PRECISION_FACTOR = 1e18;

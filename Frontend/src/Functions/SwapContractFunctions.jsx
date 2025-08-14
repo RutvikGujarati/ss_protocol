@@ -30,7 +30,7 @@ export const SwapContractProvider = ({ children }) => {
     provider,
     ReturnfetchUserTokenAddresses
   );
-  const tokenOperations = useTokenOperations(AllContracts, provider, signer, address, chainId);
+  const tokenOperations = useTokenOperations(AllContracts, address);
   const tokenInfo = useTokenInfo(AllContracts, provider, address, chainId, ReturnfetchUserTokenAddresses);
   const auctionState = useAuctionState(AllContracts, address, chainId, fetchTokenData, ReturnfetchUserTokenAddresses);
 
