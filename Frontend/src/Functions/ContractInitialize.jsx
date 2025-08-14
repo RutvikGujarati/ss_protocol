@@ -5,7 +5,7 @@ import { getContractConfigs, setChainId, isChainSupported } from "../Constants/C
 import { CHAIN_IDS } from "../Constants/ContractAddresses";
 import { useAccount, useChainId } from "wagmi";
 
-export const ContractContext = createContext(null);
+const ContractContext = createContext(null);
 
 export const ContractProvider = ({ children }) => {
   ContractProvider.propTypes = {
@@ -30,7 +30,7 @@ export const ContractProvider = ({ children }) => {
     } else {
       setChainId(chainId);
     }
-    
+
     initializeContracts();
   }, [isConnected, address, chainId]);
 
@@ -123,3 +123,5 @@ export const ContractProvider = ({ children }) => {
     </ContractContext.Provider>
   );
 };
+
+export { ContractContext }
