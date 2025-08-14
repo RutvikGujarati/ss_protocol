@@ -580,7 +580,7 @@ const SwapComponent = () => {
                   <div className="d-flex justify-content-start align-items-center mt-2">
                     <button
                       className="btn detailText btn-link text-light  p-0"
-                      style={{ textDecoration: "none", fontWeight: 200, fontSize: "14px", fontWeight: "700" }}
+                      style={{ textDecoration: "none", fontWeight: 200, fontSize: "13px", fontWeight: "700" }}
                       onClick={() => {
                         setTokenIn("STATE");
                         setTokenOut(nativeNames[chainId]);
@@ -589,7 +589,7 @@ const SwapComponent = () => {
                       disabled={isApproving || isSwapping}
                       title="Reset to default tokens"
                     >
-                      <i className="bi bi-arrow-clockwise"></i> Refresh
+                      Refresh <i className="bi bi-arrow-clockwise"></i>
                     </button>
                   </div>
                 </div>

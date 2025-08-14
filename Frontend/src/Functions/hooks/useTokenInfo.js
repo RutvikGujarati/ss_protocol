@@ -15,6 +15,11 @@ export const useTokenInfo = (AllContracts, provider, address, chainId, Returnfet
     const [supportedToken, setIsSupported] = useState(false);
     const [pstateToPlsRatio, setPstateToPlsRatio] = useState("0.0");
 
+    const chainConfigs = {
+        369: { name: "PulseChain", poolAddress: "0x5f5C53f62eA7c5Ed39D924063780dc21125dbDe7" },
+        137: { name: "polygon_pos", poolAddress: "0x9ea86c309c2e024cc53f0d95a103b8187152654d" },
+        // add more chains here
+    };
     const fetchUserTokenAddresses = useCallback(async () => {
         if (!AllContracts?.AuctionContract) return;
 
@@ -50,7 +55,7 @@ export const useTokenInfo = (AllContracts, provider, address, chainId, Returnfet
         try {
             const results = {};
             const tokenMap = await ReturnfetchUserTokenAddresses();
-            
+
             const extendedMap = { ...tokenMap, state: getSTATEContractAddress(chainId) };
 
             for (const [tokenName, TokenAddress] of Object.entries(extendedMap)) {
@@ -64,7 +69,7 @@ export const useTokenInfo = (AllContracts, provider, address, chainId, Returnfet
         } catch (e) {
             console.error("Error fetching token balances:", e);
         }
-    }, [provider, ReturnfetchUserTokenAddresses,chainId]);
+    }, [provider, ReturnfetchUserTokenAddresses, chainId]);
 
     const getTokenNamesByUser = useCallback(async () => {
         if (!AllContracts?.AuctionContract || !provider) return;
@@ -203,9 +208,13 @@ export const useTokenInfo = (AllContracts, provider, address, chainId, Returnfet
     }, [AllContracts]);
 
     const fetchPstateToPlsRatio = useCallback(async () => {
+        const config = chainConfigs[chainId];
+        console.log("Fetching PSTATE to PLS ratio for chainId:", config);
+        if (!config) return console.error("Unsupported chainId:", chainId);
         try {
-            const response = await fetch("https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0x5f5C53f62eA7c5Ed39D924063780dc21125dbDe7");
-            if (response.ok) {
+            const response = await fetch(
+                `https://api.geckoterminal.com/api/v2/networks/${config.name.toLowerCase()}/pools/${config.poolAddress}`
+            ); if (response.ok) {
                 const data = await response.json();
                 const ratio = parseFloat(data.data.attributes.base_token_price_quote_token);
                 setPstateToPlsRatio(ratio.toString());
