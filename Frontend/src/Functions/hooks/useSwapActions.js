@@ -5,11 +5,13 @@ import { ERC20_ABI } from './contractHelpers';
 import { useAccount, useChainId } from 'wagmi';
 import { ContractContext } from '../ContractInitialize';
 import { getSTATEContractAddress } from '../../Constants/ContractAddresses';
+import { useDAvContract } from '../DavTokenFunctions';
 
 export const useSwapActions = () => {
     const chainId = useChainId();
     const { AllContracts, signer } = useContext(ContractContext);
     const { address } = useAccount();
+    const { fetchData } = useDAvContract(); // Access fetchData from DAVContext
 
     const [swappingStates, setSwappingStates] = useState({});
     const [DexswappingStates, setDexSwappingStates] = useState({});
@@ -84,9 +86,11 @@ export const useSwapActions = () => {
                 });
                 setButtonTextStates(prev => ({ ...prev, [id]: "Swap Complete!" }));
                 onSuccess && onSuccess();
+                await fetchData();
             } else {
                 setTxStatusForSwap("error");
                 setButtonTextStates(prev => ({ ...prev, [id]: "Swap failed" }));
+                await fetchData();
             }
 
         } catch (error) {
@@ -221,7 +225,7 @@ export const useSwapActions = () => {
                     await tx.wait();
                 } catch (err) {
                     setTxStatusForSwap("error");
-                    console.log("error",err)
+                    console.log("error", err)
                     toast.error('Approval failed. Try again.');
                     return;
                 }
@@ -245,26 +249,37 @@ export const useSwapActions = () => {
                 });
             }
 
-            await tx.wait();
-            setTxStatusForSwap("confirmed");
+            const swapReceipt = await tx.wait();
 
+            if (swapReceipt.status === 1) {
+                setTxStatusForSwap("confirmed");
+                toast.success(`Swap successful with ${tokenOutAddress}`, {
+                    position: "top-center",
+                    autoClose: 18000,
+                });
+                const updatedSwaps = {
+                    ...swaps,
+                    [address]: {
+                        ...(swaps[address] || {}),
+                        [tokenOutAddress]: true,
+                    },
+                };
+                localStorage.setItem("auctionSwaps", JSON.stringify(updatedSwaps));
+                setButtonTextStates(prev => ({ ...prev, [id]: "Swap Complete!" }));
+                await fetchData();
+                onSuccess && onSuccess();
+            } else {
+                setTxStatusForSwap("error");
+                setButtonTextStates(prev => ({ ...prev, [id]: "Swap failed" }));
+            }
             // Save swap history using the token address
-            const updatedSwaps = {
-                ...swaps,
-                [address]: {
-                    ...(swaps[address] || {}),
-                    [tokenOutAddress]: true,
-                },
-            };
-            localStorage.setItem("auctionSwaps", JSON.stringify(updatedSwaps));
-
         } catch (err) {
             if (err?.code === 4001) {
                 setTxStatusForSwap("cancelled");
                 toast.error("Transaction cancelled by user.");
                 return;
             }
-
+            await fetchData();
             setTxStatusForSwap("error");
             console.error('Swap failed:', err);
         } finally {

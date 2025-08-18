@@ -321,7 +321,7 @@ const AuctionSection = () => {
 
                                     <p className="mb-1">
                                         <span className="detailText">
-                                            APY % -
+                                            USER APY % -
                                         </span>
                                         <span className="ms-2">
                                             {isLoading ? (
@@ -329,7 +329,7 @@ const AuctionSection = () => {
                                             ) : isNaN(calculateTotalSum() / totalInvestedPls) || !totalInvestedPls ? (
                                                 "0"
                                             ) : (
-                                                ((calculateTotalSum() / totalInvestedPls) * 36500).toFixed(3) || "0"
+                                                (formatWithCommas(calculateTotalSum() / totalInvestedPls) * 36500).toFixed(3) || "0"
                                             )}
                                         </span>
                                     </p>
