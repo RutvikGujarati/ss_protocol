@@ -307,19 +307,18 @@ const AuctionSection = () => {
                                         </span>
                                     </p>
                                     <p className="mb-1">
-                                        <span className="detailText">
-                                            USER ROI % -
-                                        </span>
+                                        <span className="detailText">USER ROI % -</span>
                                         <span className="ms-2">
                                             {isLoading ? (
                                                 <DotAnimation />
-                                            ) : isNaN(calculateTotalSum()) ? (
-                                                "Token Listing Process.."
+                                            ) : isNaN(calculateTotalSum() / totalInvestedPls) || !totalInvestedPls ? (
+                                                "0"
                                             ) : (
-                                                (calculateTotalSum() / totalInvestedPls) / 100 || "0"
+                                                ((calculateTotalSum() / totalInvestedPls) * 100).toFixed(3)
                                             )}
                                         </span>
                                     </p>
+
                                     <p className="mb-1">
                                         <span className="detailText">
                                             APY % -
@@ -327,10 +326,10 @@ const AuctionSection = () => {
                                         <span className="ms-2">
                                             {isLoading ? (
                                                 <DotAnimation />
-                                            ) : isNaN(calculateTotalSum()) ? (
-                                                "Token Listing Process.."
+                                            ) : isNaN(calculateTotalSum() / totalInvestedPls) || !totalInvestedPls ? (
+                                                "0"
                                             ) : (
-                                                (calculateTotalSum() / totalInvestedPls) * 365 || "0"
+                                                ((calculateTotalSum() / totalInvestedPls) * 36500).toFixed(3) || "0"
                                             )}
                                         </span>
                                     </p>
