@@ -2,13 +2,14 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../../Styles/InfoCards.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import PLSLogo from "../../assets/pls1.png";
 import BNBLogo from "../../assets/bnb.png";
 import matic from "../../assets/matic-token-icon.png";
 import sonic from "../../assets/S_token.svg";
-import { formatWithCommas } from ".././DetailsInfo";
+import { calculatePlsValueNumeric, formatWithCommas } from ".././DetailsInfo";
+import { TokensDetails } from "../../data/TokensDetails";
 import { useDAvContract } from "../../Functions/DavTokenFunctions";
 import DotAnimation from "../../Animations/Animation";
 import { useAccount, useChainId } from "wagmi";
@@ -17,9 +18,16 @@ import toast from "react-hot-toast";
 import { useSwapContract } from "../../Functions/SwapContractFunctions";
 import { chainCurrencyMap } from "../../../WalletConfig";
 import TxProgressModal from "../TxProgressModal";
+import useTokenBalances from "../Swap/UserTokenBalances";
+import { useAllTokens } from "../Swap/Tokens";
+import { ContractContext } from "../../Functions/ContractInitialize";
 
 const AuctionSection = () => {
     const chainId = useChainId();
+    const { tokens } = TokensDetails();
+    const TOKENS = useAllTokens();
+    const { signer } = useContext(ContractContext);
+    const tokenBalances = useTokenBalances(TOKENS, signer);
     const { address } = useAccount();
     const {
         mintDAV,
@@ -36,7 +44,7 @@ const AuctionSection = () => {
         davGovernanceHolds,
         totalInvestedPls,
     } = useDAvContract();
-    const { CalculationOfCost, TotalCost, getAirdropAmount, getInputAmount, getOutPutAmount } = useSwapContract();
+    const { CalculationOfCost, TotalCost, getAirdropAmount, getInputAmount, getOutPutAmount, pstateToPlsRatio } = useSwapContract();
     const [amount, setAmount] = useState("");
     const [Refferalamount, setReferralAmount] = useState("");
     const [load, setLoad] = useState(false);
@@ -103,7 +111,12 @@ const AuctionSection = () => {
         }
         CalculationOfCost(e.target.value);
     };
-
+    // Helper to calculate total sum
+    const calculateTotalSum = () => {
+        return tokens.reduce((sum, token) => {
+            return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio);
+        }, 0);
+    };
     const handleOptionalInputChange = (e) => {
         setReferralAmount(e.target.value);
     };
@@ -275,12 +288,50 @@ const AuctionSection = () => {
                                         </button>
                                     </p>
                                     <p className="mb-1">
-                                        <span className="detailText">ROI / {nativeSymbol} - </span>
+                                        <span className="detailText">
+                                            ROI / {nativeSymbol} -
+                                        </span>
                                         <span className="ms-2">
-                                            {isLoading ? <DotAnimation /> : formatWithCommas(totalInvestedPls) || "0"} /{" "}
-                                            <span style={{ color: "#28a745" }}>
-                                                {isLoading ? <DotAnimation /> : formatWithCommas(totalInvestedPls) || "0"}
+                                            {isLoading ? <DotAnimation /> : `${(formatWithCommas(totalInvestedPls)) || "0"}`} / {" "}
+                                            <span style={{
+                                                color: calculateTotalSum() > (totalInvestedPls || 0) ? '#28a745' : '#ff4081'
+                                            }}>
+                                                {isLoading ? (
+                                                    <DotAnimation />
+                                                ) : isNaN(calculateTotalSum()) ? (
+                                                    "Token Listing Process.."
+                                                ) : (
+                                                    formatWithCommas(calculateTotalSum()) || "0"
+                                                )}
                                             </span>
+                                        </span>
+                                    </p>
+                                    <p className="mb-1">
+                                        <span className="detailText">
+                                            USER ROI % -
+                                        </span>
+                                        <span className="ms-2">
+                                            {isLoading ? (
+                                                <DotAnimation />
+                                            ) : isNaN(calculateTotalSum()) ? (
+                                                "Token Listing Process.."
+                                            ) : (
+                                                (calculateTotalSum() / totalInvestedPls) / 100 || "0"
+                                            )}
+                                        </span>
+                                    </p>
+                                    <p className="mb-1">
+                                        <span className="detailText">
+                                            APY % -
+                                        </span>
+                                        <span className="ms-2">
+                                            {isLoading ? (
+                                                <DotAnimation />
+                                            ) : isNaN(calculateTotalSum()) ? (
+                                                "Token Listing Process.."
+                                            ) : (
+                                                (calculateTotalSum() / totalInvestedPls) * 365 || "0"
+                                            )}
                                         </span>
                                     </p>
                                 </div>
@@ -289,7 +340,7 @@ const AuctionSection = () => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 
