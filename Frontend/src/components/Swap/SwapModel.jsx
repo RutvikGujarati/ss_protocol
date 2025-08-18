@@ -366,22 +366,47 @@ const SwapComponent = () => {
           <div className="col-md-4 p-0 m-2 cards">
             <div className="card bg-dark text-light border-light p-3 d-flex w-100" style={{ minHeight: "260px" }}>
               <label className="detailText text-center small mb-1 font-weight-normal w-100">YOU PAY</label>
-              <div className="d-flex flex-column align-items-center gap-2" style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={amountIn}
-                  onChange={(e) => handleInputChange(e.target.value)}
-                  placeholder="0.0"
-                  style={{
-                    boxShadow: "none",
-                    "--placeholder-color": "#6c757d",
-                    backgroundColor: (isApproving || isSwapping) ? "#343a40" : undefined,
-                    borderColor: insufficientBalance ? "#dc3545" : undefined,
-                    maxWidth: "80%",
-                  }}
-                  disabled={isApproving || isSwapping}
-                />
+              <div className="d-flex flex-column align-items-center gap-2" style={{ position: "relative" }}>
+                {/* Input + Swap button in one row */}
+                <div className="d-flex align-items-center gap-2" style={{ maxWidth: "90%", width: "100%" }}>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={amountIn}
+                    onChange={(e) => handleInputChange(e.target.value)}
+                    placeholder="0.0"
+                    style={{
+                      boxShadow: "none",
+                      "--placeholder-color": "#6c757d",
+                      backgroundColor: (isApproving || isSwapping) ? "#343a40" : undefined,
+                      borderColor: insufficientBalance ? "#dc3545" : undefined,
+                    }}
+                    disabled={isApproving || isSwapping}
+                  />
+
+                  <button
+                    className="btn btn-outline-light rounded-circle"
+                    style={{
+                      width: "25px",
+                      height: "25px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    onClick={() => {
+                      const prevIn = tokenIn;
+                      const prevOut = tokenOut;
+                      setTokenIn(prevOut);
+                      setTokenOut(prevIn);
+                      setAmountIn("");
+                      setInsufficientBalance(false);
+                    }}
+                    disabled={isApproving || isSwapping}
+                  >
+                    <i className="bi bi-arrow-left-right" style={{ fontSize: "1rem" }}></i>
+                  </button>
+                </div>
+
                 {inputUsdValue && (
                   <small
                     className="text-secondary"
@@ -577,7 +602,7 @@ const SwapComponent = () => {
                   <p className="mb-1">
                     <span className="detailText">Slippage 1% : (Gas swap levy) </span>
                   </p>
-                  <div className="d-flex justify-content-start align-items-center mt-2">
+                  <div className="d-flex justify-content-start align-items-center ">
                     <button
                       className="btn detailText btn-link text-light  p-0"
                       style={{ textDecoration: "none", fontWeight: 200, fontSize: "13px", fontWeight: "700" }}

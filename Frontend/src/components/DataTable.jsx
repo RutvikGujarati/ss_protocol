@@ -877,9 +877,9 @@ const DataTable = () => {
               )}
             </tbody>
           </table>
-          <TxProgressModal steps={AddingTokenSteps} isOpen={isAddingPopupOpen} txStatus={txStatusForAdding} />
 
         </div>
+          <TxProgressModal steps={AddingTokenSteps} isOpen={isAddingPopupOpen} txStatus={txStatusForAdding} />
       </div>
     </>
   ) : (

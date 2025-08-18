@@ -134,8 +134,7 @@ const BurnSection = () => {
                             >
                                 Burn
                             </button>
-                            <TxProgressModal isOpen={BurnClicked} txStatus={buttonTextStates}
-                                steps={BurningSteps} />
+
                         </div>
                         <div className="carddetails2">
                             <h6 className="detailText mb-0" style={{ fontSize: "14px", textTransform: "capitalize" }}>
@@ -203,7 +202,10 @@ const BurnSection = () => {
                     </div>
                 </div>
             </div>
+            <TxProgressModal isOpen={BurnClicked} txStatus={buttonTextStates}
+                steps={BurningSteps} />
         </div>
+
     );
 };
 

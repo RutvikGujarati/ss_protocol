@@ -29,6 +29,7 @@ const AuctionSection = () => {
         davHolds,
         davExpireHolds,
         ReferralAMount,
+        stateHolding,
         DavMintFee,
         txStatus,
         ReferralCodeOfUser,
@@ -246,6 +247,12 @@ const AuctionSection = () => {
                             <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
                                 <div className="carddetails2">
                                     <h6 className="detailText">INFO</h6>
+                                    <p className="mb-1">
+                                        <span className="detailText">
+                                            State Token Holding -{" "}
+                                        </span>
+                                        <span>{formatWithCommas(stateHolding)}</span>
+                                    </p>
                                     <p className="mb-1">
                                         <span className="detailText">Affiliate com received - </span>
                                         <span>{formatWithCommas(ReferralAMount)} {nativeSymbol}</span>
