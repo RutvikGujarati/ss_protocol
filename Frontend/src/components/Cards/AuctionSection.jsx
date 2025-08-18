@@ -314,7 +314,7 @@ const AuctionSection = () => {
                                             ) : isNaN(calculateTotalSum() / totalInvestedPls) || !totalInvestedPls ? (
                                                 "0"
                                             ) : (
-                                                formatWithCommas(((calculateTotalSum() / totalInvestedPls) * 100).toFixed(3))
+                                                formatWithCommas(((calculateTotalSum() / totalInvestedPls) * 100).toFixed(0))
                                             )}
                                         </span>
                                     </p>
@@ -329,7 +329,7 @@ const AuctionSection = () => {
                                             ) : isNaN(calculateTotalSum() / totalInvestedPls) || !totalInvestedPls ? (
                                                 "0"
                                             ) : (
-                                                formatWithCommas(((calculateTotalSum() / totalInvestedPls) * 36500).toFixed(3)) || "0"
+                                                formatWithCommas(((calculateTotalSum() / totalInvestedPls) * 36500).toFixed(0)) || "0"
                                             )}
                                         </span>
                                     </p>
