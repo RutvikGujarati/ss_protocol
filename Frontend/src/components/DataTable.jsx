@@ -74,7 +74,7 @@ const DataTable = () => {
   ];
   const AddingTokenSteps = [
     { key: "initiated", label: "Initializing" },
-    { key: "Adding", label: "AddingToken" },
+    { key: "Adding", label: "Add Token" },
     { key: "Status Updating", label: "Status Updating" },
     { key: "confirmed", label: "Confirmed" },
     { key: "error", label: "Error" },
