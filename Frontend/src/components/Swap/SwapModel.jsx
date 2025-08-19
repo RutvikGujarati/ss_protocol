@@ -597,11 +597,11 @@ const SwapComponent = () => {
                     <span className="">{estimatedGas}</span>
                   </p>
                   <p className="mb-1 d-flex align-items-center gap-2 flex-wrap">
-                    <span className="detailText">Route : </span>
+                    <span className="detailText">Route - </span>
                     <span className="">Piteas API</span>
                   </p>
                   <p className="mb-1">
-                    <span className="detailText">Slippage 1% :  </span>
+                    <span className="detailText">Slippage 1% -  </span>
                     <span className="">(Gas swap levy) </span>
                   </p>
                   <div className="d-flex justify-content-start align-items-center ">

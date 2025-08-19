@@ -321,7 +321,7 @@ const AuctionSection = () => {
 
                                     <p className="mb-1">
                                         <span className="detailText">
-                                            USER APY % -
+                                            USER APR % -
                                         </span>
                                         <span className="ms-2">
                                             {isLoading ? (
