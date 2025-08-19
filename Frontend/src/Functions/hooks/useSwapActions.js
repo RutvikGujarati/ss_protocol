@@ -143,7 +143,6 @@ export const useSwapActions = () => {
         setTxStatusForSwap("initiated");
         setDexSwappingStates(prev => ({ ...prev, [id]: true }));
         setDexButtonTextStates(prev => ({ ...prev, [id]: "fetching quote..." }));
-
         // Fetch token addresses using the same method as other functions
         const tokenMap = await ReturnfetchUserTokenAddresses();
         const extendedMap = { ...tokenMap, state: getSTATEContractAddress(chainId) };
@@ -210,11 +209,10 @@ export const useSwapActions = () => {
             quoteData.to;
 
         try {
-            const contract = new ethers.Contract(tokenOutAddress, ERC20_ABI, signer);
+            const contract = new ethers.Contract(stateAddress, ERC20_ABI, signer);
             const allowance = await contract.allowance(address, swapContractAddress);
             const amount = ethers.parseUnits(amountIn || '0', 18);
             const needsApproval = BigInt(allowance) < BigInt(amount);
-
             if (needsApproval) {
                 setDexButtonTextStates(prev => ({ ...prev, [id]: "Checking allowance..." }));
                 setTxStatusForSwap("Approving");
@@ -237,11 +235,13 @@ export const useSwapActions = () => {
 
             let tx;
             if (chainId == 369) {
+                console.log("tx sending..", tx)
                 tx = await signer.sendTransaction({
                     to: swapContractAddress,
                     value: quoteData.methodParameters.value,
                     data: quoteData.methodParameters.calldata,
                 });
+
             } else {
                 tx = await signer.sendTransaction({
                     to: quoteData.to,
