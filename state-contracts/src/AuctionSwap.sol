@@ -50,7 +50,7 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
     uint256 public TotalBurnedStates;
-    uint256 public constant MAX_USER_AIRDROP = 30000000 ether;
+    uint256 public constant MAX_USER_AIRDROP = 10000000 ether;
     uint256 public constant MAX_GOV_AIRDROP = 0 ether;
     address public stateToken;
     address public governanceAddress;

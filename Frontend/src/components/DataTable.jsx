@@ -770,14 +770,12 @@ const DataTable = () => {
                         <td className="timer-cell">
                           {formatTimeVerbose(TimeLeft)}
                         </td>
-                        <td>150,000</td>
+                        <td>0</td>
                         <td>
                           <button
                             className="btn btn-sm swap-btn btn-primary"
                             onClick={() => giveRewardForAirdrop(TokenAddress)}
-                            disabled={
-                              isCliamProcessing == TokenAddress || TimeLeft > 0
-                            }
+                            disabled
                           >
                             {isCliamProcessing == TokenAddress
                               ? "Processing..."
