@@ -36,22 +36,22 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
     }
 
     //For Airdrop
-    uint256 public constant CLAIM_INTERVAL = 50 days;
+    uint256 public constant CLAIM_INTERVAL = 100 days;
     uint256 public constant MAX_SUPPLY = 500000000000 ether;
     uint256 constant MIN_DAV_REQUIRED = 1 ether;
     uint256 constant DAV_FACTOR = 5000000 ether;
     //For Airdrop
     uint256 constant AIRDROP_AMOUNT = 5000 ether;
-    uint256 constant TOKEN_OWNER_AIRDROP = 1500000 ether;
-    uint256 constant GOV_OWNER_AIRDROP = 150000 ether;
+    uint256 constant TOKEN_OWNER_AIRDROP = 1000000 ether;
+    uint256 constant GOV_OWNER_AIRDROP = 0 ether;
     uint256 constant PRECISION_FACTOR = 1e18;
-    uint256 public constant percentage = 1;
+    uint256 public constant percentage = 5; // for 100% burn
     //it is used for pulsechain and it is standered burn address
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
     uint256 public TotalBurnedStates;
     uint256 public constant MAX_USER_AIRDROP = 30000000 ether;
-    uint256 public constant MAX_GOV_AIRDROP = 3000000 ether;
+    uint256 public constant MAX_GOV_AIRDROP = 0 ether;
     address public stateToken;
     address public governanceAddress;
     address public DevAddress;
@@ -607,9 +607,11 @@ contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
         }
         bool isReverse = isReverseAuctionActive(inputToken);
         // Adjust calculation to avoid truncation
-        // uint256 firstCal = (MAX_SUPPLY * percentage * PRECISION_FACTOR) / 100;
-        // uint256 secondCalWithDavMax = (firstCal / DAV_FACTOR) * davbalance;
-        uint256 baseAmount = isReverse ? AIRDROP_AMOUNT * 2 : AIRDROP_AMOUNT;
+        uint256 firstCal = (MAX_SUPPLY * percentage * PRECISION_FACTOR) / 100;
+        uint256 secondCalWithDavMax = (firstCal / DAV_FACTOR) * davbalance;
+        uint256 baseAmount = isReverse
+            ? secondCalWithDavMax * 2
+            : secondCalWithDavMax;
 
         return baseAmount / PRECISION_FACTOR; // Scale back to correct units
     }

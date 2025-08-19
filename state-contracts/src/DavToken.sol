@@ -36,7 +36,7 @@ contract DAV_V2_2 is
     // NOTE: // This contract is intended for PulseChain, not Ethereum.
     uint256 public constant MAX_SUPPLY = 1000000000 ether; // 1 billion DAV Tokens
     uint256 public constant MAX_HOLDERS = 15000;
-    uint256 public constant TOKEN_COST = 1 ether; // 1500000 org
+    uint256 public constant TOKEN_COST = 500 ether; // 1500000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
     uint256 public constant LIQUIDITY_SHARE = 50; // 50% LIQUIDITY SHARE
     uint256 public constant DEVELOPMENT_SHARE = 5; // 5% DEV SHARE
@@ -54,8 +54,8 @@ contract DAV_V2_2 is
     ///      access restriction, or deterrence. Adjust only if this is NOT the intended behavior.
     // This contract is intended for PulseChain, not Ethereum.
     // Please note that the value of PLS is significantly lower compared to ETH,
-    uint256 public constant TOKEN_PROCESSING_FEE = 2 ether;
-    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 3 ether;
+    uint256 public constant TOKEN_PROCESSING_FEE = 1000 ether;
+    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 1500 ether;
     uint256 public totalReferralRewardsDistributed;
     uint256 public mintedSupply; // Total Minted DAV Tokens
     uint256 public claimStartTime;
@@ -63,7 +63,7 @@ contract DAV_V2_2 is
     uint256 public totalDevelopmentAllocated;
     //-------------------------- State burn ---------------------------
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
-    uint256 public constant CLAIM_INTERVAL = 3 days; // 36 days claim timer
+    uint256 public constant CLAIM_INTERVAL = 1 days; // 36 days claim timer
     uint256 public constant MIN_DAV = 50 * 1e18;
     uint256 public constant PRECISION = 1e18;
     address private constant BURN_ADDRESS =
