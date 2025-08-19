@@ -18,8 +18,8 @@ contract ScriptDAV is Script {
             DAVWallet,
             state,
             Governanace,
-            "mDAV",
-            "mDAV"
+            "pDAV",
+            "pDAV"
         );
 
         console.log("Contract deployed at:", address(dav));
