@@ -44,7 +44,7 @@ contract DAV_V2_2 is
     uint256 public constant BASIS_POINTS = 10000;
     uint256 public constant INITIAL_GOV_MINT = 2000 ether;
     uint256 public constant MAX_TOKEN_PER_USER = 100;
-    uint256 public constant DAV_TOKEN_EXPIRE = 30 days; // 30 days for mainnet
+    uint256 public constant DAV_TOKEN_EXPIRE = 2 hours; // 30 days for mainnet
 
     //cycle assinging to 10. not want to update or configure later
     uint256 public constant CYCLE_ALLOCATION_COUNT = 10;

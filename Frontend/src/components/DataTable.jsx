@@ -852,7 +852,7 @@ const DataTable = () => {
                             )}`
                             : "N/A"}
                         </td>
-                        <td>1,500,000</td>
+                        <td>1,000,000</td>
                         <td>{formatTimeVerbose(nextClaimTime)}</td>
                         <td>
                           <button
