@@ -24,7 +24,6 @@ export const SwapContractProvider = ({ children }) => {
 
   // Custom hooks
   const { fetchTokenData, ReturnfetchUserTokenAddresses } = useTokenData();
-  const swapActions = useSwapActions();
   const { AuctionTime, TimeLeftClaim, initializeClaimCountdowns } = useTokenTimers(
     AllContracts,
     provider,
@@ -33,7 +32,7 @@ export const SwapContractProvider = ({ children }) => {
   const tokenOperations = useTokenOperations(AllContracts, address);
   const tokenInfo = useTokenInfo(AllContracts, provider, address, chainId, ReturnfetchUserTokenAddresses);
   const auctionState = useAuctionState(AllContracts, address, chainId, fetchTokenData, ReturnfetchUserTokenAddresses);
-
+  const swapActions = useSwapActions(auctionState.CurrentCycleCount);
   // Handle chain changes
   useEffect(() => {
     if (!walletClient) return;
@@ -60,16 +59,26 @@ export const SwapContractProvider = ({ children }) => {
       const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
 
       if (swaps[address]) {
-        for (const [tokenName, tokenAddress] of Object.entries(extendedMap)) {
+        for (const tokenName of Object.keys(extendedMap)) {
+          const currentCycleCount = String(auctionState.CurrentCycleCount?.[tokenName]);
+          const cycleSwaps = swaps[address][currentCycleCount] || {};
           if (auctionState.IsAuctionActive[tokenName] === "false") {
-            console.log("Auction ended → removing swap for", tokenName, tokenAddress);
+            console.log(
+              `Auction ended → removing ALL swaps for cycle ${currentCycleCount}, token = ${tokenName}`
+            );
+            // 🚮 remove the whole tokenName (with all tokenOutAddresses)
+            delete cycleSwaps[tokenName];
+            localStorage.setItem("auctionSwaps", JSON.stringify(swaps));
 
-            // 🚮 delete just that token for the user
-            delete swaps[address][tokenAddress];
           }
         }
-
-        // cleanup: if no tokens left for that address, remove the address too
+        // cleanup: if no tokens left for that cycle, remove the cycle entry
+        if (Object.keys(cycleSwaps).length === 0) {
+          delete swaps[address][currentCycleCount];
+        } else {
+          swaps[address][currentCycleCount] = cycleSwaps;
+        }
+        // cleanup: if no cycles left for that user, remove the user entry
         if (Object.keys(swaps[address]).length === 0) {
           delete swaps[address];
         }
@@ -79,9 +88,13 @@ export const SwapContractProvider = ({ children }) => {
     };
 
     resetSwapsIfAuctionEnded();
-  }, [address, chainId, JSON.stringify(auctionState.IsAuctionActive), ReturnfetchUserTokenAddresses]);
-
-
+  }, [
+    address,
+    chainId,
+    auctionState.CurrentCycleCount,
+    JSON.stringify(auctionState.IsAuctionActive),
+    ReturnfetchUserTokenAddresses,
+  ]);
 
   // Batch data fetching function
   const fetchAllData = useCallback(async () => {

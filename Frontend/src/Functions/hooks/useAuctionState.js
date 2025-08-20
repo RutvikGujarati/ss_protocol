@@ -78,6 +78,7 @@ export const useAuctionState = (AllContracts, address, chainId, fetchTokenData, 
             try {
                 await CheckIsAuctionActive();
                 await CheckIsReverse();
+                await getCurrentAuctionCycle();
             } catch (err) {
                 console.error("Auction check failed:", err);
             }

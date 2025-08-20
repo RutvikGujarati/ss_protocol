@@ -7,7 +7,7 @@ import { ContractContext } from '../ContractInitialize';
 import { getSTATEContractAddress } from '../../Constants/ContractAddresses';
 import { useDAvContract } from '../DavTokenFunctions';
 
-export const useSwapActions = () => {
+export const useSwapActions = (currentCycleCount) => {
     const chainId = useChainId();
     const { AllContracts, signer } = useContext(ContractContext);
     const { address } = useAccount();
@@ -256,9 +256,17 @@ export const useSwapActions = () => {
                     ...swaps,
                     [address]: {
                         ...(swaps[address] || {}),
-                        [tokenOutAddress]: true,
+                        [String(currentCycleCount?.[tokenName])]: {   // cycle as parent
+                            ...(swaps[address]?.[String(currentCycleCount?.[tokenName])] || {}),
+                            [tokenName]: {                 // token name as sub-key
+                                ...(swaps[address]?.[String(currentCycleCount?.[tokenName])]?.[tokenName] || {}),
+                                [tokenOutAddress]: true,     // mark tokenOutAddress as swapped
+                            },
+                        },
                     },
                 };
+                console.log("updatedSwaps", updatedSwaps);
+                await fetchData();
                 localStorage.setItem("auctionSwaps", JSON.stringify(updatedSwaps));
                 setTxStatusForSwap("confirmed");
                 toast.success(`Swap successful with ${tokenOutAddress}`, {

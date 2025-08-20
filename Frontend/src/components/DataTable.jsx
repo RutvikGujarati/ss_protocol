@@ -42,6 +42,7 @@ const DataTable = () => {
     CheckMintBalance,
     isCliamProcessing,
     fetchUserTokenAddresses,
+    CurrentCycleCount,
     handleAddToken,
     tokenMap,
     handleDexTokenSwap,
@@ -206,9 +207,11 @@ const DataTable = () => {
     return () => clearTimeout(timer);
   }, [txStatusForSwap]);
 
-  const hasSwapped = (tokenInAddress) => {
+  const hasSwapped = (tokenName, tokenOutAddress) => {
     const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
-    return swaps[address]?.[tokenInAddress] || false;
+    return (
+      swaps[address]?.[CurrentCycleCount?.[tokenName]]?.[tokenName]?.[tokenOutAddress] || false
+    );
   };
 
   const filteredTokens = useMemo(() => {
@@ -515,9 +518,9 @@ const DataTable = () => {
                                 <button
                                   onClick={() => handleSwapClick(id, onlyState)}
                                   className="btn btn-sm swap-btn btn-primary"
-                                  disabled={!AuctionStatus || DexswappingStates[id] || onlyState <= 0 || hasSwapped(token)}
+                                  disabled={!AuctionStatus || DexswappingStates[id] || onlyState <= 0 || hasSwapped(name, token)}
                                 >
-                                  {hasSwapped(token) ?
+                                  {hasSwapped(name, token) ?
                                     "Swapped ✅" :
                                     DexswappingStates[id]
                                       ? "Swapping..."
@@ -877,7 +880,7 @@ const DataTable = () => {
           </table>
 
         </div>
-          <TxProgressModal steps={AddingTokenSteps} isOpen={isAddingPopupOpen} txStatus={txStatusForAdding} />
+        <TxProgressModal steps={AddingTokenSteps} isOpen={isAddingPopupOpen} txStatus={txStatusForAdding} />
       </div>
     </>
   ) : (
