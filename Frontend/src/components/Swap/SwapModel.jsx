@@ -128,8 +128,9 @@ const SwapComponent = () => {
   const handleApprove = async () => {
     setIsApproving(true);
     setShowTxModal(true);
-    setTxStatus("Approving");
+    setTxStatus("initiated")
     try {
+      setTxStatus("Approving");
       const tokenAddress = TOKENS[tokenIn].address;
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
       // Approve unlimited amount (max uint256
@@ -146,7 +147,6 @@ const SwapComponent = () => {
       );
       await tx.wait();
       setNeedsApproval(false);
-      setTxStatus("pending");
       await handleSwap();
     } catch (err) {
       toast.error("Approval failed. Try again.", {
