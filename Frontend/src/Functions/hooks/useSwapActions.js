@@ -85,8 +85,8 @@ export const useSwapActions = () => {
                     autoClose: 18000,
                 });
                 setButtonTextStates(prev => ({ ...prev, [id]: "Swap Complete!" }));
-                onSuccess && onSuccess();
                 await fetchData();
+                onSuccess && onSuccess();
             } else {
                 setTxStatusForSwap("error");
                 setButtonTextStates(prev => ({ ...prev, [id]: "Swap failed" }));
@@ -252,11 +252,6 @@ export const useSwapActions = () => {
             const swapReceipt = await tx.wait();
 
             if (swapReceipt.status === 1) {
-                setTxStatusForSwap("confirmed");
-                toast.success(`Swap successful with ${tokenOutAddress}`, {
-                    position: "top-center",
-                    autoClose: 18000,
-                });
                 const updatedSwaps = {
                     ...swaps,
                     [address]: {
@@ -265,6 +260,12 @@ export const useSwapActions = () => {
                     },
                 };
                 localStorage.setItem("auctionSwaps", JSON.stringify(updatedSwaps));
+                setTxStatusForSwap("confirmed");
+                toast.success(`Swap successful with ${tokenOutAddress}`, {
+                    position: "top-center",
+                    autoClose: 18000,
+                });
+
                 setButtonTextStates(prev => ({ ...prev, [id]: "Swap Complete!" }));
                 await fetchData();
                 onSuccess && onSuccess();

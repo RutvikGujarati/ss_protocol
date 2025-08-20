@@ -55,31 +55,33 @@ export const SwapContractProvider = ({ children }) => {
   useEffect(() => {
     const resetSwapsIfAuctionEnded = async () => {
       const tokenMap = await ReturnfetchUserTokenAddresses();
-      const extendedMap = { ...tokenMap, state:getSTATEContractAddress(chainId) };
+      const extendedMap = { ...tokenMap, state: getSTATEContractAddress(chainId) };
 
       const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
 
       if (swaps[address]) {
-        for (const [, tokenAddress] of Object.entries(extendedMap)) {
-          if (auctionState.IsAuctionActive[tokenAddress] == "false" && address) {
-            const currentSwaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
+        for (const [tokenName, tokenAddress] of Object.entries(extendedMap)) {
+          if (auctionState.IsAuctionActive[tokenName] === "false") {
+            console.log("Auction ended → removing swap for", tokenName, tokenAddress);
 
-            if (currentSwaps[address]?.[tokenAddress]) {
-              delete currentSwaps[address][tokenAddress];
-
-              if (Object.keys(currentSwaps[address]).length === 0) {
-                delete currentSwaps[address];
-              }
-
-              localStorage.setItem("auctionSwaps", JSON.stringify(currentSwaps));
-            }
+            // 🚮 delete just that token for the user
+            delete swaps[address][tokenAddress];
           }
         }
+
+        // cleanup: if no tokens left for that address, remove the address too
+        if (Object.keys(swaps[address]).length === 0) {
+          delete swaps[address];
+        }
+
+        localStorage.setItem("auctionSwaps", JSON.stringify(swaps));
       }
     };
 
     resetSwapsIfAuctionEnded();
-  }, [address, auctionState.IsAuctionActive, ReturnfetchUserTokenAddresses]);
+  }, [address, chainId, JSON.stringify(auctionState.IsAuctionActive), ReturnfetchUserTokenAddresses]);
+
+
 
   // Batch data fetching function
   const fetchAllData = useCallback(async () => {
@@ -199,7 +201,7 @@ export const SwapContractProvider = ({ children }) => {
         auctionState.HasReverseSwappedAucton();
       }
     });
-  }, [swapActions,chainId, tokenInfo.tokenMap, auctionState]);
+  }, [swapActions, chainId, tokenInfo.tokenMap, auctionState]);
 
   // Enhanced DEX swap function
   const enhancedDexSwap = useCallback(async (id, amountIn) => {
@@ -207,11 +209,11 @@ export const SwapContractProvider = ({ children }) => {
       id,
       amountIn,
       id,
-     getSTATEContractAddress(chainId),
+      getSTATEContractAddress(chainId),
       auctionState.IsAuctionActive,
       ReturnfetchUserTokenAddresses
     );
-  }, [swapActions,chainId, auctionState.IsAuctionActive, ReturnfetchUserTokenAddresses]);
+  }, [swapActions, chainId, auctionState.IsAuctionActive, ReturnfetchUserTokenAddresses]);
 
   const value = {
     // Wallet & Provider info

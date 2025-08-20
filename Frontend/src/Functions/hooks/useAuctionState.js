@@ -1,8 +1,8 @@
 import { ethers } from 'ethers';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { getDAVContractAddress, getSTATEContractAddress } from '../../Constants/ContractAddresses';
 
-export const useAuctionState = (AllContracts, address, chainId, fetchTokenData,ReturnfetchUserTokenAddresses) => {
+export const useAuctionState = (AllContracts, address, chainId, fetchTokenData, ReturnfetchUserTokenAddresses) => {
     const [InputAmount, setInputAmount] = useState({});
     const [OutPutAmount, setOutputAmount] = useState({});
     const [AirDropAmount, setAirdropAmount] = useState("0.0");
@@ -71,10 +71,30 @@ export const useAuctionState = (AllContracts, address, chainId, fetchTokenData,R
         });
     }, [fetchTokenData]);
 
+    useEffect(() => {
+        if (!AllContracts || !address) return;
+
+        const runAuctionChecks = async () => {
+            try {
+                await CheckIsAuctionActive();
+                await CheckIsReverse();
+            } catch (err) {
+                console.error("Auction check failed:", err);
+            }
+        };
+        // run immediately once
+        runAuctionChecks();
+        // poll every 10 seconds
+        const auctionPollingInterval = setInterval(runAuctionChecks, 10);
+        return () => {
+            clearInterval(auctionPollingInterval);
+        };
+    }, [AllContracts, address, CheckIsAuctionActive, CheckIsReverse]);
+
     const isRenounced = useCallback(async () => {
         try {
             const results = {};
-          
+
 
             // Get token map and extend with STATE and DAV
             const tokenMap = await ReturnfetchUserTokenAddresses();
@@ -106,7 +126,7 @@ export const useAuctionState = (AllContracts, address, chainId, fetchTokenData,R
         } catch (e) {
             console.error("Error fetching renounce status:", e);
         }
-    }, [AllContracts, chainId,ReturnfetchUserTokenAddresses]);
+    }, [AllContracts, chainId, ReturnfetchUserTokenAddresses]);
 
     const HasReverseSwappedAucton = useCallback(async () => {
         await fetchTokenData({
