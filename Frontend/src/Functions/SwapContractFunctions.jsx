@@ -60,25 +60,31 @@ export const SwapContractProvider = ({ children }) => {
 
       if (swaps[address]) {
         for (const tokenName of Object.keys(extendedMap)) {
-          const currentCycleCount = String(auctionState.CurrentCycleCount?.[tokenName]);
-          const cycleSwaps = swaps[address][currentCycleCount] || {};
-          if (auctionState.IsAuctionActive[tokenName] === "false") {
-            console.log(
-              `Auction ended → removing ALL swaps for cycle ${currentCycleCount}, token = ${tokenName}`
-            );
-            // 🚮 remove the whole tokenName (with all tokenOutAddresses)
-            delete cycleSwaps[tokenName];
-            localStorage.setItem("auctionSwaps", JSON.stringify(swaps));
+          const currentCycleCount = Number(auctionState.CurrentCycleCount?.[tokenName] || 0);
 
+          // loop through all stored cycles for this user
+          for (const storedCycle of Object.keys(swaps[address] || {})) {
+            const storedCycleNum = Number(storedCycle);
+
+            // 🧹 if stored cycle < current cycle → remove it
+            if (storedCycleNum < currentCycleCount) {
+              console.log(
+                `Cleaning old swaps → removing swaps for cycle ${storedCycleNum}, token = ${tokenName}`
+              );
+
+              if (swaps[address][storedCycle]) {
+                delete swaps[address][storedCycle][tokenName];
+
+                // cleanup empty cycle
+                if (Object.keys(swaps[address][storedCycle]).length === 0) {
+                  delete swaps[address][storedCycle];
+                }
+              }
+            }
           }
         }
-        // cleanup: if no tokens left for that cycle, remove the cycle entry
-        if (Object.keys(cycleSwaps).length === 0) {
-          delete swaps[address][currentCycleCount];
-        } else {
-          swaps[address][currentCycleCount] = cycleSwaps;
-        }
-        // cleanup: if no cycles left for that user, remove the user entry
+
+        // cleanup empty user
         if (Object.keys(swaps[address]).length === 0) {
           delete swaps[address];
         }
