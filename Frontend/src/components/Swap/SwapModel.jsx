@@ -41,7 +41,6 @@ const SwapComponent = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [needsApproval, setNeedsApproval] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
-  const [showTxModal, setShowTxModal] = useState(false);
   const [txStatus, setTxStatus] = useState("");
   const [confirmedAmountIn, setConfirmedAmountIn] = useState("");
   const [confirmedAmountOut, setConfirmedAmountOut] = useState("");
@@ -96,6 +95,7 @@ const SwapComponent = () => {
       setNeedsApproval(false);
       return;
     }
+    setTxStatus("initiated")
     try {
       const tokenAddress = TOKENS[tokenIn].address;
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
@@ -127,8 +127,6 @@ const SwapComponent = () => {
 
   const handleApprove = async () => {
     setIsApproving(true);
-    setShowTxModal(true);
-    setTxStatus("initiated")
     try {
       setTxStatus("Approving");
       const tokenAddress = TOKENS[tokenIn].address;
@@ -160,7 +158,6 @@ const SwapComponent = () => {
       });
       console.error("Approval error", err);
       setTxStatus("error");
-      setTimeout(() => setShowTxModal(false), 1200);
     } finally {
       setIsApproving(false);
     }
@@ -226,10 +223,12 @@ const SwapComponent = () => {
       toast.error("Wallet not connected.", { position: "top-center", autoClose: 5000 });
       return;
     }
-
+    setIsSwapping(true);
+    setTxStatus("initiated");
+    if (needsApproval) {
+      await handleApprove();
+    }
     try {
-      setIsSwapping(true);
-      setShowTxModal(true);
       setTxStatus("pending");
       setConfirmedAmountIn(amountIn);
       setConfirmedAmountOut(amountOut);
@@ -258,7 +257,6 @@ const SwapComponent = () => {
       setTxStatus("confirmed");
       setAmountIn("");
       setShowConfirmation(true);
-      setTimeout(() => setShowTxModal(false), 1200);
 
     } catch (err) {
       console.error("Swap failed", err);
@@ -266,7 +264,6 @@ const SwapComponent = () => {
       setTxStatus("error");
     } finally {
       setIsSwapping(false);
-      setTimeout(() => setShowTxModal(false), 1200);
     }
   };
 
@@ -530,56 +527,37 @@ const SwapComponent = () => {
 
               <div className="d-flex justify-content-center align-items-center mt-3">
                 <div className="position-relative">
-                  {needsApproval ? (
-                    <button
-                      className="btn btn-success rounded-pill py-2"
-                      onClick={handleApprove}
-                      disabled={isApproving || isSwapping}
-                      style={{ width: "270px", fontSize: "16px", padding: "10px 20px", fontWeight: 400, height: "40px", textAlign: "center" }}
-                    >
-                      {isApproving ? (
-                        <>
-                          <span
-                            className="spinner-border spinner-border-sm me-2"
-                            role="status"
-                          ></span>
-                          Approving...
-                        </>
-                      ) : (
-                        `Approve ${TOKENS[tokenIn]?.symbol || tokenIn}`
-                      )}
-                    </button>
-                  ) : (
-                    <button
-                      className="btn btn-primary rounded-pill py-2"
-                      onClick={handleSwap}
-                      disabled={!quoteData || isSwapping || insufficientBalance}
-                      style={{
-                        minWidth: "170px",
-                        width: "auto",
-                        fontSize: "16px",
-                        padding: "10px 20px",
-                        fontWeight: 400,
-                        height: "40px",
-                        textAlign: "center",
-                        whiteSpace: "nowrap"
-                      }}
-                    >
-                      {isSwapping ? (
-                        <>
-                          <span
-                            className="spinner-border spinner-border-sm me-2"
-                            role="status"
-                          ></span>
-                          Swapping...
-                        </>
-                      ) : insufficientBalance ? (
-                        `Insufficient ${TOKENS[tokenIn]?.symbol || tokenIn}`
-                      ) : (
-                        "SWAP"
-                      )}
-                    </button>
-                  )}
+
+                  <button
+                    className="btn btn-primary rounded-pill py-2"
+                    onClick={handleSwap}
+                    disabled={!quoteData || isSwapping || insufficientBalance}
+                    style={{
+                      minWidth: "170px",
+                      width: "auto",
+                      fontSize: "16px",
+                      padding: "10px 20px",
+                      fontWeight: 400,
+                      height: "40px",
+                      textAlign: "center",
+                      whiteSpace: "nowrap"
+                    }}
+                  >
+                    {isSwapping ? (
+                      <>
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                        ></span>
+                        Swapping...
+                      </>
+                    ) : insufficientBalance ? (
+                      `Insufficient ${TOKENS[tokenIn]?.symbol || tokenIn}`
+                    ) : (
+                      "SWAP"
+                    )}
+                  </button>
+
                 </div>
               </div>
 

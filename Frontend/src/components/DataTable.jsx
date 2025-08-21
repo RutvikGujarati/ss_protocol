@@ -566,9 +566,9 @@ const DataTable = () => {
                   <th>Token Address/Pair</th>
 
                   <th>Renounced</th>
-                  <th>Time To claim</th>
+                  {/* <th>Time To claim</th>
                   <th>Amount</th>
-                  <th>Airdrop</th>
+                  <th>Airdrop</th> */}
                 </tr>
               ) : (
                 <tr>
@@ -770,7 +770,7 @@ const DataTable = () => {
                             </button>
                           )}
                         </td>
-                        <td className="timer-cell">
+                        {/* <td className="timer-cell">
                           {formatTimeVerbose(TimeLeft)}
                         </td>
                         <td>0</td>
@@ -784,7 +784,7 @@ const DataTable = () => {
                               ? "Processing..."
                               : "Claim"}
                           </button>
-                        </td>
+                        </td> */}
 
                       </tr>
                     )
