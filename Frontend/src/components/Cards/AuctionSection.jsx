@@ -182,14 +182,14 @@ const AuctionSection = () => {
                                 style={{ width: "200px" }}
                                 disabled={load}
                             >
-                                Mint
+                                {load ? "Minting..." : "Mint"}
                             </button>
                         </div>
-                        <TxProgressModal
+                        {/* <TxProgressModal
                             isOpen={load}
                             txStatus={txStatus}
                             steps={mintSteps}
-                        />
+                        /> */}
                     </div>
                 </div>
                 <div className="col-md-4 p-0 m-2 cards">

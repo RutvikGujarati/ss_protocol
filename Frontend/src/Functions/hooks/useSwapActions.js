@@ -11,7 +11,7 @@ export const useSwapActions = (currentCycleCount) => {
     const chainId = useChainId();
     const { AllContracts, signer } = useContext(ContractContext);
     const { address } = useAccount();
-    const { fetchData } = useDAvContract(); // Access fetchData from DAVContext
+    const { fetchStateHolding  } = useDAvContract(); // Access fetchStateHolding  from DAVContext
 
     const [swappingStates, setSwappingStates] = useState({});
     const [DexswappingStates, setDexSwappingStates] = useState({});
@@ -85,12 +85,12 @@ export const useSwapActions = (currentCycleCount) => {
                     autoClose: 18000,
                 });
                 setButtonTextStates(prev => ({ ...prev, [id]: "Swap Complete!" }));
-                await fetchData();
+                await fetchStateHolding ();
                 onSuccess && onSuccess();
             } else {
                 setTxStatusForSwap("error");
                 setButtonTextStates(prev => ({ ...prev, [id]: "Swap failed" }));
-                await fetchData();
+                await fetchStateHolding ();
             }
 
         } catch (error) {
@@ -264,7 +264,7 @@ export const useSwapActions = (currentCycleCount) => {
                         },
                     },
                 };
-                await fetchData();
+                await fetchStateHolding ();
                 localStorage.setItem("auctionSwaps", JSON.stringify(updatedSwaps));
                 setTxStatusForSwap("confirmed");
                 toast.success(`Swap successful with ${tokenOutAddress}`, {
@@ -273,7 +273,6 @@ export const useSwapActions = (currentCycleCount) => {
                 });
 
                 setButtonTextStates(prev => ({ ...prev, [id]: "Swap Complete!" }));
-                await fetchData();
                 onSuccess && onSuccess();
             } else {
                 setTxStatusForSwap("error");
@@ -286,7 +285,7 @@ export const useSwapActions = (currentCycleCount) => {
                 toast.error("Transaction cancelled by user.");
                 return;
             }
-            await fetchData();
+            await fetchStateHolding ();
             setTxStatusForSwap("error");
             console.error('Swap failed:', err);
         } finally {

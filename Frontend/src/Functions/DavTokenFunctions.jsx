@@ -205,6 +205,11 @@ export const DavProvider = ({ children }) => {
     }
   }, [AllContracts, address, chainId]);
 
+  const fetchStateHolding = async () => {
+    await fetchAndSet("stateHolding", () =>
+      AllContracts.stateContract.balanceOf(address)
+    );
+  };
   //   console.log("dav entries", data.DavMintFee);
   const calculateTotalInvestedPls = async () => {
     try {
@@ -411,6 +416,8 @@ export const DavProvider = ({ children }) => {
       setTxStatus("error");
       console.error("Minting error:", error);
       throw error;
+    } finally {
+      setTxStatus("")
     }
   };
 
@@ -528,8 +535,9 @@ export const DavProvider = ({ children }) => {
       setisClaiming(true);
       const tx = await AllContracts.davContract.claimReward();
       await tx.wait();
-      await fetchData();
-      setisClaiming(false)
+      await fetchAndSet("claimableAmount", () =>
+        AllContracts.davContract.earned(address)
+      ); setisClaiming(false)
     } catch (err) {
       console.error("Claim error:", err);
       let errorMessage = "An unknown error occurred while claiming reward.";
@@ -543,7 +551,7 @@ export const DavProvider = ({ children }) => {
       }
 
       alert(`Claim failed: ${errorMessage}`);
-    }finally{
+    } finally {
       setisClaiming(false)
     }
   };
@@ -714,6 +722,7 @@ export const DavProvider = ({ children }) => {
         AddYourToken,
         buttonTextStates,
         fetchData,
+        fetchStateHolding,
         deployWithMetaMask,
         DepositStateBack,
         users,
