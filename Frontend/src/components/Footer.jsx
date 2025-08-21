@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 
 const Footer = () => {
   const messages = [
-    "Your swap shapes the market.",
+    "V3 Live - 20% higher yield on  ratio swaps",
     "Refresh when minting more DAV tokens.",
     "Transferring DAV tokens is not allowed after minting",
     "Referrers receive their commission directly in their wallet",
-    "Pulsechain transactions may take 1-3 minutes sometimes",
+    "Pulsechain transactions may take 1-3 minutes.",
   ];
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   useEffect(() => {

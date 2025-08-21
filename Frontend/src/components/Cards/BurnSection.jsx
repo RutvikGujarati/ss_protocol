@@ -98,7 +98,7 @@ const BurnSection = () => {
                             </div>
                             <div className="carddetails2">
                                 <h6 className="detailText mt-3 text-center" style={{ fontSize: "14px", textTransform: "capitalize" }}>
-                                    A MINIMUM OF 50 DAV TOKENS ARE REQUIRED TO CLAIM REWARDS
+                                    A MINIMUM OF 1 DAV TOKENS ARE REQUIRED TO CLAIM REWARDS
                                 </h6>
                             </div>
                         </div>

@@ -35,16 +35,16 @@ contract DAV_V2_2 is
     // DAV TOken
     // NOTE: // This contract is intended for PulseChain, not Ethereum.
     uint256 public constant MAX_SUPPLY = 1000000000 ether; // 1 billion DAV Tokens
-    uint256 public constant MAX_HOLDERS = 15000;
-    uint256 public constant TOKEN_COST = 500 ether; // 1500000 org
+    uint256 public constant MAX_HOLDERS = 20000;
+    uint256 public constant TOKEN_COST = 1500000 ether; // 1500000 org
     uint256 public constant REFERRAL_BONUS = 5; // 5% bonus for referrers
-    uint256 public constant LIQUIDITY_SHARE = 80; // 80% LIQUIDITY SHARE
+    uint256 public constant LIQUIDITY_SHARE = 60; // 60% LIQUIDITY SHARE
     uint256 public constant DEVELOPMENT_SHARE = 5; // 5% DEV SHARE
     uint256 public constant HOLDER_SHARE = 10; // 10% HOLDER SHARE
     uint256 public constant BASIS_POINTS = 10000;
     uint256 public constant INITIAL_GOV_MINT = 2000 ether;
     uint256 public constant MAX_TOKEN_PER_USER = 100;
-    uint256 public constant DAV_TOKEN_EXPIRE = 2 hours; // 30 days for mainnet
+    uint256 public constant DAV_TOKEN_EXPIRE = 30 days; // 30 days for mainnet
 
     //cycle assinging to 10. not want to update or configure later
     uint256 public constant CYCLE_ALLOCATION_COUNT = 10;
@@ -54,8 +54,8 @@ contract DAV_V2_2 is
     ///      access restriction, or deterrence. Adjust only if this is NOT the intended behavior.
     // This contract is intended for PulseChain, not Ethereum.
     // Please note that the value of PLS is significantly lower compared to ETH,
-    uint256 public constant TOKEN_PROCESSING_FEE = 1000 ether;
-    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 1500 ether;
+    uint256 public constant TOKEN_PROCESSING_FEE = 15000000 ether;
+    uint256 public constant TOKEN_WITHIMAGE_PROCESS = 20000000 ether;
     uint256 public totalReferralRewardsDistributed;
     uint256 public mintedSupply; // Total Minted DAV Tokens
     uint256 public claimStartTime;
@@ -63,8 +63,8 @@ contract DAV_V2_2 is
     uint256 public totalDevelopmentAllocated;
     //-------------------------- State burn ---------------------------
     uint256 public constant TREASURY_CLAIM_PERCENTAGE = 10; // 10% of treasury for claims
-    uint256 public constant CLAIM_INTERVAL = 1 days; // 10 days claim timer
-    uint256 public constant MIN_DAV = 50 * 1e18;
+    uint256 public constant CLAIM_INTERVAL = 10 days; // 10 days claim timer
+    uint256 public constant MIN_DAV = 1 * 1e18;
     uint256 public constant PRECISION = 1e18;
     address private constant BURN_ADDRESS =
         0x0000000000000000000000000000000000000369;
@@ -612,7 +612,7 @@ contract DAV_V2_2 is
             _tokenName,
             _emojiOrImage,
             64, // maxNameLength
-            1 // maxEmojiLength
+            2 // maxEmojiLength
         );
 
         uint256 userTokenBalance = getActiveBalance(msg.sender);
