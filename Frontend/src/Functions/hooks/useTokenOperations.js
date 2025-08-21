@@ -39,15 +39,31 @@ export const useTokenOperations = (AllContracts, address) => {
 
         try {
             setIsCllaimProccessing(tokenAddress);
+            console.log("Claiming reward for token:", tokenAddress);
             const tx = await AllContracts.AuctionContract.giveRewardToTokenOwner(tokenAddress);
             await tx.wait();
         } catch (error) {
             console.error("Error claiming reward:", error);
+            let message = "Transaction failed";
+            if (error?.reason) {
+                message = error.reason;
+            } else if (error?.error?.message) {
+                message = error.error.message;
+            } else if (error?.message) {
+                message = error.message;
+            }
+
+            toast.dismiss();
+            toast.error(message, {
+                position: "top-center",
+                autoClose: 12000,
+            });
+            throw error;
         } finally {
             setIsCllaimProccessing(null);
         }
     }, [AllContracts, address]);
-    
+
     const CheckMintBalance = useCallback(async (TokenAddress) => {
         if (!ethers.isAddress(TokenAddress)) {
             throw new Error(`Invalid token address: ${TokenAddress}`);
