@@ -522,8 +522,8 @@ const SwapComponent = () => {
                   </button>
                 </div>
               </div>
-              <TxProgressModal isOpen={isSwapping} txStatus={txStatus}
-                steps={SwappingSteps} />
+              {/* <TxProgressModal isOpen={isSwapping} txStatus={txStatus}
+                steps={SwappingSteps} /> */}
 
               <div className="d-flex justify-content-center align-items-center mt-3">
                 <div className="position-relative">

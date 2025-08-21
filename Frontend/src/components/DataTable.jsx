@@ -539,8 +539,8 @@ const DataTable = () => {
                 )
               )}
             </tbody>
-            <TxProgressModal isOpen={isPopupOpen} txStatus={txStatusForSwap}
-              steps={SwappingSteps} onClose={() => setIsPopupOpen(false)} />
+            {/* <TxProgressModal isOpen={isPopupOpen} txStatus={txStatusForSwap}
+              steps={SwappingSteps} onClose={() => setIsPopupOpen(false)} /> */}
           </table>
         </div>
       </div>
