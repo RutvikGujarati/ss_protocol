@@ -68,7 +68,7 @@ library BurnLibrary {
             "Insufficient allowance"
         );
         if (user != governance) {
-            require(getActiveBalance(user) >= MIN_DAV, "Need at least 10 DAV");
+            require(getActiveBalance(user) >= MIN_DAV, "Need at least 1 DAV");
         }
         require(
             !canClaim(

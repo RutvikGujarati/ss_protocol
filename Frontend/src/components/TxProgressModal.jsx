@@ -16,7 +16,9 @@ const TxProgressModal = ({ isOpen, txStatus, steps }) => {
       setShowClass("slide-out");
     }
   }, [isOpen]);
-
+  // ✅ Immediately hide if txStatus is "error" or "confirm"
+  if (txStatus === "error" || txStatus === "confirmed") return null;
+  
   if (!isOpen && showClass !== "slide-out") return null;
 
   const currentStepIndex = getStepIndex(txStatus, steps);
@@ -45,7 +47,7 @@ const TxProgressModal = ({ isOpen, txStatus, steps }) => {
           }}
         >
           <div className="modal-header border-0 pb-3">
-            <h6 className="modal-title" style={{fontSize:"1rem",fontWeight:"200"}}>Transaction Status</h6>
+            <h6 className="modal-title" style={{ fontSize: "1rem", fontWeight: "200" }}>Transaction Status</h6>
           </div>
           <div className="modal-body pt-0">
             <div className="position-relative d-flex justify-content-between align-items-center pb-2">

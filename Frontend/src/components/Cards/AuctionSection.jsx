@@ -60,7 +60,6 @@ const AuctionSection = () => {
         return PLSLogo;
     };
     const mintSteps = [
-        { key: "initializing", label: "Initializing" },
         { key: "initiated", label: "Initiated" },
         { key: "pending", label: "Pending" },
         { key: "confirmed", label: "Confirmed" },
