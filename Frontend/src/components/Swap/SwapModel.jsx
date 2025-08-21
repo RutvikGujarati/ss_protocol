@@ -365,10 +365,10 @@ const SwapComponent = () => {
               <label className="detailText text-center small mb-1 font-weight-normal w-100">YOU PAY</label>
               <div className="d-flex flex-column align-items-center gap-2" style={{ position: "relative" }}>
                 {/* Input + Swap button in one row */}
-                <div className="d-flex align-items-center gap-2" style={{ maxWidth: "90%", width: "100%" }}>
+                <div className="position-relative" style={{ maxWidth: "80%", width: "100%" }}>
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-control pe-5" // padding-end so text doesn't overlap with icon
                     value={amountIn}
                     onChange={(e) => handleInputChange(e.target.value)}
                     placeholder="0.0"
@@ -381,14 +381,19 @@ const SwapComponent = () => {
                     disabled={isApproving || isSwapping}
                   />
 
+                  {/* Swap Button inside input */}
                   <button
-                    className="btn btn-outline-light rounded-circle"
+                    className="btn btn-outline-light rounded-circle position-absolute"
                     style={{
                       width: "25px",
                       height: "25px",
+                      top: "50%",
+                      right: "10px",
+                      transform: "translateY(-50%)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      padding: 0,
                     }}
                     onClick={() => {
                       const prevIn = tokenIn;
@@ -403,6 +408,7 @@ const SwapComponent = () => {
                     <i className="bi bi-arrow-left-right" style={{ fontSize: "1rem" }}></i>
                   </button>
                 </div>
+
 
                 {inputUsdValue && (
                   <small
@@ -522,8 +528,8 @@ const SwapComponent = () => {
                   </button>
                 </div>
               </div>
-              <TxProgressModal isOpen={isSwapping} txStatus={txStatus}
-                steps={SwappingSteps} />
+              {/* <TxProgressModal isOpen={isSwapping} txStatus={txStatus}
+                steps={SwappingSteps} /> */}
 
               <div className="d-flex justify-content-center align-items-center mt-3">
                 <div className="position-relative">
@@ -603,14 +609,14 @@ const SwapComponent = () => {
             </div>
           </div>
 
-          {/* {isModalOpen && (
+          {isModalOpen && (
             <TokenSearchModal
               tokens={TOKENS}
               excludeToken={modalType === "in" ? tokenOut : tokenIn}
               onSelect={selectToken}
               onClose={closeModal}
             />
-          )} */}
+          )}
         </div>
       </div>
     </>
