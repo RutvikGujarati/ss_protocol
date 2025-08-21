@@ -34,6 +34,7 @@ const AuctionSection = () => {
         claimableAmount,
         isLoading,
         claimAmount,
+        isClaiming,
         davHolds,
         davExpireHolds,
         ReferralAMount,
@@ -184,11 +185,11 @@ const AuctionSection = () => {
                                 Mint
                             </button>
                         </div>
-                        {/* <TxProgressModal
+                        <TxProgressModal
                             isOpen={load}
                             txStatus={txStatus}
                             steps={mintSteps}
-                        /> */}
+                        />
                     </div>
                 </div>
                 <div className="col-md-4 p-0 m-2 cards">
@@ -244,9 +245,9 @@ const AuctionSection = () => {
                                         }}
                                         className="btn btn-primary d-flex btn-sm justify-content-center align-items-center mx-5 mt-4"
                                         style={{ width: "190px" }}
-                                        disabled={Number(claimableAmount) === 0}
+                                        disabled={Number(claimableAmount) === 0 || isClaiming}
                                     >
-                                        Claim
+                                       {isClaiming ? "Claiming..." : "Claim"}
                                     </button>
                                 </div>
                             </div>

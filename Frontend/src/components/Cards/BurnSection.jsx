@@ -202,8 +202,8 @@ const BurnSection = () => {
                     </div>
                 </div>
             </div>
-            {/* <TxProgressModal isOpen={BurnClicked} txStatus={buttonTextStates}
-                steps={BurningSteps} /> */}
+            <TxProgressModal isOpen={BurnClicked} txStatus={buttonTextStates}
+                steps={BurningSteps} />
         </div>
 
     );

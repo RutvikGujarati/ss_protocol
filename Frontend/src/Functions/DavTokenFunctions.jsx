@@ -44,6 +44,7 @@ export const DavProvider = ({ children }) => {
   const [TokenStatus, setTokenStatus] = useState([]);
   const [isUsed, setisUsed] = useState([]);
   const [isProcessing, setIsProcessing] = useState(null);
+  const [isClaiming, setisClaiming] = useState(null);
   const [isProcessingToken, setProcessToken] = useState(false);
 
   const [data, setData] = useState({
@@ -524,13 +525,15 @@ export const DavProvider = ({ children }) => {
   const claimAmount = async () => {
     if (!AllContracts?.davContract) return;
     try {
+      setisClaiming(true);
       const tx = await AllContracts.davContract.claimReward();
       await tx.wait();
       await fetchData();
+      setisClaiming(false)
     } catch (err) {
       console.error("Claim error:", err);
       let errorMessage = "An unknown error occurred while claiming reward.";
-
+      setisClaiming(false);
       if (err?.error?.message) {
         errorMessage = err.error.message;
       } else if (err?.reason) {
@@ -540,6 +543,8 @@ export const DavProvider = ({ children }) => {
       }
 
       alert(`Claim failed: ${errorMessage}`);
+    }finally{
+      setisClaiming(false)
     }
   };
 
@@ -704,6 +709,7 @@ export const DavProvider = ({ children }) => {
         mintDAV,
         BurnStateTokens,
         claimAmount,
+        isClaiming,
         claimBurnAmount,
         AddYourToken,
         buttonTextStates,

@@ -17,7 +17,7 @@ const TxProgressModal = ({ isOpen, txStatus, steps }) => {
     }
   }, [isOpen]);
   // ✅ Immediately hide if txStatus is "error" or "confirm"
-  
+
   if (txStatus === "error" || txStatus === "confirmed") return null;
 
   if (!isOpen && showClass !== "slide-out") return null;

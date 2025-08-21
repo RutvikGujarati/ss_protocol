@@ -414,10 +414,12 @@ const DataTable = () => {
                           }
                         >
                           {checkingStates[id]
-                            ? ` AIRDROPPING...`
+                            ? "AIRDROPPING..."
                             : AirdropClaimedForToken == "true"
-                              ? " CLAIMED"
-                              : `${formatWithCommas(AirDropAmount[name])} `}
+                              ? "CLAIMED ✅"
+                              : AirDropAmount?.[name] && AirDropAmount[name] > 0
+                                ? `${formatWithCommas(AirDropAmount[name])}`
+                                : "0"}
                         </button>
                       </td>
 
@@ -439,43 +441,21 @@ const DataTable = () => {
                             </>
                           )}
                           <div className="d-flex align-items-center gap-2">
-                            <>
-                              {isReversing == "true" && (
-                                <button
-                                  onClick={() => SwapT()}
-                                  disabled={
-                                    userHasReverse == "true" ||
-                                    swappingStates[id] ||
-                                    outputToken <= "1"
-                                  }
-                                  className={`btn btn-sm swap-btn btn-primary btn-sm swap-btn `}
-                                >
-                                  {userHasReverse == "true"
-                                    ? "Reverse Swapped ✅"
-                                    : swappingStates[id]
-                                      ? "Swapping..."
-                                      : "Reverse Swap"}
-                                </button>
-                              )}
+                            <button
+                              onClick={() => SwapT()}
+                              disabled={
+                                swappingStates[id] ||
+                                (isReversing == "true" ? userHasReverse == "true" || outputToken <= 1 : userHasSwapped == "true" || onlyInputAmount <= 0)
+                              }
+                              className="btn btn-sm swap-btn btn-primary"
+                            >
+                              {swappingStates[id]
+                                ? "Swapping..."
+                                : isReversing == "true"
+                                  ? (userHasReverse == "true" ? "Reverse Swapped ✅" : "Reverse Swap")
+                                  : (userHasSwapped == "true" ? "Swapped ✅" : buttonTextStates[id] || "Swap")}
+                            </button>
 
-                              {isReversing == "false" && (
-                                <button
-                                  onClick={() => SwapT()}
-                                  disabled={
-                                    userHasSwapped == "true" ||
-                                    swappingStates[id] ||
-                                    onlyInputAmount <= 0
-                                  }
-                                  className="btn btn-sm swap-btn btn-primary"
-                                >
-                                  {userHasSwapped == "true"
-                                    ? "Swapped ✅"
-                                    : swappingStates[id]
-                                      ? "Swapping..."
-                                      : buttonTextStates[id] || "Swap"}
-                                </button>
-                              )}
-                            </>
                           </div>
                         </div>
                       </td>
@@ -520,12 +500,13 @@ const DataTable = () => {
                                   className="btn btn-sm swap-btn btn-primary"
                                   disabled={!AuctionStatus || DexswappingStates[id] || onlyState <= 0 || hasSwapped(name, token)}
                                 >
-                                  {hasSwapped(name, token) ?
-                                    "Swapped ✅" :
-                                    DexswappingStates[id]
-                                      ? "Swapping..."
-                                      : DexswappingStates[id] || "Swap"}
+                                  {DexswappingStates[id]
+                                    ? "Swapping..."
+                                    : hasSwapped(name, token)
+                                      ? "Swapped ✅"
+                                      : "Swap"}
                                 </button>
+
                               </div>
                             </div>
                           </td>
@@ -539,8 +520,8 @@ const DataTable = () => {
                 )
               )}
             </tbody>
-            {/* <TxProgressModal isOpen={isPopupOpen} txStatus={txStatusForSwap}
-              steps={SwappingSteps} onClose={() => setIsPopupOpen(false)} /> */}
+            <TxProgressModal isOpen={isPopupOpen} txStatus={txStatusForSwap}
+              steps={SwappingSteps} onClose={() => setIsPopupOpen(false)} />
           </table>
         </div>
       </div>

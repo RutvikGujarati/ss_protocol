@@ -235,7 +235,6 @@ export const useSwapActions = (currentCycleCount) => {
 
             let tx;
             if (chainId == 369) {
-                console.log("tx sending..", tx)
                 tx = await signer.sendTransaction({
                     to: swapContractAddress,
                     value: quoteData.methodParameters.value,
@@ -265,7 +264,6 @@ export const useSwapActions = (currentCycleCount) => {
                         },
                     },
                 };
-                console.log("updatedSwaps", updatedSwaps);
                 await fetchData();
                 localStorage.setItem("auctionSwaps", JSON.stringify(updatedSwaps));
                 setTxStatusForSwap("confirmed");
