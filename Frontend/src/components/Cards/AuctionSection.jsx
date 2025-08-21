@@ -270,7 +270,7 @@ const AuctionSection = () => {
                                         <span className="detailText">Affiliate com received - </span>
                                         <span>{formatWithCommas(ReferralAMount)} {nativeSymbol}</span>
                                     </p>
-                                    <p className="mb-1 d-flex align-items-center gap-2 flex-wrap">
+                                    <p className="mb-1 ">
                                         <span className="detailText">Your Affiliate Link - </span>
                                         <span style={{ textTransform: "none" }}>{ReferralCodeOfUser}</span>
                                         <button
@@ -291,7 +291,7 @@ const AuctionSection = () => {
                                         <span className="detailText">
                                             ROI / {nativeSymbol} -
                                         </span>
-                                        <span className="ms-2">
+                                        <span className="ms-1">
                                             {isLoading ? <DotAnimation /> : `${(formatWithCommas(totalInvestedPls)) || "0"}`} / {" "}
                                             <span style={{
                                                 color: calculateTotalSum() > (totalInvestedPls || 0) ? '#28a745' : '#ff4081'
@@ -308,7 +308,7 @@ const AuctionSection = () => {
                                     </p>
                                     <p className="mb-1">
                                         <span className="detailText">USER ROI % -</span>
-                                        <span className="ms-2">
+                                        <span className="ms-1">
                                             {isLoading ? (
                                                 <DotAnimation />
                                             ) : isNaN(calculateTotalSum() / totalInvestedPls) || !totalInvestedPls ? (
@@ -323,7 +323,7 @@ const AuctionSection = () => {
                                         <span className="detailText">
                                             USER APR % -
                                         </span>
-                                        <span className="ms-2">
+                                        <span className="ms-1">
                                             {isLoading ? (
                                                 <DotAnimation />
                                             ) : isNaN(calculateTotalSum() / totalInvestedPls) || !totalInvestedPls ? (

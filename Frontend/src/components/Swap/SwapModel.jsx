@@ -574,7 +574,7 @@ const SwapComponent = () => {
                     <span className="detailText">Network Fee - </span>
                     <span className="">{estimatedGas}</span>
                   </p>
-                  <p className="mb-1 d-flex align-items-center gap-2 flex-wrap">
+                  <p className="mb-1">
                     <span className="detailText">Route - </span>
                     <span className="">Piteas API</span>
                   </p>
@@ -603,14 +603,14 @@ const SwapComponent = () => {
             </div>
           </div>
 
-          {isModalOpen && (
+          {/* {isModalOpen && (
             <TokenSearchModal
               tokens={TOKENS}
               excludeToken={modalType === "in" ? tokenOut : tokenIn}
               onSelect={selectToken}
               onClose={closeModal}
             />
-          )}
+          )} */}
         </div>
       </div>
     </>
