@@ -1,6 +1,5 @@
 // TxProgressModal.jsx
 import { useEffect, useState } from "react";
-import { Spinner } from "react-bootstrap";
 
 const getStepIndex = (txStatus, steps) => {
   return steps.findIndex(step => step.key === txStatus);
@@ -16,8 +15,8 @@ const TxProgressModal = ({ isOpen, txStatus, steps }) => {
       setShowClass("slide-out");
     }
   }, [isOpen]);
-  // ✅ Immediately hide if txStatus is "error" or "confirm"
 
+  // ✅ Hide immediately if error or confirmed
   if (txStatus === "error" || txStatus === "confirmed") return null;
 
   if (!isOpen && showClass !== "slide-out") return null;
@@ -48,7 +47,12 @@ const TxProgressModal = ({ isOpen, txStatus, steps }) => {
           }}
         >
           <div className="modal-header border-0 pb-3">
-            <h6 className="modal-title" style={{ fontSize: "1rem", fontWeight: "200" }}>Transaction Status</h6>
+            <h6
+              className="modal-title"
+              style={{ fontSize: "1rem", fontWeight: "200" }}
+            >
+              Transaction Status
+            </h6>
           </div>
           <div className="modal-body pt-0">
             <div className="position-relative d-flex justify-content-between align-items-center pb-2">
@@ -73,7 +77,6 @@ const TxProgressModal = ({ isOpen, txStatus, steps }) => {
 
               {steps.map((step, idx) => {
                 const isActive = idx <= currentStepIndex;
-                const isCurrent = idx === currentStepIndex;
                 const isFinal = idx === steps.length - 1;
 
                 return (
@@ -83,39 +86,28 @@ const TxProgressModal = ({ isOpen, txStatus, steps }) => {
                     style={{ zIndex: 1, flex: 1 }}
                   >
                     <div className="d-flex justify-content-center align-items-center my-4">
-                      {isCurrent ? (
-                        <Spinner
-                          animation="border"
-                          style={{
-                            width: "20px",
-                            height: "20px",
-                            color: "#ff4081",
-                          }}
-                        />
-                      ) : (
-                        <div
-                          className="rounded-circle"
-                          style={{
-                            width: "20px",
-                            height: "20px",
-                            backgroundColor: isActive
-                              ? isFinal
-                                ? txStatus === "error"
-                                  ? "#dc3545"
-                                  : "#28a745"
-                                : "#ff4081"
-                              : "#1a1b1f",
-                            border: `2px solid ${isActive
+                      <div
+                        className="rounded-circle"
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          backgroundColor: isActive
+                            ? isFinal
+                              ? txStatus === "error"
+                                ? "#dc3545" // red
+                                : "#28a745" // green
+                              : "#ff4081" // active pink
+                            : "#1a1b1f", // inactive
+                          border: `2px solid ${isActive
                               ? isFinal
                                 ? txStatus === "error"
                                   ? "#dc3545"
                                   : "#28a745"
                                 : "#ff4081"
                               : "#6c757d"
-                              }`,
-                          }}
-                        ></div>
-                      )}
+                            }`,
+                        }}
+                      ></div>
                     </div>
                     <small
                       className={
@@ -128,11 +120,11 @@ const TxProgressModal = ({ isOpen, txStatus, steps }) => {
                           : "text-light"
                       }
                       style={{
-                        whiteSpace: "nowrap",   // ✅ force in one line
-                        overflow: "hidden",     // ✅ hide overflow
-                        textOverflow: "ellipsis", // ✅ add "..." if text too long
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
                         display: "block",
-                        maxWidth: "80px",       // ✅ adjust width per your design
+                        maxWidth: "80px",
                       }}
                     >
                       {step.label}

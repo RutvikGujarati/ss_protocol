@@ -78,7 +78,6 @@ const DataTable = () => {
     { key: "Adding", label: "Add Token" },
     { key: "Status Updating", label: "Status Updating" },
     { key: "confirmed", label: "Confirmed" },
-    { key: "error", label: "Error" },
   ];
 
   const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
@@ -861,7 +860,7 @@ const DataTable = () => {
           </table>
 
         </div>
-        {/* <TxProgressModal steps={AddingTokenSteps} isOpen={isAddingPopupOpen} txStatus={txStatusForAdding} /> */}
+        <TxProgressModal steps={AddingTokenSteps} isOpen={isAddingPopupOpen} txStatus={txStatusForAdding} />
       </div>
     </>
   ) : (
