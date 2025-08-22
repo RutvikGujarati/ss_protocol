@@ -458,11 +458,7 @@ const SwapComponent = () => {
                   Bal: {tokenInBalance ? `${parseFloat(tokenInBalance).toFixed(2)}` : "-"}
                 </span>
               </div>
-              {insufficientBalance && (
-                <div className="text-danger text-center small mb-2">
-                  Insufficient balance. You only have {parseFloat(tokenInBalance).toFixed(2)} {TOKENS[tokenIn]?.symbol || tokenIn}.
-                </div>
-              )}
+             
             </div>
           </div>
 
