@@ -9,6 +9,7 @@ export const useTokenInfo = (AllContracts, provider, address, chainId, Returnfet
     const [TokenBalance, setTokenbalance] = useState({});
     const [burnedAmount, setBurnedAmount] = useState({});
     const [burnedLPAmount, setBurnLpAmount] = useState({});
+    const [TokenPariAddress, setPairAddresses] = useState({});
     const [UsersSupportedTokens, setUsersSupportedTokens] = useState("");
     const [DavAddress, setDavAddress] = useState("");
     const [StateAddress, setStateAddress] = useState("");
@@ -109,6 +110,37 @@ export const useTokenInfo = (AllContracts, provider, address, chainId, Returnfet
             console.error("Error fetching token names or pair addresses:", error);
         }
     }, [AllContracts, provider, address]);
+
+    const getPairAddress = useCallback(async () => {
+        if (!AllContracts?.AuctionContract || !provider) return null;
+
+        try {
+            const tokenMap = await ReturnfetchUserTokenAddresses();
+            const results = {};
+
+            for (const [tokenName, tokenAddress] of Object.entries(tokenMap)) {
+                try {
+                    const pairAddress = await AllContracts.AuctionContract.pairAddresses(tokenAddress);
+                    results[tokenName] = pairAddress;
+
+                    setPairAddresses((prev) => ({
+                        ...prev,
+                        [tokenName]: pairAddress,
+                    }));
+                } catch (error) {
+                    console.error(`Error fetching pair address for token ${tokenName}:`, error);
+                    results[tokenName] = "0x0000000000000000000000000000000000000000";
+                }
+            }
+
+            return results;
+        } catch (error) {
+            console.error("Error fetching token map:", error);
+            return {};
+        }
+    }, [AllContracts, provider, ReturnfetchUserTokenAddresses]);
+
+
 
     const fetchBurnLpAmount = useCallback(async () => {
         if (!AllContracts?.AuctionContract || !provider) return {};
@@ -241,6 +273,8 @@ export const useTokenInfo = (AllContracts, provider, address, chainId, Returnfet
         getTokenNamesForUser,
         getTokenBalances,
         getTokenNamesByUser,
+        getPairAddress,
+        TokenPariAddress,
         fetchBurnLpAmount,
         isTokenSupporteed,
         AddressesFromContract,

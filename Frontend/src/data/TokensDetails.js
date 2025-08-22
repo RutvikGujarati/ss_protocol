@@ -88,6 +88,7 @@ export const TokensDetails = () => {
 						? "true"
 						: swap.supportedToken?.[key],
 			TokenAddress: token.address,
+			PairAddress: swap.TokenPariAddress?.[key] || "0x0000000000000000000000000000000000000000",
 			Cycle:
 				swap.CurrentCycleCount?.[key] === "not started"
 					? "Not Started"

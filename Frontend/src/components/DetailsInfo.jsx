@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../Styles/DetailsInfo.css";
 import "../Styles/SearchInfo.css";
 import MetaMaskIcon from "../assets/metamask-icon.png";
+import gecko from "../assets/gecko.svg";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import PropTypes from "prop-types";
 import { useContext, useEffect, useState } from "react";
@@ -266,7 +267,7 @@ const DetailsInfo = ({ selectedToken }) => {
             <table className="table table-dark">
               <thead>
                 <tr>
-                  <th className="text-center">Token <br/> Name</th>
+                  <th className="text-center">Token <br /> Name</th>
                   <th className="text-center">Current <br /> Ratio</th>
                   <th className="text-center">Auctions</th>
                   <th className="text-center">DAV Vault</th>
@@ -384,6 +385,24 @@ const DetailsInfo = ({ selectedToken }) => {
                       </td>
                       <td className="text-center">
                         <div className="d-flex justify-content-center align-items-center gap-3">
+                          <div className="d-flex flex-column align-items-center">
+                            {token.tokenName === "DAV" || token.tokenName === "STATE" ? (
+                              <span>-----</span>
+                            ) : (
+                              <a
+                                href={`https://www.geckoterminal.com/pulsechain/pools/${token.PairAddress}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ fontSize: "15px", color: "white" }}
+                              >
+                                <img
+                                  src={gecko}   // make sure gecko.png is inside public/images
+                                  alt="Gecko"
+                                  style={{ width: "20px", height: "20px" }}
+                                />
+                              </a>
+                            )}
+                          </div>
                           <div className="d-flex flex-column align-items-center">
                             <a
                               href={`${explorerUrls[chainId] || "https://defaultexplorer.io/address/"}${token.TokenAddress}`}

@@ -123,6 +123,7 @@ export const SwapContractProvider = ({ children }) => {
         tokenInfo.getTokenNamesForUser,
         tokenInfo.isTokenSupporteed,
         tokenInfo.getTokenNamesByUser,
+        tokenInfo.getPairAddress,
         auctionState.HasSwappedAucton,
         auctionState.HasReverseSwappedAucton,
         tokenInfo.fetchPstateToPlsRatio,
