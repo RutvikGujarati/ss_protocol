@@ -596,6 +596,26 @@ export const DavProvider = ({ children }) => {
       });
     } catch (err) {
       console.error("Burn claim error:", err);
+      // Try to extract a readable reason
+      let message = "Transaction failed";
+      if (err.reason) {
+        message = err.reason; // ethers revert reason
+      } else if (err.error?.message) {
+        message = err.error.message; // MetaMask style
+      } else if (err.data?.message) {
+        message = err.data.message; // RPC provider style
+      } else if (err.message) {
+        message = err.message; // fallback
+      }
+
+      toast.error(message, {
+        position: "top-center",
+        autoClose: 8000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } finally {
       setClaiming(false);
     }

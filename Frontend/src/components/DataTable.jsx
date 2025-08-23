@@ -139,7 +139,7 @@ const DataTable = () => {
     }
   };
 
-  const Checking = async (id, ContractName) => {
+  const Checking = async (id, ContractName,AirDropAmount) => {
     setCheckingStates((prev) => ({ ...prev, [id]: true }));
     try {
       // Dynamically get address from swap.tokenMap (or pass it as prop if needed)
@@ -149,6 +149,7 @@ const DataTable = () => {
       }
 
       await CheckMintBalance(AddressMapping);
+      toast.success(`Airdrop claimed successfully! ${AirDropAmount}`, { duration: 5000, position: "top-center", icon: '👏' });
     } catch (e) {
       if (
         e.reason === `No new DAV holdings for this token` ||
@@ -405,7 +406,7 @@ const DataTable = () => {
                       </td>
                       <td style={{ position: "relative" }}>
                         <button
-                          onClick={() => Checking(id, ContractName)}
+                          onClick={() => Checking(id, ContractName,AirDropAmount?.[name])}
                           className="btn btn-primary btn-sm swap-btn"
                           disabled={
                             checkingStates[id] ||
