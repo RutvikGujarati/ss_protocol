@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 const Footer = () => {
   const messages = [
-    "V3 Live - 20% higher yield on  ratio swaps",
+    "30% more yield on ratio swaps",
     "Refresh when minting more DAV tokens.",
     "Transferring DAV tokens is not allowed after minting",
     "Referrers receive their commission directly in their wallet",

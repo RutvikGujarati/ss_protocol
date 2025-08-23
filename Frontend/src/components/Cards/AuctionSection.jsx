@@ -17,7 +17,6 @@ import { faCheck, faCopy } from "@fortawesome/free-solid-svg-icons";
 import toast from "react-hot-toast";
 import { useSwapContract } from "../../Functions/SwapContractFunctions";
 import { chainCurrencyMap } from "../../../WalletConfig";
-import TxProgressModal from "../TxProgressModal";
 import useTokenBalances from "../Swap/UserTokenBalances";
 import { useAllTokens } from "../Swap/Tokens";
 import { ContractContext } from "../../Functions/ContractInitialize";
@@ -40,7 +39,6 @@ const AuctionSection = () => {
         ReferralAMount,
         stateHolding,
         DavMintFee,
-        txStatus,
         ReferralCodeOfUser,
         davGovernanceHolds,
         totalInvestedPls,

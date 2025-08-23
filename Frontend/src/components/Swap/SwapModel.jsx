@@ -587,7 +587,7 @@ const SwapComponent = () => {
                   <div className="d-flex justify-content-start align-items-center ">
                     <button
                       className="btn detailText btn-link text-light  p-0"
-                      style={{ textDecoration: "none", fontWeight: 200, fontSize: "13px", fontWeight: "700" }}
+                      style={{ textDecoration: "none", fontSize: "13px", fontWeight: "700" }}
                       onClick={() => {
                         setTokenIn("STATE");
                         setTokenOut(nativeNames[chainId]);
