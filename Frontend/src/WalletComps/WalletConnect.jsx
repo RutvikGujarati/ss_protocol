@@ -1,19 +1,18 @@
 import { useEffect } from "react";
-import { useAccount } from "wagmi";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAppKitAccount } from "@reown/appkit/react";
 import "../Styles/WalletConnector.css";
 import "@rainbow-me/rainbowkit/styles.css";
 
 const WalletConnector = () => {
-  const { isConnected, address } = useAccount();
+  const { isConnected, address } = useAppKitAccount();
 
   useEffect(() => {
     console.log("Wallet connected:", isConnected, "Address:", address);
-  }, [isConnected, address]); // ✅ Runs immediately after a refresh
+  }, [isConnected, address]);
 
   return (
-    <div className="wallet-connector">
-      <ConnectButton />
+    <div>
+      <appkit-button></appkit-button>
     </div>
   );
 };

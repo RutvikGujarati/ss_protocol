@@ -1,9 +1,13 @@
 import { ethers } from "ethers";
 import { createContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { getContractConfigs, setChainId, isChainSupported } from "../Constants/ContractConfig";
+import {
+  getContractConfigs,
+  setChainId,
+  isChainSupported,
+} from "../Constants/ContractConfig";
 import { CHAIN_IDS } from "../Constants/ContractAddresses";
-import { useAccount, useChainId } from "wagmi";
+import { useAccount, useChainId, useWalletClient } from "wagmi";
 
 const ContractContext = createContext(null);
 
@@ -12,47 +16,41 @@ export const ContractProvider = ({ children }) => {
     children: PropTypes.node.isRequired,
   };
 
+  const { isConnected, address } = useAccount();
+  const chainId = useChainId();
+  const { data: walletClient } = useWalletClient();
+
   const [loading, setLoading] = useState(true);
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
   const [account, setAccount] = useState(null);
   const [AllContracts, setContracts] = useState({});
-  const chainId = useChainId(); // Get chainId from Wagmi
-  const { isConnected, address } = useAccount(); // ✅ this is the key
 
   useEffect(() => {
-    if (!isConnected || !address || !chainId) return;
+    if (!isConnected || !address || !chainId || !walletClient) return;
 
-    // Check if the connected chain is supported
+    // check supported chain
     if (!isChainSupported(chainId)) {
-      console.warn(`Connected chain ${chainId} is not supported. Using default chain.`);
+      console.warn(
+        `Connected chain ${chainId} is not supported. Using default chain.`
+      );
       setChainId(CHAIN_IDS.PULSECHAIN);
     } else {
       setChainId(chainId);
     }
 
     initializeContracts();
-  }, [isConnected, address, chainId]);
-
+  }, [isConnected, address, chainId, walletClient]);
   const initializeContracts = async () => {
-    if (!window.ethereum) {
-      console.error("Ethereum wallet not found");
-      return;
-    }
-
     try {
       setLoading(true);
 
-      const browserProvider = new ethers.BrowserProvider(window.ethereum);
-      const accounts = await window.ethereum.request({
-        method: "eth_accounts",
-      });
-
-      if (accounts.length === 0) {
-        // No connected accounts, do not proceed
-        setLoading(false);
-        return;
+      if (!walletClient) {
+        throw new Error("Wallet client not available");
       }
+
+      // ✅ Correct: wrap wagmi's walletClient transport
+      const browserProvider = new ethers.BrowserProvider(walletClient.transport);
 
       const signer = await browserProvider.getSigner();
       const userAddress = await signer.getAddress();
@@ -64,11 +62,12 @@ export const ContractProvider = ({ children }) => {
         ])
       );
 
+      console.log("Detected providers:", window.ethereum?.providers);
+
       setProvider(browserProvider);
       setSigner(signer);
       setAccount(userAddress);
       setContracts(contractInstances);
-      console.log("Contracts Initialized with signer:", contractInstances);
     } catch (err) {
       console.error("Failed to initialize contracts:", err);
     } finally {
@@ -76,37 +75,6 @@ export const ContractProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    if (!window.ethereum) return;
-
-    const handleAccountsChanged = (accounts) => {
-      if (accounts.length > 0) {
-        setAccount(accounts[0]);
-        initializeContracts();
-      } else {
-        setAccount(null);
-        setSigner(null);
-        setProvider(null);
-        setContracts({});
-      }
-    };
-
-    const handleChainChanged = (chainId) => {
-      console.log("Chain changed to:", chainId);
-      // Re-initialize contracts when chain changes
-      if (isConnected && address) {
-        initializeContracts();
-      }
-    };
-
-    window.ethereum.on("accountsChanged", handleAccountsChanged);
-    window.ethereum.on("chainChanged", handleChainChanged);
-
-    return () => {
-      window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
-      window.ethereum.removeListener("chainChanged", handleChainChanged);
-    };
-  }, [isConnected, address, chainId]);
 
   const contracts = {
     state: AllContracts.stateContract,
@@ -124,4 +92,4 @@ export const ContractProvider = ({ children }) => {
   );
 };
 
-export { ContractContext }
+export { ContractContext };

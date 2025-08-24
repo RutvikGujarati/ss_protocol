@@ -19,7 +19,7 @@ export const useSwapContract = () => useContext(SwapContractContext);
 export const SwapContractProvider = ({ children }) => {
   const chainId = useChainId();
   const { loading, provider, signer, AllContracts } = useContext(ContractContext);
-  const { address, connector } = useAccount();
+  const { address, connector, isConnected } = useAccount();
   const { data: walletClient } = useWalletClient();
 
   // Custom hooks
@@ -29,7 +29,7 @@ export const SwapContractProvider = ({ children }) => {
     provider,
     ReturnfetchUserTokenAddresses
   );
-  const tokenOperations = useTokenOperations(AllContracts, address);
+  const tokenOperations = useTokenOperations(AllContracts, address,isConnected);
   const tokenInfo = useTokenInfo(AllContracts, provider, address, chainId, ReturnfetchUserTokenAddresses);
   const auctionState = useAuctionState(AllContracts, address, chainId, fetchTokenData, ReturnfetchUserTokenAddresses);
   const swapActions = useSwapActions(auctionState.CurrentCycleCount);
@@ -171,27 +171,20 @@ export const SwapContractProvider = ({ children }) => {
       runAuctionChecks();
     }, 10000);
 
-    // Handle account changes
-    const handleAccountsChanged = (accounts) => {
-      if (accounts.length === 0) {
-        console.log('Please connect to MetaMask.');
-      } else if (accounts[0] !== address) {
-        console.log('Account changed, refreshing data...');
-        fetchAllData();
-      }
-    };
-
-    if (window.ethereum) {
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-    }
-
     return () => {
       clearInterval(auctionPollingInterval);
-      if (window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-      }
     };
-  }, [AllContracts, address, auctionState, fetchAllData]);
+  }, [AllContracts, address, auctionState]);
+
+  // 👇 Separate effect for account change
+
+  useEffect(() => {
+    if (!isConnected) return;
+
+    // whenever wagmiAddress changes, trigger data refresh
+    console.log("Account changed, refreshing data...");
+    fetchAllData();
+  }, [address, isConnected, fetchAllData]);
 
   // Regular data polling (less frequent)
   useEffect(() => {

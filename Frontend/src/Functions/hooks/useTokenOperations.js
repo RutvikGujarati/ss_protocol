@@ -3,13 +3,14 @@ import { ethers } from 'ethers';
 import toast from 'react-hot-toast';
 import { TokenABI } from './contractHelpers';
 import { getDAVContractAddress, getSTATEContractAddress } from '../../Constants/ContractAddresses';
-import { useChainId } from 'wagmi';
+import { useChainId, useWalletClient } from 'wagmi';
 
-export const useTokenOperations = (AllContracts, address) => {
+export const useTokenOperations = (AllContracts, address, isConnected) => {
     const chainId = useChainId();
     const [claiming, setClaiming] = useState(false);
     const [isCliamProcessing, setIsCllaimProccessing] = useState(null);
     const [TotalCost, setTotalCost] = useState(null);
+    const { data: walletClient } = useWalletClient();
 
     const CalculationOfCost = useCallback(async (amount, chainId) => {
         if (chainId == 146) {
@@ -78,29 +79,31 @@ export const useTokenOperations = (AllContracts, address) => {
     }, [AllContracts, address]);
 
 
-    const renounceTokenContract = useCallback(async (tokenAddress, tokenName) => {
-        try {
-            if (!window.ethereum) {
-                console.error("No wallet found");
-                return;
+    const renounceTokenContract = useCallback(
+        async (tokenAddress, tokenName) => {
+            try {
+                if (!walletClient) {
+                    console.error("No wallet connected");
+                    return;
+                }
+                // Wrap wagmi walletClient into ethers provider + signer
+                const provider = new ethers.BrowserProvider(walletClient.transport);
+                const signer = await provider.getSigner();
+
+                const tokenContract = new ethers.Contract(tokenAddress, TokenABI, signer);
+                const tx = await tokenContract.renounceOwnership();
+                await tx.wait();
+
+                console.log(`✅ Ownership renounced for ${tokenName}`);
+            } catch (error) {
+                console.error(`❌ Error renouncing ownership for ${tokenName}:`, error);
             }
-            const provider = new ethers.BrowserProvider(window.ethereum);
-            const signer = await provider.getSigner();
-
-            const tokenContract = new ethers.Contract(tokenAddress, TokenABI, signer);
-            const tx = await tokenContract.renounceOwnership();
-            await tx.wait();
-
-            console.log(`Ownership renounced for ${tokenName}`);
-        } catch (error) {
-            console.error(`Error renouncing ownership for ${tokenName}:`, error);
-        }
-    }, []);
+        }, [walletClient]);
 
 
     const handleAddToken = useCallback(async (tokenAddress, tokenSymbol, tokenDecimals = 18) => {
-        if (!window.ethereum) {
-            toast.error("MetaMask is not installed.");
+        if (!walletClient) {
+            toast.error("No wallet connected.");
             return;
         }
 
@@ -116,7 +119,7 @@ export const useTokenOperations = (AllContracts, address) => {
         const toastId = toast.loading(`Adding ${tokenSymbol} to wallet...`);
 
         try {
-            const wasAdded = await window.ethereum.request({
+            const wasAdded = await walletClient.request({
                 method: "wallet_watchAsset",
                 params: tokenDetails,
             });
@@ -133,7 +136,7 @@ export const useTokenOperations = (AllContracts, address) => {
             toast.dismiss(toastId);
             toast.error(`Failed to add ${tokenSymbol}.`);
         }
-    }, []);
+    }, [walletClient]);
 
     const setDavAndStateIntoSwap = useCallback(async () => {
         if (!AllContracts?.AuctionContract || !address) return;
