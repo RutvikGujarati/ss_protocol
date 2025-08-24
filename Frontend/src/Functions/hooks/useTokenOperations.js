@@ -5,7 +5,7 @@ import { TokenABI } from './contractHelpers';
 import { getDAVContractAddress, getSTATEContractAddress } from '../../Constants/ContractAddresses';
 import { useChainId, useWalletClient } from 'wagmi';
 
-export const useTokenOperations = (AllContracts, address, isConnected) => {
+export const useTokenOperations = (AllContracts, address) => {
     const chainId = useChainId();
     const [claiming, setClaiming] = useState(false);
     const [isCliamProcessing, setIsCllaimProccessing] = useState(null);
