@@ -1287,7 +1287,7 @@ export const SwapContractProvider = ({ children }) => {
       let url;
       console.log("chainid from swap fun", chainId)
       if (chainId == 369) {
-        url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=1`;
+        url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=0.5`;
       } else {
         const url = new URL(`https://api.sushi.com/swap/v7/${chainId}`);
         url.searchParams.set("tokenIn", tokenInAddress);

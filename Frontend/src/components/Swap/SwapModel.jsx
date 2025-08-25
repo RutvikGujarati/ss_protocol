@@ -581,7 +581,7 @@ const SwapComponent = () => {
                     <span className="">Piteas API</span>
                   </p>
                   <p className="mb-1">
-                    <span className="detailText">Slippage 1% -  </span>
+                    <span className="detailText">Slippage 0.5% -  </span>
                     <span className="">Gas swap levy </span>
                   </p>
                   <div className="d-flex justify-content-start align-items-center ">

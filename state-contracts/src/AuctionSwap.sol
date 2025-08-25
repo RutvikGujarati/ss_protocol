@@ -20,7 +20,7 @@ interface IPair {
     function token0() external view returns (address);
     function token1() external view returns (address);
 }
-contract SWAP_V2_2 is Ownable(msg.sender), ReentrancyGuard {
+contract SWAP_V3 is Ownable(msg.sender), ReentrancyGuard {
     using SafeERC20 for IERC20;
     //NOTE: contract uses safeMath by default solidity version.
     using TimeUtilsLib for uint256;

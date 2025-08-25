@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Script.sol";
-import {DAV_V2_2} from "../src/DavToken.sol";
+import {DAV_V3} from "../src/DavToken.sol";
 
 contract ScriptDAV is Script {
     function run() external {
@@ -13,7 +13,7 @@ contract ScriptDAV is Script {
 		address state = 0xCF93C29db1D6A8dA724536E68ca413883f4Fd9a2;
         address Governanace = 0x98b0379474Cf84Ab257bEe0b73dceb11051223A5;
 
-        DAV_V2_2 dav = new DAV_V2_2(
+        DAV_V3 dav = new DAV_V3(
             liquidity,
             DAVWallet,
             state,

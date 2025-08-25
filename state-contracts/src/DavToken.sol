@@ -11,7 +11,7 @@ import "./libraries/Distribution.sol";
 import "./libraries/TokenRegistryLib.sol";
 import "./libraries/BurnLibrary.sol";
 
-contract DAV_V2_2 is
+contract DAV_V3 is
     ERC20,
     Ownable(msg.sender),
     ReentrancyGuard // IERC20 initialization

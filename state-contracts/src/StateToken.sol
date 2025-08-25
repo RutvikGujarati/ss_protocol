@@ -15,7 +15,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 //-------------------------------Token name clarification----------------------------------
 //NOTE: Mainnet token name is pSTATE
 
-contract STATE_V2_2 is ERC20, Ownable(msg.sender) {
+contract STATE_V3 is ERC20, Ownable(msg.sender) {
     /// @notice Maximum total supply of the token (1 quadrillion tokens, 18 decimals)
     event InitialAllocation(
         address indexed fivePercentRecipient,
