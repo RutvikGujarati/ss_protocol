@@ -10,7 +10,7 @@ contract ScriptDAV is Script {
         //NOTE: add correct wallets for Gov and Dev
         address liquidity = 0x98b0379474Cf84Ab257bEe0b73dceb11051223A5;
         address DAVWallet = 0x1262f7De33bA34C9373C20199fAb73CaCE13B5E9;
-		address state = 0xCF93C29db1D6A8dA724536E68ca413883f4Fd9a2;
+		address state = 0x6E76680b7AB936D1613b20f1a7589EaB3A3b862A;
         address Governanace = 0x98b0379474Cf84Ab257bEe0b73dceb11051223A5;
 
         DAV_V3 dav = new DAV_V3(
