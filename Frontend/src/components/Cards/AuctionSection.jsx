@@ -344,7 +344,7 @@ const AuctionSection = () => {
                                                         ({DaipriceChange} %)
                                                     </span>{" "}
                                                     {formatWithCommas(
-                                                        Math.max(calculateTotalSum() * DaipriceChange, 0)
+                                                        (Math.max(calculateTotalSum() * DaipriceChange) * 100, 0)
                                                     )}{" "}
                                                     PLS
                                                 </>
