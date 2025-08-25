@@ -339,7 +339,7 @@ const AuctionSection = () => {
                                                 <DotAnimation />
                                             ) : (
                                                 <>
-                                                    ({DaipriceChange}) {" "}
+                                                    ({DaipriceChange} %) {" "}
                                                     {formatWithCommas( Math.max(calculateTotalSum() * DaipriceChange, 0))} PLS
 
                                                 </>
