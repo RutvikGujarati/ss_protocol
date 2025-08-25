@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {DAV_V2_2} from "./DavToken.sol";
-import {TOKEN_V2_2} from "./Tokens.sol";
+import {DAV_V3} from "./DavToken.sol";
+import {TOKEN_V3} from "./Tokens.sol";
 import "./libraries/TimeUtilsLib.sol";
 import "./libraries/AuctionLib.sol";
 import "./libraries/AirdropRewardLib.sol";
@@ -27,7 +27,7 @@ contract SWAP_V3 is Ownable(msg.sender), ReentrancyGuard {
     using AuctionLib for AuctionLib.AuctionCycle;
     using RewardDistributionLib for *;
 
-    DAV_V2_2 public dav;
+    DAV_V3 public dav;
 
     struct UserSwapInfo {
         bool hasSwapped;
@@ -203,7 +203,7 @@ contract SWAP_V3 is Ownable(msg.sender), ReentrancyGuard {
             "Token address should not be zero"
         );
 
-        TOKEN_V2_2 token = new TOKEN_V2_2(name, symbol, _One, _swap, _owner);
+        TOKEN_V3 token = new TOKEN_V3(name, symbol, _One, _swap, _owner);
         deployedTokensByUser[msg.sender][name] = address(token);
         userToTokenNames[msg.sender].push(name);
         isTokenNameUsed[name] = true;
@@ -531,12 +531,12 @@ contract SWAP_V3 is Ownable(msg.sender), ReentrancyGuard {
         address _dav
     ) external onlyGovernance {
         require(stateToken == address(0), "State token already set");
-        require(dav == DAV_V2_2(payable(address(0))), "DAV already set");
+        require(dav == DAV_V3(payable(address(0))), "DAV already set");
         require(_state != address(0), "Invalid state address");
         require(_dav != address(0), "Invalid dav address");
         supportedTokens[_state] = true;
         supportedTokens[_dav] = true;
-        dav = DAV_V2_2(payable(_dav));
+        dav = DAV_V3(payable(_dav));
         stateToken = _state;
     }
 

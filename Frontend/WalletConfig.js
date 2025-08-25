@@ -15,7 +15,7 @@ const queryClient = new QueryClient({
 });
 
 // 1. Get projectId from environment variable
-const projectId = process.env.VITE_REOWN_PROJECT_ID || "7d41cc4a6870d3e7287eb8442cb70f7a";
+const projectId = import.meta.env.VITE_REOWN_PROJECT_ID;
 if (!projectId) throw new Error("Reown projectId is not defined");
 
 // 3. Define networks

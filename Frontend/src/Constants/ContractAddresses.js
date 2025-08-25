@@ -53,7 +53,7 @@ export const explorerUrls = {
     1: "https://etherscan.io/address/",          // Ethereum Mainnet
     137: "https://polygonscan.com/address/",     // Polygon Mainnet
     10: "https://optimistic.etherscan.io/address/", // Optimism
-    369: "https://kekxplorer.avecdra.pro/address/", 
+    369: "https://midgard.wtf/address/",        // PulseChain Mainnet
 };
 
 // Get all contract addresses for a chain
