@@ -331,17 +331,22 @@ const AuctionSection = () => {
                                         </span>
                                     </p>
                                     <p className="mb-1">
-                                        <span className="detailText">
-                                            PULSECHAIN INDEX -
-                                        </span>
+                                        <span className="detailText">PULSECHAIN INDEX -</span>
                                         <span className="ms-1">
                                             {isLoading ? (
                                                 <DotAnimation />
                                             ) : (
                                                 <>
-                                                    ({DaipriceChange} %) {" "}
-                                                    {formatWithCommas( Math.max(calculateTotalSum() * DaipriceChange, 0))} PLS
-
+                                                    <span
+                                                        style={{
+                                                            color: DaipriceChange > 0 ? '#28a745' : DaipriceChange < 0 ? '#ff4081' : '#ffffff'
+                                                        }}  >
+                                                        ({DaipriceChange} %)
+                                                    </span>{" "}
+                                                    {formatWithCommas(
+                                                        Math.max(calculateTotalSum() * DaipriceChange, 0)
+                                                    )}{" "}
+                                                    PLS
                                                 </>
                                             )}
                                         </span>
