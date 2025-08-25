@@ -43,7 +43,7 @@ const AuctionSection = () => {
         davGovernanceHolds,
         totalInvestedPls,
     } = useDAvContract();
-    const { CalculationOfCost, TotalCost, getAirdropAmount, getInputAmount, getOutPutAmount, pstateToPlsRatio } = useSwapContract();
+    const { CalculationOfCost, TotalCost, getAirdropAmount, getInputAmount, getOutPutAmount, pstateToPlsRatio, DaipriceChange } = useSwapContract();
     const [amount, setAmount] = useState("");
     const [Refferalamount, setReferralAmount] = useState("");
     const [load, setLoad] = useState(false);
@@ -245,7 +245,7 @@ const AuctionSection = () => {
                                         style={{ width: "190px" }}
                                         disabled={Number(claimableAmount) === 0 || isClaiming}
                                     >
-                                       {isClaiming ? "Claiming..." : "Claim"}
+                                        {isClaiming ? "Claiming..." : "Claim"}
                                     </button>
                                 </div>
                             </div>
@@ -257,7 +257,6 @@ const AuctionSection = () => {
                         <div>
                             <div className="carddetaildiv uppercase d-flex justify-content-between align-items-center">
                                 <div className="carddetails2">
-                                    <h6 className="detailText">INFO</h6>
                                     <p className="mb-1">
                                         <span className="detailText">
                                             State Token Holding -{" "}
@@ -312,7 +311,7 @@ const AuctionSection = () => {
                                             ) : isNaN(calculateTotalSum() / totalInvestedPls) || !totalInvestedPls ? (
                                                 "0"
                                             ) : (
-                                                formatWithCommas(((calculateTotalSum() / totalInvestedPls) * 100).toFixed(0)) 
+                                                formatWithCommas(((calculateTotalSum() / totalInvestedPls) * 100).toFixed(0))
                                             )} %
                                         </span>
                                     </p>
@@ -329,6 +328,22 @@ const AuctionSection = () => {
                                             ) : (
                                                 formatWithCommas(((calculateTotalSum() / totalInvestedPls) * 36500).toFixed(0)) || "0"
                                             )} %
+                                        </span>
+                                    </p>
+                                    <p className="mb-1">
+                                        <span className="detailText">
+                                            PULSECHAIN INDEX -
+                                        </span>
+                                        <span className="ms-1">
+                                            {isLoading ? (
+                                                <DotAnimation />
+                                            ) : (
+                                                <>
+                                                    ({DaipriceChange}) {" "}
+                                                    {formatWithCommas( Math.max(calculateTotalSum() * DaipriceChange, 0))} PLS
+
+                                                </>
+                                            )}
                                         </span>
                                     </p>
                                 </div>

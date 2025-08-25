@@ -36,8 +36,7 @@ try {
 		defaultNetwork: pulsechain,
 		projectId,
 		chainImages: {
-			369: "/pulse-chain.png",
-			146: "./src/assets/S_token.svg",
+			369: "/pulse-chain.png"
 		},
 		features: {
 			socials: false,

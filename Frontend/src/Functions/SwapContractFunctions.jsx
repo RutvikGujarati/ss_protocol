@@ -53,7 +53,7 @@ export const SwapContractProvider = ({ children }) => {
   const [txStatusForSwap, setTxStatusForSwap] = useState("");
   const [txStatusForAdding, setTxStatusForAdding] = useState("");
   const [TotalCost, setTotalCost] = useState(null);
-
+  const [DaipriceChange, setDaiPriceChange] = useState("0.0");
   const [InputAmount, setInputAmount] = useState({});
   const [AirDropAmount, setAirdropAmount] = useState("0.0");
   const [AuctionTime, setAuctionTime] = useState({});
@@ -920,6 +920,7 @@ export const SwapContractProvider = ({ children }) => {
       getTokensBurned,
       getAirdropAmount,
       getPairAddresses,
+      fetchDaiLastPrice,
       getTokenBalances,
       isAirdropClaimed,
       AddressesFromContract,
@@ -1409,6 +1410,18 @@ export const SwapContractProvider = ({ children }) => {
     }
   };
 
+  const fetchDaiLastPrice = async () => {
+    try {
+      const response = await fetch('https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0xe56043671df55de5cdf8459710433c10324de0ae');
+      if (!response.ok) throw new Error('Failed to fetch DAI price');
+      const data = await response.json();
+      const price = data.data.attributes.price_change_percentage.h24;
+      console.log("DAI 24h price change %:", price);
+      setDaiPriceChange(price);
+    } catch (error) {
+      console.error("Error fetching DAI price:", error);
+    }
+  }
 
   return (
     <SwapContractContext.Provider
@@ -1453,6 +1466,7 @@ export const SwapContractProvider = ({ children }) => {
         isReversed,
         InputAmount,
         burnedLPAmount,
+        DaipriceChange,
         setTxStatusForSwap,
         AirDropAmount,
         getAirdropAmount,
