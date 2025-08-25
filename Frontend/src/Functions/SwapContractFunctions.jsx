@@ -17,12 +17,14 @@ import {
   getAUCTIONContractAddress,
 } from "../Constants/ContractAddresses";
 import { useAccount, useChainId, useWalletClient } from "wagmi";
+import { useDAvContract } from "./DavTokenFunctions";
 
 const SwapContractContext = createContext();
 
 export const useSwapContract = () => useContext(SwapContractContext);
 
 export const SwapContractProvider = ({ children }) => {
+  const { fetchStateHolding } = useDAvContract();
   const chainId = useChainId();
   const { loading, provider, signer, AllContracts } =
     useContext(ContractContext);
@@ -1053,6 +1055,7 @@ export const SwapContractProvider = ({ children }) => {
           draggable: true,
           progress: undefined,
         });
+        fetchStateHolding();
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap Complete!" }));
       } else {
         console.error("Swap transaction failed.");
@@ -1190,46 +1193,49 @@ export const SwapContractProvider = ({ children }) => {
 
   useEffect(() => {
     const resetSwapsIfAuctionEnded = async () => {
-      // 1️⃣ Get all token addresses for this user
       const tokenMap = await ReturnfetchUserTokenAddresses();
-      const extendedMap = {
-        ...tokenMap,
-        state: getStateAddress(),
-      };
+      const extendedMap = { ...tokenMap, state: getSTATEContractAddress(chainId) };
 
-      // 2️⃣ Get swap history from localStorage
       const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
 
       if (swaps[address]) {
-        // 3️⃣ Remove swap entries for each token in extendedMap
-        for (const [, tokenAddress] of Object.entries(extendedMap)) {
-          // If auction is not active for this token and user has swapped, remove it
-          if (IsAuctionActive[tokenAddress] == "false" && address) {
-            const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
+        for (const tokenName of Object.keys(extendedMap)) {
+          const currentCycleCount = Number(auctionState.CurrentCycleCount?.[tokenName] || 0);
 
-            if (swaps[address]?.[tokenAddress]) {
-              delete swaps[address][tokenAddress];
+          // loop through all stored cycles for this user
+          for (const storedCycle of Object.keys(swaps[address] || {})) {
+            const storedCycleNum = Number(storedCycle);
 
-              // Remove address entry entirely if no tokens left
-              if (Object.keys(swaps[address]).length === 0) {
-                delete swaps[address];
+            // 🧹 if stored cycle < current cycle → remove it
+            if (storedCycleNum < currentCycleCount) {
+              console.log(
+                `Cleaning old swaps → removing swaps for cycle ${storedCycleNum}, token = ${tokenName}`
+              );
+
+              if (swaps[address][storedCycle]) {
+                delete swaps[address][storedCycle][tokenName];
+
+                // cleanup empty cycle
+                if (Object.keys(swaps[address][storedCycle]).length === 0) {
+                  delete swaps[address][storedCycle];
+                }
               }
-
-              localStorage.setItem("auctionSwaps", JSON.stringify(swaps));
             }
           }
         }
-        // If no tokens left for this user, delete the user entry entirely
+        // cleanup empty user
         if (Object.keys(swaps[address]).length === 0) {
           delete swaps[address];
         }
 
-        // 4️⃣ Save updated swap history
         localStorage.setItem("auctionSwaps", JSON.stringify(swaps));
       }
-    }
+    };
+
     resetSwapsIfAuctionEnded();
-  }, [address]);
+  }, [
+    address
+  ]);
 
 
   const handleDexTokenSwap = async (
@@ -1387,9 +1393,16 @@ export const SwapContractProvider = ({ children }) => {
         ...swaps,
         [address]: {
           ...(swaps[address] || {}),
-          [tokenOutAddress]: true, // mark tokenIn as swapped
+          [String(CurrentCycleCount?.[id])]: {   // cycle as parent
+            ...(swaps[address]?.[String(CurrentCycleCount?.[id])] || {}),
+            [id]: {                 // token name as sub-key
+              ...(swaps[address]?.[String(CurrentCycleCount?.[id])]?.[id] || {}),
+              [tokenOutAddress]: true,     // mark tokenOutAddress as swapped
+            },
+          },
         },
       };
+      fetchStateHolding();
       localStorage.setItem("auctionSwaps", JSON.stringify(updatedSwaps));
     } catch (err) {
       setTxStatusForSwap("error");

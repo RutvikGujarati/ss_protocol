@@ -298,8 +298,8 @@ const AuctionSection = () => {
                                                 ) : isNaN(calculateTotalSum()) ? (
                                                     "Token Listing Process.."
                                                 ) : (
-                                                    formatWithCommas(calculateTotalSum()) || "0"
-                                                )}
+                                                    formatWithCommas(calculateTotalSum())  || "0"
+                                                )} PLS
                                             </span>
                                         </span>
                                     </p>
