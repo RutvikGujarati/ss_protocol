@@ -215,8 +215,21 @@ const TokenRow = memo(({
       <td className="text-center">
         <div className="d-flex justify-content-center align-items-center gap-3">
           <div className="d-flex flex-column align-items-center">
-            {token.tokenName === "DAV" || token.tokenName === "STATE" ? (
+            {token.tokenName === "DAV" ? (
               <span>-----</span>
+            ) : token.tokenName === "STATE" ? (
+              <a
+                href="https://www.geckoterminal.com/pulsechain/pools/0x8a37583793d74395cfa4ed841b34a5e012de3a4a"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontSize: "15px", color: "white" }}
+              >
+                <img
+                  src={gecko}
+                  alt="Gecko"
+                  style={{ width: "20px", height: "20px" }}
+                />
+              </a>
             ) : (
               <a
                 href={`https://www.geckoterminal.com/pulsechain/pools/${token.PairAddress}`}
