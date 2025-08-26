@@ -1176,7 +1176,7 @@ export const SwapContractProvider = ({ children }) => {
   // Fetch pSTATE to PLS ratio from API
   const fetchPstateToPlsRatio = async () => {
     try {
-      const response = await fetch("https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0x5f5C53f62eA7c5Ed39D924063780dc21125dbDe7");
+      const response = await fetch("https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0x8a37583793d74395cfa4ed841b34a5e012de3a4a");
       if (response.ok) {
         const data = await response.json();
         // The ratio is base_token_price_quote_token which gives us pSTATE price in terms of quote token (WPLS)
@@ -1425,12 +1425,15 @@ export const SwapContractProvider = ({ children }) => {
 
   const fetchDaiLastPrice = async () => {
     try {
-      const response = await fetch('https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0xe56043671df55de5cdf8459710433c10324de0ae');
+      const response = await fetch('https://api.geckoterminal.com/api/v2/networks/pulsechain/tokens/0xa1077a294dde1b09bb078844df40758a5d0f9a27/pools?page=1');
       if (!response.ok) throw new Error('Failed to fetch DAI price');
       const data = await response.json();
-      const price = data.data.attributes.price_change_percentage.h24;
-      console.log("DAI 24h price change %:", price);
-      setDaiPriceChange(price);
+      // Take the first pool result
+      const pool = data.data[0];
+      const priceChange24h = pool.attributes.price_change_percentage.h24;
+
+      console.log("DAI 24h price change %:", priceChange24h);
+      setDaiPriceChange(priceChange24h);
     } catch (error) {
       console.error("Error fetching DAI price:", error);
     }

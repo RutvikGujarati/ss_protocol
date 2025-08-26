@@ -98,7 +98,7 @@ const Header = () => {
           <div>Auction</div>
         </NavLink>
         <NavLink to="/Swap" className={getMobileNavLinkClass}>
-          <i className="bi bi-swap"></i>
+          <i className="bi bi-arrow-left-right"></i>
           <div>DEX</div>
         </NavLink>
         <NavLink to="/AddToken" className={getMobileNavLinkClass}>
