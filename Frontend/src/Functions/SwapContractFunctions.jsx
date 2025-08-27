@@ -1320,7 +1320,7 @@ export const SwapContractProvider = ({ children }) => {
       swapContractAddress = quoteData.to;
     }
     try {
-      const contract = new ethers.Contract(tokenOutAddress, ERC20_ABI, signer);
+      const contract = new ethers.Contract(stateAddress, ERC20_ABI, signer);
       const allowance = await contract.allowance(address, swapContractAddress);
       const amount = ethers.parseUnits(amountIn || '0', 18);
       const needsApproval = BigInt(allowance) < BigInt(amount);

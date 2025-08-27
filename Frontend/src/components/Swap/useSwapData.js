@@ -77,7 +77,7 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 
 			if (chainId === 369) {
 				// Piteas API
-				const url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=1`;
+				const url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=0.5`;
 				const response = await fetch(url);
 				if (!response.ok) throw new Error("Quote fetch failed.");
 				data = await response.json();
