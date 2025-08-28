@@ -580,15 +580,15 @@ const SwapComponent = () => {
                   <h6 className="detailText">Details</h6>
                   <p className="mb-1">
                     <span className="detailText">Network Fee - </span>
-                    <span className="">{estimatedGas}</span>
+                    <span className="second-span-fontsize">{estimatedGas}</span>
                   </p>
                   <p className="mb-1">
                     <span className="detailText">Route - </span>
-                    <span className="">Piteas API</span>
+                    <span className="second-span-fontsize">Piteas API</span>
                   </p>
                   <p className="mb-1">
                     <span className="detailText">Slippage 0.5% -  </span>
-                    <span className="">Gas swap levy </span>
+                    <span className="second-span-fontsize">Gas swap levy </span>
                   </p>
 
                   <p className="mb-1">

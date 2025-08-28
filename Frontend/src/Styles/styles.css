@@ -38,6 +38,11 @@ a {
   text-decoration: none;
 }
 
+.second-span-fontsize {
+  font-size: 13px;
+  font-weight: 700
+}
+
 /* a:hover {
   text-decoration: underline;
 } */

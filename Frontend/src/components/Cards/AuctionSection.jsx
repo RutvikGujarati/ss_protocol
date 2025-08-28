@@ -261,11 +261,11 @@ const AuctionSection = () => {
                                         <span className="detailText">
                                             State Token Holding -{" "}
                                         </span>
-                                        <span>{formatWithCommas(stateHolding)}</span>
+                                        <span className="second-span-fontsize">{formatWithCommas(stateHolding)}</span>
                                     </p>
                                     <p className="mb-1">
                                         <span className="detailText">Affiliate com received - </span>
-                                        <span>{formatWithCommas(ReferralAMount)} {nativeSymbol}</span>
+                                        <span className="second-span-fontsize">{formatWithCommas(ReferralAMount)} {nativeSymbol}</span>
                                     </p>
                                     <p className="mb-1 ">
                                         <span className="detailText">Your Affiliate Link - </span>
@@ -288,7 +288,7 @@ const AuctionSection = () => {
                                         <span className="detailText">
                                             ROI / {nativeSymbol} -
                                         </span>
-                                        <span className="ms-1">
+                                        <span className="ms-1 second-span-fontsize">
                                             {isLoading ? <DotAnimation /> : `${(formatWithCommas(totalInvestedPls)) || "0"}`} / {" "}
                                             <span style={{
                                                 color: calculateTotalSum() > (totalInvestedPls || 0) ? '#28a745' : '#ff4081'
@@ -298,14 +298,14 @@ const AuctionSection = () => {
                                                 ) : isNaN(calculateTotalSum()) ? (
                                                     "Token Listing Process.."
                                                 ) : (
-                                                    formatWithCommas(calculateTotalSum())  || "0"
+                                                    formatWithCommas(calculateTotalSum()) || "0"
                                                 )} PLS
                                             </span>
                                         </span>
                                     </p>
                                     <p className="mb-1">
                                         <span className="detailText">USER ROI % -</span>
-                                        <span className="ms-1">
+                                        <span className="ms-1 second-span-fontsize">
                                             {isLoading ? (
                                                 <DotAnimation />
                                             ) : isNaN(calculateTotalSum() / totalInvestedPls) || !totalInvestedPls ? (
@@ -320,7 +320,7 @@ const AuctionSection = () => {
                                         <span className="detailText">
                                             USER APR % -
                                         </span>
-                                        <span className="ms-1">
+                                        <span className="ms-1 second-span-fontsize">
                                             {isLoading ? (
                                                 <DotAnimation />
                                             ) : isNaN(calculateTotalSum() / totalInvestedPls) || !totalInvestedPls ? (
@@ -331,8 +331,8 @@ const AuctionSection = () => {
                                         </span>
                                     </p>
                                     <p className="mb-1">
-                                        <span className="detailText">PULSECHAIN INDEX -</span>
-                                        <span className="ms-1">
+                                        <span className="detailText">PLS INDEX FUND -</span>
+                                        <span className="ms-1 second-span-fontsize">
                                             {isLoading ? (
                                                 <DotAnimation />
                                             ) : (
@@ -346,7 +346,6 @@ const AuctionSection = () => {
                                                     {formatWithCommas(
                                                         Math.max(calculateTotalSum() * DaipriceChange, 0) / 100
                                                     )}{" "}
-
                                                     PLS
                                                 </>
                                             )}
