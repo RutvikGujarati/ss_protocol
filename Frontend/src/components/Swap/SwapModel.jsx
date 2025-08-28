@@ -10,7 +10,10 @@ import { useAccount, useChainId } from "wagmi";
 
 import useSwapData from "./useSwapData";
 import toast from "react-hot-toast";
-import TxProgressModal from "../TxProgressModal";
+import useTokenBalances from "./UserTokenBalances";
+import { TokensDetails } from "../../data/TokensDetails";
+import { useSwapContract } from "../../Functions/SwapContractFunctions";
+import { calculatePlsValueNumeric, formatWithCommas } from "../DetailsInfo";
 
 const SwapComponent = () => {
   const { signer } = useContext(ContractContext);
@@ -25,13 +28,7 @@ const SwapComponent = () => {
     369: "PulseChain from pump.tires", // pump.tires case
     56: "BNB Chain",
   };
-  const SwappingSteps = [
-    { key: "initiated", label: "Initializing" },
-    { key: "Approving", label: "Approving" },
-    { key: "pending", label: "Swapping" },
-    { key: "confirmed", label: "Confirmed" },
-    { key: "error", label: "Error" },
-  ];
+
   const [tokenIn, setTokenIn] = useState("STATE");
   const [tokenOut, setTokenOut] = useState(null);
   const [amountIn, setAmountIn] = useState("");
@@ -60,6 +57,15 @@ const SwapComponent = () => {
     tokenOut,
     TOKENS,
   });
+  const { pstateToPlsRatio, DaipriceChange } = useSwapContract();
+  const { tokens } = TokensDetails();
+  const tokenBalances = useTokenBalances(TOKENS, signer);
+
+  const calculateTotalSum = () => {
+    return tokens.reduce((sum, token) => {
+      return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio);
+    }, 0);
+  };
 
   // Check if input amount exceeds balance
   useEffect(() => {
@@ -458,7 +464,7 @@ const SwapComponent = () => {
                   Bal: {tokenInBalance ? `${parseFloat(tokenInBalance).toFixed(2)}` : "-"}
                 </span>
               </div>
-             
+
             </div>
           </div>
 
@@ -584,6 +590,38 @@ const SwapComponent = () => {
                     <span className="detailText">Slippage 0.5% -  </span>
                     <span className="">Gas swap levy </span>
                   </p>
+
+                  <p className="mb-1">
+                    <span className="detailText">WITHDRAW PLS INDEX FUND - </span>
+                    <button
+                      className="btn btn-sm text-light  p-0"
+                      style={{ textDecoration: "none", fontSize: "13px", fontWeight: "700" }}
+                      onClick={() => {
+                        const calculated = Math.max(calculateTotalSum() * DaipriceChange, 0) / 100;
+
+                        if (DaipriceChange < 0 || calculated === 0) {
+                          if (DaipriceChange < 0) {
+                            toast.error(
+                              `Invalid amount: index value is negative (${DaipriceChange}%) for now`,
+                              { position: "top-center" }
+                            );
+                          } else {
+                            toast.error("Invalid amount: get more state tokens", {
+                              position: "top-center",
+                            });
+                          }
+                          return;
+                        }
+                        setTokenIn(nativeNames[chainId]);
+                        setTokenOut("STATE");
+                        setAmountIn(calculated.toString());
+                      }}
+                      disabled={isApproving || isSwapping}
+                      title="Reset to default tokens"
+                    >
+                      CHECK
+                    </button>
+                  </p>
                   <div className="d-flex justify-content-start align-items-center ">
                     <button
                       className="btn detailText btn-link text-light  p-0"
@@ -597,6 +635,7 @@ const SwapComponent = () => {
                       title="Reset to default tokens"
                     >
                       Refresh <i className="bi bi-arrow-clockwise"></i>
+
                     </button>
                   </div>
                 </div>
