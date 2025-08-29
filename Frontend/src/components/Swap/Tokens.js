@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { TokensDetails } from "../../data/TokensDetails";
 import { useChainId } from "wagmi";
 import state from "../../assets/statelogo.png";
+import pulsechainLogo from "../../assets/pls1.png";
 
 export function useAllTokens() {
 	const chainId = useChainId();
@@ -18,52 +19,24 @@ export function useAllTokens() {
 
 				if (chainId === 369) {
 					// PulseChain → Piteas list with filter
-					const res = await fetch(
-						"https://raw.githubusercontent.com/piteasio/app-tokens/main/piteas-tokenlist.json"
-					);
-					if (!res.ok) throw new Error("Failed to fetch Piteas tokenlist");
-					const data = await res.json();
+					if (chainId === 369) {
+						// wPLS (Wrapped Pulse) token data
+						const wpls = {
+							name: "Wrapped Pulse",
+							symbol: "WPLS",
+							address: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
+							decimals: 18,
+							image: pulsechainLogo,
+						};
 
-					// Allowed tokens
-					const allowedNames = [
-						"PulseChain from pump.tires",
-						"HEX",
-						"PulseX",
-						"Incentive",
-					];
+						const obj = {
+							[wpls.name]: wpls,
+						};
 
-					// Find WPLS logo
-					const wplsToken = data.tokens.find(
-						(token) => token.name === "Wrapped Pulse"
-					);
-					const wplsLogoURI = wplsToken ? wplsToken.logoURI : null;
+						if (mounted) setApiTokensObj(obj);
+						return; // stop here for PulseChain
+					}
 
-					tokensData = data.tokens.filter((token) =>
-						allowedNames.includes(token.name)
-					);
-
-					const obj = {};
-					tokensData.forEach((token) => {
-						if (token.name === "PulseChain from pump.tires" && wplsLogoURI) {
-							obj[token.name] = {
-								symbol: token.symbol,
-								address: token.address,
-								decimals: token.decimals,
-								image: wplsLogoURI,
-								name: token.name,
-							};
-						} else {
-							obj[token.name] = {
-								symbol: token.symbol,
-								address: token.address,
-								decimals: token.decimals,
-								image: token.logoURI || null,
-								name: token.name,
-							};
-						}
-					});
-					if (mounted) setApiTokensObj(obj);
-					return; // stop here for PulseChain
 				} else {
 					// All other chains → Uniswap token list
 					const res = await fetch("https://ipfs.io/ipns/tokens.uniswap.org");

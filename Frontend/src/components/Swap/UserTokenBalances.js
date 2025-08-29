@@ -24,7 +24,7 @@ const useTokenBalances = (TOKENS, signer) => {
           if (!token || !token.address) continue;
 
           // PLS balance
-          if (symbol === "PulseChain from pump.tires") {
+          if (symbol === "WPLS") {
             const plsBal = await signer.provider.getBalance(address);
             tempBalances[symbol] = ethers.formatUnits(plsBal, 18);
           } else {

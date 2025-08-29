@@ -25,7 +25,7 @@ const SwapComponent = () => {
     137: "Wrapped Matic",
     42161: "Arbitrum",
     10: "Optimism",
-    369: "PulseChain from pump.tires", // pump.tires case
+    369: "Wrapped Pulse", // pump.tires case
     56: "BNB Chain",
   };
 
@@ -93,14 +93,10 @@ const SwapComponent = () => {
   const SPECIAL_TOKEN_LOGOS = {
     STATE: state,
     pSTATE: state,
-    "PulseChain from pump.tires": pulsechainLogo,
+    "WPLS": pulsechainLogo,
   };
 
   const checkAllowance = async () => {
-    if (tokenIn === "PulseChain from pump.tires") {
-      setNeedsApproval(false);
-      return;
-    }
     setTxStatus("initiated")
     try {
       const tokenAddress = TOKENS[tokenIn].address;
@@ -234,7 +230,7 @@ const SwapComponent = () => {
 
     try {
       // Approval step if needed
-      if (needsApproval && tokenIn !== "PulseChain from pump.tires") {
+      if (needsApproval ) {
         console.log("Approval needed, calling handleApprove");
         await handleApprove();
       }
@@ -634,10 +630,10 @@ const SwapComponent = () => {
                   </p>
                   <p className="mb-1">
                     <span className="detailText">Route - </span>
-                    <span className="second-span-fontsize">Piteas API</span>
+                    <span className="second-span-fontsize">PulseXRouter02</span>
                   </p>
                   <p className="mb-1">
-                    <span className="detailText">Slippage 0.5% -  </span>
+                    <span className="detailText">Slippage 0.0% -  </span>
                     <span className="second-span-fontsize">Gas swap levy </span>
                   </p>
 
