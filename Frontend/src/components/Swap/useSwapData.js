@@ -73,14 +73,6 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 			const amount = parseUnits(amountIn, TOKENS[tokenIn].decimals);
 			let tokenInAddress = getApiTokenAddress(tokenIn);
 			let tokenOutAddress = getApiTokenAddress(tokenOut);
-
-			// Handle native PLS (assume tokenIn/tokenOut is 'PulseChain from pump.tires')
-			const isNativeIn = tokenIn === "PulseChain from pump.tires";
-			const isNativeOut = tokenOut === "PulseChain from pump.tires";
-
-			if (isNativeIn) tokenInAddress = WPLS_ADDRESS;
-			if (isNativeOut) tokenOutAddress = WPLS_ADDRESS;
-
 			// ----------------------------
 			// PulseChain Logic
 			// ----------------------------
@@ -114,8 +106,6 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 					amountIn: amount,
 					amountOutRaw,
 					path,
-					isNativeIn,
-					isNativeOut,
 					pairAddress,
 				};
 

@@ -230,7 +230,7 @@ const SwapComponent = () => {
 
     try {
       // Approval step if needed
-      if (needsApproval ) {
+      if (needsApproval) {
         console.log("Approval needed, calling handleApprove");
         await handleApprove();
       }
@@ -259,31 +259,14 @@ const SwapComponent = () => {
           throw new Error("Invalid quoteData for PulseX swap");
         }
 
-        if (quoteData.isNativeIn) {
-          tx = await routerContract.swapExactETHForTokens(
-            quoteData.amountOutRaw,
-            quoteData.path,
-            address,
-            deadline,
-            { value: quoteData.amountIn }
-          );
-        } else if (quoteData.isNativeOut) {
-          tx = await routerContract.swapExactTokensForETH(
-            quoteData.amountIn,
-            quoteData.amountOutRaw,
-            quoteData.path,
-            address,
-            deadline
-          );
-        } else {
-          tx = await routerContract.swapExactTokensForTokens(
-            quoteData.amountIn,
-            quoteData.amountOutRaw,
-            quoteData.path,
-            address,
-            deadline
-          );
-        }
+        tx = await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+          quoteData.amountIn,
+          quoteData.amountOutRaw,
+          quoteData.path,
+          address,
+          deadline
+        );
+
       } else {
         // ✅ Other chains (Sushi API style)
         console.log("Using Sushi API for swap", quoteData.to);
