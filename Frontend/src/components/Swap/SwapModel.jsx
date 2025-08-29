@@ -608,18 +608,9 @@ const SwapComponent = () => {
                 <div className="carddetails2">
                   <h6 className="detailText">Details</h6>
                   <p className="mb-1">
-                    <span className="detailText">Network Fee - </span>
-                    <span className="second-span-fontsize">{estimatedGas}</span>
-                  </p>
-                  <p className="mb-1">
                     <span className="detailText">Route - </span>
                     <span className="second-span-fontsize">PulseXRouter02</span>
                   </p>
-                  <p className="mb-1">
-                    <span className="detailText">Slippage 0.0% -  </span>
-                    <span className="second-span-fontsize">Gas swap levy </span>
-                  </p>
-
                   <p className="mb-1">
                     <span className="detailText">WITHDRAW PLS INDEX FUND - </span>
                     <button
