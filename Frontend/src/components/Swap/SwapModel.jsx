@@ -7,7 +7,7 @@ import { useAllTokens } from "./Tokens";
 import state from "../../assets/statelogo.png";
 import pulsechainLogo from "../../assets/pls1.png";
 import { useAccount, useChainId } from "wagmi";
-
+import { PULSEX_ROUTER_ADDRESS, PULSEX_ROUTER_ABI } from '../../Constants/Constants';
 import useSwapData from "./useSwapData";
 import toast from "react-hot-toast";
 import useTokenBalances from "./UserTokenBalances";
@@ -107,7 +107,7 @@ const SwapComponent = () => {
       const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer);
       let swapRouterAddress;
       if (chainId == 369) {
-        swapRouterAddress = "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6"
+        swapRouterAddress = PULSEX_ROUTER_ADDRESS;
       } else {
         swapRouterAddress = quoteData.to;
       }
@@ -141,7 +141,7 @@ const SwapComponent = () => {
       const maxUint256 = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
       let swapRouterAddress;
       if (chainId == 369) {
-        swapRouterAddress = "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6"
+        swapRouterAddress = PULSEX_ROUTER_ADDRESS
       } else {
         swapRouterAddress = quoteData.to;
       }
@@ -231,42 +231,92 @@ const SwapComponent = () => {
     }
     setIsSwapping(true);
     setTxStatus("initiated");
-    if (needsApproval) {
-      await handleApprove();
-    }
+
     try {
+      // Approval step if needed
+      if (needsApproval && tokenIn !== "PulseChain from pump.tires") {
+        console.log("Approval needed, calling handleApprove");
+        await handleApprove();
+      }
+
       setTxStatus("pending");
       setConfirmedAmountIn(amountIn);
       setConfirmedAmountOut(amountOut);
-      let txData;
+
+      // Validate quoteData before proceeding
+      if (!quoteData) {
+        throw new Error("Invalid quoteData: missing required fields");
+      }
+
+      let tx;
+      const deadline = Math.floor(Date.now() / 1000) + 60 * 20;
 
       if (chainId === 369) {
-        // PulseChain → keep existing logic
-        txData = {
-          to: "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6",
-          value: quoteData.value,
-          data: quoteData.calldata,
-        };
+        // ✅ PulseChain logic (PulseX Router)
+        const routerContract = new ethers.Contract(
+          PULSEX_ROUTER_ADDRESS,
+          PULSEX_ROUTER_ABI,
+          signer
+        );
+
+        if (!quoteData.amountIn || !quoteData.amountOutRaw || !quoteData.path) {
+          throw new Error("Invalid quoteData for PulseX swap");
+        }
+
+        if (quoteData.isNativeIn) {
+          tx = await routerContract.swapExactETHForTokens(
+            quoteData.amountOutRaw,
+            quoteData.path,
+            address,
+            deadline,
+            { value: quoteData.amountIn }
+          );
+        } else if (quoteData.isNativeOut) {
+          tx = await routerContract.swapExactTokensForETH(
+            quoteData.amountIn,
+            quoteData.amountOutRaw,
+            quoteData.path,
+            address,
+            deadline
+          );
+        } else {
+          tx = await routerContract.swapExactTokensForTokens(
+            quoteData.amountIn,
+            quoteData.amountOutRaw,
+            quoteData.path,
+            address,
+            deadline
+          );
+        }
       } else {
-        // Other chains → Sushi API
+        // ✅ Other chains (Sushi API style)
         console.log("Using Sushi API for swap", quoteData.to);
 
-        txData = {
+        const txData = {
           to: quoteData.to,
           data: quoteData.data,
         };
+
+        tx = await signer.sendTransaction(txData);
       }
 
-      const tx = await signer.sendTransaction(txData);
+      if (!tx) {
+        throw new Error("Failed to create transaction");
+      }
+
       console.log("Transaction sent:", tx.hash);
       await tx.wait();
+
       setTxStatus("confirmed");
       setAmountIn("");
       setShowConfirmation(true);
 
     } catch (err) {
-      console.error("Swap failed", err);
-      toast.error("Swap failed. Try again.", { position: "top-center", autoClose: 5000 });
+      console.error("Swap failed:", err);
+      toast.error(`Swap failed: ${err.reason || err.message || "Unknown error"}`, {
+        position: "top-center",
+        autoClose: 5000,
+      });
       setTxStatus("error");
     } finally {
       setIsSwapping(false);
