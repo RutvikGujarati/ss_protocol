@@ -55,7 +55,7 @@ const TxProgressModal = ({ isOpen, txStatus, steps }) => {
             </h6>
           </div>
           <div className="modal-body pt-0">
-            <div className="position-relative d-flex justify-content-between align-items-center pb-2">
+            <div className="position-relative d-flex justify-center-between align-items-center pb-2">
               {/* Dotted connector */}
               {steps.map((_, idx) => {
                 if (idx === steps.length - 1) return null;
@@ -65,7 +65,7 @@ const TxProgressModal = ({ isOpen, txStatus, steps }) => {
                     className="position-absolute"
                     style={{
                       top: "35%",
-                      left: `${(idx + 0.7) * (100 / steps.length)}%`,
+                      left: `${(idx + 0.6) * (100 / steps.length)}%`,
                       transform: "translateY(-50%)",
                       width: `calc(${100 / steps.length}% - 30px)`,
                       borderTop: "2px dotted #6c757d",

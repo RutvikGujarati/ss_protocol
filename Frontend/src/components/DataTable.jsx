@@ -66,18 +66,11 @@ const DataTable = () => {
   const [checkingStates, setCheckingStates] = useState({});
   const [inputValues, setInputValues] = useState({});
   const [authorized, setAuthorized] = useState(false);
-  const SwappingSteps = [
-    { key: "initiated", label: "Initializing" },
-    { key: "Approving", label: "Approving" },
-    { key: "pending", label: "Swapping" },
-    { key: "confirmed", label: "Confirmed" },
-    { key: "error", label: "Error" },
-  ];
+
   const AddingTokenSteps = [
     { key: "initiated", label: "Initializing" },
     { key: "Adding", label: "Add Token" },
     { key: "Status Updating", label: "Status Updating" },
-    { key: "confirmed", label: "Confirmed" },
   ];
 
   const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
@@ -861,7 +854,7 @@ const DataTable = () => {
           </table>
 
         </div>
-        <TxProgressModal steps={AddingTokenSteps} isOpen={isAddingPopupOpen} txStatus={txStatusForAdding} />
+        <TxProgressModal steps={AddingTokenSteps} isOpen={true} txStatus={txStatusForAdding} />
       </div>
     </>
   ) : (
