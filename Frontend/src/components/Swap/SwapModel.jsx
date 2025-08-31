@@ -7,13 +7,13 @@ import { useAllTokens } from "./Tokens";
 import state from "../../assets/statelogo.png";
 import pulsechainLogo from "../../assets/pls1.png";
 import { useAccount, useChainId } from "wagmi";
-import { PULSEX_ROUTER_ADDRESS, PULSEX_ROUTER_ABI } from '../../Constants/Constants';
+import { PULSEX_ROUTER_ADDRESS, PULSEX_ROUTER_ABI, notifyError, ERC20_ABI } from '../../Constants/Constants';
 import useSwapData from "./useSwapData";
 import toast from "react-hot-toast";
 import useTokenBalances from "./UserTokenBalances";
 import { TokensDetails } from "../../data/TokensDetails";
 import { useSwapContract } from "../../Functions/SwapContractFunctions";
-import { calculatePlsValueNumeric, formatWithCommas } from "../DetailsInfo";
+import { calculatePlsValueNumeric, validateInputAmount } from "../../Constants/Utils";
 
 const SwapComponent = () => {
   const { signer } = useContext(ContractContext);
@@ -45,9 +45,9 @@ const SwapComponent = () => {
 
   const {
     amountOut,
-    estimatedGas,
     tokenInBalance,
     quoteData,
+    getQuoteDirect,
     inputUsdValue,
     outputUsdValue,
     isLoading,
@@ -85,10 +85,6 @@ const SwapComponent = () => {
       setTokenOut("STATE"); // Fallback to "STATE" if chainId is not supported
     }
   }, [chainId]);
-  const ERC20_ABI = [
-    "function allowance(address owner, address spender) view returns (uint256)",
-    "function approve(address spender, uint256 amount) returns (bool)",
-  ];
 
   const SPECIAL_TOKEN_LOGOS = {
     STATE: state,
@@ -149,15 +145,7 @@ const SwapComponent = () => {
       setNeedsApproval(false);
       await handleSwap();
     } catch (err) {
-      toast.error("Approval failed. Try again.", {
-        position: "top-center",
-        autoClose: 5000, // 5 seconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      notifyError("Approval failed. Try again.")
       console.error("Approval error", err);
       setTxStatus("error");
     } finally {
@@ -222,7 +210,7 @@ const SwapComponent = () => {
 
   const handleSwap = async () => {
     if (!signer) {
-      toast.error("Wallet not connected.", { position: "top-center", autoClose: 5000 });
+      notifyError("Wallet not connected.")
       return;
     }
     setIsSwapping(true);
@@ -292,10 +280,7 @@ const SwapComponent = () => {
 
     } catch (err) {
       console.error("Swap failed:", err);
-      toast.error(`Swap failed: ${err.reason || err.message || "Unknown error"}`, {
-        position: "top-center",
-        autoClose: 5000,
-      });
+      notifyError(`Swap failed: ${err.reason || err.message || "Unknown error"}`)
       setTxStatus("error");
     } finally {
       setIsSwapping(false);
@@ -335,36 +320,10 @@ const SwapComponent = () => {
     }
   }, [showConfirmation]);
 
-  // Helper to truncate token symbol and ensure single line
   const getDisplaySymbol = (symbol) => {
     if (!symbol) return '';
-    // Remove all whitespace to ensure single line
     const singleLine = symbol.replace(/\s+/g, '');
     return singleLine.length > 6 ? singleLine.slice(0, 6) + '..' : singleLine;
-  };
-  // Helper to truncate decimal without rounding
-  const truncateDecimals = (number, digits) => {
-    const [intPart, decPart = ""] = number.toString().split(".");
-    const truncated = decPart.length > digits
-      ? `${intPart}.${decPart.slice(0, digits)}`
-      : number.toString();
-    return truncated;
-  };
-
-  // Helper to format number with commas and decimals
-  const formatNumberWithCommas = (value) => {
-    if (!value || isNaN(value.replace(/,/g, ''))) return value;
-    const raw = value.replace(/,/g, '');
-    const truncated = truncateDecimals(raw, 4);
-    const [intPart, decPart] = truncated.split('.');
-    return decPart
-      ? Number(intPart).toLocaleString('en-US') + '.' + decPart
-      : Number(intPart).toLocaleString('en-US');
-  };
-
-  // Helper to validate input amount
-  const validateInputAmount = (rawValue) => {
-    return /^\d*\.?\d{0,18}$/.test(rawValue);
   };
 
   // Helper to check if amount exceeds balance
@@ -388,6 +347,34 @@ const SwapComponent = () => {
   // Helper to get max amount (exact balance without rounding)
   const getMaxAmount = () => {
     return tokenInBalance ? tokenInBalance.toString() : "";
+  };
+  const handleCheckClick = async () => {
+    try {
+      const calculated = Math.max(calculateTotalSum() * DaipriceChange, 0) / 100;
+
+      if (DaipriceChange < 0 || calculated === 0) {
+        if (DaipriceChange < 0) {
+          notifyError(`Invalid amount: index value is negative (${DaipriceChange}%) for now`)
+        } else {
+          notifyError("Invalid amount: get more state tokens")
+        }
+        return;
+      }
+
+      console.log("calculated", calculated.toString());
+
+      const firstOut = await getQuoteDirect(calculated.toString(), nativeNames[chainId], "STATE");
+      const firstOutFormatted = ethers.formatUnits(firstOut, 18);
+      console.log("first Out", firstOut)
+
+      // Update UI state
+      setTokenIn("STATE");
+      setTokenOut(nativeNames[chainId]);
+      setAmountIn(firstOutFormatted);
+    } catch (err) {
+      console.error("Error handling check click:", err);
+      notifyError("Something went wrong while preparing the swap")
+    }
   };
 
   return (
@@ -614,33 +601,15 @@ const SwapComponent = () => {
                   <p className="mb-1">
                     <span className="detailText">WITHDRAW PLS INDEX FUND - </span>
                     <button
-                      className="btn btn-sm text-light  p-0"
+                      className="btn btn-sm text-light p-0"
                       style={{ textDecoration: "none", fontSize: "13px", fontWeight: "700" }}
-                      onClick={() => {
-                        const calculated = Math.max(calculateTotalSum() * DaipriceChange, 0) / 100;
-
-                        if (DaipriceChange < 0 || calculated === 0) {
-                          if (DaipriceChange < 0) {
-                            toast.error(
-                              `Invalid amount: index value is negative (${DaipriceChange}%) for now`,
-                              { position: "top-center" }
-                            );
-                          } else {
-                            toast.error("Invalid amount: get more state tokens", {
-                              position: "top-center",
-                            });
-                          }
-                          return;
-                        }
-                        setTokenIn(nativeNames[chainId]);
-                        setTokenOut("STATE");
-                        setAmountIn(calculated.toString());
-                      }}
+                      onClick={handleCheckClick}
                       disabled={isApproving || isSwapping}
                       title="Reset to default tokens"
                     >
                       CHECK
                     </button>
+
                   </p>
                   <div className="d-flex justify-content-start align-items-center ">
                     <button

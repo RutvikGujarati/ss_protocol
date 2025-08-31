@@ -15,12 +15,12 @@ export const CONTRACT_ADDRESSES = {
         AUCTION: "0xD1C3485Cc4cc39F21Fe7779998F08eC141f7A7dA",
     },
     [CHAIN_IDS.POLYGON]: {
-        DAV_TOKEN: "0x0F7782ef1Bd024E75a47d344496022563F0C1A38", // Add Polygon mainnet addresses when available
-        STATE_TOKEN: "0x50Bb32FCB594978967265135E4d41849d7F646e0",
-        AUCTION: "0x81Ba02Ca510a58560D183F0F5eE42E47D1846245",
+        DAV_TOKEN: "", 
+        STATE_TOKEN: "",
+        AUCTION: "",
     },
     [CHAIN_IDS.MAINNET]: {
-        DAV_TOKEN: "", // Add Ethereum mainnet addresses when available
+        DAV_TOKEN: "",
         STATE_TOKEN: "",
         AUCTION: "",
     },

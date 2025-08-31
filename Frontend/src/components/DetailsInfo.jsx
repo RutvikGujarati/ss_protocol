@@ -8,7 +8,6 @@ import PropTypes from "prop-types";
 import { useContext, useEffect, useState, useMemo, useCallback, memo } from "react";
 import { TokensDetails } from "../data/TokensDetails";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
-import { Tooltip } from "bootstrap";
 import IOSpinner from "../Constants/Spinner";
 import toast from "react-hot-toast";
 import dav from "../assets/davlogo.png";
@@ -19,58 +18,8 @@ import { useAllTokens } from "./Swap/Tokens";
 import { useChainId } from "wagmi";
 import { explorerUrls } from "../Constants/ContractAddresses";
 import { chainCurrencyMap } from "../../WalletConfig";
-
-export const formatWithCommas = (value) => {
-  if (value === null || value === undefined) return "";
-  const valueString = value.toString();
-  const [integerPart, decimalPart] = valueString.split(".");
-  const formattedInteger = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return decimalPart ? `${formattedInteger}.${decimalPart}` : formattedInteger;
-};
-
-// Helper functions (exported for use in other files)
-export function calculatePlsValue(token, tokenBalances, pstateToPlsRatio, chainId) {
-  if (token.tokenName === "DAV" || token.tokenName === "STATE") {
-    return "-----";
-  }
-
-  const userBalance = tokenBalances[token.tokenName];
-  const tokenRatio = token.ratio;
-  const ratio = parseFloat(pstateToPlsRatio || 0);
-
-  if (userBalance === undefined || !tokenRatio || ratio <= 0) {
-    return "Loading...";
-  }
-
-  const pstateValue = parseFloat(userBalance) * parseFloat(tokenRatio);
-  const plsValue = pstateValue * ratio;
-  const roundedPlsValue = Math.round(plsValue / 1000) * 1000;
-
-  return `${formatWithCommas(roundedPlsValue.toFixed(0))} ${chainCurrencyMap[chainId] || 'PLS'}`;
-}
-
-export function calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio) {
-  if (token.tokenName === "DAV" || token.tokenName === "STATE") {
-    return 0;
-  }
-
-  const userBalance = tokenBalances[token.tokenName];
-  const tokenRatio = token.ratio;
-  const ratio = parseFloat(pstateToPlsRatio || 0);
-
-  if (!tokenRatio || tokenRatio === "not started" || tokenRatio === "not listed") {
-    return 0;
-  }
-  if (userBalance === undefined || !tokenRatio || ratio <= 0) {
-    return 0;
-  }
-
-  const pstateValue = parseFloat(userBalance) * parseFloat(tokenRatio);
-  const plsValue = pstateValue * ratio;
-  const roundedPlsValue = Math.round(plsValue / 1000) * 1000;
-
-  return roundedPlsValue;
-}
+import { calculatePlsValue, calculatePlsValueNumeric, formatWithCommas } from "../Constants/Utils";
+import { isImageUrl, PULSEX_ROUTER_ABI, PULSEX_ROUTER_ADDRESS } from "../Constants/Constants";
 
 // Memoized token row component
 const TokenRow = memo(({
@@ -113,13 +62,6 @@ const TokenRow = memo(({
     );
   }, [handleAddToken, token.TokenAddress, token.tokenName, chainId]);
 
-  const isImageUrl = (url) => {
-    return (
-      typeof url === "string" &&
-      url.startsWith("https://") &&
-      url.includes("ipfs")
-    );
-  };
 
   return (
     <tr>
@@ -328,8 +270,6 @@ TokenRow.displayName = 'TokenRow';
 
 const DetailsInfo = ({ selectedToken }) => {
   const {
-    setDBRequired,
-    setDBForBurnRequired,
     setDavAndStateIntoSwap,
     handleAddToken,
     DavAddress,
@@ -339,7 +279,7 @@ const DetailsInfo = ({ selectedToken }) => {
   const chainId = useChainId();
   const { totalStateBurned } = useDAvContract();
   const [localSearchQuery, setLocalSearchQuery] = useState("");
-  const { tokens, loading } = TokensDetails();
+  const { tokens, loading,refetch } = TokensDetails();
   const { signer } = useContext(ContractContext);
   const TOKENS = useAllTokens();
   const tokenBalances = useTokenBalances(TOKENS, signer);
@@ -443,28 +383,12 @@ const DetailsInfo = ({ selectedToken }) => {
       return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio);
     }, 0);
     return formatWithCommas(sum.toFixed(0));
-  }, [sortedTokens, tokenBalances, pstateToPlsRatio]);
+  }, [sortedTokens, tokenBalances]);
 
   // Optimized search handler
   const handleSearch = useCallback((e) => {
     setLocalSearchQuery(e.target.value.trim());
   }, []);
-
-  // Effects
-  useEffect(() => {
-    const handleStorageChange = (event) => {
-      if (event.key === "DavBalanceRequire") {
-        setDBRequired(event.newValue);
-      }
-      if (event.key === "DavBalanceRequireForBurn") {
-        setDBForBurnRequired(event.newValue);
-      }
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, [setDBRequired, setDBForBurnRequired]);
 
   useEffect(() => {
     const nameCells = document.querySelectorAll(".name-cell");
@@ -473,15 +397,21 @@ const DetailsInfo = ({ selectedToken }) => {
     });
   }, []);
 
-  useEffect(() => {
-    const tooltipTriggerList = document.querySelectorAll(
-      '[data-bs-toggle="tooltip"]'
+  const handleRefresh = useCallback(() => {
+    refetch();
+    toast.success(
+      "Data refreshed!",
+      {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+        theme: "dark",
+      }
     );
-    tooltipTriggerList.forEach((el) => {
-      new Tooltip(el);
-    });
   }, []);
-
   return (
     <div className="container mt-3 p-0 pb-4 mb-5">
       <div className="mb-3 d-flex justify-content-center align-items-center gap-3">
@@ -513,7 +443,19 @@ const DetailsInfo = ({ selectedToken }) => {
                     {loading ? (
                       <IOSpinner />
                     ) : (
-                      `${totalSum} ${nativeSymbol}`
+                      <>
+                        {`${totalSum} ${nativeSymbol}`}
+                        <i
+                          className="fa-solid fa-rotate-right ms-2"
+                          onClick={handleRefresh}
+                          title="Refresh Data"
+                          style={{
+                            fontSize: "15px",
+                            color: "white",
+                            cursor: "pointer",
+                          }}
+                        ></i>
+                      </>
                     )}
                   </th>
                   <th className="col-auto"></th>

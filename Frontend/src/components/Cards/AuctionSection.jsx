@@ -8,7 +8,6 @@ import PLSLogo from "../../assets/pls1.png";
 import BNBLogo from "../../assets/bnb.png";
 import matic from "../../assets/matic-token-icon.png";
 import sonic from "../../assets/S_token.svg";
-import { calculatePlsValueNumeric, formatWithCommas } from ".././DetailsInfo";
 import { TokensDetails } from "../../data/TokensDetails";
 import { useDAvContract } from "../../Functions/DavTokenFunctions";
 import DotAnimation from "../../Animations/Animation";
@@ -20,6 +19,8 @@ import { chainCurrencyMap } from "../../../WalletConfig";
 import useTokenBalances from "../Swap/UserTokenBalances";
 import { useAllTokens } from "../Swap/Tokens";
 import { ContractContext } from "../../Functions/ContractInitialize";
+import { notifyError } from "../../Constants/Constants";
+import { calculatePlsValueNumeric, formatNumber, formatWithCommas } from "../../Constants/Utils";
 
 const AuctionSection = () => {
     const chainId = useChainId();
@@ -58,12 +59,6 @@ const AuctionSection = () => {
         else if (chainId === 146) return sonic;
         return PLSLogo;
     };
-    const mintSteps = [
-        { key: "initiated", label: "Initiated" },
-        { key: "pending", label: "Pending" },
-        { key: "confirmed", label: "Confirmed" },
-        { key: "error", label: "Error" },
-    ];
     const getLogoSize = () => {
         return chainId === 56
             ? { width: "170px", height: "140px" }
@@ -76,10 +71,7 @@ const AuctionSection = () => {
 
     const handleMint = () => {
         if (!amount) {
-            toast.error("Please enter the mint amount!", {
-                position: "top-center",
-                autoClose: 12000,
-            });
+            notifyError("Please enter the mint amount!")
             return;
         }
         setLoad(true);
@@ -93,10 +85,7 @@ const AuctionSection = () => {
                 setReferralAmount("");
             } catch (error) {
                 console.error("Error minting:", error);
-                toast.error("Minting failed! Please try again.", {
-                    position: "top-center",
-                    autoClose: 12000,
-                });
+                notifyError("Minting failed! Please try again.")
             } finally {
                 setLoad(false);
             }
@@ -118,13 +107,6 @@ const AuctionSection = () => {
     const handleOptionalInputChange = (e) => {
         setReferralAmount(e.target.value);
     };
-
-    function formatNumber(number) {
-        if (!number) return "0";
-        return new Intl.NumberFormat("en-US", {
-            maximumFractionDigits: 0,
-        }).format(number);
-    }
 
     useEffect(() => {
         CalculationOfCost(amount);
@@ -183,11 +165,6 @@ const AuctionSection = () => {
                                 {load ? "Minting..." : "Mint"}
                             </button>
                         </div>
-                        {/* <TxProgressModal
-                            isOpen={load}
-                            txStatus={txStatus}
-                            steps={mintSteps}
-                        /> */}
                     </div>
                 </div>
                 <div className="col-md-4 p-0 m-2 cards">
@@ -269,7 +246,7 @@ const AuctionSection = () => {
                                     </p>
                                     <p className="mb-1 ">
                                         <span className="detailText">Your Affiliate Link - </span>
-                                        <span style={{ textTransform: "none" }}>{ReferralCodeOfUser}</span>
+                                        <span className="second-span-fontsize">{ReferralCodeOfUser}</span>
                                         <button
                                             onClick={() => {
                                                 navigator.clipboard.writeText(ReferralCodeOfUser);
@@ -277,7 +254,7 @@ const AuctionSection = () => {
                                                 setCopiedCode(ReferralCodeOfUser);
                                                 setTimeout(() => setCopied(false), 2000);
                                             }}
-                                            className="btn btn-outline-light btn-sm py-0 px-2"
+                                            className="btn btn-outline-light btn-sm py-0 px-2 mx-2"
                                             style={{ fontSize: "14px" }}
                                             title={copied ? "Copied!" : "Copy"}
                                         >
@@ -344,7 +321,7 @@ const AuctionSection = () => {
                                                         ({DaipriceChange} %)
                                                     </span>{" "}
                                                     {formatWithCommas(
-                                                        Math.max(calculateTotalSum() * DaipriceChange, 0) / 100
+                                                        parseFloat(Math.max(calculateTotalSum() * DaipriceChange, 0) / 100).toFixed(2)
                                                     )}{" "}
                                                     PLS
                                                 </>

@@ -3,20 +3,7 @@ import { ethers } from "ethers";
 import { useAccount } from "wagmi";
 import { ContractContext } from "../Functions/ContractInitialize";
 import toast from "react-hot-toast";
-
-const formatTimestamp = (timestamp) => {
-  try {
-    const ts =
-      typeof timestamp === "object" && "toNumber" in timestamp
-        ? timestamp.toNumber()
-        : Number(timestamp);
-    const date = new Date(ts * 1000);
-    return date.toLocaleString();
-  } catch (error) {
-    console.error("Error formatting timestamp:", error);
-    return "Invalid Date";
-  }
-};
+import { formatTimestamp } from "../Constants/Utils";
 
 const DavHistory = () => {
   const { AllContracts } = useContext(ContractContext);

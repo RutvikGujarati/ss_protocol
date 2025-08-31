@@ -16,13 +16,10 @@ import {
   getAUCTIONContractAddress,
 } from "../Constants/ContractAddresses";
 import toast from "react-hot-toast";
+import { ERC20_ABI, notifyError } from "../Constants/Constants";
+import { truncateDecimals } from "../Constants/Utils";
 
 export const DAVContext = createContext();
-
-const ERC20_ABI = [
-  "function approve(address spender, uint256 amount) external returns (bool)",
-  "function allowance(address owner, address spender) external view returns (uint256)",
-];
 
 export const DavProvider = ({ children }) => {
   const { AllContracts, signer } = useContext(ContractContext);
@@ -76,13 +73,6 @@ export const DavProvider = ({ children }) => {
   });
 
   // Helper to truncate without rounding
-  const truncateDecimals = (number, digits) => {
-    const [intPart, decPart = ""] = number.toString().split(".");
-    return decPart.length > digits
-      ? `${intPart}.${decPart.slice(0, digits)}`
-      : number.toString();
-  };
-
   const fetchAndSet = async (
     label,
     fn,
@@ -114,10 +104,16 @@ export const DavProvider = ({ children }) => {
         [label]: value,
       }));
     } catch (err) {
+      if (
+        err?.reason?.includes("No previous cycle exists") ||
+        err?.data?.message?.includes("No previous cycle exists")
+      ) {
+        console.log(`Suppressed error for ${label}: No previous cycle exists`);
+        return; // Skip updating state for this error
+      }
       console.error(`Error fetching ${label}:`, err);
     }
   };
-
 
   const fetchData = useCallback(async () => {
     if (!AllContracts?.davContract || !address) return;
@@ -374,7 +370,7 @@ export const DavProvider = ({ children }) => {
     }
   }, [isConnected, AllContracts, fetchData]);
 
-  const [txStatus, setTxStatus] = useState(""); // e.g. "initiated", "pending", "confirmed", "error"
+  const [txStatus, setTxStatus] = useState("");
 
   const mintDAV = async (amount, ref = "") => {
     if (!AllContracts?.davContract) return;
@@ -510,20 +506,10 @@ export const DavProvider = ({ children }) => {
       // Update toast notification
       toast.dismiss(toastId);
       if (!toastId) {
-        toast.error("❌ Transaction rejected by user", {
-          position: "top-center",
-          autoClose: 3000,
-        });
+        notifyError("❌ Transaction rejected by user")
       } else {
-        toast.update(toastId, {
-          render: `❌ Error: ${errorMessage}`,
-          type: "error",
-          isLoading: false,
-          autoClose: 5000,
-          position: "top-center",
-        });
+        notifyError(`❌ Error: ${errorMessage}`)
       }
-
       throw error;
     } finally {
       setProcessToken(false);
@@ -607,15 +593,7 @@ export const DavProvider = ({ children }) => {
       } else if (err.message) {
         message = err.message; // fallback
       }
-
-      toast.error(message, {
-        position: "top-center",
-        autoClose: 8000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      notifyError(message)
     } finally {
       setClaiming(false);
     }
@@ -705,18 +683,7 @@ export const DavProvider = ({ children }) => {
       if (errorMessage.includes("execution reverted (unknown custom error)")) {
         errorMessage = "Check state token balance";
       }
-
-      // Show toast with extracted message
-      toast.error(errorMessage, {
-        position: "top-center",
-        autoClose: 5000, // 5 seconds
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-
+      notifyError(errorMessage)
       setClicked(false);
     } finally {
       setButtonTextStates("");

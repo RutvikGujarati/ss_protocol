@@ -7,15 +7,15 @@ import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useChainId } from "wagmi";
 
-
 export const shortenAddress = (addr) =>
 	addr ? `${addr.slice(0, 6)}...${addr.slice(-6)}` : "";
 
 export const TokensDetails = () => {
 	const swap = useSwapContract();
-	const { Emojies, names } = useDAvContract(); // Add names from useDAvContract
+	const { Emojies, names } = useDAvContract();
 	const chainId = useChainId();
 	const [loading, setLoading] = useState(true);
+	const [refreshKey, setRefreshKey] = useState(0); // State to trigger refresh
 
 	// Get contract addresses for the connected chain
 	const getDavAddress = () => getDAVContractAddress(chainId);
@@ -29,9 +29,7 @@ export const TokensDetails = () => {
 		}, {})
 		: {};
 
-	// Log for debugging
-
-
+	// Static tokens
 	const staticTokens = [
 		{
 			name: "DAV",
@@ -51,6 +49,7 @@ export const TokensDetails = () => {
 		},
 	];
 
+	// Dynamic tokens
 	const dynamicTokens = Array.from(swap.TokenNames || [])
 		.filter((name) => name !== "DAV" && name !== "STATE")
 		.map((name) => {
@@ -79,7 +78,7 @@ export const TokensDetails = () => {
 			emoji,
 			isRenounced: swap.isTokenRenounce?.[token.name],
 			DavVault: swap.TokenBalance?.[key],
-			BurnedLp: swap.burnedLPAmount?.[token.name]?.balance ?? "0", 
+			BurnedLp: swap.burnedLPAmount?.[token.name]?.balance ?? "0",
 			burned: swap.burnedAmount?.[key],
 			isSupported:
 				token.name === "DAV"
@@ -95,6 +94,12 @@ export const TokensDetails = () => {
 					: swap.CurrentCycleCount?.[key] + 1,
 		};
 	});
+
+	// Refetch function to reload all values
+	const refetch = () => {
+		setLoading(true);
+		setRefreshKey((prev) => prev + 1); // Increment refreshKey to trigger useEffect
+	};
 
 	useEffect(() => {
 		const checkDataFetched = () => {
@@ -115,9 +120,8 @@ export const TokensDetails = () => {
 				swap.supportedToken &&
 				swap.CurrentCycleCount;
 
-			setLoading(!isDataReady); // Now it's using isDataReady correctly
+			setLoading(!isDataReady);
 		};
-
 
 		checkDataFetched();
 	}, [
@@ -131,8 +135,8 @@ export const TokensDetails = () => {
 		swap.supportedToken,
 		swap.CurrentCycleCount,
 		dynamicTokens.length,
+		refreshKey, // Add refreshKey to dependencies to trigger re-run
 	]);
 
-
-	return { tokens, loading };
+	return { tokens, loading, refetch };
 };

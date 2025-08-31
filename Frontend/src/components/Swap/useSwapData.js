@@ -164,6 +164,24 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 		}
 	};
 
+	const getQuoteDirect = async (amount, tokenIn, tokenOut) => {
+		const routerContract = new ethers.Contract(
+			PULSEX_ROUTER_ADDRESS,
+			PULSEX_ROUTER_ABI,
+			signer.provider
+		);
+
+		let tokenInAddress = TOKENS[tokenIn]?.address;
+		let tokenOutAddress = TOKENS[tokenOut]?.address;
+
+		const parsedAmount = ethers.parseUnits(amount.toString(), 18);
+
+		const path = [tokenInAddress, tokenOutAddress];
+		const amounts = await routerContract.getAmountsOut(parsedAmount, path);
+		const rawOut = amounts[amounts.length - 1];
+		return rawOut;
+	};
+	
 	const fetchTokenPrices = async () => {
 		try {
 			const prices = {};
@@ -284,6 +302,7 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 		tokenOutBalance,
 		fetchQuote,
 		fetchTokenPrices,
+		getQuoteDirect,
 		isLoading,
 	};
 };

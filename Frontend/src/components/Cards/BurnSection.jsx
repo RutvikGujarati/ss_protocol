@@ -1,13 +1,12 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../Styles/InfoCards.css";
 import { useState } from "react";
-import { formatWithCommas } from ".././DetailsInfo";
 import { useDAvContract } from "../../Functions/DavTokenFunctions";
 import DotAnimation from "../../Animations/Animation";
 import { useAccount, useChainId } from "wagmi";
 import IOSpinner from "../../Constants/Spinner";
 import { chainCurrencyMap } from "../../../WalletConfig";
-import TxProgressModal from "../TxProgressModal";
+import { formatWithCommas } from "../../Constants/Utils";
 
 const BurnSection = () => {
     const { address } = useAccount();
@@ -29,7 +28,6 @@ const BurnSection = () => {
         TimeUntilNextClaim,
         hasClaimingStarted,
         stateHolding,
-        buttonTextStates,
         claimBurnAmount,
     } = useDAvContract();
     const [amountOfInput, setAmountOfInput] = useState("");
@@ -47,14 +45,6 @@ const BurnSection = () => {
             console.error("Burn failed:", error);
         }
     };
-    const BurningSteps = [
-        { key: "initiated", label: "Initializing" },
-        { key: "Approving", label: "Approving" },
-        { key: "Pending", label: "Burning" },
-        { key: "confirmed", label: "Confirmed" },
-        { key: "error", label: "Error" },
-    ];
-
     const handleInputChangeForBurn = (e) => {
         const input = e.target.value.replace(/,/g, "");
         if (!isNaN(input)) {
@@ -202,8 +192,6 @@ const BurnSection = () => {
                     </div>
                 </div>
             </div>
-            {/* <TxProgressModal isOpen={BurnClicked} txStatus={buttonTextStates}
-                steps={BurningSteps} /> */}
         </div>
 
     );

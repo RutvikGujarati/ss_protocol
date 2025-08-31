@@ -4,7 +4,6 @@ import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useEffect, useState, useMemo, useContext } from "react";
-import { formatWithCommas } from "./DetailsInfo";
 import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useAccount, useChainId } from "wagmi";
@@ -15,6 +14,8 @@ import TxProgressModal from "./TxProgressModal";
 import { useAllTokens } from "./Swap/Tokens";
 import { ContractContext } from "../Functions/ContractInitialize";
 import toast from "react-hot-toast";
+import { AddingTokenSteps, ERC20_ABI, isImageUrl } from "../Constants/Constants";
+import { formatCountdown, formatTimeVerbose, formatWithCommas } from "../Constants/Utils";
 
 const DataTable = () => {
   const chainId = useChainId();
@@ -66,13 +67,7 @@ const DataTable = () => {
   const [checkingStates, setCheckingStates] = useState({});
   const [inputValues, setInputValues] = useState({});
   const [authorized, setAuthorized] = useState(false);
-
-  const AddingTokenSteps = [
-    { key: "initiated", label: "Initializing" },
-    { key: "Adding", label: "Add Token" },
-    { key: "Status Updating", label: "Status Updating" },
-  ];
-
+ 
   const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
 
   const handleSetAddress = () => {
@@ -87,35 +82,12 @@ const DataTable = () => {
   useEffect(() => {
     handleSetAddress();
   }, [address, AuthAddress]);
-  //utils
-  function formatCountdown(seconds) {
-    if (!seconds || seconds <= 0) return "0h 0m";
-
-    const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
-    const minutes = Math.floor((seconds % (60 * 60)) / 60);
-
-    return `${hours}h ${minutes}m`;
-  }
-  function formatTimeVerbose(seconds) {
-    if (typeof seconds !== "number" || isNaN(seconds) || seconds <= 0)
-      return "0";
-
-    const days = Math.floor(seconds / 86400);
-    const hrs = Math.floor((seconds % 86400) / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    // const secs = Math.floor(seconds % 60); // in case it's float
-
-    return `${days}d ${hrs}h ${mins}m`;
-  }
   // Handle input change for tokenAddress or pairAddress for a specific user
   const handleInputChange = (tokenName, value) => {
     setInputValues((prev) => ({
       ...prev,
       [tokenName]: value, // store pairAddress directly
     }));
-  };
-  const isImageUrl = (str) => {
-    return typeof str === "string" && str.includes("mypinata.cloud/ipfs/");
   };
 
   // Handle Add button click (calls AddTokenIntoSwapContract)
@@ -159,7 +131,6 @@ const DataTable = () => {
     setCheckingStates((prev) => ({ ...prev, [id]: false }));
   };
 
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isAddingPopupOpen, setIsAddingPopUpOpen] = useState(false);
 
   // Show/hide popup based on txStatus
@@ -176,29 +147,11 @@ const DataTable = () => {
       timer = setTimeout(() => {
         setIsAddingPopUpOpen(false);
         setTxStatusForAdding("");
-      }, 2000); // 2-second delay for confirmed and error states
+      }, 1000); // 2-second delay for confirmed and error states
     }
 
     return () => clearTimeout(timer);
   }, [txStatusForAdding]);
-  useEffect(() => {
-    if (!txStatusForSwap) {
-      setIsPopupOpen(false);
-      return;
-    }
-
-    setIsPopupOpen(true);
-
-    let timer;
-    if (["confirmed", "error"].includes(txStatusForSwap)) {
-      timer = setTimeout(() => {
-        setIsPopupOpen(false);
-        setTxStatusForSwap("");
-      }, 2000); // 2-second delay for confirmed and error states
-    }
-
-    return () => clearTimeout(timer);
-  }, [txStatusForSwap]);
 
   const hasSwapped = (tokenName, tokenOutAddress) => {
     const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
@@ -222,16 +175,11 @@ const DataTable = () => {
     });
   }, [tokens]);
   const TOKENS = useAllTokens();
-  const ERC20_ABI = [
-    "function allowance(address owner, address spender) view returns (uint256)",
-    "function approve(address spender, uint256 amount) returns (bool)",
-  ];
-
+ 
   const stateAddress = getSTATEContractAddress(chainId)
 
   const handleSwapClick = (id, onlyInputAmount) => {
     try {
-      setIsPopupOpen(true)
       const tokenOutAddress = TOKENS[id].address
       handleDexTokenSwap(
         id,
@@ -245,19 +193,13 @@ const DataTable = () => {
       );
     } catch (error) {
       console.error("Error in handleSwapClick:", error);
-    } finally { setIsPopupOpen(false) }
-
+    }
   };
   return !isConnected || !address ? (
     <div className="container text-center mt-5">
       <p className="text-light">Please connect your wallet.</p>
     </div>
   ) : isAuction ? (
-    // loading ? (
-    //   <div className="container text-center mt-5">
-    //     <IOSpinner />
-    //   </div>
-    // ) :
     <div className="container datatablemarginbottom">
       <div className="table-responsive ">
         <div>
@@ -268,7 +210,6 @@ const DataTable = () => {
                 <th></th>
                 <th>Token Name</th>
                 <th></th>
-
                 <th></th>
                 <th>Auction Timer</th>
                 <th
@@ -337,7 +278,6 @@ const DataTable = () => {
                       name,
                       emoji,
                       token,
-                      // currentRatio,
                       SwapT,
                       ContractName,
                       isReversing,
@@ -349,7 +289,6 @@ const DataTable = () => {
                       TimeLeft,
                       inputTokenAmount,
                       onlyInputAmount,
-                      // handleAddToken,
                       outputToken,
                     },
                     index
@@ -507,25 +446,16 @@ const DataTable = () => {
                         </>
                       )}
                       <td></td>
-
                     </tr>
                   )
                 )
               )}
             </tbody>
-            {/* <TxProgressModal isOpen={isPopupOpen} txStatus={txStatusForSwap}
-              steps={SwappingSteps} onClose={() => setIsPopupOpen(false)} /> */}
           </table>
         </div>
       </div>
     </div>
   ) : isAddToken ? (
-    // addTokensLoading ? (
-    //   <div className="container text-center mt-5">
-    //     <IOSpinner />
-    //     <p className="funny-loading-text">Fetching...</p>
-    //   </div>
-    // ) :
     <>
       <div className="container  datatablemarginbottom">
         <div className="table-responsive">
@@ -533,23 +463,16 @@ const DataTable = () => {
             <thead>
               {authorized ? (
                 <tr>
-                  {/* <th></th> */}
                   <th></th>
                   <th>Token Name</th>
                   <th>Deploy</th>
                   <th>Token Address/Pair</th>
-
                   <th>Renounced</th>
-                  {/* <th>Time To claim</th>
-                  <th>Amount</th>
-                  <th>Airdrop</th> */}
                 </tr>
               ) : (
                 <tr>
                   <th>Emoticon</th>
                   <th>Token Name</th>
-
-                  {/* <th>Liquidity</th> */}
                   <th></th>
                   <th>Token Address</th>
                   <th>Pair Address</th>
@@ -600,7 +523,6 @@ const DataTable = () => {
                         name,
                         Emojis,
                         isAdded,
-                        TimeLeft,
                         isDeployed,
                         isRenounceToken,
                         TokenAddress,
@@ -744,22 +666,6 @@ const DataTable = () => {
                             </button>
                           )}
                         </td>
-                        {/* <td className="timer-cell">
-                          {formatTimeVerbose(TimeLeft)}
-                        </td>
-                        <td>0</td>
-                        <td>
-                          <button
-                            className="btn btn-sm swap-btn btn-primary"
-                            onClick={() => giveRewardForAirdrop(TokenAddress)}
-                            disabled
-                          >
-                            {isCliamProcessing == TokenAddress
-                              ? "Processing..."
-                              : "Claim"}
-                          </button>
-                        </td> */}
-
                       </tr>
                     )
                   )}

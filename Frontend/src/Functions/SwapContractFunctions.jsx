@@ -18,6 +18,7 @@ import {
 } from "../Constants/ContractAddresses";
 import { useAccount, useChainId, useWalletClient } from "wagmi";
 import { useDAvContract } from "./DavTokenFunctions";
+import { notifyError } from "../Constants/Constants";
 
 const SwapContractContext = createContext();
 
@@ -768,9 +769,6 @@ export const SwapContractProvider = ({ children }) => {
     }
   };
 
-  console.log("burn lp", burnedLPAmount)
-
-
   const setDavAndStateIntoSwap = async () => {
     if (!AllContracts?.AuctionContract || !address) return;
 
@@ -1071,10 +1069,7 @@ export const SwapContractProvider = ({ children }) => {
       // 👇 Detect user rejection
       if (error?.code === 4001) {
         setTxStatusForSwap("cancelled");
-        toast.error("Transaction cancelled by user.", {
-          position: "top-center",
-          autoClose: 3000,
-        });
+        notifyError("Transaction cancelled by user.")
         setButtonTextStates((prev) => ({ ...prev, [id]: "Cancelled" }));
         return;
       }
@@ -1095,12 +1090,7 @@ export const SwapContractProvider = ({ children }) => {
       if (errorMessage.includes("execution reverted (unknown custom error)")) {
         errorMessage = "Check Token Balance on your account or Make Airdrop";
       }
-
-      toast.error(errorMessage, {
-        position: "top-center",
-        autoClose: 5000,
-      });
-
+      notifyError(errorMessage)
       setButtonTextStates((prev) => ({ ...prev, [id]: "Swap failed" }));
     } finally {
       // Reset swapping state
@@ -1258,24 +1248,13 @@ export const SwapContractProvider = ({ children }) => {
     const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
     if (IsAuctionActive[tokenOutAddress] == "false") {
       if (swaps[address]?.[tokenOutAddress]) {
-        toast.error("You have already swapped this token in this auction period.", {
-          position: "top-center",
-          autoClose: 3000,
-        });
+        notifyError("You have already swapped this token in this auction period.")
         return;
       }
     }
 
     if (!amountIn) {
-      toast.error('Invalid input parameters.', {
-        position: 'top-center',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      notifyError("Invalid input parameters.")
       return;
     }
 
@@ -1300,15 +1279,7 @@ export const SwapContractProvider = ({ children }) => {
       quoteData = await response.json();
     } catch (err) {
       console.error('Error fetching quote:', err);
-      toast.error('Failed to fetch quote. Try again.', {
-        position: 'top-center',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      notifyError('Failed to fetch quote. Try again.')
       return;
     }
 
@@ -1339,29 +1310,13 @@ export const SwapContractProvider = ({ children }) => {
         } catch (err) {
           console.error('Approval error:', err);
           setTxStatusForSwap("error");
-          toast.error('Approval failed. Try again.', {
-            position: 'top-center',
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-          });
+          notifyError('Approval failed. Try again.')
           return;
         }
       }
     } catch (err) {
       console.error('Error checking allowance:', err);
-      toast.error('Failed to check allowance. Try again.', {
-        position: 'top-center',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      notifyError('Failed to check allowance. Try again.')
       return;
     }
 
@@ -1409,10 +1364,7 @@ export const SwapContractProvider = ({ children }) => {
       console.error('Swap failed:', err);
       if (err?.code === 4001) {
         setTxStatusForSwap("cancelled");
-        toast.error("Transaction cancelled by user.", {
-          position: "top-center",
-          autoClose: 3000,
-        });
+        notifyError("Transaction cancelled by user.")
         return;
       }
       setDexSwappingStates((prev) => ({ ...prev, [id]: false }));

@@ -1,3 +1,5 @@
+import toast from "react-hot-toast";
+
 export const PULSEX_ROUTER_ADDRESS = '0x165C3410fC91EF562C50559f7d2289fEbed552d9';
 export const WPLS_ADDRESS = '0xA1077a294dDE1B09bB078844df40758a5D0f9a27';
 
@@ -13,3 +15,29 @@ export const PULSEX_ROUTER_ABI = [
 export const PULSEX_FACTORY_ABI = [
     'function getPair(address tokenA, address tokenB) external view returns (address pair)',
 ];
+
+export const ERC20_ABI = [
+    "function allowance(address owner, address spender) view returns (uint256)",
+    "function approve(address spender, uint256 amount) returns (bool)",
+];
+export const notifyError = (message) => {
+    toast.error(message, {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+    });
+};
+
+export const AddingTokenSteps = [
+    { key: "initiated", label: "Initializing" },
+    { key: "Adding", label: "Add Token" },
+    { key: "Status Updating", label: "Status Updating" },
+];
+
+export const isImageUrl = (str) => {
+    return typeof str === "string" && str.includes("mypinata.cloud/ipfs/");
+};

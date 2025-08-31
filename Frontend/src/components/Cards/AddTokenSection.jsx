@@ -6,9 +6,9 @@ import IOSpinner from "../../Constants/Spinner";
 import toast from "react-hot-toast";
 import axios from "axios";
 import GraphemeSplitter from "grapheme-splitter";
-import { formatWithCommas } from "../DetailsInfo";
 import { chainCurrencyMap } from "../../../WalletConfig";
 import { useChainId } from "wagmi";
+import { formatWithCommas } from "../../Constants/Utils";
 
 const AddTokenSection = () => {
     const splitter = new GraphemeSplitter();
