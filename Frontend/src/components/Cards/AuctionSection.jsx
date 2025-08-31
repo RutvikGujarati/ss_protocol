@@ -246,7 +246,7 @@ const AuctionSection = () => {
                                     </p>
                                     <p className="mb-1 ">
                                         <span className="detailText">Your Affiliate Link - </span>
-                                        <span className="second-span-fontsize">{ReferralCodeOfUser}</span>
+                                        <span className="second-span-fontsize" style={{ textTransform: "none" }}>{ReferralCodeOfUser}</span>
                                         <button
                                             onClick={() => {
                                                 navigator.clipboard.writeText(ReferralCodeOfUser);

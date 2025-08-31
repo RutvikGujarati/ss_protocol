@@ -143,7 +143,6 @@ const SwapComponent = () => {
       );
       await tx.wait();
       setNeedsApproval(false);
-      await handleSwap();
     } catch (err) {
       notifyError("Approval failed. Try again.")
       console.error("Approval error", err);
