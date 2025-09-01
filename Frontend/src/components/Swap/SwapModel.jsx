@@ -597,7 +597,7 @@ const SwapComponent = () => {
                     <span className="detailText">Route - </span>
                     <span className="second-span-fontsize">PulseXRouter02</span>
                   </p>
-                  <p className="mb-1">
+                  {/* <p className="mb-1">
                     <span className="detailText">WITHDRAW PLS INDEX FUND - </span>
                     <button
                       className="btn btn-sm text-light p-0"
@@ -609,7 +609,7 @@ const SwapComponent = () => {
                       CHECK
                     </button>
 
-                  </p>
+                  </p> */}
                   <div className="d-flex justify-content-start align-items-center ">
                     <button
                       className="btn detailText btn-link text-light  p-0"
