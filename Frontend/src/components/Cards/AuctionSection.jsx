@@ -276,7 +276,7 @@ const AuctionSection = () => {
                                                     "Token Listing Process.."
                                                 ) : (
                                                     formatWithCommas(calculateTotalSum()) || "0"
-                                                )} PLS
+                                                )} {nativeSymbol} 
                                             </span>
                                         </span>
                                     </p>
@@ -308,7 +308,7 @@ const AuctionSection = () => {
                                         </span>
                                     </p>
                                     <p className="mb-1">
-                                        <span className="detailText">PLS INDEX FUND -</span>
+                                        <span className="detailText">{nativeSymbol} INDEX FUND -</span>
                                         <span className="ms-1 second-span-fontsize">
                                             {isLoading ? (
                                                 <DotAnimation />
@@ -323,7 +323,7 @@ const AuctionSection = () => {
                                                     {formatWithCommas(
                                                         parseFloat(Math.max(calculateTotalSum() * DaipriceChange, 0) / 100).toFixed(2)
                                                     )}{" "}
-                                                    PLS
+                                                    {nativeSymbol}
                                                 </>
                                             )}
                                         </span>

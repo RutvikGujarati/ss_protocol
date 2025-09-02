@@ -25,7 +25,7 @@ const networks = [mainnet, avalanche, pulsechain, bsc, sonic];
 const wagmiAdapter = new WagmiAdapter({
 	networks,
 	projectId,
-	ssr: false, // Enable SSR if using Next.js
+	ssr: false,
 });
 
 // 5. Create AppKit configuration
@@ -36,7 +36,8 @@ try {
 		defaultNetwork: pulsechain,
 		projectId,
 		chainImages: {
-			369: "/pulse-chain.png"
+			369: "/pulse-chain.png",
+			146: "/S_token.svg",
 		},
 		features: {
 			socials: false,
@@ -49,20 +50,13 @@ try {
 
 export { wagmiAdapter, queryClient, networks };
 
-// Remove RainbowKit-related exports
-// export const config = ... (removed)
-// export const chains = ... (removed)
-// export const chainCurrencyMap = ... (removed)
 export const chains = [pulsechain, avalanche, mainnet, bsc, sonic];
-
-// Keep config lightweight
 
 
 export const chainCurrencyMap = {
 	[avalanche.id]: avalanche.nativeCurrency.symbol,
 	[bsc.id]: bsc.nativeCurrency.symbol,
 	[sonic.id]: sonic.nativeCurrency.symbol,
-	[pulsechain.id]: pulsechain.nativeCurrency.symbol,
 	[pulsechain.id]: pulsechain.nativeCurrency.symbol,
 	[mainnet.id]: mainnet.nativeCurrency.symbol,
 };

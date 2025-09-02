@@ -211,20 +211,6 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 					console.error(`Error fetching price for ${tokenOut}:`, err);
 				}
 			}
-
-			if (tokenIn === "PulseChain from pump.tires" || tokenOut === "PulseChain from pump.tires") {
-				try {
-					const plsResponse = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=pulsechain&vs_currencies=usd");
-					const plsData = await plsResponse.json();
-					if (plsData.pulsechain) {
-						prices["PulseChain from pump.tires"] = plsData.pulsechain.usd;
-						console.log("PLS price:", plsData.pulsechain.usd);
-					}
-				} catch (err) {
-					console.error("Error fetching PLS price:", err);
-				}
-			}
-
 			const fallbackPrices = {};
 			Object.keys(fallbackPrices).forEach((address) => {
 				if (!prices[address.toLowerCase()]) {

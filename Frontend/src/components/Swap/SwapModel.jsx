@@ -6,8 +6,9 @@ import { ContractContext } from "../../Functions/ContractInitialize";
 import { useAllTokens } from "./Tokens";
 import state from "../../assets/statelogo.png";
 import pulsechainLogo from "../../assets/pls1.png";
+import sonic from "../../assets/S_token.svg";
 import { useAccount, useChainId } from "wagmi";
-import { PULSEX_ROUTER_ADDRESS, PULSEX_ROUTER_ABI, notifyError, ERC20_ABI } from '../../Constants/Constants';
+import { PULSEX_ROUTER_ADDRESS, PULSEX_ROUTER_ABI, notifyError, ERC20_ABI, notifySuccess } from '../../Constants/Constants';
 import useSwapData from "./useSwapData";
 import toast from "react-hot-toast";
 import useTokenBalances from "./UserTokenBalances";
@@ -23,6 +24,7 @@ const SwapComponent = () => {
   const nativeNames = {
     1: "Wrapped Ether",
     137: "Wrapped Matic",
+    146: "Wrapped Sonic",
     42161: "Arbitrum",
     10: "Optimism",
     369: "Wrapped Pulse", // pump.tires case
@@ -89,6 +91,7 @@ const SwapComponent = () => {
   const SPECIAL_TOKEN_LOGOS = {
     STATE: state,
     pSTATE: state,
+    "Wrapped Sonic": sonic,
     "WPLS": pulsechainLogo,
   };
 
@@ -286,34 +289,9 @@ const SwapComponent = () => {
     }
   };
 
-
-  const getPriceDifference = () => {
-    if (!inputUsdValue || !outputUsdValue) return null;
-    const inputUsd = parseFloat(inputUsdValue.replace("$", ""));
-    const outputUsd = parseFloat(outputUsdValue.replace("$", ""));
-    if (isNaN(inputUsd) || isNaN(outputUsd)) return null;
-    const difference = outputUsd - inputUsd;
-    const percentage = inputUsd > 0 ? (difference / inputUsd) * 100 : 0;
-    return {
-      value: difference,
-      percentage: percentage,
-      isPositive: difference > 0,
-    };
-  };
-
   useEffect(() => {
     if (showConfirmation) {
-      toast.success(
-        `${confirmedAmountIn} ${getDisplaySymbol(TOKENS[tokenIn].symbol)} → ${confirmedAmountOut} ${getDisplaySymbol(TOKENS[tokenOut].symbol)} Swap Complete!`,
-        {
-          position: "top-center",
-          autoClose: 6000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-          theme: "dark",
-        }
+      notifySuccess(`${confirmedAmountIn} ${getDisplaySymbol(TOKENS[tokenIn].symbol)} → ${confirmedAmountOut} ${getDisplaySymbol(TOKENS[tokenOut].symbol)} Swap Complete!`,
       );
       setShowConfirmation(false);
     }
@@ -507,20 +485,6 @@ const SwapComponent = () => {
                     }}
                   >
                     <small className="text-secondary">{outputUsdValue}</small>
-                    {getPriceDifference() && (
-                      <span
-                        className="badge"
-                        style={{
-                          color: getPriceDifference().isPositive ? "#28a745" : "#dc3545",
-                          fontSize: "0.7rem",
-                          fontWeight: 100,
-                          padding: "2px 6px",
-                        }}
-                      >
-                        {getPriceDifference().isPositive ? "+" : ""}(
-                        {getPriceDifference().percentage.toFixed(2)}%)
-                      </span>
-                    )}
                   </div>
                 )}
 
@@ -595,7 +559,7 @@ const SwapComponent = () => {
                   <h6 className="detailText">Details</h6>
                   <p className="mb-1">
                     <span className="detailText">Route - </span>
-                    <span className="second-span-fontsize">PulseXRouter02</span>
+                    <span className="second-span-fontsize">{chainId == 369 ? "PulseXRouter02" : "SushiSwap API"} </span>
                   </p>
                   {/* <p className="mb-1">
                     <span className="detailText">WITHDRAW PLS INDEX FUND - </span>

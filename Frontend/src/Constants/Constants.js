@@ -31,6 +31,17 @@ export const notifyError = (message) => {
         progress: undefined,
     });
 };
+export const notifySuccess = (message) => {
+    toast.success(message, {
+        position: "top-center",
+        autoClose: 12000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+    });
+};
 
 export const AddingTokenSteps = [
     { key: "initiated", label: "Initializing" },

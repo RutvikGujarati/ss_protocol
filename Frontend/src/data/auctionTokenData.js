@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 
@@ -17,17 +17,20 @@ export const useAuctionTokens = () => {
 		TokenNames,
 		tokenMap,
 	} = useSwapContract();
-	const { Emojies, names } = useDAvContract(); // Add names from useDAvContract
+
+	const { Emojies, names } = useDAvContract();
 	const [loading, setLoading] = useState(true);
+	const [cachedTokens, setCachedTokens] = useState([]); // store last known good state
+	const prevSnapshotRef = useRef(null); // for shallow compare
 
-	// Create a name-to-emoji mapping
-	const nameToEmoji = Array.isArray(names) && Array.isArray(Emojies) && names.length === Emojies.length
-		? names.reduce((acc, name, index) => {
-			acc[name.toLowerCase()] = Emojies[index] || "🔹";
-			return acc;
-		}, {})
-		: {};
-
+	// Create name-to-emoji mapping
+	const nameToEmoji =
+		Array.isArray(names) && Array.isArray(Emojies) && names.length === Emojies.length
+			? names.reduce((acc, name, index) => {
+				acc[name.toLowerCase()] = Emojies[index] || "🔹";
+				return acc;
+			}, {})
+			: {};
 
 	const dynamicTokenNames = Array.from(TokenNames || []).filter(
 		(name) => name !== "DAV" && name !== "STATE"
@@ -37,13 +40,12 @@ export const useAuctionTokens = () => {
 		second: () => { }, // Replace with actual handler if exists
 	};
 
-	const tokenConfigs = dynamicTokenNames.map((contract) => {
+	const newTokenConfigs = dynamicTokenNames.map((contract) => {
 		const id = contract;
 		const handleAddToken = handleAddMap[contract] || (() => { });
 		const address =
 			tokenMap?.[contract] || "0x0000000000000000000000000000000000000000";
 		const emoji = nameToEmoji[contract.toLowerCase()];
-	
 
 		return {
 			id,
@@ -70,26 +72,32 @@ export const useAuctionTokens = () => {
 		};
 	});
 
+	// Compare snapshots to update only if something actually changed
 	useEffect(() => {
-		const checkDataFetched = () => {
-			const isDataReady =
-				TokenNames?.length > 0 &&
-				AuctionTime &&
-				tokenMap &&
-				isReversed &&
-				IsAuctionActive &&
-				userHashSwapped &&
-				userHasReverseSwapped &&
-				InputAmount &&
-				OutPutAmount &&
-				AirdropClaimed &&
-				names?.length > 0 &&
-				Emojies?.length > 0;
+		const snapshot = JSON.stringify(newTokenConfigs);
+		if (prevSnapshotRef.current !== snapshot) {
+			prevSnapshotRef.current = snapshot;
+			setCachedTokens(newTokenConfigs);
+		}
+	}, [newTokenConfigs]);
 
-			setLoading(!isDataReady);
-		};
+	// Loading detection
+	useEffect(() => {
+		const isDataReady =
+			TokenNames?.length > 0 &&
+			AuctionTime &&
+			tokenMap &&
+			isReversed &&
+			IsAuctionActive &&
+			userHashSwapped &&
+			userHasReverseSwapped &&
+			InputAmount &&
+			OutPutAmount &&
+			AirdropClaimed &&
+			names?.length > 0 &&
+			Emojies?.length > 0;
 
-		checkDataFetched();
+		setLoading(!isDataReady);
 	}, [
 		TokenNames,
 		AuctionTime,
@@ -105,6 +113,5 @@ export const useAuctionTokens = () => {
 		AirdropClaimed,
 	]);
 
-
-	return { tokens: tokenConfigs, loading };
+	return { tokens: cachedTokens, loading };
 };

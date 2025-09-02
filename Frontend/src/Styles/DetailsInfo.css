@@ -99,3 +99,57 @@
   font-weight: bold;
   animation: blinkPink 2s infinite;
 }
+
+.table-skeleton-row td {
+  border: none;
+  padding: 0;
+}
+
+/* Wrapper for skeleton blocks */
+.skeleton-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px;
+  background: #1f1f1f;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Individual skeleton blocks */
+.skeleton-block {
+  height: 20px;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(50, 50, 50, 0.2) 20%,
+    rgba(80, 80, 80, 0.4) 40%,
+    rgba(100, 100, 100, 0.6) 50%,
+    rgba(80, 80, 80, 0.4) 60%,
+    rgba(50, 50, 50, 0.2) 80%
+  );
+  background-size: 300% 100%;
+  animation: shimmer 2.5s linear infinite;
+}
+
+/* Shimmer animation for skeleton blocks */
+@keyframes shimmer {
+  0% {
+    background-position: 300% 0;
+  }
+  100% {
+    background-position: -300% 0;
+  }
+}
+
+/* Pulse animation for the wrapper */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}

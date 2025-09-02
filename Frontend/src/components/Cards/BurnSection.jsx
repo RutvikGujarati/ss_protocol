@@ -122,7 +122,14 @@ const BurnSection = () => {
                                 className="btn btn-primary mx-5 mt-5 btn-sm d-flex justify-content-center align-items-center"
                                 disabled={BurnClicked}
                             >
-                                Burn
+                                {BurnClicked ? (
+                                    <>
+                                        <IOSpinner className="me-2" />
+                                        Processing...
+                                    </>
+                                ) : (
+                                    "Burn"
+                                )}
                             </button>
 
                         </div>

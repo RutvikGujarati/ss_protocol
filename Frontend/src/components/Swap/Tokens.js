@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { TokensDetails } from "../../data/TokensDetails";
 import { useChainId } from "wagmi";
 import state from "../../assets/statelogo.png";
+import sonic from "../../assets/S_token.svg";
 import pulsechainLogo from "../../assets/pls1.png";
 
 export function useAllTokens() {
@@ -18,26 +19,39 @@ export function useAllTokens() {
 				let tokensData = [];
 
 				if (chainId === 369) {
-					// PulseChain → Piteas list with filter
-					if (chainId === 369) {
-						// wPLS (Wrapped Pulse) token data
-						const wpls = {
-							name: "Wrapped Pulse",
-							symbol: "WPLS",
-							address: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
-							decimals: 18,
-							image: pulsechainLogo,
-						};
+					// wPLS (Wrapped Pulse) token data
+					const wpls = {
+						name: "Wrapped Pulse",
+						symbol: "WPLS",
+						address: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27",
+						decimals: 18,
+						image: pulsechainLogo,
+					};
 
-						const obj = {
-							[wpls.name]: wpls,
-						};
+					const obj = {
+						[wpls.name]: wpls,
+					};
 
-						if (mounted) setApiTokensObj(obj);
-						return; // stop here for PulseChain
-					}
+					if (mounted) setApiTokensObj(obj);
+					return;
 
-				} else {
+				} else if (chainId == 146) {
+					const wpls = {
+						name: "Wrapped Sonic",
+						symbol: "Ws",
+						address: "0x039e2fb66102314ce7b64ce5ce3e5183bc94ad38",
+						decimals: 18,
+						image: sonic,
+					};
+
+					const obj = {
+						[wpls.name]: wpls,
+					};
+
+					if (mounted) setApiTokensObj(obj);
+					return;
+				}
+				else {
 					// All other chains → Uniswap token list
 					const res = await fetch("https://ipfs.io/ipns/tokens.uniswap.org");
 					if (!res.ok) throw new Error("Failed to fetch Uniswap tokenlist");

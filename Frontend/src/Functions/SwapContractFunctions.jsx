@@ -18,7 +18,7 @@ import {
 } from "../Constants/ContractAddresses";
 import { useAccount, useChainId, useWalletClient } from "wagmi";
 import { useDAvContract } from "./DavTokenFunctions";
-import { notifyError } from "../Constants/Constants";
+import { notifyError, notifySuccess } from "../Constants/Constants";
 
 const SwapContractContext = createContext();
 
@@ -956,7 +956,6 @@ export const SwapContractProvider = ({ children }) => {
       clearInterval(dataPollingInterval);
     };
   }, [AllContracts, address]);
-  // Adjust based on when you want it to run
 
   const ERC20_ABI = [
     "function approve(address spender, uint256 amount) external returns (bool)",
@@ -1044,15 +1043,7 @@ export const SwapContractProvider = ({ children }) => {
       if (swapReceipt.status === 1) {
         console.log("Swap Complete!");
         setTxStatusForSwap("confirmed");
-        toast.success(`swapped success with ${ContractName} `, {
-          position: "top-center", // Centered
-          autoClose: 18000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
+        notifySuccess(`Swap successful with ${ContractName}`);
         fetchStateHolding();
         setButtonTextStates((prev) => ({ ...prev, [id]: "Swap Complete!" }));
       } else {
@@ -1236,7 +1227,6 @@ export const SwapContractProvider = ({ children }) => {
     tokenOutAddress,
     ERC20_ABI,
     stateAddress,
-    toast
   ) => {
     // Input validation
     setTxStatusForSwap("initiated");
@@ -1280,6 +1270,8 @@ export const SwapContractProvider = ({ children }) => {
     } catch (err) {
       console.error('Error fetching quote:', err);
       notifyError('Failed to fetch quote. Try again.')
+      setDexSwappingStates((prev) => ({ ...prev, [id]: false })); // <-- reset here
+      setTxStatusForSwap("error");
       return;
     }
 
@@ -1317,6 +1309,7 @@ export const SwapContractProvider = ({ children }) => {
     } catch (err) {
       console.error('Error checking allowance:', err);
       notifyError('Failed to check allowance. Try again.')
+      setDexSwappingStates((prev) => ({ ...prev, [id]: false }));
       return;
     }
 

@@ -16,7 +16,7 @@ import {
   getAUCTIONContractAddress,
 } from "../Constants/ContractAddresses";
 import toast from "react-hot-toast";
-import { ERC20_ABI, notifyError } from "../Constants/Constants";
+import { ERC20_ABI, notifyError, notifySuccess } from "../Constants/Constants";
 import { truncateDecimals } from "../Constants/Utils";
 
 export const DAVContext = createContext();
@@ -402,10 +402,7 @@ export const DavProvider = ({ children }) => {
       await tx.wait();
 
       setTxStatus("confirmed");
-      toast.success(`${amount} token minted successfully!`, {
-        position: "top-center",
-        autoClose: 12000,
-      });
+      notifySuccess(`${amount} token minted successfully!`);
       await fetchData();
       return tx;
     } catch (error) {
@@ -571,15 +568,7 @@ export const DavProvider = ({ children }) => {
       const tx = await AllContracts.davContract.claimPLS();
       await tx.wait();
       await fetchData();
-      toast.success("Claimed PLS!", {
-        position: "top-center", // Centered
-        autoClose: 12000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      notifySuccess("Claimed PLS!")
     } catch (err) {
       console.error("Burn claim error:", err);
       // Try to extract a readable reason
@@ -615,15 +604,7 @@ export const DavProvider = ({ children }) => {
       );
       await tx.wait();
       await fetchData();
-      toast.success("Deposited State tokens", {
-        position: "top-center", // Centered
-        autoClose: 12000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      notifySuccess("Deposited State tokens")
     } catch (err) {
       console.error("Deposit  error:", err);
     }
@@ -652,15 +633,7 @@ export const DavProvider = ({ children }) => {
       await (await AllContracts.davContract.burnState(weiAmount)).wait();
       setButtonTextStates("confirmed");
       setClicked(false);
-      toast.success(`${amount} of tokens Burned Successfully`, {
-        position: "top-center", // Centered
-        autoClose: 12000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
+      notifySuccess(`${amount} of tokens Burned Successfully`)
       await fetchData();
       await fetchTimeUntilNextClaim();
     } catch (err) {

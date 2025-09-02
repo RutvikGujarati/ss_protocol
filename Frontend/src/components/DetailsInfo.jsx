@@ -19,7 +19,7 @@ import { useChainId } from "wagmi";
 import { explorerUrls } from "../Constants/ContractAddresses";
 import { chainCurrencyMap } from "../../WalletConfig";
 import { calculatePlsValue, calculatePlsValueNumeric, formatWithCommas } from "../Constants/Utils";
-import { isImageUrl, PULSEX_ROUTER_ABI, PULSEX_ROUTER_ADDRESS } from "../Constants/Constants";
+import { isImageUrl, notifySuccess } from "../Constants/Constants";
 
 // Memoized token row component
 const TokenRow = memo(({
@@ -37,18 +37,7 @@ const TokenRow = memo(({
 }) => {
   const handleCopyAddress = useCallback(() => {
     navigator.clipboard.writeText(token.TokenAddress);
-    toast.success(
-      `${token.tokenName} Address copied to clipboard!`,
-      {
-        position: "top-center",
-        autoClose: 2000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        theme: "dark",
-      }
-    );
+    notifySuccess(`${token.tokenName} Address copied to clipboard!`)
   }, [token.TokenAddress, token.tokenName]);
 
   const handleAddTokenClick = useCallback(() => {
@@ -399,18 +388,7 @@ const DetailsInfo = ({ selectedToken }) => {
 
   const handleRefresh = useCallback(() => {
     refetch();
-    toast.success(
-      "Data refreshed!",
-      {
-        position: "top-center",
-        autoClose: 2000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: false,
-        theme: "dark",
-      }
-    );
+    notifySuccess("Data refreshed!");
   }, []);
   return (
     <div className="container mt-3 p-0 pb-4 mb-5">
@@ -462,22 +440,37 @@ const DetailsInfo = ({ selectedToken }) => {
                 </tr>
               </thead>
               <tbody>
-                {sortedTokens.map((token) => (
-                  <TokenRow
-                    key={token.tokenName}
-                    token={token}
-                    tokenBalances={tokenBalances}
-                    pstateToPlsRatio={pstateToPlsRatio}
-                    chainId={chainId}
-                    totalStateBurned={totalStateBurned}
-                    showDot={greenDotEligibleTokens.includes(token.tokenName)}
-                    handleAddToken={handleAddToken}
-                    DavAddress={DavAddress}
-                    setDavAndStateIntoSwap={setDavAndStateIntoSwap}
-                    nativeSymbol={nativeSymbol}
-                    explorerUrl={explorerUrl}
-                  />
-                ))}
+                {loading ? (
+                  [...Array(4)].map((_, index) => (
+                    <tr key={index} className="table-skeleton-row">
+                      <td colSpan="9">
+                        <div className="skeleton-wrapper">
+                          <div className="skeleton-block" style={{ width: "25%", height: "24px" }} />
+                          <div className="skeleton-block" style={{ width: "15%", height: "18px" }} />
+                          <div className="skeleton-block" style={{ width: "35%", height: "22px" }} />
+                          <div className="skeleton-block" style={{ width: "20%", height: "20px" }} />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  sortedTokens.map((token) => (
+                    <TokenRow
+                      key={token.tokenName}
+                      token={token}
+                      tokenBalances={tokenBalances}
+                      pstateToPlsRatio={pstateToPlsRatio}
+                      chainId={chainId}
+                      totalStateBurned={totalStateBurned}
+                      showDot={greenDotEligibleTokens.includes(token.tokenName)}
+                      handleAddToken={handleAddToken}
+                      DavAddress={DavAddress}
+                      setDavAndStateIntoSwap={setDavAndStateIntoSwap}
+                      nativeSymbol={nativeSymbol}
+                      explorerUrl={explorerUrl}
+                    />
+                  ))
+                )}
               </tbody>
             </table>
 

@@ -14,9 +14,9 @@ library AuctionLib {
         uint256 auctionCount;
     }
 	// Constants for auction cycles
-    uint256 public constant AUCTION_INTERVAL = 50 days;
-    uint256 public constant AUCTION_DURATION = 24 hours;
-    uint256 public constant REVERSE_DURATION = 24 hours;
+    uint256 public constant AUCTION_INTERVAL = 2 days;
+    uint256 public constant AUCTION_DURATION = 5 hours;
+    uint256 public constant REVERSE_DURATION = 5 hours;
     uint256 public constant MAX_AUCTIONS = 19;
 
     /**
@@ -81,8 +81,8 @@ library AuctionLib {
         ) = getAuctionCycleData(cycle);
 
         if (!initialized || !isValidCycle) return false;
-        // Skip every 4th cycle (4,8,12...)
-        bool isFourthCycle = ((cycleNumber + 1) % 4 == 0);
+        // Skip every 3rd cycle 
+        bool isFourthCycle = ((cycleNumber + 1) % 3 == 0);
         if (isFourthCycle) return false;
         uint256 currentCycleStart = firstAuctionStart +
             cycleNumber *
@@ -108,8 +108,8 @@ library AuctionLib {
             bool isValidCycle
         ) = getAuctionCycleData(cycle);
         if (!initialized || !isValidCycle) return false;
-        // Only every 4th cycle (4,8,12...) is reverse auction
-        bool isFourthCycle = ((cycleNumber + 1) % 4 == 0);
+        // Only every 3rd cycle  is reverse auction
+        bool isFourthCycle = ((cycleNumber + 1) % 3 == 0);
         if (!isFourthCycle) return false;
         uint256 currentCycleStart = firstAuctionStart +
             cycleNumber *

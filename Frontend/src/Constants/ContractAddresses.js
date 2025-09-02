@@ -49,6 +49,9 @@ export const getSTATEContractAddress = (chainId) => {
 export const getAUCTIONContractAddress = (chainId) => {
     return getContractAddress(chainId, 'AUCTION') || getContractAddress(CHAIN_IDS.PULSECHAIN, 'AUCTION');
 };
+export const getSTATEPAIRAddress = (chainId) => {
+    return getContractAddress(chainId, 'STATE_PAIR_ADDRESS') || getContractAddress(CHAIN_IDS.PULSECHAIN, 'STATE_PAIR_ADDRESS');
+};
 export const explorerUrls = {
     1: "https://etherscan.io/address/",          // Ethereum Mainnet
     137: "https://polygonscan.com/address/",     // Polygon Mainnet

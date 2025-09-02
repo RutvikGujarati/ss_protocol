@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useAppKitAccount } from "@reown/appkit/react";
 import "../Styles/WalletConnector.css";
-import "@rainbow-me/rainbowkit/styles.css";
 
 const WalletConnector = () => {
   const { isConnected, address } = useAppKitAccount();

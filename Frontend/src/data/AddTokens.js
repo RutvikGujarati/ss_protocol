@@ -12,7 +12,7 @@ export const useAddTokens = () => {
 	const [AuthLoading, setAuthLoading] = useState(true);
 
 	useEffect(() => {
-	
+
 		const checkDataFetched = () => {
 			const isDataReady =
 				names?.length > 0 &&
@@ -39,11 +39,15 @@ export const useAddTokens = () => {
 	const tokenConfigs = users.map((user, index) => {
 		const name = names[index] || `Unknown_${index}`;
 		const isDeployed = isUsedMap[name] ?? false;
-		const isRenounceToken = isTokenRenounce?.[name] ?? false;
+
+		// Convert string "true"/"false" to actual boolean
+		const isRenounceToken = String(isTokenRenounce?.[name]).toLowerCase() === "true";
+
 		const isAdded = supportedToken?.[name] ?? false;
 		const Emojis = Emojies[index] || "❓";
 		const tokenAddress = tokenMap?.[name] || "0x0000000000000000000000000000000000000000";
 		const timeLeft = TimeLeftClaim?.[name] || "0";
+
 		return {
 			user,
 			name,
@@ -57,8 +61,11 @@ export const useAddTokens = () => {
 		};
 	});
 
+	// ✅ Filter only NOT renounced tokens
+	const activeTokens = tokenConfigs.filter(cfg => cfg.isRenounceToken === false);
+
 	return {
-		tokens: tokenConfigs.map((config) => ({
+		tokens: activeTokens.map((config) => ({
 			id: config.user,
 			user: config.user,
 			name: config.name,
@@ -68,7 +75,7 @@ export const useAddTokens = () => {
 			isAdded: config.isAdded,
 			Pname: `${config.name} - State - ${config.name}`,
 			ReverseName: `State - ${config.name}`,
-			ContractName: config.contract === "OneDollar" ? "oneD" : config.contract,
+			ContractName: config.contract,
 			image: config.image,
 			TokenAddress: config.tokenAddress,
 			TimeLeft: config.timeLeft,
