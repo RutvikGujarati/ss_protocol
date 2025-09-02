@@ -13,7 +13,6 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 	const [amountOut, setAmountOut] = useState("");
 	const [estimatedGas, setEstimatedGas] = useState(null);
 	const [quoteData, setQuoteData] = useState(null);
-	const [routeDetails, setRouteDetails] = useState(null);
 	const [tokenPrices, setTokenPrices] = useState({});
 	const [inputUsdValue, setInputUsdValue] = useState("");
 	const [outputUsdValue, setOutputUsdValue] = useState("");
@@ -25,7 +24,6 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 	const requestIdRef = useRef(0);
 
 	const getApiTokenAddress = (symbol) => {
-		if (symbol === "PulseChain from pump.tires") return "PLS";
 		return TOKENS[symbol]?.address;
 	};
 
@@ -35,19 +33,16 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 			return;
 		}
 		try {
-			if (tokenSymbol === "PulseChain from pump.tires") {
-				const bal = await signer.provider.getBalance(address);
-				setBalance(ethers.formatUnits(bal, 18));
-			} else {
-				const tokenAddress = TOKENS[tokenSymbol].address;
-				const contract = new ethers.Contract(
-					tokenAddress,
-					["function balanceOf(address) view returns (uint256)"],
-					signer
-				);
-				const bal = await contract.balanceOf(address);
-				setBalance(ethers.formatUnits(bal, TOKENS[tokenSymbol].decimals));
-			}
+
+			const tokenAddress = TOKENS[tokenSymbol].address;
+			const contract = new ethers.Contract(
+				tokenAddress,
+				["function balanceOf(address) view returns (uint256)"],
+				signer
+			);
+			const bal = await contract.balanceOf(address);
+			setBalance(ethers.formatUnits(bal, TOKENS[tokenSymbol].decimals));
+
 		} catch (err) {
 			console.error("Error fetching balance", err);
 			setBalance("");
@@ -58,7 +53,6 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 		if (!amountIn || isNaN(amountIn)) {
 			setAmountOut("");
 			setQuoteData(null);
-			setRouteDetails([]);
 			setEstimatedGas(null);
 			return;
 		}
@@ -115,12 +109,6 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 					);
 					setEstimatedGas(0);
 					setQuoteData(quote);
-					setRouteDetails({
-						swaps: [
-							{ pool: pairAddress, tokenIn: tokenInAddress, tokenOut: tokenOutAddress },
-						],
-					});
-					console.log("PulseChain route:", routeDetails);
 				}
 			} else {
 				// ----------------------------
@@ -146,14 +134,12 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 					);
 					setEstimatedGas(data.estimatedGas || null);
 					setQuoteData(data);
-					setRouteDetails(data.route || []);
 				}
 			}
 		} catch (err) {
 			if (requestIdRef.current === thisRequestId) {
 				console.error("Error fetching quote:", err);
 				setAmountOut("");
-				setRouteDetails([]);
 				setEstimatedGas(null);
 				setQuoteData(null);
 			}
@@ -181,12 +167,12 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 		const rawOut = amounts[amounts.length - 1];
 		return rawOut;
 	};
-	
+
 	const fetchTokenPrices = async () => {
 		try {
 			const prices = {};
 
-			if (tokenIn !== "PulseChain from pump.tires" && TOKENS[tokenIn]?.address) {
+			if (TOKENS[tokenIn]?.address) {
 				try {
 					const response = await fetch(`https://api.geckoterminal.com/api/v2/networks/pulsechain/tokens/${TOKENS[tokenIn].address}`);
 					if (response.ok) {
@@ -199,7 +185,7 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 				}
 			}
 
-			if (tokenOut !== "PulseChain from pump.tires" && TOKENS[tokenOut]?.address && tokenOut !== tokenIn) {
+			if (TOKENS[tokenOut]?.address && tokenOut !== tokenIn) {
 				try {
 					const response = await fetch(`https://api.geckoterminal.com/api/v2/networks/pulsechain/tokens/${TOKENS[tokenOut].address}`);
 					if (response.ok) {
@@ -231,23 +217,12 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 			setOutputUsdValue("");
 			return;
 		}
-
-		let inputPrice = 0;
-		if (tokenIn === "PulseChain from pump.tires") {
-			inputPrice = tokenPrices["PulseChain from pump.tires"] || 0;
-		} else if (TOKENS[tokenIn]?.address) {
-			inputPrice = tokenPrices[TOKENS[tokenIn].address.toLowerCase()] || 0;
-		}
+		const inputPrice = tokenPrices[TOKENS[tokenIn].address.toLowerCase()] || 0;
 		const inputUsd = parseFloat(amountIn) * inputPrice;
 		setInputUsdValue(inputUsd > 0 ? `$${inputUsd.toFixed(4)}` : "");
 
 		if (amountOut && !isNaN(amountOut)) {
-			let outputPrice = 0;
-			if (tokenOut === "PulseChain from pump.tires") {
-				outputPrice = tokenPrices["PulseChain from pump.tires"] || 0;
-			} else if (TOKENS[tokenOut]?.address) {
-				outputPrice = tokenPrices[TOKENS[tokenOut].address.toLowerCase()] || 0;
-			}
+			const outputPrice = tokenPrices[TOKENS[tokenOut].address.toLowerCase()] || 0;
 			const outputUsd = parseFloat(amountOut) * outputPrice;
 			setOutputUsdValue(outputUsd > 0 ? `$${outputUsd.toFixed(4)}` : "");
 		} else {
@@ -280,7 +255,6 @@ const useSwapData = ({ amountIn, tokenIn, tokenOut, TOKENS }) => {
 		amountOut,
 		estimatedGas,
 		quoteData,
-		routeDetails,
 		tokenPrices,
 		inputUsdValue,
 		outputUsdValue,

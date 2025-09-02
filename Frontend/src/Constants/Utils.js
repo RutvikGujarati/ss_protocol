@@ -75,9 +75,8 @@ export function calculatePlsValue(token, tokenBalances, pstateToPlsRatio, chainI
 
     const pstateValue = parseFloat(userBalance) * parseFloat(tokenRatio);
     const plsValue = pstateValue * ratio;
-    const roundedPlsValue = Math.round(plsValue / 1000) * 1000;
 
-    return `${formatWithCommas(roundedPlsValue.toFixed(0))} ${chainCurrencyMap[chainId] || 'PLS'}`;
+    return `${formatWithCommas(plsValue.toFixed(0))} ${chainCurrencyMap[chainId] || 'PLS'}`;
 }
 
 export function calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio) {
@@ -98,7 +97,6 @@ export function calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio)
 
     const pstateValue = parseFloat(userBalance) * parseFloat(tokenRatio);
     const plsValue = pstateValue * ratio;
-    const roundedPlsValue = Math.round(plsValue / 1000) * 1000;
 
-    return roundedPlsValue;
+    return plsValue;
 }

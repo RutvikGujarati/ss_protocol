@@ -65,7 +65,7 @@ const DataTable = () => {
   const [checkingStates, setCheckingStates] = useState({});
   const [inputValues, setInputValues] = useState({});
   const [authorized, setAuthorized] = useState(false);
- 
+
   const AuthAddress = import.meta.env.VITE_AUTH_ADDRESS;
 
   const handleSetAddress = () => {
@@ -102,7 +102,7 @@ const DataTable = () => {
     }
   };
 
-  const Checking = async (id, ContractName,AirDropAmount) => {
+  const Checking = async (id, ContractName, AirDropAmount) => {
     setCheckingStates((prev) => ({ ...prev, [id]: true }));
     try {
       // Dynamically get address from swap.tokenMap (or pass it as prop if needed)
@@ -169,7 +169,7 @@ const DataTable = () => {
     });
   }, [tokens]);
   const TOKENS = useAllTokens();
- 
+
   const stateAddress = getSTATEContractAddress(chainId)
 
   const handleSwapClick = (id, onlyInputAmount) => {
@@ -332,7 +332,7 @@ const DataTable = () => {
                       </td>
                       <td style={{ position: "relative" }}>
                         <button
-                          onClick={() => Checking(id, ContractName,AirDropAmount?.[name])}
+                          onClick={() => Checking(id, ContractName, AirDropAmount?.[name])}
                           className="btn btn-primary btn-sm swap-btn"
                           disabled={
                             checkingStates[id] ||

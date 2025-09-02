@@ -18,7 +18,7 @@ import {
 } from "../Constants/ContractAddresses";
 import { useAccount, useChainId, useWalletClient } from "wagmi";
 import { useDAvContract } from "./DavTokenFunctions";
-import { notifyError, notifySuccess } from "../Constants/Constants";
+import { notifyError, notifySuccess, PULSEX_ROUTER_ABI, PULSEX_ROUTER_ADDRESS, WPLS_ADDRESS } from "../Constants/Constants";
 
 const SwapContractContext = createContext();
 
@@ -1157,15 +1157,27 @@ export const SwapContractProvider = ({ children }) => {
   // Fetch pSTATE to PLS ratio from API
   const fetchPstateToPlsRatio = async () => {
     try {
-      const response = await fetch("https://api.geckoterminal.com/api/v2/networks/pulsechain/pools/0x8a37583793d74395cfa4ed841b34a5e012de3a4a");
-      if (response.ok) {
-        const data = await response.json();
-        // The ratio is base_token_price_quote_token which gives us pSTATE price in terms of quote token (WPLS)
-        const ratio = parseFloat(data.data.attributes.base_token_price_quote_token);
-        setPstateToPlsRatio(ratio.toString());
-        console.log("pSTATE to PLS ratio:", ratio);
-        return ratio;
-      }
+      const routerContract = new ethers.Contract(
+        PULSEX_ROUTER_ADDRESS,
+        PULSEX_ROUTER_ABI,
+        signer
+      );
+
+      // 1 pSTATE (18 decimals)
+      const onePstate = ethers.parseUnits("1", 18);
+
+      // Path from pSTATE → WPLS
+      const path = [getStateAddress(chainId), WPLS_ADDRESS];
+
+      const amountsOut = await routerContract.getAmountsOut(onePstate, path);
+
+      // The last element in amountsOut is the output amount of WPLS
+      const plsAmount = amountsOut[amountsOut.length - 1];
+      // Convert from wei to human-readable
+      const plsAmountFormatted = ethers.formatUnits(plsAmount, 18);
+      setPstateToPlsRatio(plsAmountFormatted.toString());
+      console.log("pSTATE to PLS ratio:", plsAmountFormatted);
+
     } catch (err) {
       console.error("Error fetching pSTATE to PLS ratio:", err);
       return 0;
@@ -1251,8 +1263,8 @@ export const SwapContractProvider = ({ children }) => {
     // Step 1: Fetch Quote
     let quoteData;
     try {
-      const amount = ethers.parseUnits(amountIn, 18).toString();
-      const tokenInAddress = stateAddress;
+        const amount = ethers.parseUnits(amountIn, 18).toString();
+        const tokenInAddress = stateAddress;
       let url;
       console.log("chainid from swap fun", chainId)
       if (chainId == 369) {
@@ -1264,9 +1276,9 @@ export const SwapContractProvider = ({ children }) => {
         url.searchParams.set("amount", amount);
         url.searchParams.set("sender", address || "0x0000000000000000000000000000000000000000");
       }
-      const response = await fetch(url);
+        const response = await fetch(url);
       if (!response.ok) throw new Error('Quote fetch failed.');
-      quoteData = await response.json();
+        quoteData = await response.json();
     } catch (err) {
       console.error('Error fetching quote:', err);
       notifyError('Failed to fetch quote. Try again.')
@@ -1280,8 +1292,8 @@ export const SwapContractProvider = ({ children }) => {
     if (chainId == 369) {
       swapContractAddress = "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6"
     } else {
-      swapContractAddress = quoteData.to;
-    }
+        swapContractAddress = quoteData.to;
+      }
     try {
       const contract = new ethers.Contract(stateAddress, ERC20_ABI, signer);
       const allowance = await contract.allowance(address, swapContractAddress);
@@ -1297,8 +1309,8 @@ export const SwapContractProvider = ({ children }) => {
         setTxStatusForSwap("Approving");
         try {
           const maxUint256 = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
-          const tx = await contract.approve(swapContractAddress, maxUint256);
-          await tx.wait();
+        const tx = await contract.approve(swapContractAddress, maxUint256);
+        await tx.wait();
         } catch (err) {
           console.error('Approval error:', err);
           setTxStatusForSwap("error");
@@ -1361,7 +1373,7 @@ export const SwapContractProvider = ({ children }) => {
         return;
       }
       setDexSwappingStates((prev) => ({ ...prev, [id]: false }));
-      setTxStatusForSwap("error");
+        setTxStatusForSwap("error");
     } finally {
       setDexSwappingStates((prev) => ({ ...prev, [id]: false }));
       setTxStatusForSwap("error")
