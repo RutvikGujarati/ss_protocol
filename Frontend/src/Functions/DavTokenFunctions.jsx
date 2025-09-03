@@ -4,6 +4,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useRef,
 } from "react";
 
 import PropTypes from "prop-types";
@@ -26,6 +27,7 @@ export const DavProvider = ({ children }) => {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
   const [buttonTextStates, setButtonTextStates] = useState({});
+  const toastId = useRef(null);
 
   // Get contract addresses for the connected chain
   const getDavAddress = () => getDAVContractAddress(chainId);
@@ -662,6 +664,18 @@ export const DavProvider = ({ children }) => {
       setButtonTextStates("");
     }
   };
+  useEffect(() => {
+    if (isProcessing || isProcessingToken) {
+      toastId.current = toast.loading(`Processing`, {
+        position: "top-center",
+        autoClose: false,
+      });
+    } else if (toastId.current !== null) {
+      toast.dismiss(toastId.current);
+      toastId.current = null;
+    }
+  }, [isProcessing,isProcessingToken]);
+
 
   DavProvider.propTypes = {
     children: PropTypes.node.isRequired,

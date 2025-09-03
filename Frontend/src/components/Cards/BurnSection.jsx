@@ -1,16 +1,18 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../Styles/InfoCards.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDAvContract } from "../../Functions/DavTokenFunctions";
 import DotAnimation from "../../Animations/Animation";
 import { useAccount, useChainId } from "wagmi";
 import IOSpinner from "../../Constants/Spinner";
 import { chainCurrencyMap } from "../../../WalletConfig";
 import { formatWithCommas } from "../../Constants/Utils";
+import toast from "react-hot-toast";
 
 const BurnSection = () => {
     const { address } = useAccount();
     const chainId = useChainId();
+    const toastId = useRef(null);
     const {
         BurnStateTokens,
         claimableAmountForBurn,
@@ -55,7 +57,17 @@ const BurnSection = () => {
             setAmountOfInput("");
         }
     };
-
+    useEffect(() => {
+        if (BurnClicked || Claiming) {
+            toastId.current = toast.loading("Processing", {
+                position: "top-center",
+                autoClose: false,
+            });
+        } else if (toastId.current !== null) {
+            toast.dismiss(toastId.current);
+            toastId.current = null;
+        }
+    }, [BurnClicked,Claiming]);
     return (
         <div className="container mt-4">
             <div className="row g-4 d-flex align-items-stretch pb-1">
@@ -122,14 +134,7 @@ const BurnSection = () => {
                                 className="btn btn-primary mx-5 mt-5 btn-sm d-flex justify-content-center align-items-center"
                                 disabled={BurnClicked}
                             >
-                                {BurnClicked ? (
-                                    <>
-                                        <IOSpinner className="me-2" />
-                                        Processing...
-                                    </>
-                                ) : (
-                                    "Burn"
-                                )}
+                                Burn
                             </button>
 
                         </div>
@@ -168,14 +173,7 @@ const BurnSection = () => {
                                     className="btn btn-primary btn-sm d-flex justify-content-center align-items-center"
                                     disabled={Claiming || claimableAmountForBurn == 0 || CanClaimNow === "false"}
                                 >
-                                    {Claiming ? (
-                                        <>
-                                            <IOSpinner className="me-2" />
-                                            Claiming...
-                                        </>
-                                    ) : (
-                                        "Claim"
-                                    )}
+                                    Claim
                                 </button>
                             </div>
                         </div>

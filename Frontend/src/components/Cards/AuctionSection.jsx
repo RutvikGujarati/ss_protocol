@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../../Styles/InfoCards.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { ethers } from "ethers";
 import PLSLogo from "../../assets/pls1.png";
 import BNBLogo from "../../assets/bnb.png";
@@ -29,6 +29,7 @@ const AuctionSection = () => {
     const { signer } = useContext(ContractContext);
     const tokenBalances = useTokenBalances(TOKENS, signer);
     const { address } = useAccount();
+    const toastId = useRef(null);
     const {
         mintDAV,
         claimableAmount,
@@ -91,6 +92,17 @@ const AuctionSection = () => {
             }
         }, 0);
     };
+    useEffect(() => {
+        if (load || isClaiming) {
+            toastId.current = toast.loading("Processing", {
+                position: "top-center",
+                autoClose: false,
+            });
+        } else if (toastId.current !== null) {
+            toast.dismiss(toastId.current);
+            toastId.current = null;
+        }
+    }, [load, isClaiming]);
 
     const handleInputChange = (e) => {
         if (/^\d*$/.test(e.target.value)) {
@@ -112,6 +124,11 @@ const AuctionSection = () => {
         CalculationOfCost(amount);
     }, [CalculationOfCost, amount]);
 
+    const invested = Number(totalInvestedPls);
+    const totalSum = Number(calculateTotalSum());
+
+    const roi = invested > 0 ? (totalSum / invested) * 100 : 0;
+    const apr = invested > 0 ? (totalSum / invested) * 36500 : 0;
     return (
         <div className="container mt-4">
             <div className="row g-4 d-flex align-items-stretch pb-1">
@@ -275,38 +292,26 @@ const AuctionSection = () => {
                                                 ) : isNaN(calculateTotalSum()) ? (
                                                     "Token Listing Process.."
                                                 ) : (
-                                                    formatWithCommas(calculateTotalSum()) || "0"
-                                                )} {nativeSymbol} 
+                                                    parseFloat(formatWithCommas(calculateTotalSum())).toFixed(2) || "0"
+                                                )} {nativeSymbol}
                                             </span>
                                         </span>
                                     </p>
                                     <p className="mb-1">
                                         <span className="detailText">USER ROI % -</span>
                                         <span className="ms-1 second-span-fontsize">
-                                            {isLoading ? (
-                                                <DotAnimation />
-                                            ) : isNaN(calculateTotalSum() / totalInvestedPls) || !totalInvestedPls ? (
-                                                "0"
-                                            ) : (
-                                                formatWithCommas(((calculateTotalSum() / totalInvestedPls) * 100).toFixed(0))
-                                            )} %
+                                            {isLoading ? <DotAnimation /> : formatWithCommas(roi.toFixed(0))} %
                                         </span>
                                     </p>
 
                                     <p className="mb-1">
-                                        <span className="detailText">
-                                            USER APR % -
-                                        </span>
+                                        <span className="detailText">USER APR % -</span>
                                         <span className="ms-1 second-span-fontsize">
-                                            {isLoading ? (
-                                                <DotAnimation />
-                                            ) : isNaN(calculateTotalSum() / totalInvestedPls) || !totalInvestedPls ? (
-                                                "0"
-                                            ) : (
-                                                formatWithCommas(((calculateTotalSum() / totalInvestedPls) * 36500).toFixed(0)) || "0"
-                                            )} %
+                                            {isLoading ? <DotAnimation /> : formatWithCommas(apr.toFixed(0))} %
                                         </span>
                                     </p>
+
+
                                     <p className="mb-1">
                                         <span className="detailText">{nativeSymbol} INDEX FUND -</span>
                                         <span className="ms-1 second-span-fontsize">

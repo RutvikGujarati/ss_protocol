@@ -1,5 +1,5 @@
 import { parseUnits } from "ethers";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import TokenSearchModal from "./TokenSearchModal";
 import { ethers } from "ethers";
 import { ContractContext } from "../../Functions/ContractInitialize";
@@ -21,6 +21,8 @@ const SwapComponent = () => {
   const chainId = useChainId();
   const TOKENS = useAllTokens();
   const { address } = useAccount();
+  const toastId = useRef(null);
+
   const nativeNames = {
     1: "Wrapped Ether",
     137: "Wrapped Matic",
@@ -45,6 +47,7 @@ const SwapComponent = () => {
   const [confirmedAmountOut, setConfirmedAmountOut] = useState("");
   const [insufficientBalance, setInsufficientBalance] = useState(false);
 
+
   const {
     amountOut,
     tokenInBalance,
@@ -68,7 +71,17 @@ const SwapComponent = () => {
       return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio);
     }, 0);
   };
-
+  useEffect(() => {
+    if (isSwapping) {
+      toastId.current = toast.loading(`Swapping ${tokenIn} for ${tokenOut}… .`, {
+        position: "top-center",
+        autoClose: false,
+      });
+    } else if (toastId.current !== null) {
+      toast.dismiss(toastId.current);
+      toastId.current = null;
+    }
+  }, [isSwapping]);
   // Check if input amount exceeds balance
   useEffect(() => {
     if (amountIn && tokenInBalance) {
@@ -479,7 +492,7 @@ const SwapComponent = () => {
                   <div
                     className="d-flex align-items-start gap-2 mb-2"
                     style={{
-                      fontSize: "0.7rem",
+                      fontSize: "0.8rem",
                       alignSelf: "flex-start",
                       marginLeft: "10%", // aligns with centered input edges
                     }}
@@ -530,15 +543,7 @@ const SwapComponent = () => {
                       whiteSpace: "nowrap"
                     }}
                   >
-                    {isSwapping ? (
-                      <>
-                        <span
-                          className="spinner-border spinner-border-sm me-2"
-                          role="status"
-                        ></span>
-                        Swapping...
-                      </>
-                    ) : insufficientBalance ? (
+                    {insufficientBalance ? (
                       `Insufficient ${TOKENS[tokenIn]?.symbol || tokenIn}`
                     ) : (
                       "SWAP"

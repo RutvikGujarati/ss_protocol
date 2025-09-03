@@ -31,6 +31,7 @@ export const SwapContractProvider = ({ children }) => {
     useContext(ContractContext);
   const { address, connector } = useAccount();
   const { data: walletClient } = useWalletClient();
+  const toastId = useRef(null);
   useEffect(() => {
     if (!walletClient) return;
 
@@ -1230,7 +1231,7 @@ export const SwapContractProvider = ({ children }) => {
     address
   ]);
 
-
+  //using event listner on transaciton and mark true
   const handleDexTokenSwap = async (
     id,
     amountIn,
@@ -1263,8 +1264,8 @@ export const SwapContractProvider = ({ children }) => {
     // Step 1: Fetch Quote
     let quoteData;
     try {
-        const amount = ethers.parseUnits(amountIn, 18).toString();
-        const tokenInAddress = stateAddress;
+      const amount = ethers.parseUnits(amountIn, 18).toString();
+      const tokenInAddress = stateAddress;
       let url;
       console.log("chainid from swap fun", chainId)
       if (chainId == 369) {
@@ -1276,9 +1277,9 @@ export const SwapContractProvider = ({ children }) => {
         url.searchParams.set("amount", amount);
         url.searchParams.set("sender", address || "0x0000000000000000000000000000000000000000");
       }
-        const response = await fetch(url);
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Quote fetch failed.');
-        quoteData = await response.json();
+      quoteData = await response.json();
     } catch (err) {
       console.error('Error fetching quote:', err);
       notifyError('Failed to fetch quote. Try again.')
@@ -1292,8 +1293,8 @@ export const SwapContractProvider = ({ children }) => {
     if (chainId == 369) {
       swapContractAddress = "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6"
     } else {
-        swapContractAddress = quoteData.to;
-      }
+      swapContractAddress = quoteData.to;
+    }
     try {
       const contract = new ethers.Contract(stateAddress, ERC20_ABI, signer);
       const allowance = await contract.allowance(address, swapContractAddress);
@@ -1309,8 +1310,8 @@ export const SwapContractProvider = ({ children }) => {
         setTxStatusForSwap("Approving");
         try {
           const maxUint256 = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
-        const tx = await contract.approve(swapContractAddress, maxUint256);
-        await tx.wait();
+          const tx = await contract.approve(swapContractAddress, maxUint256);
+          await tx.wait();
         } catch (err) {
           console.error('Approval error:', err);
           setTxStatusForSwap("error");
@@ -1373,7 +1374,7 @@ export const SwapContractProvider = ({ children }) => {
         return;
       }
       setDexSwappingStates((prev) => ({ ...prev, [id]: false }));
-        setTxStatusForSwap("error");
+      setTxStatusForSwap("error");
     } finally {
       setDexSwappingStates((prev) => ({ ...prev, [id]: false }));
       setTxStatusForSwap("error")
@@ -1395,7 +1396,25 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching DAI price:", error);
     }
   }
+  useEffect(() => {
+    const processingStates = ["initiated","Adding","Approving", "pending", "loading"];
 
+    const isProcessing =
+      processingStates.includes(txStatusForSwap) ||
+      processingStates.includes(txStatusForAdding);
+
+    if (isProcessing) {
+      if (toastId.current === null) {
+        toastId.current = toast.loading(`Processing…`, {
+          position: "top-center",
+          autoClose: false,
+        });
+      }
+    } else if (toastId.current !== null) {
+      toast.dismiss(toastId.current);
+      toastId.current = null;
+    }
+  }, [txStatusForSwap, txStatusForAdding]);
   return (
     <SwapContractContext.Provider
       value={{

@@ -3,7 +3,7 @@ import "../Styles/DataTable.css";
 import MetaMaskIcon from "../assets/metamask-icon.png";
 import { useLocation } from "react-router-dom";
 import { useSwapContract } from "../Functions/SwapContractFunctions";
-import { useEffect, useState, useMemo, useContext } from "react";
+import { useEffect, useState, useMemo, useContext, useRef } from "react";
 import { useAuctionTokens } from "../data/auctionTokenData";
 import { useDAvContract } from "../Functions/DavTokenFunctions";
 import { useAccount, useChainId } from "wagmi";
@@ -55,7 +55,7 @@ const DataTable = () => {
   const { tokens } = useAuctionTokens();
   const { tokens: Addtokens } = useAddTokens();
   const OwnersTokens = useUsersOwnerTokens();
-
+  const toastId = useRef(null);
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
   const isAddToken = location.pathname === "/AddToken";
@@ -88,7 +88,23 @@ const DataTable = () => {
     }));
   };
 
-  // Handle Add button click (calls AddTokenIntoSwapContract)
+  useEffect(() => {
+    const isProcessing = Object.values(checkingStates).some(Boolean);
+
+    if (processingToken || isProcessing) {
+      if (toastId.current === null) {
+        toastId.current = toast.loading("Processing…", {
+          position: "top-center",
+          autoClose: false,
+        });
+      }
+    } else if (toastId.current !== null) {
+      toast.dismiss(toastId.current);
+      toastId.current = null;
+    }
+  }, [processingToken, checkingStates]);   // 👈 include checkingStates here
+
+
   const handleAdd = async (tokenAddress, tokenName, user, name) => {
     const pairAddress = inputValues[tokenName] || "";
     setProcessingToken(tokenName); // Set current token being processed

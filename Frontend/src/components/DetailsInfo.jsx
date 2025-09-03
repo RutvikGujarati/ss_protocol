@@ -423,16 +423,6 @@ const DetailsInfo = ({ selectedToken }) => {
                     ) : (
                       <>
                         {`${totalSum} ${nativeSymbol}`}
-                        <i
-                          className="fa-solid fa-rotate-right ms-2"
-                          onClick={handleRefresh}
-                          title="Refresh Data"
-                          style={{
-                            fontSize: "15px",
-                            color: "white",
-                            cursor: "pointer",
-                          }}
-                        ></i>
                       </>
                     )}
                   </th>
