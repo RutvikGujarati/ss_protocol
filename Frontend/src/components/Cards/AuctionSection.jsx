@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../../Styles/InfoCards.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ethers } from "ethers";
 import PLSLogo from "../../assets/pls1.png";
 import BNBLogo from "../../assets/bnb.png";
@@ -111,11 +111,15 @@ const AuctionSection = () => {
         CalculationOfCost(e.target.value);
     };
     // Helper to calculate total sum
-    const calculateTotalSum = () => {
-        return tokens.reduce((sum, token) => {
+
+    const calculateTotalSum = useCallback(() => {
+        const sum = tokens.reduce((sum, token) => {
             return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio);
         }, 0);
-    };
+        return formatWithCommas(sum.toFixed(0));
+    }, [tokens, tokenBalances]);
+
+
     const handleOptionalInputChange = (e) => {
         setReferralAmount(e.target.value);
     };
@@ -292,7 +296,7 @@ const AuctionSection = () => {
                                                 ) : isNaN(calculateTotalSum()) ? (
                                                     "Token Listing Process.."
                                                 ) : (
-                                                    parseFloat(formatWithCommas(calculateTotalSum())).toFixed(2) || "0"
+                                                    parseFloat(formatWithCommas(calculateTotalSum())).toFixed(0) || "0"
                                                 )} {nativeSymbol}
                                             </span>
                                         </span>
@@ -310,8 +314,6 @@ const AuctionSection = () => {
                                             {isLoading ? <DotAnimation /> : formatWithCommas(apr.toFixed(0))} %
                                         </span>
                                     </p>
-
-
                                     <p className="mb-1">
                                         <span className="detailText">{nativeSymbol} INDEX FUND -</span>
                                         <span className="ms-1 second-span-fontsize">
