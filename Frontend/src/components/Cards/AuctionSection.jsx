@@ -102,7 +102,7 @@ const AuctionSection = () => {
     const calculateTotalSum = () => {
         return tokens.reduce((sum, token) => {
             return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio);
-        }, 0);
+        },0);
     };
     const handleOptionalInputChange = (e) => {
         setReferralAmount(e.target.value);
@@ -275,8 +275,9 @@ const AuctionSection = () => {
                                                 ) : isNaN(calculateTotalSum()) ? (
                                                     "Token Listing Process.."
                                                 ) : (
-                                                    parseFloat(formatWithCommas(calculateTotalSum())).toFixed(0) || "0"
+                                                parseFloat(formatWithCommas(calculateTotalSum())).toFixed(0) || "0"
                                                 )} {nativeSymbol} 
+
                                             </span>
                                         </span>
                                     </p>
