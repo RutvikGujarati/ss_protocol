@@ -275,7 +275,7 @@ const AuctionSection = () => {
                                                 ) : isNaN(calculateTotalSum()) ? (
                                                     "Token Listing Process.."
                                                 ) : (
-                                                    formatWithCommas(calculateTotalSum()) || "0"
+                                                    parseFloat(formatWithCommas(calculateTotalSum())).toFixed(0) || "0"
                                                 )} {nativeSymbol} 
                                             </span>
                                         </span>
