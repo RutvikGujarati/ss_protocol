@@ -55,7 +55,6 @@ const DataTable = () => {
   const { tokens } = useAuctionTokens();
   const { tokens: Addtokens } = useAddTokens();
   const OwnersTokens = useUsersOwnerTokens();
-  const toastId = useRef(null);
   const location = useLocation();
   const isAuction = location.pathname === "/auction";
   const isAddToken = location.pathname === "/AddToken";
@@ -87,23 +86,6 @@ const DataTable = () => {
       [tokenName]: value, // store pairAddress directly
     }));
   };
-
-  useEffect(() => {
-    const isProcessing = Object.values(checkingStates).some(Boolean);
-
-    if (processingToken || isProcessing) {
-      if (toastId.current === null) {
-        toastId.current = toast.loading("Processing…", {
-          position: "top-center",
-          autoClose: false,
-        });
-      }
-    } else if (toastId.current !== null) {
-      toast.dismiss(toastId.current);
-      toastId.current = null;
-    }
-  }, [processingToken, checkingStates]);   // 👈 include checkingStates here
-
 
   const handleAdd = async (tokenAddress, tokenName, user, name) => {
     const pairAddress = inputValues[tokenName] || "";

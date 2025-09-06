@@ -12,7 +12,6 @@ import toast from "react-hot-toast";
 const BurnSection = () => {
     const { address } = useAccount();
     const chainId = useChainId();
-    const toastId = useRef(null);
     const {
         BurnStateTokens,
         claimableAmountForBurn,
@@ -57,17 +56,7 @@ const BurnSection = () => {
             setAmountOfInput("");
         }
     };
-    useEffect(() => {
-        if (BurnClicked || Claiming) {
-            toastId.current = toast.loading("Processing", {
-                position: "top-center",
-                autoClose: false,
-            });
-        } else if (toastId.current !== null) {
-            toast.dismiss(toastId.current);
-            toastId.current = null;
-        }
-    }, [BurnClicked,Claiming]);
+
     return (
         <div className="container mt-4">
             <div className="row g-4 d-flex align-items-stretch pb-1">

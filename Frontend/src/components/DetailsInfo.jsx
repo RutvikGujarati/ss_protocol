@@ -431,7 +431,7 @@ const DetailsInfo = ({ selectedToken }) => {
               </thead>
               <tbody>
                 {loading ? (
-                  [...Array(4)].map((_, index) => (
+                  [...Array(1)].map((_, index) => (
                     <tr key={index} className="table-skeleton-row">
                       <td colSpan="9">
                         <div className="skeleton-wrapper">

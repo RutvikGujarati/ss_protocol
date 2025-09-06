@@ -21,7 +21,6 @@ const SwapComponent = () => {
   const chainId = useChainId();
   const TOKENS = useAllTokens();
   const { address } = useAccount();
-  const toastId = useRef(null);
 
   const nativeNames = {
     1: "Wrapped Ether",
@@ -71,17 +70,6 @@ const SwapComponent = () => {
       return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio);
     }, 0);
   };
-  useEffect(() => {
-    if (isSwapping) {
-      toastId.current = toast.loading(`Swapping ${tokenIn} for ${tokenOut}… .`, {
-        position: "top-center",
-        autoClose: false,
-      });
-    } else if (toastId.current !== null) {
-      toast.dismiss(toastId.current);
-      toastId.current = null;
-    }
-  }, [isSwapping]);
   // Check if input amount exceeds balance
   useEffect(() => {
     if (amountIn && tokenInBalance) {

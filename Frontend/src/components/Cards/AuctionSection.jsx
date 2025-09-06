@@ -29,7 +29,6 @@ const AuctionSection = () => {
     const { signer } = useContext(ContractContext);
     const tokenBalances = useTokenBalances(TOKENS, signer);
     const { address } = useAccount();
-    const toastId = useRef(null);
     const {
         mintDAV,
         claimableAmount,
@@ -92,17 +91,6 @@ const AuctionSection = () => {
             }
         }, 0);
     };
-    useEffect(() => {
-        if (load || isClaiming) {
-            toastId.current = toast.loading("Processing", {
-                position: "top-center",
-                autoClose: false,
-            });
-        } else if (toastId.current !== null) {
-            toast.dismiss(toastId.current);
-            toastId.current = null;
-        }
-    }, [load, isClaiming]);
 
     const handleInputChange = (e) => {
         if (/^\d*$/.test(e.target.value)) {
@@ -111,14 +99,11 @@ const AuctionSection = () => {
         CalculationOfCost(e.target.value);
     };
     // Helper to calculate total sum
-
-    const calculateTotalSum = useCallback(() => {
-        const sum = tokens.reduce((sum, token) => {
+    const calculateTotalSum = () => {
+        return tokens.reduce((sum, token) => {
             return sum + calculatePlsValueNumeric(token, tokenBalances, pstateToPlsRatio);
         }, 0);
-        return formatWithCommas(sum.toFixed(0));
-    }, [tokens, tokenBalances]);
-
+    };
 
     const handleOptionalInputChange = (e) => {
         setReferralAmount(e.target.value);
