@@ -234,74 +234,125 @@ export const SwapContractProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const intervalHandles = {};
-    const results = {};
+    let animationFrameId;
+    let isActive = true;
+    const auctionData = {};
 
     const initializeCountdowns = async () => {
-      if (!AllContracts?.AuctionContract || !provider) return;
+      if (!AllContracts?.AuctionContract || !provider || !isActive) return;
 
-      const tokenMap = await ReturnfetchUserTokenAddresses();
+      try {
+        const tokenMap = await ReturnfetchUserTokenAddresses();
+        const results = {};
 
-      for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-        try {
-          // Get current block timestamp from the contract
-          const currentBlock = await provider.getBlock('latest');
-          const currentBlockTime = currentBlock.timestamp;
+        // Fetch all auction times first
+        for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
+          if (!isActive) break;
 
-          // Fetch the remaining auction time from the smart contract
-          const AuctionTimeInWei = await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
-          const timeLeft = Math.floor(Number(AuctionTimeInWei));
+          try {
+            const AuctionTimeInWei = await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
+            const timeLeft = Math.floor(Number(AuctionTimeInWei));
 
-          // Store the end time based on blockchain timestamp
-          const endTime = currentBlockTime + timeLeft;
-          results[tokenName] = timeLeft >= 0 ? timeLeft : 0;
-
-          // Set up blockchain-synchronized countdown
-          intervalHandles[tokenName] = setInterval(async () => {
-            try {
-              // Get latest block timestamp
-              const latestBlock = await provider.getBlock('latest');
-              const latestBlockTime = latestBlock.timestamp;
-
-              // Calculate remaining time based on blockchain time
-              const remainingTime = Math.max(0, endTime - latestBlockTime);
-
-              setAuctionTime((prev) => {
-                const newTime = { ...prev };
-                newTime[tokenName] = remainingTime;
-
-                // Check auction status when time runs low
-                if (remainingTime <= 300) { // 5 minutes or less
-                  CheckIsAuctionActive();
-                  CheckIsReverse();
-                }
-
-                return newTime;
-              });
-            } catch (error) {
-              console.error(`Error updating timer for ${tokenName}:`, error);
+            if (timeLeft >= 0 && isActive) {
+              const endTime = Date.now() + (timeLeft * 1000);
+              auctionData[tokenName] = {
+                endTime,
+                TokenAddress,
+                lastSync: Date.now()
+              };
+              results[tokenName] = timeLeft;
             }
-          }, 1000);
-        } catch (e) {
-          results[tokenName] = 0;
-          console.error(`Error fetching auction time for ${tokenName} (${TokenAddress}):`, e);
+          } catch (e) {
+            console.error(`Error fetching auction time for ${tokenName}:`, e);
+            results[tokenName] = 0;
+          }
         }
-      }
 
-      // Update state only if results are valid
-      if (Object.keys(results).length > 0) {
-        setAuctionTime(results);
-      } else {
-        console.warn("No valid auction times fetched, skipping state update");
+        if (isActive && Object.keys(results).length > 0) {
+          setAuctionTime(results);
+          startAnimationLoop();
+        }
+
+      } catch (error) {
+        console.error("Error initializing countdowns:", error);
       }
     };
+
+    const startAnimationLoop = () => {
+      const updateTimers = () => {
+        if (!isActive) return;
+
+        const now = Date.now();
+        const updates = {};
+        let hasUpdates = false;
+
+        for (const [tokenName, data] of Object.entries(auctionData)) {
+          const remainingTime = Math.max(0, Math.floor((data.endTime - now) / 1000));
+          updates[tokenName] = remainingTime;
+          hasUpdates = true;
+
+          // Check auction status when time runs low
+          if (remainingTime <= 300 && remainingTime > 0) {
+            CheckIsAuctionActive();
+            CheckIsReverse();
+          }
+
+          // Optional: Re-sync with blockchain every 2 minutes
+          if (now - data.lastSync > 120000 && remainingTime > 0) {
+            resyncToken(tokenName, data.TokenAddress);
+            data.lastSync = now;
+          }
+        }
+
+        if (hasUpdates && isActive) {
+          setAuctionTime(prev => ({ ...prev, ...updates }));
+        }
+
+        // Continue the loop
+        animationFrameId = requestAnimationFrame(updateTimers);
+      };
+
+      updateTimers();
+    };
+
+    const resyncToken = async (tokenName, TokenAddress) => {
+      if (!isActive || !AllContracts?.AuctionContract || !provider) return;
+
+      try {
+        const AuctionTimeInWei = await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
+        const actualTimeLeft = Math.floor(Number(AuctionTimeInWei));
+
+        if (isActive && actualTimeLeft >= 0) {
+          auctionData[tokenName].endTime = Date.now() + (actualTimeLeft * 1000);
+        }
+      } catch (error) {
+        console.error(`Error resyncing ${tokenName}:`, error);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isActive) {
+        // Re-initialize when tab becomes visible
+        setTimeout(() => {
+          if (isActive) {
+            initializeCountdowns();
+          }
+        }, 100);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     if (AllContracts?.AuctionContract && provider) {
       initializeCountdowns();
     }
 
     return () => {
-      Object.values(intervalHandles).forEach(clearInterval);
+      isActive = false;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [AllContracts, provider]);
 
@@ -1183,53 +1234,32 @@ export const SwapContractProvider = ({ children }) => {
       return 0;
     }
   };
+  // utils/cleanupSwaps.js (for example)
+  function cleanupInactiveTokenSwaps() {
+    const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
+    if (!swaps[address]) return;
 
-  useEffect(() => {
-    const resetSwapsIfAuctionEnded = async () => {
-      const tokenMap = await ReturnfetchUserTokenAddresses();
-      const extendedMap = { ...tokenMap, state: getSTATEContractAddress(chainId) };
-
-      const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
-
-      if (swaps[address]) {
-        for (const tokenName of Object.keys(extendedMap)) {
-          const currentCycleCount = Number(auctionState.CurrentCycleCount?.[tokenName] || 0);
-
-          // loop through all stored cycles for this user
-          for (const storedCycle of Object.keys(swaps[address] || {})) {
-            const storedCycleNum = Number(storedCycle);
-
-            // 🧹 if stored cycle < current cycle → remove it
-            if (storedCycleNum < currentCycleCount) {
-              console.log(
-                `Cleaning old swaps → removing swaps for cycle ${storedCycleNum}, token = ${tokenName}`
-              );
-
-              if (swaps[address][storedCycle]) {
-                delete swaps[address][storedCycle][tokenName];
-
-                // cleanup empty cycle
-                if (Object.keys(swaps[address][storedCycle]).length === 0) {
-                  delete swaps[address][storedCycle];
-                }
-              }
-            }
-          }
+    for (const storedCycle of Object.keys(swaps[address])) {
+      for (const tokenName of Object.keys(swaps[address][storedCycle])) {
+        const isAuctionActive = IsAuctionActive?.[tokenName] === true;
+        if (!isAuctionActive) {
+          console.log(`Auction not active → deleting swaps for token = ${tokenName}`);
+          delete swaps[address][storedCycle][tokenName];
         }
-        // cleanup empty user
-        if (Object.keys(swaps[address]).length === 0) {
-          delete swaps[address];
-        }
-
-        localStorage.setItem("auctionSwaps", JSON.stringify(swaps));
       }
-    };
+      // cleanup empty cycle
+      if (Object.keys(swaps[address][storedCycle]).length === 0) {
+        delete swaps[address][storedCycle];
+      }
+    }
 
-    resetSwapsIfAuctionEnded();
-  }, [
-    address
-  ]);
+    // cleanup empty user
+    if (Object.keys(swaps[address]).length === 0) {
+      delete swaps[address];
+    }
 
+    localStorage.setItem("auctionSwaps", JSON.stringify(swaps));
+  }
 
   const handleDexTokenSwap = async (
     id,
@@ -1242,6 +1272,7 @@ export const SwapContractProvider = ({ children }) => {
   ) => {
     // Input validation
     setTxStatusForSwap("initiated");
+    cleanupInactiveTokenSwaps();
     setDexSwappingStates((prev) => ({ ...prev, [id]: true }));
     setDexButtonTextStates((prev) => ({
       ...prev,
@@ -1263,8 +1294,8 @@ export const SwapContractProvider = ({ children }) => {
     // Step 1: Fetch Quote
     let quoteData;
     try {
-        const amount = ethers.parseUnits(amountIn, 18).toString();
-        const tokenInAddress = stateAddress;
+      const amount = ethers.parseUnits(amountIn, 18).toString();
+      const tokenInAddress = stateAddress;
       let url;
       console.log("chainid from swap fun", chainId)
       if (chainId == 369) {
@@ -1276,9 +1307,9 @@ export const SwapContractProvider = ({ children }) => {
         url.searchParams.set("amount", amount);
         url.searchParams.set("sender", address || "0x0000000000000000000000000000000000000000");
       }
-        const response = await fetch(url);
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Quote fetch failed.');
-        quoteData = await response.json();
+      quoteData = await response.json();
     } catch (err) {
       console.error('Error fetching quote:', err);
       notifyError('Failed to fetch quote. Try again.')
@@ -1292,8 +1323,8 @@ export const SwapContractProvider = ({ children }) => {
     if (chainId == 369) {
       swapContractAddress = "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6"
     } else {
-        swapContractAddress = quoteData.to;
-      }
+      swapContractAddress = quoteData.to;
+    }
     try {
       const contract = new ethers.Contract(stateAddress, ERC20_ABI, signer);
       const allowance = await contract.allowance(address, swapContractAddress);
@@ -1309,8 +1340,8 @@ export const SwapContractProvider = ({ children }) => {
         setTxStatusForSwap("Approving");
         try {
           const maxUint256 = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
-        const tx = await contract.approve(swapContractAddress, maxUint256);
-        await tx.wait();
+          const tx = await contract.approve(swapContractAddress, maxUint256);
+          await tx.wait();
         } catch (err) {
           console.error('Approval error:', err);
           setTxStatusForSwap("error");
@@ -1346,24 +1377,36 @@ export const SwapContractProvider = ({ children }) => {
         tx = await signer.sendTransaction(txData);
       }
       console.log('Transaction sent:', tx.hash);
-      await tx.wait();
-      console.log('Transaction confirmed:', tx.hash);
-      setTxStatusForSwap("confirmed");
-      const updatedSwaps = {
+      // Immediately store "pending" state in localStorage
+      const pendingSwaps = {
         ...swaps,
         [address]: {
           ...(swaps[address] || {}),
-          [String(CurrentCycleCount?.[id])]: {   // cycle as parent
+          [String(CurrentCycleCount?.[id])]: {
             ...(swaps[address]?.[String(CurrentCycleCount?.[id])] || {}),
-            [id]: {                 // token name as sub-key
+            [id]: {
               ...(swaps[address]?.[String(CurrentCycleCount?.[id])]?.[id] || {}),
-              [tokenOutAddress]: true,     // mark tokenOutAddress as swapped
+              [tokenOutAddress]: "pending",
             },
           },
         },
       };
-      fetchStateHolding();
-      localStorage.setItem("auctionSwaps", JSON.stringify(updatedSwaps));
+      localStorage.setItem("auctionSwaps", JSON.stringify(pendingSwaps));
+
+      tx.wait().then((receipt) => {
+        console.log('Transaction confirmed:', receipt.transactionHash);
+        // Update to confirmed
+        const updatedSwaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
+        updatedSwaps[address][String(CurrentCycleCount?.[id])][id][tokenOutAddress] = true;
+        localStorage.setItem("auctionSwaps", JSON.stringify(updatedSwaps));
+
+        setTxStatusForSwap("confirmed");
+        fetchStateHolding();
+      }).catch((err) => {
+        console.error('Swap failed:', err);
+        notifyError('Swap failed');
+        setTxStatusForSwap("error");
+      })
     } catch (err) {
       setTxStatusForSwap("error");
       console.error('Swap failed:', err);
@@ -1373,10 +1416,9 @@ export const SwapContractProvider = ({ children }) => {
         return;
       }
       setDexSwappingStates((prev) => ({ ...prev, [id]: false }));
-        setTxStatusForSwap("error");
+      setTxStatusForSwap("error");
     } finally {
       setDexSwappingStates((prev) => ({ ...prev, [id]: false }));
-      setTxStatusForSwap("error")
     }
   };
 
