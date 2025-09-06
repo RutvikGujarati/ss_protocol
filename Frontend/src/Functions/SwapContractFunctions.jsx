@@ -1261,6 +1261,25 @@ export const SwapContractProvider = ({ children }) => {
 
     localStorage.setItem("auctionSwaps", JSON.stringify(swaps));
   }
+  // Helper: remove swap entry from localStorage safely
+  function removeSwapFromLocalStorage(address, cycleId, id, tokenOutAddress) {
+    const swaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
+    if (swaps[address]?.[cycleId]?.[id]?.[tokenOutAddress]) {
+      delete swaps[address][cycleId][id][tokenOutAddress];
+
+      // Clean up empty objects to avoid deep empty nesting
+      if (Object.keys(swaps[address][cycleId][id]).length === 0) {
+        delete swaps[address][cycleId][id];
+      }
+      if (Object.keys(swaps[address][cycleId]).length === 0) {
+        delete swaps[address][cycleId];
+      }
+      if (Object.keys(swaps[address]).length === 0) {
+        delete swaps[address];
+      }
+      localStorage.setItem("auctionSwaps", JSON.stringify(swaps));
+    }
+  }
 
   const handleDexTokenSwap = async (
     id,
@@ -1400,13 +1419,13 @@ export const SwapContractProvider = ({ children }) => {
         const updatedSwaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
         updatedSwaps[address][String(CurrentCycleCount?.[id])][id][tokenOutAddress] = true;
         localStorage.setItem("auctionSwaps", JSON.stringify(updatedSwaps));
-
         setTxStatusForSwap("confirmed");
         fetchStateHolding();
       }).catch((err) => {
         console.error('Swap failed:', err);
         notifyError('Swap failed');
         setTxStatusForSwap("error");
+        removeSwapFromLocalStorage(address, String(CurrentCycleCount?.[id]), id, tokenOutAddress);
       })
     } catch (err) {
       setTxStatusForSwap("error");
@@ -1414,10 +1433,13 @@ export const SwapContractProvider = ({ children }) => {
       if (err?.code === 4001) {
         setTxStatusForSwap("cancelled");
         notifyError("Transaction cancelled by user.")
+        removeSwapFromLocalStorage(address, String(CurrentCycleCount?.[id]), id, tokenOutAddress);
         return;
       }
       setDexSwappingStates((prev) => ({ ...prev, [id]: false }));
       setTxStatusForSwap("error");
+      removeSwapFromLocalStorage(address, String(CurrentCycleCount?.[id]), id, tokenOutAddress);
+
     } finally {
       setDexSwappingStates((prev) => ({ ...prev, [id]: false }));
     }
