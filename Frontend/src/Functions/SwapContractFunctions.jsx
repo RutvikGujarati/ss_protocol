@@ -69,6 +69,7 @@ export const SwapContractProvider = ({ children }) => {
   const [burnedAmount, setBurnedAmount] = useState({});
   const [burnedLPAmount, setBurnLpAmount] = useState({});
   const [TokenBalance, setTokenbalance] = useState({});
+  const [StateBalance, setStateBalance] = useState("");
   const [isReversed, setIsReverse] = useState({});
   const [IsAuctionActive, setisAuctionActive] = useState({});
   const [isTokenRenounce, setRenonced] = useState({});
@@ -234,128 +235,205 @@ export const SwapContractProvider = ({ children }) => {
     });
   };
 
-  useEffect(() => {
-    let animationFrameId;
-    let isActive = true;
-    const auctionData = {};
+  const WSS_RPC_URL = "wss://pulsechain-rpc.publicnode.com"; // <-- Replace with your working WSS RPC
+  const wsProvider = new ethers.WebSocketProvider(WSS_RPC_URL);
 
-    const initializeCountdowns = async () => {
-      if (!AllContracts?.AuctionContract || !provider || !isActive) return;
+
+  useEffect(() => {
+    let countdownInterval;
+    let resyncInterval;
+    let isActive = true;
+
+    // WebSocket connection management
+    const setupWebSocketListeners = () => {
+      wsProvider.on("error", (error) => {
+        console.error("❌ WebSocket error:", error);
+      });
+
+      wsProvider.on("close", () => {
+        console.warn("⚠️ WebSocket connection closed");
+      });
+
+      wsProvider.on("open", () => {
+        console.log("✅ WebSocket connection established");
+      });
+    };
+
+    const fetchAuctionTimes = async () => {
+      if (!AllContracts?.AuctionContract || !isActive) return;
 
       try {
-        const tokenMap = await ReturnfetchUserTokenAddresses();
-        const results = {};
+        console.log("🔄 Fetching auction times via WebSocket...");
 
-        // Fetch all auction times first
+        const tokenMap = await ReturnfetchUserTokenAddresses();
+        const updatedTimes = {};
+        const currentBlock = await wsProvider.getBlockNumber();
+
+        console.log(`📡 Current block: ${currentBlock}`);
+
         for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-          if (!isActive) break;
+          if (!isActive) break; // Exit early if component unmounted
 
           try {
-            const AuctionTimeInWei = await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
+            // Create a read-only contract with wsProvider
+            const readOnlyAuctionContract = AllContracts.AuctionContract.connect(wsProvider);
+
+            const AuctionTimeInWei = await readOnlyAuctionContract.getAuctionTimeLeft(TokenAddress, {
+              blockTag: 'latest'
+            });
+
             const timeLeft = Math.floor(Number(AuctionTimeInWei));
 
-            if (timeLeft >= 0 && isActive) {
-              const endTime = Date.now() + (timeLeft * 1000);
-              auctionData[tokenName] = {
-                endTime,
-                TokenAddress,
-                lastSync: Date.now()
-              };
-              results[tokenName] = timeLeft;
-            }
+            console.log(`⏱️ ${tokenName}: ${timeLeft}s remaining`);
+            updatedTimes[tokenName] = timeLeft >= 0 ? timeLeft : 0;
+
           } catch (e) {
-            console.error(`Error fetching auction time for ${tokenName}:`, e);
-            results[tokenName] = 0;
+            console.error(`❌ Error fetching auction time for ${tokenName}:`, e.message);
+            updatedTimes[tokenName] = 0;
           }
         }
 
-        if (isActive && Object.keys(results).length > 0) {
-          setAuctionTime(results);
-          startAnimationLoop();
+        // Update state only if we have valid data and component is still active
+        if (isActive && Object.keys(updatedTimes).length > 0) {
+          setAuctionTime(updatedTimes);
+          console.log("✅ Auction times updated:", updatedTimes);
         }
 
-      } catch (error) {
-        console.error("Error initializing countdowns:", error);
+      } catch (err) {
+        console.error("❌ Error fetching auction times:", err);
+
+        // If WebSocket fails, try to reconnect
+        if (err.message.includes('connection') || err.message.includes('socket')) {
+          console.log("🔄 Attempting to reconnect WebSocket...");
+          setTimeout(() => {
+            if (isActive) {
+              setupWebSocketListeners();
+              fetchAuctionTimes();
+            }
+          }, 5000);
+        }
       }
     };
 
-    const startAnimationLoop = () => {
-      const updateTimers = () => {
+    const startCountdown = () => {
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      countdownInterval = setInterval(() => {
         if (!isActive) return;
 
-        const now = Date.now();
-        const updates = {};
-        let hasUpdates = false;
+        setAuctionTime((prev) => {
+          const updated = {};
+          let hasChanges = false;
 
-        for (const [tokenName, data] of Object.entries(auctionData)) {
-          const remainingTime = Math.max(0, Math.floor((data.endTime - now) / 1000));
-          updates[tokenName] = remainingTime;
-          hasUpdates = true;
+          for (const [token, time] of Object.entries(prev)) {
+            const newTime = Math.max(0, time - 1);
+            updated[token] = newTime;
+            if (newTime !== time) hasChanges = true;
 
-          // Check auction status when time runs low
-          if (remainingTime <= 300 && remainingTime > 0) {
-            CheckIsAuctionActive();
-            CheckIsReverse();
+            // Log when auctions are about to end
+            if (newTime === 300) {
+              console.log(`⏰ ${token} auction ending in 5 minutes!`);
+              CheckIsAuctionActive?.();
+              CheckIsReverse?.();
+            } else if (newTime === 60) {
+              console.log(`🚨 ${token} auction ending in 1 minute!`);
+            } else if (newTime === 0 && time > 0) {
+              console.log(`🏁 ${token} auction ended!`);
+            }
           }
 
-          // Optional: Re-sync with blockchain every 2 minutes
-          if (now - data.lastSync > 120000 && remainingTime > 0) {
-            resyncToken(tokenName, data.TokenAddress);
-            data.lastSync = now;
-          }
-        }
+          return hasChanges ? updated : prev;
+        });
+      }, 1000);
 
-        if (hasUpdates && isActive) {
-          setAuctionTime(prev => ({ ...prev, ...updates }));
-        }
-
-        // Continue the loop
-        animationFrameId = requestAnimationFrame(updateTimers);
-      };
-
-      updateTimers();
+      console.log("⏱️ Countdown timer started");
     };
 
-    const resyncToken = async (tokenName, TokenAddress) => {
-      if (!isActive || !AllContracts?.AuctionContract || !provider) return;
+    const setupResyncInterval = () => {
+      if (resyncInterval) clearInterval(resyncInterval);
 
-      try {
-        const AuctionTimeInWei = await AllContracts.AuctionContract.getAuctionTimeLeft(TokenAddress);
-        const actualTimeLeft = Math.floor(Number(AuctionTimeInWei));
-
-        if (isActive && actualTimeLeft >= 0) {
-          auctionData[tokenName].endTime = Date.now() + (actualTimeLeft * 1000);
+      resyncInterval = setInterval(() => {
+        if (isActive) {
+          console.log("⏰ Scheduled resync - fetching fresh auction times...");
+          fetchAuctionTimes();
         }
-      } catch (error) {
-        console.error(`Error resyncing ${tokenName}:`, error);
-      }
+      }, 120000); // 2 minutes
+
+      console.log("🔄 Resync interval set to 2 minutes");
     };
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && isActive) {
-        // Re-initialize when tab becomes visible
+        console.log("👀 Tab became visible, fetching fresh data...");
         setTimeout(() => {
           if (isActive) {
-            initializeCountdowns();
+            fetchAuctionTimes();
           }
-        }, 100);
+        }, 500);
+      } else if (document.visibilityState === 'hidden') {
+        console.log("🙈 Tab became hidden");
       }
     };
 
+    const handleOnline = () => {
+      if (isActive) {
+        console.log("🌐 Connection restored, fetching fresh data...");
+        setTimeout(() => {
+          if (isActive) {
+            setupWebSocketListeners();
+            fetchAuctionTimes();
+          }
+        }, 1000);
+      }
+    };
+
+    const handleOffline = () => {
+      console.log("📡 Connection lost");
+    };
+
+    // Setup event listeners
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
-    if (AllContracts?.AuctionContract && provider) {
-      initializeCountdowns();
-    }
+    // Initialize
+    console.log("🚀 Initializing WebSocket auction timer...");
 
-    return () => {
-      isActive = false;
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
+    // Setup WebSocket connection
+    setupWebSocketListeners();
+
+    // Start countdown immediately (will show 0s initially)
+    startCountdown();
+
+    // Fetch initial data
+    setTimeout(() => {
+      if (isActive) {
+        fetchAuctionTimes();
       }
+    }, 1000);
+
+    // Setup periodic resync
+    setupResyncInterval();
+
+    // Cleanup function
+    return () => {
+      console.log("🧹 Cleaning up WebSocket auction timer...");
+      isActive = false;
+
+      if (countdownInterval) clearInterval(countdownInterval);
+      if (resyncInterval) clearInterval(resyncInterval);
+
+      // Remove event listeners
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+
+      // Close WebSocket connection
+      if (wsProvider && wsProvider.destroy) {
+        wsProvider.destroy();
+      }
     };
-  }, [AllContracts, provider]);
+  }, [AllContracts]);
 
   const getCurrentAuctionCycle = async () => {
     await fetchTokenData({
@@ -479,6 +557,94 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching input amounts:", e);
     }
   };
+
+  const getStateTokenBalanceAndSave = async () => {
+    try {
+      const stateAddress = getStateAddress();
+      const tokenContract = new ethers.Contract(stateAddress, ERC20_ABI, provider);
+      const rawBalance = await tokenContract.balanceOf(getAuctionAddress());
+      const formattedBalance = Math.floor(Number(ethers.formatUnits(rawBalance, 18)));
+
+      // Update your React state
+      setStateBalance(prev => ({ ...prev, state: formattedBalance }));
+
+      // Save to localStorage with timestamp
+      const now = Date.now();
+      localStorage.setItem("stateTokenBalance", JSON.stringify({
+        balance: formattedBalance,
+        updatedAt: now,
+      }));
+    } catch (e) {
+      console.error("Error fetching state token balance:", e);
+    }
+  };
+  useEffect(() => {
+    const saved = localStorage.getItem("stateTokenBalance");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setStateBalance(prev => ({ ...prev, state: parsed.balance }));
+      } catch (e) {
+        console.error("Failed to parse cached state token balance:", e);
+      }
+    }
+  }, []);
+
+  function msUntilNextTargetGMT(hours = 15, minutes = 0) {
+    const now = new Date();
+    const target = new Date();
+    target.setUTCHours(hours, minutes, 0, 0); // e.g. 15:00 GMT
+    if (now > target) {
+      target.setUTCDate(target.getUTCDate() + 1); // schedule for tomorrow
+    }
+    return target.getTime() - now.getTime();
+  }
+
+  useEffect(() => {
+    const TARGET_HOURS = 15;
+    const TARGET_MINUTES = 0;
+
+    const saved = localStorage.getItem("stateTokenBalance");
+    let shouldUpdate = true;
+
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const lastUpdated = parsed.updatedAt;
+        const now = Date.now();
+
+        // Compute last scheduled target timestamp
+        const target = new Date();
+        target.setUTCHours(TARGET_HOURS, TARGET_MINUTES, 0, 0);
+        let lastScheduled = target.getTime();
+        if (now < lastScheduled) {
+          lastScheduled -= 24 * 60 * 60 * 1000; // use yesterday's
+        }
+
+        if (lastUpdated >= lastScheduled) {
+          shouldUpdate = false; // already updated since last scheduled time
+        }
+      } catch (e) {
+        console.error("Failed to parse cached balance:", e);
+      }
+    }
+
+    if (shouldUpdate) {
+      getStateTokenBalanceAndSave();
+    }
+
+    // Schedule the next run
+    const timeoutId = setTimeout(() => {
+      getStateTokenBalanceAndSave();
+      const intervalId = setInterval(getStateTokenBalanceAndSave, 24 * 60 * 60 * 1000);
+      window._stateTokenInterval = intervalId;
+    }, msUntilNextTargetGMT(TARGET_HOURS, TARGET_MINUTES));
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (window._stateTokenInterval) clearInterval(window._stateTokenInterval);
+    };
+  }, []);
 
   const CheckIsReverse = async () => {
     await fetchTokenData({
@@ -1223,9 +1389,7 @@ export const SwapContractProvider = ({ children }) => {
 
       const amountsOut = await routerContract.getAmountsOut(onePstate, path);
 
-      // The last element in amountsOut is the output amount of WPLS
       const plsAmount = amountsOut[amountsOut.length - 1];
-      // Convert from wei to human-readable
       const plsAmountFormatted = ethers.formatUnits(plsAmount, 18);
       setPstateToPlsRatio(plsAmountFormatted.toString());
       console.log("pSTATE to PLS ratio:", plsAmountFormatted);
@@ -1311,40 +1475,62 @@ export const SwapContractProvider = ({ children }) => {
       return;
     }
 
-    // Step 1: Fetch Quote
-    let quoteData;
+    let swapContractAddress = null;
+    const tokenInAddress = stateAddress;
+    let quoteData = null;
+    let pulseXData = null;
     try {
-      const amount = ethers.parseUnits(amountIn, 18).toString();
-      const tokenInAddress = stateAddress;
-      let url;
       console.log("chainid from swap fun", chainId)
-      if (chainId == 369) {
-        url = `https://sdk.piteas.io/quote?tokenInAddress=${tokenInAddress}&tokenOutAddress=${tokenOutAddress}&amount=${amount}&allowedSlippage=0.5`;
-      } else {
-        const url = new URL(`https://api.sushi.com/swap/v7/${chainId}`);
-        url.searchParams.set("tokenIn", tokenInAddress);
-        url.searchParams.set("tokenOut", tokenOutAddress);
-        url.searchParams.set("amount", amount);
-        url.searchParams.set("sender", address || "0x0000000000000000000000000000000000000000");
+      try {
+        if (chainId === 369) {
+          // ---- PulseX path ----
+          const routerContract = new ethers.Contract(
+            PULSEX_ROUTER_ADDRESS,
+            PULSEX_ROUTER_ABI,
+            signer
+          );
+
+          const parsedAmount = ethers.parseUnits(amountIn.toString(), 18);
+          const path = [stateAddress, tokenOutAddress];
+          const amounts = await routerContract.getAmountsOut(parsedAmount, path);
+          const rawOut = amounts[amounts.length - 1];
+
+          const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 mins
+          swapContractAddress = PULSEX_ROUTER_ADDRESS;
+
+          pulseXData = { routerContract, parsedAmount, rawOut, path, deadline };
+        } else {
+          // ---- Sushi path ----
+          const amount = ethers.parseUnits(amountIn, 18).toString();
+          const url = new URL(`https://api.sushi.com/swap/v7/${chainId}`);
+          url.searchParams.set("tokenIn", tokenInAddress);
+          url.searchParams.set("tokenOut", tokenOutAddress);
+          url.searchParams.set("amount", amount);
+          url.searchParams.set(
+            "sender",
+            address || "0x0000000000000000000000000000000000000000"
+          );
+
+          const response = await fetch(url);
+          if (!response.ok) throw new Error("Quote fetch failed.");
+          quoteData = await response.json();
+          swapContractAddress = quoteData.to;
+        }
+      } catch (err) {
+        console.error('Error fetching quote:', err);
+        notifyError('Failed to fetch quote. Try again.')
+        setDexSwappingStates((prev) => ({ ...prev, [id]: false })); // <-- reset here
+        setTxStatusForSwap("error");
+        return;
       }
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Quote fetch failed.');
-      quoteData = await response.json();
     } catch (err) {
-      console.error('Error fetching quote:', err);
-      notifyError('Failed to fetch quote. Try again.')
-      setDexSwappingStates((prev) => ({ ...prev, [id]: false })); // <-- reset here
+      console.error('Error in main try block:', err);
+      notifyError('Unexpected error occurred. Try again.');
+      setDexSwappingStates((prev) => ({ ...prev, [id]: false }));
       setTxStatusForSwap("error");
       return;
     }
 
-    // Step 2: Check Allowance
-    let swapContractAddress;
-    if (chainId == 369) {
-      swapContractAddress = "0x6BF228eb7F8ad948d37deD07E595EfddfaAF88A6"
-    } else {
-      swapContractAddress = quoteData.to;
-    }
     try {
       const contract = new ethers.Contract(stateAddress, ERC20_ABI, signer);
       const allowance = await contract.allowance(address, swapContractAddress);
@@ -1383,18 +1569,20 @@ export const SwapContractProvider = ({ children }) => {
         [id]: "Swapping...",
       }));
       let tx;
-      if (chainId == 369) {
-        tx = await signer.sendTransaction({
-          to: swapContractAddress,
-          value: quoteData.methodParameters.value,
-          data: quoteData.methodParameters.calldata,
-        });
+      if (chainId === 369) {
+        const { routerContract, parsedAmount, rawOut, path, deadline } = pulseXData;
+        tx = await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+          parsedAmount,
+          rawOut,
+          path,
+          address,
+          deadline
+        );
       } else {
-        const txData = {
+        tx = await signer.sendTransaction({
           to: quoteData.to,
           data: quoteData.data,
-        };
-        tx = await signer.sendTransaction(txData);
+        });
       }
       console.log('Transaction sent:', tx.hash);
       // Immediately store "pending" state in localStorage
@@ -1415,6 +1603,7 @@ export const SwapContractProvider = ({ children }) => {
 
       tx.wait().then((receipt) => {
         console.log('Transaction confirmed:', receipt.transactionHash);
+        notifySuccess(`Swap successful with ${id} token for ${amountIn}`);
         // Update to confirmed
         const updatedSwaps = JSON.parse(localStorage.getItem("auctionSwaps") || "{}");
         updatedSwaps[address][String(CurrentCycleCount?.[id])][id][tokenOutAddress] = true;
@@ -1494,7 +1683,9 @@ export const SwapContractProvider = ({ children }) => {
         DexbuttonTextStates,
         DavAddress,
         StateAddress,
+        StateBalance,
         swappingStates,
+        getStateTokenBalanceAndSave,
         TokenPariAddress,
         AuctionTime,
         txStatusForSwap,

@@ -326,8 +326,9 @@ const DataTable = () => {
                       </td>
 
                       <td className="timer-cell">
-                        {formatCountdown(TimeLeft)}
+                        {TimeLeft == null || TimeLeft === 0 ? "Loading..." : formatCountdown(TimeLeft)}
                       </td>
+
                       <td style={{ position: "relative" }}>
                         <button
                           onClick={() => Checking(id, ContractName, AirDropAmount?.[name])}

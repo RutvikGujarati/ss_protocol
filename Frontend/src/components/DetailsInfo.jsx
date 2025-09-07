@@ -39,6 +39,7 @@ const TokenRow = memo(({
     navigator.clipboard.writeText(token.TokenAddress);
     notifySuccess(`${token.tokenName} Address copied to clipboard!`)
   }, [token.TokenAddress, token.tokenName]);
+  const { StateBalance,getStateTokenBalanceAndSave } = useSwapContract();
 
   const handleAddTokenClick = useCallback(() => {
     handleAddToken(
@@ -51,7 +52,16 @@ const TokenRow = memo(({
     );
   }, [handleAddToken, token.TokenAddress, token.tokenName, chainId]);
 
-
+  const savedStateTokenBalance = (() => {
+    try {
+      const saved = localStorage.getItem("stateTokenBalance");
+      if (!saved) return null;
+      const parsed = JSON.parse(saved);
+      return parsed.balance ?? null;
+    } catch {
+      return null;
+    }
+  })();
   return (
     <tr>
       <td className="text-center align-middle">
@@ -110,11 +120,32 @@ const TokenRow = memo(({
       </td>
       <td className="text-center">
         <div className="mx-4">
-          {token.tokenName === "DAV"
-            ? "-----"
-            : `${formatWithCommas(token.DavVault)}`}
+          {token.tokenName === "DAV" ? (
+            "-----"
+          ) : token.tokenName === "STATE" ? (
+            <>
+              <div
+                style={{ cursor: "pointer" }}
+                onClick={async () => {
+                  await getStateTokenBalanceAndSave();
+                }}
+                title="Click to refresh cached STATE balance"
+              >
+                {formatWithCommas(token.DavVault)}
+              </div>
+              {savedStateTokenBalance !== null && (
+                <div style={{ color: "#ff4081" }}>
+                  {formatWithCommas(savedStateTokenBalance)}
+                </div>
+              )}
+            </>
+          ) : (
+            formatWithCommas(token.DavVault)
+          )}
         </div>
       </td>
+
+
       <td className="text-center">
         <div className="mx-4">
           {token.tokenName === "DAV" ? (
@@ -268,7 +299,7 @@ const DetailsInfo = ({ selectedToken }) => {
   const chainId = useChainId();
   const { totalStateBurned } = useDAvContract();
   const [localSearchQuery, setLocalSearchQuery] = useState("");
-  const { tokens, loading,refetch } = TokensDetails();
+  const { tokens, loading, refetch } = TokensDetails();
   const { signer } = useContext(ContractContext);
   const TOKENS = useAllTokens();
   const tokenBalances = useTokenBalances(TOKENS, signer);

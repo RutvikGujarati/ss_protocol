@@ -277,7 +277,6 @@ export const DavProvider = ({ children }) => {
 
       // Store the results directly as an array of booleans in the state
       setisUsed(results);
-      console.log("✅ Updated isUsed state:", results);
     } catch (error) {
       console.error("Error in isTokenDeployed:", error);
       // Don't update state on error to preserve previous values
