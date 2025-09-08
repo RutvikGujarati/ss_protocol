@@ -235,82 +235,118 @@ export const SwapContractProvider = ({ children }) => {
     });
   };
 
-  const WSS_RPC_URL = "wss://pulsechain-rpc.publicnode.com"; // <-- Replace with your working WSS RPC
+  const WSS_RPC_URL = "wss://pulsechain-rpc.publicnode.com";
+  const HTTP_RPC_URL = "https://pulsechain-rpc.publicnode.com"; // Fallback HTTP RPC
+
+  // Create providers
   const wsProvider = new ethers.WebSocketProvider(WSS_RPC_URL);
+  const httpProvider = new ethers.JsonRpcProvider(HTTP_RPC_URL);
 
-
-  useEffect(() => {
+    useEffect(() => {
     let countdownInterval;
     let resyncInterval;
     let isActive = true;
+    let wsConnected = false;
 
     // WebSocket connection management
     const setupWebSocketListeners = () => {
       wsProvider.on("error", (error) => {
         console.error("❌ WebSocket error:", error);
+        wsConnected = false;
       });
 
       wsProvider.on("close", () => {
         console.warn("⚠️ WebSocket connection closed");
+        wsConnected = false;
       });
 
       wsProvider.on("open", () => {
         console.log("✅ WebSocket connection established");
+        wsConnected = true;
       });
     };
 
-    const fetchAuctionTimes = async () => {
+    // Batch process tokens for better performance
+    const fetchAuctionTimesBatch = async (tokenEntries, batchSize = 10) => {
+      const results = [];
+
+      for (let i = 0; i < tokenEntries.length; i += batchSize) {
+        const batch = tokenEntries.slice(i, i + batchSize);
+        const batchPromises = batch.map(([tokenName, TokenAddress]) =>
+          getCurrentProvider()
+            .then(provider => {
+              const readOnlyAuctionContract = AllContracts.AuctionContract.connect(provider);
+              return readOnlyAuctionContract.getAuctionTimeLeft(TokenAddress, { blockTag: "latest" });
+            })
+            .then((AuctionTimeInWei) => ({
+              tokenName,
+              timeLeft: Math.max(0, Math.floor(Number(AuctionTimeInWei))),
+            }))
+            .catch((e) => {
+              console.error(`❌ Error fetching auction time for ${tokenName}:`, e.message);
+              return { tokenName, timeLeft: 0 };
+            })
+        );
+
+        const batchResults = await Promise.all(batchPromises);
+        results.push(...batchResults);
+
+        // Small delay between batches to prevent overwhelming the RPC
+        if (i + batchSize < tokenEntries.length) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+
+      return results;
+    };
+
+    // Get the best available provider
+    const getCurrentProvider = async () => {
+      // Try WebSocket first if connected, otherwise use HTTP
+      if (wsConnected) {
+        return wsProvider;
+      }
+      return httpProvider;
+    };
+
+    const fetchAuctionTimes = async (showLogs = true) => {
       if (!AllContracts?.AuctionContract || !isActive) return;
 
       try {
-        console.log("🔄 Fetching auction times via WebSocket...");
+        if (showLogs) {
+          console.log("🔄 Fetching auction times...");
+        }
 
         const tokenMap = await ReturnfetchUserTokenAddresses();
-        const updatedTimes = {};
-        const currentBlock = await wsProvider.getBlockNumber();
+        const entries = Object.entries(tokenMap);
 
-        console.log(`📡 Current block: ${currentBlock}`);
-
-        for (const [tokenName, TokenAddress] of Object.entries(tokenMap)) {
-          if (!isActive) break; // Exit early if component unmounted
-
-          try {
-            // Create a read-only contract with wsProvider
-            const readOnlyAuctionContract = AllContracts.AuctionContract.connect(wsProvider);
-
-            const AuctionTimeInWei = await readOnlyAuctionContract.getAuctionTimeLeft(TokenAddress, {
-              blockTag: 'latest'
-            });
-
-            const timeLeft = Math.floor(Number(AuctionTimeInWei));
-
-            console.log(`⏱️ ${tokenName}: ${timeLeft}s remaining`);
-            updatedTimes[tokenName] = timeLeft >= 0 ? timeLeft : 0;
-
-          } catch (e) {
-            console.error(`❌ Error fetching auction time for ${tokenName}:`, e.message);
-            updatedTimes[tokenName] = 0;
-          }
+        if (entries.length === 0) {
+          console.warn("⚠️ No tokens found");
+          return;
         }
 
-        // Update state only if we have valid data and component is still active
+        // Process in batches for better performance
+        const results = await fetchAuctionTimesBatch(entries, 15);
+
+        // Convert to object
+        const updatedTimes = results.reduce((acc, { tokenName, timeLeft }) => {
+          acc[tokenName] = timeLeft;
+          return acc;
+        }, {});
+
         if (isActive && Object.keys(updatedTimes).length > 0) {
           setAuctionTime(updatedTimes);
-          console.log("✅ Auction times updated:", updatedTimes);
+          if (showLogs) {
+            console.log("✅ Auction times updated:", Object.keys(updatedTimes).length, "tokens");
+          }
         }
-
       } catch (err) {
         console.error("❌ Error fetching auction times:", err);
 
-        // If WebSocket fails, try to reconnect
-        if (err.message.includes('connection') || err.message.includes('socket')) {
-          console.log("🔄 Attempting to reconnect WebSocket...");
-          setTimeout(() => {
-            if (isActive) {
-              setupWebSocketListeners();
-              fetchAuctionTimes();
-            }
-          }, 5000);
+        // Only attempt reconnection for WebSocket issues
+        if (err.message.includes("connection") || err.message.includes("socket")) {
+          console.log("🔄 WebSocket issue, will use HTTP provider for next request");
+          wsConnected = false;
         }
       }
     };
@@ -339,6 +375,12 @@ export const SwapContractProvider = ({ children }) => {
               console.log(`🚨 ${token} auction ending in 1 minute!`);
             } else if (newTime === 0 && time > 0) {
               console.log(`🏁 ${token} auction ended!`);
+              // Trigger a fresh fetch when auction ends
+              setTimeout(() => {
+                if (isActive) {
+                  fetchAuctionTimes(false);
+                }
+              }, 2000);
             }
           }
 
@@ -355,21 +397,17 @@ export const SwapContractProvider = ({ children }) => {
       resyncInterval = setInterval(() => {
         if (isActive) {
           console.log("⏰ Scheduled resync - fetching fresh auction times...");
-          fetchAuctionTimes();
+          fetchAuctionTimes(false);
         }
-      }, 120000); // 2 minutes
+      }, 90000); // Reduced to 1.5 minutes for more frequent updates
 
-      console.log("🔄 Resync interval set to 2 minutes");
+      console.log("🔄 Resync interval set to 1.5 minutes");
     };
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && isActive) {
         console.log("👀 Tab became visible, fetching fresh data...");
-        setTimeout(() => {
-          if (isActive) {
-            fetchAuctionTimes();
-          }
-        }, 500);
+        fetchAuctionTimes();
       } else if (document.visibilityState === 'hidden') {
         console.log("🙈 Tab became hidden");
       }
@@ -383,7 +421,7 @@ export const SwapContractProvider = ({ children }) => {
             setupWebSocketListeners();
             fetchAuctionTimes();
           }
-        }, 1000);
+        }, 500);
       }
     };
 
@@ -397,27 +435,46 @@ export const SwapContractProvider = ({ children }) => {
     window.addEventListener('offline', handleOffline);
 
     // Initialize
-    console.log("🚀 Initializing WebSocket auction timer...");
+    console.log("🚀 Initializing auction timer...");
 
-    // Setup WebSocket connection
+    // Setup WebSocket connection (non-blocking)
     setupWebSocketListeners();
 
-    // Start countdown immediately (will show 0s initially)
+    // Start countdown immediately
     startCountdown();
 
-    // Fetch initial data
-    setTimeout(() => {
-      if (isActive) {
-        fetchAuctionTimes();
+    // Set initial loading state
+    setAuctionTime(prev => {
+      if (Object.keys(prev).length === 0) {
+        // Show loading state only if no data exists
+        return { loading: true };
       }
-    }, 1000);
+      return prev;
+    });
+
+    // Fetch initial data immediately (no delay)
+    const initializeFetch = async () => {
+      try {
+        await fetchAuctionTimes();
+        // Clear loading state
+        setAuctionTime(prev => {
+          const { loading, ...rest } = prev;
+          return rest;
+        });
+      } catch (error) {
+        console.error("❌ Initial fetch failed:", error);
+        setAuctionTime({});
+      }
+    };
+
+    initializeFetch();
 
     // Setup periodic resync
     setupResyncInterval();
 
     // Cleanup function
     return () => {
-      console.log("🧹 Cleaning up WebSocket auction timer...");
+      console.log("🧹 Cleaning up auction timer...");
       isActive = false;
 
       if (countdownInterval) clearInterval(countdownInterval);
@@ -429,8 +486,12 @@ export const SwapContractProvider = ({ children }) => {
       window.removeEventListener('offline', handleOffline);
 
       // Close WebSocket connection
-      if (wsProvider && wsProvider.destroy) {
-        wsProvider.destroy();
+      try {
+        if (wsProvider && wsProvider.destroy) {
+          wsProvider.destroy();
+        }
+      } catch (error) {
+        console.error("Error closing WebSocket:", error);
       }
     };
   }, [AllContracts]);
@@ -578,73 +639,6 @@ export const SwapContractProvider = ({ children }) => {
       console.error("Error fetching state token balance:", e);
     }
   };
-  useEffect(() => {
-    const saved = localStorage.getItem("stateTokenBalance");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setStateBalance(prev => ({ ...prev, state: parsed.balance }));
-      } catch (e) {
-        console.error("Failed to parse cached state token balance:", e);
-      }
-    }
-  }, []);
-
-  function msUntilNextTargetGMT(hours = 15, minutes = 0) {
-    const now = new Date();
-    const target = new Date();
-    target.setUTCHours(hours, minutes, 0, 0); // e.g. 15:00 GMT
-    if (now > target) {
-      target.setUTCDate(target.getUTCDate() + 1); // schedule for tomorrow
-    }
-    return target.getTime() - now.getTime();
-  }
-
-  useEffect(() => {
-    const TARGET_HOURS = 15;
-    const TARGET_MINUTES = 0;
-
-    const saved = localStorage.getItem("stateTokenBalance");
-    let shouldUpdate = true;
-
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        const lastUpdated = parsed.updatedAt;
-        const now = Date.now();
-
-        // Compute last scheduled target timestamp
-        const target = new Date();
-        target.setUTCHours(TARGET_HOURS, TARGET_MINUTES, 0, 0);
-        let lastScheduled = target.getTime();
-        if (now < lastScheduled) {
-          lastScheduled -= 24 * 60 * 60 * 1000; // use yesterday's
-        }
-
-        if (lastUpdated >= lastScheduled) {
-          shouldUpdate = false; // already updated since last scheduled time
-        }
-      } catch (e) {
-        console.error("Failed to parse cached balance:", e);
-      }
-    }
-
-    if (shouldUpdate) {
-      getStateTokenBalanceAndSave();
-    }
-
-    // Schedule the next run
-    const timeoutId = setTimeout(() => {
-      getStateTokenBalanceAndSave();
-      const intervalId = setInterval(getStateTokenBalanceAndSave, 24 * 60 * 60 * 1000);
-      window._stateTokenInterval = intervalId;
-    }, msUntilNextTargetGMT(TARGET_HOURS, TARGET_MINUTES));
-
-    return () => {
-      clearTimeout(timeoutId);
-      if (window._stateTokenInterval) clearInterval(window._stateTokenInterval);
-    };
-  }, []);
 
   const CheckIsReverse = async () => {
     await fetchTokenData({
