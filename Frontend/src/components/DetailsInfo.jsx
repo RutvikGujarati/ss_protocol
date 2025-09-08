@@ -128,6 +128,7 @@ const TokenRow = memo(({
                 style={{ cursor: "pointer" }}
                 onClick={async () => {
                   await getStateTokenBalanceAndSave();
+                  notifySuccess("Update - STATE Token Vault Amount")
                 }}
                 title="Click to refresh cached STATE balance"
               >
@@ -135,7 +136,7 @@ const TokenRow = memo(({
               </div>
               {savedStateTokenBalance !== null && (
                 <div style={{ color: "#ff4081" }}>
-                  {formatWithCommas(savedStateTokenBalance)}
+                  {formatWithCommas(savedStateTokenBalance - token.DavVault)}
                 </div>
               )}
             </>
